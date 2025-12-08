@@ -137,7 +137,7 @@
 
                             <div class="template-repeater row d-none" id="template-wrapper">
                                 <div data-repeater-list="templates">
-
+{{--@dd($model->templates)--}}
                                     @foreach($model->templates as $tpl)
                                         <div data-repeater-item class="row template-item align-items-end">
 
@@ -312,7 +312,6 @@
             ['front','back','none'].forEach(type => {
                 const base = saved[`${type}_base`];
                 const mask = saved[`${type}_mask`];
-                console.log(base,mask,saved)
                 if (base) {
                     const preview = document.querySelector(`#${type}-base-input + .upload-card .preview`);
                     preview.innerHTML = `<img src="${base}" class="img-fluid rounded border" style="max-height:120px;">`;
@@ -620,7 +619,7 @@
         let canvasNone = new fabric.Canvas('mockupCanvasNone');
 
         function loadBaseImage(canvas, baseUrl) {
-            console.log("DFgdf",canvas,baseUrl)
+
             fabric.Image.fromURL(baseUrl, function (img) {
                 img.set({selectable: false});
                 canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
@@ -839,74 +838,74 @@
             templateWrapper.classList.remove("d-none");
         };
 
-        window.loadTemplates = function () {
-            let productId = document.getElementById('productsSelect')?.value;
-            let typeMap = {front: 1, back: 2, none: 3};
-            let selectedTypes = [...document.querySelectorAll('.type-checkbox')]
-                .filter(cb => cb.checked)
-                .map(cb => typeMap[cb.dataset.typeName]);
+        {{--window.loadTemplates = function () {--}}
+        {{--    let productId = document.getElementById('productsSelect')?.value;--}}
+        {{--    let typeMap = {front: 1, back: 2, none: 3};--}}
+        {{--    let selectedTypes = [...document.querySelectorAll('.type-checkbox')]--}}
+        {{--        .filter(cb => cb.checked)--}}
+        {{--        .map(cb => typeMap[cb.dataset.typeName]);--}}
 
-            if (!productId || selectedTypes.length === 0) return;
+        {{--    if (!productId || selectedTypes.length === 0) return;--}}
 
-            $.ajax({
-                url: "{{ route('product-templates.index') }}",
-                method: "GET",
-                data: {
-                    product_without_category_id: productId,
-                    request_type: "api",
-                    approach: "without_editor",
-                    paginate: true,
-                    has_not_mockups: true,
-                    per_page: 3,
-                    limit: 3,
-                    types: selectedTypes,
-                },
-                success: function (response) {
+        {{--    $.ajax({--}}
+        {{--        url: "{{ route('product-templates.index') }}",--}}
+        {{--        method: "GET",--}}
+        {{--        data: {--}}
+        {{--            product_without_category_id: productId,--}}
+        {{--            request_type: "api",--}}
+        {{--            approach: "without_editor",--}}
+        {{--            paginate: true,--}}
+        {{--            has_not_mockups: true,--}}
+        {{--            per_page: 3,--}}
+        {{--            limit: 3,--}}
+        {{--            types: selectedTypes,--}}
+        {{--        },--}}
+        {{--        success: function (response) {--}}
 
-                    const templates = Array.isArray(response) ? response : (response.data.data ?? []);
+        {{--            const templates = Array.isArray(response) ? response : (response.data.data ?? []);--}}
 
-                    document.querySelectorAll('.template-select').forEach(select => {
+        {{--            document.querySelectorAll('.template-select').forEach(select => {--}}
 
-                        const savedSelectedId = select.dataset.selectedId;  // 🟢 saved template ID
-                        const currentValue = select.value;                  // 🟢 may also have a value
+        {{--                const savedSelectedId = select.dataset.selectedId;  // 🟢 saved template ID--}}
+        {{--                const currentValue = select.value;                  // 🟢 may also have a value--}}
 
-                        // Destroy old Select2
-                        if ($(select).data('select2')) {
-                            $(select).select2("destroy");
-                        }
+        {{--                // Destroy old Select2--}}
+        {{--                if ($(select).data('select2')) {--}}
+        {{--                    $(select).select2("destroy");--}}
+        {{--                }--}}
 
-                        // Clear ONLY if we are not editing existing
-                        select.innerHTML = `<option value="" disabled ${!savedSelectedId ? 'selected' : ''}>Choose template</option>`;
+        {{--                // Clear ONLY if we are not editing existing--}}
+        {{--                select.innerHTML = `<option value="" disabled ${!savedSelectedId ? 'selected' : ''}>Choose template</option>`;--}}
 
-                        templates.forEach(t => {
-                            const option = document.createElement("option");
-                            const label = typeof t.name === "object"
-                                ? (t.name[locale] ?? Object.values(t.name)[0])
-                                : t.name;
+        {{--                templates.forEach(t => {--}}
+        {{--                    const option = document.createElement("option");--}}
+        {{--                    const label = typeof t.name === "object"--}}
+        {{--                        ? (t.name[locale] ?? Object.values(t.name)[0])--}}
+        {{--                        : t.name;--}}
 
-                            option.value = t.id;
-                            option.textContent = label;
-                            option.dataset.image = t.source_design_svg;
-                            option.dataset.backImage = t.back_base64_preview_image;
+        {{--                    option.value = t.id;--}}
+        {{--                    option.textContent = label;--}}
+        {{--                    option.dataset.image = t.source_design_svg;--}}
+        {{--                    option.dataset.backImage = t.back_base64_preview_image;--}}
 
-                            // 🟢 Re-select previously saved template
-                            if (savedSelectedId && Number(savedSelectedId) === Number(t.id)) {
-                                option.selected = true;
-                            }
+        {{--                    // 🟢 Re-select previously saved template--}}
+        {{--                    if (savedSelectedId && Number(savedSelectedId) === Number(t.id)) {--}}
+        {{--                        option.selected = true;--}}
+        {{--                    }--}}
 
-                            select.appendChild(option);
-                        });
+        {{--                    select.appendChild(option);--}}
+        {{--                });--}}
 
-                        // Re-init Select2
-                        initTemplateSelect(select);
-                    });
+        {{--                // Re-init Select2--}}
+        {{--                initTemplateSelect(select);--}}
+        {{--            });--}}
 
-                },
-                error: function (xhr) {
-                    console.error("Error loading templates", xhr);
-                }
-            });
-        };
+        {{--        },--}}
+        {{--        error: function (xhr) {--}}
+        {{--            console.error("Error loading templates", xhr);--}}
+        {{--        }--}}
+        {{--    });--}}
+        {{--};--}}
 
     </script>
     <script>
