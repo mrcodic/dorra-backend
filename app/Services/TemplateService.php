@@ -141,8 +141,8 @@ class TemplateService extends BaseService
             $query = $query->whereStatus(StatusEnum::LIVE);
 
             return !$paginate
-                ? $query->get()
-                : $query->paginate($requested);
+                ? $query->paginate($requested)
+                : $query->get();
         }
 
         return $this->repository->all(
