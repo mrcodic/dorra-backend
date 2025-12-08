@@ -142,19 +142,20 @@
                                             <div class="form-group mb-2 col-8">
                                                 <label class="label-text mb-1">Template</label>
 
-                                                <select class="template-select" name="template_id">
-                                                    <option value="{{ $tpl->template_id }}" selected
-                                                            data-image="{{ $tpl->front_image }}"
-                                                            data-back-image="{{ $tpl->back_image }}">
+                                                <select class="template-select" name="template_id" data-selected-id="{{ $tpl->id }}">
+                                                    <option value="{{ $tpl->id }}" selected
+                                                            data-image="{{ $tpl->source_design_svg }}"
+                                                            data-back-image="{{ $tpl->back_base64_preview_image }}"
+                                                    >
                                                         {{ $tpl->name }}
                                                     </option>
                                                 </select>
 
                                                 <div class="template-preview mt-25">
-                                                    @if($tpl->front_image)
+                                                    @if($tpl->source_design_svg)
                                                         <img src="{{ $tpl->source_design_svg }}" class="front-preview rounded-circle" style="width:40px;height:40px;">
                                                     @endif
-                                                    @if($tpl->back_image)
+                                                    @if($tpl->back_base64_preview_image)
                                                         <img src="{{ $tpl->back_base64_preview_image }}" class="back-preview rounded-circle" style="width:40px;height:40px;">
                                                     @endif
                                                 </div>
@@ -851,22 +852,18 @@
 
                     document.querySelectorAll('.template-select').forEach(select => {
 
-                        const currentValue = select.value; // 🟢 keep old value
+                        const savedSelectedId = select.dataset.selectedId;  // 🟢 saved template ID
+                        const currentValue = select.value;                  // 🟢 may also have a value
 
-                        // Destroy select2, but DO NOT reset the value
+                        // Destroy old Select2
                         if ($(select).data('select2')) {
                             $(select).select2("destroy");
                         }
 
-                        // ONLY reset options if value is empty
-                        if (!currentValue) {
-                            select.innerHTML = `<option value="" disabled selected>Choose template</option>`;
-                        }
+                        // Clear ONLY if we are not editing existing
+                        select.innerHTML = `<option value="" disabled ${!savedSelectedId ? 'selected' : ''}>Choose template</option>`;
 
                         templates.forEach(t => {
-                            // If option already exists, skip it
-                            if (select.querySelector(`option[value="${t.id}"]`)) return;
-
                             const option = document.createElement("option");
                             const label = typeof t.name === "object"
                                 ? (t.name[locale] ?? Object.values(t.name)[0])
@@ -877,17 +874,18 @@
                             option.dataset.image = t.source_design_svg;
                             option.dataset.backImage = t.back_base64_preview_image;
 
+                            // 🟢 Re-select previously saved template
+                            if (savedSelectedId && Number(savedSelectedId) === Number(t.id)) {
+                                option.selected = true;
+                            }
+
                             select.appendChild(option);
                         });
 
-                        // Restore previous selected value
-                        if (currentValue) {
-                            select.value = currentValue;
-                        }
-
-                        // Re-init select2
+                        // Re-init Select2
                         initTemplateSelect(select);
                     });
+
                 },
                 error: function (xhr) {
                     console.error("Error loading templates", xhr);
