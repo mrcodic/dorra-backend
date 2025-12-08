@@ -318,7 +318,7 @@
                     preview.innerHTML = `<img src="${base}" class="img-fluid rounded border" style="max-height:120px;">`;
 
                     loadBaseImage(window[`canvas${type.charAt(0).toUpperCase() + type.slice(1)}`], base);
-                    document.getElementById(`editor${type.charAt(0).toUpperCase() + type.slice(1)}Wrapper`).classList.remove('d-none');
+                    // document.getElementById(`editor${type.charAt(0).toUpperCase() + type.slice(1)}Wrapper`).classList.remove('d-none');
                 }
 
                 if (mask) {
