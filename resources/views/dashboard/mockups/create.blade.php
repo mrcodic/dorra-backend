@@ -202,20 +202,30 @@
                         </div>
                     </div>
 
-                    <div class="mt-2 d-none" id="editorFrontWrapper">
-                        <label class="label-text">Mockup Editor (Front)</label>
-                        <canvas id="mockupCanvasFront" width="800" height="800" style="border:1px solid #ccc;"></canvas>
-                    </div>
+                        <div class="mt-2 d-none" id="editorFrontWrapper">
+                            <label class="label-text">Mockup Editor (Front)</label>
+                            <canvas id="mockupCanvasFront" width="800" height="800" style="border:1px solid #ccc;"></canvas>
+                        </div>
 
-                    <div class="mt-2 d-none" id="editorBackWrapper">
-                        <label class="label-text">Mockup Editor (Back)</label>
-                        <canvas id="mockupCanvasBack" width="800" height="800" style="border:1px solid #ccc;"></canvas>
-                    </div>
+                        <div class="mt-2 d-none" id="editorBackWrapper">
+                            <label class="label-text">Mockup Editor (Back)</label>
+                            <canvas id="mockupCanvasBack" width="800" height="800" style="border:1px solid #ccc;"></canvas>
+                        </div>
 
-                    <div class="mt-2 d-none" id="editorNoneWrapper">
-                        <label class="label-text">Mockup Editor (General)</label>
-                        <canvas id="mockupCanvasNone" width="800" height="800" style="border:1px solid #ccc;"></canvas>
+                        <div class="mt-2 d-none" id="editorNoneWrapper">
+                            <label class="label-text">Mockup Editor (General)</label>
+                            <canvas id="mockupCanvasNone" width="800" height="800" style="border:1px solid #ccc;"></canvas>
+                        </div>
+                    <div class="d-flex justify-content-end mt-2">
+                        <button type="button"
+                                class="btn btn-sm btn-primary"
+                                id="saveTemplatePositionsBtn">
+                           Save Template Positions
+                        </button>
                     </div>
+                    <small class="text-muted d-block mb-3">
+                        Press save after adjusting design positions to keep latest adjustments.
+                    </small>
                     <div class="mb-2">
                         <label class="label-text mb-1 d-block">Colors</label>
                         <div class="d-flex flex-wrap align-items-center gap-1">
@@ -602,6 +612,7 @@
             clearTemplateDesigns(canvas, type);
 
             fabric.Image.fromURL(designUrl, function (img) {
+                // default placement (fallback)
                 img.set({
                     left: 150,
                     top: 150,
@@ -609,17 +620,92 @@
                     scaleY: 0.5,
                     transparentCorners: false
                 });
-                img.templateItem = templateItem;
+
+                img.templateItem = templateItem || null;
                 img.templateType = type;
+
+                // ✅ If this design belongs to a repeater row, try to restore saved values
+                if (templateItem) {
+                    const xInput      = templateItem.querySelector(`.template_x.${type}`);
+                    const yInput      = templateItem.querySelector(`.template_y.${type}`);
+                    const widthInput  = templateItem.querySelector(`.template_width.${type}`);
+                    const heightInput = templateItem.querySelector(`.template_height.${type}`);
+                    const angleInput  = templateItem.querySelector(`.template_angle.${type}`);
+
+                    if (xInput && yInput && widthInput && heightInput && angleInput) {
+                        const savedLeft   = parseFloat(xInput.value);
+                        const savedTop    = parseFloat(yInput.value);
+                        const savedWidth  = parseFloat(widthInput.value);
+                        const savedHeight = parseFloat(heightInput.value);
+                        const savedAngle  = parseFloat(angleInput.value);
+
+                        // لو فيه قيم محفوظة نرجع لها بدل الـ 150/150
+                        if (!isNaN(savedLeft))  img.left  = savedLeft;
+                        if (!isNaN(savedTop))   img.top   = savedTop;
+                        if (!isNaN(savedAngle)) img.angle = savedAngle;
+
+                        if (!isNaN(savedWidth) && img.width) {
+                            img.scaleX = savedWidth / img.width;
+                        }
+                        if (!isNaN(savedHeight) && img.height) {
+                            img.scaleY = savedHeight / img.height;
+                        }
+                    }
+                }
 
                 canvas.add(img);
                 canvas.setActiveObject(img);
                 canvas.renderAll();
 
+                // أول مزامنة للحقول بعد اللود
                 syncTemplateInputs(img, type);
             });
         }
+        function saveAllTemplatePositions() {
+            // front
+            if (canvasFront) {
+                canvasFront.getObjects().forEach(obj => {
+                    if (obj.templateType === 'front') {
+                        syncTemplateInputs(obj, 'front');
+                    }
+                });
+            }
 
+            // back
+            if (canvasBack) {
+                canvasBack.getObjects().forEach(obj => {
+                    if (obj.templateType === 'back') {
+                        syncTemplateInputs(obj, 'back');
+                    }
+                });
+            }
+
+            // none
+            if (canvasNone) {
+                canvasNone.getObjects().forEach(obj => {
+                    if (obj.templateType === 'none') {
+                        syncTemplateInputs(obj, 'none');
+                    }
+                });
+            }
+        }
+
+        // زر الحفظ في المحرر
+        document.addEventListener('DOMContentLoaded', function () {
+            const btn = document.getElementById('saveTemplatePositionsBtn');
+            if (!btn) return;
+
+            btn.addEventListener('click', function () {
+                saveAllTemplatePositions();
+
+                // اختياري: Toast أو Alert بسيط
+                if (window.toastr) {
+                    toastr.success('تم حفظ مواضع التصميم في الحقول بنجاح');
+                } else {
+                    console.log('Template positions saved.');
+                }
+            });
+        });
 
         function bindCanvasUpdates(canvas, type) {
             canvas.on('object:modified', function (e) {
