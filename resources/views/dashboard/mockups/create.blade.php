@@ -890,49 +890,53 @@
                 const preview = area.querySelector('.preview');
 
                 area.addEventListener('click', () => input?.click());
+
                 area.addEventListener('dragover', e => {
                     e.preventDefault();
                     area.classList.add('dragover');
                 });
+
                 area.addEventListener('dragleave', e => {
                     e.preventDefault();
                     area.classList.remove('dragover');
                 });
+
                 area.addEventListener('drop', e => {
                     e.preventDefault();
                     area.classList.remove('dragover');
                     handleFiles(e.dataTransfer.files, input, preview);
                 });
-                input?.addEventListener('change', e => handleFiles(e.target.files, input, preview));
+
+                // IMPORTANT: use input event = no double dialog
+                input?.addEventListener('input', e => handleFiles(e.target.files, input, preview));
             });
         }
+
         function copyFileToInput(file, inputId) {
             const clonedInput = document.getElementById(inputId);
             if (!clonedInput) return;
 
-            // وضع الملف
+            // set the file
             const dt = new DataTransfer();
             dt.items.add(file);
             clonedInput.files = dt.files;
 
-            // منع إعادة فتح نافذة اختيار الملفات
+            // IMPORTANT: use input event (NOT change)
             clonedInput.dispatchEvent(new Event("input"));
 
-            // إيجاد upload area الصحيح
-            const uploadArea = document.querySelector(`[data-input-id="${inputId}"]`);
+            // preview UI
+            const uploadArea = document.querySelector(`.upload-area[data-input-id="${inputId}"]`);
             if (!uploadArea) return;
 
             const preview = uploadArea.querySelector('.preview');
             if (!preview) return;
 
-            // عرض الصورة
             const reader = new FileReader();
             reader.onload = e => {
                 preview.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded border" style="max-height:120px;">`;
             };
             reader.readAsDataURL(file);
         }
-
 
 
         function handleFiles(files, input, preview) {
@@ -944,57 +948,44 @@
             reader.onload = e => {
                 const dataUrl = e.target.result;
 
-                // show preview
+                // Show preview for this input
                 preview.innerHTML = `<img src="${dataUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
 
-                // ==============================
-                // 🔥 NEW FIX: replicate file if both front & back are selected
-                // ==============================
-                const selectedTypes = [...document.querySelectorAll('.type-checkbox')]
-                    .filter(cb => cb.checked)
-                    .map(cb => cb.dataset.typeName);
+                const isFrontBack =
+                    document.querySelector('.type-checkbox[data-type-name="front"]').checked &&
+                    document.querySelector('.type-checkbox[data-type-name="back"]').checked;
 
-                // if both selected → clone this upload for the other type
-                if (selectedTypes.includes('front') && selectedTypes.includes('back')) {
-
-                    // if the user uploaded FRONT → duplicate for BACK
-                    if (input.id.startsWith('front-base-input')) {
+                if (isFrontBack) {
+                    // FRONT uploaded → update BACK
+                    if (input.id === "front-base-input") {
                         copyFileToInput(file, "back-base-input");
                         loadBaseImage(canvasBack, dataUrl);
-                        document.getElementById('editorBackWrapper').classList.remove('d-none');
                     }
 
-                    // if the user uploaded BACK → duplicate for FRONT
-                    if (input.id.startsWith('back-base-input')) {
+                    // BACK uploaded → update FRONT
+                    if (input.id === "back-base-input") {
                         copyFileToInput(file, "front-base-input");
                         loadBaseImage(canvasFront, dataUrl);
-                        document.getElementById('editorFrontWrapper').classList.remove('d-none');
                     }
                 }
 
-                // Load current base image
-                if (input.name.includes('_base_image')) {
-                    if (input.id.startsWith('front')) {
-                        loadBaseImage(canvasFront, dataUrl);
-                        document.getElementById('editorFrontWrapper').classList.remove('d-none');
-                    } else if (input.id.startsWith('back')) {
-                        loadBaseImage(canvasBack, dataUrl);
-                        document.getElementById('editorBackWrapper').classList.remove('d-none');
-                    } else if (input.id.startsWith('none')) {
-                        loadBaseImage(canvasNone, dataUrl);
-                        document.getElementById('editorNoneWrapper').classList.remove('d-none');
-                    }
+                // load on active side
+                if (input.id.startsWith("front")) {
+                    loadBaseImage(canvasFront, dataUrl);
+                }
+
+                if (input.id.startsWith("back")) {
+                    loadBaseImage(canvasBack, dataUrl);
                 }
             };
 
             reader.readAsDataURL(file);
 
-            // attach file to input
+            // Set original input file
             const dt = new DataTransfer();
             dt.items.add(file);
             input.files = dt.files;
         }
-
 
         checkboxes.forEach(cb => cb.addEventListener('change', toggleCheckboxes));
     </script>
