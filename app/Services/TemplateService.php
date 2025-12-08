@@ -32,7 +32,7 @@ class TemplateService extends BaseService
         $relations = [], bool $paginate = false, $columns = ['*'], $perPage = 16, $counts = [])
     {
         request('with_design_data', true);
-        $paginate =  request()->boolean('paginate');
+        $paginate = request()->has('paginate') && request()->boolean('paginate');
         $requested = request('per_page', $perPage);
         $pageSize = $requested === 'all' ? null : (int)$requested;
 
@@ -140,9 +140,9 @@ class TemplateService extends BaseService
         if (request()->expectsJson()) {
             $query = $query->whereStatus(StatusEnum::LIVE);
 
-            return $paginate == null
-                ? $query->paginate($requested)
-                : $query->get();
+            return !$paginate
+                ? $query->get()
+                : $query->paginate($requested);
         }
 
         return $this->repository->all(
