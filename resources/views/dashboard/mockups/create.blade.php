@@ -906,16 +906,61 @@
                 input?.addEventListener('change', e => handleFiles(e.target.files, input, preview));
             });
         }
+        function copyFileToInput(file, inputId) {
+            const clonedInput = document.getElementById(inputId);
+            if (!clonedInput) return;
+
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            clonedInput.files = dt.files;
+
+            // also update preview UI
+            const preview = clonedInput.closest('.upload-area').querySelector('.preview');
+            const reader = new FileReader();
+            reader.onload = e => {
+                preview.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded border" style="max-height:120px;">`;
+            };
+            reader.readAsDataURL(file);
+        }
 
         function handleFiles(files, input, preview) {
             if (!files.length) return;
 
+            const file = files[0];
+
             const reader = new FileReader();
             reader.onload = e => {
                 const dataUrl = e.target.result;
+
+                // show preview
                 preview.innerHTML = `<img src="${dataUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
 
-                // Load base image into the canvas
+                // ==============================
+                // 🔥 NEW FIX: replicate file if both front & back are selected
+                // ==============================
+                const selectedTypes = [...document.querySelectorAll('.type-checkbox')]
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.dataset.typeName);
+
+                // if both selected → clone this upload for the other type
+                if (selectedTypes.includes('front') && selectedTypes.includes('back')) {
+
+                    // if the user uploaded FRONT → duplicate for BACK
+                    if (input.id.startsWith('front-base-input')) {
+                        copyFileToInput(file, "back-base-input");
+                        loadBaseImage(canvasBack, dataUrl);
+                        document.getElementById('editorBackWrapper').classList.remove('d-none');
+                    }
+
+                    // if the user uploaded BACK → duplicate for FRONT
+                    if (input.id.startsWith('back-base-input')) {
+                        copyFileToInput(file, "front-base-input");
+                        loadBaseImage(canvasFront, dataUrl);
+                        document.getElementById('editorFrontWrapper').classList.remove('d-none');
+                    }
+                }
+
+                // Load current base image
                 if (input.name.includes('_base_image')) {
                     if (input.id.startsWith('front')) {
                         loadBaseImage(canvasFront, dataUrl);
@@ -929,12 +974,15 @@
                     }
                 }
             };
-            reader.readAsDataURL(files[0]);
 
+            reader.readAsDataURL(file);
+
+            // attach file to input
             const dt = new DataTransfer();
-            dt.items.add(files[0]);
+            dt.items.add(file);
             input.files = dt.files;
         }
+
 
         checkboxes.forEach(cb => cb.addEventListener('change', toggleCheckboxes));
     </script>
