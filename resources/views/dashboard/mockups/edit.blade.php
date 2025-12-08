@@ -316,9 +316,9 @@
                 if (base) {
                     const preview = document.querySelector(`#${type}-base-input + .upload-card .preview`);
                     preview.innerHTML = `<img src="${base}" class="img-fluid rounded border" style="max-height:120px;">`;
-
-                    loadBaseImage(window[`canvas${type.charAt(0).toUpperCase() + type.slice(1)}`], base);
-                    // document.getElementById(`editor${type.charAt(0).toUpperCase() + type.slice(1)}Wrapper`).classList.remove('d-none');
+                    let canvas =  new fabric.Canvas(`mockupCanvas${type.charAt(0).toUpperCase() + type.slice(1)}`)
+                    loadBaseImage(canvas, base);
+                    document.getElementById(`editor${type.charAt(0).toUpperCase() + type.slice(1)}Wrapper`).classList.remove('d-none');
                 }
 
                 if (mask) {
@@ -620,6 +620,7 @@
         let canvasNone = new fabric.Canvas('mockupCanvasNone');
 
         function loadBaseImage(canvas, baseUrl) {
+            console.log("DFgdf",canvas,baseUrl)
             fabric.Image.fromURL(baseUrl, function (img) {
                 img.set({selectable: false});
                 canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
