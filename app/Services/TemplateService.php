@@ -28,25 +28,25 @@ class TemplateService extends BaseService
 
     }
 
-    public function getAll(
-        $relations = [], bool $paginate = false, $columns = ['*'], $perPage = 16, $counts = [])
+    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 16, $counts = [])
     {
-        request('with_design_data', true);
-
-
-        $requested = request('per_page', $perPage);
+        $req = request();
+        $requested = $req->input('per_page', $perPage);
         $pageSize = $requested === 'all' ? null : (int)$requested;
 
-        $productId = request('product_id');
-        $categoryId = request('product_without_category_id');
+        $productId = $req->input('product_id');
+        $categoryId = $req->input('product_without_category_id');
         $locale = app()->getLocale();
-        $search = request('search');
+        $search = $req->input('search', '');
+        $categoryRepo = $this->categoryRepository;
+
         $query = $this->repository
-            ->query()->with([
+            ->query()
+            ->with([
                 'products:id,name',
                 'tags' => function ($q) use ($locale, $search) {
-
-                    if ($search !== '') {
+                    // Only add a where if search is non-empty
+                    if (trim($search) !== '') {
                         $q->whereRaw(
                             "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?",
                             ["%{$search}%"]
@@ -54,94 +54,111 @@ class TemplateService extends BaseService
                     }
                 },
                 'types',
-            ])->when(request()->filled('search_value'), function ($q) use ($locale) {
-                if (hasMeaningfulSearch(request('search_value'))) {
-
+            ])
+            ->when($req->filled('search_value'), function ($q) use ($locale, $req) {
+                $value = $req->input('search_value');
+                if (hasMeaningfulSearch($value)) {
                     $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
-                        '%' . strtolower(request('search_value')) . '%'
+                        '%' . strtolower($value) . '%'
                     ]);
                 } else {
+                    // If not meaningful, ensure no results
                     $q->whereRaw('1 = 0');
                 }
-            })->when(filter_var(request('has_not_mockups'), FILTER_VALIDATE_BOOLEAN), function ($q) {
+            })
+            ->when(filter_var($req->input('has_not_mockups', false), FILTER_VALIDATE_BOOLEAN), function ($q) {
                 $q->whereDoesntHave('mockups');
             })
-            ->when(request()->filled('types'), function ($query) {
-                $types = array_map('intval', request()->input('types'));
+            ->when($req->filled('types'), function ($query) use ($req) {
+                $types = array_map('intval', (array)$req->input('types', []));
+                if (count($types) === 0) {
+                    // if empty types array, no results
+                    $query->whereRaw('1 = 0');
+                    return;
+                }
+                // require all the provided types (exact match count)
                 $query->whereHas('types', function ($q) use ($types) {
                     $q->whereIn('types.value', $types);
                 }, '=', count($types));
 
+                // ensure no other types exist beyond the provided set
                 $query->whereDoesntHave('types', function ($q) use ($types) {
                     $q->whereNotIn('types.value', $types);
                 });
             })
-            ->when(request()->filled('product_id'), function ($query) use ($productId) {
+            ->when($req->filled('product_id'), function ($query) use ($productId) {
                 $query->whereHas('products', function ($q) use ($productId) {
                     $q->where('products.id', $productId);
                 });
-            })->when(request('product_without_category_id'), function ($q) use ($categoryId) {
-                $q->where(function ($q) use ($categoryId) {
+            })
+            ->when($req->filled('product_without_category_id'), function ($q) use ($categoryId, $categoryRepo) {
+                // capture repo to avoid referencing $this inside nested closure unexpectedly
+                $q->where(function ($q) use ($categoryId, $categoryRepo) {
                     $q->whereHas('categories', function ($q) use ($categoryId) {
                         $q->where('categories.id', $categoryId);
                     })
-                        ->orwhereHas('products.category', function ($q) use ($categoryId) {
+                        ->orWhereHas('products.category', function ($q) use ($categoryId) {
                             $q->where('categories.id', $categoryId);
-                        })->orwhereHas('products', function ($q) use ($categoryId) {
-                            $category =  $this->categoryRepository->find($categoryId);
-                            $q->whereIn('products.id', $category->products->pluck('id'));
+                        })
+                        ->orWhereHas('products', function ($q) use ($categoryId, $categoryRepo) {
+                            // defensive: if category doesn't exist, use an empty array
+                            $category = $categoryRepo->find($categoryId);
+                            $ids = $category ? $category->products->pluck('id')->toArray() : [];
+                            if (empty($ids)) {
+                                // ensure no results for this branch
+                                $q->whereRaw('1 = 0');
+                            } else {
+                                $q->whereIn('products.id', $ids);
+                            }
                         });
                 });
-
             })
-            ->when(request()->filled('approach'), function ($q) {
-                $q->where('approach', request('approach'));
+            ->when($req->filled('approach'), function ($q) use ($req) {
+                $q->where('approach', $req->input('approach'));
             })
-            ->when(request('category_id'), function ($q) {
-                $q->whereHas('products', function ($q) {
-                    $q->whereCategoryId(request('category_id'));
+            ->when($req->filled('category_id'), function ($q) use ($req) {
+                $q->whereHas('products', function ($q) use ($req) {
+                    $q->whereCategoryId($req->input('category_id'));
                 });
             })
-            ->when(request('search'), function ($q) use ($locale) {
-                $q->whereHas('tags', function ($q) use ($locale) {
+            ->when($req->filled('search'), function ($q) use ($locale, $req) {
+                $term = $req->input('search');
+                $q->whereHas('tags', function ($q) use ($locale, $term) {
                     $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
-                        '%' . strtolower(request('search')) . '%'
+                        '%' . strtolower($term) . '%'
                     ]);
                 });
             })
-            ->when(request()->filled('status'), fn($q) => $q->whereStatus(request('status')))
-            ->when(request()->filled('is_landing'), function ($query) {
+            ->when($req->filled('status'), fn($q) => $q->whereStatus($req->input('status')))
+            ->when($req->filled('is_landing'), function ($query) {
                 $query->where('is_landing', true);
-            })->when(request()->filled('tags'), function ($q) {
-                $tags = request('tags');
+            })
+            ->when($req->filled('tags'), function ($q) use ($req) {
+                $tags = $req->input('tags');
                 $q->whereHas('tags', function ($q) use ($tags) {
                     $q->whereIn('tags.id', is_array($tags) ? $tags : [$tags]);
                 });
-            })->when(request()->filled('industries'), function ($q) {
-                $industries = request('industries');
+            })
+            ->when($req->filled('industries'), function ($q) use ($req) {
+                $industries = $req->input('industries');
                 $q->whereHas('industries', function ($q) use ($industries) {
                     $q->whereIn('industries.id', is_array($industries) ? $industries : [$industries]);
                 });
             })
-            ->when(request()->filled('orientation'), function ($q) {
-                $q->whereOrientation(OrientationEnum::tryFrom(request('orientation')));
+            ->when($req->filled('orientation'), function ($q) use ($req) {
+                $q->whereOrientation(OrientationEnum::tryFrom($req->input('orientation')));
             })
-            ->when(request()->filled('limit'), function ($q) {
-                $q->limit((int) request('limit'));
+            ->when($req->filled('limit'), function ($q) use ($req) {
+                $q->limit((int) $req->input('limit'));
             });
 
-        if (request()->ajax()) {
-            return $pageSize === null
-                ? $query->get()
-                : $query->paginate($pageSize)->withQueryString();
+        if ($req->ajax()) {
+            return $pageSize === null ? $query->get() : $query->paginate($pageSize)->withQueryString();
         }
 
-        if (request()->expectsJson()) {
+        if ($req->expectsJson()) {
             $query = $query->whereStatus(StatusEnum::LIVE);
-
-            return $paginate
-                ? $query->paginate($requested)
-                : $query->get();
+            return $paginate ? $query->paginate($requested) : $query->get();
         }
 
         return $this->repository->all(
