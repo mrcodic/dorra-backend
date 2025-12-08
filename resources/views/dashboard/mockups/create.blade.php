@@ -889,6 +889,15 @@
                 const input = document.getElementById(area.dataset.inputId);
                 const preview = area.querySelector('.preview');
 
+                // 🛑 Remove previous listeners (important!)
+                area.replaceWith(area.cloneNode(true));
+            });
+
+            // Re-select after cloning
+            document.querySelectorAll('.upload-area').forEach(area => {
+                const input = document.getElementById(area.dataset.inputId);
+                const preview = area.querySelector('.preview');
+
                 area.addEventListener('click', () => input?.click());
                 area.addEventListener('dragover', e => {
                     e.preventDefault();
@@ -903,9 +912,11 @@
                     area.classList.remove('dragover');
                     handleFiles(e.dataTransfer.files, input, preview);
                 });
+
                 input?.addEventListener('change', e => handleFiles(e.target.files, input, preview));
             });
         }
+
         function copyFileToInput(file, inputId) {
             const clonedInput = document.getElementById(inputId);
             if (!clonedInput) return;

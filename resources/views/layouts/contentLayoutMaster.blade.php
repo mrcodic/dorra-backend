@@ -50,8 +50,8 @@ $configData = Helper::applClasses();
 
     @include('panels/styles')
     @stack('styles')
-    <link rel="stylesheet" href="{{ asset('css/style.css') }} ?v={{ time() }}">
-    <link rel="stylesheet" href="{{ asset('vendors/css/file-uploaders/dropzone.min.css') }} ?v={{ time() }}">
+{{--    <link rel="stylesheet" href="{{ asset('css/style.css') }} ?v={{ time() }}">--}}
+{{--    <link rel="stylesheet" href="{{ asset('vendors/css/file-uploaders/dropzone.min.css') }} ?v={{ time() }}">--}}
 
 </head>
 <!-- END: Head-->
