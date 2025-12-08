@@ -152,10 +152,10 @@
 
                                                 <div class="template-preview mt-25">
                                                     @if($tpl->front_image)
-                                                        <img src="{{ $tpl->front_image }}" class="front-preview rounded-circle" style="width:40px;height:40px;">
+                                                        <img src="{{ $tpl->source_design_svg }}" class="front-preview rounded-circle" style="width:40px;height:40px;">
                                                     @endif
                                                     @if($tpl->back_image)
-                                                        <img src="{{ $tpl->back_image }}" class="back-preview rounded-circle" style="width:40px;height:40px;">
+                                                        <img src="{{ $tpl->back_base64_preview_image }}" class="back-preview rounded-circle" style="width:40px;height:40px;">
                                                     @endif
                                                 </div>
                                             </div>
