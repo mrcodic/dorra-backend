@@ -221,8 +221,8 @@ class MockupService extends BaseService
                         $basePath = $baseMedia->getPath();
                         [$baseWidth, $baseHeight] = getimagesize($basePath);
 
-                        $previewWidth = 800;
-                        $previewHeight = 800;
+                        $previewWidth = 300;
+                        $previewHeight = 300;
 
                         $scaleX = $baseWidth / $previewWidth;
                         $scaleY = $baseHeight / $previewHeight;

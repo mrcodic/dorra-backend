@@ -821,12 +821,14 @@
             btn.addEventListener('click', function () {
                 saveAllTemplatePositions();
 
-                // اختياري: Toast أو Alert بسيط
-                if (window.toastr) {
-                    toastr.success('تم حفظ مواضع التصميم في الحقول بنجاح');
-                } else {
-                    console.log('Template positions saved.');
-                }
+                Toastify({
+                    text: "Positions saved successfully",
+                    duration: 1500,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    close: true,
+                }).showToast();
             });
         });
 
@@ -1089,7 +1091,7 @@
                      <label class="form-label label-text">${typeLabel} Base Image</label>
                      <input type="file" name="${type}_base_image" id="${type}-base-input"
                         class="d-none" accept="image/*">
-                
+
 
             <div class="upload-card upload-area" data-input-id="${type}-base-input">
                 <div class="upload-content">
