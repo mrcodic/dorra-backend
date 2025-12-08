@@ -216,16 +216,14 @@
                             <label class="label-text">Mockup Editor (General)</label>
                             <canvas id="mockupCanvasNone" width="800" height="800" style="border:1px solid #ccc;"></canvas>
                         </div>
-                    <div class="d-flex justify-content-end mt-2">
+                    <div class="d-flex justify-content-end mt-2 ">
                         <button type="button"
-                                class="btn btn-sm btn-primary"
+                                class="btn btn-sm btn-primary d-none"
                                 id="saveTemplatePositionsBtn">
                            Save Template Positions
                         </button>
                     </div>
-                    <small class="text-muted d-block mb-3">
-                        Press save after adjusting design positions to keep latest adjustments.
-                    </small>
+
                     <div class="mb-2">
                         <label class="label-text mb-1 d-block">Colors</label>
                         <div class="d-flex flex-wrap align-items-center gap-1">
@@ -1040,6 +1038,8 @@
                         loadBaseImage(canvasNone, dataUrl);
                         document.getElementById('editorNoneWrapper').classList.remove('d-none');
                     }
+                    document.getElementById('saveTemplatePositionsBtn').classList.remove('d-none');
+
                 }
             };
             reader.readAsDataURL(files[0]);
