@@ -913,54 +913,77 @@
         const fileInputsContainer = document.getElementById('fileInputsContainer');
 
         function toggleCheckboxes() {
-            let frontChecked = false, backChecked = false, noneChecked = false;
-            checkboxes.forEach(cb => {
-                if (cb.dataset.typeName === 'front' && cb.checked) frontChecked = true;
-                if (cb.dataset.typeName === 'back' && cb.checked) backChecked = true;
-                if (cb.dataset.typeName === 'none' && cb.checked) noneChecked = true;
-            });
+            let selectedTypes = [...checkboxes]
+                .filter(cb => cb.checked)
+                .map(cb => cb.dataset.typeName);
 
             checkboxes.forEach(cb => {
                 const type = cb.dataset.typeName;
-                cb.disabled = (noneChecked && (type === 'front' || type === 'back')) || ((frontChecked || backChecked) && type === 'none');
+
+                // enforce front/back vs none rule
+                cb.disabled =
+                    (selectedTypes.includes('none') && (type === 'front' || type === 'back')) ||
+                    (selectedTypes.includes('front') || selectedTypes.includes('back')) && type === 'none';
             });
 
-            renderFileInputs();
+            renderFileInputs(); // ⬅ This now handles removal
         }
 
         function renderFileInputs() {
             if (!fileInputsContainer) return;
 
-            let selectedTypes = [...checkboxes].filter(cb => cb.checked).map(cb => cb.dataset.typeName);
+            let selectedTypes = [...checkboxes]
+                .filter(cb => cb.checked)
+                .map(cb => cb.dataset.typeName);
 
+            // -------------------------------
+            // REMOVE blocks for unchecked types
+            // -------------------------------
+            ['front', 'back', 'none'].forEach(type => {
+                if (!selectedTypes.includes(type)) {
+                    const block = document.getElementById(`${type}-file-block`);
+                    if (block) block.remove();
+                }
+            });
+
+            // -------------------------------
+            // ADD blocks for newly selected types
+            // -------------------------------
             selectedTypes.forEach(type => {
-                if (document.getElementById(`${type}-base-input`)) return;
+                if (document.getElementById(`${type}-file-block`)) return; // already exists
 
                 const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+
                 const block = document.createElement('div');
                 block.classList.add('mb-3');
+                block.id = `${type}-file-block`;  // ⬅ Important: uniform ID for removal
 
                 block.innerHTML = `
-                <label class="form-label label-text">${typeLabel} Base Image</label>
-                <input type="file" name="${type}_base_image" id="${type}-base-input" class="d-none" accept="image/*">
-                <div class="upload-card upload-area" data-input-id="${type}-base-input">
-                    <div class="upload-content">
-                        <i data-feather="upload" class="mb-2"></i>
-                        <p>${typeLabel} Base Image: Drag file here or click to upload</p>
-                        <div class="preview mt-1"></div>
-                    </div>
-                </div>
+            <label class="form-label label-text">${typeLabel} Base Image</label>
+            <input type="file" name="${type}_base_image" id="${type}-base-input"
+                   class="d-none" accept="image/*">
 
-                <label class="form-label label-text mt-2">${typeLabel} Mask Image</label>
-                <input type="file" name="${type}_mask_image" id="${type}-mask-input" class="d-none" accept="image/*">
-                <div class="upload-card upload-area" data-input-id="${type}-mask-input">
-                    <div class="upload-content">
-                        <i data-feather="upload" class="mb-2"></i>
-                        <p>${typeLabel} Mask Image: Drag file here or click to upload</p>
-                        <div class="preview mt-1"></div>
-                    </div>
+            <div class="upload-card upload-area" data-input-id="${type}-base-input">
+                <div class="upload-content">
+                    <i data-feather="upload" class="mb-2"></i>
+                    <p>${typeLabel} Base Image: Drag file here or click to upload</p>
+                    <div class="preview mt-1"></div>
                 </div>
-            `;
+            </div>
+
+            <label class="form-label label-text mt-2">${typeLabel} Mask Image</label>
+            <input type="file" name="${type}_mask_image" id="${type}-mask-input"
+                   class="d-none" accept="image/*">
+
+            <div class="upload-card upload-area" data-input-id="${type}-mask-input">
+                <div class="upload-content">
+                    <i data-feather="upload" class="mb-2"></i>
+                    <p>${typeLabel} Mask Image: Drag file here or click to upload</p>
+                    <div class="preview mt-1"></div>
+                </div>
+            </div>
+        `;
+
                 fileInputsContainer.appendChild(block);
             });
 
