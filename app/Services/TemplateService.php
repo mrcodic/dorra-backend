@@ -32,7 +32,8 @@ class TemplateService extends BaseService
         $relations = [], bool $paginate = false, $columns = ['*'], $perPage = 16, $counts = [])
     {
         request('with_design_data', true);
-        $paginate = request()->has('paginate') && request()->boolean('paginate');
+
+
         $requested = request('per_page', $perPage);
         $pageSize = $requested === 'all' ? null : (int)$requested;
 
@@ -62,22 +63,7 @@ class TemplateService extends BaseService
                 } else {
                     $q->whereRaw('1 = 0');
                 }
-            })->when(filter_var(request('has_not_mockups'), FILTER_VALIDATE_BOOLEAN), function ($q) {
-                $q->whereDoesntHave('mockups');
             })
-            ->when(request()->filled('types'), function ($query) {
-                $types = array_map('intval', request()->input('types'));
-                $query->whereHas('types', function ($q) use ($types) {
-                    $q->whereIn('types.value', $types);
-                }, '=', count($types));
-
-                $query->whereDoesntHave('types', function ($q) use ($types) {
-                    $q->whereNotIn('types.value', $types);
-                });
-            })
-
-
-
             ->when(request()->filled('product_id'), function ($query) use ($productId) {
                 $query->whereHas('products', function ($q) use ($productId) {
                     $q->where('products.id', $productId);
@@ -90,7 +76,7 @@ class TemplateService extends BaseService
                         ->orwhereHas('products.category', function ($q) use ($categoryId) {
                             $q->where('categories.id', $categoryId);
                         })->orwhereHas('products', function ($q) use ($categoryId) {
-                            $category = $this->categoryRepository->find($categoryId);
+                            $category =  $this->categoryRepository->find($categoryId);
                             $q->whereIn('products.id', $category->products->pluck('id'));
                         });
                 });
@@ -127,9 +113,8 @@ class TemplateService extends BaseService
             })
             ->when(request()->filled('orientation'), function ($q) {
                 $q->whereOrientation(OrientationEnum::tryFrom(request('orientation')));
-            })->latest()->when(request()->filled('limit'), function ($q) {
-            $q->limit((int) request('limit'));
-    });
+            })
+            ->latest();
 
         if (request()->ajax()) {
             return $pageSize === null
@@ -140,7 +125,7 @@ class TemplateService extends BaseService
         if (request()->expectsJson()) {
             $query = $query->whereStatus(StatusEnum::LIVE);
 
-            return !$paginate
+            return $paginate
                 ? $query->paginate($requested)
                 : $query->get();
         }
