@@ -146,7 +146,7 @@ class TemplateService extends BaseService
         }
 
         return $this->repository->all(
-            $paginate,
+            true,
             $columns,
             $relations,
             filters: $this->filters,
