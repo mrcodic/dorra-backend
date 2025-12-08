@@ -256,6 +256,17 @@
         @include("modals.templates.template-modal")
     </section>
     <!-- users list ends -->
+    @php
+        $savedImages = [
+            'front_base' => $model->front_base_image_url,
+            'front_mask' => $model->front_mask_image_url,
+            'back_base'  => $model->back_base_image_url,
+            'back_mask'  => $model->back_mask_image_url,
+            'none_base'  => $model->none_base_image_url,
+            'none_mask'  => $model->none_mask_image_url,
+        ];
+   
+    @endphp
 @endsection
 
 @section('vendor-script')
@@ -281,7 +292,33 @@
 @endsection
 
 @section('page-script')
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            toggleCheckboxes();
+            const saved = @json($savedImages);
 
+
+            // loop through types
+            ['front','back','none'].forEach(type => {
+                const base = saved[`${type}_base`];
+                const mask = saved[`${type}_mask`];
+
+                if (base) {
+                    const preview = document.querySelector(`#${type}-base-input + .upload-card .preview`);
+                    preview.innerHTML = `<img src="${base}" class="img-fluid rounded border" style="max-height:120px;">`;
+
+                    loadBaseImage(window[`canvas${type.charAt(0).toUpperCase() + type.slice(1)}`], base);
+                    document.getElementById(`editor${type.charAt(0).toUpperCase() + type.slice(1)}Wrapper`).classList.remove('d-none');
+                }
+
+                if (mask) {
+                    const preview = document.querySelector(`#${type}-mask-input + .upload-card .preview`);
+                    preview.innerHTML = `<img src="${mask}" class="img-fluid rounded border" style="max-height:120px;">`;
+                }
+            });
+        });
+
+    </script>
     <script>
         $(function () {
             let nextPageUrl = null; // from pagination.next_page_url
@@ -866,7 +903,6 @@
     </script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            toggleCheckboxes();
             const productSelect = document.getElementById("productsSelect");
             productSelect?.addEventListener("change", () => {
                 updateTemplateVisibility();
