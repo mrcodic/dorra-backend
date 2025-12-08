@@ -133,8 +133,8 @@ class TemplateService extends BaseService
 
         if (request()->ajax()) {
             return $pageSize === null
-                ?$query->paginate($pageSize)->withQueryString()
-                : $query->get();
+                ? $query->get()
+                : $query->paginate($pageSize)->withQueryString();
         }
 
         if (request()->expectsJson()) {
