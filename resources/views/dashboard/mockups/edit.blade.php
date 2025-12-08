@@ -134,7 +134,7 @@
                                     @endforeach
                                 </select>
                             </div>
-
+@dd($model->templates)
                             <div class="template-repeater row d-none" id="template-wrapper">
                                 <div data-repeater-list="templates">
                                     @foreach($model->templates as $tpl)
