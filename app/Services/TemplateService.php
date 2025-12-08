@@ -128,7 +128,7 @@ class TemplateService extends BaseService
             ->when(request()->filled('orientation'), function ($q) {
                 $q->whereOrientation(OrientationEnum::tryFrom(request('orientation')));
             })->latest()->when(request()->filled('limit'), function ($q) {
-        $q->limit((int) request('limit'));
+            $q->limit((int) request('limit'));
     });
 
         if (request()->ajax()) {
@@ -140,7 +140,7 @@ class TemplateService extends BaseService
         if (request()->expectsJson()) {
             $query = $query->whereStatus(StatusEnum::LIVE);
 
-            return $paginate
+            return $paginate == null
                 ? $query->paginate($requested)
                 : $query->get();
         }

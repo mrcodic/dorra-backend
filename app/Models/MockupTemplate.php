@@ -30,12 +30,4 @@ class MockupTemplate extends Pivot
     {
         return $this->belongsTo(Template::class);
     }
-
-    /**
-     * كل الـ positions المرتبطة بالـ mockup_template row ده
-     */
-    public function positions()
-    {
-        return $this->hasMany(MockupPositionTemplate::class, 'mockup_template_id');
-    }
 }

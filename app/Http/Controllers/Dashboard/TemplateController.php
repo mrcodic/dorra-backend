@@ -77,10 +77,12 @@ class TemplateController extends DashboardController
             {
                 return Response::api(data: TemplateResource::collection($data)->response()->getData()) ;
             }
+
             $cards = view('dashboard.partials.filtered-templates', compact('data'))->render();
 
             $pagination = '';
             if ($data instanceof \Illuminate\Pagination\LengthAwarePaginator) {
+                dd($data);
                 $pagination = '<div class="mt-2 px-1">' .
                     $data->withQueryString()->links('pagination::bootstrap-5')->render() .
                     '</div>';

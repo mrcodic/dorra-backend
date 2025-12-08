@@ -91,8 +91,9 @@
     <section class="">
         <div class="card">
             <div class="card-body">
-                <form id="addMockupForm" enctype="multipart/form-data" action="{{ route('mockups.store') }}">
+                <form id="addMockupForm" enctype="multipart/form-data" action="{{ route('mockups.update',$model->id) }}">
                     @csrf
+                    @method("PUT")
                     <div class="modal-body flex-grow-1">
                         <div class="">
                             <div class="form-group mb-2">
@@ -137,9 +138,10 @@
 
                             <div class="template-repeater row d-none" id="template-wrapper">
                                 <div data-repeater-list="templates">
-{{--@dd($model->templates)--}}
+                                    <div data-repeater-item class="row template-item align-items-end">
+
                                     @foreach($model->templates as $tpl)
-                                        <div data-repeater-item class="row template-item align-items-end">
+
 
                                             <div class="form-group mb-2 col-8">
                                                 <label class="label-text mb-1">Template</label>
@@ -147,7 +149,7 @@
                                                 <select class="template-select"
                                                         name="template_id"
                                                         data-selected-id="{{ $tpl->id }}">
-                                                    <option value="{{ $tpl->id }}" selected
+                                                    <option value="{{ $tpl->id }}"
                                                             data-image="{{ $tpl->source_design_svg }}"
                                                             data-back-image="{{ $tpl->back_base64_preview_image }}">
                                                         {{ $tpl->name }}
@@ -169,25 +171,26 @@
                                                     Show on Canvas
                                                 </button>
                                             </div>
-
+{{--                                            @dd($tpl->pivot->positions)--}}
                                             <!-- Hidden fields FOR THIS ROW ONLY -->
-                                            <input type="hidden" name="front_x" value="{{ $tpl->front_x }}">
-                                            <input type="hidden" name="front_y" value="{{ $tpl->front_y }}">
-                                            <input type="hidden" name="front_width" value="{{ $tpl->front_width }}">
-                                            <input type="hidden" name="front_height" value="{{ $tpl->front_height }}">
-                                            <input type="hidden" name="front_angle" value="{{ $tpl->front_angle }}">
+                                            <input type="hidden" name="front_x" class="template_x front" value="{{ data_get($tpl->pivot->positions, 'front_x', '') }}">
+                                            <input type="hidden" name="front_y" class="template_y front" value="{{ data_get($tpl->pivot->positions, 'front_y', '') }}">
+                                            <input type="hidden" name="front_width" class="template_width front" value="{{ data_get($tpl->pivot->positions, 'front_width', '') }}">
+                                            <input type="hidden" name="front_height" class="template_height front" value="{{ data_get($tpl->pivot->positions, 'front_height', '') }}">
+                                            <input type="hidden" name="front_angle" class="template_angle front" value="{{ data_get($tpl->pivot->positions, 'front_angle', '') }}">
 
-                                            <input type="hidden" name="back_x" value="{{ $tpl->back_x }}">
-                                            <input type="hidden" name="back_y" value="{{ $tpl->back_y }}">
-                                            <input type="hidden" name="back_width" value="{{ $tpl->back_width }}">
-                                            <input type="hidden" name="back_height" value="{{ $tpl->back_height }}">
-                                            <input type="hidden" name="back_angle" value="{{ $tpl->back_angle }}">
+                                            <input type="hidden" name="back_x" class="template_x back" value="{{ data_get($tpl->pivot->positions, 'back_x', '') }}">
+                                            <input type="hidden" name="back_y" class="template_y back" value="{{ data_get($tpl->pivot->positions, 'back_y', '') }}">
+                                            <input type="hidden" name="back_width" class="template_width back" value="{{ data_get($tpl->pivot->positions, 'back_width', '') }}">
+                                            <input type="hidden" name="back_height" class="template_height back" value="{{ data_get($tpl->pivot->positions, 'back_height', '') }}">
+                                            <input type="hidden" name="back_angle" class="template_angle back" value="{{ data_get($tpl->pivot->positions, 'back_angle', '') }}">
 
-                                            <input type="hidden" name="none_x" value="{{ $tpl->none_x }}">
-                                            <input type="hidden" name="none_y" value="{{ $tpl->none_y }}">
-                                            <input type="hidden" name="none_width" value="{{ $tpl->none_width }}">
-                                            <input type="hidden" name="none_height" value="{{ $tpl->none_height }}">
-                                            <input type="hidden" name="none_angle" value="{{ $tpl->none_angle }}">
+                                            <input type="hidden" name="none_x" class="template_x none" value="{{ data_get($tpl->pivot->positions, 'none_x', '') }}">
+                                            <input type="hidden" name="none_y" class="template_y none" value="{{ data_get($tpl->pivot->positions, 'none_y', '') }}">
+                                            <input type="hidden" name="none_width" class="template_width none" value="{{ data_get($tpl->pivot->positions, 'none_width', '') }}">
+                                            <input type="hidden" name="none_height" class="template_height none" value="{{ data_get($tpl->pivot->positions, 'none_height', '') }}">
+                                            <input type="hidden" name="none_angle" class="template_angle none" value="{{ data_get($tpl->pivot->positions, 'none_angle', '') }}">
+
 
                                             <div class="col-12 text-end mt-2">
                                                 <button type="button" data-repeater-delete class="btn btn-sm btn-light-danger">
@@ -195,8 +198,9 @@
                                                 </button>
                                             </div>
 
-                                        </div>
+
                                     @endforeach
+                                    </div>
 
                                 </div>
 
@@ -252,9 +256,8 @@
                     </div>
 
                     <div class="modal-footer border-top-0">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
-                            <span class="btn-text">Create</span>
+                            <span class="btn-text">Save Changes</span>
                             <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
                                   role="status" aria-hidden="true"></span>
                         </button>
@@ -304,30 +307,67 @@
 @section('page-script')
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // 1) Initialize canvases once
+            canvasFront = new fabric.Canvas('mockupCanvasFront');
+            canvasBack  = new fabric.Canvas('mockupCanvasBack');
+            canvasNone  = new fabric.Canvas('mockupCanvasNone');
+
             toggleCheckboxes();
+
             const saved = @json($savedImages);
 
+            const canvasMap = {
+                front: canvasFront,
+                back:  canvasBack,
+                none:  canvasNone,
+            };
 
             // loop through types
             ['front','back','none'].forEach(type => {
                 const base = saved[`${type}_base`];
                 const mask = saved[`${type}_mask`];
+
                 if (base) {
-                    const preview = document.querySelector(`#${type}-base-input + .upload-card .preview`);
-                    preview.innerHTML = `<img src="${base}" class="img-fluid rounded border" style="max-height:120px;">`;
-                    let canvas =  new fabric.Canvas(`mockupCanvas${type.charAt(0).toUpperCase() + type.slice(1)}`)
-                    loadBaseImage(canvas, base);
-                    document.getElementById(`editor${type.charAt(0).toUpperCase() + type.slice(1)}Wrapper`).classList.remove('d-none');
+                    // ensure file inputs exist first
+                    const basePreview = document.querySelector(
+                        `#${type}-base-input + .upload-card .preview`
+                    );
+                    if (basePreview) {
+                        basePreview.innerHTML = `
+                        <img src="${base}" class="img-fluid rounded border" style="max-height:120px;">
+                    `;
+                    }
+
+                    const canvas = canvasMap[type];
+                    if (canvas) {
+                        loadBaseImage(canvas, base);
+                        document
+                            .getElementById(
+                                `editor${type.charAt(0).toUpperCase() + type.slice(1)}Wrapper`
+                            )
+                            ?.classList.remove('d-none');
+                    }
                 }
 
                 if (mask) {
-                    const preview = document.querySelector(`#${type}-mask-input + .upload-card .preview`);
-                    preview.innerHTML = `<img src="${mask}" class="img-fluid rounded border" style="max-height:120px;">`;
+                    const maskPreview = document.querySelector(
+                        `#${type}-mask-input + .upload-card .preview`
+                    );
+                    if (maskPreview) {
+                        maskPreview.innerHTML = `
+                        <img src="${mask}" class="img-fluid rounded border" style="max-height:120px;">
+                    `;
+                    }
                 }
             });
-        });
 
+            // بعد ما الكانفاسات اتعملت، اربط الـ object:modified
+            if (canvasFront) bindCanvasUpdates(canvasFront, "front");
+            if (canvasBack)  bindCanvasUpdates(canvasBack, "back");
+            if (canvasNone)  bindCanvasUpdates(canvasNone, "none");
+        });
     </script>
+
     <script>
         $(function () {
             let nextPageUrl = null; // from pagination.next_page_url
@@ -647,9 +687,7 @@
             const widthInput  = row.querySelector(`.template_width.${type}`);
             const heightInput = row.querySelector(`.template_height.${type}`);
             const angleInput  = row.querySelector(`.template_angle.${type}`);
-
             if (!xInput || !yInput || !widthInput || !heightInput || !angleInput) return;
-
             xInput.value      = obj.left;
             yInput.value      = obj.top;
             widthInput.value  = obj.width * obj.scaleX;
@@ -688,20 +726,27 @@
                         const savedWidth  = parseFloat(widthInput.value);
                         const savedHeight = parseFloat(heightInput.value);
                         const savedAngle  = parseFloat(angleInput.value);
+                        console.log("LEFT RAW:", xInput?.value);
+                        console.log("TOP RAW:", yInput?.value);
+                        console.log("WIDTH RAW:", widthInput?.value);
+                        console.log("HEIGHT RAW:", heightInput?.value);
+                        console.log("ANGLE RAW:", angleInput?.value);
 
-                        // لو فيه قيم محفوظة نرجع لها بدل الـ 150/150
+
                         if (!isNaN(savedLeft))  img.left  = savedLeft;
                         if (!isNaN(savedTop))   img.top   = savedTop;
                         if (!isNaN(savedAngle)) img.angle = savedAngle;
 
                         if (!isNaN(savedWidth) && img.width) {
                             img.scaleX = savedWidth / img.width;
+                            console.log(savedWidth)
                         }
                         if (!isNaN(savedHeight) && img.height) {
                             img.scaleY = savedHeight / img.height;
                         }
                     }
                 }
+
 
                 canvas.add(img);
                 canvas.setActiveObject(img);
@@ -778,6 +823,7 @@
             // ================================
             // CASE 1: inside repeater row
             // ================================
+            // CASE 1: inside repeater row
             const row = btn.closest(".template-item");
             if (row) {
                 const select = row.querySelector(".template-select");
@@ -792,8 +838,9 @@
                 if (front) loadAndBind(canvasFront, front, "front", row);
                 if (back)  loadAndBind(canvasBack,  back,  "back",  row);
 
-                return; // ✅ stop here, we handled repeater case
+                return;
             }
+
 
             // ================================
             // CASE 2: inside modal drawer
@@ -838,74 +885,73 @@
             templateWrapper.classList.remove("d-none");
         };
 
-        {{--window.loadTemplates = function () {--}}
-        {{--    let productId = document.getElementById('productsSelect')?.value;--}}
-        {{--    let typeMap = {front: 1, back: 2, none: 3};--}}
-        {{--    let selectedTypes = [...document.querySelectorAll('.type-checkbox')]--}}
-        {{--        .filter(cb => cb.checked)--}}
-        {{--        .map(cb => typeMap[cb.dataset.typeName]);--}}
+        window.loadTemplates = function () {
+            let productId = document.getElementById('productsSelect')?.value;
+            let typeMap = {front: 1, back: 2, none: 3};
+            let selectedTypes = [...document.querySelectorAll('.type-checkbox')]
+                .filter(cb => cb.checked)
+                .map(cb => typeMap[cb.dataset.typeName]);
 
-        {{--    if (!productId || selectedTypes.length === 0) return;--}}
+            if (!productId || selectedTypes.length === 0) return;
 
-        {{--    $.ajax({--}}
-        {{--        url: "{{ route('product-templates.index') }}",--}}
-        {{--        method: "GET",--}}
-        {{--        data: {--}}
-        {{--            product_without_category_id: productId,--}}
-        {{--            request_type: "api",--}}
-        {{--            approach: "without_editor",--}}
-        {{--            paginate: true,--}}
-        {{--            has_not_mockups: true,--}}
-        {{--            per_page: 3,--}}
-        {{--            limit: 3,--}}
-        {{--            types: selectedTypes,--}}
-        {{--        },--}}
-        {{--        success: function (response) {--}}
+            $.ajax({
+                url: "{{ route('product-templates.index') }}",
+                method: "GET",
+                data: {
+                    product_without_category_id: productId,
+                    request_type: "api",
+                    approach: "without_editor",
+                    paginate: true,
+                    has_not_mockups: true,
+                    per_page: 3,
+                    limit: 3,
+                    types: selectedTypes,
+                },
+                success: function (response) {
 
-        {{--            const templates = Array.isArray(response) ? response : (response.data.data ?? []);--}}
+                    const templates = Array.isArray(response) ? response : (response.data.data ?? []);
 
-        {{--            document.querySelectorAll('.template-select').forEach(select => {--}}
+                    document.querySelectorAll('.template-select').forEach(select => {
 
-        {{--                const savedSelectedId = select.dataset.selectedId;  // 🟢 saved template ID--}}
-        {{--                const currentValue = select.value;                  // 🟢 may also have a value--}}
+                        const savedSelectedId = select.dataset.selectedId;  // 🟢 saved template ID
+                        const currentValue = select.value;                  // 🟢 may also have a value
 
-        {{--                // Destroy old Select2--}}
-        {{--                if ($(select).data('select2')) {--}}
-        {{--                    $(select).select2("destroy");--}}
-        {{--                }--}}
+                        // Destroy old Select2
+                        if ($(select).data('select2')) {
+                            $(select).select2("destroy");
+                        }
 
-        {{--                // Clear ONLY if we are not editing existing--}}
-        {{--                select.innerHTML = `<option value="" disabled ${!savedSelectedId ? 'selected' : ''}>Choose template</option>`;--}}
+                        // Clear ONLY if we are not editing existing
+                        select.innerHTML = `<option value="" disabled ${!savedSelectedId ? 'selected' : ''}>Choose template</option>`;
+                        templates.forEach(t => {
+                            const option = document.createElement("option");
+                            const label = typeof t.name === "object"
+                                ? (t.name[locale] ?? Object.values(t.name)[0])
+                                : t.name;
 
-        {{--                templates.forEach(t => {--}}
-        {{--                    const option = document.createElement("option");--}}
-        {{--                    const label = typeof t.name === "object"--}}
-        {{--                        ? (t.name[locale] ?? Object.values(t.name)[0])--}}
-        {{--                        : t.name;--}}
+                            option.value = t.id;
+                            option.textContent = label;
+                            option.dataset.image = t.source_design_svg;
+                            option.dataset.backImage = t.back_base64_preview_image;
 
-        {{--                    option.value = t.id;--}}
-        {{--                    option.textContent = label;--}}
-        {{--                    option.dataset.image = t.source_design_svg;--}}
-        {{--                    option.dataset.backImage = t.back_base64_preview_image;--}}
 
-        {{--                    // 🟢 Re-select previously saved template--}}
-        {{--                    if (savedSelectedId && Number(savedSelectedId) === Number(t.id)) {--}}
-        {{--                        option.selected = true;--}}
-        {{--                    }--}}
+                            if (savedSelectedId && savedSelectedId === t.id) {
+                                option.selected = true;
+                            }
 
-        {{--                    select.appendChild(option);--}}
-        {{--                });--}}
+                            select.appendChild(option);
+                        });
 
-        {{--                // Re-init Select2--}}
-        {{--                initTemplateSelect(select);--}}
-        {{--            });--}}
+                        // Re-init Select2
+                        initTemplateSelect(select);
+                    });
 
-        {{--        },--}}
-        {{--        error: function (xhr) {--}}
-        {{--            console.error("Error loading templates", xhr);--}}
-        {{--        }--}}
-        {{--    });--}}
-        {{--};--}}
+                },
+                error: function (xhr) {
+                    console.error("Error loading templates", xhr);
+                }
+            });
+        };
 
     </script>
     <script>
@@ -924,7 +970,7 @@
             );
 
             updateTemplateVisibility();
-            loadTemplates();
+            // loadTemplates();
 
             // Repeater
             const $templateRepeater = $('.template-repeater');
