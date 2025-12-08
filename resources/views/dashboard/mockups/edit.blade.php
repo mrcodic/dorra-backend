@@ -304,45 +304,26 @@
 @section('page-script')
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-
-            // 1) Render file inputs FIRST
-            renderFileInputs();
-
-            // 2) Now load saved images correctly
+            toggleCheckboxes();
             const saved = @json($savedImages);
 
+
+            // loop through types
             ['front','back','none'].forEach(type => {
                 const base = saved[`${type}_base`];
                 const mask = saved[`${type}_mask`];
-
-                // Base Image Preview + Canvas Load
+                console.log(base,mask,saved)
                 if (base) {
-                    const preview = document.querySelector(`#${type}-base-input`)
-                        ?.closest('.upload-card')
-                        ?.querySelector('.preview');
+                    const preview = document.querySelector(`#${type}-base-input + .upload-card .preview`);
+                    preview.innerHTML = `<img src="${base}" class="img-fluid rounded border" style="max-height:120px;">`;
 
-                    if (preview) {
-                        preview.innerHTML = `<img src="${base}" class="img-fluid rounded border" style="max-height:120px;">`;
-                    }
-
-                    // Load into canvas
-                    const canvasName = `canvas${type.charAt(0).toUpperCase() + type.slice(1)}`;
-                    if (window[canvasName]) {
-                        loadBaseImage(window[canvasName], base);
-                        document.getElementById(`editor${type.charAt(0).toUpperCase() + type.slice(1)}Wrapper`)
-                            ?.classList.remove('d-none');
-                    }
+                    loadBaseImage(window[`canvas${type.charAt(0).toUpperCase() + type.slice(1)}`], base);
+                    document.getElementById(`editor${type.charAt(0).toUpperCase() + type.slice(1)}Wrapper`).classList.remove('d-none');
                 }
 
-                // Mask Image Preview
                 if (mask) {
-                    const preview = document.querySelector(`#${type}-mask-input`)
-                        ?.closest('.upload-card')
-                        ?.querySelector('.preview');
-
-                    if (preview) {
-                        preview.innerHTML = `<img src="${mask}" class="img-fluid rounded border" style="max-height:120px;">`;
-                    }
+                    const preview = document.querySelector(`#${type}-mask-input + .upload-card .preview`);
+                    preview.innerHTML = `<img src="${mask}" class="img-fluid rounded border" style="max-height:120px;">`;
                 }
             });
         });
