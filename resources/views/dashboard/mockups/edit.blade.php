@@ -146,8 +146,8 @@
 
                                                 <select class="template-select"
                                                         name="template_id"
-                                                        data-selected-id="{{ $tpl->template_id }}">
-                                                    <option value="{{ $tpl->template_id }}" selected
+                                                        data-selected-id="{{ $tpl->id }}">
+                                                    <option value="{{ $tpl->id }}" selected
                                                             data-image="{{ $tpl->source_design_svg }}"
                                                             data-back-image="{{ $tpl->back_base64_preview_image }}">
                                                         {{ $tpl->name }}
