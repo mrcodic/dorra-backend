@@ -63,6 +63,18 @@ class TemplateService extends BaseService
                 } else {
                     $q->whereRaw('1 = 0');
                 }
+            })->when(filter_var(request('has_not_mockups'), FILTER_VALIDATE_BOOLEAN), function ($q) {
+                $q->whereDoesntHave('mockups');
+            })
+            ->when(request()->filled('types'), function ($query) {
+                $types = array_map('intval', request()->input('types'));
+                $query->whereHas('types', function ($q) use ($types) {
+                    $q->whereIn('types.value', $types);
+                }, '=', count($types));
+
+                $query->whereDoesntHave('types', function ($q) use ($types) {
+                    $q->whereNotIn('types.value', $types);
+                });
             })
             ->when(request()->filled('product_id'), function ($query) use ($productId) {
                 $query->whereHas('products', function ($q) use ($productId) {
@@ -114,7 +126,9 @@ class TemplateService extends BaseService
             ->when(request()->filled('orientation'), function ($q) {
                 $q->whereOrientation(OrientationEnum::tryFrom(request('orientation')));
             })
-            ->latest();
+            ->when(request()->filled('limit'), function ($q) {
+                $q->limit((int) request('limit'));
+            });
 
         if (request()->ajax()) {
             return $pageSize === null
@@ -138,7 +152,6 @@ class TemplateService extends BaseService
             perPage: $pageSize ?? $perPage
         );
     }
-
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $colors = Arr::get($validatedData, 'colors');
