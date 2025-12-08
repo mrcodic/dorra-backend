@@ -910,28 +910,29 @@
             const clonedInput = document.getElementById(inputId);
             if (!clonedInput) return;
 
-            // set cloned file
+            // وضع الملف
             const dt = new DataTransfer();
             dt.items.add(file);
             clonedInput.files = dt.files;
 
-            // ---- FIX: safely find upload area ----
-            const uploadArea = clonedInput.closest('.upload-area');
-            if (!uploadArea) {
-                console.warn(`Upload area not found for ${inputId}`);
-                return; // exit safely
-            }
+            // منع إعادة فتح نافذة اختيار الملفات
+            clonedInput.dispatchEvent(new Event("input"));
+
+            // إيجاد upload area الصحيح
+            const uploadArea = document.querySelector(`[data-input-id="${inputId}"]`);
+            if (!uploadArea) return;
 
             const preview = uploadArea.querySelector('.preview');
             if (!preview) return;
 
-            // show preview image
+            // عرض الصورة
             const reader = new FileReader();
             reader.onload = e => {
                 preview.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded border" style="max-height:120px;">`;
             };
             reader.readAsDataURL(file);
         }
+
 
 
         function handleFiles(files, input, preview) {
@@ -1021,9 +1022,8 @@
                 input.click();
             });
 
-            input.on('change', function (e) {
-                handleFiles(e.target.files);
-            });
+            input.addEventListener("input", e => handleFiles(e.target.files, input, preview));
+
 
             uploadArea.on('dragover', function (e) {
                 e.preventDefault();
