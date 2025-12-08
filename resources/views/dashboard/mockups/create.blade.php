@@ -910,18 +910,29 @@
             const clonedInput = document.getElementById(inputId);
             if (!clonedInput) return;
 
+            // set cloned file
             const dt = new DataTransfer();
             dt.items.add(file);
             clonedInput.files = dt.files;
 
-            // also update preview UI
-            const preview = clonedInput.closest('.upload-area').querySelector('.preview');
+            // ---- FIX: safely find upload area ----
+            const uploadArea = clonedInput.closest('.upload-area');
+            if (!uploadArea) {
+                console.warn(`Upload area not found for ${inputId}`);
+                return; // exit safely
+            }
+
+            const preview = uploadArea.querySelector('.preview');
+            if (!preview) return;
+
+            // show preview image
             const reader = new FileReader();
             reader.onload = e => {
                 preview.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded border" style="max-height:120px;">`;
             };
             reader.readAsDataURL(file);
         }
+
 
         function handleFiles(files, input, preview) {
             if (!files.length) return;
