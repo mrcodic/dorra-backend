@@ -890,47 +890,32 @@
                 const preview = area.querySelector('.preview');
 
                 area.addEventListener('click', () => input?.click());
-
                 area.addEventListener('dragover', e => {
                     e.preventDefault();
                     area.classList.add('dragover');
                 });
-
                 area.addEventListener('dragleave', e => {
                     e.preventDefault();
                     area.classList.remove('dragover');
                 });
-
                 area.addEventListener('drop', e => {
                     e.preventDefault();
                     area.classList.remove('dragover');
                     handleFiles(e.dataTransfer.files, input, preview);
                 });
-
-                // IMPORTANT: use input event = no double dialog
-                input?.addEventListener('input', e => handleFiles(e.target.files, input, preview));
+                input?.addEventListener('change', e => handleFiles(e.target.files, input, preview));
             });
         }
-
         function copyFileToInput(file, inputId) {
             const clonedInput = document.getElementById(inputId);
             if (!clonedInput) return;
 
-            // set the file
             const dt = new DataTransfer();
             dt.items.add(file);
             clonedInput.files = dt.files;
 
-            // IMPORTANT: use input event (NOT change)
-            clonedInput.dispatchEvent(new Event("input"));
-
-            // preview UI
-            const uploadArea = document.querySelector(`.upload-area[data-input-id="${inputId}"]`);
-            if (!uploadArea) return;
-
-            const preview = uploadArea.querySelector('.preview');
-            if (!preview) return;
-
+            // also update preview UI
+            const preview = clonedInput.closest('.upload-area').querySelector('.preview');
             const reader = new FileReader();
             reader.onload = e => {
                 preview.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded border" style="max-height:120px;">`;
@@ -938,52 +923,32 @@
             reader.readAsDataURL(file);
         }
 
-
         function handleFiles(files, input, preview) {
             if (!files.length) return;
-
-            const file = files[0];
 
             const reader = new FileReader();
             reader.onload = e => {
                 const dataUrl = e.target.result;
-
-                // Show preview for this input
                 preview.innerHTML = `<img src="${dataUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
 
-                const isFrontBack =
-                    document.querySelector('.type-checkbox[data-type-name="front"]').checked &&
-                    document.querySelector('.type-checkbox[data-type-name="back"]').checked;
-
-                if (isFrontBack) {
-                    // FRONT uploaded → update BACK
-                    if (input.id === "front-base-input") {
-                        copyFileToInput(file, "back-base-input");
-                        loadBaseImage(canvasBack, dataUrl);
-                    }
-
-                    // BACK uploaded → update FRONT
-                    if (input.id === "back-base-input") {
-                        copyFileToInput(file, "front-base-input");
+                // Load base image into the canvas
+                if (input.name.includes('_base_image')) {
+                    if (input.id.startsWith('front')) {
                         loadBaseImage(canvasFront, dataUrl);
+                        document.getElementById('editorFrontWrapper').classList.remove('d-none');
+                    } else if (input.id.startsWith('back')) {
+                        loadBaseImage(canvasBack, dataUrl);
+                        document.getElementById('editorBackWrapper').classList.remove('d-none');
+                    } else if (input.id.startsWith('none')) {
+                        loadBaseImage(canvasNone, dataUrl);
+                        document.getElementById('editorNoneWrapper').classList.remove('d-none');
                     }
-                }
-
-                // load on active side
-                if (input.id.startsWith("front")) {
-                    loadBaseImage(canvasFront, dataUrl);
-                }
-
-                if (input.id.startsWith("back")) {
-                    loadBaseImage(canvasBack, dataUrl);
                 }
             };
+            reader.readAsDataURL(files[0]);
 
-            reader.readAsDataURL(file);
-
-            // Set original input file
             const dt = new DataTransfer();
-            dt.items.add(file);
+            dt.items.add(files[0]);
             input.files = dt.files;
         }
 
@@ -1013,8 +978,9 @@
                 input.click();
             });
 
-            input.addEventListener("input", e => handleFiles(e.target.files, input, preview));
-
+            input.on('change', function (e) {
+                handleFiles(e.target.files);
+            });
 
             uploadArea.on('dragover', function (e) {
                 e.preventDefault();
