@@ -137,16 +137,19 @@
 
                             <div class="template-repeater row d-none" id="template-wrapper">
                                 <div data-repeater-list="templates">
+
                                     @foreach($model->templates as $tpl)
                                         <div data-repeater-item class="row template-item align-items-end">
+
                                             <div class="form-group mb-2 col-8">
                                                 <label class="label-text mb-1">Template</label>
 
-                                                <select class="template-select" name="template_id" data-selected-id="{{ $tpl->id }}">
-                                                    <option value="{{ $tpl->id }}" selected
+                                                <select class="template-select"
+                                                        name="template_id"
+                                                        data-selected-id="{{ $tpl->template_id }}">
+                                                    <option value="{{ $tpl->template_id }}" selected
                                                             data-image="{{ $tpl->source_design_svg }}"
-                                                            data-back-image="{{ $tpl->back_base64_preview_image }}"
-                                                    >
+                                                            data-back-image="{{ $tpl->back_base64_preview_image }}">
                                                         {{ $tpl->name }}
                                                     </option>
                                                 </select>
@@ -167,25 +170,36 @@
                                                 </button>
                                             </div>
 
-                                            <!-- HIDDEN VALUES RESTORED -->
-                                            <input type="hidden" name="front_x" value="{{ $tpl->front_x }}" class="template_x front">
-                                            <input type="hidden" name="front_y" value="{{ $tpl->front_y }}" class="template_y front">
-                                            <input type="hidden" name="front_width" value="{{ $tpl->front_width }}" class="template_width front">
-                                            <input type="hidden" name="front_height" value="{{ $tpl->front_height }}" class="template_height front">
-                                            <input type="hidden" name="front_angle" value="{{ $tpl->front_angle }}" class="template_angle front">
+                                            <!-- Hidden fields FOR THIS ROW ONLY -->
+                                            <input type="hidden" name="front_x" value="{{ $tpl->front_x }}">
+                                            <input type="hidden" name="front_y" value="{{ $tpl->front_y }}">
+                                            <input type="hidden" name="front_width" value="{{ $tpl->front_width }}">
+                                            <input type="hidden" name="front_height" value="{{ $tpl->front_height }}">
+                                            <input type="hidden" name="front_angle" value="{{ $tpl->front_angle }}">
 
-                                            <!-- same for back + none -->
+                                            <input type="hidden" name="back_x" value="{{ $tpl->back_x }}">
+                                            <input type="hidden" name="back_y" value="{{ $tpl->back_y }}">
+                                            <input type="hidden" name="back_width" value="{{ $tpl->back_width }}">
+                                            <input type="hidden" name="back_height" value="{{ $tpl->back_height }}">
+                                            <input type="hidden" name="back_angle" value="{{ $tpl->back_angle }}">
+
+                                            <input type="hidden" name="none_x" value="{{ $tpl->none_x }}">
+                                            <input type="hidden" name="none_y" value="{{ $tpl->none_y }}">
+                                            <input type="hidden" name="none_width" value="{{ $tpl->none_width }}">
+                                            <input type="hidden" name="none_height" value="{{ $tpl->none_height }}">
+                                            <input type="hidden" name="none_angle" value="{{ $tpl->none_angle }}">
 
                                             <div class="col-12 text-end mt-2">
                                                 <button type="button" data-repeater-delete class="btn btn-sm btn-light-danger">
                                                     Remove Template
                                                 </button>
                                             </div>
+
                                         </div>
                                     @endforeach
+
                                 </div>
 
-                                <!-- ADD BUTTON -->
                                 <div class="row mt-1">
                                     <div class="col-12">
                                         <button type="button" data-repeater-create class="w-100 rounded-3 p-1 text-dark"
