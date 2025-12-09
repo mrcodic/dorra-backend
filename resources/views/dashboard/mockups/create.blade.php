@@ -178,6 +178,11 @@
                                 <label class="label-text">Mockup Editor (Back)</label>
                                 <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="300"></canvas>
                             </div>
+
+                            <div class="mt-2 d-none" id="editorNoneWrapper" style="width: auto">
+                                <label class="label-text">Mockup Editor (General)</label>
+                                <canvas id="mockupCanvasNone" height="300" style="border:1px solid #ccc;"></canvas>
+                            </div>
                         </div>
                     </div>
 
@@ -192,6 +197,35 @@
                             @endforeach
                         </select>
                     </div>
+
+                    {{-- Templates Cards --}}
+                    <div class="form-group mb-2">
+                        <label class="form-label mb-1">Choose Template</label>
+                        <div class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm">
+                            <div class="card rounded-3 shadow-sm cursor-pointer" style="border: 1px solid #24B094;">
+                                <img src="{{asset('images/placeholder.svg')}}" class="card-img-top"
+                                    alt="template-preview">
+                                <div class="card-body">
+                                    <h5 class="card-title">Template Name</h5>
+                                </div>
+                            </div>
+                            <div class="card rounded-3 shadow-sm cursor-pointer" style="border: 1px solid #24B094;">
+                                <img src="{{asset('images/placeholder.svg')}}" class="card-img-top"
+                                    alt="template-preview">
+                                <div class="card-body">
+                                    <h5 class="card-title">Template Name</h5>
+                                </div>
+                            </div>
+                            <div class="card rounded-3 shadow-sm cursor-pointer" style="border: 1px solid #24B094;">
+                                <img src="{{asset('images/placeholder.svg')}}" class="card-img-top"
+                                    alt="template-preview">
+                                <div class="card-body">
+                                    <h5 class="card-title">Template Name</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
 
                     <div class="template-repeater row d-none" id="template-wrapper">
                         <div data-repeater-list="templates">
@@ -213,7 +247,7 @@
                                 <!-- SHOW ON CANVAS BUTTON -->
                                 <div class="form-group mb-2 col-4">
                                     <button type="button" class="btn btn-primary w-100 show-template-canvas">
-                                        Show on Canvas
+                                        Show on Mockup
                                     </button>
                                 </div>
 
@@ -270,10 +304,10 @@
                     <canvas id="mockupCanvasBack" width="800" height="800" style="border:1px solid #ccc;"></canvas>
                 </div> --}}
 
-                <div class="mt-2 d-none" id="editorNoneWrapper">
+                {{-- <div class="mt-2 d-none" id="editorNoneWrapper">
                     <label class="label-text">Mockup Editor (General)</label>
                     <canvas id="mockupCanvasNone" width="800" height="800" style="border:1px solid #ccc;"></canvas>
-                </div>
+                </div> --}}
                 <div class="d-flex justify-content-end mt-2 ">
                     <button type="button" class="btn btn-sm btn-primary d-none" id="saveTemplatePositionsBtn">
                         Save Template Positions
