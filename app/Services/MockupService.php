@@ -163,7 +163,6 @@ class MockupService extends BaseService
         );
     }
 
-
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $model = $this->handleTransaction(function () use ($validatedData) {
@@ -218,30 +217,30 @@ class MockupService extends BaseService
                         if (!$designMedia || !$designMedia->getPath()) {
                             throw new \Exception("Missing design media for {$sideName}");
                         }
-                        $basePath = $baseMedia->getPath();
-                        [$baseWidth, $baseHeight] = getimagesize($basePath);
+                            $basePath = $baseMedia->getPath();
+                            [$baseWidth, $baseHeight] = getimagesize($basePath);
 
+                            // القيم جاية من الـ JS كنِسَب 0..1 من مساحة الموكاب
+                            $xPct  = (float)($pivotPositions[$sideName . '_x']      ?? 0.5);  // مركز X
+                            $yPct  = (float)($pivotPositions[$sideName . '_y']      ?? 0.5);  // مركز Y
+                            $wPct  = (float)($pivotPositions[$sideName . '_width']  ?? 0.4);  // نسبة عرض البوكس
+                            $hPct  = (float)($pivotPositions[$sideName . '_height'] ?? 0.4);  // نسبة ارتفاع البوكس
+                            $angle = (float)($pivotPositions[$sideName . '_angle']  ?? 0);
 
-                        $previewHeight = 300;
+                            // نحول النِّسَب لأبعاد فعلية
+                            $printW = max(1, (int) round($wPct * $baseWidth));
+                            $printH = max(1, (int) round($hPct * $baseHeight));
 
+                            // مركز البوكس بالبيكسل
+                            $centerX = $xPct * $baseWidth;
+                            $centerY = $yPct * $baseHeight;
 
-                        $scale = $baseHeight / $previewHeight;
-
-                        $previewX = (float)($pivotPositions["{$sideName}_x"] ?? 0);
-                        $previewY = (float)($pivotPositions["{$sideName}_y"] ?? 0);
-                        $previewW = (float)($pivotPositions["{$sideName}_width"] ?? 0);
-                        $previewH = (float)($pivotPositions["{$sideName}_height"] ?? 0);
-                        $angle    = (float)($pivotPositions["{$sideName}_angle"] ?? 0);
-
-
-                        $printX = (int) round($previewX * $scale);
-                        $printY = (int) round($previewY * $scale);
-                        $printW = (int) round($previewW * $scale);
-                        $printH = (int) round($previewH * $scale);
+                            // نحسب الـ top-left من المركز
+                            $printX = (int) round($centerX - $printW / 2);
+                            $printY = (int) round($centerY - $printH / 2);
 
                         if ($printW <= 0) $printW = (int) round($baseWidth * 0.3);
                         if ($printH <= 0) $printH = (int) round($baseHeight * 0.3);
-
 
                         $firstMockup = $this->repository
                             ->query()
@@ -487,7 +486,6 @@ class MockupService extends BaseService
         return $model;
     }
 
-
     public function deleteResource($id)
     {
         $model = $this->repository->find($id);
@@ -520,7 +518,6 @@ class MockupService extends BaseService
 
 
     }
-
 
     public function showAndUpdateRecent($id)
     {

@@ -444,36 +444,36 @@
                         const back  = tpl.back_base64_preview_image || '';
 
                         const html = `
-    <div class="col-6 col-md-4 mb-2">
-        <button
-            type="button"
-            class="btn w-100 p-0 border-0 template-item-modal show-template-canvas"
-            data-id="${tpl.id}"
-            data-name="${tpl.name || ''}"
-            data-image="${img}"
-            data-front="${front}"
-            data-back="${back}"
-        >
-            <div class="card h-100">
-                ${img
-                            ? `<img src="${img}" class="card-img-top" style="height:140px;object-fit:cover;" alt="${tpl.name || ''}">`
-                            : `<div class="d-flex align-items-center justify-content-center bg-light" style="height:140px;">
-                           <span class="text-muted small">No image</span>
-                       </div>`
-                        }
-                <div class="card-body py-2 px-2">
-                    <div class="small fw-semibold text-truncate mb-1">
-                        ${tpl.name || ''}
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center small text-muted">
-                        <span>${tpl.type || ''}</span>
-                        ${tpl.rating ? `<span>${'★'.repeat(tpl.rating)}</span>` : ''}
-                    </div>
+                <div class="col-6 col-md-4 mb-2">
+                    <button
+                        type="button"
+                        class="btn w-100 p-0 border-0 template-item-modal show-template-canvas"
+                        data-id="${tpl.id}"
+                        data-name="${tpl.name || ''}"
+                        data-image="${img}"
+                        data-front="${front}"
+                        data-back="${back}"
+                    >
+                        <div class="card h-100">
+                            ${img
+                                        ? `<img src="${img}" class="card-img-top" style="height:140px;object-fit:cover;" alt="${tpl.name || ''}">`
+                                        : `<div class="d-flex align-items-center justify-content-center bg-light" style="height:140px;">
+                                    <span class="text-muted small">No image</span>
+                                </div>`
+                                    }
+                            <div class="card-body py-2 px-2">
+                                <div class="small fw-semibold text-truncate mb-1">
+                                    ${tpl.name || ''}
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center small text-muted">
+                                    <span>${tpl.type || ''}</span>
+                                    ${tpl.rating ? `<span>${'★'.repeat(tpl.rating)}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </button>
                 </div>
-            </div>
-        </button>
-    </div>
-`;
+            `;
 
                         $('#templates-modal-container').append(html);
                     });
@@ -575,13 +575,13 @@
             dropdown.find(".load-all-wrapper").remove();
 
             dropdown.append(`
-        <div class="load-all-wrapper text-center py-1 border-top">
-            <button type="button"
-                class="btn btn-sm btn-outline-primary load-all-btn">
-                Show Remaining Templates
-            </button>
-        </div>
-    `);
+                    <div class="load-all-wrapper text-center py-1 border-top">
+                        <button type="button"
+                            class="btn btn-sm btn-outline-primary load-all-btn">
+                            Show Remaining Templates
+                        </button>
+                    </div>
+                `);
 
             dropdown.find(".load-all-btn").off("click.loadAll").on("click.loadAll", function (e) {
                 e.preventDefault();
@@ -623,13 +623,45 @@
 
         function loadBaseImage(canvas, baseUrl) {
             fabric.Image.fromURL(baseUrl, function (img) {
-                img.set({selectable: false});
-                canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-                    scaleX: canvas.width / img.width,
-                    scaleY: canvas.height / img.height
-                });
+                img.set({ selectable: false, evented: false });
+
+                const canvasW = canvas.getWidth();
+                const canvasH = canvas.getHeight();
+
+                // نحافظ على الـ aspect ratio
+                const scale = Math.min(canvasW / img.width, canvasH / img.height);
+                const scaledW = img.width * scale;
+                const scaledH = img.height * scale;
+
+                // نوسّط الموكاب داخل الكانفاس
+                const left = (canvasW - scaledW) / 2;
+                const top  = (canvasH - scaledH) / 2;
+
+                // نحتفظ بمعلومات الصورة على الكانفاس نفسه
+                canvas.__mockupMeta = {
+                    originalWidth:  img.width,
+                    originalHeight: img.height,
+                    scaledWidth:    scaledW,
+                    scaledHeight:   scaledH,
+                    offsetLeft:     left,
+                    offsetTop:      top
+                };
+
+                canvas.setBackgroundImage(
+                    img,
+                    canvas.renderAll.bind(canvas),
+                    {
+                        scaleX:  scale,
+                        scaleY:  scale,
+                        left:    left,
+                        top:     top,
+                        originX: 'left',
+                        originY: 'top'
+                    }
+                );
             });
         }
+
         function clearTemplateDesigns(canvas, type) {
             // Remove only images that belong to this template type
             const objects = canvas.getObjects();
@@ -642,7 +674,11 @@
         }
         function syncTemplateInputs(obj, type) {
             if (!obj?.templateItem) return;
-            const row = obj.templateItem;
+
+            const row    = obj.templateItem;
+            const canvas = obj.canvas;
+            const meta   = canvas && canvas.__mockupMeta;
+            if (!meta) return; // ما عندناش موكاب لسة
 
             const xInput      = row.querySelector(`.template_x.${type}`);
             const yInput      = row.querySelector(`.template_y.${type}`);
@@ -652,12 +688,24 @@
 
             if (!xInput || !yInput || !widthInput || !heightInput || !angleInput) return;
 
-            xInput.value      = obj.left;
-            yInput.value      = obj.top;
-            widthInput.value  = obj.width * obj.scaleX;
-            heightInput.value = obj.height * obj.scaleY;
+            // نشتغل بمركز التصميم عشان ما يتأثرش بالدوران
+            const center = obj.getCenterPoint();
+            const wReal  = obj.width  * obj.scaleX;
+            const hReal  = obj.height * obj.scaleY;
+
+            // نحسب النِّسَب داخل مساحة الموكاب (مش الكانفاس)
+            const xPct = (center.x - meta.offsetLeft) / meta.scaledWidth;
+            const yPct = (center.y - meta.offsetTop)  / meta.scaledHeight;
+            const wPct = wReal / meta.scaledWidth;
+            const hPct = hReal / meta.scaledHeight;
+
+            xInput.value      = xPct.toFixed(6);   // 0..1
+            yInput.value      = yPct.toFixed(6);   // 0..1
+            widthInput.value  = wPct.toFixed(6);   // 0..1
+            heightInput.value = hPct.toFixed(6);   // 0..1
             angleInput.value  = obj.angle || 0;
         }
+
         function clearTemplateInputsForObject(obj, type) {
             if (!obj?.templateItem) return;
 
@@ -733,8 +781,12 @@
             clearTemplateDesigns(canvas, type);
 
             fabric.Image.fromURL(designUrl, function (img) {
-                const canvasWidth = canvas.getWidth();   // auto على حسب الكونتينر
-                const canvasHeight = canvas.getHeight(); // 300
+
+                img.set({
+                    originX: 'center',
+                    originY: 'center',
+                    transparentCorners: false
+                });
 
                 img.scaleToHeight(canvasHeight * 0.6);
 
@@ -750,44 +802,83 @@
                 img.templateItem = templateItem || null;
                 img.templateType = type;
 
-                // 🔁 استرجاع القيم المحفوظة لو فيه templateItem
-                if (templateItem) {
+                const meta = canvas.__mockupMeta; // جاي من loadBaseImage الجديدة
+
+                // ========= 1) لو عندنا قيم محفوظة من قبل =========
+                if (templateItem && meta) {
                     const xInput      = templateItem.querySelector(`.template_x.${type}`);
                     const yInput      = templateItem.querySelector(`.template_y.${type}`);
                     const widthInput  = templateItem.querySelector(`.template_width.${type}`);
                     const heightInput = templateItem.querySelector(`.template_height.${type}`);
                     const angleInput  = templateItem.querySelector(`.template_angle.${type}`);
 
-                    if (xInput && yInput && widthInput && heightInput && angleInput) {
-                        const savedLeft   = parseFloat(xInput.value);
-                        const savedTop    = parseFloat(yInput.value);
-                        const savedWidth  = parseFloat(widthInput.value);
-                        const savedHeight = parseFloat(heightInput.value);
-                        const savedAngle  = parseFloat(angleInput.value);
+                    const xPct  = parseFloat(xInput?.value);
+                    const yPct  = parseFloat(yInput?.value);
+                    const wPct  = parseFloat(widthInput?.value);
+                    const hPct  = parseFloat(heightInput?.value);
+                    const angle = parseFloat(angleInput?.value);
 
-                        if (!isNaN(savedLeft))  img.left  = savedLeft;
-                        if (!isNaN(savedTop))   img.top   = savedTop;
-                        if (!isNaN(savedAngle)) img.angle = savedAngle;
+                    if (!isNaN(xPct) && !isNaN(yPct) && !isNaN(wPct) && !isNaN(hPct)) {
+                        const targetW = meta.scaledWidth  * wPct;
+                        const targetH = meta.scaledHeight * hPct;
 
-                        if (!isNaN(savedWidth) && img.width) {
-                            img.scaleX = savedWidth / img.width;
-                        }
-                        if (!isNaN(savedHeight) && img.height) {
-                            img.scaleY = savedHeight / img.height;
-                        }
+                        const centerX = meta.offsetLeft + meta.scaledWidth  * xPct;
+                        const centerY = meta.offsetTop  + meta.scaledHeight * yPct;
+
+                        img.set({
+                            left:   centerX,
+                            top:    centerY,
+                            scaleX: targetW / img.width,
+                            scaleY: targetH / img.height
+                        });
+                    } else {
+                        // fallback لو القيم فاضية → نطبّق الـ default sizing تحت
+                        applyDefaultPlacement(img, canvas, meta);
                     }
+
+                    if (!isNaN(angle)) {
+                        img.angle = angle;
+                    }
+
+                } else {
+                    // ========= 2) أول مرة: مافيش قيم محفوظة → حجم افتراضي صغير =========
+                    applyDefaultPlacement(img, canvas, meta);
                 }
 
-                // ✅ هنا نضيف أيقونة الـ delete فوق التصميم
                 addDeleteControl(img, type);
 
                 canvas.add(img);
                 canvas.setActiveObject(img);
                 canvas.renderAll();
 
-                // أول sync للحقول
+                // حفظ القيم في الـ inputs (هتتبعت للسيرفر)
                 syncTemplateInputs(img, type);
             });
+        }
+
+        function applyDefaultPlacement(img, canvas, meta) {
+            const defaultWidthRatio = 0.35; // 35% من عرض الموكاب
+
+            if (meta) {
+                const targetW = meta.scaledWidth * defaultWidthRatio;
+                const scale   = targetW / img.width;
+
+                img.scaleX = img.scaleY = scale;
+
+                // في منتصف التيشيرت وأقرب شوية للصدر
+                img.left = meta.offsetLeft + meta.scaledWidth / 2;
+                img.top  = meta.offsetTop + meta.scaledHeight * 0.35;
+            } else {
+                // لو لسه مافيش موكاب متحمّل، نستخدم عرض الكانفاس
+                const canvasW = canvas.getWidth();
+                const canvasH = canvas.getHeight();
+                const targetW = canvasW * defaultWidthRatio;
+                const scale   = targetW / img.width;
+
+                img.scaleX = img.scaleY = scale;
+                img.left   = canvasW / 2;
+                img.top    = canvasH / 2;
+            }
         }
 
         function saveAllTemplatePositions() {
