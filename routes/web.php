@@ -333,7 +333,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
 
         Route::controller(MockupController::class)->group(function () {
-            Route::get('mockups', 'index');
+            Route::get('mockups', 'index')->name('mockups.index');
             Route::get('mockups/{mockup}', 'showAndUpdateRecent');
             Route::get('recent-mockups', 'recentMockups');
             Route::get('mockup-types', 'mockupTypes');

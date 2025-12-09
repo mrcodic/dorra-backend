@@ -733,14 +733,20 @@
             clearTemplateDesigns(canvas, type);
 
             fabric.Image.fromURL(designUrl, function (img) {
-                img.set({
-                    left: 150,
-                    top: 150,
-                    scaleX: 0.5,
-                    scaleY: 0.5,
-                    transparentCorners: false
-                });
+                const canvasWidth = canvas.getWidth();   // auto على حسب الكونتينر
+                const canvasHeight = canvas.getHeight(); // 300
 
+                img.scaleToHeight(canvasHeight * 0.6);
+
+                // لازم call دي بعد الـscale عشان الـgetScaledWidth/Height تزبط
+                const imgW = img.getScaledWidth();
+                const imgH = img.getScaledHeight();
+
+                img.set({
+                    left: (canvasWidth - imgW) / 2,
+                    top: (canvasHeight - imgH) / 2,
+                    transparentCorners: false,
+                });
                 img.templateItem = templateItem || null;
                 img.templateType = type;
 

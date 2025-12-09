@@ -67,6 +67,7 @@ class MockupController extends DashboardController
                 'cards' => $cards,
                 'pagination' => $pagination,
                 'total' => is_countable($data) ? count($data) : $data->total(),
+                'data' => MockupResource::collection($data),
             ]);
         } elseif (request()->expectsJson()) {
             return Response::api(data: MockupResource::collection($data->load('types'))->response()->getData(true));

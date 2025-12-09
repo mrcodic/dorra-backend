@@ -28,21 +28,24 @@
                             <div class="">
                                 <div class="row">
                                     @if($model->approach == 'without_editor')
-                                    <div class="form-group mb-2 col-md-6">
-                                        <label class="label-text mb-1">Template Image</label>
+                                        @foreach($model->types as $type)
+                                            <div class="form-group mb-2 col-md-6">
+                                            <label class="label-text mb-1">Template Image ({{ $type->value->label() }})</label>
 
-                                        <!-- Dropzone container -->
-                                        <div id="template-main-dropzone" class="dropzone border rounded p-3"
-                                            style="cursor:pointer; min-height:150px;">
-                                            <div class="dz-message" data-dz-message>
-                                                <span>Drop image here or click to upload</span>
+                                            <!-- Dropzone container -->
+                                            <div id="template-main-dropzone" class="dropzone border rounded p-3"
+                                                 style="cursor:pointer; min-height:150px;">
+                                                <div class="dz-message" data-dz-message>
+                                                    <span>Drop image here or click to upload</span>
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <!-- Hidden input for uploaded file id -->
-                                        <input type="hidden" name="template_image_main_id"
-                                            id="uploadedMainTemplateImage">
-                                    </div>
+                                            <!-- Hidden input for uploaded file id -->
+                                            <input type="hidden" name="template_image_main_id"
+                                                   id="uploadedMainTemplateImage">
+                                        </div>
+                                        @endforeach
+
                                     @endif
                                     <div class="form-group mb-2 {{ $model->approach == 'with_editor' ? 'col-md-12' :'col-md-6 '}}">
                                         <label class="label-text mb-1">Template Model Image</label>

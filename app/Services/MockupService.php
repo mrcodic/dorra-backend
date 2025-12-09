@@ -221,25 +221,31 @@ class MockupService extends BaseService
                         $basePath = $baseMedia->getPath();
                         [$baseWidth, $baseHeight] = getimagesize($basePath);
 
-                        $previewWidth = 300;
+
                         $previewHeight = 300;
 
-                        $scaleX = $baseWidth / $previewWidth;
-                        $scaleY = $baseHeight / $previewHeight;
+
+                        $scale = $baseHeight / $previewHeight;
+
+                        $previewX = (float)($pivotPositions["{$sideName}_x"] ?? 0);
+                        $previewY = (float)($pivotPositions["{$sideName}_y"] ?? 0);
+                        $previewW = (float)($pivotPositions["{$sideName}_width"] ?? 0);
+                        $previewH = (float)($pivotPositions["{$sideName}_height"] ?? 0);
+                        $angle    = (float)($pivotPositions["{$sideName}_angle"] ?? 0);
 
 
-                        $printX = (int)round($pivotPositions[$sideName . '_x'] * $scaleX);
-                        $printY = (int)round($pivotPositions[$sideName . '_y'] * $scaleY);
-                        $printW = (int)round($pivotPositions[$sideName . '_width'] * $scaleX);
-                        $printH = (int)round($pivotPositions[$sideName . '_height'] * $scaleY);
-                        $angle = (float)($pivotPositions[$sideName . '_angle'] ?? 0);
+                        $printX = (int) round($previewX * $scale);
+                        $printY = (int) round($previewY * $scale);
+                        $printW = (int) round($previewW * $scale);
+                        $printH = (int) round($previewH * $scale);
 
+                        if ($printW <= 0) $printW = (int) round($baseWidth * 0.3);
+                        if ($printH <= 0) $printH = (int) round($baseHeight * 0.3);
 
-                        if ($printW <= 0) $printW = (int)round($baseWidth * 0.3);
-                        if ($printH <= 0) $printH = (int)round($baseHeight * 0.3);
 
                         $firstMockup = $this->repository
                             ->query()
+                            ->whereNotNull('colors')
                             ->whereBelongsTo($model->category)
                             ->first();
 
@@ -275,7 +281,7 @@ class MockupService extends BaseService
     }
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
-        dd($validatedData);
+//        dd($validatedData);
 
         $model = $this->handleTransaction(function () use ($id, $validatedData, $relationsToLoad) {
 

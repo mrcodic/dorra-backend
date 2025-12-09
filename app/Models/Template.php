@@ -119,8 +119,7 @@ class Template extends Model implements HasMedia
         return $this->belongsToMany(
             Mockup::class,
             'mockup_template',
-            'mockup_id',
-            'template_id'
+
         )
             ->using(MockupTemplate::class)
             ->withPivot(['id','positions'])
