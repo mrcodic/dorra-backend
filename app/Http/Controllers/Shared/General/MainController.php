@@ -155,47 +155,7 @@ class MainController extends Controller
         return Response::api(data: TypeResource::collection(Type::all(['id', 'value'])));
 
     }
-
-    public function convertFabricJson(Request $request)
-    {
-        $jsonPath = storage_path('app/fabric-json.json');
-        $tempPngPath = storage_path('app/fabric-rendered.png');
-        $nodeScriptPath = base_path('fabric-renderer/renderFabric.js');
-
-        try {
-            file_put_contents($jsonPath, $request->design_data);
-            $cmd = "\"C:\\Program Files\\nodejs\\node.exe\" {$nodeScriptPath} {$jsonPath} {$tempPngPath} 2>&1";
-
-            exec($cmd, $output, $returnVar);
-
-            if ($returnVar !== 0) {
-                Log::error('Fabric render job failed', ['cmd' => $cmd, 'output' => implode("\n", $output)]);
-                throw new \Exception("Failed to render PNG from Fabric JSON");
-            }
-
-            if (!file_exists($tempPngPath)) {
-                Log::error('Rendered PNG file missing after node script', ['path' => $tempPngPath]);
-                throw new \Exception("Rendered PNG file not found");
-            }
-
-            $asset = GlobalAsset::create([
-                'title' => 'Fabric Render',
-                'type' => 'design-preview'
-            ]);
-
-            $assetMedia = $asset->addMedia($tempPngPath)->toMediaCollection('fabric');
-
-        } finally {
-            if (file_exists($jsonPath)) {
-                unlink($jsonPath);
-            }
-            if (file_exists($tempPngPath)) {
-                unlink($tempPngPath);
-            }
-        }
-        return Response::api(data: MediaResource::make($assetMedia));
-    }
-
+    
     public function addMedia(Request $request, $modelName = null, $model = null)
     {
         $modelId = (int) $model;
