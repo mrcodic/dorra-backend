@@ -592,6 +592,10 @@
 
                                                                                             <input type="hidden" name="option_image" class="uploadedImage" value="{{ $option->image?->id }}">
                                                                                         </div>
+                                                                                        <span
+                                                                                            class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 200x200 px
+                                            </span>
 
                                                                                         <div class="col-12 text-end mt-1 mb-2">
                                                                                             <button type="button" class="btn btn-outline-danger" data-repeater-delete>
@@ -670,7 +674,10 @@
                                                                                         <input type="hidden" name="option_image" class="uploadedImage">
                                                                                     </div>
                                                                                 </div>
-
+                                                                                <span
+                                                                                    class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 200x200 px
+                                            </span>
                                                                                 <!-- ✅ Delete Value Button -->
                                                                                 <div class="col-12 text-end mt-1 mb-2">
                                                                                     <button type="button" class="btn btn-outline-danger" data-repeater-delete>

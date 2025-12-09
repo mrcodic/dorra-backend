@@ -622,6 +622,9 @@
                                                                                                name="option_image"
                                                                                                class="option-image-hidden">
                                                                                     </div>
+                                                                                    <span class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 200x200 px
+                                            </span>
                                                                                     <!-- ❌ Delete Option Button -->
                                                                                     <div class="row mt-2">
                                                                                         <div class="col-12 text-end">

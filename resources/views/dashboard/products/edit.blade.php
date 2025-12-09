@@ -739,7 +739,9 @@
                                                                                                        class="uploadedImage"
                                                                                                        value="{{ $option->image?->id }}">
                                                                                             </div>
-
+                                                                                            <span class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 200x200 px
+                                            </span>
                                                                                             <div
                                                                                                 class="col-12 text-end mt-1 mb-2">
                                                                                                 <button type="button"
