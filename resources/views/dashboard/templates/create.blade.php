@@ -588,8 +588,8 @@
             }
 
             $("#mockupsSelect").select2({
-                // templateResult: formatMockup,
-                // templateSelection: formatMockup,
+                templateResult: formatMockup,
+                templateSelection: formatMockup,
                 allowClear: true,
                 placeholder: "Choose Mockups"
             });
