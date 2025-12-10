@@ -260,37 +260,6 @@
                         </select>
                     </div>
 
-                    {{-- Templates Cards --}}
-                    {{-- <div class="form-group mb-2">--}}
-                        {{-- <label class="form-label mb-1">Choose Template</label>--}}
-                        {{-- <div class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm">--}}
-                            {{-- <div class="card rounded-3 shadow-sm cursor-pointer"
-                                style="border: 1px solid #24B094;">--}}
-                                {{-- <img src="{{asset('images/placeholder.svg')}}" class="card-img-top" --}} {{--
-                                    alt="template-preview">--}}
-                                {{-- <div class="card-body">--}}
-                                    {{-- <h5 class="card-title">Template Name</h5>--}}
-                                    {{-- </div>--}}
-                                {{-- </div>--}}
-                            {{-- <div class="card rounded-3 shadow-sm cursor-pointer"
-                                style="border: 1px solid #24B094;">--}}
-                                {{-- <img src="{{asset('images/placeholder.svg')}}" class="card-img-top" --}} {{--
-                                    alt="template-preview">--}}
-                                {{-- <div class="card-body">--}}
-                                    {{-- <h5 class="card-title">Template Name</h5>--}}
-                                    {{-- </div>--}}
-                                {{-- </div>--}}
-                            {{-- <div class="card rounded-3 shadow-sm cursor-pointer"
-                                style="border: 1px solid #24B094;">--}}
-                                {{-- <img src="{{asset('images/placeholder.svg')}}" class="card-img-top" --}} {{--
-                                    alt="template-preview">--}}
-                                {{-- <div class="card-body">--}}
-                                    {{-- <h5 class="card-title">Template Name</h5>--}}
-                                    {{-- </div>--}}
-                                {{-- </div>--}}
-                            {{-- </div>--}}
-                        {{-- </div>--}}
-
 
                     <div class="form-group mb-2 d-none" id="templatesCardsWrapper">
                         <label class="form-label mb-1">Choose Template</label>
@@ -304,15 +273,6 @@
                     </div>
                 </div>
 
-                {{-- <div class="mt-2 d-none" id="editorBackWrapper">
-                    <label class="label-text">Mockup Editor (Back)</label>
-                    <canvas id="mockupCanvasBack" width="800" height="800" style="border:1px solid #ccc;"></canvas>
-                </div> --}}
-
-                {{-- <div class="mt-2 d-none" id="editorNoneWrapper">
-                    <label class="label-text">Mockup Editor (General)</label>
-                    <canvas id="mockupCanvasNone" width="800" height="800" style="border:1px solid #ccc;"></canvas>
-                </div> --}}
 
                 <div class="mb-2">
                     <label class="label-text mb-1 d-block">Colors</label>
@@ -471,7 +431,7 @@
                 // لو عندنا أكتر من 3 → زر Show Remaining
                 if (templates.length > maxInline) {
                     const showMoreHtml = `
-                    <div class="template-card cursor-pointer">
+                    <div class="template-card cursor-pointer show-more">
                         <div class="card rounded-3 shadow-sm show-more-card js-open-templates-modal" tabindex="0" style="border:1px solid #24B094;">
                             <div class="d-flex justify-content-center align-items-center gap-1"
                              style="background-color:#F4F6F6; height:310px; width:270px; border-radius:12px; padding:10px; color: #24B094; font-size: 16px; overflow:hidden;">
@@ -656,41 +616,87 @@
             // Show on Mockup (cards + modal)
             // =========================
 
-            $(document).on('click', '.js-show-on-mockup', function () {
-                const $cardWrapper = $(this).closest('.template-card');
-                const id    = $cardWrapper.data('id');
-                const front = $cardWrapper.data('front');
-                const back  = $cardWrapper.data('back');
+        $(document).on('click', '.js-show-on-mockup', function () {
+            const $cardWrapper = $(this).closest('.template-card');
+            const id    = $cardWrapper.data('id');
+            const front = $cardWrapper.data('front');
+            const back  = $cardWrapper.data('back');
+            const name  = $cardWrapper.find('.card-title').text();
 
-                // highlight الكارد المختار في الـ cards section (اختياري)
-                $('#templatesCardsContainer').find('.template-card .card')
-                    .removeClass('border-primary shadow-lg')
-                    .css('border-color', '#24B094');
+            // Highlight the selected card in templatesCardsWrapper
+            $('#templatesCardsContainer').find('.template-card .card')
+                .removeClass('border-primary shadow-lg')
+                .css('border-color', '#24B094');
 
-                $cardWrapper.find('.card')
-                    .addClass('border-primary shadow-lg')
-                    .css('border-color', '#0d6efd');
+            // If clicked from the modal
+            if ($(this).closest('#templateModal').length) {
+                // Remove from modal
+                $cardWrapper.remove();
 
-                // خزن template_id
-                $('#selectedTemplateId').val(id);
+                // Build the card for templatesCardsWrapper
+                const cardHtml = `<div class="col-12 col-md-4 col-lg-3">
+            ${buildTemplateInnerCard({
+                    id: id,
+                    source_design_svg: front,
+                    back_base64_preview_image: back,
+                    name: name
+                })}
+        </div>`;
 
-                // حط التصميم على الكانفاس
-                if (typeof loadAndBind === 'function') {
-                    if (front) {
-                        loadAndBind(window.canvasFront, front, 'front', null);
-                        document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
-                    }
-                    if (back) {
-                        loadAndBind(window.canvasBack, back, 'back', null);
-                        document.getElementById('editorBackWrapper')?.classList.remove('d-none');
-                    }
+                // Prepend to the start
+                $('#templatesCardsContainer').prepend(cardHtml);
+
+                // Move last card in templatesCardsWrapper back to modal (if more than 3 cards)
+                const $cards = $('#templatesCardsContainer .template-card').not('.show-more');
+                if ($cards.length > 3) {
+                    const $lastCard = $cards.last();
+                    const lastId = $lastCard.data('id');
+                    const lastFront = $lastCard.data('front');
+                    const lastBack  = $lastCard.data('back');
+                    const lastName  = $lastCard.find('.card-title').text();
+
+                    // Remove from container
+                    $lastCard.remove();
+
+                    // Build modal card
+                    const modalCardHtml = `<div class="col-6 col-md-4 mb-2">
+                ${buildTemplateInnerCard({
+                        id: lastId,
+                        source_design_svg: lastFront,
+                        back_base64_preview_image: lastBack,
+                        name: lastName
+                    })}
+            </div>`;
+
+                    $('#templates-modal-container').prepend(modalCardHtml); // prepend to modal or append
                 }
+            }
 
-                // 🔴 لو الزر جوّه المودال → اقفل المودال
-                if ($(this).closest('#templateModal').length) {
-                    $('#templateModal').modal('hide');
+            // Highlight the newly added/existing card
+            $('#templatesCardsContainer').find(`.template-card[data-id="${id}"] .card`)
+                .addClass('border-primary shadow-lg')
+                .css('border-color', '#0d6efd');
+
+            // Save template_id
+            $('#selectedTemplateId').val(id);
+
+            // Load template on canvas
+            if (typeof loadAndBind === 'function') {
+                if (front) {
+                    loadAndBind(window.canvasFront, front, 'front', null);
+                    document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
                 }
-            });
+                if (back) {
+                    loadAndBind(window.canvasBack, back, 'back', null);
+                    document.getElementById('editorBackWrapper')?.classList.remove('d-none');
+                }
+            }
+
+            // Close modal
+            // if ($(this).closest('#templateModal').length) {
+                $('#templateModal').modal('hide');
+            // }
+        });
 
 // =========================
 // Save Positions (cards + modal)
