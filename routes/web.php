@@ -34,6 +34,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
 use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Api\V1\User\ShippingAddress\ShippingController;
 use App\Http\Controllers\Shared\CommentController;
+use App\Http\Controllers\Shared\FontController;
 use App\Http\Controllers\Shared\General\MainController;
 use App\Http\Controllers\Shared\LibraryAssetController;
 use App\Http\Middleware\AutoCheckPermission;
@@ -324,6 +325,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");
 
         Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
+        Route::apiResource('fonts', FontController::class)->only(['store', 'index']);
 
         Route::resource('shipping-addresses', ShippingAddressController::class)->only(['store', 'update', 'destroy']);
 

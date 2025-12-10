@@ -5,7 +5,7 @@ use App\Http\Controllers\Dashboard\MockupController;
 use App\Http\Controllers\Dashboard\OrderController;
 use App\Http\Controllers\Dashboard\ProductController;
 use App\Http\Controllers\Dashboard\TemplateController;
-use App\Http\Controllers\Shared\{General\MainController,};
+use App\Http\Controllers\Shared\{FontController, General\MainController};
 use App\Http\Controllers\Shared\LibraryAssetController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,3 +35,4 @@ Route::apiResource('/products', ProductController::class)
         'show' => 'admin.products.show',
     ]);
 
+Route::apiResource('fonts', FontController::class)->only(['store', 'index']);
