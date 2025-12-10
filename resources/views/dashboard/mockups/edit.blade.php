@@ -96,7 +96,7 @@
         }
 
         /* لو الـ inner d-flex موجود داخل البلوك فهو هعرض Base | Mask جنب بعض */
-        .type-block>.d-flex {
+        .type-block > .d-flex {
             display: flex;
             gap: 1rem;
             align-items: flex-start;
@@ -126,7 +126,8 @@
     <section class="">
         <div class="card">
             <div class="card-body">
-                <form id="editMockupForm" enctype="multipart/form-data" action="{{ route('mockups.update',$model->id) }}">
+                <form id="editMockupForm" enctype="multipart/form-data"
+                      action="{{ route('mockups.update',$model->id) }}">
                     @csrf
                     @method('PUT')
                     <div class="modal-body flex-grow-1">
@@ -149,7 +150,8 @@
                                     @foreach($associatedData['types'] as $type)
                                         <div class="col-md-4 mb-1">
                                             <label class="radio-box">
-                                                <input class="form-check-input type-checkbox" type="checkbox" name="types[]"
+                                                <input class="form-check-input type-checkbox" type="checkbox"
+                                                       name="types[]"
                                                        value="{{ $type->value }}"
                                                        @checked($model->types->contains($type))
                                                        data-type-name="{{ strtolower($type->value->name) }}">
@@ -204,7 +206,8 @@
                             <label class="form-label mb-1">Choose Template</label>
 
                             {{-- هنا هتنضاف الكروت بالـ JS --}}
-                            <div id="templatesCardsContainer" class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm"></div>
+                            <div id="templatesCardsContainer"
+                                 class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm"></div>
                             <input type="hidden" name="template_id" id="selectedTemplateId">
                             <div id="templatesHiddenContainer"></div>
 
@@ -225,7 +228,8 @@
                     <div class="modal-footer border-top-0">
                         <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
                             <span class="btn-text">Save Changes</span>
-                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
+                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
+                                  role="status"
                                   aria-hidden="true"></span>
                         </button>
                     </div>
@@ -265,15 +269,16 @@
         function capitalize(str) {
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
-        document.addEventListener('DOMContentLoaded', function() {
+
+        document.addEventListener('DOMContentLoaded', function () {
 
             function capitalize(str) {
                 return str.charAt(0).toUpperCase() + str.slice(1);
             }
 
             function preloadFile(type, baseUrl, maskUrl) {
-                const baseInput  = document.getElementById(`${type}-base-input`);
-                const maskInput  = document.getElementById(`${type}-mask-input`);
+                const baseInput = document.getElementById(`${type}-base-input`);
+                const maskInput = document.getElementById(`${type}-mask-input`);
                 const basePreview = baseInput ? baseInput.closest('.type-block').querySelector('.upload-area[data-input-id="' + type + '-base-input"] .preview') : null;
                 const maskPreview = maskInput ? maskInput.closest('.type-block').querySelector('.upload-area[data-input-id="' + type + '-mask-input"] .preview') : null;
                 if (baseUrl && basePreview) {
@@ -289,7 +294,7 @@
 
             @if($model)
                 @foreach($model->types as $type)
-            (function() {
+            (function () {
                 const typeName = "{{ strtolower($type->value->name) }}";
                 const checkbox = document.querySelector(`.type-checkbox[data-type-name="${typeName}"]`);
 
@@ -314,21 +319,21 @@
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const $productSelect            = $('#productsSelect');
-            const $templatesWrapper         = $('#templatesCardsWrapper');
-            const $templatesCardsContainer  = $('#templatesCardsContainer');
-            const $selectedTemplateId       = $('#selectedTemplateId');
+            const $productSelect = $('#productsSelect');
+            const $templatesWrapper = $('#templatesCardsWrapper');
+            const $templatesCardsContainer = $('#templatesCardsContainer');
+            const $selectedTemplateId = $('#selectedTemplateId');
 
-            const $modal            = $('#templateModal');
-            const $modalContainer   = $('#templates-modal-container');
-            const $modalPagination  = $('#templates-modal-pagination');
+            const $modal = $('#templateModal');
+            const $modalContainer = $('#templates-modal-container');
+            const $modalPagination = $('#templates-modal-pagination');
 
             const locale = "{{ app()->getLocale() }}";
 
             // حالة التمبليتس
-            let firstPageTemplates   = [];
-            let nextPageUrl          = null;
-            let currentProductId     = null;
+            let firstPageTemplates = [];
+            let nextPageUrl = null;
+            let currentProductId = null;
 
             // =========================
             // Helpers
@@ -338,22 +343,41 @@
                 $templatesWrapper.addClass('d-none');
                 $selectedTemplateId.val('');
                 firstPageTemplates = [];
-                nextPageUrl        = null;
+                nextPageUrl = null;
 
                 $modalContainer.empty();
                 $modalPagination.empty();
             }
 
+            function getTemplateImageByType(tpl) {
+                // types is an array like: [{id:3,label:"None",value:3}]
+                const typeObj = Array.isArray(tpl.types) && tpl.types.length
+                    ? tpl.types[0]
+                    : null;
+
+                const type = typeObj ? (typeObj.label || '').toLowerCase() : 'front';
+                console.log(type)
+                switch (type) {
+                    case 'front':
+                        return tpl.source_design_svg || '';
+                    case 'back':
+                        return tpl.back_base64_preview_image || '';
+                    case 'none':
+                        return tpl.source_design_svg || '';
+                    default:
+                        return tpl.source_design_svg || '';
+                }
+            }
+
             function buildTemplateInnerCard(tpl) {
-                const id   = tpl.id;
+                const id = tpl.id;
                 const name = typeof tpl.name === 'object'
                     ? (tpl.name[locale] ?? Object.values(tpl.name)[0])
                     : (tpl.name || ('Template #' + id));
-                console.log(tpl.types,tpl.types.includes(type))
-                const front =  tpl.source_design_svg || '';
-                const none = tpl.source_design_svg || '';
-                const back  = tpl.back_base64_preview_image || '';
-                const img   = front || back || "{{ asset('images/placeholder.svg') }}";
+                const front = getTemplateImageByType(tpl);
+                const none = getTemplateImageByType(tpl);
+                const back = tpl.back_base64_preview_image || '';
+                const img = front || back || "{{ asset('images/placeholder.svg') }}";
 
                 return `
                 <div class="template-card h-100"
@@ -408,7 +432,7 @@
                 }
 
                 const maxInline = 3;
-                const visible   = templates.slice(0, maxInline);
+                const visible = templates.slice(0, maxInline);
 
                 visible.forEach(function (tpl) {
                     const cardHtml = `
@@ -484,7 +508,7 @@
             // Fetch templates (API)
             // =========================
             function getSelectedTypesForRequest() {
-                const typeMap = { front: 1, back: 2, none: 3 };
+                const typeMap = {front: 1, back: 2, none: 3};
 
                 return $('.type-checkbox:checked')
                     .map(function () {
@@ -524,12 +548,12 @@
                     },
 
                     success: function (response) {
-                        const data  = response.data ?? {};
+                        const data = response.data ?? {};
                         const items = data.data ?? [];
                         const links = data.links ?? {};
 
                         firstPageTemplates = items;
-                        nextPageUrl        = links.next || null;
+                        nextPageUrl = links.next || null;
 
                         renderTemplateCards(firstPageTemplates);
                     },
@@ -579,7 +603,7 @@
                     url: nextPageUrl,
                     method: "GET",
                     success: function (res) {
-                        const data  = res.data ?? {};
+                        const data = res.data ?? {};
                         const items = data.data ?? [];
                         const links = data.links ?? {};
 
@@ -608,10 +632,10 @@
 
             $(document).on('click', '.js-show-on-mockup', function () {
                 const $cardWrapper = $(this).closest('.template-card');
-                const id    = $cardWrapper.data('id');
+                const id = $cardWrapper.data('id');
                 const front = $cardWrapper.data('front');
-                const back  = $cardWrapper.data('back');
-                const none  = $cardWrapper.data('none');
+                const back = $cardWrapper.data('back');
+                const none = $cardWrapper.data('none');
 
                 // highlight selected card
                 $('#templatesCardsContainer').find('.template-card .card')
@@ -628,9 +652,10 @@
                 // find saved template positions from $model->templates
                 const templatesData = @json($model->templates ?? []);
                 const savedTemplate = templatesData.find(t => t.id === id);
-
+                console.log(front, none)
                 // FRONT
-                if (front) {
+                if (front && !none) {
+                    console.log("dsfds")
                     loadAndBind(window.canvasFront, front, 'front', savedTemplate?.pivot.positions.front_x ? savedTemplate : null);
                     document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
                 }
@@ -641,11 +666,13 @@
                     document.getElementById('editorBackWrapper')?.classList.remove('d-none');
                 }
                 // NONE
-                if (none) {
-                    console.log("Ds")
+                if (none && !front) {
+                    console.log("dsfds")
+
                     loadAndBind(window.canvasNone, none, 'none', savedTemplate?.pivot.positions.none_x ? savedTemplate : null);
                     document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
                 }
+
 
                 // close modal if inside
                 if ($(this).closest('#templateModal').length) {
@@ -690,7 +717,7 @@
                         const obj = window['canvas' + capitalize(side)]?.getObjects()?.find(o => o.templateType === side);
                         if (obj) {
                             const meta = window['canvas' + capitalize(side)].__mockupMeta;
-                            const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
+                            const {xPct, yPct, wPct, hPct, angle} = calculateObjectPercents(obj, meta);
                             html += `<input type="hidden" name="templates[${index}][${side}_x]" value="${xPct}">`;
                             html += `<input type="hidden" name="templates[${index}][${side}_y]" value="${yPct}">`;
                             html += `<input type="hidden" name="templates[${index}][${side}_width]" value="${wPct}">`;
@@ -710,7 +737,7 @@
 
                 return {
                     xPct: ((center.x - meta.offsetLeft) / meta.scaledWidth).toFixed(6),
-                    yPct: ((center.y - meta.offsetTop)  / meta.scaledHeight).toFixed(6),
+                    yPct: ((center.y - meta.offsetTop) / meta.scaledHeight).toFixed(6),
                     wPct: (wReal / meta.scaledWidth).toFixed(6),
                     hPct: (hReal / meta.scaledHeight).toFixed(6),
                     angle: obj.angle || 0
@@ -753,40 +780,40 @@
         // CANVAS HELPER FUNCTIONS
         // =========================
         window.canvasFront = new fabric.Canvas('mockupCanvasFront');
-        window.canvasBack  = new fabric.Canvas('mockupCanvasBack');
-        window.canvasNone  = new fabric.Canvas('mockupCanvasNone');
+        window.canvasBack = new fabric.Canvas('mockupCanvasBack');
+        window.canvasNone = new fabric.Canvas('mockupCanvasNone');
 
         function loadBaseImage(canvas, baseUrl) {
             fabric.Image.fromURL(baseUrl, function (img) {
-                img.set({ selectable: false, evented: false });
+                img.set({selectable: false, evented: false});
 
                 const canvasW = canvas.getWidth();
                 const canvasH = canvas.getHeight();
 
-                const scale   = Math.min(canvasW / img.width, canvasH / img.height);
+                const scale = Math.min(canvasW / img.width, canvasH / img.height);
                 const scaledW = img.width * scale;
                 const scaledH = img.height * scale;
 
                 const left = (canvasW - scaledW) / 2;
-                const top  = (canvasH - scaledH) / 2;
+                const top = (canvasH - scaledH) / 2;
 
                 canvas.__mockupMeta = {
-                    originalWidth:  img.width,
+                    originalWidth: img.width,
                     originalHeight: img.height,
-                    scaledWidth:    scaledW,
-                    scaledHeight:   scaledH,
-                    offsetLeft:     left,
-                    offsetTop:      top
+                    scaledWidth: scaledW,
+                    scaledHeight: scaledH,
+                    offsetLeft: left,
+                    offsetTop: top
                 };
 
                 canvas.setBackgroundImage(
                     img,
                     canvas.renderAll.bind(canvas),
                     {
-                        scaleX:  scale,
-                        scaleY:  scale,
-                        left:    left,
-                        top:     top,
+                        scaleX: scale,
+                        scaleY: scale,
+                        left: left,
+                        top: top,
                         originX: 'left',
                         originY: 'top'
                     }
@@ -809,42 +836,42 @@
             if (!wrapper) return;
 
             const canvas = obj.canvas;
-            const meta   = canvas && canvas.__mockupMeta;
+            const meta = canvas && canvas.__mockupMeta;
             if (!meta) return;
 
-            const xInput      = wrapper.querySelector(`.template_x.${type}`);
-            const yInput      = wrapper.querySelector(`.template_y.${type}`);
-            const widthInput  = wrapper.querySelector(`.template_width.${type}`);
+            const xInput = wrapper.querySelector(`.template_x.${type}`);
+            const yInput = wrapper.querySelector(`.template_y.${type}`);
+            const widthInput = wrapper.querySelector(`.template_width.${type}`);
             const heightInput = wrapper.querySelector(`.template_height.${type}`);
-            const angleInput  = wrapper.querySelector(`.template_angle.${type}`);
+            const angleInput = wrapper.querySelector(`.template_angle.${type}`);
 
             if (!xInput || !yInput || !widthInput || !heightInput || !angleInput) return;
 
             const center = obj.getCenterPoint();
-            const wReal  = obj.width  * obj.scaleX;
-            const hReal  = obj.height * obj.scaleY;
+            const wReal = obj.width * obj.scaleX;
+            const hReal = obj.height * obj.scaleY;
 
             const xPct = (center.x - meta.offsetLeft) / meta.scaledWidth;
-            const yPct = (center.y - meta.offsetTop)  / meta.scaledHeight;
+            const yPct = (center.y - meta.offsetTop) / meta.scaledHeight;
             const wPct = wReal / meta.scaledWidth;
             const hPct = hReal / meta.scaledHeight;
 
-            xInput.value      = xPct.toFixed(6);
-            yInput.value      = yPct.toFixed(6);
-            widthInput.value  = wPct.toFixed(6);
+            xInput.value = xPct.toFixed(6);
+            yInput.value = yPct.toFixed(6);
+            widthInput.value = wPct.toFixed(6);
             heightInput.value = hPct.toFixed(6);
-            angleInput.value  = obj.angle || 0;
+            angleInput.value = obj.angle || 0;
         }
 
         function clearTemplateInputsForObject(type) {
             const wrapper = document.getElementById('templatesCardsWrapper');
             if (!wrapper) return;
 
-            const xInput      = wrapper.querySelector(`.template_x.${type}`);
-            const yInput      = wrapper.querySelector(`.template_y.${type}`);
-            const widthInput  = wrapper.querySelector(`.template_width.${type}`);
+            const xInput = wrapper.querySelector(`.template_x.${type}`);
+            const yInput = wrapper.querySelector(`.template_y.${type}`);
+            const widthInput = wrapper.querySelector(`.template_width.${type}`);
             const heightInput = wrapper.querySelector(`.template_height.${type}`);
-            const angleInput  = wrapper.querySelector(`.template_angle.${type}`);
+            const angleInput = wrapper.querySelector(`.template_angle.${type}`);
 
             [xInput, yInput, widthInput, heightInput, angleInput].forEach(inp => {
                 if (inp) inp.value = '';
@@ -900,21 +927,21 @@
 
             if (meta) {
                 const targetW = meta.scaledWidth * defaultWidthRatio;
-                const scale   = targetW / img.width;
+                const scale = targetW / img.width;
 
                 img.scaleX = img.scaleY = scale;
 
                 img.left = meta.offsetLeft + meta.scaledWidth / 2;
-                img.top  = meta.offsetTop + meta.scaledHeight * 0.35;
+                img.top = meta.offsetTop + meta.scaledHeight * 0.35;
             } else {
                 const canvasW = canvas.getWidth();
                 const canvasH = canvas.getHeight();
                 const targetW = canvasW * defaultWidthRatio;
-                const scale   = targetW / img.width;
+                const scale = targetW / img.width;
 
                 img.scaleX = img.scaleY = scale;
-                img.left   = canvasW / 2;
-                img.top    = canvasH / 2;
+                img.left = canvasW / 2;
+                img.top = canvasH / 2;
             }
         }
 
@@ -944,7 +971,7 @@
 
                     // set center position
                     img.left = meta.offsetLeft + meta.scaledWidth * xPct;
-                    img.top  = meta.offsetTop  + meta.scaledHeight * yPct;
+                    img.top = meta.offsetTop + meta.scaledHeight * yPct;
 
                     // scale according to width percentage
                     const scaleX = (wPct * meta.scaledWidth) / img.width;
@@ -1008,8 +1035,9 @@
         // =========================
         // TYPE CHECKBOXES + UPLOAD AREAS
         // =========================
-        const checkboxes          = document.querySelectorAll('.type-checkbox');
+        const checkboxes = document.querySelectorAll('.type-checkbox');
         const fileInputsContainer = document.getElementById('fileInputsContainer');
+
         function removeCanvasByType(type) {
             let canvas = null;
             let wrapperId = "";
@@ -1066,17 +1094,18 @@
                 }
             }
         }
+
         function hideCanvasForType(type) {
             const wrapperIdMap = {
                 front: 'editorFrontWrapper',
-                back:  'editorBackWrapper',
-                none:  'editorNoneWrapper',
+                back: 'editorBackWrapper',
+                none: 'editorNoneWrapper',
             };
 
             const canvasMap = {
                 front: window.canvasFront,
-                back:  window.canvasBack,
-                none:  window.canvasNone,
+                back: window.canvasBack,
+                none: window.canvasNone,
             };
 
             // أخفي الـ wrapper
@@ -1182,7 +1211,7 @@
             });
 
             document.querySelectorAll('.upload-area').forEach(area => {
-                const input   = document.getElementById(area.dataset.inputId);
+                const input = document.getElementById(area.dataset.inputId);
                 const preview = area.querySelector('.preview');
 
                 area.addEventListener('click', () => input?.click());
@@ -1249,12 +1278,12 @@
         });
 
         $(document).ready(function () {
-            let input          = $('#product-image-main');
-            let uploadArea     = $('#upload-area');
-            let progress       = $('#upload-progress');
-            let progressBar    = $('.progress-bar');
-            let uploadedImage  = $('#uploaded-image');
-            let removeButton   = $('#remove-image');
+            let input = $('#product-image-main');
+            let uploadArea = $('#upload-area');
+            let progress = $('#upload-progress');
+            let progressBar = $('.progress-bar');
+            let uploadedImage = $('#uploaded-image');
+            let removeButton = $('#remove-image');
 
             uploadArea.on('click', function () {
                 input.click();
@@ -1282,7 +1311,7 @@
 
             function handleMainImageFiles(files) {
                 if (files.length > 0) {
-                    let file         = files[0];
+                    let file = files[0];
                     let dataTransfer = new DataTransfer();
                     dataTransfer.items.add(file);
                     input[0].files = dataTransfer.files;
@@ -1325,7 +1354,7 @@
         // COLOR PICKER
         // =========================
         let selectedColors = @json($model->colors ?? []);
-        let pickrInstance  = null;
+        let pickrInstance = null;
 
         $(document).ready(function () {
             // Render any previously selected colors
@@ -1362,8 +1391,8 @@
         });
 
         $('#openColorPicker').on('click', function () {
-            const trigger        = document.getElementById('openColorPicker');
-            const rect           = trigger.getBoundingClientRect();
+            const trigger = document.getElementById('openColorPicker');
+            const rect = trigger.getBoundingClientRect();
             const modalScrollTop = document.querySelector('#addMockupModal .modal-body')?.scrollTop || 0;
 
             if (pickrInstance) {
@@ -1373,9 +1402,9 @@
                     const pickerPanel = document.querySelector('.pcr-app.visible');
                     if (pickerPanel) {
                         pickerPanel.style.position = 'absolute';
-                        pickerPanel.style.left     = `${rect.left + window.scrollX}px`;
-                        pickerPanel.style.top      = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
-                        pickerPanel.style.zIndex   = 9999;
+                        pickerPanel.style.left = `${rect.left + window.scrollX}px`;
+                        pickerPanel.style.top = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
+                        pickerPanel.style.zIndex = 9999;
                     }
                 }, 0);
             }
@@ -1387,12 +1416,12 @@
         };
 
         function renderSelectedColors() {
-            const ul        = document.getElementById('selected-colors');
+            const ul = document.getElementById('selected-colors');
             const container = document.getElementById('colorsInputContainer');
 
             if (!ul || !container) return;
 
-            ul.innerHTML        = '';
+            ul.innerHTML = '';
             container.innerHTML = '';
 
             selectedColors.forEach(c => {
@@ -1408,8 +1437,8 @@
                 ul.appendChild(li);
 
                 const hiddenInput = document.createElement('input');
-                hiddenInput.type  = 'hidden';
-                hiddenInput.name  = 'colors[]';
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'colors[]';
                 hiddenInput.value = c;
                 container.appendChild(hiddenInput);
             });

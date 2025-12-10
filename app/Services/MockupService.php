@@ -304,7 +304,8 @@ class MockupService extends BaseService
                             'print_w' => $printW,
                             'print_h' => $printH,
                             'angle' => $angle ?? 0,
-                            'hex' => $firstMockup->colors ? $firstMockup->colors[0] : null,
+                            'hex' => $firstMockup?->colors ?
+                                $firstMockup?->colors[0] : null,
                         ]);
 
 
