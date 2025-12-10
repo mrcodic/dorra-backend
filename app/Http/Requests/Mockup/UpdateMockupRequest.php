@@ -40,11 +40,25 @@ class UpdateMockupRequest extends BaseRequest
             'types.*' => ['required', Rule::in(TypeEnum::values())],
             'category_id' => ['required','integer', Rule::exists(Category::class, 'id')],
             'colors' => ['sometimes','array'],
-            'templates' => ['required','array'],
-            'templates.*.template_id' => ['required','exists:templates,id','distinct'],
-            'templates.*.front' => ['sometimes', 'exists:positions,id'],
-            'templates.*.back' => ['sometimes', 'exists:positions,id'],
-            'templates.*.none' => ['sometimes', 'exists:positions,id'],
+            'templates' => ['sometimes','array'],
+            'templates.*.template_id' => ['sometimes','exists:templates,id'],
+            'templates.*.front_x'      => ['nullable', 'numeric', 'min:0'],
+            'templates.*.front_y'      => ['nullable', 'numeric', 'min:0'],
+            'templates.*.front_width'  => ['nullable', 'numeric', 'min:0'],
+            'templates.*.front_height' => ['nullable', 'numeric', 'min:0'],
+            'templates.*.front_angle'  => ['nullable', 'numeric'],
+
+            'templates.*.back_x'       => ['nullable', 'numeric', 'min:0'],
+            'templates.*.back_y'       => ['nullable', 'numeric', 'min:0'],
+            'templates.*.back_width'   => ['nullable', 'numeric', 'min:0'],
+            'templates.*.back_height'  => ['nullable', 'numeric', 'min:0'],
+            'templates.*.back_angle'   => ['nullable', 'numeric'],
+
+            'templates.*.none_x'       => ['nullable', 'numeric', 'min:0'],
+            'templates.*.none_y'       => ['nullable', 'numeric', 'min:0'],
+            'templates.*.none_width'   => ['nullable', 'numeric', 'min:0'],
+            'templates.*.none_height'  => ['nullable', 'numeric', 'min:0'],
+            'templates.*.none_angle'   => ['nullable', 'numeric'],
             'front_mask_image' => [
                 Rule::requiredIf(in_array(1, $types)),
                 'image',
@@ -75,5 +89,11 @@ class UpdateMockupRequest extends BaseRequest
         ];
     }
 
+    public function attributes()
+    {
+        return [
+            'templates' => 'positions'
+        ];
+    }
 
 }

@@ -102,4 +102,11 @@ class StoreMockupRequest extends BaseRequest
         ];
     }
 
+    public function attributes()
+    {
+        return [
+            'templates' => 'positions'
+        ];
+    }
+
 }

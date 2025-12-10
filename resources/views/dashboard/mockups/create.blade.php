@@ -1204,8 +1204,7 @@
             handleAjaxFormSubmit("#addMockupForm", {
                 successMessage: "Mockup Created Successfully",
                 onSuccess: function () {
-                    $('#addMockupModal').modal('hide');
-                    location.reload();
+                    location.replace('/mockups');
                 }
             });
         });

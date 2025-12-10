@@ -23,13 +23,16 @@
             cursor: pointer;
             position: relative;
         }
+
         .gradient-picker-trigger .pcr-button {
             display: none !important;
         }
+
         .selected-color-wrapper {
             width: 28px;
             height: 28px;
         }
+
         .selected-color-dot {
             width: 100%;
             height: 100%;
@@ -39,11 +42,13 @@
             box-sizing: border-box;
             background-clip: content-box;
         }
+
         .selected-color-inner {
             width: 100%;
             height: 100%;
             border-radius: 50%;
         }
+
         .remove-color-btn {
             position: absolute;
             top: -5px;
@@ -58,11 +63,13 @@
             padding: 1px;
             display: none;
         }
+
         .selected-color-wrapper:hover .remove-color-btn {
             display: flex;
             align-items: center;
             justify-content: center;
         }
+
         .gradient-edit-picker-trigger {
             width: 40px;
             height: 40px;
@@ -75,8 +82,36 @@
             cursor: pointer;
             position: relative;
         }
+
         .gradient-edit-picker-trigger .pcr-button {
             display: none !important;
+        }
+
+        /* كل بلوك ياخد سطر كامل ويتكدس عموديًا */
+        .type-block {
+            display: block !important;
+            width: 100% !important;
+            box-sizing: border-box;
+            margin-bottom: .75rem;
+        }
+
+        /* لو الـ inner d-flex موجود داخل البلوك فهو هعرض Base | Mask جنب بعض */
+        .type-block>.d-flex {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        /* تأكد أن الحاوية اليسرى عمودية */
+        #left-column {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: .75rem;
+        }
+
+        /* لو محتاج تجاويف داخل البلوكات */
+        .upload-card {
+            box-sizing: border-box;
         }
     </style>
 @endsection
@@ -91,166 +126,98 @@
     <section class="">
         <div class="card">
             <div class="card-body">
-                <form id="addMockupForm" enctype="multipart/form-data" action="{{ route('mockups.update',$model->id) }}">
+                <form id="editMockupForm" enctype="multipart/form-data" action="{{ route('mockups.update',$model->id) }}">
                     @csrf
-                    @method("PUT")
+                    @method('PUT')
                     <div class="modal-body flex-grow-1">
-                        <div class="">
-                            <div class="form-group mb-2">
-                                <label for="templateName" class="label-text mb-1">Mockup Name</label>
+                        <div class="position-relative text-center mb-2">
+                            <hr class="opacity-75" style="border: 1px solid #24B094;">
+                            <span
+                                class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                style="color: #24B094">
+                            Mockup Details
+                        </span>
+                        </div>
+                        <div class="row">
+                            <div class="form-group mb-2 col-md-3">
                                 <input type="text" id="templateName" class="form-control" name="name"
-                                       value="{{ $model->name }}"
-                                       placeholder="Mockup Name">
+                                       placeholder="Mockup Name" value="{{ $model->name }}">
                             </div>
 
-                            <div class="form-group mb-2">
-                                <label for="mockup-type" class="label-text mb-1">Mockup Type</label>
+                            <div class="form-group mb-2 col-md-9">
                                 <div class="row">
                                     @foreach($associatedData['types'] as $type)
                                         <div class="col-md-4 mb-1">
                                             <label class="radio-box">
-                                                <input class="form-check-input type-checkbox" type="checkbox"
-                                                       name="types[]"
+                                                <input class="form-check-input type-checkbox" type="checkbox" name="types[]"
                                                        value="{{ $type->value }}"
-                                                       data-type-name="{{ strtolower($type->value->name) }}"
-                                                @checked($model->types->contains($type))
-                                                >
+                                                       @checked($model->types->contains($type))
+                                                       data-type-name="{{ strtolower($type->value->name) }}">
                                                 <span>{{ $type->value->label() }}</span>
                                             </label>
                                         </div>
                                     @endforeach
                                 </div>
                             </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <!-- العمود الشمال: يحتوي fixed-block + fileInputsContainer (البلوكات تتحط هنا) -->
+                            <div id="left-column" class="d-flex flex-column" style="width:60%;">
+                                <!-- fixed-block يبقى مكان الإشارة لفانكشنك -->
+                                <div id="fixed-block"></div>
 
-                            <div class="form-group mb-2">
-                                <label for="productsSelect" class="label-text mb-1">Product</label>
-                                <select id="productsSelect" name="category_id" class="form-select">
-                                    <option value="" disabled selected>Choose product</option>
-                                    @foreach($associatedData['products'] as $product)
-                                        <option value="{{ $product->id }}"
-                                        @selected($product->id == $model->category_id)
-                                        >
-                                            {{ $product->getTranslation('name', app()->getLocale()) }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                <!-- الحاوية اللى بتضيف لها الفانكشن البلوكات (لو مش موجودة بالفعل) -->
+                                <div id="fileInputsContainer"></div>
                             </div>
 
-                            <div class="template-repeater row d-none" id="template-wrapper">
-                                <div data-repeater-list="templates">
-                                    <div data-repeater-item class="row template-item align-items-end">
-
-                                    @foreach($model->templates as $tpl)
-
-
-                                            <div class="form-group mb-2 col-8">
-                                                <label class="label-text mb-1">Template</label>
-
-                                                <select class="template-select"
-                                                        name="template_id"
-                                                        data-selected-id="{{ $tpl->id }}">
-                                                    <option value="{{ $tpl->id }}"
-                                                            data-image="{{ $tpl->source_design_svg }}"
-                                                            data-back-image="{{ $tpl->back_base64_preview_image }}">
-                                                        {{ $tpl->name }}
-                                                    </option>
-                                                </select>
-
-                                                <div class="template-preview mt-25">
-                                                    @if($tpl->source_design_svg)
-                                                        <img src="{{ $tpl->source_design_svg }}" class="front-preview rounded-circle" style="width:40px;height:40px;">
-                                                    @endif
-                                                    @if($tpl->back_base64_preview_image)
-                                                        <img src="{{ $tpl->back_base64_preview_image }}" class="back-preview rounded-circle" style="width:40px;height:40px;">
-                                                    @endif
-                                                </div>
-                                            </div>
-
-                                            <div class="form-group mb-2 col-4">
-                                                <button type="button" class="btn btn-primary w-100 show-template-canvas">
-                                                    Show on Canvas
-                                                </button>
-                                            </div>
-{{--                                            @dd($tpl->pivot->positions)--}}
-                                            <!-- Hidden fields FOR THIS ROW ONLY -->
-                                            <input type="hidden" name="front_x" class="template_x front" value="{{ data_get($tpl->pivot->positions, 'front_x', '') }}">
-                                            <input type="hidden" name="front_y" class="template_y front" value="{{ data_get($tpl->pivot->positions, 'front_y', '') }}">
-                                            <input type="hidden" name="front_width" class="template_width front" value="{{ data_get($tpl->pivot->positions, 'front_width', '') }}">
-                                            <input type="hidden" name="front_height" class="template_height front" value="{{ data_get($tpl->pivot->positions, 'front_height', '') }}">
-                                            <input type="hidden" name="front_angle" class="template_angle front" value="{{ data_get($tpl->pivot->positions, 'front_angle', '') }}">
-
-                                            <input type="hidden" name="back_x" class="template_x back" value="{{ data_get($tpl->pivot->positions, 'back_x', '') }}">
-                                            <input type="hidden" name="back_y" class="template_y back" value="{{ data_get($tpl->pivot->positions, 'back_y', '') }}">
-                                            <input type="hidden" name="back_width" class="template_width back" value="{{ data_get($tpl->pivot->positions, 'back_width', '') }}">
-                                            <input type="hidden" name="back_height" class="template_height back" value="{{ data_get($tpl->pivot->positions, 'back_height', '') }}">
-                                            <input type="hidden" name="back_angle" class="template_angle back" value="{{ data_get($tpl->pivot->positions, 'back_angle', '') }}">
-
-                                            <input type="hidden" name="none_x" class="template_x none" value="{{ data_get($tpl->pivot->positions, 'none_x', '') }}">
-                                            <input type="hidden" name="none_y" class="template_y none" value="{{ data_get($tpl->pivot->positions, 'none_y', '') }}">
-                                            <input type="hidden" name="none_width" class="template_width none" value="{{ data_get($tpl->pivot->positions, 'none_width', '') }}">
-                                            <input type="hidden" name="none_height" class="template_height none" value="{{ data_get($tpl->pivot->positions, 'none_height', '') }}">
-                                            <input type="hidden" name="none_angle" class="template_angle none" value="{{ data_get($tpl->pivot->positions, 'none_angle', '') }}">
-
-
-                                            <div class="col-12 text-end mt-2">
-                                                <button type="button" data-repeater-delete class="btn btn-sm btn-light-danger">
-                                                    Remove Template
-                                                </button>
-                                            </div>
-
-
-                                    @endforeach
-                                    </div>
-
+                            <!-- العمود اليمين: الـ editor / preview -->
+                            <div class="d-flex flex-column gap-2 justify-content-between">
+                                <div class="mt-2 d-none" id="editorFrontWrapper" style="width:auto">
+                                    <label class="label-text">Mockup Editor (Front)</label>
+                                    <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="300"></canvas>
+                                </div>
+                                <div class="mt-2 d-none" id="editorBackWrapper" style="width:auto">
+                                    <label class="label-text">Mockup Editor (Back)</label>
+                                    <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="300"></canvas>
                                 </div>
 
-                                <div class="row mt-1">
-                                    <div class="col-12">
-                                        <button type="button" data-repeater-create class="w-100 rounded-3 p-1 text-dark"
-                                                style="border: 2px dashed #CED5D4; background-color: #EBEFEF">
-                                            <i data-feather="plus"></i> Add New Template
-                                        </button>
-                                    </div>
+                                <div class="mt-2 d-none" id="editorNoneWrapper" style="width: auto">
+                                    <label class="label-text">Mockup Editor (General)</label>
+                                    <canvas id="mockupCanvasNone" height="300" style="border:1px solid #ccc;"></canvas>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="form-group mb-2">
+                            <label for="productsSelect" class="label-text mb-1">Product</label>
+                            <select id="productsSelect" name="category_id" class="form-select">
+                                <option value="" disabled selected>Choose product</option>
+                                @foreach($associatedData['products'] as $product)
+                                    <option value="{{ $product->id }}" @selected($product->id == $model->category_id)>
+                                        {{ $product->getTranslation('name', app()->getLocale()) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-2 d-none" id="templatesCardsWrapper">
+                            <label class="form-label mb-1">Choose Template</label>
+
+                            {{-- هنا هتنضاف الكروت بالـ JS --}}
+                            <div id="templatesCardsContainer" class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm"></div>
+                            <input type="hidden" name="template_id" id="selectedTemplateId">
+                            <div id="templatesHiddenContainer"></div>
 
                         </div>
 
-                        <div class="col-md-12">
-                            <div id="fileInputsContainer" class="dynamic-upload-container mb-1"></div>
-                        </div>
-                    </div>
-
-                    <div class="mt-2 d-none" id="editorFrontWrapper">
-                        <label class="label-text">Mockup Editor (Front)</label>
-                        <canvas id="mockupCanvasFront" width="800" height="800" style="border:1px solid #ccc;"></canvas>
-                    </div>
-
-                    <div class="mt-2 d-none" id="editorBackWrapper">
-                        <label class="label-text">Mockup Editor (Back)</label>
-                        <canvas id="mockupCanvasBack" width="800" height="800" style="border:1px solid #ccc;"></canvas>
-                    </div>
-
-                    <div class="mt-2 d-none" id="editorNoneWrapper">
-                        <label class="label-text">Mockup Editor (General)</label>
-                        <canvas id="mockupCanvasNone" width="800" height="800" style="border:1px solid #ccc;"></canvas>
-                    </div>
-                    <div class="d-flex justify-content-end mt-2 ">
-                        <button type="button"
-                                class="btn btn-sm btn-primary d-none"
-                                id="saveTemplatePositionsBtn">
-                            Save Template Positions
-                        </button>
                     </div>
 
                     <div class="mb-2">
                         <label class="label-text mb-1 d-block">Colors</label>
                         <div class="d-flex flex-wrap align-items-center gap-1">
-                            <button type="button" id="openColorPicker"
-                                    class="gradient-picker-trigger border"></button>
+                            <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
 
-                            <span id="selected-colors"
-                                  class="d-flex gap-1 flex-wrap align-items-center"></span>
+                            <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>
                         </div>
                         <div id="colorsInputContainer"></div>
                     </div>
@@ -258,8 +225,8 @@
                     <div class="modal-footer border-top-0">
                         <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
                             <span class="btn-text">Save Changes</span>
-                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
-                                  role="status" aria-hidden="true"></span>
+                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
+                                  aria-hidden="true"></span>
                         </button>
                     </div>
 
@@ -269,17 +236,6 @@
         @include("modals.templates.template-modal")
     </section>
     <!-- users list ends -->
-    @php
-        $savedImages = [
-            'front_base' => $model->front_base_image_url,
-            'front_mask' => $model->front_mask_image_url,
-            'back_base'  => $model->back_base_image_url,
-            'back_mask'  => $model->back_mask_image_url,
-            'none_base'  => $model->none_base_image_url,
-            'none_mask'  => $model->none_mask_image_url,
-        ];
-
-    @endphp
 @endsection
 
 @section('vendor-script')
@@ -306,115 +262,253 @@
 
 @section('page-script')
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // 1) Initialize canvases once
-            canvasFront = new fabric.Canvas('mockupCanvasFront');
-            canvasBack  = new fabric.Canvas('mockupCanvasBack');
-            canvasNone  = new fabric.Canvas('mockupCanvasNone');
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+        document.addEventListener('DOMContentLoaded', function() {
 
-            toggleCheckboxes();
+            function capitalize(str) {
+                return str.charAt(0).toUpperCase() + str.slice(1);
+            }
 
-            const saved = @json($savedImages);
-
-            const canvasMap = {
-                front: canvasFront,
-                back:  canvasBack,
-                none:  canvasNone,
-            };
-
-            // loop through types
-            ['front','back','none'].forEach(type => {
-                const base = saved[`${type}_base`];
-                const mask = saved[`${type}_mask`];
-
-                if (base) {
-                    // ensure file inputs exist first
-                    const basePreview = document.querySelector(
-                        `#${type}-base-input + .upload-card .preview`
-                    );
-                    if (basePreview) {
-                        basePreview.innerHTML = `
-                        <img src="${base}" class="img-fluid rounded border" style="max-height:120px;">
-                    `;
-                    }
-
-                    const canvas = canvasMap[type];
-                    if (canvas) {
-                        loadBaseImage(canvas, base);
-                        document
-                            .getElementById(
-                                `editor${type.charAt(0).toUpperCase() + type.slice(1)}Wrapper`
-                            )
-                            ?.classList.remove('d-none');
-                    }
+            function preloadFile(type, baseUrl, maskUrl) {
+                const baseInput  = document.getElementById(`${type}-base-input`);
+                const maskInput  = document.getElementById(`${type}-mask-input`);
+                const basePreview = baseInput ? baseInput.closest('.type-block').querySelector('.upload-area[data-input-id="' + type + '-base-input"] .preview') : null;
+                const maskPreview = maskInput ? maskInput.closest('.type-block').querySelector('.upload-area[data-input-id="' + type + '-mask-input"] .preview') : null;
+                if (baseUrl && basePreview) {
+                    basePreview.innerHTML = `<img src="${baseUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
+                    loadBaseImage(window[`canvas${capitalize(type)}`], baseUrl);
+                    document.getElementById(`editor${capitalize(type)}Wrapper`)?.classList.remove('d-none');
                 }
 
-                if (mask) {
-                    const maskPreview = document.querySelector(
-                        `#${type}-mask-input + .upload-card .preview`
-                    );
-                    if (maskPreview) {
-                        maskPreview.innerHTML = `
-                        <img src="${mask}" class="img-fluid rounded border" style="max-height:120px;">
-                    `;
-                    }
+                if (maskUrl && maskPreview) {
+                    maskPreview.innerHTML = `<img src="${maskUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
                 }
-            });
+            }
 
-            // بعد ما الكانفاسات اتعملت، اربط الـ object:modified
-            if (canvasFront) bindCanvasUpdates(canvasFront, "front");
-            if (canvasBack)  bindCanvasUpdates(canvasBack, "back");
-            if (canvasNone)  bindCanvasUpdates(canvasNone, "none");
+            @if($model)
+                @foreach($model->types as $type)
+            (function() {
+                const typeName = "{{ strtolower($type->value->name) }}";
+                const checkbox = document.querySelector(`.type-checkbox[data-type-name="${typeName}"]`);
+
+                if (checkbox && !checkbox.checked) {
+                    checkbox.checked = true;
+                }
+                // Call toggleCheckboxes to render the block
+                toggleCheckboxes();
+                // Wait a tick to ensure the block exists in DOM
+                setTimeout(() => {
+                    preloadFile(
+                        "{{ strtolower($type->value->name) }}",
+                        "{{ $model->{ strtolower($type->value->name) . '_base_image_url' } ?? '' }}",
+                        "{{ $model->{ strtolower($type->value->name) . '_mask_image_url' } ?? '' }}"
+                    );
+                }, 50); // 50ms delay usually enough
+            })();
+            @endforeach
+            @endif
         });
+
     </script>
-
     <script>
-        $(function () {
-            let nextPageUrl = null; // from pagination.next_page_url
+        document.addEventListener('DOMContentLoaded', function () {
+            const $productSelect            = $('#productsSelect');
+            const $templatesWrapper         = $('#templatesCardsWrapper');
+            const $templatesCardsContainer  = $('#templatesCardsContainer');
+            const $selectedTemplateId       = $('#selectedTemplateId');
 
-            // When modal is about to open
-            $('#templateModal').on('show.bs.modal', function () {
-                // 1) Close any open Select2
-                try {
-                    $('.select2-hidden-accessible').each(function () {
-                        if ($(this).data('select2')) {
-                            $(this).select2('close');
-                        }
-                    });
-                } catch (e) {
-                    console.warn('Select2 close error:', e);
+            const $modal            = $('#templateModal');
+            const $modalContainer   = $('#templates-modal-container');
+            const $modalPagination  = $('#templates-modal-pagination');
+
+            const locale = "{{ app()->getLocale() }}";
+
+            // حالة التمبليتس
+            let firstPageTemplates   = [];
+            let nextPageUrl          = null;
+            let currentProductId     = null;
+
+            // =========================
+            // Helpers
+            // =========================
+            function resetTemplatesUI() {
+                $templatesCardsContainer.empty();
+                $templatesWrapper.addClass('d-none');
+                $selectedTemplateId.val('');
+                firstPageTemplates = [];
+                nextPageUrl        = null;
+
+                $modalContainer.empty();
+                $modalPagination.empty();
+            }
+
+            function buildTemplateInnerCard(tpl) {
+                const id   = tpl.id;
+                const name = typeof tpl.name === 'object'
+                    ? (tpl.name[locale] ?? Object.values(tpl.name)[0])
+                    : (tpl.name || ('Template #' + id));
+                console.log(tpl.types,tpl.types.includes(type))
+                const front =  tpl.source_design_svg || '';
+                const none = tpl.source_design_svg || '';
+                const back  = tpl.back_base64_preview_image || '';
+                const img   = front || back || "{{ asset('images/placeholder.svg') }}";
+
+                return `
+                <div class="template-card h-100"
+                     data-id="${id}"
+                     data-front="${front}"
+                     data-back="${back}"
+                     data-none="${none}"
+
+>
+                    <div class="card rounded-3 shadow-sm" style="border:1px solid #24B094;">
+                        <div class="d-flex justify-content-center align-items-center"
+                             style="background-color:#F4F6F6;height:200px;border-radius:12px;padding:10px;">
+                            <img
+                                src="${img}"
+                                class="mx-auto d-block"
+                                style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:5px;"
+                                alt="${name}">
+                        </div>
+
+                        <div class="card-body py-2">
+                            <h6 class="card-title mb-0 text-truncate fs-5">${name}</h6>
+                        </div>
+
+                        <div class="d-flex gap-1 px-1 pb-2">
+                            <button type="button"
+                                    class="btn btn-sm btn-primary w-100 js-show-on-mockup">
+                                Show on Mockup
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-primary w-100 js-save-positions">
+                                Save Positions
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            }
+
+            // =========================
+            // Cards (أول 3 بس)
+            // =========================
+            function renderTemplateCards(templates) {
+                $templatesCardsContainer.empty();
+
+                if (!templates.length) {
+                    $templatesCardsContainer.append(`
+                    <div class="col-12 text-center text-muted py-2">
+                        No templates found
+                    </div>
+                `);
+                    return;
                 }
 
-                // 2) Load first page of remaining templates
-                loadTemplatesFirstPage();
-            });
+                const maxInline = 3;
+                const visible   = templates.slice(0, maxInline);
 
-            function getFilters() {
-                // same mapping you used in loadTemplates()
+                visible.forEach(function (tpl) {
+                    const cardHtml = `
+                    <div class="col-12 col-md-4 col-lg-3">
+                        ${buildTemplateInnerCard(tpl)}
+                    </div>
+                `;
+                    $templatesCardsContainer.append(cardHtml);
+                });
+
+                // لو عندنا أكتر من 3 → زر Show Remaining
+                if (templates.length > maxInline) {
+                    const showMoreHtml = `
+                    <div class="col-12 mt-2">
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-primary  js-open-templates-modal"
+                        >
+                            Show more Templates
+                        </button>
+                    </div>
+                `;
+                    $templatesCardsContainer.append(showMoreHtml);
+                }
+
+                $templatesWrapper.removeClass('d-none');
+            }
+
+            // =========================
+            // Modal render
+            // =========================
+            function renderModalTemplates(templates, append = false) {
+                if (!append) {
+                    $modalContainer.empty();
+                }
+
+                if (!templates.length && !append) {
+                    $modalContainer.html(`
+                    <div class="col-12 text-center text-muted py-3">
+                        No templates found
+                    </div>
+                `);
+                    return;
+                }
+
+                templates.forEach(function (tpl) {
+                    const cardHtml = `
+                    <div class="col-6 col-md-4 mb-2">
+                        ${buildTemplateInnerCard(tpl)}
+                    </div>
+                `;
+                    $modalContainer.append(cardHtml);
+                });
+            }
+
+            function renderModalPagination() {
+                $modalPagination.empty();
+
+                if (nextPageUrl) {
+                    $modalPagination.html(`
+                    <button
+                        id="templates-modal-load-more"
+                        type="button"
+                        class="btn btn-sm btn-outline-primary"
+                    >
+                        Load More
+                    </button>
+                `);
+                }
+            }
+
+            // =========================
+            // Fetch templates (API)
+            // =========================
+            function getSelectedTypesForRequest() {
                 const typeMap = { front: 1, back: 2, none: 3 };
 
-                // product from #productsSelect
-                const productId = $('#productsSelect').val() || null;
-
-                // types from checkboxes
-                const selectedTypes = $('.type-checkbox:checked')
+                return $('.type-checkbox:checked')
                     .map(function () {
                         const typeName = $(this).data('typeName'); // front / back / none
                         return typeMap[typeName];
                     })
-                    .get(); // => [1, 2] for example
-
-                return { productId, selectedTypes };
+                    .get(); // → [1, 2] مثلاً
             }
 
-            function loadTemplatesFirstPage() {
-                const {productId, selectedTypes} = getFilters();
+            function fetchTemplatesForProduct(productId) {
+                if (!productId) {
+                    resetTemplatesUI();
+                    return;
+                }
 
-                $('#templates-modal-container').html(
-                    '<div class="col-12 text-center py-3">Loading...</div>'
-                );
-                $('#templates-modal-pagination').empty();
-                nextPageUrl = null;
+                resetTemplatesUI();
+                currentProductId = productId;
+
+                $templatesCardsContainer.html(`
+                <div class="col-12 text-center py-2">
+                    Loading templates...
+                </div>
+            `);
+                $templatesWrapper.removeClass('d-none');
 
                 $.ajax({
                     url: "{{ route('product-templates.index') }}",
@@ -424,252 +518,283 @@
                         request_type: "api",
                         approach: "without_editor",
                         paginate: true,
-                        has_not_mockups: true,
-                        per_page: 3,
-                        limit: 3,
-                        types: selectedTypes,
-                        page: 1,
+                        has_not_mockups: false,
+                        per_page: 12,
+                        types: getSelectedTypesForRequest(),
                     },
-                    success: function (res) {
-                        renderTemplatesResponse(res, false);
+
+                    success: function (response) {
+                        const data  = response.data ?? {};
+                        const items = data.data ?? [];
+                        const links = data.links ?? {};
+
+                        firstPageTemplates = items;
+                        nextPageUrl        = links.next || null;
+
+                        renderTemplateCards(firstPageTemplates);
                     },
                     error: function (xhr) {
-                        console.error(xhr.responseText || xhr.statusText);
-                        $('#templates-modal-container').html(
-                            '<div class="col-12 text-danger text-center py-3">Error loading templates</div>'
-                        );
+                        console.error("Error loading templates", xhr);
+                        resetTemplatesUI();
                     }
                 });
             }
 
-            // Handle "Load more" click inside modal (delegated)
+            // =========================
+            // Events: Product change
+            // =========================
+            $productSelect.on('change', function () {
+                const productId = $(this).val();
+                fetchTemplatesForProduct(productId);
+            });
+
+            // حالة edit: لو فيه value جاهزة
+            if ($productSelect.val()) {
+                fetchTemplatesForProduct($productSelect.val());
+            }
+
+            // =========================
+            // Show Remaining → افتح المودال
+            // =========================
+            $templatesCardsContainer.on('click', '.js-open-templates-modal', function () {
+                // باقي العناصر من أول صفحة
+                const remaining = firstPageTemplates.slice(3);
+
+                renderModalTemplates(remaining, false);
+                renderModalPagination();
+
+                $modal.modal('show');
+            });
+
+            // =========================
+            // Modal: Load More
+            // =========================
             $(document).on('click', '#templates-modal-load-more', function () {
+                const $btn = $(this);
                 if (!nextPageUrl) return;
 
-                const $btn = $(this);
                 $btn.prop('disabled', true).text('Loading...');
 
                 $.ajax({
                     url: nextPageUrl,
                     method: "GET",
                     success: function (res) {
-                        renderTemplatesResponse(res, true);
+                        const data  = res.data ?? {};
+                        const items = data.data ?? [];
+                        const links = data.links ?? {};
+
+                        if (items.length) {
+                            renderModalTemplates(items, true);
+                        }
+
+                        nextPageUrl = links.next || null;
+
+                        if (nextPageUrl) {
+                            $btn.prop('disabled', false).text('Load More');
+                        } else {
+                            $btn.remove();
+                        }
                     },
                     error: function (xhr) {
-                        console.error(xhr.responseText || xhr.statusText);
+                        console.error("Error loading more templates", xhr);
                         $btn.prop('disabled', false).text('Load More');
                     }
                 });
             });
 
-            function renderTemplatesResponse(res, append) {
-                const templates  = res.data.data || [];
-                const pagination = res.data.links || {};
+            // =========================
+            // Show on Mockup (cards + modal)
+            // =========================
 
-                if (!append) {
-                    $('#templates-modal-container').empty();
+            $(document).on('click', '.js-show-on-mockup', function () {
+                const $cardWrapper = $(this).closest('.template-card');
+                const id    = $cardWrapper.data('id');
+                const front = $cardWrapper.data('front');
+                const back  = $cardWrapper.data('back');
+                const none  = $cardWrapper.data('none');
+
+                // highlight selected card
+                $('#templatesCardsContainer').find('.template-card .card')
+                    .removeClass('border-primary shadow-lg')
+                    .css('border-color', '#24B094');
+
+                $cardWrapper.find('.card')
+                    .addClass('border-primary shadow-lg')
+                    .css('border-color', '#0d6efd');
+
+                // store template_id
+                $('#selectedTemplateId').val(id);
+
+                // find saved template positions from $model->templates
+                const templatesData = @json($model->templates ?? []);
+                const savedTemplate = templatesData.find(t => t.id === id);
+
+                // FRONT
+                if (front) {
+                    loadAndBind(window.canvasFront, front, 'front', savedTemplate?.pivot.positions.front_x ? savedTemplate : null);
+                    document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
                 }
 
-                if (!templates.length && !append) {
-                    $('#templates-modal-container').html(
-                        '<div class="col-12 text-center text-muted py-3">No templates found</div>'
-                    );
-                } else {
-                    templates.forEach(function (tpl) {
-                        const img   = tpl.source_design_svg || tpl.back_base64_preview_image || '';
-                        const front = tpl.source_design_svg || '';
-                        const back  = tpl.back_base64_preview_image || '';
+                // BACK
+                if (back) {
+                    loadAndBind(window.canvasBack, back, 'back', savedTemplate?.pivot.positions.back_x ? savedTemplate : null);
+                    document.getElementById('editorBackWrapper')?.classList.remove('d-none');
+                }
+                // NONE
+                if (none) {
+                    console.log("Ds")
+                    loadAndBind(window.canvasNone, none, 'none', savedTemplate?.pivot.positions.none_x ? savedTemplate : null);
+                    document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
+                }
 
-                        const html = `
-    <div class="col-6 col-md-4 mb-2">
-        <button
-            type="button"
-            class="btn w-100 p-0 border-0 template-item-modal show-template-canvas"
-            data-id="${tpl.id}"
-            data-name="${tpl.name || ''}"
-            data-image="${img}"
-            data-front="${front}"
-            data-back="${back}"
-        >
-            <div class="card h-100">
-                ${img
-                            ? `<img src="${img}" class="card-img-top" style="height:140px;object-fit:cover;" alt="${tpl.name || ''}">`
-                            : `<div class="d-flex align-items-center justify-content-center bg-light" style="height:140px;">
-                           <span class="text-muted small">No image</span>
-                       </div>`
+                // close modal if inside
+                if ($(this).closest('#templateModal').length) {
+                    $('#templateModal').modal('hide');
+                }
+            });
+
+// =========================
+// Save Positions (cards + modal)
+// =========================
+            function buildHiddenTemplateInputs() {
+                const container = document.getElementById("templatesHiddenContainer");
+                container.innerHTML = "";
+
+                const previousTemplates = @json($model->templates ?? []);
+                const templateId = $('#selectedTemplateId').val();
+
+                let html = '';
+
+                // Include all previous templates
+                previousTemplates.forEach((tpl, index) => {
+                    html += `<input type="hidden" name="templates[${index}][template_id]" value="${tpl.id}">`;
+
+                    ['front', 'back', 'none'].forEach(side => {
+                        if (tpl.pivot?.positions[side + '_x'] != null) {
+                            console.log("kmk")
+                            html += `<input type="hidden" name="templates[${index}][${side}_x]" value="${tpl.pivot?.positions[side + '_x']}">`;
+                            html += `<input type="hidden" name="templates[${index}][${side}_y]" value="${tpl.pivot?.positions[side + '_y']}">`;
+                            html += `<input type="hidden" name="templates[${index}][${side}_width]" value="${tpl.pivot?.positions[side + '_width']}">`;
+                            html += `<input type="hidden" name="templates[${index}][${side}_height]" value="${tpl.pivot?.positions[side + '_height']}">`;
+                            html += `<input type="hidden" name="templates[${index}][${side}_angle]" value="${tpl.pivot?.positions[side + '_angle']}">`;
                         }
-                <div class="card-body py-2 px-2">
-                    <div class="small fw-semibold text-truncate mb-1">
-                        ${tpl.name || ''}
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center small text-muted">
-                        <span>${tpl.type || ''}</span>
-                        ${tpl.rating ? `<span>${'★'.repeat(tpl.rating)}</span>` : ''}
-                    </div>
-                </div>
-            </div>
-        </button>
-    </div>
-`;
+                    });
+                });
 
-                        $('#templates-modal-container').append(html);
+                // Add or update the currently selected template
+                if (templateId) {
+                    let index = previousTemplates.length;
+                    html += `<input type="hidden" name="templates[${index}][template_id]" value="${templateId}">`;
+
+                    ['front', 'back', 'none'].forEach(side => {
+                        const obj = window['canvas' + capitalize(side)]?.getObjects()?.find(o => o.templateType === side);
+                        if (obj) {
+                            const meta = window['canvas' + capitalize(side)].__mockupMeta;
+                            const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
+                            html += `<input type="hidden" name="templates[${index}][${side}_x]" value="${xPct}">`;
+                            html += `<input type="hidden" name="templates[${index}][${side}_y]" value="${yPct}">`;
+                            html += `<input type="hidden" name="templates[${index}][${side}_width]" value="${wPct}">`;
+                            html += `<input type="hidden" name="templates[${index}][${side}_height]" value="${hPct}">`;
+                            html += `<input type="hidden" name="templates[${index}][${side}_angle]" value="${angle}">`;
+                        }
                     });
                 }
 
-                nextPageUrl = pagination.next || null;
-
-                if (nextPageUrl) {
-                    $('#templates-modal-pagination').html(`
-            <button
-                id="templates-modal-load-more"
-                type="button"
-                class="btn btn-sm btn-outline-primary"
-            >
-                Load More
-            </button>
-        `);
-                } else {
-                    if (!append) {
-                        $('#templates-modal-pagination').empty();
-                    } else {
-                        $('#templates-modal-pagination').html(`
-                <div class="text-muted small">No more templates</div>
-            `);
-                    }
-                }
+                container.innerHTML = html;
             }
 
-            // Optional: handle click on template in modal -> set value somewhere + close modal
-            // Click on template card inside modal
-            $(document).on('click', '.template-item-modal', function () {
-                const id    = $(this).data('id');
-                const name  = $(this).data('name');
-                const front = $(this).data('front');
-                const back  = $(this).data('back');
+            function calculateObjectPercents(obj, meta) {
+                const center = obj.getCenterPoint();
+                const wReal = obj.width * obj.scaleX;
+                const hReal = obj.height * obj.scaleY;
 
-                // 1) الـ select اللي فتح المودال
-                const select = $('#templateModal').data('origin-select');
-                if (!select) return;
+                return {
+                    xPct: ((center.x - meta.offsetLeft) / meta.scaledWidth).toFixed(6),
+                    yPct: ((center.y - meta.offsetTop)  / meta.scaledHeight).toFixed(6),
+                    wPct: (wReal / meta.scaledWidth).toFixed(6),
+                    hPct: (hReal / meta.scaledHeight).toFixed(6),
+                    angle: obj.angle || 0
+                };
+            }
 
-                const $select = $(select);
 
-                // 2) لو الـ option مش موجودة، نضيفها
-                let $option = $select.find(`option[value="${id}"]`);
-                if (!$option.length) {
-                    $option = $('<option>')
-                        .val(id)
-                        .text(name || '')
-                        .attr('data-image', front || '')
-                        .attr('data-back-image', back || '');
-                    $select.append($option);
+            $(document).on('click', '.js-save-positions', function () {
+                if (typeof saveAllTemplatePositions === 'function') {
+                    saveAllTemplatePositions();
                 }
 
-                // 3) نخليها selected
-                $select.val(id).trigger('change');
+                buildHiddenTemplateInputs();
 
-                // 4) تحديث واجهة Select2
-                if ($select.data('select2')) {
-                    $select.trigger('change.select2');
+                if (window.Toastify) {
+                    Toastify({
+                        text: "Positions saved successfully",
+                        duration: 1500,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#28a745",
+                        close: true,
+                    }).showToast();
+                } else {
+                    alert('Positions saved successfully');
                 }
 
-                // 5) (اختياري) إغلاق المودال
-                const modalEl = document.getElementById('templateModal');
-                const modal   = bootstrap.Modal.getInstance(modalEl);
-                if (modal) modal.hide();
-
-                // 6) (اختياري) حطّ التصميم على الكانفس لو عايز
-                if (front) loadAndBind(canvasFront, front, "front", null);
-                if (back)  loadAndBind(canvasBack,  back,  "back",  null);
+                // 🔴 لو الزر جوّه المودال → اقفل المودال
+                if ($(this).closest('#templateModal').length) {
+                    $('#templateModal').modal('hide');
+                }
             });
-
 
         });
     </script>
 
+
     <script>
-        // =========================
-        // SELECT2 FORMATTER
-        // =========================
-        function formatTemplateOption(option) {
-            if (!option.id) return option.text;
-
-            const $option = $(option.element);
-            const front = $option.data("image");
-            const back = $option.data("back-image");
-
-            return $(`
-            <div style="display:flex;align-items:center;">
-                ${front ? `<img src="${front}" style="width:24px;height:24px;border-radius:50%;margin-right:5px;">` : ""}
-                ${back ? `<img src="${back}"  style="width:24px;height:24px;border-radius:50%;margin-right:5px;">` : ""}
-                <span>${option.text}</span>
-            </div>
-        `);
-        }
-        function injectLoadMoreButton($select) {
-            let dropdown = $(".select2-results");
-
-            // avoid duplicates
-            dropdown.find(".load-all-wrapper").remove();
-
-            dropdown.append(`
-        <div class="load-all-wrapper text-center py-1 border-top">
-            <button type="button"
-                class="btn btn-sm btn-outline-primary load-all-btn">
-                Show Remaining Templates
-            </button>
-        </div>
-    `);
-
-            dropdown.find(".load-all-btn").off("click.loadAll").on("click.loadAll", function (e) {
-                e.preventDefault();
-
-                // ✅ هنا نخزن الـ select الحقيقي مباشرة
-                $('#templateModal').data('origin-select', $select[0]);
-
-                // افتح المودال يدويًا
-                $('#templateModal').modal('show');
-            });
-        }
-
-        // =========================
-        // INIT SELECT2
-        // =========================
-        function initTemplateSelect(select) {
-            const $select = $(select);
-
-            if ($select.hasClass("select2-hidden-accessible")) {
-                $select.select2("destroy");
-            }
-
-            $select.select2({
-                templateResult: formatTemplateOption,
-                templateSelection: formatTemplateOption,
-                minimumResultsForSearch: -1
-            });
-            $select.on("select2:open", function () {
-                injectLoadMoreButton($select);
-            });
-        }
-
         // =========================
         // CANVAS HELPER FUNCTIONS
         // =========================
-        let canvasFront = new fabric.Canvas('mockupCanvasFront');
-        let canvasBack = new fabric.Canvas('mockupCanvasBack');
-        let canvasNone = new fabric.Canvas('mockupCanvasNone');
+        window.canvasFront = new fabric.Canvas('mockupCanvasFront');
+        window.canvasBack  = new fabric.Canvas('mockupCanvasBack');
+        window.canvasNone  = new fabric.Canvas('mockupCanvasNone');
 
         function loadBaseImage(canvas, baseUrl) {
-
             fabric.Image.fromURL(baseUrl, function (img) {
-                img.set({selectable: false});
-                canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-                    scaleX: canvas.width / img.width,
-                    scaleY: canvas.height / img.height
-                });
+                img.set({ selectable: false, evented: false });
+
+                const canvasW = canvas.getWidth();
+                const canvasH = canvas.getHeight();
+
+                const scale   = Math.min(canvasW / img.width, canvasH / img.height);
+                const scaledW = img.width * scale;
+                const scaledH = img.height * scale;
+
+                const left = (canvasW - scaledW) / 2;
+                const top  = (canvasH - scaledH) / 2;
+
+                canvas.__mockupMeta = {
+                    originalWidth:  img.width,
+                    originalHeight: img.height,
+                    scaledWidth:    scaledW,
+                    scaledHeight:   scaledH,
+                    offsetLeft:     left,
+                    offsetTop:      top
+                };
+
+                canvas.setBackgroundImage(
+                    img,
+                    canvas.renderAll.bind(canvas),
+                    {
+                        scaleX:  scale,
+                        scaleY:  scale,
+                        left:    left,
+                        top:     top,
+                        originX: 'left',
+                        originY: 'top'
+                    }
+                );
             });
         }
+
         function clearTemplateDesigns(canvas, type) {
-            // Remove only images that belong to this template type
             const objects = canvas.getObjects();
             objects.forEach(obj => {
                 if (obj.templateType === type) {
@@ -678,129 +803,194 @@
             });
             canvas.renderAll();
         }
-        function syncTemplateInputs(obj, type) {
-            if (!obj?.templateItem) return;
-            const row = obj.templateItem;
 
-            const xInput      = row.querySelector(`.template_x.${type}`);
-            const yInput      = row.querySelector(`.template_y.${type}`);
-            const widthInput  = row.querySelector(`.template_width.${type}`);
-            const heightInput = row.querySelector(`.template_height.${type}`);
-            const angleInput  = row.querySelector(`.template_angle.${type}`);
+        function syncTemplateInputs(obj, type) {
+            const wrapper = document.getElementById('templatesCardsWrapper');
+            if (!wrapper) return;
+
+            const canvas = obj.canvas;
+            const meta   = canvas && canvas.__mockupMeta;
+            if (!meta) return;
+
+            const xInput      = wrapper.querySelector(`.template_x.${type}`);
+            const yInput      = wrapper.querySelector(`.template_y.${type}`);
+            const widthInput  = wrapper.querySelector(`.template_width.${type}`);
+            const heightInput = wrapper.querySelector(`.template_height.${type}`);
+            const angleInput  = wrapper.querySelector(`.template_angle.${type}`);
+
             if (!xInput || !yInput || !widthInput || !heightInput || !angleInput) return;
-            xInput.value      = obj.left;
-            yInput.value      = obj.top;
-            widthInput.value  = obj.width * obj.scaleX;
-            heightInput.value = obj.height * obj.scaleY;
+
+            const center = obj.getCenterPoint();
+            const wReal  = obj.width  * obj.scaleX;
+            const hReal  = obj.height * obj.scaleY;
+
+            const xPct = (center.x - meta.offsetLeft) / meta.scaledWidth;
+            const yPct = (center.y - meta.offsetTop)  / meta.scaledHeight;
+            const wPct = wReal / meta.scaledWidth;
+            const hPct = hReal / meta.scaledHeight;
+
+            xInput.value      = xPct.toFixed(6);
+            yInput.value      = yPct.toFixed(6);
+            widthInput.value  = wPct.toFixed(6);
+            heightInput.value = hPct.toFixed(6);
             angleInput.value  = obj.angle || 0;
         }
 
+        function clearTemplateInputsForObject(type) {
+            const wrapper = document.getElementById('templatesCardsWrapper');
+            if (!wrapper) return;
 
-        function loadAndBind(canvas, designUrl, type, templateItem) {
+            const xInput      = wrapper.querySelector(`.template_x.${type}`);
+            const yInput      = wrapper.querySelector(`.template_y.${type}`);
+            const widthInput  = wrapper.querySelector(`.template_width.${type}`);
+            const heightInput = wrapper.querySelector(`.template_height.${type}`);
+            const angleInput  = wrapper.querySelector(`.template_angle.${type}`);
+
+            [xInput, yInput, widthInput, heightInput, angleInput].forEach(inp => {
+                if (inp) inp.value = '';
+            });
+        }
+
+        function renderDeleteIcon(ctx, left, top) {
+            const size = 18;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(left, top, size / 2, 0, Math.PI * 2, false);
+            ctx.fillStyle = "#ff4d4f";
+            ctx.fill();
+
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(left - 4, top - 4);
+            ctx.lineTo(left + 4, top + 4);
+            ctx.moveTo(left + 4, top - 4);
+            ctx.lineTo(left - 4, top + 4);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function addDeleteControl(obj, type) {
+            obj.controls.deleteControl = new fabric.Control({
+                x: 0.5,
+                y: -0.5,
+                offsetX: 0,
+                offsetY: 0,
+                cursorStyle: 'pointer',
+                cornerSize: 24,
+                mouseUpHandler: function (eventData, transform) {
+                    const target = transform.target;
+                    const canvas = target.canvas;
+
+                    clearTemplateInputsForObject(type);
+
+                    canvas.remove(target);
+                    canvas.requestRenderAll();
+
+                    return true;
+                },
+                render: renderDeleteIcon
+            });
+        }
+
+        function applyDefaultPlacement(img, canvas, meta) {
+            const defaultWidthRatio = 0.35;
+
+            if (meta) {
+                const targetW = meta.scaledWidth * defaultWidthRatio;
+                const scale   = targetW / img.width;
+
+                img.scaleX = img.scaleY = scale;
+
+                img.left = meta.offsetLeft + meta.scaledWidth / 2;
+                img.top  = meta.offsetTop + meta.scaledHeight * 0.35;
+            } else {
+                const canvasW = canvas.getWidth();
+                const canvasH = canvas.getHeight();
+                const targetW = canvasW * defaultWidthRatio;
+                const scale   = targetW / img.width;
+
+                img.scaleX = img.scaleY = scale;
+                img.left   = canvasW / 2;
+                img.top    = canvasH / 2;
+            }
+        }
+
+        function loadAndBind(canvas, designUrl, type, savedPositions) {
             clearTemplateDesigns(canvas, type);
 
             fabric.Image.fromURL(designUrl, function (img) {
-                // default placement (fallback)
                 img.set({
-                    left: 150,
-                    top: 150,
-                    scaleX: 0.5,
-                    scaleY: 0.5,
+                    originX: 'center',
+                    originY: 'center',
                     transparentCorners: false
                 });
 
-                img.templateItem = templateItem || null;
                 img.templateType = type;
 
-                // ✅ If this design belongs to a repeater row, try to restore saved values
-                if (templateItem) {
-                    const xInput      = templateItem.querySelector(`.template_x.${type}`);
-                    const yInput      = templateItem.querySelector(`.template_y.${type}`);
-                    const widthInput  = templateItem.querySelector(`.template_width.${type}`);
-                    const heightInput = templateItem.querySelector(`.template_height.${type}`);
-                    const angleInput  = templateItem.querySelector(`.template_angle.${type}`);
+                const meta = canvas.__mockupMeta;
 
-                    if (xInput && yInput && widthInput && heightInput && angleInput) {
-                        const savedLeft   = parseFloat(xInput.value);
-                        const savedTop    = parseFloat(yInput.value);
-                        const savedWidth  = parseFloat(widthInput.value);
-                        const savedHeight = parseFloat(heightInput.value);
-                        const savedAngle  = parseFloat(angleInput.value);
-                        console.log("LEFT RAW:", xInput?.value);
-                        console.log("TOP RAW:", yInput?.value);
-                        console.log("WIDTH RAW:", widthInput?.value);
-                        console.log("HEIGHT RAW:", heightInput?.value);
-                        console.log("ANGLE RAW:", angleInput?.value);
+                if (savedPositions && meta) {
+                    const prefix = type + '_';
 
+                    // center position in canvas
+                    const xPct = parseFloat(savedPositions[prefix + 'x'] ?? 0.5);
+                    const yPct = parseFloat(savedPositions[prefix + 'y'] ?? 0.5);
+                    const wPct = parseFloat(savedPositions[prefix + 'width'] ?? 0.4);
+                    const hPct = parseFloat(savedPositions[prefix + 'height'] ?? 0.4);
+                    const angle = parseFloat(savedPositions[prefix + 'angle'] ?? 0);
 
-                        if (!isNaN(savedLeft))  img.left  = savedLeft;
-                        if (!isNaN(savedTop))   img.top   = savedTop;
-                        if (!isNaN(savedAngle)) img.angle = savedAngle;
+                    // set center position
+                    img.left = meta.offsetLeft + meta.scaledWidth * xPct;
+                    img.top  = meta.offsetTop  + meta.scaledHeight * yPct;
 
-                        if (!isNaN(savedWidth) && img.width) {
-                            img.scaleX = savedWidth / img.width;
-                            console.log(savedWidth)
-                        }
-                        if (!isNaN(savedHeight) && img.height) {
-                            img.scaleY = savedHeight / img.height;
-                        }
-                    }
+                    // scale according to width percentage
+                    const scaleX = (wPct * meta.scaledWidth) / img.width;
+                    const scaleY = (hPct * meta.scaledHeight) / img.height;
+                    img.scaleX = img.scaleY = Math.min(scaleX, scaleY); // keep square scale, optional
+
+                    img.angle = angle;
+                } else {
+                    // default placement if no saved position
+                    applyDefaultPlacement(img, canvas, meta);
                 }
 
-
+                addDeleteControl(img, type);
                 canvas.add(img);
                 canvas.setActiveObject(img);
                 canvas.renderAll();
 
-                // أول مزامنة للحقول بعد اللود
                 syncTemplateInputs(img, type);
             });
         }
+
         function saveAllTemplatePositions() {
-            // front
-            if (canvasFront) {
-                canvasFront.getObjects().forEach(obj => {
+            if (window.canvasFront) {
+                window.canvasFront.getObjects().forEach(obj => {
                     if (obj.templateType === 'front') {
                         syncTemplateInputs(obj, 'front');
                     }
                 });
             }
 
-            // back
-            if (canvasBack) {
-                canvasBack.getObjects().forEach(obj => {
+            if (window.canvasBack) {
+                window.canvasBack.getObjects().forEach(obj => {
                     if (obj.templateType === 'back') {
                         syncTemplateInputs(obj, 'back');
                     }
                 });
             }
 
-            // none
-            if (canvasNone) {
-                canvasNone.getObjects().forEach(obj => {
+            if (window.canvasNone) {
+                window.canvasNone.getObjects().forEach(obj => {
                     if (obj.templateType === 'none') {
                         syncTemplateInputs(obj, 'none');
                     }
                 });
             }
         }
-
-        // زر الحفظ في المحرر
-        document.addEventListener('DOMContentLoaded', function () {
-            const btn = document.getElementById('saveTemplatePositionsBtn');
-            if (!btn) return;
-
-            btn.addEventListener('click', function () {
-                saveAllTemplatePositions();
-
-                // اختياري: Toast أو Alert بسيط
-                if (window.toastr) {
-                    toastr.success('تم حفظ مواضع التصميم في الحقول بنجاح');
-                } else {
-                    console.log('Template positions saved.');
-                }
-            });
-        });
 
         function bindCanvasUpdates(canvas, type) {
             canvas.on('object:modified', function (e) {
@@ -809,203 +999,51 @@
             });
         }
 
-
-        bindCanvasUpdates(canvasFront, "front");
-        bindCanvasUpdates(canvasBack, "back");
-        bindCanvasUpdates(canvasNone, "none");
-    </script>
-    <script>
-        // Global handler for all ".show-template-canvas" clicks
-        document.addEventListener('click', function (e) {
-            const btn = e.target.closest('.show-template-canvas');
-            if (!btn) return;
-
-            // ================================
-            // CASE 1: inside repeater row
-            // ================================
-            // CASE 1: inside repeater row
-            const row = btn.closest(".template-item");
-            if (row) {
-                const select = row.querySelector(".template-select");
-                if (!select) return;
-
-                const option = select.selectedOptions[0];
-                if (!option) return;
-
-                const front = option.dataset.image;
-                const back  = option.dataset.backImage;
-
-                if (front) loadAndBind(canvasFront, front, "front", row);
-                if (back)  loadAndBind(canvasBack,  back,  "back",  row);
-
-                return;
-            }
-
-
-            // ================================
-            // CASE 2: inside modal drawer
-            // ================================
-            const modalItem = btn.closest(".template-item-modal");
-            if (modalItem) {
-                const front = modalItem.dataset.front;
-                const back  = modalItem.dataset.back;
-
-                if (front) {
-                    loadAndBind(canvasFront, front, "front", null);
-                    document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
-                }
-
-                if (back) {
-                    loadAndBind(canvasBack, back, "back", null);
-                    document.getElementById('editorBackWrapper')?.classList.remove('d-none');
-                }
-
-                const modalEl = document.getElementById('templateModal');
-                const modal   = bootstrap.Modal.getInstance(modalEl);
-                if (modal) modal.hide();
-
-                return;
-            }
-        });
+        bindCanvasUpdates(window.canvasFront, "front");
+        bindCanvasUpdates(window.canvasBack, "back");
+        bindCanvasUpdates(window.canvasNone, "none");
     </script>
 
     <script>
-        const locale = "{{ app()->getLocale() }}";
-
-        window.updateTemplateVisibility = function () {
-            const productSelect = document.getElementById('productsSelect');
-            const templateWrapper = document.getElementById('template-wrapper');
-
-            const selectedTypes = [...document.querySelectorAll('.type-checkbox')]
-                .filter(cb => cb.checked)
-                .map(cb => cb.dataset.typeName);
-
-            templateWrapper.classList.add("d-none");
-            if (!productSelect.value || selectedTypes.length === 0) return;
-            templateWrapper.classList.remove("d-none");
-        };
-
-        window.loadTemplates = function () {
-            let productId = document.getElementById('productsSelect')?.value;
-            let typeMap = {front: 1, back: 2, none: 3};
-            let selectedTypes = [...document.querySelectorAll('.type-checkbox')]
-                .filter(cb => cb.checked)
-                .map(cb => typeMap[cb.dataset.typeName]);
-
-            if (!productId || selectedTypes.length === 0) return;
-
-            $.ajax({
-                url: "{{ route('product-templates.index') }}",
-                method: "GET",
-                data: {
-                    product_without_category_id: productId,
-                    request_type: "api",
-                    approach: "without_editor",
-                    paginate: true,
-                    has_not_mockups: true,
-                    per_page: 3,
-                    limit: 3,
-                    types: selectedTypes,
-                },
-                success: function (response) {
-
-                    const templates = Array.isArray(response) ? response : (response.data.data ?? []);
-
-                    document.querySelectorAll('.template-select').forEach(select => {
-
-                        const savedSelectedId = select.dataset.selectedId;  // 🟢 saved template ID
-                        const currentValue = select.value;                  // 🟢 may also have a value
-
-                        // Destroy old Select2
-                        if ($(select).data('select2')) {
-                            $(select).select2("destroy");
-                        }
-
-                        // Clear ONLY if we are not editing existing
-                        select.innerHTML = `<option value="" disabled ${!savedSelectedId ? 'selected' : ''}>Choose template</option>`;
-                        templates.forEach(t => {
-                            const option = document.createElement("option");
-                            const label = typeof t.name === "object"
-                                ? (t.name[locale] ?? Object.values(t.name)[0])
-                                : t.name;
-
-                            option.value = t.id;
-                            option.textContent = label;
-                            option.dataset.image = t.source_design_svg;
-                            option.dataset.backImage = t.back_base64_preview_image;
-
-
-                            if (savedSelectedId && savedSelectedId === t.id) {
-                                option.selected = true;
-                            }
-
-                            select.appendChild(option);
-                        });
-
-                        // Re-init Select2
-                        initTemplateSelect(select);
-                    });
-
-                },
-                error: function (xhr) {
-                    console.error("Error loading templates", xhr);
-                }
-            });
-        };
-
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const productSelect = document.getElementById("productsSelect");
-            productSelect?.addEventListener("change", () => {
-                updateTemplateVisibility();
-                loadTemplates();
-            });
-
-            document.querySelectorAll(".type-checkbox").forEach(cb =>
-                cb.addEventListener("change", () => {
-                    updateTemplateVisibility();
-                    loadTemplates();
-                })
-            );
-
-            updateTemplateVisibility();
-            // loadTemplates();
-
-            // Repeater
-            const $templateRepeater = $('.template-repeater');
-            if ($templateRepeater.length && $.fn.repeater) {
-                $templateRepeater.repeater({
-                    initEmpty: true,
-                    show: function () {
-                        $(this).slideDown();
-                        if (window.feather) feather.replace();
-                        window.updateTemplateVisibility();
-                        window.loadTemplates();
-                    },
-                    hide: function (deleteElement) {
-                        $(this).slideUp(deleteElement);
-                    }
-                });
-                $templateRepeater.find('[data-repeater-create]').first().click();
-            }
-        });
-
-        // Repeater new row click: initialize Select2
-        document.addEventListener("click", function (e) {
-            if (!e.target.matches("[data-repeater-create]")) return;
-            setTimeout(() => {
-                document.querySelectorAll(".template-select").forEach(select => {
-                    if (!$(select).hasClass("select2-hidden-accessible")) {
-                        initTemplateSelect(select);
-                    }
-                });
-            }, 50);
-        });
-    </script>
-    <script>
-        const checkboxes = document.querySelectorAll('.type-checkbox');
+        // =========================
+        // TYPE CHECKBOXES + UPLOAD AREAS
+        // =========================
+        const checkboxes          = document.querySelectorAll('.type-checkbox');
         const fileInputsContainer = document.getElementById('fileInputsContainer');
+        function removeCanvasByType(type) {
+            let canvas = null;
+            let wrapperId = "";
+
+            if (type === "front") {
+                canvas = window.canvasFront;
+                wrapperId = "editorFrontWrapper";
+            } else if (type === "back") {
+                canvas = window.canvasBack;
+                wrapperId = "editorBackWrapper";
+            } else if (type === "none") {
+                canvas = window.canvasNone;
+                wrapperId = "editorNoneWrapper";
+            }
+
+            if (!canvas) return;
+
+            // 1️⃣ Remove all template objects of this type
+            canvas.getObjects().forEach(o => {
+                if (o.templateType === type) canvas.remove(o);
+            });
+
+            // 2️⃣ Remove background image
+            canvas.setBackgroundImage(null, canvas.renderAll.bind(canvas));
+
+            // 3️⃣ Clear saved input fields
+            clearTemplateInputsForObject(type);
+
+            // 4️⃣ Hide canvas wrapper
+            const wrapper = document.getElementById(wrapperId);
+            if (wrapper) wrapper.classList.add("d-none");
+
+            canvas.renderAll();
+        }
 
         function toggleCheckboxes() {
             let selectedTypes = [...checkboxes]
@@ -1015,14 +1053,52 @@
             checkboxes.forEach(cb => {
                 const type = cb.dataset.typeName;
 
-                // enforce front/back vs none rule
                 cb.disabled =
                     (selectedTypes.includes('none') && (type === 'front' || type === 'back')) ||
-                    (selectedTypes.includes('front') || selectedTypes.includes('back')) && type === 'none';
+                    ((selectedTypes.includes('front') || selectedTypes.includes('back')) && type === 'none');
             });
 
-            renderFileInputs(); // ⬅ This now handles removal
+            renderFileInputs();
+            if (window.jQuery) {
+                const $prod = $('#productsSelect');
+                if ($prod.length && $prod.val()) {
+                    $prod.trigger('change');
+                }
+            }
         }
+        function hideCanvasForType(type) {
+            const wrapperIdMap = {
+                front: 'editorFrontWrapper',
+                back:  'editorBackWrapper',
+                none:  'editorNoneWrapper',
+            };
+
+            const canvasMap = {
+                front: window.canvasFront,
+                back:  window.canvasBack,
+                none:  window.canvasNone,
+            };
+
+            // أخفي الـ wrapper
+            const wrapper = document.getElementById(wrapperIdMap[type]);
+            if (wrapper) {
+                wrapper.classList.add('d-none');
+            }
+
+            // امسح الكانفاس (الخلفية + الأوبجكتس)
+            const canvas = canvasMap[type];
+            if (canvas) {
+                canvas.clear();
+                canvas.renderAll();
+                delete canvas.__mockupMeta; // ننسى الـ meta بتاعة الموكاب
+            }
+
+            // صفّر الـ hidden inputs بتاعة النوع ده
+            if (typeof clearTemplateInputsForObject === 'function') {
+                clearTemplateInputsForObject(type);
+            }
+        }
+
 
         function renderFileInputs() {
             if (!fileInputsContainer) return;
@@ -1032,12 +1108,17 @@
                 .map(cb => cb.dataset.typeName);
 
             // -------------------------------
-            // REMOVE blocks for unchecked types
+            // REMOVE blocks + hide canvas for unchecked types
             // -------------------------------
             ['front', 'back', 'none'].forEach(type => {
                 if (!selectedTypes.includes(type)) {
                     const block = document.getElementById(`${type}-file-block`);
                     if (block) block.remove();
+
+                    // ⬅ هنا نخبّي الكانفاس ونفضّيه ونصفّر الـ inputs
+                    if (typeof hideCanvasForType === 'function') {
+                        hideCanvasForType(type);
+                    }
                 }
             });
 
@@ -1050,54 +1131,58 @@
                 const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
 
                 const block = document.createElement('div');
-                block.classList.add('mb-3');
-                block.id = `${type}-file-block`;  // ⬅ Important: uniform ID for removal
+                block.classList.add('type-block');
+                block.id = `${type}-file-block`;
 
                 block.innerHTML = `
-            <label class="form-label label-text">${typeLabel} Base Image</label>
-            <input type="file" name="${type}_base_image" id="${type}-base-input"
-                   class="d-none" accept="image/*">
+            <div class="d-flex justify-content-between gap-4">
+                <div>
+                    <label class="form-label label-text">${typeLabel} Base Image</label>
+                    <input type="file" name="${type}_base_image" id="${type}-base-input"
+                        class="d-none" accept="image/*">
 
-            <div class="upload-card upload-area" data-input-id="${type}-base-input">
-                <div class="upload-content">
-                    <i data-feather="upload" class="mb-2"></i>
-                    <p>${typeLabel} Base Image: Drag file here or click to upload</p>
-                    <div class="preview mt-1"></div>
+                    <div class="upload-card upload-area" data-input-id="${type}-base-input">
+                        <div class="upload-content">
+                            <i data-feather="upload" class="mb-2"></i>
+                            <p>${typeLabel} Base Image: Drag file here or click to upload</p>
+                            <div class="preview mt-1"></div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <label class="form-label label-text mt-2">${typeLabel} Mask Image</label>
-            <input type="file" name="${type}_mask_image" id="${type}-mask-input"
-                   class="d-none" accept="image/*">
+                <div>
+                    <label class="form-label label-text">${typeLabel} Mask Image</label>
+                    <input type="file" name="${type}_mask_image" id="${type}-mask-input"
+                        class="d-none" accept="image/*">
 
-            <div class="upload-card upload-area" data-input-id="${type}-mask-input">
-                <div class="upload-content">
-                    <i data-feather="upload" class="mb-2"></i>
-                    <p>${typeLabel} Mask Image: Drag file here or click to upload</p>
-                    <div class="preview mt-1"></div>
+                    <div class="upload-card upload-area" data-input-id="${type}-mask-input">
+                        <div class="upload-content">
+                            <i data-feather="upload" class="mb-2"></i>
+                            <p>${typeLabel} Mask Image: Drag file here or click to upload</p>
+                            <div class="preview mt-1"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
 
-                fileInputsContainer.appendChild(block);
+                const target = document.getElementById("fixed-block");
+                removeCanvasByType(type);
+                target.before(block);
             });
 
             feather.replace();
             bindUploadAreas();
         }
 
+
         function bindUploadAreas() {
             document.querySelectorAll('.upload-area').forEach(area => {
-                const input = document.getElementById(area.dataset.inputId);
-                const preview = area.querySelector('.preview');
-
-                // 🛑 Remove previous listeners (important!)
                 area.replaceWith(area.cloneNode(true));
             });
 
-            // Re-select after cloning
             document.querySelectorAll('.upload-area').forEach(area => {
-                const input = document.getElementById(area.dataset.inputId);
+                const input   = document.getElementById(area.dataset.inputId);
                 const preview = area.querySelector('.preview');
 
                 area.addEventListener('click', () => input?.click());
@@ -1119,23 +1204,6 @@
             });
         }
 
-        function copyFileToInput(file, inputId) {
-            const clonedInput = document.getElementById(inputId);
-            if (!clonedInput) return;
-
-            const dt = new DataTransfer();
-            dt.items.add(file);
-            clonedInput.files = dt.files;
-
-            // also update preview UI
-            const preview = clonedInput.closest('.upload-area').querySelector('.preview');
-            const reader = new FileReader();
-            reader.onload = e => {
-                preview.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded border" style="max-height:120px;">`;
-            };
-            reader.readAsDataURL(file);
-        }
-
         function handleFiles(files, input, preview) {
             if (!files.length) return;
 
@@ -1144,20 +1212,17 @@
                 const dataUrl = e.target.result;
                 preview.innerHTML = `<img src="${dataUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
 
-                // Load base image into the canvas
                 if (input.name.includes('_base_image')) {
                     if (input.id.startsWith('front')) {
-                        loadBaseImage(canvasFront, dataUrl);
-                        document.getElementById('editorFrontWrapper').classList.remove('d-none');
+                        loadBaseImage(window.canvasFront, dataUrl);
+                        document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
                     } else if (input.id.startsWith('back')) {
-                        loadBaseImage(canvasBack, dataUrl);
-                        document.getElementById('editorBackWrapper').classList.remove('d-none');
+                        loadBaseImage(window.canvasBack, dataUrl);
+                        document.getElementById('editorBackWrapper')?.classList.remove('d-none');
                     } else if (input.id.startsWith('none')) {
-                        loadBaseImage(canvasNone, dataUrl);
-                        document.getElementById('editorNoneWrapper').classList.remove('d-none');
+                        loadBaseImage(window.canvasNone, dataUrl);
+                        document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
                     }
-                    document.getElementById('saveTemplatePositionsBtn').classList.remove('d-none');
-
                 }
             };
             reader.readAsDataURL(files[0]);
@@ -1171,30 +1236,32 @@
     </script>
 
     <script>
+        // =========================
+        // MAIN IMAGE UPLOAD + FORM SUBMIT
+        // =========================
         $(document).ready(function () {
-            handleAjaxFormSubmit("#addMockupForm", {
-                successMessage: "Mockup Created Successfully",
+            handleAjaxFormSubmit("#editMockupForm", {
+                successMessage: "Mockup Updated Successfully",
                 onSuccess: function () {
-                    $('#addMockupModal').modal('hide');
-                    location.reload();
+                    location.replace('/mockups');
                 }
             });
         });
 
         $(document).ready(function () {
-            let input = $('#product-image-main');
-            let uploadArea = $('#upload-area');
-            let progress = $('#upload-progress');
-            let progressBar = $('.progress-bar');
-            let uploadedImage = $('#uploaded-image');
-            let removeButton = $('#remove-image');
+            let input          = $('#product-image-main');
+            let uploadArea     = $('#upload-area');
+            let progress       = $('#upload-progress');
+            let progressBar    = $('.progress-bar');
+            let uploadedImage  = $('#uploaded-image');
+            let removeButton   = $('#remove-image');
 
             uploadArea.on('click', function () {
                 input.click();
             });
 
             input.on('change', function (e) {
-                handleFiles(e.target.files);
+                handleMainImageFiles(e.target.files);
             });
 
             uploadArea.on('dragover', function (e) {
@@ -1210,12 +1277,12 @@
             uploadArea.on('drop', function (e) {
                 e.preventDefault();
                 uploadArea.removeClass('dragover');
-                handleFiles(e.originalEvent.dataTransfer.files);
+                handleMainImageFiles(e.originalEvent.dataTransfer.files);
             });
 
-            function handleFiles(files) {
+            function handleMainImageFiles(files) {
                 if (files.length > 0) {
-                    let file = files[0];
+                    let file         = files[0];
                     let dataTransfer = new DataTransfer();
                     dataTransfer.items.add(file);
                     input[0].files = dataTransfer.files;
@@ -1251,11 +1318,19 @@
                 input.val('');
             });
         });
+    </script>
 
-        let selectedColors = [];
-        let pickrInstance = null;
+    <script>
+        // =========================
+        // COLOR PICKER
+        // =========================
+        let selectedColors = @json($model->colors ?? []);
+        let pickrInstance  = null;
 
         $(document).ready(function () {
+            // Render any previously selected colors
+            renderSelectedColors();
+
             if (pickrInstance) pickrInstance.destroyAndRemove();
 
             const dummyElement = document.createElement('div');
@@ -1287,8 +1362,8 @@
         });
 
         $('#openColorPicker').on('click', function () {
-            const trigger = document.getElementById('openColorPicker');
-            const rect = trigger.getBoundingClientRect();
+            const trigger        = document.getElementById('openColorPicker');
+            const rect           = trigger.getBoundingClientRect();
             const modalScrollTop = document.querySelector('#addMockupModal .modal-body')?.scrollTop || 0;
 
             if (pickrInstance) {
@@ -1298,9 +1373,9 @@
                     const pickerPanel = document.querySelector('.pcr-app.visible');
                     if (pickerPanel) {
                         pickerPanel.style.position = 'absolute';
-                        pickerPanel.style.left = `${rect.left + window.scrollX}px`;
-                        pickerPanel.style.top = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
-                        pickerPanel.style.zIndex = 9999;
+                        pickerPanel.style.left     = `${rect.left + window.scrollX}px`;
+                        pickerPanel.style.top      = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
+                        pickerPanel.style.zIndex   = 9999;
                     }
                 }, 0);
             }
@@ -1312,30 +1387,33 @@
         };
 
         function renderSelectedColors() {
-            const ul = document.getElementById('selected-colors');
-            ul.innerHTML = '';
-
+            const ul        = document.getElementById('selected-colors');
             const container = document.getElementById('colorsInputContainer');
+
+            if (!ul || !container) return;
+
+            ul.innerHTML        = '';
             container.innerHTML = '';
 
             selectedColors.forEach(c => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                    <div class="selected-color-wrapper position-relative">
-                        <div class="selected-color-dot" style="background-color: #fff;">
-                            <div class="selected-color-inner" style="background-color: ${c};"></div>
-                        </div>
-                        <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
-                    </div>
-                `;
+            <div class="selected-color-wrapper position-relative">
+                <div class="selected-color-dot" style="background-color: #fff;">
+                    <div class="selected-color-inner" style="background-color: ${c};"></div>
+                </div>
+                <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
+            </div>
+        `;
                 ul.appendChild(li);
 
                 const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'colors[]';
+                hiddenInput.type  = 'hidden';
+                hiddenInput.name  = 'colors[]';
                 hiddenInput.value = c;
                 container.appendChild(hiddenInput);
             });
         }
     </script>
+
 @endsection

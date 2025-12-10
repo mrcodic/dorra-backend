@@ -8,6 +8,7 @@ use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\MockupRepositoryInterface;
 use App\Services\Mockup\MockupRenderer;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -22,17 +23,48 @@ class MockupService extends BaseService
 
     public function getMockups(): array
     {
+        $productId  = request('product_id');
+        $templateId = request('template_id');
+        $color      = request('color');
+
+        /**
+         * CACHE KEY FOR THIS COMBINATION
+         */
+        $cacheKey = "mockups:{$productId}:{$templateId}:{$color}";
+
+        /**
+         * If cached → return immediately
+         */
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
+
+        /**
+         * Fetch mockups
+         */
         $mockups = $this->repository
             ->query()
-            ->when(request()->filled('product_id'), fn($q) => $q->whereCategoryId(request('product_id')))
-            ->when(request()->filled('template_id'), fn($q) => $q->whereHas('templates', function ($query) {
-                $query->where('templates.id', request('template_id'));
+            ->when($productId, fn($q) => $q->whereCategoryId($productId))
+            ->when($templateId, fn($q) => $q->whereHas('templates', function ($query) use ($templateId) {
+                $query->where('templates.id', $templateId);
             }))
-            ->with(['templates', 'types', 'media'])
+            ->with([
+                'templates:id',
+                'types:id,value',
+                'media' => fn($q) => $q->whereIn('collection_name', [
+                    'mockups',
+                    'generated_mockups',
+                    'templates',
+                    'back_templates'
+                ])
+            ])
             ->get();
 
-
-        $colors = $mockups->pluck('colors')
+        /**
+         * Collect unique colors
+         */
+        $colors = $this->repository->query()
+            ->pluck('colors')
             ->filter()
             ->flatten()
             ->unique()
@@ -40,63 +72,71 @@ class MockupService extends BaseService
             ->toArray();
 
         $urls = [];
-        $color = request('color');
 
         foreach ($mockups as $mockup) {
+
+            $mockupMedia = $mockup->getMedia('mockups')
+                ->groupBy(fn($m) => $m->getCustomProperty('side') . '_' . $m->getCustomProperty('role'));
+
+            $generatedMedia = $mockup->getMedia('generated_mockups')
+                ->groupBy(fn($m) =>
+                    $m->getCustomProperty('side')
+                    . '_' . $m->getCustomProperty('template_id')
+                    . '_' . $m->getCustomProperty('color')
+                );
+
             foreach ($mockup->templates as $template) {
+
+                $designMediaCache = [
+                    'front' => $template->getFirstMedia('templates'),
+                    'back'  => $template->getFirstMedia('back_templates'),
+                ];
+
                 foreach ($mockup->types as $type) {
+
                     $sideName = strtolower($type->value->name);
+                    $key = "{$sideName}_{$template->id}_{$color}";
 
-                    $baseMedia = $mockup->getMedia('mockups')
-                        ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
-                            $m->getCustomProperty('role') === 'base'
-                        );
+                    /**
+                     * EXISTING GENERATED MOCKUP FOUND → USE IT
+                     */
+                    if (isset($generatedMedia[$key])) {
+                        $urls[] = $generatedMedia[$key]->first()->getFullUrl();
+                        continue;
+                    }
 
-                    $maskMedia = $mockup->getMedia('mockups')
-                        ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
-                            $m->getCustomProperty('role') === 'mask'
-                        );
+                    $baseMedia = $mockupMedia[$sideName . '_base'][0] ?? null;
+                    $maskMedia = $mockupMedia[$sideName . '_mask'][0] ?? null;
 
                     if (!$baseMedia || !$maskMedia) {
                         continue;
                     }
 
-                    $designMedia = $type == TypeEnum::BACK
-                        ? $template->getFirstMedia('back_templates')
-                        : $template->getFirstMedia('templates');
+                    $designMedia = $sideName === 'back'
+                        ? $designMediaCache['back']
+                        : $designMediaCache['front'];
 
                     if (!$designMedia || !$designMedia->getPath()) {
                         continue;
                     }
 
-
-                    $existingMedia = $mockup->getMedia('generated_mockups')
-                        ->first(function ($m) use ($sideName, $template, $color) {
-                            return $m->getCustomProperty('side') === $sideName
-                                && $m->getCustomProperty('template_id') === $template->id
-                                && $m->getCustomProperty('color') === $color;
-                        });
-
-                    if ($existingMedia) {
-                        $urls[] = $existingMedia->getFullUrl();
-                        continue;
-                    }
-
-
+                    /**
+                     * RENDER NEW MOCKUP
+                     */
                     $binary = $this->renderer->render([
-                        'base_path' => $baseMedia->getPath(),
-                        'shirt_path' => $maskMedia->getPath(),
+                        'base_path'   => $baseMedia->getPath(),
+                        'shirt_path'  => $maskMedia->getPath(),
                         'design_path' => $designMedia->getPath(),
-                        'hex' => $color,
+                        'hex'         => $color,
                     ]);
 
                     $media = $mockup
                         ->addMediaFromString($binary)
                         ->usingFileName("mockup_{$sideName}_{$template->id}_{$color}.png")
                         ->withCustomProperties([
-                            'side' => $sideName,
+                            'side'        => $sideName,
                             'template_id' => $template->id,
-                            'color' => $color,
+                            'color'       => $color,
                         ])
                         ->toMediaCollection('generated_mockups');
 
@@ -105,13 +145,20 @@ class MockupService extends BaseService
             }
         }
 
-
-        $urls = array_values(array_unique($urls));
-
-        return [
+        /**
+         * Remove duplicates
+         */
+        $result = [
             'colors' => $colors,
-            'urls' => $urls,
+            'urls'   => array_values(array_unique($urls)),
         ];
+
+        /**
+         * STORE TO CACHE FOR NEXT REQUEST (1 DAY)
+         */
+        Cache::put($cacheKey, $result, now()->addDay());
+
+        return $result;
     }
 
 
@@ -280,11 +327,9 @@ class MockupService extends BaseService
     }
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
-//        dd($validatedData);
-
         $model = $this->handleTransaction(function () use ($id, $validatedData, $relationsToLoad) {
 
-            $model = $this->repository->update($id, $validatedData);
+            $model = $this->repository->update($validatedData, $id);
 
             $model->types()->sync(Arr::get($validatedData, 'types') ?? []);
 
@@ -318,11 +363,7 @@ class MockupService extends BaseService
                     $model->templates()->detach();
                 }
 
-            } else {
-                $model->templates()->detach();
             }
-
-
 
            if (request()->allFiles())
            {
@@ -331,105 +372,6 @@ class MockupService extends BaseService
 
            }
 
-            foreach ($model->templates as $template) {
-                $pivotPositions = $template->pivot->positions ?? [];
-
-                collect($model->types)->each(function ($type) use ($model, $template, $pivotPositions) {
-                    $sideName = strtolower($type->value->name);
-
-                    $baseMedia = $model->getMedia('mockups')
-                        ->first(fn($m) =>
-                            $m->getCustomProperty('side') === $sideName &&
-                            $m->getCustomProperty('role') === 'base'
-                        );
-
-                    $maskMedia = $model->getMedia('mockups')
-                        ->first(fn($m) =>
-                            $m->getCustomProperty('side') === $sideName &&
-                            $m->getCustomProperty('role') === 'mask'
-                        );
-
-                    if (!$baseMedia || !$maskMedia) {
-                        return;
-                    }
-
-                    $designMedia = $type == TypeEnum::BACK
-                        ? $template->getFirstMedia('back_templates')
-                        : $template->getFirstMedia('templates');
-
-                    if (!$designMedia || !$designMedia->getPath()) {
-                        return;
-                    }
-
-                    $basePath = $baseMedia->getPath();
-                    if (!is_file($basePath)) {
-                        return;
-                    }
-
-                    [$baseWidth, $baseHeight] = getimagesize($basePath);
-
-                $previewWidth  = 800;
-                    $previewHeight = 800;
-
-                    $scaleX = $baseWidth / $previewWidth;
-                    $scaleY = $baseHeight / $previewHeight;
-
-                    $xKey     = "{$sideName}_x";
-                    $yKey     = "{$sideName}_y";
-                    $wKey     = "{$sideName}_width";
-                    $hKey     = "{$sideName}_height";
-                    $angleKey = "{$sideName}_angle";
-
-                    $canvasX = (float)($pivotPositions[$xKey] ?? 0);
-                    $canvasY = (float)($pivotPositions[$yKey] ?? 0);
-                    $canvasW = (float)($pivotPositions[$wKey] ?? 0);
-                    $canvasH = (float)($pivotPositions[$hKey] ?? 0);
-                    $angle   = (float)($pivotPositions[$angleKey] ?? 0);
-
-
-                    $printX = (int)round($canvasX * $scaleX);
-                    $printY = (int)round($canvasY * $scaleY);
-                    $printW = (int)round($canvasW * $scaleX);
-                    $printH = (int)round($canvasH * $scaleY);
-
-
-                    if ($printW <= 0) $printW = (int)round($baseWidth * 0.3);
-                    if ($printH <= 0) $printH = (int)round($baseHeight * 0.3);
-
-
-                    $firstMockup = $this->repository
-                        ->query()
-                        ->whereBelongsTo($model->category)
-                        ->first();
-
-                    $hexColor = $firstMockup && $firstMockup->colors
-                        ? $firstMockup->colors[0]
-                        : null;
-
-
-                    $binary = (new MockupRenderer())->render([
-                        'base_path'   => $basePath,
-                        'shirt_path'  => $maskMedia->getPath(),
-                        'design_path' => $designMedia->getPath(),
-                        'print_x'     => $printX,
-                        'print_y'     => $printY,
-                        'print_w'     => $printW,
-                        'print_h'     => $printH,
-                        'angle'       => $angle,
-                        'hex'         => $hexColor,
-                    ]);
-
-
-                    $model
-                        ->addMediaFromString($binary)
-                        ->usingFileName("mockup_{$sideName}_{$template->id}.png")
-                        ->withCustomProperties([
-                            'side'        => $sideName,
-                            'template_id' => $template->id,
-                        ])
-                        ->toMediaCollection('generated_mockups');
-                });
-            }
 
             return $model;
         });
