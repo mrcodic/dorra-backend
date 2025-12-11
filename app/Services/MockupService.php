@@ -9,8 +9,6 @@ use App\Repositories\Interfaces\MockupRepositoryInterface;
 use App\Services\Mockup\MockupRenderer;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class MockupService extends BaseService
 {
@@ -26,18 +24,6 @@ class MockupService extends BaseService
         $productId  = request('product_id');
         $templateId = request('template_id');
         $color      = request('color');
-
-        /**
-         * CACHE KEY FOR THIS COMBINATION
-         */
-        $cacheKey = "mockups:{$productId}:{$templateId}:{$color}";
-
-        /**
-         * If cached → return immediately
-         */
-        if (Cache::has($cacheKey)) {
-            return Cache::get($cacheKey);
-        }
 
         /**
          * Fetch mockups
@@ -86,6 +72,7 @@ class MockupService extends BaseService
                 );
 
             foreach ($mockup->templates as $template) {
+                $pivotPositions = $template->pivot->positions ?? [];
 
                 $designMediaCache = [
                     'front' => $template->getFirstMedia('templates'),
@@ -106,6 +93,30 @@ class MockupService extends BaseService
                     }
 
                     $baseMedia = $mockupMedia[$sideName . '_base'][0] ?? null;
+                    $basePath = $baseMedia->getPath();
+                    [$baseWidth, $baseHeight] = getimagesize($basePath);
+
+                    // القيم جاية من الـ JS كنِسَب 0..1 من مساحة الموكاب
+                    $xPct  = (float)($pivotPositions[$sideName . '_x']      ?? 0.5);  // مركز X
+                    $yPct  = (float)($pivotPositions[$sideName . '_y']      ?? 0.5);  // مركز Y
+                    $wPct  = (float)($pivotPositions[$sideName . '_width']  ?? 0.4);  // نسبة عرض البوكس
+                    $hPct  = (float)($pivotPositions[$sideName . '_height'] ?? 0.4);  // نسبة ارتفاع البوكس
+                    $angle = (float)($pivotPositions[$sideName . '_angle']  ?? 0);
+
+                    // نحول النِّسَب لأبعاد فعلية
+                    $printW = max(1, (int) round($wPct * $baseWidth));
+                    $printH = max(1, (int) round($hPct * $baseHeight));
+
+                    // مركز البوكس بالبيكسل
+                    $centerX = $xPct * $baseWidth;
+                    $centerY = $yPct * $baseHeight;
+
+                    // نحسب الـ top-left من المركز
+                    $printX = (int) round($centerX - $printW / 2);
+                    $printY = (int) round($centerY - $printH / 2);
+
+                    if ($printW <= 0) $printW = (int) round($baseWidth * 0.3);
+                    if ($printH <= 0) $printH = (int) round($baseHeight * 0.3);
                     $maskMedia = $mockupMedia[$sideName . '_mask'][0] ?? null;
 
                     if (!$baseMedia || !$maskMedia) {
@@ -127,6 +138,11 @@ class MockupService extends BaseService
                         'base_path'   => $baseMedia->getPath(),
                         'shirt_path'  => $maskMedia->getPath(),
                         'design_path' => $designMedia->getPath(),
+                        'print_x' => $printX,
+                        'print_y' => $printY,
+                        'print_w' => $printW,
+                        'print_h' => $printH,
+                        'angle' => $angle ?? 0,
                         'hex'         => $color,
                     ]);
 
@@ -152,11 +168,6 @@ class MockupService extends BaseService
             'colors' => $colors,
             'urls'   => array_values(array_unique($urls)),
         ];
-
-        /**
-         * STORE TO CACHE FOR NEXT REQUEST (1 DAY)
-         */
-        Cache::put($cacheKey, $result, now()->addDay());
 
         return $result;
     }
@@ -367,6 +378,89 @@ class MockupService extends BaseService
                 }
 
             }
+            foreach ($model->templates as $template) {
+                $pivotPositions = $template->pivot->positions ?? [];
+
+                collect($model->types)->each(function ($type) use ($model, $template, $pivotPositions) {
+                    $sideName = strtolower($type->value->name);
+
+                    // ----- base & mask media -----
+                    $baseMedia = $model->getMedia('mockups')
+                        ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
+                            $m->getCustomProperty('role') === 'base'
+                        );
+
+                    $maskMedia = $model->getMedia('mockups')
+                        ->first(fn($m) => $m->getCustomProperty('side') === $sideName &&
+                            $m->getCustomProperty('role') === 'mask'
+                        );
+
+                    if (!$baseMedia || !$maskMedia) {
+                        return [$sideName => null];
+                    }
+
+                    $designMedia = $type == TypeEnum::BACK
+                        ? $template->getFirstMedia('back_templates')
+                        : $template->getFirstMedia('templates');
+
+                    if (!$designMedia || !$designMedia->getPath()) {
+                        throw new \Exception("Missing design media for {$sideName}");
+                    }
+                    $basePath = $baseMedia->getPath();
+                    [$baseWidth, $baseHeight] = getimagesize($basePath);
+
+                    // القيم جاية من الـ JS كنِسَب 0..1 من مساحة الموكاب
+                    $xPct  = (float)($pivotPositions[$sideName . '_x']      ?? 0.5);  // مركز X
+                    $yPct  = (float)($pivotPositions[$sideName . '_y']      ?? 0.5);  // مركز Y
+                    $wPct  = (float)($pivotPositions[$sideName . '_width']  ?? 0.4);  // نسبة عرض البوكس
+                    $hPct  = (float)($pivotPositions[$sideName . '_height'] ?? 0.4);  // نسبة ارتفاع البوكس
+                    $angle = (float)($pivotPositions[$sideName . '_angle']  ?? 0);
+
+                    // نحول النِّسَب لأبعاد فعلية
+                    $printW = max(1, (int) round($wPct * $baseWidth));
+                    $printH = max(1, (int) round($hPct * $baseHeight));
+
+                    // مركز البوكس بالبيكسل
+                    $centerX = $xPct * $baseWidth;
+                    $centerY = $yPct * $baseHeight;
+
+                    // نحسب الـ top-left من المركز
+                    $printX = (int) round($centerX - $printW / 2);
+                    $printY = (int) round($centerY - $printH / 2);
+
+                    if ($printW <= 0) $printW = (int) round($baseWidth * 0.3);
+                    if ($printH <= 0) $printH = (int) round($baseHeight * 0.3);
+
+                    $firstMockup = $this->repository
+                        ->query()
+                        ->whereNotNull('colors')
+                        ->whereBelongsTo($model->category)
+                        ->first();
+
+                    $binary = (new MockupRenderer())->render([
+                        'base_path' => $basePath,
+                        'shirt_path' => $maskMedia->getPath(),
+                        'design_path' => $designMedia->getPath(),
+                        'print_x' => $printX,
+                        'print_y' => $printY,
+                        'print_w' => $printW,
+                        'print_h' => $printH,
+                        'angle' => $angle ?? 0,
+                        'hex' => $firstMockup?->colors ?
+                            $firstMockup?->colors[0] : null,
+                    ]);
+
+
+                    $model
+                        ->addMediaFromString($binary)
+                        ->usingFileName("mockup_{$sideName}.png")
+                        ->withCustomProperties([
+                            'side' => $sideName,
+                            'template_id' => $template->id,
+                        ])
+                        ->toMediaCollection('generated_mockups');
+                });
+            }
 
            if (request()->allFiles())
            {
@@ -414,8 +508,6 @@ class MockupService extends BaseService
                         ->where('custom_properties->role', $role)
                         ->delete();
                 }
-
-
                 handleMediaUploads(
                     request()->file($inputName),
                     $model,

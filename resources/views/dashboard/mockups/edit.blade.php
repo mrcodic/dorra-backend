@@ -716,7 +716,7 @@
                 }
 
                 if (none) {
-                    loadAndBind(window.canvasNone, none, 'none', null);
+                    loadAndBind(window.canvasNone, none, 'none', savedTemplate?.pivot.positions.none_x ? savedTemplate : null);
                     document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
                 }
                 // close modal if inside
@@ -970,6 +970,7 @@
         function applyDefaultPlacement(img, canvas, meta) {
             const defaultWidthRatio = 0.35;
 
+
             if (meta) {
                 const targetW = meta.scaledWidth * defaultWidthRatio;
                 const scale = targetW / img.width;
@@ -1003,10 +1004,9 @@
                 img.templateType = type;
 
                 const meta = canvas.__mockupMeta;
-
+                savedPositions = savedPositions.pivot.positions;
                 if (savedPositions && meta) {
                     const prefix = type + '_';
-
                     // center position in canvas
                     const xPct = parseFloat(savedPositions[prefix + 'x'] ?? 0.5);
                     const yPct = parseFloat(savedPositions[prefix + 'y'] ?? 0.5);
