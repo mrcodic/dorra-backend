@@ -331,10 +331,12 @@ class MockupService extends BaseService
         $model = $this->handleTransaction(function () use ($id, $validatedData, $relationsToLoad) {
 
             $model = $this->repository->update($validatedData, $id);
-
+            $selectedTypeValues = Arr::get($validatedData, 'types', []);
+            $modelTypesValues = $model->types->pluck('value.value')->toArray();
+            if (collect($selectedTypeValues)->sort()->values()->all() != collect($modelTypesValues)->sort()->values()->all()) {
+                $model->templates()->detach();
+            }
             $model->types()->sync(Arr::get($validatedData, 'types') ?? []);
-
-
             $templatesInput = collect(Arr::get($validatedData, 'templates', []));
 
             if ($templatesInput->isNotEmpty()) {

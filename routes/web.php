@@ -33,10 +33,8 @@ use App\Http\Controllers\Dashboard\{AdminController,
 };
 use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Api\V1\User\ShippingAddress\ShippingController;
-use App\Http\Controllers\Shared\CommentController;
-use App\Http\Controllers\Shared\FontController;
+use App\Http\Controllers\Shared\{CommentController,FontController,LibraryAssetController};
 use App\Http\Controllers\Shared\General\MainController;
-use App\Http\Controllers\Shared\LibraryAssetController;
 use App\Http\Middleware\AutoCheckPermission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;

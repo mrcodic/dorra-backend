@@ -349,36 +349,27 @@
                 $modalPagination.empty();
             }
 
-            function getTemplateImageByType(tpl) {
-                // types is an array like: [{id:3,label:"None",value:3}]
-                const typeObj = Array.isArray(tpl.types) && tpl.types.length
-                    ? tpl.types[0]
-                    : null;
-
-                const type = typeObj ? (typeObj.label || '').toLowerCase() : 'front';
-                console.log(type)
-                switch (type) {
-                    case 'front':
-                        return tpl.source_design_svg || '';
-                    case 'back':
-                        return tpl.back_base64_preview_image || '';
-                    case 'none':
-                        return tpl.source_design_svg || '';
-                    default:
-                        return tpl.source_design_svg || '';
-                }
-            }
 
             function buildTemplateInnerCard(tpl) {
                 const id = tpl.id;
                 const name = typeof tpl.name === 'object'
                     ? (tpl.name[locale] ?? Object.values(tpl.name)[0])
                     : (tpl.name || ('Template #' + id));
-                const front = getTemplateImageByType(tpl);
-                const none = getTemplateImageByType(tpl);
-                const back = tpl.back_base64_preview_image || '';
-                const img = front || back || "{{ asset('images/placeholder.svg') }}";
+                const hasType3 = tpl.types?.some(t => t.value === 3);
 
+                let front = '';
+                let none  = '';
+
+                if (hasType3) {
+                    none  = tpl.source_design_svg || '';
+                    front = '';
+                } else {
+                    front = tpl.source_design_svg || '';
+                    none  = '';
+                }
+
+                const back = tpl.back_base64_preview_image || '';
+                const img = front || back || none|| "{{ asset('images/placeholder.svg') }}";
                 return `
                 <div class="template-card h-100"
                      data-id="${id}"
@@ -652,10 +643,9 @@
                 // find saved template positions from $model->templates
                 const templatesData = @json($model->templates ?? []);
                 const savedTemplate = templatesData.find(t => t.id === id);
-                console.log(front, none)
                 // FRONT
-                if (front && !none) {
-                    console.log("dsfds")
+                if (front) {
+
                     loadAndBind(window.canvasFront, front, 'front', savedTemplate?.pivot.positions.front_x ? savedTemplate : null);
                     document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
                 }
@@ -665,15 +655,11 @@
                     loadAndBind(window.canvasBack, back, 'back', savedTemplate?.pivot.positions.back_x ? savedTemplate : null);
                     document.getElementById('editorBackWrapper')?.classList.remove('d-none');
                 }
-                // NONE
-                if (none && !front) {
-                    console.log("dsfds")
 
-                    loadAndBind(window.canvasNone, none, 'none', savedTemplate?.pivot.positions.none_x ? savedTemplate : null);
+                if (none) {
+                    loadAndBind(window.canvasNone, none, 'none', null);
                     document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
                 }
-
-
                 // close modal if inside
                 if ($(this).closest('#templateModal').length) {
                     $('#templateModal').modal('hide');

@@ -44,12 +44,15 @@ class FontController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'file' => ['required', 'file',
-                'mime' => 'mimetypes:font/ttf,
-                font/otf,font/woff,font/woff2,
-                application/vnd.ms-fontobject,image/svg+xml',
+            'file' => [
+                'required',
+                'file',
+                'mimes:ttf,otf,woff,woff2,eot',
+                'mimetypes:application/octet-stream,font/ttf,font/otf,application/x-font-ttf,application/x-font-otf,application/font-sfnt,font/woff,font/woff2,application/font-woff,application/font-woff2,application/vnd.ms-fontobject',
             ],
         ]);
+
+
 
         $isAdminRoute = request()->is('api/v1/admin/*');
 

@@ -363,15 +363,29 @@
                     ? (tpl.name[locale] ?? Object.values(tpl.name)[0])
                     : (tpl.name || ('Template #' + id));
 
-                const front = tpl.source_design_svg || '';
+                const hasType3 = tpl.types?.some(t => t.value === 3);
+
+                let front = '';
+                let none  = '';
+
+                if (hasType3) {
+                    none  = tpl.source_design_svg || '';
+                    front = '';
+                } else {
+                    front = tpl.source_design_svg || '';
+                    none  = '';
+                }
+
                 const back  = tpl.back_base64_preview_image || '';
-                const img   = front || back || "{{ asset('images/placeholder.svg') }}";
+                const img   = front || back ||none || "{{ asset('images/placeholder.svg') }}";
 
                 return `
                 <div class="template-card h-100"
                      data-id="${id}"
                      data-front="${front}"
-                     data-back="${back}">
+                     data-back="${back}"
+                     data-none="${none}"
+>
                     <div class="card rounded-3 shadow-sm" style="border:1px solid #24B094;">
                         <div class="d-flex justify-content-center align-items-center"
                              style="background-color:#F4F6F6;height:200px;border-radius:12px;padding:10px;">
@@ -621,6 +635,7 @@
             const id    = $cardWrapper.data('id');
             const front = $cardWrapper.data('front');
             const back  = $cardWrapper.data('back');
+            const none  = $cardWrapper.data('none');
             const name  = $cardWrapper.find('.card-title').text();
 
             // Highlight the selected card in templatesCardsWrapper
@@ -637,7 +652,7 @@
                 const cardHtml = `<div class="col-12 col-md-4 col-lg-3">
             ${buildTemplateInnerCard({
                     id: id,
-                    source_design_svg: front,
+                    source_design_svg: front ?? none,
                     back_base64_preview_image: back,
                     name: name
                 })}
@@ -651,7 +666,7 @@
                 if ($cards.length > 3) {
                     const $lastCard = $cards.last();
                     const lastId = $lastCard.data('id');
-                    const lastFront = $lastCard.data('front');
+                    const lastFront = $lastCard.data('front') ??  $lastCard.data('none');
                     const lastBack  = $lastCard.data('back');
                     const lastName  = $lastCard.find('.card-title').text();
 
@@ -689,6 +704,10 @@
                 if (back) {
                     loadAndBind(window.canvasBack, back, 'back', null);
                     document.getElementById('editorBackWrapper')?.classList.remove('d-none');
+                }
+                if (none) {
+                    loadAndBind(window.canvasNone, none, 'none', null);
+                    document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
                 }
             }
 
