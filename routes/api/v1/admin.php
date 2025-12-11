@@ -35,4 +35,4 @@ Route::apiResource('/products', ProductController::class)
         'show' => 'admin.products.show',
     ]);
 
-Route::apiResource('fonts', FontController::class)->only(['store', 'index']);
+Route::apiResource('fonts', FontController::class)->only(['store', 'index','destroy']);

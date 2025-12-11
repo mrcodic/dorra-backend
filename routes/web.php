@@ -323,7 +323,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");
 
         Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
-        Route::apiResource('fonts', FontController::class)->only(['store', 'index']);
+        Route::apiResource('fonts', FontController::class)->only(['store', 'index','destroy']);
 
         Route::resource('shipping-addresses', ShippingAddressController::class)->only(['store', 'update', 'destroy']);
 

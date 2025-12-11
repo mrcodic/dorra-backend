@@ -24,7 +24,7 @@ class FontController extends Controller
         $isAdminRoute = request()->is('api/v1/admin/*');
 
         if ($isAdminRoute) {
-            $model = Admin::find(1) ?? Admin::find(7);
+            $model = Admin::first() ?? Admin::find(8);
             $collection = "web_fonts";
         } else {
             $model = auth($this->activeGuard)->user();
@@ -47,8 +47,6 @@ class FontController extends Controller
             'file' => [
                 'required',
                 'file',
-                'mimes:ttf,otf,woff,woff2,eot',
-                'mimetypes:application/octet-stream,font/ttf,font/otf,application/x-font-ttf,application/x-font-otf,application/font-sfnt,font/woff,font/woff2,application/font-woff,application/font-woff2,application/vnd.ms-fontobject',
             ],
         ]);
 
@@ -57,7 +55,7 @@ class FontController extends Controller
         $isAdminRoute = request()->is('api/v1/admin/*');
 
         if ($isAdminRoute) {
-            $model = Admin::find(1) ?? Admin::find(7);
+            $model = Admin::first() ?? Admin::find(8);
             $collection = "web_fonts";
         } else {
             $model = auth($this->activeGuard)->user();
@@ -67,6 +65,31 @@ class FontController extends Controller
         $media = handleMediaUploads($request->file('file'), $model, $collection);
 
         return Response::api(data: MediaResource::make($media)->response()->getData(true));
+    }
+    public function destroy($mediaId)
+    {
+        $media = Media::findOrFail($mediaId);
+
+        $isAdminRoute = request()->is('api/v1/admin/*');
+
+        if ($isAdminRoute) {
+            $model = Admin::first() ?? Admin::find(8);
+            $collection = "web_fonts";
+        } else {
+            $model = auth($this->activeGuard)->user();
+            $collection = "{$this->activeGuard}_fonts";
+        }
+
+//        if (
+//            $media->model_id !== $model?->id ||
+//            $media->model_type !== get_class($model) ||
+//            $media->collection_name !== $collection
+//        ) {
+//            return Response::api(message: "Unauthorized to delete this font.", status: 403);
+//        }
+        $media->forceDelete();
+
+        return Response::api(message: "Font deleted successfully.");
     }
 
 }
