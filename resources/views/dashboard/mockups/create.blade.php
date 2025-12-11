@@ -457,7 +457,6 @@
                 `;
                     $templatesCardsContainer.append(showMoreHtml);
                 }
-
                 $templatesWrapper.removeClass('d-none');
             }
 
