@@ -167,7 +167,7 @@ class MockupService extends BaseService
          * Remove duplicates
          */
         $result = [
-            'colors' => $colors,
+            'colors' => array_values(array_unique($colors)),
             'urls'   => array_values(array_unique($urls)),
         ];
 
