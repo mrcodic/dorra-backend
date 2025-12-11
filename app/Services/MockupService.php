@@ -49,15 +49,16 @@ class MockupService extends BaseService
         /**
          * Collect unique colors
          */
-        $colors = $this->repository->query()
-            ->pluck('colors')
-            ->filter()
-            ->flatten()
-            ->unique()
-            ->values()
-            ->toArray();
+//        $colors = $this->repository->query()
+//            ->pluck('colors')
+//            ->filter()
+//            ->flatten()
+//            ->unique()
+//            ->values()
+//            ->toArray();
 
         $urls = [];
+        $colors = [];
 
         foreach ($mockups as $mockup) {
 
@@ -72,6 +73,7 @@ class MockupService extends BaseService
                 );
 
             foreach ($mockup->templates as $template) {
+                $colors[] = $template->pivot->colors ?? [];
                 $pivotPositions = $template->pivot->positions ?? [];
 
                 $designMediaCache = [
@@ -235,12 +237,14 @@ class MockupService extends BaseService
                     if (!$templateId) return;
 
                     $positions = collect($template)
-                        ->except('template_id')
+                        ->except(['template_id','colors'])
                         ->filter(fn($value) => !is_null($value))
                         ->toArray();
-
+                    $colors = Arr::get($template,'colors');
                     $model->templates()->attach([
-                        $templateId => ['positions' => $positions],
+                        $templateId => [
+                            'positions' => $positions,
+                            'colors' => $colors,],
                     ]);
                 });
 

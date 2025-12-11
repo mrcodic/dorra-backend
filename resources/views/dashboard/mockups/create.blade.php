@@ -324,6 +324,7 @@
 @section('page-script')
 
 <script>
+
     document.addEventListener('DOMContentLoaded', function () {
             const $productSelect            = $('#productsSelect');
             const $templatesWrapper         = $('#templatesCardsWrapper');
@@ -412,10 +413,11 @@
                         <div class="mb-2" style="padding-left: 10px">
                             <label class="label-text mb-1 d-block">Colors</label>
                             <div class="d-flex flex-wrap align-items-center gap-1">
-                                <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
-                                <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>
+                               <button type="button" class="openColorPicker gradient-picker-trigger border"></button>
+
+                                <span  class="selected-colors d-flex gap-1 flex-wrap align-items-center"></span>
                             </div>
-                            <div id="colorsInputContainer"></div>
+                            <div class="colorsInputContainer"></div>
                         </div>
                     </div>
                 </div>
@@ -638,11 +640,23 @@
 
         $(document).on('click', '.js-show-on-mockup', function () {
             const $cardWrapper = $(this).closest('.template-card');
-            const id    = $cardWrapper.data('id');
+            const id = $cardWrapper.data('id');
             const front = $cardWrapper.data('front');
-            const back  = $cardWrapper.data('back');
-            const none  = $cardWrapper.data('none');
-            const name  = $cardWrapper.find('.card-title').text();
+            const back = $cardWrapper.data('back');
+            const none = $cardWrapper.data('none');
+            const name = $cardWrapper.find('.card-title').text();
+
+            // Mark this template as selected
+            $cardWrapper.addClass('selected');
+
+            // Ensure it has a selectedColors array
+            if (!$cardWrapper[0].selectedColors) {
+                $cardWrapper[0].selectedColors = [];
+            }
+
+            // Copy any existing selected colors from the card DOM inputs
+            const colorInputs = $cardWrapper.find('input[name="colors[]"]');
+            $cardWrapper[0].selectedColors = Array.from(colorInputs).map(input => input.value);
 
             // Highlight the selected card in templatesCardsWrapper
             $('#templatesCardsContainer').find('.template-card .card')
@@ -651,10 +665,8 @@
 
             // If clicked from the modal
             if ($(this).closest('#templateModal').length) {
-                // Remove from modal
                 $cardWrapper.remove();
 
-                // Build the card for templatesCardsWrapper
                 const cardHtml = `<div class="col-12 col-md-4 col-lg-3">
             ${buildTemplateInnerCard({
                     id: id,
@@ -664,22 +676,19 @@
                 })}
         </div>`;
 
-                // Prepend to the start
                 $('#templatesCardsContainer').prepend(cardHtml);
 
-                // Move last card in templatesCardsWrapper back to modal (if more than 3 cards)
+                // Move last card if more than 3
                 const $cards = $('#templatesCardsContainer .template-card').not('.show-more');
                 if ($cards.length > 3) {
                     const $lastCard = $cards.last();
                     const lastId = $lastCard.data('id');
-                    const lastFront = $lastCard.data('front') ??  $lastCard.data('none');
-                    const lastBack  = $lastCard.data('back');
-                    const lastName  = $lastCard.find('.card-title').text();
+                    const lastFront = $lastCard.data('front') ?? $lastCard.data('none');
+                    const lastBack = $lastCard.data('back');
+                    const lastName = $lastCard.find('.card-title').text();
 
-                    // Remove from container
                     $lastCard.remove();
 
-                    // Build modal card
                     const modalCardHtml = `<div class="col-6 col-md-4 mb-2">
                 ${buildTemplateInnerCard({
                         id: lastId,
@@ -689,102 +698,107 @@
                     })}
             </div>`;
 
-                    $('#templates-modal-container').prepend(modalCardHtml); // prepend to modal or append
+                    $('#templates-modal-container').prepend(modalCardHtml);
                 }
             }
 
-            // Highlight the newly added/existing card
+            // Highlight newly added/existing card
             $('#templatesCardsContainer').find(`.template-card[data-id="${id}"] .card`)
                 .addClass('border-primary shadow-lg')
                 .css('border-color', '#0d6efd');
 
-            // Save template_id
+            // Save template_id for single selection fallback (optional)
             $('#selectedTemplateId').val(id);
 
             // Load template on canvas
             if (typeof loadAndBind === 'function') {
                 if (front) {
-                    loadAndBind(window.canvasFront, front, 'front', null);
+                    loadAndBind(window.canvasFront, front, 'front', id);
                     document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
                 }
                 if (back) {
-                    loadAndBind(window.canvasBack, back, 'back', null);
+                    loadAndBind(window.canvasBack, back, 'back', id);
                     document.getElementById('editorBackWrapper')?.classList.remove('d-none');
                 }
                 if (none) {
-                    loadAndBind(window.canvasNone, none, 'none', null);
+                    loadAndBind(window.canvasNone, none, 'none', id);
                     document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
                 }
             }
 
             // Close modal
-            // if ($(this).closest('#templateModal').length) {
-                $('#templateModal').modal('hide');
-            // }
+            $('#templateModal').modal('hide');
         });
 
 // =========================
 // Save Positions (cards + modal)
 // =========================
-            function buildHiddenTemplateInputs() {
-                const container = document.getElementById("templatesHiddenContainer");
-                container.innerHTML = ""; // clear old values
+        function buildHiddenTemplateInputs() {
+            const container = document.getElementById("templatesHiddenContainer");
+            container.innerHTML = "";
 
-                const templateId = document.getElementById("selectedTemplateId").value;
-                if (!templateId) return;
+            const selectedTemplates = document.querySelectorAll('.template-card.selected');
 
-                // Create a wrapper for the template:
-                let html = `
-        <input type="hidden" name="templates[0][template_id]" value="${templateId}">
-    `;
+            selectedTemplates.forEach((card, index) => {
+                const templateId = card.dataset.id;
+                const selectedColors = card.selectedColors || [];
 
-                // Helper to add inputs
+                let html = `<input type="hidden" name="templates[${index}][template_id]" value="${templateId}">`;
+
                 function add(name, value) {
-                    html += `<input type="hidden" name="templates[0][${name}]" value="${value}">`;
+                    html += `<input type="hidden" name="templates[${index}][${name}]" value="${value}">`;
                 }
 
                 // FRONT
-                const frontObj = canvasFront?.getObjects()?.find(o => o.templateType === "front");
-                if (frontObj) {
-                    const meta = canvasFront.__mockupMeta;
-                    const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(frontObj, meta);
-
-                    add("front_x", xPct);
-                    add("front_y", yPct);
-                    add("front_width", wPct);
-                    add("front_height", hPct);
-                    add("front_angle", angle);
-                }
+                canvasFront?.getObjects()
+                    .filter(o => o.templateType === "front" && o.templateId == templateId)
+                    .forEach(obj => {
+                        const meta = canvasFront.__mockupMeta;
+                        const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
+                        add("front_x", xPct);
+                        add("front_y", yPct);
+                        add("front_width", wPct);
+                        add("front_height", hPct);
+                        add("front_angle", angle);
+                    });
 
                 // BACK
-                const backObj = canvasBack?.getObjects()?.find(o => o.templateType === "back");
-                if (backObj) {
-                    const meta = canvasBack.__mockupMeta;
-                    const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(backObj, meta);
-
-                    add("back_x", xPct);
-                    add("back_y", yPct);
-                    add("back_width", wPct);
-                    add("back_height", hPct);
-                    add("back_angle", angle);
-                }
+                canvasBack?.getObjects()
+                    .filter(o => o.templateType === "back" && o.templateId == templateId)
+                    .forEach(obj => {
+                        const meta = canvasBack.__mockupMeta;
+                        const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
+                        add("back_x", xPct);
+                        add("back_y", yPct);
+                        add("back_width", wPct);
+                        add("back_height", hPct);
+                        add("back_angle", angle);
+                    });
 
                 // NONE
-                const noneObj = canvasNone?.getObjects()?.find(o => o.templateType === "none");
-                if (noneObj) {
-                    const meta = canvasNone.__mockupMeta;
-                    const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(noneObj, meta);
+                canvasNone?.getObjects()
+                    .filter(o => o.templateType === "none" && o.templateId == templateId)
+                    .forEach(obj => {
+                        const meta = canvasNone.__mockupMeta;
+                        const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
+                        add("none_x", xPct);
+                        add("none_y", yPct);
+                        add("none_width", wPct);
+                        add("none_height", hPct);
+                        add("none_angle", angle);
+                    });
 
-                    add("none_x", xPct);
-                    add("none_y", yPct);
-                    add("none_width", wPct);
-                    add("none_height", hPct);
-                    add("none_angle", angle);
-                }
+                // COLORS
+                selectedColors.forEach(color => {
+                    html += `<input type="hidden" name="templates[${index}][colors][]" value="${color}">`;
+                });
 
-                container.innerHTML = html;
-            }
-            function calculateObjectPercents(obj, meta) {
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+
+        function calculateObjectPercents(obj, meta) {
                 const center = obj.getCenterPoint();
                 const wReal = obj.width * obj.scaleX;
                 const hReal = obj.height * obj.scaleY;
@@ -797,7 +811,9 @@
                     angle: obj.angle || 0
                 };
             }
-
+        $('form').on('submit', function () {
+            buildHiddenTemplateInputs();
+        });
             $(document).on('click', '.js-save-positions', function () {
                 if (typeof saveAllTemplatePositions === 'function') {
                     saveAllTemplatePositions();
@@ -999,7 +1015,7 @@
             }
         }
 
-        function loadAndBind(canvas, designUrl, type) {
+        function loadAndBind(canvas, designUrl, type,templateId) {
             clearTemplateDesigns(canvas, type);
 
             fabric.Image.fromURL(designUrl, function (img) {
@@ -1010,6 +1026,7 @@
                 });
 
                 img.templateType = type;
+                img.templateId = templateId;
 
                 const meta = canvas.__mockupMeta;
                 applyDefaultPlacement(img, canvas, meta);
@@ -1380,79 +1397,106 @@
 
 <script>
     // =========================
-        // COLOR PICKER
-        // =========================
-        let selectedColors = [];
-        let pickrInstance  = null;
+    // COLOR PICKER
+    // =========================
 
-        $(document).ready(function () {
-            if (pickrInstance) pickrInstance.destroyAndRemove();
+    let pickrInstance  = null;
+    let currentCard    = null; // card for current pickr session
 
-            const dummyElement = document.createElement('div');
-            document.body.appendChild(dummyElement);
+    $(document).ready(function () {
 
-            pickrInstance = Pickr.create({
-                el: dummyElement,
-                theme: 'classic',
-                components: {
-                    preview: false,
-                    opacity: false,
-                    hue: true,
-                    interaction: {
-                        input: true,
-                        save: true,
-                        clear: true
-                    }
+        // Destroy previous instance if exists
+        if (pickrInstance) pickrInstance.destroyAndRemove();
+
+        // Dummy element for pickr
+        const dummyElement = document.createElement('div');
+        document.body.appendChild(dummyElement);
+
+        pickrInstance = Pickr.create({
+            el: dummyElement,
+            theme: 'classic',
+            components: {
+                preview: false,
+                opacity: false,
+                hue: true,
+                interaction: {
+                    input: true,
+                    save: true,
+                    clear: true
                 }
-            });
-
-            pickrInstance.on('save', (color) => {
-                const hex = color.toHEXA().toString();
-                if (!selectedColors.includes(hex)) {
-                    selectedColors.push(hex);
-                    renderSelectedColors();
-                }
-                pickrInstance.hide();
-            });
-        });
-
-        $('#openColorPicker').on('click', function () {
-            const trigger        = document.getElementById('openColorPicker');
-            const rect           = trigger.getBoundingClientRect();
-            const modalScrollTop = document.querySelector('#addMockupModal .modal-body')?.scrollTop || 0;
-
-            if (pickrInstance) {
-                pickrInstance.show();
-
-                setTimeout(() => {
-                    const pickerPanel = document.querySelector('.pcr-app.visible');
-                    if (pickerPanel) {
-                        pickerPanel.style.position = 'absolute';
-                        pickerPanel.style.left     = `${rect.left + window.scrollX}px`;
-                        pickerPanel.style.top      = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
-                        pickerPanel.style.zIndex   = 9999;
-                    }
-                }, 0);
             }
         });
 
-        window.removeColor = function (hex) {
-            selectedColors = selectedColors.filter(c => c !== hex);
-            renderSelectedColors();
-        };
+        // Handle save
+        pickrInstance.on('save', (color) => {
+            if (!currentCard) return;
 
-        function renderSelectedColors() {
-            const ul        = document.getElementById('selected-colors');
-            const container = document.getElementById('colorsInputContainer');
+            const hex = color.toHEXA().toString();
 
-            if (!ul || !container) return;
+            // Store colors array in the card itself
+            if (!currentCard.selectedColors) currentCard.selectedColors = [];
+            if (!currentCard.selectedColors.includes(hex)) {
+                currentCard.selectedColors.push(hex);
+            }
 
-            ul.innerHTML        = '';
-            container.innerHTML = '';
+            renderSelectedColors(currentCard);
+            pickrInstance.hide();
+        });
 
-            selectedColors.forEach(c => {
-                const li = document.createElement('li');
-                li.innerHTML = `
+        // Handle clear
+        pickrInstance.on('clear', () => {
+            if (!currentCard) return;
+            currentCard.selectedColors = [];
+            renderSelectedColors(currentCard);
+            pickrInstance.hide();
+        });
+    });
+
+    // Open color picker
+    $(document).on('click', '.openColorPicker', function () {
+        const trigger = this;
+        const card = trigger.closest('.template-card');
+        currentCard = card;
+
+        // Initialize selectedColors array if not exists
+        if (!card.selectedColors) card.selectedColors = [];
+
+        const rect = trigger.getBoundingClientRect();
+        const modalScrollTop = document.querySelector('#templateModal .modal-body')?.scrollTop || 0;
+
+        pickrInstance.show();
+
+        setTimeout(() => {
+            const pickerPanel = document.querySelector('.pcr-app.visible');
+            if (pickerPanel) {
+                pickerPanel.style.position = 'absolute';
+                pickerPanel.style.left = `${rect.left + window.scrollX}px`;
+                pickerPanel.style.top = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
+                pickerPanel.style.zIndex = 9999;
+            }
+        }, 0);
+    });
+
+    // Remove color from current card
+    window.removeColor = function (hex) {
+        if (!currentCard || !currentCard.selectedColors) return;
+        currentCard.selectedColors = currentCard.selectedColors.filter(c => c !== hex);
+        renderSelectedColors(currentCard);
+    };
+
+    // Render colors inside a card
+    function renderSelectedColors(card) {
+        const ul = card.querySelector('.selected-colors');
+        const container = card.querySelector('.colorsInputContainer');
+
+        if (!ul || !container) return;
+
+        ul.innerHTML = '';
+        container.innerHTML = '';
+
+        (card.selectedColors || []).forEach(c => {
+            const li = document.createElement('li');
+            li.innerHTML = `
                 <div class="selected-color-wrapper position-relative">
                     <div class="selected-color-dot" style="background-color: #fff;">
                         <div class="selected-color-inner" style="background-color: ${c};"></div>
@@ -1460,15 +1504,16 @@
                     <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
                 </div>
             `;
-                ul.appendChild(li);
+            ul.appendChild(li);
 
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type  = 'hidden';
-                hiddenInput.name  = 'colors[]';
-                hiddenInput.value = c;
-                container.appendChild(hiddenInput);
-            });
-        }
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type  = 'hidden';
+            hiddenInput.name  = 'colors[]';
+            hiddenInput.value = c;
+            container.appendChild(hiddenInput);
+        });
+    }
 </script>
+
 
 @endsection
