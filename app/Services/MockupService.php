@@ -49,7 +49,7 @@ class MockupService extends BaseService
         /**
          * Collect unique colors
          */
-        $colors = $mockups->query()
+        $colors = $mockups
             ->pluck('colors')
             ->filter()
             ->flatten()
