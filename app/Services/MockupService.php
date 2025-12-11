@@ -49,13 +49,13 @@ class MockupService extends BaseService
         /**
          * Collect unique colors
          */
-//        $colors = $this->repository->query()
-//            ->pluck('colors')
-//            ->filter()
-//            ->flatten()
-//            ->unique()
-//            ->values()
-//            ->toArray();
+        $colors = $mockups->query()
+            ->pluck('colors')
+            ->filter()
+            ->flatten()
+            ->unique()
+            ->values()
+            ->toArray();
 
         $urls = [];
         $colors = [];
@@ -73,7 +73,6 @@ class MockupService extends BaseService
                 );
 
             foreach ($mockup->templates as $template) {
-                $colors[] = $template->pivot->colors ?? [];
                 $pivotPositions = $template->pivot->positions ?? [];
 
                 $designMediaCache = [
@@ -167,7 +166,7 @@ class MockupService extends BaseService
          * Remove duplicates
          */
         $result = [
-            'colors' => array_values(array_unique($colors)),
+            'colors' => $colors,
             'urls'   => array_values(array_unique($urls)),
         ];
 
