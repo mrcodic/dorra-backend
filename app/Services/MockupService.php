@@ -58,7 +58,6 @@ class MockupService extends BaseService
             ->toArray();
 
         $urls = [];
-        $colors = [];
 
         foreach ($mockups as $mockup) {
 
