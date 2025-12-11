@@ -114,13 +114,13 @@
         box-sizing: border-box;
     }
 
-    /* إعدادات عامة للانيميشن */
+    /* show more button animation */
     :root {
         --anim-duration: 300ms;
         --anim-ease: cubic-bezier(.2, .9, .3, 1);
     }
 
-    /* وضع البداية للنص والسهم */
+    /* first position of text and arrow */
     .show-more-text,
     .show-more-arrow {
         display: inline-block;
@@ -128,20 +128,20 @@
         transition: transform var(--anim-duration) var(--anim-ease), opacity var(--anim-duration) var(--anim-ease);
     }
 
-    /* السهم مخفي في البداية (موقعه خارج اليمين) */
+    /* first position of the arrow is hidden and come from right */
     .show-more-arrow {
         opacity: 0;
         transform: translateX(10px) scale(0.9);
         pointer-events: none;
     }
 
-    /* النص ظاهر بمكانه */
+    /* text is in the same position */
     .show-more-text {
         opacity: 1;
         transform: translateX(0) scale(1);
     }
 
-    /* عند hover أو focus: النص يخرج لليسار، السهم يدخل من اليمين */
+    /* on focus or hover: the text go to left and the arrow come from right */
     .show-more-card:hover .show-more-text,
     .show-more-card:focus .show-more-text,
     .show-more-card:focus-within .show-more-text {
@@ -156,20 +156,18 @@
         transform: translateX(0) scale(1);
     }
 
-    /* تحسين بصري بسيط: حركة السهم صغيرة ومقوسة */
+    /* the movement of the arrow is delayed */
     .show-more-arrow {
         font-size: 22px;
         margin-left: 6px;
         transition-delay: 80ms;
-        /* يدخل بعد النص يبدأ بالخروج */
     }
 
     .show-more-text {
         transition-delay: 0ms;
-        /* يبتدي يخرج فورًا */
     }
 
-    /* اختياري — ظل وخفة عند hover */
+    /* on hover: some shadow and movement of the arrow */
     .show-more-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
