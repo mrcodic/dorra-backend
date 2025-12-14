@@ -55,8 +55,8 @@ class MockupService extends BaseService
             ->values()
             ->toArray();
 
-        $urls = $mockups->each(function ($mockup) use ($colors) {
-            $mockup->media
+        $urls = $mockups->map(function ($mockup) use ($colors) {
+           return $mockup->media
                 ->where('collection_name', 'generated_mockups')
                 ->map(fn($media) => $media->getFullUrl())
                 ->values()
