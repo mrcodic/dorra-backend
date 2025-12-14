@@ -82,7 +82,6 @@ class DashboardController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
         $validatedData = $request->validate($this->storeRequestClass->rules());
         $model = $this->service->storeResource($validatedData, $this->relationsToStore, $this->getRelations('store'));
         return $this->resourceClass ? Response::api(data: $this->resourceClass::make($model))

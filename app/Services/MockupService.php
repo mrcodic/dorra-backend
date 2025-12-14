@@ -136,7 +136,6 @@ class MockupService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        dd($validatedData);
         $model = $this->handleTransaction(function () use ($validatedData) {
 
             $model = $this->repository->create($validatedData);
@@ -332,10 +331,10 @@ class MockupService extends BaseService
                 } else {
                     $model->templates()->detach();
                 }
-            } else {
-                // لو مفيش templates في الريكوست
-                $model->templates()->detach();
+                // ✅ امسح generated قبل ما تعمل regenerate
+                $model->clearMediaCollection('generated_mockups');
             }
+
 
             // ✅ لو فيه ملفات مرفوعة: حدث الميديا أولاً (عشان base/mask/design يكونوا موجودين)
             if (request()->allFiles()) {
@@ -345,8 +344,7 @@ class MockupService extends BaseService
             // ✅ reload relations + pivot values
             $model->load(['templates', 'types', 'category', 'media']);
 
-            // ✅ امسح generated قبل ما تعمل regenerate
-            $model->clearMediaCollection('generated_mockups');
+
 
             // ✅ regenerate like store (per template, per type, per color)
             foreach ($model->templates as $template) {
