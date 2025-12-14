@@ -173,6 +173,7 @@
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
         transition: transform 180ms var(--anim-ease), box-shadow 180ms var(--anim-ease);
     }
+
 </style>
 @endsection
 
@@ -639,7 +640,6 @@
             // =========================
 
         $(document).on('click', '.js-show-on-mockup', function () {
-            persistCurrentTemplate();
             const $cardWrapper = $(this).closest('.template-card');
             const id = $cardWrapper.data('id');
             const front = $cardWrapper.data('front');
@@ -797,28 +797,7 @@
                 container.insertAdjacentHTML('beforeend', html);
             });
         }
-        $('form').on('submit', function () {
-            buildHiddenTemplateInputs();
-        });
-        window.templateState = {};
-        function persistCurrentTemplate() {
-            const templateId = $('#selectedTemplateId').val();
-            if (!templateId) return;
 
-            window.templateState[templateId] ??= {};
-            console.log(window.templateState)
-            const save = (canvas, side) => {
-                const obj = canvas?.getObjects()?.find(o => o.templateType === side);
-                if (!obj) return;
-
-                const meta = canvas.__mockupMeta;
-                window.templateState[templateId][side] = calculateObjectPercents(obj, meta);
-            };
-
-            save(canvasFront, 'front');
-            save(canvasBack,  'back');
-            save(canvasNone,  'none');
-        }
 
         function calculateObjectPercents(obj, meta) {
                 const center = obj.getCenterPoint();
@@ -833,10 +812,10 @@
                     angle: obj.angle || 0
                 };
             }
-
+        // $('form').on('submit', function () {
+        //     buildHiddenTemplateInputs();
+        // });
             $(document).on('click', '.js-save-positions', function () {
-                persistCurrentTemplate();
-                
                 if (typeof saveAllTemplatePositions === 'function') {
                     saveAllTemplatePositions();
                 }
@@ -1051,17 +1030,7 @@
                 img.templateId = templateId;
 
                 const meta = canvas.__mockupMeta;
-                const saved = window.templateState?.[templateId]?.[type];
-
-                if (saved) {
-                    img.left   = meta.offsetLeft + saved.xPct * meta.scaledWidth;
-                    img.top    = meta.offsetTop  + saved.yPct * meta.scaledHeight;
-                    img.scaleX = (saved.wPct * meta.scaledWidth) / img.width;
-                    img.scaleY = (saved.hPct * meta.scaledHeight) / img.height;
-                    img.angle  = saved.angle || 0;
-                } else {
-                    applyDefaultPlacement(img, canvas, meta);
-                }
+                applyDefaultPlacement(img, canvas, meta);
 
                 addDeleteControl(img, type);
 

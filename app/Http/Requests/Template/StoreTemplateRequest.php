@@ -35,6 +35,7 @@ class StoreTemplateRequest extends BaseRequest
             'category_ids.*' => ['integer', 'exists:categories,id'],
             'mockup_ids' => ['nullable', 'array'],
             'mockup_ids.*' => ['integer', 'exists:mockups,id'],
+            'mockup_id' => ['nullable'  ,'integer', 'exists:mockups,id'],
             'tags' => ['sometimes', 'array'],
             'tags.*' => ['integer', 'exists:tags,id'],
             'flags' => ['sometimes', 'array'],

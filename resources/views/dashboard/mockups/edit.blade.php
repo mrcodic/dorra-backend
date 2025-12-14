@@ -376,10 +376,156 @@
 
 </script>
 <script>
+    // =========================
+    // COLOR PICKER
+    // =========================
+
+    let pickrInstance  = null;
+    let currentCard    = null; // card for current pickr session
+
+    $(document).ready(function () {
+
+        // Destroy previous instance if exists
+        if (pickrInstance) pickrInstance.destroyAndRemove();
+
+        // Dummy element for pickr
+        const dummyElement = document.createElement('div');
+        document.body.appendChild(dummyElement);
+
+        pickrInstance = Pickr.create({
+            el: dummyElement,
+            theme: 'classic',
+            components: {
+                preview: false,
+                opacity: false,
+                hue: true,
+                interaction: {
+                    input: true,
+                    save: true,
+                    clear: true
+                }
+            }
+        });
+
+        // Handle save
+        pickrInstance.on('save', (color) => {
+            if (!currentCard) return;
+
+            const hex = color.toHEXA().toString();
+
+            // Store colors array in the card itself
+            if (!currentCard.selectedColors) currentCard.selectedColors = [];
+            if (!currentCard.selectedColors.includes(hex)) {
+                currentCard.selectedColors.push(hex);
+            }
+
+            renderSelectedColors(currentCard);
+            pickrInstance.hide();
+        });
+
+        // Handle clear
+        pickrInstance.on('clear', () => {
+            if (!currentCard) return;
+            currentCard.selectedColors = [];
+            renderSelectedColors(currentCard);
+            pickrInstance.hide();
+        });
+    });
+
+    // Open color picker
+    $(document).on('click', '.openColorPicker', function () {
+        const trigger = this;
+        const card = trigger.closest('.template-card');
+        currentCard = card;
+        // Initialize selectedColors array if not exists
+        if (!card.selectedColors) card.selectedColors = [];
+        console.log(card.selectedColors)
+        const rect = trigger.getBoundingClientRect();
+        const modalScrollTop = document.querySelector('#templateModal .modal-body')?.scrollTop || 0;
+        if (!card.selectedColors || !card.selectedColors.length) {
+        }
+        hydrateColorsForCard(card); // يجيب المحفوظ ويرسمه مرة واح-دة
+
+        pickrInstance.show();
+
+        setTimeout(() => {
+            const pickerPanel = document.querySelector('.pcr-app.visible');
+            if (pickerPanel) {
+                pickerPanel.style.position = 'absolute';
+                pickerPanel.style.left = `${rect.left + window.scrollX}px`;
+                pickerPanel.style.top = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
+                pickerPanel.style.zIndex = 9999;
+            }
+        }, 0);
+    });
+
+    // Remove color from current card
+    window.removeColor = function (hex) {
+        if (!currentCard || !currentCard.selectedColors) return;
+        currentCard.selectedColors = currentCard.selectedColors.filter(c => c !== hex);
+        renderSelectedColors(currentCard);
+    };
+
+    // Render colors inside a card
+    function renderSelectedColors(card) {
+        const ul = card.querySelector('.selected-colors');
+        const container = card.querySelector('.colorsInputContainer');
+
+        if (!ul || !container) return;
+
+        ul.innerHTML = '';
+        container.innerHTML = '';
+
+        (card.selectedColors || []).forEach(c => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <div class="selected-color-wrapper position-relative">
+                    <div class="selected-color-dot" style="background-color: #fff;">
+                        <div class="selected-color-inner" style="background-color: ${c};"></div>
+                    </div>
+                    <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
+                </div>
+            `;
+            ul.appendChild(li);
+
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type  = 'hidden';
+            hiddenInput.name  = 'colors[]';
+            hiddenInput.value = c;
+            container.appendChild(hiddenInput);
+        });
+    }
+    const templatesData = @json($model->templates ?? []);
+
+    // Map: template_id -> colors[]
+    const savedColorsById = new Map(
+        (templatesData || []).map(t => {
+            let colors = t?.pivot?.colors ?? [];
+            // لو متخزن JSON string
+            if (typeof colors === 'string') {
+                try { colors = JSON.parse(colors); } catch(e) { colors = []; }
+            }
+            if (!Array.isArray(colors)) colors = [];
+            return [t.id, colors];
+        })
+    );
+
+    function hydrateColorsForCard(cardEl) {
+        if (!cardEl) return;
+        const id =cardEl.getAttribute('data-id');
+        const saved = savedColorsById.get(id) || [];
+
+        cardEl.selectedColors = [...saved];
+        renderSelectedColors(cardEl);
+    }
+
+</script>
+<script>
     // When user clicks Save Changes of the whole form:
     $('form').on('submit', function () {
         buildHiddenTemplateInputs();
     });
+
 
     document.addEventListener('DOMContentLoaded', function () {
             const $productSelect = $('#productsSelect');
@@ -465,13 +611,14 @@
                                 Save Positions
                             </button>
                         </div>
-                        <div class="mb-2" style="padding-left: 10px;">
+                        <div class="mb-2" style="padding-left: 10px">
                             <label class="label-text mb-1 d-block">Colors</label>
                             <div class="d-flex flex-wrap align-items-center gap-1">
-                                <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
-                                <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>
+                               <button type="button" class="openColorPicker gradient-picker-trigger border"></button>
+
+                                <span  class="selected-colors d-flex gap-1 flex-wrap align-items-center"></span>
                             </div>
-                            <div id="colorsInputContainer"></div>
+                            <div class="colorsInputContainer"></div>
                         </div>
                     </div>
                 </div>
@@ -522,6 +669,7 @@
                 }
 
                 $templatesWrapper.removeClass('d-none');
+
             }
 
             // =========================
@@ -549,6 +697,7 @@
                 `;
                     $modalContainer.append(cardHtml);
                 });
+
             }
 
             function renderModalPagination() {
@@ -652,7 +801,6 @@
 
                 $modal.modal('show');
             });
-
             // =========================
             // Modal: Load More
             // =========================
@@ -1428,100 +1576,6 @@
         });
 </script>
 
-<script>
-    // =========================
-        // COLOR PICKER
-        // =========================
-        let selectedColors = @json($model->colors ?? []);
-        let pickrInstance = null;
 
-        $(document).ready(function () {
-            // Render any previously selected colors
-            renderSelectedColors();
-
-            if (pickrInstance) pickrInstance.destroyAndRemove();
-
-            const dummyElement = document.createElement('div');
-            document.body.appendChild(dummyElement);
-
-            pickrInstance = Pickr.create({
-                el: dummyElement,
-                theme: 'classic',
-                components: {
-                    preview: false,
-                    opacity: false,
-                    hue: true,
-                    interaction: {
-                        input: true,
-                        save: true,
-                        clear: true
-                    }
-                }
-            });
-
-            pickrInstance.on('save', (color) => {
-                const hex = color.toHEXA().toString();
-                if (!selectedColors.includes(hex)) {
-                    selectedColors.push(hex);
-                    renderSelectedColors();
-                }
-                pickrInstance.hide();
-            });
-        });
-
-        $('#openColorPicker').on('click', function () {
-            const trigger = document.getElementById('openColorPicker');
-            const rect = trigger.getBoundingClientRect();
-            const modalScrollTop = document.querySelector('#addMockupModal .modal-body')?.scrollTop || 0;
-
-            if (pickrInstance) {
-                pickrInstance.show();
-
-                setTimeout(() => {
-                    const pickerPanel = document.querySelector('.pcr-app.visible');
-                    if (pickerPanel) {
-                        pickerPanel.style.position = 'absolute';
-                        pickerPanel.style.left = `${rect.left + window.scrollX}px`;
-                        pickerPanel.style.top = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
-                        pickerPanel.style.zIndex = 9999;
-                    }
-                }, 0);
-            }
-        });
-
-        window.removeColor = function (hex) {
-            selectedColors = selectedColors.filter(c => c !== hex);
-            renderSelectedColors();
-        };
-
-        function renderSelectedColors() {
-            const ul = document.getElementById('selected-colors');
-            const container = document.getElementById('colorsInputContainer');
-
-            if (!ul || !container) return;
-
-            ul.innerHTML = '';
-            container.innerHTML = '';
-
-            selectedColors.forEach(c => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-            <div class="selected-color-wrapper position-relative">
-                <div class="selected-color-dot" style="background-color: #fff;">
-                    <div class="selected-color-inner" style="background-color: ${c};"></div>
-                </div>
-                <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
-            </div>
-        `;
-                ul.appendChild(li);
-
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'colors[]';
-                hiddenInput.value = c;
-                container.appendChild(hiddenInput);
-            });
-        }
-</script>
 
 @endsection
