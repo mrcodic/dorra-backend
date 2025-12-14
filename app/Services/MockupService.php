@@ -72,7 +72,7 @@ class MockupService extends BaseService
          */
         $result = [
             'colors' => $colors,
-            'urls'   => array_values(array_unique($urls)),
+            'urls'   => $urls,
         ];
 
         return $result;
