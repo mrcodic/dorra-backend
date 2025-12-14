@@ -155,7 +155,7 @@ class MainController extends Controller
         return Response::api(data: TypeResource::collection(Type::all(['id', 'value'])));
 
     }
-    
+
     public function addMedia(Request $request, $modelName = null, $model = null)
     {
         $modelId = (int) $model;

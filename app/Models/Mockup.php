@@ -103,7 +103,7 @@ class Mockup extends Model implements HasMedia
             'template_id'
         )
             ->using(MockupTemplate::class)
-            ->withPivot(['id','positions'])
+            ->withPivot(['id','positions','colors'])
             ->withTimestamps();
     }
 }
