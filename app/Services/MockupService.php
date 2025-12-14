@@ -59,14 +59,22 @@ class MockupService extends BaseService
             ->all();
 
 
+        $requested = $color ? (str_starts_with($color, '#') ? strtolower($color) : '#'.strtolower($color)) : null;
+
         $urls = $mockups
             ->flatMap(fn ($mockup) => $mockup->media
                 ->where('collection_name', 'generated_mockups')
+                ->filter(function ($media) use ($requested) {
+                    if (!$requested) return true;
+                    $hex = $media->getCustomProperty('hex');
+                    return is_string($hex) && strtolower($hex) === $requested;
+                })
                 ->map(fn ($media) => $media->getFullUrl())
             )
             ->unique()
             ->values()
             ->all();
+
 
 
 
