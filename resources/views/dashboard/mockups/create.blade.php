@@ -812,9 +812,9 @@
                     angle: obj.angle || 0
                 };
             }
-        $('form').on('submit', function () {
-            buildHiddenTemplateInputs();
-        });
+        // $('form').on('submit', function () {
+        //     buildHiddenTemplateInputs();
+        // });
             $(document).on('click', '.js-save-positions', function () {
                 if (typeof saveAllTemplatePositions === 'function') {
                     saveAllTemplatePositions();
