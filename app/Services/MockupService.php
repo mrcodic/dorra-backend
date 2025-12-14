@@ -59,7 +59,9 @@ class MockupService extends BaseService
            return $mockup->media
                 ->where('collection_name', 'generated_mockups')
                 ->map(fn($media) => $media->getFullUrl())
+               ->flatten()
                 ->values()
+
                 ->all();
 
         });
