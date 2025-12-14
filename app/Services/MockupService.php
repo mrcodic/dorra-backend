@@ -111,6 +111,7 @@ class MockupService extends BaseService
             }))
             ->when(request()->filled('product_ids'), fn($q) => $q->whereIn('category_id', request()->array('product_ids')))
             ->when(request()->filled('type'), fn($q) => $q->whereHas('types', fn($q) => $q->where('types.id', request('type'))))
+            ->when(request()->filled('types'), fn($q) => $q->whereHas('types', fn($q) => $q->whereIn('types.value', request('types'))))
             ->when(request()->filled('search'), function ($q) {
                 $q->where('name', 'like', '%' . request('search') . '%');
             })
@@ -144,7 +145,6 @@ class MockupService extends BaseService
             $templatesInput = collect(Arr::get($validatedData, 'templates', []));
 
             if ($templatesInput->isNotEmpty()) {
-
                 collect($validatedData['templates'])->each(function ($template) use ($model) {
                     $templateId = $template['template_id'] ?? null;
                     if (!$templateId) return;

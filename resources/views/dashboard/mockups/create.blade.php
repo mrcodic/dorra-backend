@@ -173,6 +173,7 @@
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
         transition: transform 180ms var(--anim-ease), box-shadow 180ms var(--anim-ease);
     }
+
 </style>
 @endsection
 

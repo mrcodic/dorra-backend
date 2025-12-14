@@ -167,10 +167,13 @@ class TemplateService extends BaseService
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->industries()->sync($validatedData['industry_ids'] ?? []);
             $model->categories()->sync($validatedData['category_ids'] ?? []);
-            $model->mockups()->syncWithPivotValues(
-                $validatedData['mockup_ids'] ?? [],
-                ['positions' => []]
-            );
+            if ($validatedData['mockup_id']){
+                $model->mockups()->syncWithPivotValues(
+                    [$validatedData['mockup_id']] ?? [],
+                    ['positions' => []]
+                );
+            }
+
             $model->types()->sync($validatedData['types']);
             $model->tags()->sync($validatedData['tags'] ?? []);
             $model->flags()->sync($validatedData['flags'] ?? []);
