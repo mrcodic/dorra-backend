@@ -59,11 +59,11 @@ class MockupService extends BaseService
             ? (str_starts_with($color, '#') ? strtolower($color) : '#'.strtolower($color))
             : null;
 
-        // ✅ collect all generated_mockups media from all returned models
+
         $media = $mockups
             ->flatMap(fn ($mockup) => $mockup->media->where('collection_name', 'generated_mockups'));
 
-        // ✅ filter by color if provided
+
         if ($requested) {
             $media = $media->filter(function ($m) use ($requested) {
                 $hex = $m->getCustomProperty('hex');
@@ -71,13 +71,11 @@ class MockupService extends BaseService
             });
         }
 
-        // pick first per side
+
         $front = $media->first(fn($m) => $m->getCustomProperty('side') === 'front')?->getFullUrl();
         $back  = $media->first(fn($m) => $m->getCustomProperty('side') === 'back')?->getFullUrl();
         $none  = $media->first(fn($m) => $m->getCustomProperty('side') === 'none')?->getFullUrl();
-
-        $urls = array_values(array_filter([$front, $back,$none])); // ✅ numeric array [front, back]
-
+        $urls = array_values(array_filter([$front, $back,$none]));
         return [
             'colors' => $colors,
             'urls'   => $urls,
@@ -213,7 +211,7 @@ class MockupService extends BaseService
                             return;
                         }
 
-                        $designMedia = $type == TypeEnum::BACK
+                        $designMedia = ($sideName === 'back')
                             ? $template->getFirstMedia('back_templates')
                             : $template->getFirstMedia('templates');
 
