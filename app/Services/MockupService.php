@@ -48,12 +48,16 @@ class MockupService extends BaseService
 
 
         $colors = $mockups
-            ->pluck('templates.pivot.colors')
-            ->filter()
+            ->flatMap(fn ($mockup) => $mockup->templates->map(function ($tpl) {
+                $c = $tpl->pivot->colors ?? [];
+                return is_array($c) ? $c : [];
+            }))
             ->flatten()
+            ->filter()
             ->unique()
             ->values()
-            ->toArray();
+            ->all();
+
 
         $urls = $mockups
             ->flatMap(fn ($mockup) => $mockup->media
