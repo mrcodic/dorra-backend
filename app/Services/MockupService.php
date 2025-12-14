@@ -25,9 +25,6 @@ class MockupService extends BaseService
         $templateId = request('template_id');
         $color      = request('color');
 
-        /**
-         * Fetch mockups
-         */
         $mockups = $this->repository
             ->query()
             ->when($productId, fn($q) => $q->whereCategoryId($productId))
@@ -46,10 +43,10 @@ class MockupService extends BaseService
             ])
             ->get();
 
-
         $colors = $mockups
             ->flatMap(fn ($mockup) => $mockup->templates->map(function ($tpl) {
                 $c = $tpl->pivot->colors ?? [];
+                if (is_string($c)) $c = json_decode($c, true) ?: [];
                 return is_array($c) ? $c : [];
             }))
             ->flatten()
@@ -58,10 +55,11 @@ class MockupService extends BaseService
             ->values()
             ->all();
 
+        $requested = $color
+            ? (str_starts_with($color, '#') ? strtolower($color) : '#'.strtolower($color))
+            : null;
 
-        $requested = $color ? (str_starts_with($color, '#') ? strtolower($color) : '#'.strtolower($color)) : null;
-
-        $urls = $mockups
+        $firstUrl = $mockups
             ->flatMap(fn ($mockup) => $mockup->media
                 ->where('collection_name', 'generated_mockups')
                 ->filter(function ($media) use ($requested) {
@@ -69,26 +67,13 @@ class MockupService extends BaseService
                     $hex = $media->getCustomProperty('hex');
                     return is_string($hex) && strtolower($hex) === $requested;
                 })
-                ->map(fn ($media) => $media->getFullUrl())
             )
-            ->unique()
-            ->values()
-            ->all();
+            ->first()?->getFullUrl();
 
-
-
-
-
-
-        /**
-         * Remove duplicates
-         */
-        $result = [
+        return [
             'colors' => $colors,
-            'urls'   => $urls,
+            'url'    => $firstUrl,
         ];
-
-        return $result;
     }
 
 
