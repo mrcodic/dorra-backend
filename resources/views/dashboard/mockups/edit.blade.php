@@ -413,8 +413,11 @@
 
             const hex = color.toHEXA().toString();
 
-            // Store colors array in the card itself
-            if (!currentCard.selectedColors) currentCard.selectedColors = [];
+            if (!Array.isArray(currentCard.selectedColors)) {
+                currentCard.selectedColors = [];
+            }
+
+            // ADD ONLY (no replace)
             if (!currentCard.selectedColors.includes(hex)) {
                 currentCard.selectedColors.push(hex);
             }
@@ -509,10 +512,13 @@
             return [t.id, colors];
         })
     );
-
     function hydrateColorsForCard(cardEl) {
         if (!cardEl) return;
-        const id =cardEl.getAttribute('data-id');
+
+        // ⛔ already has colors → do nothing
+        if (Array.isArray(cardEl.selectedColors)) return;
+
+        const id = cardEl.getAttribute('data-id');
         const saved = savedColorsById.get(id) || [];
 
         cardEl.selectedColors = [...saved];
