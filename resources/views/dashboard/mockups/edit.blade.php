@@ -4,327 +4,327 @@
 @section('main-page', 'Edit Mockup')
 
 @section('vendor-style')
-{{-- Page Css files --}}
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/dataTables.bootstrap5.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
-<style>
-    .gradient-picker-trigger {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-image: url('/images/AddColor.svg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        border: 1px solid #ccc;
-        cursor: pointer;
-        position: relative;
-    }
+    {{-- Page Css files --}}
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/dataTables.bootstrap5.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
+    <style>
+        .gradient-picker-trigger {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-image: url('/images/AddColor.svg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            position: relative;
+        }
 
-    .gradient-picker-trigger .pcr-button {
-        display: none !important;
-    }
+        .gradient-picker-trigger .pcr-button {
+            display: none !important;
+        }
 
-    .selected-color-wrapper {
-        width: 28px;
-        height: 28px;
-    }
+        .selected-color-wrapper {
+            width: 28px;
+            height: 28px;
+        }
 
-    .selected-color-dot {
-        width: 100%;
-        height: 100%;
-        padding: 1px;
-        border-radius: 50%;
-        border: 2px solid #ccc;
-        box-sizing: border-box;
-        background-clip: content-box;
-    }
+        .selected-color-dot {
+            width: 100%;
+            height: 100%;
+            padding: 1px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            box-sizing: border-box;
+            background-clip: content-box;
+        }
 
-    .selected-color-inner {
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-    }
+        .selected-color-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
 
-    .remove-color-btn {
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        background-color: #F4F6F6 !important;
-        color: #424746 !important;
-        border-radius: 5px;
-        width: 16px;
-        height: 16px;
-        font-size: 16px;
-        line-height: 1;
-        padding: 1px;
-        display: none;
-    }
+        .remove-color-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #F4F6F6 !important;
+            color: #424746 !important;
+            border-radius: 5px;
+            width: 16px;
+            height: 16px;
+            font-size: 16px;
+            line-height: 1;
+            padding: 1px;
+            display: none;
+        }
 
-    .selected-color-wrapper:hover .remove-color-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+        .selected-color-wrapper:hover .remove-color-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .gradient-edit-picker-trigger {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-image: url('/images/AddColor.svg') !important;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        border: 1px solid #ccc;
-        cursor: pointer;
-        position: relative;
-    }
+        .gradient-edit-picker-trigger {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-image: url('/images/AddColor.svg') !important;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            position: relative;
+        }
 
-    .gradient-edit-picker-trigger .pcr-button {
-        display: none !important;
-    }
+        .gradient-edit-picker-trigger .pcr-button {
+            display: none !important;
+        }
 
-    /* كل بلوك ياخد سطر كامل ويتكدس عموديًا */
-    .type-block {
-        display: block !important;
-        width: 100% !important;
-        box-sizing: border-box;
-        margin-bottom: .75rem;
-    }
+        /* كل بلوك ياخد سطر كامل ويتكدس عموديًا */
+        .type-block {
+            display: block !important;
+            width: 100% !important;
+            box-sizing: border-box;
+            margin-bottom: .75rem;
+        }
 
-    /* لو الـ inner d-flex موجود داخل البلوك فهو هعرض Base | Mask جنب بعض */
-    .type-block>.d-flex {
-        display: flex;
-        gap: 1rem;
-        align-items: flex-start;
-    }
+        /* لو الـ inner d-flex موجود داخل البلوك فهو هعرض Base | Mask جنب بعض */
+        .type-block>.d-flex {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
 
-    /* تأكد أن الحاوية اليسرى عمودية */
-    #left-column {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: .75rem;
-    }
+        /* تأكد أن الحاوية اليسرى عمودية */
+        #left-column {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: .75rem;
+        }
 
-    /* لو محتاج تجاويف داخل البلوكات */
-    .upload-card {
-        box-sizing: border-box;
-    }
+        /* لو محتاج تجاويف داخل البلوكات */
+        .upload-card {
+            box-sizing: border-box;
+        }
 
-    /* إعدادات عامة للانيميشن */
-    :root {
-        --anim-duration: 300ms;
-        --anim-ease: cubic-bezier(.2, .9, .3, 1);
-    }
+        /* إعدادات عامة للانيميشن */
+        :root {
+            --anim-duration: 300ms;
+            --anim-ease: cubic-bezier(.2, .9, .3, 1);
+        }
 
-    /* وضع البداية للنص والسهم */
-    .show-more-text,
-    .show-more-arrow {
-        display: inline-block;
-        vertical-align: middle;
-        transition: transform var(--anim-duration) var(--anim-ease), opacity var(--anim-duration) var(--anim-ease);
-    }
+        /* وضع البداية للنص والسهم */
+        .show-more-text,
+        .show-more-arrow {
+            display: inline-block;
+            vertical-align: middle;
+            transition: transform var(--anim-duration) var(--anim-ease), opacity var(--anim-duration) var(--anim-ease);
+        }
 
-    /* السهم مخفي في البداية (موقعه خارج اليمين) */
-    .show-more-arrow {
-        opacity: 0;
-        transform: translateX(10px) scale(0.9);
-        pointer-events: none;
-    }
+        /* السهم مخفي في البداية (موقعه خارج اليمين) */
+        .show-more-arrow {
+            opacity: 0;
+            transform: translateX(10px) scale(0.9);
+            pointer-events: none;
+        }
 
-    /* النص ظاهر بمكانه */
-    .show-more-text {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
+        /* النص ظاهر بمكانه */
+        .show-more-text {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
 
-    /* عند hover أو focus: النص يخرج لليسار، السهم يدخل من اليمين */
-    .show-more-card:hover .show-more-text,
-    .show-more-card:focus .show-more-text,
-    .show-more-card:focus-within .show-more-text {
-        opacity: 0;
-        transform: translateX(-30px) scale(0.95);
-    }
+        /* عند hover أو focus: النص يخرج لليسار، السهم يدخل من اليمين */
+        .show-more-card:hover .show-more-text,
+        .show-more-card:focus .show-more-text,
+        .show-more-card:focus-within .show-more-text {
+            opacity: 0;
+            transform: translateX(-30px) scale(0.95);
+        }
 
-    .show-more-card:hover .show-more-arrow,
-    .show-more-card:focus .show-more-arrow,
-    .show-more-card:focus-within .show-more-arrow {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
+        .show-more-card:hover .show-more-arrow,
+        .show-more-card:focus .show-more-arrow,
+        .show-more-card:focus-within .show-more-arrow {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
 
-    /* تحسين بصري بسيط: حركة السهم صغيرة ومقوسة */
-    .show-more-arrow {
-        font-size: 22px;
-        margin-left: 6px;
-        transition-delay: 80ms;
-        /* يدخل بعد النص يبدأ بالخروج */
-    }
+        /* تحسين بصري بسيط: حركة السهم صغيرة ومقوسة */
+        .show-more-arrow {
+            font-size: 22px;
+            margin-left: 6px;
+            transition-delay: 80ms;
+            /* يدخل بعد النص يبدأ بالخروج */
+        }
 
-    .show-more-text {
-        transition-delay: 0ms;
-        /* يبتدي يخرج فورًا */
-    }
+        .show-more-text {
+            transition-delay: 0ms;
+            /* يبتدي يخرج فورًا */
+        }
 
-    /* اختياري — ظل وخفة عند hover */
-    .show-more-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-        transition: transform 180ms var(--anim-ease), box-shadow 180ms var(--anim-ease);
-    }
-</style>
+        /* اختياري — ظل وخفة عند hover */
+        .show-more-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            transition: transform 180ms var(--anim-ease), box-shadow 180ms var(--anim-ease);
+        }
+    </style>
 @endsection
 
 @section('page-style')
-{{-- Page Css files --}}
-<link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
+    {{-- Page Css files --}}
+    <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 @endsection
 
 @section('content')
-<!-- users list start -->
-<section class="">
-    <div class="card">
-        <div class="card-body">
-            <form id="editMockupForm" enctype="multipart/form-data" action="{{ route('mockups.update',$model->id) }}">
-                @csrf
-                @method('PUT')
-                <div class="modal-body flex-grow-1">
-                    <div class="position-relative text-center mb-2">
-                        <hr class="opacity-75" style="border: 1px solid #24B094;">
-                        <span
-                            class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
-                            style="color: #24B094">
+    <!-- users list start -->
+    <section class="">
+        <div class="card">
+            <div class="card-body">
+                <form id="editMockupForm" enctype="multipart/form-data" action="{{ route('mockups.update',$model->id) }}">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body flex-grow-1">
+                        <div class="position-relative text-center mb-2">
+                            <hr class="opacity-75" style="border: 1px solid #24B094;">
+                            <span
+                                class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                style="color: #24B094">
                             Mockup Details
                         </span>
-                    </div>
-                    <div class="row">
-                        <div class="form-group mb-2 col-md-3">
-                            <input type="text" id="templateName" class="form-control" name="name"
-                                placeholder="Mockup Name" value="{{ $model->name }}">
                         </div>
+                        <div class="row">
+                            <div class="form-group mb-2 col-md-3">
+                                <input type="text" id="templateName" class="form-control" name="name"
+                                       placeholder="Mockup Name" value="{{ $model->name }}">
+                            </div>
 
-                        <div class="form-group mb-2 col-md-9">
-                            <div class="row">
-                                @foreach($associatedData['types'] as $type)
-                                <div class="col-md-4 mb-1">
-                                    <label class="radio-box">
-                                        <input class="form-check-input type-checkbox" type="checkbox" name="types[]"
-                                            value="{{ $type->value }}" @checked($model->types->contains($type))
-                                        data-type-name="{{ strtolower($type->value->name) }}">
-                                        <span>{{ $type->value->label() }}</span>
-                                    </label>
+                            <div class="form-group mb-2 col-md-9">
+                                <div class="row">
+                                    @foreach($associatedData['types'] as $type)
+                                        <div class="col-md-4 mb-1">
+                                            <label class="radio-box">
+                                                <input class="form-check-input type-checkbox" type="checkbox" name="types[]"
+                                                       value="{{ $type->value }}" @checked($model->types->contains($type))
+                                                       data-type-name="{{ strtolower($type->value->name) }}">
+                                                <span>{{ $type->value->label() }}</span>
+                                            </label>
+                                        </div>
+                                    @endforeach
                                 </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <!-- العمود الشمال: يحتوي fixed-block + fileInputsContainer (البلوكات تتحط هنا) -->
+                            <div id="left-column" class="d-flex flex-column" style="width:60%;">
+                                <!-- fixed-block يبقى مكان الإشارة لفانكشنك -->
+                                <div id="fixed-block"></div>
+
+                                <!-- الحاوية اللى بتضيف لها الفانكشن البلوكات (لو مش موجودة بالفعل) -->
+                                <div id="fileInputsContainer"></div>
+                            </div>
+
+                            <!-- العمود اليمين: الـ editor / preview -->
+                            <div class="d-flex flex-column gap-2 justify-content-between">
+                                <div class="mt-2 d-none" id="editorFrontWrapper" style="width:auto">
+                                    <label class="label-text">Mockup Editor (Front)</label>
+                                    <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="300"></canvas>
+                                </div>
+                                <div class="mt-2 d-none" id="editorBackWrapper" style="width:auto">
+                                    <label class="label-text">Mockup Editor (Back)</label>
+                                    <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="300"></canvas>
+                                </div>
+
+                                <div class="mt-2 d-none" id="editorNoneWrapper" style="width: auto">
+                                    <label class="label-text">Mockup Editor (General)</label>
+                                    <canvas id="mockupCanvasNone" height="300" style="border:1px solid #ccc;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-2">
+                            <label for="productsSelect" class="label-text mb-1">Product</label>
+                            <select id="productsSelect" name="category_id" class="form-select">
+                                <option value="" disabled selected>Choose product</option>
+                                @foreach($associatedData['products'] as $product)
+                                    <option value="{{ $product->id }}" @selected($product->id == $model->category_id)>
+                                        {{ $product->getTranslation('name', app()->getLocale()) }}
+                                    </option>
                                 @endforeach
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-start">
-                        <!-- العمود الشمال: يحتوي fixed-block + fileInputsContainer (البلوكات تتحط هنا) -->
-                        <div id="left-column" class="d-flex flex-column" style="width:60%;">
-                            <!-- fixed-block يبقى مكان الإشارة لفانكشنك -->
-                            <div id="fixed-block"></div>
-
-                            <!-- الحاوية اللى بتضيف لها الفانكشن البلوكات (لو مش موجودة بالفعل) -->
-                            <div id="fileInputsContainer"></div>
+                            </select>
                         </div>
 
-                        <!-- العمود اليمين: الـ editor / preview -->
-                        <div class="d-flex flex-column gap-2 justify-content-between">
-                            <div class="mt-2 d-none" id="editorFrontWrapper" style="width:auto">
-                                <label class="label-text">Mockup Editor (Front)</label>
-                                <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="300"></canvas>
-                            </div>
-                            <div class="mt-2 d-none" id="editorBackWrapper" style="width:auto">
-                                <label class="label-text">Mockup Editor (Back)</label>
-                                <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="300"></canvas>
-                            </div>
+                        <div class="form-group mb-2 d-none" id="templatesCardsWrapper">
+                            <label class="form-label mb-1">Choose Template</label>
 
-                            <div class="mt-2 d-none" id="editorNoneWrapper" style="width: auto">
-                                <label class="label-text">Mockup Editor (General)</label>
-                                <canvas id="mockupCanvasNone" height="300" style="border:1px solid #ccc;"></canvas>
-                            </div>
+                            {{-- هنا هتنضاف الكروت بالـ JS --}}
+                            <div id="templatesCardsContainer"
+                                 class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm"></div>
+                            <input type="hidden" name="template_id" id="selectedTemplateId">
+                            <div id="templatesHiddenContainer"></div>
+
                         </div>
-                    </div>
-
-                    <div class="form-group mb-2">
-                        <label for="productsSelect" class="label-text mb-1">Product</label>
-                        <select id="productsSelect" name="category_id" class="form-select">
-                            <option value="" disabled selected>Choose product</option>
-                            @foreach($associatedData['products'] as $product)
-                            <option value="{{ $product->id }}" @selected($product->id == $model->category_id)>
-                                {{ $product->getTranslation('name', app()->getLocale()) }}
-                            </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="form-group mb-2 d-none" id="templatesCardsWrapper">
-                        <label class="form-label mb-1">Choose Template</label>
-
-                        {{-- هنا هتنضاف الكروت بالـ JS --}}
-                        <div id="templatesCardsContainer"
-                            class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm"></div>
-                        <input type="hidden" name="template_id" id="selectedTemplateId">
-                        <div id="templatesHiddenContainer"></div>
 
                     </div>
 
-                </div>
+                    {{-- <div class="mb-2">
+                        <label class="label-text mb-1 d-block">Colors</label>
+                        <div class="d-flex flex-wrap align-items-center gap-1">
+                            <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
 
-                {{-- <div class="mb-2">
-                    <label class="label-text mb-1 d-block">Colors</label>
-                    <div class="d-flex flex-wrap align-items-center gap-1">
-                        <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
+                            <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>
+                        </div>
+                        <div id="colorsInputContainer"></div>
+                    </div> --}}
 
-                        <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>
+                    <div class="modal-footer border-top-0">
+                        <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
+                            <span class="btn-text">Save Changes</span>
+                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
+                                  aria-hidden="true"></span>
+                        </button>
                     </div>
-                    <div id="colorsInputContainer"></div>
-                </div> --}}
 
-                <div class="modal-footer border-top-0">
-                    <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
-                        <span class="btn-text">Save Changes</span>
-                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                            aria-hidden="true"></span>
-                    </button>
-                </div>
-
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
-    @include("modals.templates.template-modal")
-</section>
-<!-- users list ends -->
+        @include("modals.templates.template-modal")
+    </section>
+    <!-- users list ends -->
 @endsection
 
 @section('vendor-script')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
 
-{{-- Vendor js files --}}
-<script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
+    {{-- Vendor js files --}}
+    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
 @endsection
 
 @section('page-script')
-<script>
-    function capitalize(str) {
+    <script>
+        function capitalize(str) {
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
@@ -374,114 +374,114 @@
             @endif
         });
 
-</script>
-<script>
-    // =========================
-    // COLOR PICKER
-    // =========================
+    </script>
+    <script>
+        // =========================
+        // COLOR PICKER
+        // =========================
 
-    let pickrInstance  = null;
-    let currentCard    = null; // card for current pickr session
+        let pickrInstance  = null;
+        let currentCard    = null; // card for current pickr session
 
-    $(document).ready(function () {
+        $(document).ready(function () {
 
-        // Destroy previous instance if exists
-        if (pickrInstance) pickrInstance.destroyAndRemove();
+            // Destroy previous instance if exists
+            if (pickrInstance) pickrInstance.destroyAndRemove();
 
-        // Dummy element for pickr
-        const dummyElement = document.createElement('div');
-        document.body.appendChild(dummyElement);
+            // Dummy element for pickr
+            const dummyElement = document.createElement('div');
+            document.body.appendChild(dummyElement);
 
-        pickrInstance = Pickr.create({
-            el: dummyElement,
-            theme: 'classic',
-            components: {
-                preview: false,
-                opacity: false,
-                hue: true,
-                interaction: {
-                    input: true,
-                    save: true,
-                    clear: true
+            pickrInstance = Pickr.create({
+                el: dummyElement,
+                theme: 'classic',
+                components: {
+                    preview: false,
+                    opacity: false,
+                    hue: true,
+                    interaction: {
+                        input: true,
+                        save: true,
+                        clear: true
+                    }
                 }
-            }
-        });
+            });
 
-        // Handle save
-        pickrInstance.on('save', (color) => {
-            if (!currentCard) return;
+            // Handle save
+            pickrInstance.on('save', (color) => {
+                if (!currentCard) return;
 
-            const hex = color.toHEXA().toString();
+                const hex = color.toHEXA().toString();
 
-            if (!Array.isArray(currentCard.selectedColors)) {
+                if (!Array.isArray(currentCard.selectedColors)) {
+                    currentCard.selectedColors = [];
+                }
+
+                // ADD ONLY (no replace)
+                if (!currentCard.selectedColors.includes(hex)) {
+                    currentCard.selectedColors.push(hex);
+                }
+
+                renderSelectedColors(currentCard);
+                pickrInstance.hide();
+            });
+
+            // Handle clear
+            pickrInstance.on('clear', () => {
+                if (!currentCard) return;
                 currentCard.selectedColors = [];
-            }
-
-            // ADD ONLY (no replace)
-            if (!currentCard.selectedColors.includes(hex)) {
-                currentCard.selectedColors.push(hex);
-            }
-
-            renderSelectedColors(currentCard);
-            pickrInstance.hide();
+                renderSelectedColors(currentCard);
+                pickrInstance.hide();
+            });
         });
 
-        // Handle clear
-        pickrInstance.on('clear', () => {
-            if (!currentCard) return;
-            currentCard.selectedColors = [];
-            renderSelectedColors(currentCard);
-            pickrInstance.hide();
-        });
-    });
-
-    // Open color picker
-    $(document).on('click', '.openColorPicker', function () {
-        const trigger = this;
-        const card = trigger.closest('.template-card');
-        currentCard = card;
-        // Initialize selectedColors array if not exists
-        if (!card.selectedColors) card.selectedColors = [];
-        console.log(card.selectedColors)
-        const rect = trigger.getBoundingClientRect();
-        const modalScrollTop = document.querySelector('#templateModal .modal-body')?.scrollTop || 0;
-        if (!card.selectedColors || !card.selectedColors.length) {
-        }
-        hydrateColorsForCard(card); // يجيب المحفوظ ويرسمه مرة واح-دة
-
-        pickrInstance.show();
-
-        setTimeout(() => {
-            const pickerPanel = document.querySelector('.pcr-app.visible');
-            if (pickerPanel) {
-                pickerPanel.style.position = 'absolute';
-                pickerPanel.style.left = `${rect.left + window.scrollX}px`;
-                pickerPanel.style.top = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
-                pickerPanel.style.zIndex = 9999;
+        // Open color picker
+        $(document).on('click', '.openColorPicker', function () {
+            const trigger = this;
+            const card = trigger.closest('.template-card');
+            currentCard = card;
+            // Initialize selectedColors array if not exists
+            if (!card.selectedColors) card.selectedColors = [];
+            console.log(card.selectedColors)
+            const rect = trigger.getBoundingClientRect();
+            const modalScrollTop = document.querySelector('#templateModal .modal-body')?.scrollTop || 0;
+            if (!card.selectedColors || !card.selectedColors.length) {
             }
-        }, 0);
-    });
+            hydrateColorsForCard(card); // يجيب المحفوظ ويرسمه مرة واح-دة
 
-    // Remove color from current card
-    window.removeColor = function (hex) {
-        if (!currentCard || !currentCard.selectedColors) return;
-        currentCard.selectedColors = currentCard.selectedColors.filter(c => c !== hex);
-        renderSelectedColors(currentCard);
-    };
+            pickrInstance.show();
 
-    // Render colors inside a card
-    function renderSelectedColors(card) {
-        const ul = card.querySelector('.selected-colors');
-        const container = card.querySelector('.colorsInputContainer');
+            setTimeout(() => {
+                const pickerPanel = document.querySelector('.pcr-app.visible');
+                if (pickerPanel) {
+                    pickerPanel.style.position = 'absolute';
+                    pickerPanel.style.left = `${rect.left + window.scrollX}px`;
+                    pickerPanel.style.top = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
+                    pickerPanel.style.zIndex = 9999;
+                }
+            }, 0);
+        });
 
-        if (!ul || !container) return;
+        // Remove color from current card
+        window.removeColor = function (hex) {
+            if (!currentCard || !currentCard.selectedColors) return;
+            currentCard.selectedColors = currentCard.selectedColors.filter(c => c !== hex);
+            renderSelectedColors(currentCard);
+        };
 
-        ul.innerHTML = '';
-        container.innerHTML = '';
+        // Render colors inside a card
+        function renderSelectedColors(card) {
+            const ul = card.querySelector('.selected-colors');
+            const container = card.querySelector('.colorsInputContainer');
 
-        (card.selectedColors || []).forEach(c => {
-            const li = document.createElement('li');
-            li.innerHTML = `
+            if (!ul || !container) return;
+
+            ul.innerHTML = '';
+            container.innerHTML = '';
+
+            (card.selectedColors || []).forEach(c => {
+                const li = document.createElement('li');
+                li.innerHTML = `
                 <div class="selected-color-wrapper position-relative">
                     <div class="selected-color-dot" style="background-color: #fff;">
                         <div class="selected-color-inner" style="background-color: ${c};"></div>
@@ -489,51 +489,51 @@
                     <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
                 </div>
             `;
-            ul.appendChild(li);
+                ul.appendChild(li);
 
-            const hiddenInput = document.createElement('input');
-            hiddenInput.type  = 'hidden';
-            hiddenInput.name  = 'colors[]';
-            hiddenInput.value = c;
-            container.appendChild(hiddenInput);
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type  = 'hidden';
+                hiddenInput.name  = 'colors[]';
+                hiddenInput.value = c;
+                container.appendChild(hiddenInput);
+            });
+        }
+        const templatesData = @json($model->templates ?? []);
+
+        // Map: template_id -> colors[]
+        const savedColorsById = new Map(
+            (templatesData || []).map(t => {
+                let colors = t?.pivot?.colors ?? [];
+                // لو متخزن JSON string
+                if (typeof colors === 'string') {
+                    try { colors = JSON.parse(colors); } catch(e) { colors = []; }
+                }
+                if (!Array.isArray(colors)) colors = [];
+                return [t.id, colors];
+            })
+        );
+        function hydrateColorsForCard(cardEl) {
+            if (!cardEl) return;
+
+            // ⛔ already has colors → do nothing
+            if (Array.isArray(cardEl.selectedColors)) return;
+
+            const id = cardEl.getAttribute('data-id');
+            const saved = savedColorsById.get(id) || [];
+
+            cardEl.selectedColors = [...saved];
+            renderSelectedColors(cardEl);
+        }
+
+    </script>
+    <script>
+        // When user clicks Save Changes of the whole form:
+        $('form').on('submit', function () {
+            buildHiddenTemplateInputs();
         });
-    }
-    const templatesData = @json($model->templates ?? []);
-
-    // Map: template_id -> colors[]
-    const savedColorsById = new Map(
-        (templatesData || []).map(t => {
-            let colors = t?.pivot?.colors ?? [];
-            // لو متخزن JSON string
-            if (typeof colors === 'string') {
-                try { colors = JSON.parse(colors); } catch(e) { colors = []; }
-            }
-            if (!Array.isArray(colors)) colors = [];
-            return [t.id, colors];
-        })
-    );
-    function hydrateColorsForCard(cardEl) {
-        if (!cardEl) return;
-
-        // ⛔ already has colors → do nothing
-        if (Array.isArray(cardEl.selectedColors)) return;
-
-        const id = cardEl.getAttribute('data-id');
-        const saved = savedColorsById.get(id) || [];
-
-        cardEl.selectedColors = [...saved];
-        renderSelectedColors(cardEl);
-    }
-
-</script>
-<script>
-    // When user clicks Save Changes of the whole form:
-    $('form').on('submit', function () {
-        buildHiddenTemplateInputs();
-    });
 
 
-    document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {
             const $productSelect = $('#productsSelect');
             const $templatesWrapper = $('#templatesCardsWrapper');
             const $templatesCardsContainer = $('#templatesCardsContainer');
@@ -895,73 +895,73 @@
 // =========================
 // Save Positions (cards + modal)
 // =========================
-        function buildHiddenTemplateInputs() {
-            const container = document.getElementById("templatesHiddenContainer");
-            container.innerHTML = "";
+            function buildHiddenTemplateInputs() {
+                const container = document.getElementById("templatesHiddenContainer");
+                container.innerHTML = "";
 
-            const previousTemplates = @json($model->templates ?? []);
-            const templateId = $('#selectedTemplateId').val();
+                const previousTemplates = @json($model->templates ?? []);
+                const templateId = $('#selectedTemplateId').val();
 
-            let html = '';
-            let found = false;
+                let html = '';
+                let found = false;
 
-            // Include all previous templates, but override if templateId matches
-            previousTemplates.forEach((tpl, index) => {
-                let currentTemplateId = tpl.id;
+                // Include all previous templates, but override if templateId matches
+                previousTemplates.forEach((tpl, index) => {
+                    let currentTemplateId = tpl.id;
 
-                html += `<input type="hidden" name="templates[${index}][template_id]" value="${currentTemplateId}">`;
+                    html += `<input type="hidden" name="templates[${index}][template_id]" value="${currentTemplateId}">`;
 
-                ['front', 'back', 'none'].forEach(side => {
-                    let x, y, w, h, angle;
+                    ['front', 'back', 'none'].forEach(side => {
+                        let x, y, w, h, angle;
 
-                    if (currentTemplateId == templateId) {
-                        // Override with client-side values if object exists on canvas
+                        if (currentTemplateId == templateId) {
+                            // Override with client-side values if object exists on canvas
+                            const obj = window['canvas' + capitalize(side)]?.getObjects()?.find(o => o.templateType === side);
+                            if (obj) {
+                                const meta = window['canvas' + capitalize(side)].__mockupMeta;
+                                ({ xPct: x, yPct: y, wPct: w, hPct: h, angle } = calculateObjectPercents(obj, meta));
+                                found = true;
+                            }
+                        } else if (tpl.pivot?.positions[side + '_x'] != null) {
+                            // Keep existing backend values
+                            x = tpl.pivot[side + '_x'];
+                            y = tpl.pivot[side + '_y'];
+                            w = tpl.pivot[side + '_width'];
+                            h = tpl.pivot[side + '_height'];
+                            angle = tpl.pivot[side + '_angle'];
+                        }
+
+                        if (x != null) {
+                            html += `<input type="hidden" name="templates[${index}][${side}_x]" value="${x}">`;
+                            html += `<input type="hidden" name="templates[${index}][${side}_y]" value="${y}">`;
+                            html += `<input type="hidden" name="templates[${index}][${side}_width]" value="${w}">`;
+                            html += `<input type="hidden" name="templates[${index}][${side}_height]" value="${h}">`;
+                            html += `<input type="hidden" name="templates[${index}][${side}_angle]" value="${angle}">`;
+                        }
+                    });
+                });
+
+                // If it's a new template (not in previousTemplates), add it at the end
+                if (templateId && !found) {
+                    let index = previousTemplates.length;
+                    html += `<input type="hidden" name="templates[${index}][template_id]" value="${templateId}">`;
+
+                    ['front', 'back', 'none'].forEach(side => {
                         const obj = window['canvas' + capitalize(side)]?.getObjects()?.find(o => o.templateType === side);
                         if (obj) {
                             const meta = window['canvas' + capitalize(side)].__mockupMeta;
-                            ({ xPct: x, yPct: y, wPct: w, hPct: h, angle } = calculateObjectPercents(obj, meta));
-                            found = true;
+                            const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
+                            html += `<input type="hidden" name="templates[${index}][${side}_x]" value="${xPct}">`;
+                            html += `<input type="hidden" name="templates[${index}][${side}_y]" value="${yPct}">`;
+                            html += `<input type="hidden" name="templates[${index}][${side}_width]" value="${wPct}">`;
+                            html += `<input type="hidden" name="templates[${index}][${side}_height]" value="${hPct}">`;
+                            html += `<input type="hidden" name="templates[${index}][${side}_angle]" value="${angle}">`;
                         }
-                    } else if (tpl.pivot?.positions[side + '_x'] != null) {
-                        // Keep existing backend values
-                        x = tpl.pivot[side + '_x'];
-                        y = tpl.pivot[side + '_y'];
-                        w = tpl.pivot[side + '_width'];
-                        h = tpl.pivot[side + '_height'];
-                        angle = tpl.pivot[side + '_angle'];
-                    }
+                    });
+                }
 
-                    if (x != null) {
-                        html += `<input type="hidden" name="templates[${index}][${side}_x]" value="${x}">`;
-                        html += `<input type="hidden" name="templates[${index}][${side}_y]" value="${y}">`;
-                        html += `<input type="hidden" name="templates[${index}][${side}_width]" value="${w}">`;
-                        html += `<input type="hidden" name="templates[${index}][${side}_height]" value="${h}">`;
-                        html += `<input type="hidden" name="templates[${index}][${side}_angle]" value="${angle}">`;
-                    }
-                });
-            });
-
-            // If it's a new template (not in previousTemplates), add it at the end
-            if (templateId && !found) {
-                let index = previousTemplates.length;
-                html += `<input type="hidden" name="templates[${index}][template_id]" value="${templateId}">`;
-
-                ['front', 'back', 'none'].forEach(side => {
-                    const obj = window['canvas' + capitalize(side)]?.getObjects()?.find(o => o.templateType === side);
-                    if (obj) {
-                        const meta = window['canvas' + capitalize(side)].__mockupMeta;
-                        const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
-                        html += `<input type="hidden" name="templates[${index}][${side}_x]" value="${xPct}">`;
-                        html += `<input type="hidden" name="templates[${index}][${side}_y]" value="${yPct}">`;
-                        html += `<input type="hidden" name="templates[${index}][${side}_width]" value="${wPct}">`;
-                        html += `<input type="hidden" name="templates[${index}][${side}_height]" value="${hPct}">`;
-                        html += `<input type="hidden" name="templates[${index}][${side}_angle]" value="${angle}">`;
-                    }
-                });
+                container.innerHTML = html;
             }
-
-            container.innerHTML = html;
-        }
 
             function calculateObjectPercents(obj, meta) {
                 const center = obj.getCenterPoint();
@@ -1005,11 +1005,11 @@
             });
 
         });
-</script>
+    </script>
 
 
-<script>
-    // =========================
+    <script>
+        // =========================
         // CANVAS HELPER FUNCTIONS
         // =========================
         window.canvasFront = new fabric.Canvas('mockupCanvasFront');
@@ -1262,10 +1262,10 @@
         bindCanvasUpdates(window.canvasFront, "front");
         bindCanvasUpdates(window.canvasBack, "back");
         bindCanvasUpdates(window.canvasNone, "none");
-</script>
+    </script>
 
-<script>
-    // =========================
+    <script>
+        // =========================
         // TYPE CHECKBOXES + UPLOAD AREAS
         // =========================
         const checkboxes = document.querySelectorAll('.type-checkbox');
@@ -1495,10 +1495,10 @@
         }
 
         checkboxes.forEach(cb => cb.addEventListener('change', toggleCheckboxes));
-</script>
+    </script>
 
-<script>
-    // =========================
+    <script>
+        // =========================
         // MAIN IMAGE UPLOAD + FORM SUBMIT
         // =========================
         $(document).ready(function () {
@@ -1580,7 +1580,7 @@
                 input.val('');
             });
         });
-</script>
+    </script>
 
 
 
