@@ -741,7 +741,7 @@
             selectedTemplates.forEach((card, index) => {
                 const templateId = card.dataset.id;
                 const selectedColors = card.selectedColors || [];
-
+                console.log("kjjkjk",templateId)
                 let html = `<input type="hidden" name="templates[${index}][template_id]" value="${templateId}">`;
 
                 function add(name, value) {
@@ -817,11 +817,13 @@
 
             // 1️⃣ Update positions from all canvases
             if (typeof saveAllTemplatePositions === 'function') {
+                buildHiddenTemplateInputs();
                 saveAllTemplatePositions();
+
             }
 
             // 2️⃣ Build hidden inputs inside form
-            buildHiddenTemplateInputs();
+
 
             // 3️⃣ Verify before submit
             console.log("Hidden inputs:", $('#templatesHiddenContainer input').length);
@@ -897,18 +899,16 @@
         }
 
     function syncTemplateInputs(obj, type) {
-        const wrapper = document.getElementById('templatesCardsWrapper');
-        if (!wrapper) return;
+        const container = document.getElementById('templatesHiddenContainer');
+        if (!container) return;
 
         const canvas = obj.canvas;
         const meta = canvas && canvas.__mockupMeta;
-
-
         if (!meta) return;
 
-        // ✅ find correct template container
         const templateId = obj.templateId;
-        const templateContainer = wrapper.querySelector(`.template-inputs[data-template-id="${templateId}"]`);
+
+        const templateContainer = container.querySelector(`.template-inputs[data-template-id="${templateId}"]`);
         if (!templateContainer) return;
 
         const xInput = templateContainer.querySelector(`.template_x.${type}`);
@@ -916,25 +916,28 @@
         const widthInput = templateContainer.querySelector(`.template_width.${type}`);
         const heightInput = templateContainer.querySelector(`.template_height.${type}`);
         const angleInput = templateContainer.querySelector(`.template_angle.${type}`);
-
         if (!xInput || !yInput || !widthInput || !heightInput || !angleInput) return;
 
         const center = obj.getCenterPoint();
-        const wReal = obj.width * obj.scaleX;
-        const hReal = obj.height * obj.scaleY;
+        const wReal  = (obj.width || 0) * (obj.scaleX || 1);
+        const hReal  = (obj.height || 0) * (obj.scaleY || 1);
 
-        const xPct = (center.x - meta.offsetLeft) / meta.scaledWidth;
-        const yPct = (center.y - meta.offsetTop) / meta.scaledHeight;
-        const wPct = wReal / meta.scaledWidth;
-        const hPct = hReal / meta.scaledHeight;
+        let xPct = (center.x - meta.offsetLeft) / meta.scaledWidth;
+        let yPct = (center.y - meta.offsetTop)  / meta.scaledHeight;
+        let wPct = wReal / meta.scaledWidth;
+        let hPct = hReal / meta.scaledHeight;
 
-        xInput.value = xPct.toFixed(6);
-        yInput.value = yPct.toFixed(6);
-        widthInput.value = wPct.toFixed(6);
+        if (!Number.isFinite(xPct)) xPct = 0;
+        if (!Number.isFinite(yPct)) yPct = 0;
+        if (!Number.isFinite(wPct)) wPct = 0;
+        if (!Number.isFinite(hPct)) hPct = 0;
+
+        xInput.value      = xPct.toFixed(6);
+        yInput.value      = yPct.toFixed(6);
+        widthInput.value  = wPct.toFixed(6);
         heightInput.value = hPct.toFixed(6);
-        angleInput.value = obj.angle || 0;
+        angleInput.value  = String(obj.angle || 0);
     }
-
 
     function clearTemplateInputsForObject(type) {
             const wrapper = document.getElementById('templatesCardsWrapper');
