@@ -348,6 +348,7 @@ class TemplateService extends BaseService
         $model = $this->repository->update($validatedData, $id);
 
         if (isset($validatedData['base64_preview_image'])) {
+            dd("DSfsd");
             ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model, 'templates');
         }
         if (isset($validatedData['back_base64_preview_image'])) {
