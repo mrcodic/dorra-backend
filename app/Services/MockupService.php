@@ -296,20 +296,13 @@ class MockupService extends BaseService
 
             $model = $this->repository->update($validatedData, $id);
 
-            // لو types اتغيرت: افصل templates (زي عندك)
+            // 1️⃣ sync types
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
-            $modelTypesValues   = $model->types->pluck('value.value')->toArray();
-
-            if (collect($selectedTypeValues)->sort()->values()->all() != collect($modelTypesValues)->sort()->values()->all()) {
-                $model->templates()->detach();
-            }
-
-            // sync types
             $model->types()->sync($selectedTypeValues);
 
+            // 2️⃣ sync templates
             $templatesInput = collect(Arr::get($validatedData, 'templates', []));
 
-            // ✅ sync templates pivot (positions + colors)
             if ($templatesInput->isNotEmpty()) {
                 $syncData = [];
 
@@ -319,7 +312,7 @@ class MockupService extends BaseService
 
                     $positions = collect($template)
                         ->except(['template_id', 'colors'])
-                        ->filter(fn ($v) => !is_null($v) && $v !== '')
+                        ->filter(fn($v) => $v !== null && $v !== '')
                         ->toArray();
 
                     $colors = Arr::get($template, 'colors', []);
@@ -329,7 +322,7 @@ class MockupService extends BaseService
                     if (!is_array($colors)) $colors = [];
 
                     $colors = collect($colors)
-                        ->filter(fn ($c) => is_string($c) && preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $c))
+                        ->filter(fn($c) => is_string($c) && preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $c))
                         ->values()
                         ->all();
 
@@ -339,70 +332,80 @@ class MockupService extends BaseService
                     ];
                 });
 
-                if (!empty($syncData)) {
-                    $model->templates()->sync($syncData);
-                } else {
-                    $model->templates()->detach();
+                // ✅ update or attach logic
+                foreach ($syncData as $templateId => $pivotData) {
+                    $existing = $model->templates()->where('template_id', $templateId)->exists();
+
+                    if ($existing) {
+                        // update only changed fields (partial update)
+                        $currentPivot = $model->templates()->where('template_id', $templateId)->first()?->pivot;
+
+                        $merged = [
+                            'positions' => array_merge(
+                                (array) ($currentPivot->positions ?? []),
+                                $pivotData['positions'] ?? []
+                            ),
+                            'colors' => array_values(array_unique(
+                                array_merge(
+                                    (array) ($currentPivot->colors ?? []),
+                                    $pivotData['colors'] ?? []
+                                )
+                            )),
+                        ];
+
+                        $model->templates()->updateExistingPivot($templateId, $merged);
+                    } else {
+                        // attach new
+                        $model->templates()->attach($templateId, $pivotData);
+                    }
                 }
-                // ✅ امسح generated قبل ما تعمل regenerate
+
+                // clear old generated media
                 $model->clearMediaCollection('generated_mockups');
             }
 
-
-            // ✅ لو فيه ملفات مرفوعة: حدث الميديا أولاً (عشان base/mask/design يكونوا موجودين)
+            // 3️⃣ handle media uploads
             if (request()->allFiles()) {
                 $this->handleFiles($model, true);
             }
 
-            // ✅ reload relations + pivot values
+            // 4️⃣ reload relations
             $model->load(['templates', 'types', 'category', 'media']);
 
-
-
-            // ✅ regenerate like store (per template, per type, per color)
+            // 5️⃣ regenerate mockups
             foreach ($model->templates as $template) {
-
                 $pivotPositions = $template->pivot->positions ?? [];
                 $pivotColors    = $template->pivot->colors ?? [];
 
                 if (is_string($pivotColors)) {
                     $pivotColors = json_decode($pivotColors, true) ?: [];
                 }
-                if (!is_array($pivotColors)) $pivotColors = [];
 
                 $colorsToRender = count($pivotColors) ? $pivotColors : [null];
 
-                collect($model->types)->each(function ($type) use ($model, $template, $pivotPositions, $colorsToRender) {
-
-                    $sideName = strtolower($type->value->name); // front/back/none
+                foreach ($model->types as $type) {
+                    $sideName = strtolower($type->value->name);
 
                     $baseMedia = $model->getMedia('mockups')
-                        ->first(fn ($m) => $m->getCustomProperty('side') === $sideName && $m->getCustomProperty('role') === 'base');
-
+                        ->first(fn($m) => $m->getCustomProperty('side') === $sideName && $m->getCustomProperty('role') === 'base');
                     $maskMedia = $model->getMedia('mockups')
-                        ->first(fn ($m) => $m->getCustomProperty('side') === $sideName && $m->getCustomProperty('role') === 'mask');
+                        ->first(fn($m) => $m->getCustomProperty('side') === $sideName && $m->getCustomProperty('role') === 'mask');
 
-                    if (!$baseMedia || !$maskMedia) {
-                        return;
-                    }
+                    if (!$baseMedia || !$maskMedia) continue;
 
-                    // ✅ FIX: choose correct design by side
                     $designMedia = ($sideName === 'back')
                         ? $template->getFirstMedia('back_templates')
                         : $template->getFirstMedia('templates');
 
-                    if (!$designMedia || !$designMedia->getPath()) {
-                        throw new \Exception("Missing design media for {$sideName}");
-                    }
+                    if (!$designMedia || !$designMedia->getPath()) continue;
 
-                    $basePath = $baseMedia->getPath();
-                    [$baseWidth, $baseHeight] = getimagesize($basePath);
+                    [$baseWidth, $baseHeight] = getimagesize($baseMedia->getPath());
 
-                    $xPct  = (float)($pivotPositions[$sideName . '_x']      ?? 0.5);
-                    $yPct  = (float)($pivotPositions[$sideName . '_y']      ?? 0.5);
-                    $wPct  = (float)($pivotPositions[$sideName . '_width']  ?? 0.4);
-                    $hPct  = (float)($pivotPositions[$sideName . '_height'] ?? 0.4);
-                    $angle = (float)($pivotPositions[$sideName . '_angle']  ?? 0);
+                    $xPct  = (float)($pivotPositions["{$sideName}_x"] ?? 0.5);
+                    $yPct  = (float)($pivotPositions["{$sideName}_y"] ?? 0.5);
+                    $wPct  = (float)($pivotPositions["{$sideName}_width"] ?? 0.4);
+                    $hPct  = (float)($pivotPositions["{$sideName}_height"] ?? 0.4);
+                    $angle = (float)($pivotPositions["{$sideName}_angle"] ?? 0);
 
                     $printW = max(1, (int) round($wPct * $baseWidth));
                     $printH = max(1, (int) round($hPct * $baseHeight));
@@ -413,26 +416,22 @@ class MockupService extends BaseService
                     $printX = (int) round($centerX - $printW / 2);
                     $printY = (int) round($centerY - $printH / 2);
 
-                    if ($printW <= 0) $printW = (int) round($baseWidth * 0.3);
-                    if ($printH <= 0) $printH = (int) round($baseHeight * 0.3);
-
                     foreach ($colorsToRender as $hex) {
                         $binary = (new MockupRenderer())->render([
-                            'base_path'   => $basePath,
+                            'base_path'   => $baseMedia->getPath(),
                             'shirt_path'  => $maskMedia->getPath(),
                             'design_path' => $designMedia->getPath(),
                             'print_x'     => $printX,
                             'print_y'     => $printY,
                             'print_w'     => $printW,
                             'print_h'     => $printH,
-                            'angle'       => $angle ?? 0,
+                            'angle'       => $angle,
                             'hex'         => $hex,
                         ]);
 
                         $safeHex = $hex ? ltrim(strtolower($hex), '#') : 'no-color';
 
-                        $model
-                            ->addMediaFromString($binary)
+                        $model->addMediaFromString($binary)
                             ->usingFileName("mockup_{$sideName}_tpl{$template->id}_{$safeHex}.png")
                             ->withCustomProperties([
                                 'side'        => $sideName,
@@ -441,7 +440,7 @@ class MockupService extends BaseService
                             ])
                             ->toMediaCollection('generated_mockups');
                     }
-                });
+                }
             }
 
             return $model;
@@ -449,7 +448,6 @@ class MockupService extends BaseService
 
         return $model;
     }
-
 
     /**
      * @param mixed $model
