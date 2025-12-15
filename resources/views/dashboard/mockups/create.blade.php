@@ -738,69 +738,77 @@
             const container = document.getElementById("templatesHiddenContainer");
             if (!container) return;
 
-            container.innerHTML = ""; // امسح القديم وابدأ جديد
+            // Clear existing inputs entirely (full rebuild each Save click)
+            container.innerHTML = "";
 
+            // Get all selected templates
             const selectedTemplates = document.querySelectorAll(".template-card.selected");
 
             selectedTemplates.forEach((card, index) => {
                 const templateId = card.dataset.id;
                 const selectedColors = card.selectedColors || [];
 
-                // نبدأ الحقول
-                let html = `<input type="hidden" name="templates[${index}][template_id]" value="${templateId}">`;
+                // Start HTML for this template
+                let html = `<div class="template-inputs" data-template-id="${templateId}">`;
+                html += `<input type="hidden" name="templates[${index}][template_id]" value="${templateId}">`;
 
-                // helper
+                // Helper
                 function add(name, value) {
                     html += `<input type="hidden" name="templates[${index}][${name}]" value="${value}">`;
                 }
 
                 // FRONT
-                canvasFront?.getObjects()
-                    .filter((o) => o.templateType === "front" && o.templateId == templateId)
-                    .forEach((obj) => {
-                        const meta = canvasFront.__mockupMeta;
-                        const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
-                        add("front_x", xPct);
-                        add("front_y", yPct);
-                        add("front_width", wPct);
-                        add("front_height", hPct);
-                        add("front_angle", angle);
-                    });
+                const frontObj = window.canvasFront
+                    ?.getObjects()
+                    ?.find(o => o.templateType === "front" && o.templateId == templateId);
+                if (frontObj && window.canvasFront.__mockupMeta) {
+                    const meta = window.canvasFront.__mockupMeta;
+                    const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(frontObj, meta);
+                    add("front_x", xPct);
+                    add("front_y", yPct);
+                    add("front_width", wPct);
+                    add("front_height", hPct);
+                    add("front_angle", angle);
+                }
 
                 // BACK
-                canvasBack?.getObjects()
-                    .filter((o) => o.templateType === "back" && o.templateId == templateId)
-                    .forEach((obj) => {
-                        const meta = canvasBack.__mockupMeta;
-                        const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
-                        add("back_x", xPct);
-                        add("back_y", yPct);
-                        add("back_width", wPct);
-                        add("back_height", hPct);
-                        add("back_angle", angle);
-                    });
+                const backObj = window.canvasBack
+                    ?.getObjects()
+                    ?.find(o => o.templateType === "back" && o.templateId == templateId);
+                if (backObj && window.canvasBack.__mockupMeta) {
+                    const meta = window.canvasBack.__mockupMeta;
+                    const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(backObj, meta);
+                    add("back_x", xPct);
+                    add("back_y", yPct);
+                    add("back_width", wPct);
+                    add("back_height", hPct);
+                    add("back_angle", angle);
+                }
 
                 // NONE
-                canvasNone?.getObjects()
-                    .filter((o) => o.templateType === "none" && o.templateId == templateId)
-                    .forEach((obj) => {
-                        const meta = canvasNone.__mockupMeta;
-                        const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
-                        add("none_x", xPct);
-                        add("none_y", yPct);
-                        add("none_width", wPct);
-                        add("none_height", hPct);
-                        add("none_angle", angle);
-                    });
+                const noneObj = window.canvasNone
+                    ?.getObjects()
+                    ?.find(o => o.templateType === "none" && o.templateId == templateId);
+                if (noneObj && window.canvasNone.__mockupMeta) {
+                    const meta = window.canvasNone.__mockupMeta;
+                    const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(noneObj, meta);
+                    add("none_x", xPct);
+                    add("none_y", yPct);
+                    add("none_width", wPct);
+                    add("none_height", hPct);
+                    add("none_angle", angle);
+                }
 
                 // COLORS
-                selectedColors.forEach((color) => {
+                selectedColors.forEach(color => {
                     html += `<input type="hidden" name="templates[${index}][colors][]" value="${color}">`;
                 });
 
+                html += `</div>`;
                 container.insertAdjacentHTML("beforeend", html);
             });
         }
+
 
 
 
