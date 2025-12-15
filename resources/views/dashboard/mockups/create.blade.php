@@ -736,7 +736,7 @@
 // =========================
         function buildHiddenTemplateInputs() {
             const container = document.getElementById("templatesHiddenContainer");
-            container.innerHTML = "";
+            if (!container) return;
 
             const selectedTemplates = document.querySelectorAll('.template-card.selected');
 
@@ -744,10 +744,22 @@
                 const templateId = card.dataset.id;
                 const selectedColors = card.selectedColors || [];
 
-                let html = `<input type="hidden" name="templates[${index}][template_id]" value="${templateId}">`;
+                // Check if existing inputs for this template exist
+                let templateContainer = container.querySelector(`.template-inputs[data-template-id="${templateId}"]`);
+                if (!templateContainer) {
+                    templateContainer = document.createElement('div');
+                    templateContainer.classList.add('template-inputs');
+                    templateContainer.dataset.templateId = templateId;
+                    container.appendChild(templateContainer);
+                }
+
+                // Clear old inputs for this template
+                templateContainer.innerHTML = '';
+
+                let html = `<input type="hidden" name="templates[][template_id]" value="${templateId}">`;
 
                 function add(name, value) {
-                    html += `<input type="hidden" name="templates[${index}][${name}]" value="${value}">`;
+                    html += `<input type="hidden" name="templates[][${name}]" value="${value}">`;
                 }
 
                 // FRONT
