@@ -534,7 +534,7 @@
             container.innerHTML = "";
 
             const previousTemplates = @json($model->templates ?? []);
-            const selectedTemplateId = $('#selectedTemplateId').val(); // current selected in UI
+            const selectedTemplateId = $('#selectedTemplateId').val();
 
             let html = '';
 
@@ -558,34 +558,39 @@
                 );
             };
 
-            // 1) include all previous templates
+            // 🟢 helper: get selected colors for this template card
+            const getSelectedColors = (templateId) => {
+                const card = document.querySelector(`.template-card[data-id="${templateId}"]`);
+                if (!card) return [];
+                return card.selectedColors || [];
+            };
+
+            // 1️⃣ include all previous templates
             previousTemplates.forEach((tpl, index) => {
                 const currentId = tpl.id;
 
                 html += `<input type="hidden" name="templates[${index}][template_id]" value="${currentId}">`;
 
                 ['front', 'back', 'none'].forEach(side => {
-                    let x=null, y=null, w=null, h=null, angle=null;
+                    let x = null, y = null, w = null, h = null, angle = null;
 
-                    // ✅ لو ده هو الـtemplate الحالي و object موجود على الكانفاس -> override من الكانفاس
+                    // override from canvas if selected
                     if (selectedTemplateId && String(currentId) === String(selectedTemplateId)) {
                         const canvas = getCanvas(side);
                         const obj = findObj(side, currentId);
                         const meta = canvas?.__mockupMeta;
-
                         if (obj && meta) {
                             const res = calculateObjectPercents(obj, meta) || {};
                             x = res.xPct; y = res.yPct; w = res.wPct; h = res.hPct; angle = res.angle;
                         }
                     }
 
-                    // ✅ لو مفيش override من الكانفاس -> خد قيم الباك اند
+                    // fallback to backend
                     if (x === null) {
                         const pv = readPivot(tpl, side);
                         x = pv.x; y = pv.y; w = pv.w; h = pv.h; angle = pv.angle;
                     }
 
-                    // ✅ اكتب لو فيه قيم
                     if (x !== null) {
                         html += `<input type="hidden" name="templates[${index}][${side}_x]" value="${x}">`;
                         html += `<input type="hidden" name="templates[${index}][${side}_y]" value="${y}">`;
@@ -594,16 +599,28 @@
                         html += `<input type="hidden" name="templates[${index}][${side}_angle]" value="${angle ?? 0}">`;
                     }
                 });
+
+                // 🟡 add selected colors (from UI or pivot)
+                const uiColors = getSelectedColors(currentId);
+                const pivotColors = Array.isArray(tpl.pivot?.colors)
+                    ? tpl.pivot.colors
+                    : (typeof tpl.pivot?.colors === 'string'
+                        ? JSON.parse(tpl.pivot.colors || '[]')
+                        : []);
+                const allColors = [...new Set([...pivotColors, ...uiColors])];
+
+                allColors.forEach(c => {
+                    html += `<input type="hidden" name="templates[${index}][colors][]" value="${c}">`;
+                });
             });
 
-            // 2) if selected template is new (not in previousTemplates) add it at end
+            // 2️⃣ if selected template is new → add it
             const existsInPrevious = selectedTemplateId
                 ? previousTemplates.some(t => String(t.id) === String(selectedTemplateId))
                 : false;
 
             if (selectedTemplateId && !existsInPrevious) {
                 const index = previousTemplates.length;
-
                 html += `<input type="hidden" name="templates[${index}][template_id]" value="${selectedTemplateId}">`;
 
                 ['front', 'back', 'none'].forEach(side => {
@@ -620,10 +637,21 @@
                         html += `<input type="hidden" name="templates[${index}][${side}_angle]" value="${angle}">`;
                     }
                 });
+
+                // 🟡 colors for new template
+                const uiColors = getSelectedColors(selectedTemplateId);
+                uiColors.forEach(c => {
+                    html += `<input type="hidden" name="templates[${index}][colors][]" value="${c}">`;
+                });
             }
 
             container.innerHTML = html;
         }
+
+        // قبل حفظ الفورم:
+        $('form').on('submit', function () {
+            buildHiddenTemplateInputs();
+        });
         // When user clicks Save Changes of the whole form:
         $('form').on('submit', function () {
             buildHiddenTemplateInputs();
