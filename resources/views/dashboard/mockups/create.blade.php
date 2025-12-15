@@ -755,65 +755,70 @@
 // =========================
         function buildHiddenTemplateInputs() {
             const container = document.getElementById("templatesHiddenContainer");
+            if (!container) return;
+
             container.innerHTML = "";
 
-            const selectedTemplates = document.querySelectorAll('.template-card.selected');
-            console.log(selectedTemplates)
+            const selectedTemplates = document.querySelectorAll(".template-card.selected");
+
             selectedTemplates.forEach((card, index) => {
                 const templateId = card.dataset.id;
                 const selectedColors = card.selectedColors || [];
-                console.log("kjjkjk",templateId)
+
                 let html = `<input type="hidden" name="templates[${index}][template_id]" value="${templateId}">`;
 
-                function add(name, value) {
+                const add = (name, value) => {
                     html += `<input type="hidden" name="templates[${index}][${name}]" value="${value}">`;
+                };
+
+                // FRONT (only this template)
+                const frontObj = canvasFront?.getObjects()?.find(
+                    (o) => o.templateType === "front" && String(o.templateId) === String(templateId)
+                );
+                if (frontObj && canvasFront?.__mockupMeta) {
+                    const meta = canvasFront.__mockupMeta;
+                    const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(frontObj, meta);
+                    add("front_x", xPct);
+                    add("front_y", yPct);
+                    add("front_width", wPct);
+                    add("front_height", hPct);
+                    add("front_angle", angle);
                 }
 
-                // FRONT
-                canvasFront?.getObjects()
-                    .filter(o => o.templateType === "front" )
-                    .forEach(obj => {
-                        const meta = canvasFront.__mockupMeta;
-                        const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
-                        add("front_x", xPct);
-                        add("front_y", yPct);
-                        add("front_width", wPct);
-                        add("front_height", hPct);
-                        add("front_angle", angle);
-                    });
+                // BACK (only this template)
+                const backObj = canvasBack?.getObjects()?.find(
+                    (o) => o.templateType === "back" && String(o.templateId) === String(templateId)
+                );
+                if (backObj && canvasBack?.__mockupMeta) {
+                    const meta = canvasBack.__mockupMeta;
+                    const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(backObj, meta);
+                    add("back_x", xPct);
+                    add("back_y", yPct);
+                    add("back_width", wPct);
+                    add("back_height", hPct);
+                    add("back_angle", angle);
+                }
 
-                // BACK
-                canvasBack?.getObjects()
-                    .filter(o => o.templateType === "back")
-                    .forEach(obj => {
-                        const meta = canvasBack.__mockupMeta;
-                        const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
-                        add("back_x", xPct);
-                        add("back_y", yPct);
-                        add("back_width", wPct);
-                        add("back_height", hPct);
-                        add("back_angle", angle);
-                    });
-
-                // NONE
-                canvasNone?.getObjects()
-                    .filter(o => o.templateType === "none")
-                    .forEach(obj => {
-                        const meta = canvasNone.__mockupMeta;
-                        const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
-                        add("none_x", xPct);
-                        add("none_y", yPct);
-                        add("none_width", wPct);
-                        add("none_height", hPct);
-                        add("none_angle", angle);
-                    });
+                // NONE (only this template)
+                const noneObj = canvasNone?.getObjects()?.find(
+                    (o) => o.templateType === "none" && String(o.templateId) === String(templateId)
+                );
+                if (noneObj && canvasNone?.__mockupMeta) {
+                    const meta = canvasNone.__mockupMeta;
+                    const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(noneObj, meta);
+                    add("none_x", xPct);
+                    add("none_y", yPct);
+                    add("none_width", wPct);
+                    add("none_height", hPct);
+                    add("none_angle", angle);
+                }
 
                 // COLORS
-                selectedColors.forEach(color => {
+                selectedColors.forEach((color) => {
                     html += `<input type="hidden" name="templates[${index}][colors][]" value="${color}">`;
                 });
 
-                container.insertAdjacentHTML('beforeend', html);
+                container.insertAdjacentHTML("beforeend", html);
             });
         }
 
