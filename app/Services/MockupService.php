@@ -52,7 +52,7 @@ class MockupService extends BaseService
                     if (is_string($c)) $c = json_decode($c, true) ?: [];
                     return is_array($c) ? $c : [];
                 }
-             
+
             }))
             ->flatten()
             ->filter()
@@ -64,7 +64,7 @@ class MockupService extends BaseService
             ? (str_starts_with($color, '#') ? strtolower($color) : '#'.strtolower($color))
             : null;
 
-
+dd($mockups);
         $media = $mockups
             ->flatMap(fn ($mockup) => $mockup->media->where('collection_name', 'generated_mockups'));
 
