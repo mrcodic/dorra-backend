@@ -24,6 +24,7 @@ class ProcessBase64Image implements ShouldQueue
      */
     public function handle(): void
     {
+        dd($this->base64Image);
             if (preg_match('/^data:image\/(\w+);base64,/', $this->base64Image, $type)) {
             $imageData = substr($this->base64Image, strpos($this->base64Image, ',') + 1);
             $type = strtolower($type[1]);
