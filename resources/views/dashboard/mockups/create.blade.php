@@ -262,13 +262,11 @@
 
                     <div class="form-group mb-2 d-none" id="templatesCardsWrapper">
                         <label class="form-label mb-1">Choose Template</label>
-
-                        {{-- هنا هتنضاف الكروت بالـ JS --}}
                         <div id="templatesCardsContainer"
-                            class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm"></div>
+                             class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm"></div>
                         <input type="hidden" name="template_id" id="selectedTemplateId">
-                        <div id="templatesHiddenContainer"></div>
 
+                        <div id="templatesHiddenContainer"></div>
                     </div>
                 </div>
 
@@ -738,78 +736,37 @@
             const container = document.getElementById("templatesHiddenContainer");
             if (!container) return;
 
-            // Clear existing inputs entirely (full rebuild each Save click)
             container.innerHTML = "";
 
-            // Get all selected templates
             const selectedTemplates = document.querySelectorAll(".template-card.selected");
 
             selectedTemplates.forEach((card, index) => {
                 const templateId = card.dataset.id;
                 const selectedColors = card.selectedColors || [];
 
-                // Start HTML for this template
-                let html = `<div class="template-inputs" data-template-id="${templateId}">`;
-                html += `<input type="hidden" name="templates[${index}][template_id]" value="${templateId}">`;
+                const wrapper = document.createElement("div");
+                wrapper.className = "template-inputs";
+                wrapper.dataset.templateId = templateId;
 
-                // Helper
-                function add(name, value) {
-                    html += `<input type="hidden" name="templates[${index}][${name}]" value="${value}">`;
-                }
+                wrapper.innerHTML = `
+      <input type="hidden" name="templates[${index}][template_id]" value="${templateId}">
+      <input type="hidden" class="template_x front" name="templates[${index}][front_x]" value="">
+      <input type="hidden" class="template_y front" name="templates[${index}][front_y]" value="">
+      <input type="hidden" class="template_width front" name="templates[${index}][front_width]" value="">
+      <input type="hidden" class="template_height front" name="templates[${index}][front_height]" value="">
+      <input type="hidden" class="template_angle front" name="templates[${index}][front_angle]" value="">
+    `;
 
-                // FRONT
-                const frontObj = window.canvasFront
-                    ?.getObjects()
-                    ?.find(o => o.templateType === "front" && o.templateId == templateId);
-                if (frontObj && window.canvasFront.__mockupMeta) {
-                    const meta = window.canvasFront.__mockupMeta;
-                    const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(frontObj, meta);
-                    add("front_x", xPct);
-                    add("front_y", yPct);
-                    add("front_width", wPct);
-                    add("front_height", hPct);
-                    add("front_angle", angle);
-                }
-
-                // BACK
-                const backObj = window.canvasBack
-                    ?.getObjects()
-                    ?.find(o => o.templateType === "back" && o.templateId == templateId);
-                if (backObj && window.canvasBack.__mockupMeta) {
-                    const meta = window.canvasBack.__mockupMeta;
-                    const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(backObj, meta);
-                    add("back_x", xPct);
-                    add("back_y", yPct);
-                    add("back_width", wPct);
-                    add("back_height", hPct);
-                    add("back_angle", angle);
-                }
-
-                // NONE
-                const noneObj = window.canvasNone
-                    ?.getObjects()
-                    ?.find(o => o.templateType === "none" && o.templateId == templateId);
-                if (noneObj && window.canvasNone.__mockupMeta) {
-                    const meta = window.canvasNone.__mockupMeta;
-                    const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(noneObj, meta);
-                    add("none_x", xPct);
-                    add("none_y", yPct);
-                    add("none_width", wPct);
-                    add("none_height", hPct);
-                    add("none_angle", angle);
-                }
-
-                // COLORS
-                selectedColors.forEach(color => {
-                    html += `<input type="hidden" name="templates[${index}][colors][]" value="${color}">`;
+                selectedColors.forEach(c => {
+                    wrapper.insertAdjacentHTML(
+                        "beforeend",
+                        `<input type="hidden" name="templates[${index}][colors][]" value="${c}">`
+                    );
                 });
 
-                html += `</div>`;
-                container.insertAdjacentHTML("beforeend", html);
+                container.appendChild(wrapper);
             });
         }
-
-
 
 
         function calculateObjectPercents(obj, meta) {
@@ -828,32 +785,31 @@
         // $('form').on('submit', function () {
         //     buildHiddenTemplateInputs();
         // });
-            $(document).on('click', '.js-save-positions', function () {
-                if (typeof saveAllTemplatePositions === 'function') {
-                    saveAllTemplatePositions();
-                }
-                buildHiddenTemplateInputs();
+        $(document).on('click', '.js-save-positions', function () {
+            console.log("Save Positions clicked");
 
-                if (window.Toastify) {
-                    Toastify({
-                        text: "Positions saved successfully",
-                        duration: 1500,
-                        gravity: "top",
-                        position: "right",
-                        backgroundColor: "#28a745",
-                        close: true,
-                    }).showToast();
-                } else {
-                    alert('Positions saved successfully');
-                }
+            // 1️⃣ Update positions from all canvases
+            if (typeof saveAllTemplatePositions === 'function') {
+                saveAllTemplatePositions();
+            }
 
-                // 🔴 لو الزر جوّه المودال → اقفل المودال
-                if ($(this).closest('#templateModal').length) {
-                    $('#templateModal').modal('hide');
-                }
-            });
+            // 2️⃣ Build hidden inputs inside form
+            buildHiddenTemplateInputs();
 
+            // 3️⃣ Verify before submit
+            console.log("Hidden inputs:", $('#templatesHiddenContainer input').length);
+
+            Toastify({
+                text: "Positions saved successfully",
+                duration: 1500,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#28a745",
+                close: true,
+            }).showToast();
         });
+
+    });
 </script>
 
 
@@ -913,39 +869,45 @@
             canvas.renderAll();
         }
 
-        function syncTemplateInputs(obj, type) {
-            const wrapper = document.getElementById('templatesCardsWrapper');
-            if (!wrapper) return;
+    function syncTemplateInputs(obj, type) {
+        const wrapper = document.getElementById('templatesCardsWrapper');
+        if (!wrapper) return;
 
-            const canvas = obj.canvas;
-            const meta   = canvas && canvas.__mockupMeta;
-            if (!meta) return;
+        const canvas = obj.canvas;
+        const meta = canvas && canvas.__mockupMeta;
+        if (!meta) return;
 
-            const xInput      = wrapper.querySelector(`.template_x.${type}`);
-            const yInput      = wrapper.querySelector(`.template_y.${type}`);
-            const widthInput  = wrapper.querySelector(`.template_width.${type}`);
-            const heightInput = wrapper.querySelector(`.template_height.${type}`);
-            const angleInput  = wrapper.querySelector(`.template_angle.${type}`);
+        // ✅ find correct template container
+        const templateId = obj.templateId;
+        const templateContainer = wrapper.querySelector(`.template-inputs[data-template-id="${templateId}"]`);
+        if (!templateContainer) return;
 
-            if (!xInput || !yInput || !widthInput || !heightInput || !angleInput) return;
+        const xInput = templateContainer.querySelector(`.template_x.${type}`);
+        const yInput = templateContainer.querySelector(`.template_y.${type}`);
+        const widthInput = templateContainer.querySelector(`.template_width.${type}`);
+        const heightInput = templateContainer.querySelector(`.template_height.${type}`);
+        const angleInput = templateContainer.querySelector(`.template_angle.${type}`);
 
-            const center = obj.getCenterPoint();
-            const wReal  = obj.width  * obj.scaleX;
-            const hReal  = obj.height * obj.scaleY;
+        if (!xInput || !yInput || !widthInput || !heightInput || !angleInput) return;
 
-            const xPct = (center.x - meta.offsetLeft) / meta.scaledWidth;
-            const yPct = (center.y - meta.offsetTop)  / meta.scaledHeight;
-            const wPct = wReal / meta.scaledWidth;
-            const hPct = hReal / meta.scaledHeight;
+        const center = obj.getCenterPoint();
+        const wReal = obj.width * obj.scaleX;
+        const hReal = obj.height * obj.scaleY;
 
-            xInput.value      = xPct.toFixed(6);
-            yInput.value      = yPct.toFixed(6);
-            widthInput.value  = wPct.toFixed(6);
-            heightInput.value = hPct.toFixed(6);
-            angleInput.value  = obj.angle || 0;
-        }
+        const xPct = (center.x - meta.offsetLeft) / meta.scaledWidth;
+        const yPct = (center.y - meta.offsetTop) / meta.scaledHeight;
+        const wPct = wReal / meta.scaledWidth;
+        const hPct = hReal / meta.scaledHeight;
 
-        function clearTemplateInputsForObject(type) {
+        xInput.value = xPct.toFixed(6);
+        yInput.value = yPct.toFixed(6);
+        widthInput.value = wPct.toFixed(6);
+        heightInput.value = hPct.toFixed(6);
+        angleInput.value = obj.angle || 0;
+    }
+
+
+    function clearTemplateInputsForObject(type) {
             const wrapper = document.getElementById('templatesCardsWrapper');
             if (!wrapper) return;
 
