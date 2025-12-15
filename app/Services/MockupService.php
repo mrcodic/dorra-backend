@@ -44,7 +44,7 @@ class MockupService extends BaseService
                 ])
             ])
             ->get();
-
+dd($mockups);
         $colors = $mockups
             ->flatMap(fn ($mockup) => $mockup->templates->map(function ($tpl) {
                 $c = $tpl->pivot->colors ?? [];
