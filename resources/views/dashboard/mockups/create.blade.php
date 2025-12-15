@@ -734,40 +734,67 @@
 // =========================
         function buildHiddenTemplateInputs() {
             const container = document.getElementById("templatesHiddenContainer");
-            if (!container) return;
-
             container.innerHTML = "";
 
-            const selectedTemplates = document.querySelectorAll(".template-card.selected");
-
+            const selectedTemplates = document.querySelectorAll('.template-card.selected');
+            console.log(selectedTemplates)
             selectedTemplates.forEach((card, index) => {
                 const templateId = card.dataset.id;
                 const selectedColors = card.selectedColors || [];
 
-                const wrapper = document.createElement("div");
-                wrapper.className = "template-inputs";
-                wrapper.dataset.templateId = templateId;
+                let html = `<input type="hidden" name="templates[${index}][template_id]" value="${templateId}">`;
 
-                wrapper.innerHTML = `
-      <input type="hidden" name="templates[${index}][template_id]" value="${templateId}">
-      <input type="hidden" class="template_x front" name="templates[${index}][front_x]" value="">
-      <input type="hidden" class="template_y front" name="templates[${index}][front_y]" value="">
-      <input type="hidden" class="template_width front" name="templates[${index}][front_width]" value="">
-      <input type="hidden" class="template_height front" name="templates[${index}][front_height]" value="">
-      <input type="hidden" class="template_angle front" name="templates[${index}][front_angle]" value="">
-    `;
+                function add(name, value) {
+                    html += `<input type="hidden" name="templates[${index}][${name}]" value="${value}">`;
+                }
 
-                selectedColors.forEach(c => {
-                    wrapper.insertAdjacentHTML(
-                        "beforeend",
-                        `<input type="hidden" name="templates[${index}][colors][]" value="${c}">`
-                    );
+                // FRONT
+                canvasFront?.getObjects()
+                    .filter(o => o.templateType === "front" )
+                    .forEach(obj => {
+                        const meta = canvasFront.__mockupMeta;
+                        const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
+                        add("front_x", xPct);
+                        add("front_y", yPct);
+                        add("front_width", wPct);
+                        add("front_height", hPct);
+                        add("front_angle", angle);
+                    });
+
+                // BACK
+                canvasBack?.getObjects()
+                    .filter(o => o.templateType === "back")
+                    .forEach(obj => {
+                        const meta = canvasBack.__mockupMeta;
+                        const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
+                        add("back_x", xPct);
+                        add("back_y", yPct);
+                        add("back_width", wPct);
+                        add("back_height", hPct);
+                        add("back_angle", angle);
+                    });
+
+                // NONE
+                canvasNone?.getObjects()
+                    .filter(o => o.templateType === "none")
+                    .forEach(obj => {
+                        const meta = canvasNone.__mockupMeta;
+                        const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
+                        add("none_x", xPct);
+                        add("none_y", yPct);
+                        add("none_width", wPct);
+                        add("none_height", hPct);
+                        add("none_angle", angle);
+                    });
+
+                // COLORS
+                selectedColors.forEach(color => {
+                    html += `<input type="hidden" name="templates[${index}][colors][]" value="${color}">`;
                 });
-                container.appendChild(wrapper);
+
+                container.insertAdjacentHTML('beforeend', html);
             });
-
         }
-
 
         function calculateObjectPercents(obj, meta) {
                 const center = obj.getCenterPoint();
