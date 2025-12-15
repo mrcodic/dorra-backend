@@ -738,34 +738,26 @@
             const container = document.getElementById("templatesHiddenContainer");
             if (!container) return;
 
-            const selectedTemplates = document.querySelectorAll('.template-card.selected');
+            container.innerHTML = ""; // امسح القديم وابدأ جديد
+
+            const selectedTemplates = document.querySelectorAll(".template-card.selected");
 
             selectedTemplates.forEach((card, index) => {
                 const templateId = card.dataset.id;
                 const selectedColors = card.selectedColors || [];
 
-                // Check if existing inputs for this template exist
-                let templateContainer = container.querySelector(`.template-inputs[data-template-id="${templateId}"]`);
-                if (!templateContainer) {
-                    templateContainer = document.createElement('div');
-                    templateContainer.classList.add('template-inputs');
-                    templateContainer.dataset.templateId = templateId;
-                    container.appendChild(templateContainer);
-                }
+                // نبدأ الحقول
+                let html = `<input type="hidden" name="templates[${index}][template_id]" value="${templateId}">`;
 
-                // Clear old inputs for this template
-                templateContainer.innerHTML = '';
-
-                let html = `<input type="hidden" name="templates[][template_id]" value="${templateId}">`;
-
+                // helper
                 function add(name, value) {
-                    html += `<input type="hidden" name="templates[][${name}]" value="${value}">`;
+                    html += `<input type="hidden" name="templates[${index}][${name}]" value="${value}">`;
                 }
 
                 // FRONT
                 canvasFront?.getObjects()
-                    .filter(o => o.templateType === "front" && o.templateId == templateId)
-                    .forEach(obj => {
+                    .filter((o) => o.templateType === "front" && o.templateId == templateId)
+                    .forEach((obj) => {
                         const meta = canvasFront.__mockupMeta;
                         const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
                         add("front_x", xPct);
@@ -777,8 +769,8 @@
 
                 // BACK
                 canvasBack?.getObjects()
-                    .filter(o => o.templateType === "back" && o.templateId == templateId)
-                    .forEach(obj => {
+                    .filter((o) => o.templateType === "back" && o.templateId == templateId)
+                    .forEach((obj) => {
                         const meta = canvasBack.__mockupMeta;
                         const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
                         add("back_x", xPct);
@@ -790,8 +782,8 @@
 
                 // NONE
                 canvasNone?.getObjects()
-                    .filter(o => o.templateType === "none" && o.templateId == templateId)
-                    .forEach(obj => {
+                    .filter((o) => o.templateType === "none" && o.templateId == templateId)
+                    .forEach((obj) => {
                         const meta = canvasNone.__mockupMeta;
                         const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
                         add("none_x", xPct);
@@ -802,13 +794,14 @@
                     });
 
                 // COLORS
-                selectedColors.forEach(color => {
+                selectedColors.forEach((color) => {
                     html += `<input type="hidden" name="templates[${index}][colors][]" value="${color}">`;
                 });
 
-                container.insertAdjacentHTML('beforeend', html);
+                container.insertAdjacentHTML("beforeend", html);
             });
         }
+
 
 
         function calculateObjectPercents(obj, meta) {
