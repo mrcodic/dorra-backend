@@ -66,7 +66,15 @@ class MockupService extends BaseService
 
         $media = $mockups
             ->filter(fn ($mockup) => $mockup->templates->contains('id', $templateId))
-            ->flatMap(fn ($mockup) => $mockup->media->where('collection_name', 'generated_mockups'))
+            ->flatMap(fn ($mockup) =>
+            $mockup->media
+                ->where('collection_name', 'generated_mockups')
+                ->filter(function ($m) use ($colors) {
+                    $hex = strtolower($m->getCustomProperty('hex', ''));
+
+                    return $hex && in_array($hex, array_map('strtolower', $colors));
+                })
+            )
             ->values();
 
 

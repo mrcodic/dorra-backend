@@ -323,6 +323,27 @@
 @section('page-script')
 
 <script>
+    function cacheCurrentTemplatePositions() {
+        window.savedTemplatePositions = window.savedTemplatePositions || {};
+
+        document.querySelectorAll('#templatesHiddenContainer .template-inputs').forEach(div => {
+            const templateId = div.dataset.templateId;
+            const inputs = div.querySelectorAll('input');
+            const data = {};
+
+            inputs.forEach(inp => {
+                const m = inp.name.match(/\[(front|back|none)_[a-z]+\]/);
+                if (m) {
+                    const cleanKey = m[0].replace(/[\[\]]/g, ''); // front_x
+                    data[cleanKey] = parseFloat(inp.value) || 0;
+                }
+            });
+
+            window.savedTemplatePositions[String(templateId)] = data;
+        });
+
+        console.log('✅ cached positions:', window.savedTemplatePositions);
+    }
 
     document.addEventListener('DOMContentLoaded', function () {
             const $productSelect            = $('#productsSelect');
@@ -812,6 +833,8 @@
         // $('form').on('submit', function () {
         //     buildHiddenTemplateInputs();
         // });
+
+
         $(document).on('click', '.js-save-positions', function () {
             console.log("Save Positions clicked");
 
@@ -819,6 +842,7 @@
             if (typeof saveAllTemplatePositions === 'function') {
                 buildHiddenTemplateInputs();
                 saveAllTemplatePositions();
+                cacheCurrentTemplatePositions();
 
             }
 
