@@ -832,8 +832,6 @@
                 if (typeof saveAllTemplatePositions === 'function') {
                     saveAllTemplatePositions();
                 }
-
-                saveAllTemplatePositions();     // update canvas inputs
                 buildHiddenTemplateInputs();
 
                 if (window.Toastify) {
