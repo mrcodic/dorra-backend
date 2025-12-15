@@ -242,6 +242,7 @@ class TemplateService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
+        dd($validatedData);
         $colors = Arr::get($validatedData, 'colors');
         $finalColors = collect($colors)->flatMap(function ($color) {
             return [
@@ -251,9 +252,23 @@ class TemplateService extends BaseService
         $validatedData['colors'] = $finalColors;
         $model = $this->handleTransaction(function () use ($validatedData, $id, $colors) {
             $model = $this->repository->update($validatedData, $id);
-            if (!empty($validatedData['types'])) {
-                $model->types()->sync($validatedData['types']);
+
+            $selectedTypeValues = Arr::get($validatedData, 'types', []);
+            $modelTypesValues   = $model->types->pluck('value.value')->toArray();
+
+            $typesChanged = collect($selectedTypeValues)->sort()->values()->all()
+                != collect($modelTypesValues)->sort()->values()->all();
+
+            if ($typesChanged) {
+                if (in_array(1, $selectedTypeValues) || in_array(3, $selectedTypeValues)) {
+                    $model->clearMediaCollection('templates');
+                }if (in_array(2, $selectedTypeValues) ) {
+                    $model->clearMediaCollection('back_templates');
+                }
             }
+
+            $model->types()->sync($validatedData['types']);
+
             $model->industries()->sync($validatedData['industry_ids'] ?? []);
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->categories()->sync($validatedData['category_ids'] ?? []);
