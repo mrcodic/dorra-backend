@@ -439,6 +439,7 @@
         $(document).on('click', '.openColorPicker', function () {
             const trigger = this;
             const card = trigger.closest('.template-card');
+            hydrateColorsForCard(card);
             currentCard = card;
             // Initialize selectedColors array if not exists
             if (!card.selectedColors) card.selectedColors = [];
@@ -515,13 +516,18 @@
         function hydrateColorsForCard(cardEl) {
             if (!cardEl) return;
 
-            // ⛔ already has colors → do nothing
-            if (Array.isArray(cardEl.selectedColors)) return;
+            // ✅ hydrate مرة واحدة فقط
+            if (cardEl.__colorsHydrated) return;
+            cardEl.__colorsHydrated = true;
 
-            const id = cardEl.getAttribute('data-id');
+            const id = String(cardEl.getAttribute('data-id'));
             const saved = savedColorsById.get(id) || [];
 
-            cardEl.selectedColors = [...saved];
+            // لو فيه ألوان موجودة بالفعل (اختيارات UI) دمجها مع المحفوظ
+            const existing = Array.isArray(cardEl.selectedColors) ? cardEl.selectedColors : [];
+            const merged = [...new Set([...saved, ...existing].map(c => String(c).toLowerCase()))];
+
+            cardEl.selectedColors = merged;
             renderSelectedColors(cardEl);
         }
 
