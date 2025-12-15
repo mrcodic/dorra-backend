@@ -527,6 +527,73 @@
 
     </script>
     <script>
+        function buildHiddenTemplateInputs() {
+            const container = document.getElementById("templatesHiddenContainer");
+            container.innerHTML = "";
+
+            const previousTemplates = @json($model->templates ?? []);
+            const templateId = $('#selectedTemplateId').val();
+
+            let html = '';
+            let found = false;
+
+            // Include all previous templates, but override if templateId matches
+            previousTemplates.forEach((tpl, index) => {
+                let currentTemplateId = tpl.id;
+
+                html += `<input type="hidden" name="templates[${index}][template_id]" value="${currentTemplateId}">`;
+
+                ['front', 'back', 'none'].forEach(side => {
+                    let x, y, w, h, angle;
+
+                    if (currentTemplateId == templateId) {
+                        // Override with client-side values if object exists on canvas
+                        const obj = window['canvas' + capitalize(side)]?.getObjects()?.find(o => o.templateType === side);
+                        if (obj) {
+                            const meta = window['canvas' + capitalize(side)].__mockupMeta;
+                            ({ xPct: x, yPct: y, wPct: w, hPct: h, angle } = calculateObjectPercents(obj, meta));
+                            found = true;
+                        }
+                    } else if (tpl.pivot?.positions[side + '_x'] != null) {
+                        // Keep existing backend values
+                        x = tpl.pivot[side + '_x'];
+                        y = tpl.pivot[side + '_y'];
+                        w = tpl.pivot[side + '_width'];
+                        h = tpl.pivot[side + '_height'];
+                        angle = tpl.pivot[side + '_angle'];
+                    }
+
+                    if (x != null) {
+                        html += `<input type="hidden" name="templates[${index}][${side}_x]" value="${x}">`;
+                        html += `<input type="hidden" name="templates[${index}][${side}_y]" value="${y}">`;
+                        html += `<input type="hidden" name="templates[${index}][${side}_width]" value="${w}">`;
+                        html += `<input type="hidden" name="templates[${index}][${side}_height]" value="${h}">`;
+                        html += `<input type="hidden" name="templates[${index}][${side}_angle]" value="${angle}">`;
+                    }
+                });
+            });
+
+            // If it's a new template (not in previousTemplates), add it at the end
+            if (templateId && !found) {
+                let index = previousTemplates.length;
+                html += `<input type="hidden" name="templates[${index}][template_id]" value="${templateId}">`;
+
+                ['front', 'back', 'none'].forEach(side => {
+                    const obj = window['canvas' + capitalize(side)]?.getObjects()?.find(o => o.templateType === side);
+                    if (obj) {
+                        const meta = window['canvas' + capitalize(side)].__mockupMeta;
+                        const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
+                        html += `<input type="hidden" name="templates[${index}][${side}_x]" value="${xPct}">`;
+                        html += `<input type="hidden" name="templates[${index}][${side}_y]" value="${yPct}">`;
+                        html += `<input type="hidden" name="templates[${index}][${side}_width]" value="${wPct}">`;
+                        html += `<input type="hidden" name="templates[${index}][${side}_height]" value="${hPct}">`;
+                        html += `<input type="hidden" name="templates[${index}][${side}_angle]" value="${angle}">`;
+                    }
+                });
+            }
+
+            container.innerHTML = html;
+        }
         // When user clicks Save Changes of the whole form:
         $('form').on('submit', function () {
             buildHiddenTemplateInputs();
@@ -895,73 +962,7 @@
 // =========================
 // Save Positions (cards + modal)
 // =========================
-            function buildHiddenTemplateInputs() {
-                const container = document.getElementById("templatesHiddenContainer");
-                container.innerHTML = "";
 
-                const previousTemplates = @json($model->templates ?? []);
-                const templateId = $('#selectedTemplateId').val();
-
-                let html = '';
-                let found = false;
-
-                // Include all previous templates, but override if templateId matches
-                previousTemplates.forEach((tpl, index) => {
-                    let currentTemplateId = tpl.id;
-
-                    html += `<input type="hidden" name="templates[${index}][template_id]" value="${currentTemplateId}">`;
-
-                    ['front', 'back', 'none'].forEach(side => {
-                        let x, y, w, h, angle;
-
-                        if (currentTemplateId == templateId) {
-                            // Override with client-side values if object exists on canvas
-                            const obj = window['canvas' + capitalize(side)]?.getObjects()?.find(o => o.templateType === side);
-                            if (obj) {
-                                const meta = window['canvas' + capitalize(side)].__mockupMeta;
-                                ({ xPct: x, yPct: y, wPct: w, hPct: h, angle } = calculateObjectPercents(obj, meta));
-                                found = true;
-                            }
-                        } else if (tpl.pivot?.positions[side + '_x'] != null) {
-                            // Keep existing backend values
-                            x = tpl.pivot[side + '_x'];
-                            y = tpl.pivot[side + '_y'];
-                            w = tpl.pivot[side + '_width'];
-                            h = tpl.pivot[side + '_height'];
-                            angle = tpl.pivot[side + '_angle'];
-                        }
-
-                        if (x != null) {
-                            html += `<input type="hidden" name="templates[${index}][${side}_x]" value="${x}">`;
-                            html += `<input type="hidden" name="templates[${index}][${side}_y]" value="${y}">`;
-                            html += `<input type="hidden" name="templates[${index}][${side}_width]" value="${w}">`;
-                            html += `<input type="hidden" name="templates[${index}][${side}_height]" value="${h}">`;
-                            html += `<input type="hidden" name="templates[${index}][${side}_angle]" value="${angle}">`;
-                        }
-                    });
-                });
-
-                // If it's a new template (not in previousTemplates), add it at the end
-                if (templateId && !found) {
-                    let index = previousTemplates.length;
-                    html += `<input type="hidden" name="templates[${index}][template_id]" value="${templateId}">`;
-
-                    ['front', 'back', 'none'].forEach(side => {
-                        const obj = window['canvas' + capitalize(side)]?.getObjects()?.find(o => o.templateType === side);
-                        if (obj) {
-                            const meta = window['canvas' + capitalize(side)].__mockupMeta;
-                            const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
-                            html += `<input type="hidden" name="templates[${index}][${side}_x]" value="${xPct}">`;
-                            html += `<input type="hidden" name="templates[${index}][${side}_y]" value="${yPct}">`;
-                            html += `<input type="hidden" name="templates[${index}][${side}_width]" value="${wPct}">`;
-                            html += `<input type="hidden" name="templates[${index}][${side}_height]" value="${hPct}">`;
-                            html += `<input type="hidden" name="templates[${index}][${side}_angle]" value="${angle}">`;
-                        }
-                    });
-                }
-
-                container.innerHTML = html;
-            }
 
             function calculateObjectPercents(obj, meta) {
                 const center = obj.getCenterPoint();
