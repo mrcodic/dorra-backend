@@ -6,6 +6,7 @@ namespace App\Services;
 use App\Enums\Mockup\TypeEnum;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\MockupRepositoryInterface;
+use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Services\Mockup\MockupRenderer;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
@@ -14,7 +15,7 @@ class MockupService extends BaseService
 {
     public BaseRepositoryInterface $repository;
 
-    public function __construct(MockupRepositoryInterface $repository, public MockupRenderer $renderer)
+    public function __construct(MockupRepositoryInterface $repository, public MockupRenderer $renderer,public ProductRepositoryInterface $productRepository)
     {
         parent::__construct($repository);
     }
@@ -22,9 +23,10 @@ class MockupService extends BaseService
     public function getMockups(): array
     {
         $productId  = request('product_id');
+        $productType  = request('type');
         $templateId = request('template_id');
         $color      = request('color');
-
+        $productId =  $productType == 'category' ? $productId : $this->productRepository->query()->whereCategoryId($productId)->first()->id;
         $mockups = $this->repository
             ->query()
             ->when($productId, fn($q) => $q->whereCategoryId($productId))
@@ -279,7 +281,6 @@ class MockupService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
-        dd($validatedData);
         $model = $this->handleTransaction(function () use ($id, $validatedData) {
 
             $model = $this->repository->update($validatedData, $id);

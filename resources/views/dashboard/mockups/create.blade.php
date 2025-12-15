@@ -763,9 +763,9 @@
                         `<input type="hidden" name="templates[${index}][colors][]" value="${c}">`
                     );
                 });
-
                 container.appendChild(wrapper);
             });
+
         }
 
 
@@ -875,6 +875,8 @@
 
         const canvas = obj.canvas;
         const meta = canvas && canvas.__mockupMeta;
+
+
         if (!meta) return;
 
         // ✅ find correct template container
@@ -1025,6 +1027,8 @@
             }
 
             if (window.canvasBack) {
+                console.log('Canvas', window.canvasBack.getObjects());
+
                 window.canvasBack.getObjects().forEach(obj => {
                     if (obj.templateType === 'back') {
                         syncTemplateInputs(obj, 'back');
