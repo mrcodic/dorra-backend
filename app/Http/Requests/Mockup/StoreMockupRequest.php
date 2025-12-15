@@ -40,7 +40,7 @@ class StoreMockupRequest extends BaseRequest
             'category_id' => ['required','integer', Rule::exists(Category::class, 'id')],
             'colors' => ['sometimes','array'],
             'templates' => ['required','array'],
-            'templates.*.template_id' => ['required','exists:templates,id','distinct'],
+            'templates.*.template_id' => ['required','exists:templates,id'],
             'templates.*.front_x'      => ['nullable', 'numeric', 'min:0'],
             'templates.*.front_y'      => ['nullable', 'numeric', 'min:0'],
             'templates.*.front_width'  => ['nullable', 'numeric', 'min:0'],
