@@ -65,10 +65,10 @@ class MockupService extends BaseService
             : null;
 
         $media = $mockups
-            ->map(fn ($mockup) => $mockup->templates->filter(function ($tpl) use ($templateId) {
-                return $tpl->id == $templateId;
-            }))
-            ->flatMap(fn ($mockup) => $mockup->media->where('collection_name', 'generated_mockups'));
+            ->filter(fn ($mockup) => $mockup->templates->contains('id', $templateId))
+            ->flatMap(fn ($mockup) => $mockup->media->where('collection_name', 'generated_mockups'))
+            ->values();
+
 
 
         if ($requested) {
