@@ -352,14 +352,11 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
 });
 Route::get('test', function () {
-
-    // 1️⃣ Delete all associated Spatie media files
     \App\Models\Template::all()->each(function ($template) {
-        $template->clearMediaCollection(); // removes files from storage
+        $template->delete();
+
     });
 
-    // 2️⃣ Truncate the table
-    \App\Models\Template::truncate();
 
     return '✅ Templates table emptied and all media deleted.';
 });
