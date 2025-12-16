@@ -106,7 +106,7 @@ class MockupService extends BaseService
             ->map(fn ($m) => $m->getFullUrl())
             ->values()
             ->all();
-        $urls = array_values(array_filter([$front, $back,$none]));
+        $urls = array_merge($front, $back, $none);
         return [
             'colors' => $colors,
             'urls'   => $urls,
