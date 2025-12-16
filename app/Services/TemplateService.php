@@ -146,7 +146,7 @@ class TemplateService extends BaseService
                     ->orWhere(function ($q) {
                         $q->where('approach', 'without_editor')
                             ->whereHas('mockups',function ($query){
-                                $query->where('category_id',request('product_id'));
+                                $query->where('category_id',request('product_without_category_id'));
                             });
                     });
                 });
