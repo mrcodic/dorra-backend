@@ -72,7 +72,7 @@ class TemplateService extends BaseService
                 }
                 else{
                     $q->whereDoesntHave('mockups');
-                    
+
                 }
 
             })
