@@ -892,6 +892,7 @@
                         approach: "without_editor",
                         paginate: true,
                         has_not_mockups: false,
+                        mockup_id: "{{ $modal->id }}",
                         per_page: 12,
                         types: getSelectedTypesForRequest(),
                     },
