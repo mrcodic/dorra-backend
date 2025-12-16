@@ -48,17 +48,16 @@ class MockupService extends BaseService
                 ])
             ])
             ->get();
-        dd($mockups
-            ->filter(fn ($mockup) => (int) $mockup->category_id === (int) $productId));
+
         $colors = $mockups
             ->filter(fn ($mockup) => (int) $mockup->category_id === (int) $productId)
-            ->flatMap(fn ($mockup) => $mockup->templates->map(function ($tpl) use ($templateId) {
-                if ($tpl->id == $templateId)
-                {
+            ->flatMap(fn ($mockup) => $mockup->templates
+                ->filter(fn($template) => $template->id == $templateId)
+                ->map(function ($tpl) use ($templateId) {
+
                     $c = $tpl->pivot->colors ?? [];
                     if (is_string($c)) $c = json_decode($c, true) ?: [];
                     return is_array($c) ? $c : [];
-                }
 
             }))
             ->flatten()
