@@ -68,10 +68,11 @@ class TemplateService extends BaseService
                     $q->whereDoesntHave('mockups',function ($q){
                         $q->where('id',request('mockup_id'));
                     });
-
                 }
                 else{
-                    $q->whereDoesntHave('mockups');
+                    $q->whereDoesntHave('mockups',function ($q){
+                        $q->where('category_id',request('product_without_category_id'));
+                    });
 
                 }
 
