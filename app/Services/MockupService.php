@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Enums\Mockup\TypeEnum;
 use App\Repositories\Base\BaseRepositoryInterface;
+use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\MockupRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Services\Mockup\MockupRenderer;
@@ -15,7 +16,9 @@ class MockupService extends BaseService
 {
     public BaseRepositoryInterface $repository;
 
-    public function __construct(MockupRepositoryInterface $repository, public MockupRenderer $renderer,public ProductRepositoryInterface $productRepository)
+    public function __construct(MockupRepositoryInterface $repository, public MockupRenderer $renderer
+        ,public ProductRepositoryInterface $productRepository
+    )
     {
         parent::__construct($repository);
     }
@@ -26,7 +29,8 @@ class MockupService extends BaseService
         $productType  = request('type');
         $templateId = request('template_id');
         $color      = request('color');
-        $productId =  $productType == 'category' ? $productId : $this->productRepository->query()->whereCategoryId($productId)->first()?->id;
+        $product = $this->productRepository->query()->whereCategoryId($productId)->first();
+        $productId =  $productType == 'category' ? $productId : $product?->id;
         $mockups = $this->repository
             ->query()
             ->when($productId, fn($q) => $q->whereCategoryId($productId))
@@ -45,7 +49,9 @@ class MockupService extends BaseService
             ])
             ->get();
         $colors = $mockups
+            ->filter(fn ($mockup) => (int) $mockup->category_id === (int) $productId)
             ->flatMap(fn ($mockup) => $mockup->templates->map(function ($tpl) use ($templateId) {
+
                 if ($tpl->id == $templateId)
                 {
                     $c = $tpl->pivot->colors ?? [];
