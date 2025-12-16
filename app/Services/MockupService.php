@@ -345,12 +345,7 @@ class MockupService extends BaseService
                                 (array) ($currentPivot->positions ?? []),
                                 $pivotData['positions'] ?? []
                             ),
-                            'colors' => array_values(array_unique(
-                                array_merge(
-                                    (array) ($currentPivot->colors ?? []),
-                                    $pivotData['colors'] ?? []
-                                )
-                            )),
+                            'colors' => $pivotData['colors']
                         ];
 
                         $model->templates()->updateExistingPivot($templateId, $merged);
