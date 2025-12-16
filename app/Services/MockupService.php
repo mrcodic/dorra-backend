@@ -29,8 +29,7 @@ class MockupService extends BaseService
         $productType  = request('type');
         $templateId = request('template_id');
         $color      = request('color');
-        $product = $this->productRepository->query()->whereCategoryId($productId)->first();
-        dd($product);
+        $product = $this->productRepository->query()->whereId($productId)->first();
         $productId =  $productType == 'category' ? $productId : $product?->id;
         $mockups = $this->repository
             ->query()
