@@ -21,7 +21,8 @@
             @endcan
 
             <div style="background-color: #F4F6F6;height:200px">
-                @php$media = $mockup->getMedia('mockups');
+                @php
+                    $media = $mockup->getMedia('mockups');
 
                 $url = $media->first(fn ($m) =>
                         data_get($m, 'custom_properties.side') === 'front' &&
