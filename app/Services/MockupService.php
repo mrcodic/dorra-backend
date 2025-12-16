@@ -29,12 +29,12 @@ class MockupService extends BaseService
         $productType  = request('type');
         $templateId = request('template_id');
         $color      = request('color');
-        $productId = $this->productRepository->query()->whereId($categoryId)->first()?->category_id;
-        $productId =  $productType == 'category' ? $categoryId : $productId;
-        dd($productId, $categoryId);
+
+        $categoryId =  $productType == 'category' ? $categoryId : $this->productRepository->query()->whereId($categoryId)->first()?->category_id;
+        dd($categoryId);
         $mockups = $this->repository
             ->query()
-            ->when($productId, fn($q) => $q->whereCategoryId($productId ?? $categoryId))
+            ->when($productId, fn($q) => $q->whereCategoryId($categoryId))
             ->when($templateId, fn($q) => $q->whereHas('templates', function ($query) use ($templateId) {
                 $query->where('templates.id', $templateId);
             }))
@@ -51,7 +51,7 @@ class MockupService extends BaseService
             ->get();
 
         $colors = $mockups
-            ->filter(fn ($mockup) => (int) $mockup->category_id === (int) $productId)
+            ->filter(fn ($mockup) => (int) $mockup->category_id === (int) $categoryId)
             ->flatMap(fn ($mockup) => $mockup->templates
                 ->filter(fn($template) => $template->id == $templateId)
                 ->map(function ($tpl) use ($templateId) {
