@@ -89,24 +89,10 @@ class MockupService extends BaseService
         }
 
 
-        $front = $media
-            ->filter(fn ($m) => $m->getCustomProperty('side') === 'front')
-            ->map(fn ($m) => $m->getFullUrl())
-            ->values()
-            ->all();
-
-        $back = $media
-            ->filter(fn ($m) => $m->getCustomProperty('side') === 'back')
-            ->map(fn ($m) => $m->getFullUrl())
-            ->values()
-            ->all();
-
-        $none = $media
-            ->filter(fn ($m) => $m->getCustomProperty('side') === 'none')
-            ->map(fn ($m) => $m->getFullUrl())
-            ->values()
-            ->all();
-        $urls = array_merge($front, $back, $none);
+        $front = $media->first(fn($m) => $m->getCustomProperty('side') === 'front')?->getFullUrl();
+        $back  = $media->first(fn($m) => $m->getCustomProperty('side') === 'back')?->getFullUrl();
+        $none  = $media->first(fn($m) => $m->getCustomProperty('side') === 'none')?->getFullUrl();
+        $urls = array_values(array_filter([$front, $back,$none]));
         return [
             'colors' => $colors,
             'urls'   => $urls,
