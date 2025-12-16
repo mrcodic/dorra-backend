@@ -351,12 +351,4 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
     });
 
 });
-Route::get('test', function () {
-    \App\Models\Template::all()->each(function ($template) {
-        $template->delete();
-
-    });
-
-
-    return '✅ Templates table emptied and all media deleted.';
-});
+Route::get('test','dashboard.test');
