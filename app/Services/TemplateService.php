@@ -140,7 +140,7 @@ class TemplateService extends BaseService
         if (request()->expectsJson()) {
 
             $query = $query
-                ->when(request('approach') === 'without_editor', function ($q) {
+                ->when($query->approah === 'without_editor', function ($q) {
                     $q->whereHas('mockups');
                 })
                 ->whereStatus(StatusEnum::LIVE);
