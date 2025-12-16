@@ -891,7 +891,7 @@
                         request_type: "api",
                         approach: "without_editor",
                         paginate: true,
-                        // has_not_mockups: false,
+                        has_not_mockups: false,
                         per_page: 12,
                         types: getSelectedTypesForRequest(),
                     },
