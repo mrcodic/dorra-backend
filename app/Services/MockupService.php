@@ -35,7 +35,7 @@ class MockupService extends BaseService
             : (int) ($this->productRepository->query()
                 ->whereKey($categoryId)
                 ->value('category_id'));
-
+dd($resolvedCategoryId);
         $categoryId = $resolvedCategoryId;
 
         $mockups = $this->repository
