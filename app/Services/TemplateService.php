@@ -145,7 +145,9 @@ class TemplateService extends BaseService
                     $q->where('approach', '!=', 'without_editor') // all others always allowed
                     ->orWhere(function ($q) {
                         $q->where('approach', 'without_editor')
+
                             ->whereHas('mockups'); // only if has mockups
+                        dd("DAS");
                     });
                 });
 
