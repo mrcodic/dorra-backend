@@ -141,9 +141,14 @@ class TemplateService extends BaseService
 
             $query = $query
                 ->whereStatus(StatusEnum::LIVE)
-                ->when(fn ($q) => $q->where('approach', 'without_editor'), function ($q) {
-                    $q->whereHas('mockups');
+                ->where(function ($q) {
+                    $q->where('approach', '!=', 'without_editor') // all others always allowed
+                    ->orWhere(function ($q) {
+                        $q->where('approach', 'without_editor')
+                            ->whereHas('mockups'); // only if has mockups
+                    });
                 });
+
 
             return $paginate
                 ? $query->paginate($requested)
