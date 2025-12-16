@@ -49,7 +49,7 @@ class MockupService extends BaseService
             ])
             ->get();
         dd($mockups
-            ->filter(fn ($mockup) => (int) $mockup->category_id === (int) $productId)->get());
+            ->filter(fn ($mockup) => (int) $mockup->category_id === (int) $productId));
         $colors = $mockups
             ->filter(fn ($mockup) => (int) $mockup->category_id === (int) $productId)
             ->flatMap(fn ($mockup) => $mockup->templates->map(function ($tpl) use ($templateId) {
