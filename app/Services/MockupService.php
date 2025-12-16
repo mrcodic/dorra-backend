@@ -66,7 +66,7 @@ class MockupService extends BaseService
         $requested = $color
             ? (str_starts_with($color, '#') ? strtolower($color) : '#'.strtolower($color))
             : null;
-
+dd($mockups);
         $media = $mockups
             ->filter(fn ($mockup) => $mockup->templates->contains('id', $templateId))
             ->flatMap(fn ($mockup) =>
@@ -74,7 +74,6 @@ class MockupService extends BaseService
                 ->where('collection_name', 'generated_mockups')
                 ->filter(function ($m) use ($colors) {
                     $hex = strtolower($m->getCustomProperty('hex', ''));
-
                     return $hex && in_array($hex, array_map('strtolower', $colors));
                 })
             )
