@@ -448,7 +448,7 @@
             const modalScrollTop = document.querySelector('#templateModal .modal-body')?.scrollTop || 0;
             if (!card.selectedColors || !card.selectedColors.length) {
             }
-            hydrateColorsForCard(card); // يجيب المحفوظ ويرسمه مرة واح-دة
+            hydrateColorsForCard(card); // يجيب المحفوظ ويرسمه مرةv واح-دة
 
             pickrInstance.show();
 

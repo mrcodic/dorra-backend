@@ -26,7 +26,10 @@
             ->where('custom_properties.side', 'front')
             ->where('custom_properties.role', 'base')
             ->first()?->getFullUrl()
-        ?? asset('images/default-photo.png') }}"
+        ?: $mockup->getMedia('mockups')
+            ->where('custom_properties.side', 'back')
+            ->where('custom_properties.role', 'base')
+            ->first()?->getFullUrl()?: asset('images/default-photo.png') }}"
                     class="mx-auto d-block rounded-top" style="height:100%; width:auto; max-width:100%;"
                     alt="Template Image">
             </div>
