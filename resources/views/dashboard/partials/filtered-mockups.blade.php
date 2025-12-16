@@ -21,20 +21,23 @@
             @endcan
 
             <div style="background-color: #F4F6F6;height:200px">
-                <img
-                    src="{{ $mockup->getMedia('mockups')
-            ->where('custom_properties.side', 'front')
-            ->where('custom_properties.role', 'base')
-            ->first()?->getFullUrl()
-        ?: $mockup->getMedia('mockups')
-            ->where('custom_properties.side', 'back')
-            ->where('custom_properties.role', 'base')
-            ->first()?->getFullUrl()
-              ?: $mockup->getMedia('mockups')
-            ->where('custom_properties.side', 'none')
-            ->where('custom_properties.role', 'base')
-            ->first()?->getFullUrl()
+                @php$media = $mockup->getMedia('mockups');
 
+                $url = $media->first(fn ($m) =>
+                        data_get($m, 'custom_properties.side') === 'front' &&
+                        data_get($m, 'custom_properties.role') === 'base'
+                    )?->getFullUrl()
+                    ?? $media->first(fn ($m) =>
+                        data_get($m, 'custom_properties.side') === 'back' &&
+                        data_get($m, 'custom_properties.role') === 'base'
+                    )?->getFullUrl()
+                    ?? $media->first(fn ($m) =>
+                        data_get($m, 'custom_properties.side') === 'none' &&
+                        data_get($m, 'custom_properties.role') === 'base'
+                    )?->getFullUrl();
+                @endphp
+                <img
+                    src="{{ $url
             ?: asset('images/default-photo.png') }}"
                     class="mx-auto d-block rounded-top" style="height:100%; width:auto; max-width:100%;"
                     alt="Template Image">
