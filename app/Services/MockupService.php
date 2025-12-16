@@ -66,8 +66,7 @@ class MockupService extends BaseService
         $requested = $color
             ? (str_starts_with($color, '#') ? strtolower($color) : '#'.strtolower($color))
             : null;
-dd($mockups
-    ->filter(fn ($mockup) => $mockup->templates->contains('id', $templateId)));
+
         $media = $mockups
             ->filter(fn ($mockup) => $mockup->templates->contains('id', $templateId))
             ->flatMap(fn ($mockup) =>
@@ -80,7 +79,7 @@ dd($mockups
             )
             ->values();
 
-
+dd($media);
 
         if ($requested) {
             $media = $media->filter(function ($m) use ($requested) {
