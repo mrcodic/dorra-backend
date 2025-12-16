@@ -42,7 +42,7 @@ class TemplateResource extends JsonResource
             'types' => TypeResource::collection($this->whenLoaded('types')),
             'tags' => TagResource::collection($this->whenLoaded('tags')),
             'products' => ProductResource::collection($this->whenLoaded('products')),
-            'source_design_svg' => $this->when(isset($this->image), $this->image),
+            'source_design_svg' => $this->when(isset($this->image), $this->image) ?: $this->getFirstMediaUrl('back_templates'),
             'back_base64_preview_image' => $this->getFirstMediaUrl('back_templates'),
             'has_mockup' => (boolean)$this->products->contains('has_mockup', true),
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
