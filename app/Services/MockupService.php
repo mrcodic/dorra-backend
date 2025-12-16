@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Enums\Mockup\TypeEnum;
 use App\Repositories\Base\BaseRepositoryInterface;
+use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\MockupRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Services\Mockup\MockupRenderer;
@@ -15,21 +16,24 @@ class MockupService extends BaseService
 {
     public BaseRepositoryInterface $repository;
 
-    public function __construct(MockupRepositoryInterface $repository, public MockupRenderer $renderer,public ProductRepositoryInterface $productRepository)
+    public function __construct(MockupRepositoryInterface $repository, public MockupRenderer $renderer
+        ,public ProductRepositoryInterface $productRepository
+    )
     {
         parent::__construct($repository);
     }
 
     public function getMockups(): array
     {
-        $productId  = request('product_id');
+        $categoryId  = request('product_id');
         $productType  = request('type');
         $templateId = request('template_id');
         $color      = request('color');
-        $productId =  $productType == 'category' ? $productId : $this->productRepository->query()->whereCategoryId($productId)->first()?->id;
+        $productId = $this->productRepository->query()->whereCategoryId($categoryId)->first()?->id;
+        $productId =  $productType == 'category' ? $categoryId : $productId;
         $mockups = $this->repository
             ->query()
-            ->when($productId, fn($q) => $q->whereCategoryId($productId))
+            ->when($productId, fn($q) => $q->whereCategoryId($productId ?? $categoryId))
             ->when($templateId, fn($q) => $q->whereHas('templates', function ($query) use ($templateId) {
                 $query->where('templates.id', $templateId);
             }))
@@ -44,16 +48,17 @@ class MockupService extends BaseService
                 ])
             ])
             ->get();
+
         $colors = $mockups
-            ->flatMap(fn ($mockup) => $mockup->templates->map(function ($tpl) use ($templateId) {
-                if ($tpl->id == $templateId)
-                {
+            ->filter(fn ($mockup) => (int) $mockup->category_id === (int) $productId)
+            ->flatMap(fn ($mockup) => $mockup->templates
+                ->filter(fn($template) => $template->id == $templateId)
+                ->map(function ($tpl) use ($templateId) {
                     $c = $tpl->pivot->colors ?? [];
                     if (is_string($c)) $c = json_decode($c, true) ?: [];
                     return is_array($c) ? $c : [];
-                }
 
-            }))
+                }))
             ->flatten()
             ->filter()
             ->unique()
@@ -341,16 +346,8 @@ class MockupService extends BaseService
                         $currentPivot = $model->templates()->where('template_id', $templateId)->first()?->pivot;
 
                         $merged = [
-                            'positions' => array_merge(
-                                (array) ($currentPivot->positions ?? []),
-                                $pivotData['positions'] ?? []
-                            ),
-                            'colors' => array_values(array_unique(
-                                array_merge(
-                                    (array) ($currentPivot->colors ?? []),
-                                    $pivotData['colors'] ?? []
-                                )
-                            )),
+                            'positions' => $pivotData['positions'],
+                            'colors' => $pivotData['colors'],
                         ];
 
                         $model->templates()->updateExistingPivot($templateId, $merged);
