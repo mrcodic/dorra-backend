@@ -88,11 +88,11 @@ class MockupService extends BaseService
             });
         }
 
-
         $front = $media->first(fn($m) => $m->getCustomProperty('side') === 'front')?->getFullUrl();
         $back  = $media->first(fn($m) => $m->getCustomProperty('side') === 'back')?->getFullUrl();
         $none  = $media->first(fn($m) => $m->getCustomProperty('side') === 'none')?->getFullUrl();
         $urls = array_values(array_filter([$front, $back,$none]));
+
         return [
             'colors' => $colors,
             'urls'   => $urls,
