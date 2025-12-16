@@ -53,7 +53,6 @@ class MockupService extends BaseService
                 ->filter(fn($template) => $template->id == $templateId)
                 ->map(function ($tpl) use ($templateId) {
                     $c = $tpl->pivot->colors ?? [];
-                    dd($tpl->pivot->colors);
                     if (is_string($c)) $c = json_decode($c, true) ?: [];
                     return is_array($c) ? $c : [];
 
