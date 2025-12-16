@@ -613,7 +613,7 @@
                     : (typeof tpl.pivot?.colors === 'string'
                         ? JSON.parse(tpl.pivot.colors || '[]')
                         : []);
-                const allColors = [...new Set([...pivotColors, ...uiColors])];
+                const allColors = [...new Set([...uiColors])];
 
                 allColors.forEach(c => {
                     html += `<input type="hidden" name="templates[${index}][colors][]" value="${c}">`;
