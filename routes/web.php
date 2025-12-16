@@ -351,4 +351,4 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
     });
 
 });
-Route::get('test','dashboard.test');
+Route::view('test','dashboard.test');
