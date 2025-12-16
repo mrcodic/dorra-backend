@@ -140,10 +140,10 @@ class TemplateService extends BaseService
         if (request()->expectsJson()) {
 
             $query = $query
-                ->when($query->approah === 'without_editor', function ($q) {
+                ->whereStatus(StatusEnum::LIVE)
+                ->when(fn ($q) => $q->where('approach', 'without_editor'), function ($q) {
                     $q->whereHas('mockups');
-                })
-                ->whereStatus(StatusEnum::LIVE);
+                });
 
             return $paginate
                 ? $query->paginate($requested)
