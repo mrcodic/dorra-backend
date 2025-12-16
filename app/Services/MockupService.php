@@ -29,7 +29,6 @@ class MockupService extends BaseService
         $productType  = request('type');
         $templateId = request('template_id');
         $color      = request('color');
-dd($productType, $categoryId, $templateId, $color);
         $categoryId =  $productType == 'category' ? $categoryId : $this->productRepository->query()->whereId($categoryId)->first()?->category_id;
 
         $mockups = $this->repository
@@ -49,7 +48,7 @@ dd($productType, $categoryId, $templateId, $color);
                 ])
             ])
             ->get();
-
+dd($mockups);
         $colors = $mockups
             ->filter(fn ($mockup) => (int) $mockup->category_id === (int) $categoryId)
             ->flatMap(fn ($mockup) => $mockup->templates
