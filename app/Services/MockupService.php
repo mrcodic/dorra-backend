@@ -211,7 +211,7 @@ class MockupService extends BaseService
         });
         $this->handleFiles($model);
         // 🟢 احضر كل mockups في نفس الـ category وبنفس الـ templates
-        $mockups = Mockup::->query()
+        $mockups = Mockup::query()
             ->where('category_id', $model->category_id)
             ->whereKeyNot($model->id)
             ->whereHas('templates', fn($q) =>
