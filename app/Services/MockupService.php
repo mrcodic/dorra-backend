@@ -223,7 +223,7 @@ class MockupService extends BaseService
             return $tplIds === $modelTemplateIds;
         });
 
-//        dd($matchingMockups);
+        dd($matchingMockups);
 
 
         HandleMockupFilesJob::dispatch($model);
