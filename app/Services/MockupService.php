@@ -81,7 +81,7 @@ class MockupService extends BaseService
                 })
             )
             ->values();
-
+dd($media);
 
         if ($requested) {
             $media = $media->filter(function ($m) use ($requested) {
