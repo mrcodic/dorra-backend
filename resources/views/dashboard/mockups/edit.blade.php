@@ -538,6 +538,20 @@
 
     </script>
     <script>
+        function calculateObjectPercents(obj, meta) {
+            const center = obj.getCenterPoint();
+            const wReal = obj.width * obj.scaleX;
+            const hReal = obj.height * obj.scaleY;
+
+            return {
+                xPct: ((center.x - meta.offsetLeft) / meta.scaledWidth).toFixed(6),
+                yPct: ((center.y - meta.offsetTop) / meta.scaledHeight).toFixed(6),
+                wPct: (wReal / meta.scaledWidth).toFixed(6),
+                hPct: (hReal / meta.scaledHeight).toFixed(6),
+                angle: obj.angle || 0
+            };
+        }
+
         function buildHiddenTemplateInputs() {
             const container = document.getElementById("templatesHiddenContainer");
             if (!container) return;
@@ -1069,19 +1083,6 @@
 // =========================
 
 
-            function calculateObjectPercents(obj, meta) {
-                const center = obj.getCenterPoint();
-                const wReal = obj.width * obj.scaleX;
-                const hReal = obj.height * obj.scaleY;
-
-                return {
-                    xPct: ((center.x - meta.offsetLeft) / meta.scaledWidth).toFixed(6),
-                    yPct: ((center.y - meta.offsetTop) / meta.scaledHeight).toFixed(6),
-                    wPct: (wReal / meta.scaledWidth).toFixed(6),
-                    hPct: (hReal / meta.scaledHeight).toFixed(6),
-                    angle: obj.angle || 0
-                };
-            }
 
 
             $(document).on('click', '.js-save-positions', function () {
