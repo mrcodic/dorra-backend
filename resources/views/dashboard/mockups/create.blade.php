@@ -4,348 +4,348 @@
 @section('main-page', 'Create Mockup')
 
 @section('vendor-style')
-{{-- Page Css files --}}
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/dataTables.bootstrap5.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
-<style>
-    .gradient-picker-trigger {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-image: url('/images/AddColor.svg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        border: 1px solid #ccc;
-        cursor: pointer;
-        position: relative;
-    }
+    {{-- Page Css files --}}
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/dataTables.bootstrap5.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/responsive.bootstrap5.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/buttons.bootstrap5.min.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/tables/datatable/rowGroup.bootstrap5.min.css')) }}">
+    <style>
+        .gradient-picker-trigger {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-image: url('/images/AddColor.svg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            position: relative;
+        }
 
-    .gradient-picker-trigger .pcr-button {
-        display: none !important;
-    }
+        .gradient-picker-trigger .pcr-button {
+            display: none !important;
+        }
 
-    .selected-color-wrapper {
-        width: 28px;
-        height: 28px;
-    }
+        .selected-color-wrapper {
+            width: 28px;
+            height: 28px;
+        }
 
-    .selected-color-dot {
-        width: 100%;
-        height: 100%;
-        padding: 1px;
-        border-radius: 50%;
-        border: 2px solid #ccc;
-        box-sizing: border-box;
-        background-clip: content-box;
-    }
+        .selected-color-dot {
+            width: 100%;
+            height: 100%;
+            padding: 1px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            box-sizing: border-box;
+            background-clip: content-box;
+        }
 
-    .selected-color-inner {
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-    }
+        .selected-color-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
 
-    .remove-color-btn {
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        background-color: #F4F6F6 !important;
-        color: #424746 !important;
-        border-radius: 5px;
-        width: 16px;
-        height: 16px;
-        font-size: 16px;
-        line-height: 1;
-        padding: 1px;
-        display: none;
-    }
+        .remove-color-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #F4F6F6 !important;
+            color: #424746 !important;
+            border-radius: 5px;
+            width: 16px;
+            height: 16px;
+            font-size: 16px;
+            line-height: 1;
+            padding: 1px;
+            display: none;
+        }
 
-    .selected-color-wrapper:hover .remove-color-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+        .selected-color-wrapper:hover .remove-color-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .gradient-edit-picker-trigger {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-image: url('/images/AddColor.svg') !important;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        border: 1px solid #ccc;
-        cursor: pointer;
-        position: relative;
-    }
+        .gradient-edit-picker-trigger {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-image: url('/images/AddColor.svg') !important;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            position: relative;
+        }
 
-    .gradient-edit-picker-trigger .pcr-button {
-        display: none !important;
-    }
+        .gradient-edit-picker-trigger .pcr-button {
+            display: none !important;
+        }
 
-    /* كل بلوك ياخد سطر كامل ويتكدس عموديًا */
-    .type-block {
-        display: block !important;
-        width: 100% !important;
-        box-sizing: border-box;
-        margin-bottom: .75rem;
-    }
+        /* كل بلوك ياخد سطر كامل ويتكدس عموديًا */
+        .type-block {
+            display: block !important;
+            width: 100% !important;
+            box-sizing: border-box;
+            margin-bottom: .75rem;
+        }
 
-    /* لو الـ inner d-flex موجود داخل البلوك فهو هعرض Base | Mask جنب بعض */
-    .type-block>.d-flex {
-        display: flex;
-        gap: 1rem;
-        align-items: flex-start;
-    }
+        /* لو الـ inner d-flex موجود داخل البلوك فهو هعرض Base | Mask جنب بعض */
+        .type-block>.d-flex {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
 
-    /* تأكد أن الحاوية اليسرى عمودية */
-    #left-column {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: .75rem;
-    }
+        /* تأكد أن الحاوية اليسرى عمودية */
+        #left-column {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: .75rem;
+        }
 
-    /* لو محتاج تجاويف داخل البلوكات */
-    .upload-card {
-        box-sizing: border-box;
-    }
+        /* لو محتاج تجاويف داخل البلوكات */
+        .upload-card {
+            box-sizing: border-box;
+        }
 
-    /* show more button animation */
-    :root {
-        --anim-duration: 300ms;
-        --anim-ease: cubic-bezier(.2, .9, .3, 1);
-    }
+        /* show more button animation */
+        :root {
+            --anim-duration: 300ms;
+            --anim-ease: cubic-bezier(.2, .9, .3, 1);
+        }
 
-    /* first position of text and arrow */
-    .show-more-text,
-    .show-more-arrow {
-        display: inline-block;
-        vertical-align: middle;
-        transition: transform var(--anim-duration) var(--anim-ease), opacity var(--anim-duration) var(--anim-ease);
-    }
+        /* first position of text and arrow */
+        .show-more-text,
+        .show-more-arrow {
+            display: inline-block;
+            vertical-align: middle;
+            transition: transform var(--anim-duration) var(--anim-ease), opacity var(--anim-duration) var(--anim-ease);
+        }
 
-    /* first position of the arrow is hidden and come from right */
-    .show-more-arrow {
-        opacity: 0;
-        transform: translateX(10px) scale(0.9);
-        pointer-events: none;
-    }
+        /* first position of the arrow is hidden and come from right */
+        .show-more-arrow {
+            opacity: 0;
+            transform: translateX(10px) scale(0.9);
+            pointer-events: none;
+        }
 
-    /* text is in the same position */
-    .show-more-text {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
+        /* text is in the same position */
+        .show-more-text {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
 
-    /* on focus or hover: the text go to left and the arrow come from right */
-    .show-more-card:hover .show-more-text,
-    .show-more-card:focus .show-more-text,
-    .show-more-card:focus-within .show-more-text {
-        opacity: 0;
-        transform: translateX(-30px) scale(0.95);
-    }
+        /* on focus or hover: the text go to left and the arrow come from right */
+        .show-more-card:hover .show-more-text,
+        .show-more-card:focus .show-more-text,
+        .show-more-card:focus-within .show-more-text {
+            opacity: 0;
+            transform: translateX(-30px) scale(0.95);
+        }
 
-    .show-more-card:hover .show-more-arrow,
-    .show-more-card:focus .show-more-arrow,
-    .show-more-card:focus-within .show-more-arrow {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
+        .show-more-card:hover .show-more-arrow,
+        .show-more-card:focus .show-more-arrow,
+        .show-more-card:focus-within .show-more-arrow {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
 
-    /* the movement of the arrow is delayed */
-    .show-more-arrow {
-        font-size: 22px;
-        margin-left: 6px;
-        transition-delay: 80ms;
-    }
+        /* the movement of the arrow is delayed */
+        .show-more-arrow {
+            font-size: 22px;
+            margin-left: 6px;
+            transition-delay: 80ms;
+        }
 
-    .show-more-text {
-        transition-delay: 0ms;
-    }
+        .show-more-text {
+            transition-delay: 0ms;
+        }
 
-    /* on hover: some shadow and movement of the arrow */
-    .show-more-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-        transition: transform 180ms var(--anim-ease), box-shadow 180ms var(--anim-ease);
-    }
+        /* on hover: some shadow and movement of the arrow */
+        .show-more-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            transition: transform 180ms var(--anim-ease), box-shadow 180ms var(--anim-ease);
+        }
 
-</style>
+    </style>
 @endsection
 
 @section('page-style')
-{{-- Page Css files --}}
-<link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
+    {{-- Page Css files --}}
+    <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 @endsection
 
 @section('content')
-<!-- users list start -->
-<section class="">
-    <div class="card">
-        <div class="card-body">
-            <form id="addMockupForm" enctype="multipart/form-data" action="{{ route('mockups.store') }}">
-                @csrf
-                <div class="modal-body flex-grow-1">
-                    <div class="position-relative text-center mb-2">
-                        <hr class="opacity-75" style="border: 1px solid #24B094;">
-                        <span
-                            class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
-                            style="color: #24B094">
+    <!-- users list start -->
+    <section class="">
+        <div class="card">
+            <div class="card-body">
+                <form id="addMockupForm" enctype="multipart/form-data" action="{{ route('mockups.store') }}">
+                    @csrf
+                    <div class="modal-body flex-grow-1">
+                        <div class="position-relative text-center mb-2">
+                            <hr class="opacity-75" style="border: 1px solid #24B094;">
+                            <span
+                                class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                style="color: #24B094">
                             Mockup Details
                         </span>
-                    </div>
-                    <div class="row">
-                        <div class="form-group mb-2 col-md-3">
-                            <input type="text" id="templateName" class="form-control" name="name"
-                                placeholder="Mockup Name">
                         </div>
+                        <div class="row">
+                            <div class="form-group mb-2 col-md-3">
+                                <input type="text" id="templateName" class="form-control" name="name"
+                                       placeholder="Mockup Name">
+                            </div>
 
-                        <div class="form-group mb-2 col-md-9">
-                            <div class="row">
-                                @foreach($associatedData['types'] as $type)
-                                <div class="col-md-4 mb-1">
-                                    <label class="radio-box">
-                                        <input class="form-check-input type-checkbox" type="checkbox" name="types[]"
-                                            value="{{ $type->value }}"
-                                            data-type-name="{{ strtolower($type->value->name) }}">
-                                        <span>{{ $type->value->label() }}</span>
-                                    </label>
+                            <div class="form-group mb-2 col-md-9">
+                                <div class="row">
+                                    @foreach($associatedData['types'] as $type)
+                                        <div class="col-md-4 mb-1">
+                                            <label class="radio-box">
+                                                <input class="form-check-input type-checkbox" type="checkbox" name="types[]"
+                                                       value="{{ $type->value }}"
+                                                       data-type-name="{{ strtolower($type->value->name) }}">
+                                                <span>{{ $type->value->label() }}</span>
+                                            </label>
+                                        </div>
+                                    @endforeach
                                 </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <!-- العمود الشمال: يحتوي fixed-block + fileInputsContainer (البلوكات تتحط هنا) -->
+                            <div id="left-column" class="d-flex flex-column" style="width:60%;">
+                                <!-- fixed-block يبقى مكان الإشارة لفانكشنك -->
+                                <div id="fixed-block"></div>
+
+                                <!-- الحاوية اللى بتضيف لها الفانكشن البلوكات (لو مش موجودة بالفعل) -->
+                                <div id="fileInputsContainer"></div>
+                            </div>
+
+                            <!-- العمود اليمين: الـ editor / preview -->
+                            <div class="d-flex flex-column gap-2 justify-content-between">
+                                <div class="mt-2 d-none" id="editorFrontWrapper" style="width:auto">
+                                    <label class="label-text">Mockup Editor (Front)</label>
+                                    <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="300"></canvas>
+                                </div>
+                                <div class="mt-2 d-none" id="editorBackWrapper" style="width:auto">
+                                    <label class="label-text">Mockup Editor (Back)</label>
+                                    <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="300"></canvas>
+                                </div>
+
+                                <div class="mt-2 d-none" id="editorNoneWrapper" style="width: auto">
+                                    <label class="label-text">Mockup Editor (General)</label>
+                                    <canvas id="mockupCanvasNone" height="300" style="border:1px solid #ccc;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-2">
+                            <label for="productsSelect" class="label-text mb-1">Product</label>
+                            <select id="productsSelect" name="category_id" class="form-select">
+                                <option value="" disabled selected>Choose product</option>
+                                @foreach($associatedData['products'] as $product)
+                                    <option value="{{ $product->id }}">
+                                        {{ $product->getTranslation('name', app()->getLocale()) }}
+                                    </option>
                                 @endforeach
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-start">
-                        <!-- العمود الشمال: يحتوي fixed-block + fileInputsContainer (البلوكات تتحط هنا) -->
-                        <div id="left-column" class="d-flex flex-column" style="width:60%;">
-                            <!-- fixed-block يبقى مكان الإشارة لفانكشنك -->
-                            <div id="fixed-block"></div>
-
-                            <!-- الحاوية اللى بتضيف لها الفانكشن البلوكات (لو مش موجودة بالفعل) -->
-                            <div id="fileInputsContainer"></div>
+                            </select>
                         </div>
 
-                        <!-- العمود اليمين: الـ editor / preview -->
-                        <div class="d-flex flex-column gap-2 justify-content-between">
-                            <div class="mt-2 d-none" id="editorFrontWrapper" style="width:auto">
-                                <label class="label-text">Mockup Editor (Front)</label>
-                                <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="300"></canvas>
-                            </div>
-                            <div class="mt-2 d-none" id="editorBackWrapper" style="width:auto">
-                                <label class="label-text">Mockup Editor (Back)</label>
-                                <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="300"></canvas>
-                            </div>
 
-                            <div class="mt-2 d-none" id="editorNoneWrapper" style="width: auto">
-                                <label class="label-text">Mockup Editor (General)</label>
-                                <canvas id="mockupCanvasNone" height="300" style="border:1px solid #ccc;"></canvas>
-                            </div>
+                        <div class="form-group mb-2 d-none" id="templatesCardsWrapper">
+                            <label class="form-label mb-1">Choose Template</label>
+                            <div id="templatesCardsContainer"
+                                 class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm"></div>
+                            <input type="hidden" name="template_id" id="selectedTemplateId">
+
+                            <div id="templatesHiddenContainer"></div>
                         </div>
                     </div>
 
-                    <div class="form-group mb-2">
-                        <label for="productsSelect" class="label-text mb-1">Product</label>
-                        <select id="productsSelect" name="category_id" class="form-select">
-                            <option value="" disabled selected>Choose product</option>
-                            @foreach($associatedData['products'] as $product)
-                            <option value="{{ $product->id }}">
-                                {{ $product->getTranslation('name', app()->getLocale()) }}
-                            </option>
-                            @endforeach
-                        </select>
+
+                    {{-- <div class="mb-2">
+                        <label class="label-text mb-1 d-block">Colors</label>
+                        <div class="d-flex flex-wrap align-items-center gap-1">
+                            <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
+
+                            <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>
+                        </div>
+                        <div id="colorsInputContainer"></div>
+                    </div> --}}
+
+                    <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
+                            <span class="btn-text">Create</span>
+                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
+                                  aria-hidden="true"></span>
+                        </button>
                     </div>
 
-
-                    <div class="form-group mb-2 d-none" id="templatesCardsWrapper">
-                        <label class="form-label mb-1">Choose Template</label>
-                        <div id="templatesCardsContainer"
-                             class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm"></div>
-                        <input type="hidden" name="template_id" id="selectedTemplateId">
-
-                        <div id="templatesHiddenContainer"></div>
-                    </div>
-                </div>
-
-
-                {{-- <div class="mb-2">
-                    <label class="label-text mb-1 d-block">Colors</label>
-                    <div class="d-flex flex-wrap align-items-center gap-1">
-                        <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
-
-                        <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>
-                    </div>
-                    <div id="colorsInputContainer"></div>
-                </div> --}}
-
-                <div class="modal-footer border-top-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
-                        <span class="btn-text">Create</span>
-                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                            aria-hidden="true"></span>
-                    </button>
-                </div>
-
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
-    @include("modals.templates.template-modal")
-</section>
-<!-- users list ends -->
+        @include("modals.templates.template-modal")
+    </section>
+    <!-- users list ends -->
 @endsection
 
 @section('vendor-script')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
 
-{{-- Vendor js files --}}
-<script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
+    {{-- Vendor js files --}}
+    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/jquery.dataTables.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.bootstrap5.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.responsive.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/responsive.bootstrap5.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/datatables.buttons.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/jszip.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/pdfmake.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/vfs_fonts.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.html5.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/buttons.print.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/tables/datatable/dataTables.rowGroup.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/validation/jquery.validate.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/cleave/cleave.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/cleave/addons/cleave-phone.us.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
 @endsection
 
 @section('page-script')
 
-<script>
-    function cacheCurrentTemplatePositions() {
-        window.savedTemplatePositions = window.savedTemplatePositions || {};
+    <script>
+        function cacheCurrentTemplatePositions() {
+            window.savedTemplatePositions = window.savedTemplatePositions || {};
 
-        document.querySelectorAll('#templatesHiddenContainer .template-inputs').forEach(div => {
-            const templateId = div.dataset.templateId;
-            const inputs = div.querySelectorAll('input');
-            const data = {};
+            document.querySelectorAll('#templatesHiddenContainer .template-inputs').forEach(div => {
+                const templateId = div.dataset.templateId;
+                const inputs = div.querySelectorAll('input');
+                const data = {};
 
-            inputs.forEach(inp => {
-                const m = inp.name.match(/\[(front|back|none)_[a-z]+\]/);
-                if (m) {
-                    const cleanKey = m[0].replace(/[\[\]]/g, ''); // front_x
-                    data[cleanKey] = parseFloat(inp.value) || 0;
-                }
+                inputs.forEach(inp => {
+                    const m = inp.name.match(/\[(front|back|none)_[a-z]+\]/);
+                    if (m) {
+                        const cleanKey = m[0].replace(/[\[\]]/g, ''); // front_x
+                        data[cleanKey] = parseFloat(inp.value) || 0;
+                    }
+                });
+
+                window.savedTemplatePositions[String(templateId)] = data;
             });
 
-            window.savedTemplatePositions[String(templateId)] = data;
-        });
+            console.log('✅ cached positions:', window.savedTemplatePositions);
+        }
 
-        console.log('✅ cached positions:', window.savedTemplatePositions);
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {
             const $productSelect            = $('#productsSelect');
             const $templatesWrapper         = $('#templatesCardsWrapper');
             const $templatesCardsContainer  = $('#templatesCardsContainer');
@@ -658,165 +658,165 @@
             // Show on Mockup (cards + modal)
             // =========================
 
-        $(document).on('click', '.js-show-on-mockup', function () {
-            const $cardWrapper = $(this).closest('.template-card');
-            const id = $cardWrapper.data('id');
-            const front = $cardWrapper.data('front');
-            const back = $cardWrapper.data('back');
-            const none = $cardWrapper.data('none');
-            const name = $cardWrapper.find('.card-title').text();
+            $(document).on('click', '.js-show-on-mockup', function () {
+                const $cardWrapper = $(this).closest('.template-card');
+                const id = $cardWrapper.data('id');
+                const front = $cardWrapper.data('front');
+                const back = $cardWrapper.data('back');
+                const none = $cardWrapper.data('none');
+                const name = $cardWrapper.find('.card-title').text();
 
-            // Mark this template as selected
-            $cardWrapper.addClass('selected');
+                // Mark this template as selected
+                $cardWrapper.addClass('selected');
 
-            // Ensure it has a selectedColors array
-            if (!$cardWrapper[0].selectedColors) {
-                $cardWrapper[0].selectedColors = [];
-            }
+                // Ensure it has a selectedColors array
+                if (!$cardWrapper[0].selectedColors) {
+                    $cardWrapper[0].selectedColors = [];
+                }
 
-            // Copy any existing selected colors from the card DOM inputs
-            const colorInputs = $cardWrapper.find('input[name="colors[]"]');
-            $cardWrapper[0].selectedColors = Array.from(colorInputs).map(input => input.value);
+                // Copy any existing selected colors from the card DOM inputs
+                const colorInputs = $cardWrapper.find('input[name="colors[]"]');
+                $cardWrapper[0].selectedColors = Array.from(colorInputs).map(input => input.value);
 
-            // Highlight the selected card in templatesCardsWrapper
-            $('#templatesCardsContainer').find('.template-card .card')
-                .removeClass('border-primary shadow-lg')
-                .css('border-color', '#24B094');
+                // Highlight the selected card in templatesCardsWrapper
+                $('#templatesCardsContainer').find('.template-card .card')
+                    .removeClass('border-primary shadow-lg')
+                    .css('border-color', '#24B094');
 
-            // If clicked from the modal
-            if ($(this).closest('#templateModal').length) {
-                $cardWrapper.remove();
+                // If clicked from the modal
+                if ($(this).closest('#templateModal').length) {
+                    $cardWrapper.remove();
 
-                const cardHtml = `<div class="col-12 col-md-4 col-lg-3">
+                    const cardHtml = `<div class="col-12 col-md-4 col-lg-3">
             ${buildTemplateInnerCard({
-                    id: id,
-                    source_design_svg: front ?? none,
-                    back_base64_preview_image: back,
-                    name: name
-                })}
+                        id: id,
+                        source_design_svg: front ?? none,
+                        back_base64_preview_image: back,
+                        name: name
+                    })}
         </div>`;
 
-                $('#templatesCardsContainer').prepend(cardHtml);
+                    $('#templatesCardsContainer').prepend(cardHtml);
 
-                // Move last card if more than 3
-                const $cards = $('#templatesCardsContainer .template-card').not('.show-more');
-                if ($cards.length > 3) {
-                    const $lastCard = $cards.last();
-                    const lastId = $lastCard.data('id');
-                    const lastFront = $lastCard.data('front') ?? $lastCard.data('none');
-                    const lastBack = $lastCard.data('back');
-                    const lastName = $lastCard.find('.card-title').text();
+                    // Move last card if more than 3
+                    const $cards = $('#templatesCardsContainer .template-card').not('.show-more');
+                    if ($cards.length > 3) {
+                        const $lastCard = $cards.last();
+                        const lastId = $lastCard.data('id');
+                        const lastFront = $lastCard.data('front') ?? $lastCard.data('none');
+                        const lastBack = $lastCard.data('back');
+                        const lastName = $lastCard.find('.card-title').text();
 
-                    $lastCard.remove();
+                        $lastCard.remove();
 
-                    const modalCardHtml = `<div class="col-6 col-md-4 mb-2">
+                        const modalCardHtml = `<div class="col-6 col-md-4 mb-2">
                 ${buildTemplateInnerCard({
-                        id: lastId,
-                        source_design_svg: lastFront,
-                        back_base64_preview_image: lastBack,
-                        name: lastName
-                    })}
+                            id: lastId,
+                            source_design_svg: lastFront,
+                            back_base64_preview_image: lastBack,
+                            name: lastName
+                        })}
             </div>`;
 
-                    $('#templates-modal-container').prepend(modalCardHtml);
+                        $('#templates-modal-container').prepend(modalCardHtml);
+                    }
                 }
-            }
 
-            // Highlight newly added/existing card
-            $('#templatesCardsContainer').find(`.template-card[data-id="${id}"] .card`)
-                .addClass('border-primary shadow-lg')
-                .css('border-color', '#0d6efd');
+                // Highlight newly added/existing card
+                $('#templatesCardsContainer').find(`.template-card[data-id="${id}"] .card`)
+                    .addClass('border-primary shadow-lg')
+                    .css('border-color', '#0d6efd');
 
-            // Save template_id for single selection fallback (optional)
-            $('#selectedTemplateId').val(id);
+                // Save template_id for single selection fallback (optional)
+                $('#selectedTemplateId').val(id);
 
-            // Load template on canvas
-            if (typeof loadAndBind === 'function') {
-                if (front) {
-                    loadAndBind(window.canvasFront, front, 'front', id);
-                    document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
+                // Load template on canvas
+                if (typeof loadAndBind === 'function') {
+                    if (front) {
+                        loadAndBind(window.canvasFront, front, 'front', id);
+                        document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
+                    }
+                    if (back) {
+                        loadAndBind(window.canvasBack, back, 'back', id);
+                        document.getElementById('editorBackWrapper')?.classList.remove('d-none');
+                    }
+                    if (none) {
+                        loadAndBind(window.canvasNone, none, 'none', id);
+                        document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
+                    }
                 }
-                if (back) {
-                    loadAndBind(window.canvasBack, back, 'back', id);
-                    document.getElementById('editorBackWrapper')?.classList.remove('d-none');
-                }
-                if (none) {
-                    loadAndBind(window.canvasNone, none, 'none', id);
-                    document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
-                }
-            }
 
-            // Close modal
-            $('#templateModal').modal('hide');
-        });
+                // Close modal
+                $('#templateModal').modal('hide');
+            });
 
 // =========================
 // Save Positions (cards + modal)
 // =========================
-        function buildHiddenTemplateInputs() {
-            const container = document.getElementById("templatesHiddenContainer");
-            container.innerHTML = "";
+            function buildHiddenTemplateInputs() {
+                const container = document.getElementById("templatesHiddenContainer");
+                container.innerHTML = "";
 
-            const selectedTemplates = document.querySelectorAll('.template-card.selected');
-            console.log(selectedTemplates)
-            selectedTemplates.forEach((card, index) => {
-                const templateId = card.dataset.id;
-                const selectedColors = card.selectedColors || [];
-              let html = `<input type="hidden" name="templates[${index}][template_id]" value="${templateId}">`;
+                const selectedTemplates = document.querySelectorAll('.template-card.selected');
+                console.log(selectedTemplates)
+                selectedTemplates.forEach((card, index) => {
+                    const templateId = card.dataset.id;
+                    const selectedColors = card.selectedColors || [];
+                    let html = `<input type="hidden" name="templates[${index}][template_id]" value="${templateId}">`;
 
-                function add(name, value) {
-                    html += `<input type="hidden" name="templates[${index}][${name}]" value="${value}">`;
-                }
+                    function add(name, value) {
+                        html += `<input type="hidden" name="templates[${index}][${name}]" value="${value}">`;
+                    }
 
-                // FRONT
-                canvasFront?.getObjects()
-                    .filter(o => o.templateType === "front" )
-                    .forEach(obj => {
-                        const meta = canvasFront.__mockupMeta;
-                        const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
-                        add("front_x", xPct);
-                        add("front_y", yPct);
-                        add("front_width", wPct);
-                        add("front_height", hPct);
-                        add("front_angle", angle);
+                    // FRONT
+                    canvasFront?.getObjects()
+                        .filter(o => o.templateType === "front" )
+                        .forEach(obj => {
+                            const meta = canvasFront.__mockupMeta;
+                            const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
+                            add("front_x", xPct);
+                            add("front_y", yPct);
+                            add("front_width", wPct);
+                            add("front_height", hPct);
+                            add("front_angle", angle);
+                        });
+
+                    // BACK
+                    canvasBack?.getObjects()
+                        .filter(o => o.templateType === "back")
+                        .forEach(obj => {
+                            const meta = canvasBack.__mockupMeta;
+                            const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
+                            add("back_x", xPct);
+                            add("back_y", yPct);
+                            add("back_width", wPct);
+                            add("back_height", hPct);
+                            add("back_angle", angle);
+                        });
+
+                    // NONE
+                    canvasNone?.getObjects()
+                        .filter(o => o.templateType === "none")
+                        .forEach(obj => {
+                            const meta = canvasNone.__mockupMeta;
+                            const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
+                            add("none_x", xPct);
+                            add("none_y", yPct);
+                            add("none_width", wPct);
+                            add("none_height", hPct);
+                            add("none_angle", angle);
+                        });
+
+                    // COLORS
+                    selectedColors.forEach(color => {
+                        html += `<input type="hidden" name="templates[${index}][colors][]" value="${color}">`;
                     });
 
-                // BACK
-                canvasBack?.getObjects()
-                    .filter(o => o.templateType === "back")
-                    .forEach(obj => {
-                        const meta = canvasBack.__mockupMeta;
-                        const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
-                        add("back_x", xPct);
-                        add("back_y", yPct);
-                        add("back_width", wPct);
-                        add("back_height", hPct);
-                        add("back_angle", angle);
-                    });
-
-                // NONE
-                canvasNone?.getObjects()
-                    .filter(o => o.templateType === "none")
-                    .forEach(obj => {
-                        const meta = canvasNone.__mockupMeta;
-                        const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
-                        add("none_x", xPct);
-                        add("none_y", yPct);
-                        add("none_width", wPct);
-                        add("none_height", hPct);
-                        add("none_angle", angle);
-                    });
-
-                // COLORS
-                selectedColors.forEach(color => {
-                    html += `<input type="hidden" name="templates[${index}][colors][]" value="${color}">`;
+                    container.insertAdjacentHTML('beforeend', html);
                 });
+            }
 
-                container.insertAdjacentHTML('beforeend', html);
-            });
-        }
-
-        function calculateObjectPercents(obj, meta) {
+            function calculateObjectPercents(obj, meta) {
                 const center = obj.getCenterPoint();
                 const wReal = obj.width * obj.scaleX;
                 const hReal = obj.height * obj.scaleY;
@@ -829,44 +829,43 @@
                     angle: obj.angle || 0
                 };
             }
-        // $('form').on('submit', function () {
-        //     buildHiddenTemplateInputs();
-        // });
+            // $('form').on('submit', function () {
+            //     buildHiddenTemplateInputs();
+            // });
 
 
-        $(document).on('click', '.js-save-positions', function () {
-            console.log("Save Positions clicked");
+            $(document).on('click', '.js-save-positions', function () {
+                console.log("Save Positions clicked");
 
-            // 1️⃣ Update positions from all canvases
-            if (typeof saveAllTemplatePositions === 'function') {
-                buildHiddenTemplateInputs();
-                saveAllTemplatePositions();
-                cacheCurrentTemplatePositions();
+                // 1️⃣ Update positions from all canvases
+                if (typeof saveAllTemplatePositions === 'function') {
+                    buildHiddenTemplateInputs();
+                    saveAllTemplatePositions();
+                    cacheCurrentTemplatePositions();
 
-            }
+                }
 
-            // 2️⃣ Build hidden inputs inside form
+                // 2️⃣ Build hidden inputs inside form
 
 
-            // 3️⃣ Verify before submit
-            console.log("Hidden inputs:", $('#templatesHiddenContainer input').length);
+                // 3️⃣ Verify before submit
+                console.log("Hidden inputs:", $('#templatesHiddenContainer input').length);
 
-            Toastify({
-                text: "Positions saved successfully",
-                duration: 1500,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#28a745",
-                close: true,
-            }).showToast();
+                Toastify({
+                    text: "Positions saved successfully",
+                    duration: 1500,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    close: true,
+                }).showToast();
+            });
+
         });
+    </script>
 
-    });
-</script>
-
-
-<script>
-    // =========================
+    <script>
+        // =========================
         // CANVAS HELPER FUNCTIONS
         // =========================
         window.canvasFront = new fabric.Canvas('mockupCanvasFront');
@@ -921,48 +920,48 @@
             canvas.renderAll();
         }
 
-    function syncTemplateInputs(obj, type) {
-        const container = document.getElementById('templatesHiddenContainer');
-        if (!container) return;
+        function syncTemplateInputs(obj, type) {
+            const container = document.getElementById('templatesHiddenContainer');
+            if (!container) return;
 
-        const canvas = obj.canvas;
-        const meta = canvas && canvas.__mockupMeta;
-        if (!meta) return;
+            const canvas = obj.canvas;
+            const meta = canvas && canvas.__mockupMeta;
+            if (!meta) return;
 
-        const templateId = obj.templateId;
+            const templateId = obj.templateId;
 
-        const templateContainer = container.querySelector(`.template-inputs[data-template-id="${templateId}"]`);
-        if (!templateContainer) return;
+            const templateContainer = container.querySelector(`.template-inputs[data-template-id="${templateId}"]`);
+            if (!templateContainer) return;
 
-        const xInput = templateContainer.querySelector(`.template_x.${type}`);
-        const yInput = templateContainer.querySelector(`.template_y.${type}`);
-        const widthInput = templateContainer.querySelector(`.template_width.${type}`);
-        const heightInput = templateContainer.querySelector(`.template_height.${type}`);
-        const angleInput = templateContainer.querySelector(`.template_angle.${type}`);
-        if (!xInput || !yInput || !widthInput || !heightInput || !angleInput) return;
+            const xInput = templateContainer.querySelector(`.template_x.${type}`);
+            const yInput = templateContainer.querySelector(`.template_y.${type}`);
+            const widthInput = templateContainer.querySelector(`.template_width.${type}`);
+            const heightInput = templateContainer.querySelector(`.template_height.${type}`);
+            const angleInput = templateContainer.querySelector(`.template_angle.${type}`);
+            if (!xInput || !yInput || !widthInput || !heightInput || !angleInput) return;
 
-        const center = obj.getCenterPoint();
-        const wReal  = (obj.width || 0) * (obj.scaleX || 1);
-        const hReal  = (obj.height || 0) * (obj.scaleY || 1);
+            const center = obj.getCenterPoint();
+            const wReal  = (obj.width || 0) * (obj.scaleX || 1);
+            const hReal  = (obj.height || 0) * (obj.scaleY || 1);
 
-        let xPct = (center.x - meta.offsetLeft) / meta.scaledWidth;
-        let yPct = (center.y - meta.offsetTop)  / meta.scaledHeight;
-        let wPct = wReal / meta.scaledWidth;
-        let hPct = hReal / meta.scaledHeight;
+            let xPct = (center.x - meta.offsetLeft) / meta.scaledWidth;
+            let yPct = (center.y - meta.offsetTop)  / meta.scaledHeight;
+            let wPct = wReal / meta.scaledWidth;
+            let hPct = hReal / meta.scaledHeight;
 
-        if (!Number.isFinite(xPct)) xPct = 0;
-        if (!Number.isFinite(yPct)) yPct = 0;
-        if (!Number.isFinite(wPct)) wPct = 0;
-        if (!Number.isFinite(hPct)) hPct = 0;
+            if (!Number.isFinite(xPct)) xPct = 0;
+            if (!Number.isFinite(yPct)) yPct = 0;
+            if (!Number.isFinite(wPct)) wPct = 0;
+            if (!Number.isFinite(hPct)) hPct = 0;
 
-        xInput.value      = xPct.toFixed(6);
-        yInput.value      = yPct.toFixed(6);
-        widthInput.value  = wPct.toFixed(6);
-        heightInput.value = hPct.toFixed(6);
-        angleInput.value  = String(obj.angle || 0);
-    }
+            xInput.value      = xPct.toFixed(6);
+            yInput.value      = yPct.toFixed(6);
+            widthInput.value  = wPct.toFixed(6);
+            heightInput.value = hPct.toFixed(6);
+            angleInput.value  = String(obj.angle || 0);
+        }
 
-    function clearTemplateInputsForObject(type) {
+        function clearTemplateInputsForObject(type) {
             const wrapper = document.getElementById('templatesCardsWrapper');
             if (!wrapper) return;
 
@@ -1108,10 +1107,10 @@
         bindCanvasUpdates(window.canvasFront, "front");
         bindCanvasUpdates(window.canvasBack, "back");
         bindCanvasUpdates(window.canvasNone, "none");
-</script>
+    </script>
 
-<script>
-    // =========================
+    <script>
+        // =========================
         // TYPE CHECKBOXES + UPLOAD AREAS
         // =========================
         const checkboxes          = document.querySelectorAll('.type-checkbox');
@@ -1339,10 +1338,10 @@
         }
 
         checkboxes.forEach(cb => cb.addEventListener('change', toggleCheckboxes));
-</script>
+    </script>
 
-<script>
-    // =========================
+    <script>
+        // =========================
         // MAIN IMAGE UPLOAD + FORM SUBMIT
         // =========================
         $(document).ready(function () {
@@ -1424,110 +1423,110 @@
                 input.val('');
             });
         });
-</script>
+    </script>
 
-<script>
-    // =========================
-    // COLOR PICKER
-    // =========================
+    <script>
+        // =========================
+        // COLOR PICKER
+        // =========================
 
-    let pickrInstance  = null;
-    let currentCard    = null; // card for current pickr session
+        let pickrInstance  = null;
+        let currentCard    = null; // card for current pickr session
 
-    $(document).ready(function () {
+        $(document).ready(function () {
 
-        // Destroy previous instance if exists
-        if (pickrInstance) pickrInstance.destroyAndRemove();
+            // Destroy previous instance if exists
+            if (pickrInstance) pickrInstance.destroyAndRemove();
 
-        // Dummy element for pickr
-        const dummyElement = document.createElement('div');
-        document.body.appendChild(dummyElement);
+            // Dummy element for pickr
+            const dummyElement = document.createElement('div');
+            document.body.appendChild(dummyElement);
 
-        pickrInstance = Pickr.create({
-            el: dummyElement,
-            theme: 'classic',
-            components: {
-                preview: false,
-                opacity: false,
-                hue: true,
-                interaction: {
-                    input: true,
-                    save: true,
-                    clear: true
+            pickrInstance = Pickr.create({
+                el: dummyElement,
+                theme: 'classic',
+                components: {
+                    preview: false,
+                    opacity: false,
+                    hue: true,
+                    interaction: {
+                        input: true,
+                        save: true,
+                        clear: true
+                    }
                 }
-            }
+            });
+
+            // Handle save
+            pickrInstance.on('save', (color) => {
+                if (!currentCard) return;
+
+                const hex = color.toHEXA().toString();
+
+                // Store colors array in the card itself
+                if (!currentCard.selectedColors) currentCard.selectedColors = [];
+                if (!currentCard.selectedColors.includes(hex)) {
+                    currentCard.selectedColors.push(hex);
+                }
+
+                renderSelectedColors(currentCard);
+                pickrInstance.hide();
+            });
+
+            // Handle clear
+            pickrInstance.on('clear', () => {
+                if (!currentCard) return;
+                currentCard.selectedColors = [];
+                renderSelectedColors(currentCard);
+                pickrInstance.hide();
+            });
         });
 
-        // Handle save
-        pickrInstance.on('save', (color) => {
-            if (!currentCard) return;
+        // Open color picker
+        $(document).on('click', '.openColorPicker', function () {
+            const trigger = this;
+            const card = trigger.closest('.template-card');
+            currentCard = card;
 
-            const hex = color.toHEXA().toString();
+            // Initialize selectedColors array if not exists
+            if (!card.selectedColors) card.selectedColors = [];
 
-            // Store colors array in the card itself
-            if (!currentCard.selectedColors) currentCard.selectedColors = [];
-            if (!currentCard.selectedColors.includes(hex)) {
-                currentCard.selectedColors.push(hex);
-            }
+            const rect = trigger.getBoundingClientRect();
+            const modalScrollTop = document.querySelector('#templateModal .modal-body')?.scrollTop || 0;
 
+            pickrInstance.show();
+
+            setTimeout(() => {
+                const pickerPanel = document.querySelector('.pcr-app.visible');
+                if (pickerPanel) {
+                    pickerPanel.style.position = 'absolute';
+                    pickerPanel.style.left = `${rect.left + window.scrollX}px`;
+                    pickerPanel.style.top = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
+                    pickerPanel.style.zIndex = 9999;
+                }
+            }, 0);
+        });
+
+        // Remove color from current card
+        window.removeColor = function (hex) {
+            if (!currentCard || !currentCard.selectedColors) return;
+            currentCard.selectedColors = currentCard.selectedColors.filter(c => c !== hex);
             renderSelectedColors(currentCard);
-            pickrInstance.hide();
-        });
+        };
 
-        // Handle clear
-        pickrInstance.on('clear', () => {
-            if (!currentCard) return;
-            currentCard.selectedColors = [];
-            renderSelectedColors(currentCard);
-            pickrInstance.hide();
-        });
-    });
+        // Render colors inside a card
+        function renderSelectedColors(card) {
+            const ul = card.querySelector('.selected-colors');
+            const container = card.querySelector('.colorsInputContainer');
 
-    // Open color picker
-    $(document).on('click', '.openColorPicker', function () {
-        const trigger = this;
-        const card = trigger.closest('.template-card');
-        currentCard = card;
+            if (!ul || !container) return;
 
-        // Initialize selectedColors array if not exists
-        if (!card.selectedColors) card.selectedColors = [];
+            ul.innerHTML = '';
+            container.innerHTML = '';
 
-        const rect = trigger.getBoundingClientRect();
-        const modalScrollTop = document.querySelector('#templateModal .modal-body')?.scrollTop || 0;
-
-        pickrInstance.show();
-
-        setTimeout(() => {
-            const pickerPanel = document.querySelector('.pcr-app.visible');
-            if (pickerPanel) {
-                pickerPanel.style.position = 'absolute';
-                pickerPanel.style.left = `${rect.left + window.scrollX}px`;
-                pickerPanel.style.top = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
-                pickerPanel.style.zIndex = 9999;
-            }
-        }, 0);
-    });
-
-    // Remove color from current card
-    window.removeColor = function (hex) {
-        if (!currentCard || !currentCard.selectedColors) return;
-        currentCard.selectedColors = currentCard.selectedColors.filter(c => c !== hex);
-        renderSelectedColors(currentCard);
-    };
-
-    // Render colors inside a card
-    function renderSelectedColors(card) {
-        const ul = card.querySelector('.selected-colors');
-        const container = card.querySelector('.colorsInputContainer');
-
-        if (!ul || !container) return;
-
-        ul.innerHTML = '';
-        container.innerHTML = '';
-
-        (card.selectedColors || []).forEach(c => {
-            const li = document.createElement('li');
-            li.innerHTML = `
+            (card.selectedColors || []).forEach(c => {
+                const li = document.createElement('li');
+                li.innerHTML = `
                 <div class="selected-color-wrapper position-relative">
                     <div class="selected-color-dot" style="background-color: #fff;">
                         <div class="selected-color-inner" style="background-color: ${c};"></div>
@@ -1535,16 +1534,15 @@
                     <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
                 </div>
             `;
-            ul.appendChild(li);
+                ul.appendChild(li);
 
-            const hiddenInput = document.createElement('input');
-            hiddenInput.type  = 'hidden';
-            hiddenInput.name  = 'colors[]';
-            hiddenInput.value = c;
-            container.appendChild(hiddenInput);
-        });
-    }
-</script>
-
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type  = 'hidden';
+                hiddenInput.name  = 'colors[]';
+                hiddenInput.value = c;
+                container.appendChild(hiddenInput);
+            });
+        }
+    </script>
 
 @endsection
