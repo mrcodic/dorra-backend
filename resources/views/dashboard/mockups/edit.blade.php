@@ -945,8 +945,8 @@
                         request_type: "api",
                         approach: "without_editor",
                         paginate: true,
-                        has_not_mockups: false,
-                        mockup_id: "{{ $model->id }}",
+                        // has_not_mockups: false,
+{{--                        mockup_id: "{{ $model->id }}",--}}
                         per_page: 12,
                         types: getSelectedTypesForRequest(),
                     },
