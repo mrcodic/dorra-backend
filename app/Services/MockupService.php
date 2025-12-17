@@ -239,7 +239,6 @@ class MockupService extends BaseService
             $matchingMockups = $mockups->filter(function ($m) use ($templateId) {
                 return $m->templates->pluck('id')->contains($templateId);
             });
-dd($matchingMockups, $modelColors);
             // 🧩 لكل mockup مطابق، شوف الفرق في الألوان
             foreach ($matchingMockups as $otherMockup) {
                 $otherTemplate = $otherMockup->templates->firstWhere('id', $templateId);
@@ -257,7 +256,7 @@ dd($matchingMockups, $modelColors);
                     ->filter()
                     ->values()
                     ->all();
-
+dd($missingColors);
                 if (empty($missingColors)) continue; // ما فيش جديد
 
                 // 🔄 حدّث pivot بالألوان الجديدة
