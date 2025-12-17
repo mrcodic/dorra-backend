@@ -545,14 +545,41 @@
             container.innerHTML = "";
 
             const previousTemplates = @json($model->templates ?? []);
-            const selectedTemplateId = $('#selectedTemplateId').val();
+            const selectedTemplateIdRaw = $('#selectedTemplateId').val();
+            const selectedTemplateId = selectedTemplateIdRaw ? String(selectedTemplateIdRaw) : "";
 
-            let html = '';
+            const safeJson = (v, fallback = {}) => {
+                if (v == null) return fallback;
+                if (typeof v === "object") return v;
+                if (typeof v === "string") {
+                    try { return JSON.parse(v) || fallback; } catch (e) { return fallback; }
+                }
+                return fallback;
+            };
 
             const getCanvas = (side) => window['canvas' + capitalize(side)];
 
+            const findObj = (side, templateId) => {
+                const canvas = getCanvas(side);
+                if (!canvas) return null;
+
+                const tid = String(templateId);
+
+                // ✅ match more than one possible property name
+                return canvas.getObjects()?.find(o => {
+                    const sameId = String(o.templateId ?? o.tplId ?? o.template_id ?? "") === tid;
+                    const sameSide =
+                        (o.templateType === side) ||
+                        (o.templateSide === side) ||
+                        (o.side === side) ||
+                        (o.mockupSide === side);
+
+                    return sameId && sameSide;
+                }) || null;
+            };
+
             const readPivot = (tpl, side) => {
-                const pos = tpl?.pivot?.positions || {};
+                const pos = safeJson(tpl?.pivot?.positions, {});
                 return {
                     x: pos[`${side}_x`] ?? null,
                     y: pos[`${side}_y`] ?? null,
@@ -562,111 +589,124 @@
                 };
             };
 
-            const findObj = (side, templateId) => {
-                const canvas = getCanvas(side);
-                return canvas?.getObjects()?.find(o =>
-                    o.templateType === side && String(o.templateId) === String(templateId)
-                );
-            };
-
-            // 🟢 helper: get selected colors for this template card
-            const getSelectedColors = (templateId) => {
+            // ✅ colors: read from card.selectedColors OR from DOM OR pivot
+            const getSelectedColors = (templateId, tpl) => {
                 const card = document.querySelector(`.template-card[data-id="${templateId}"]`);
-                if (!card) return [];
-                return card.selectedColors || [];
+
+                let uiColors = [];
+                if (card && Array.isArray(card.selectedColors)) {
+                    uiColors = card.selectedColors;
+                } else if (card) {
+                    // fallback: لو عندك swatches متعلمة
+                    const nodes = card.querySelectorAll('[data-color].selected, .color-swatch.selected, .color-dot.selected');
+                    uiColors = Array.from(nodes).map(n => n.dataset.color).filter(Boolean);
+                }
+
+                const pivotColors = safeJson(tpl?.pivot?.colors, []);
+                const merged = [...new Set([...(Array.isArray(uiColors) ? uiColors : []), ...(Array.isArray(pivotColors) ? pivotColors : [])])];
+
+                return merged.filter(c => typeof c === "string" && /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/.test(c));
             };
 
-            // 1️⃣ include all previous templates
+            const getPercents = (tpl, side, templateId) => {
+                // 1) لو هو selected template: حاول من canvas
+                if (selectedTemplateId && String(templateId) === selectedTemplateId) {
+                    const canvas = getCanvas(side);
+                    const obj = findObj(side, templateId) || canvas?.getActiveObject?.();
+                    const meta = canvas?.__mockupMeta;
+
+                    if (obj && meta) {
+                        const res = calculateObjectPercents(obj, meta) || {};
+                        const x = res.xPct, y = res.yPct, w = res.wPct, h = res.hPct, angle = res.angle;
+                        if ([x, y, w, h].every(v => v !== undefined && v !== null && v !== "")) {
+                            return {
+                                x: parseFloat(x),
+                                y: parseFloat(y),
+                                w: parseFloat(w),
+                                h: parseFloat(h),
+                                angle: parseFloat(angle ?? 0),
+                            };
+                        }
+                    }
+                }
+
+                // 2) fallback: pivot (مع parse لو string)
+                const pv = readPivot(tpl, side);
+                if (pv.x !== null) {
+                    return {
+                        x: parseFloat(pv.x),
+                        y: parseFloat(pv.y),
+                        w: parseFloat(pv.w),
+                        h: parseFloat(pv.h),
+                        angle: parseFloat(pv.angle ?? 0),
+                    };
+                }
+
+                // 3) لو new template ومفيش obj/meta: ابعت defaults عشان backend مايبقاش فاضي
+                if (selectedTemplateId && String(templateId) === selectedTemplateId) {
+                    return { x: 0.5, y: 0.5, w: 0.4, h: 0.4, angle: 0 };
+                }
+
+                return null;
+            };
+
+            const writeSideInputs = (htmlArr, index, side, p) => {
+                if (!p) return;
+                htmlArr.push(`<input type="hidden" name="templates[${index}][${side}_x]" value="${p.x}">`);
+                htmlArr.push(`<input type="hidden" name="templates[${index}][${side}_y]" value="${p.y}">`);
+                htmlArr.push(`<input type="hidden" name="templates[${index}][${side}_width]" value="${p.w}">`);
+                htmlArr.push(`<input type="hidden" name="templates[${index}][${side}_height]" value="${p.h}">`);
+                htmlArr.push(`<input type="hidden" name="templates[${index}][${side}_angle]" value="${p.angle ?? 0}">`);
+            };
+
+            const html = [];
+
+            // 1️⃣ include all previous templates (preserve old pivot + override selected from canvas)
             previousTemplates.forEach((tpl, index) => {
                 const currentId = tpl.id;
 
-                html += `<input type="hidden" name="templates[${index}][template_id]" value="${currentId}">`;
+                html.push(`<input type="hidden" name="templates[${index}][template_id]" value="${currentId}">`);
 
                 ['front', 'back', 'none'].forEach(side => {
-                    let x = null, y = null, w = null, h = null, angle = null;
-
-                    // override from canvas if selected
-                    if (selectedTemplateId && String(currentId) === String(selectedTemplateId)) {
-                        const canvas = getCanvas(side);
-                        const obj = findObj(side, currentId);
-                        const meta = canvas?.__mockupMeta;
-                        if (obj && meta) {
-                            const res = calculateObjectPercents(obj, meta) || {};
-                            x = res.xPct; y = res.yPct; w = res.wPct; h = res.hPct; angle = res.angle;
-                        }
-                    }
-
-                    // fallback to backend
-                    if (x === null) {
-                        const pv = readPivot(tpl, side);
-                        x = pv.x; y = pv.y; w = pv.w; h = pv.h; angle = pv.angle;
-                    }
-
-                    if (x !== null) {
-                        html += `<input type="hidden" name="templates[${index}][${side}_x]" value="${x}">`;
-                        html += `<input type="hidden" name="templates[${index}][${side}_y]" value="${y}">`;
-                        html += `<input type="hidden" name="templates[${index}][${side}_width]" value="${w}">`;
-                        html += `<input type="hidden" name="templates[${index}][${side}_height]" value="${h}">`;
-                        html += `<input type="hidden" name="templates[${index}][${side}_angle]" value="${angle ?? 0}">`;
-                    }
+                    const p = getPercents(tpl, side, currentId);
+                    writeSideInputs(html, index, side, p);
                 });
 
-                // 🟡 add selected colors (from UI or pivot)
-                const uiColors = getSelectedColors(currentId);
-                const pivotColors = Array.isArray(tpl.pivot?.colors)
-                    ? tpl.pivot.colors
-                    : (typeof tpl.pivot?.colors === 'string'
-                        ? JSON.parse(tpl.pivot.colors || '[]')
-                        : []);
-                const allColors = [...new Set([...uiColors])];
-
-                allColors.forEach(c => {
-                    html += `<input type="hidden" name="templates[${index}][colors][]" value="${c}">`;
+                const colors = getSelectedColors(currentId, tpl);
+                colors.forEach(c => {
+                    html.push(`<input type="hidden" name="templates[${index}][colors][]" value="${c}">`);
                 });
             });
 
-            // 2️⃣ if selected template is new → add it
+            // 2️⃣ if selected template is new → add it (always send defaults if canvas not ready)
             const existsInPrevious = selectedTemplateId
                 ? previousTemplates.some(t => String(t.id) === String(selectedTemplateId))
                 : false;
 
             if (selectedTemplateId && !existsInPrevious) {
                 const index = previousTemplates.length;
-                html += `<input type="hidden" name="templates[${index}][template_id]" value="${selectedTemplateId}">`;
+
+                html.push(`<input type="hidden" name="templates[${index}][template_id]" value="${selectedTemplateId}">`);
 
                 ['front', 'back', 'none'].forEach(side => {
-                    const canvas = getCanvas(side);
-                    const obj = findObj(side, selectedTemplateId);
-                    const meta = canvas?.__mockupMeta;
-
-                    if (obj && meta) {
-                        const { xPct=0, yPct=0, wPct=0, hPct=0, angle=0 } = calculateObjectPercents(obj, meta) || {};
-                        html += `<input type="hidden" name="templates[${index}][${side}_x]" value="${xPct}">`;
-                        html += `<input type="hidden" name="templates[${index}][${side}_y]" value="${yPct}">`;
-                        html += `<input type="hidden" name="templates[${index}][${side}_width]" value="${wPct}">`;
-                        html += `<input type="hidden" name="templates[${index}][${side}_height]" value="${hPct}">`;
-                        html += `<input type="hidden" name="templates[${index}][${side}_angle]" value="${angle}">`;
-                    }
+                    const p = getPercents({}, side, selectedTemplateId);
+                    writeSideInputs(html, index, side, p);
                 });
 
-                // 🟡 colors for new template
-                const uiColors = getSelectedColors(selectedTemplateId);
-                uiColors.forEach(c => {
-                    html += `<input type="hidden" name="templates[${index}][colors][]" value="${c}">`;
+                const colors = getSelectedColors(selectedTemplateId, {});
+                colors.forEach(c => {
+                    html.push(`<input type="hidden" name="templates[${index}][colors][]" value="${c}">`);
                 });
             }
 
-            container.innerHTML = html;
+            container.innerHTML = html.join("");
         }
 
         // قبل حفظ الفورم:
         $('form').on('submit', function () {
             buildHiddenTemplateInputs();
         });
-        // When user clicks Save Changes of the whole form:
-        $('form').on('submit', function () {
-            buildHiddenTemplateInputs();
-        });
+
 
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -1004,18 +1044,18 @@
                 // FRONT
                 if (front) {
 
-                    loadAndBind(window.canvasFront, front, 'front', savedTemplate?.pivot.positions.front_x ? savedTemplate : null);
+                    loadAndBind(window.canvasFront, front, 'front', savedTemplate?.pivot.positions.front_x ? savedTemplate : null,id);
                     document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
                 }
 
                 // BACK
                 if (back) {
-                    loadAndBind(window.canvasBack, back, 'back', savedTemplate?.pivot.positions.back_x ? savedTemplate : null);
+                    loadAndBind(window.canvasBack, back, 'back', savedTemplate?.pivot.positions.back_x ? savedTemplate : null,id);
                     document.getElementById('editorBackWrapper')?.classList.remove('d-none');
                 }
 
                 if (none) {
-                    loadAndBind(window.canvasNone, none, 'none', savedTemplate?.pivot.positions.none_x ? savedTemplate : null);
+                    loadAndBind(window.canvasNone, none, 'none', savedTemplate?.pivot.positions.none_x ? savedTemplate : null,id);
                     document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
                 }
                 // close modal if inside
@@ -1245,7 +1285,7 @@
             }
         }
 
-        function loadAndBind(canvas, designUrl, type, savedPositions) {
+        function loadAndBind(canvas, designUrl, type, savedPositions,templateId) {
             clearTemplateDesigns(canvas, type);
 
             fabric.Image.fromURL(designUrl, function (img) {
@@ -1256,6 +1296,7 @@
                 });
 
                 img.templateType = type;
+                img.templateId = templateId;
 
                 const meta = canvas.__mockupMeta;
                 savedPositions = savedPositions?.pivot.positions;
