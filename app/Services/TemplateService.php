@@ -402,6 +402,10 @@ class TemplateService extends BaseService
                     $q->whereIn('tags.id', $tags);
                 });
             })
+            ->when(request()->filled('approach'), function ($q) {
+                $q->where('approach', request('approach'));
+            })
+
             ->when(!empty($types), function ($query) use ($types) {
                 $query->whereHas('types', function ($q) use ($types) {
                     $q->whereIn('types.id', $types);
