@@ -566,7 +566,7 @@
                     url: "{{ route('product-templates.index') }}",
                     method: "GET",
                     data: {
-                        // product_without_category_id: productId,
+                        product_without_category_id: productId,
                         request_type: "api",
                         approach: "without_editor",
                         paginate: true,
