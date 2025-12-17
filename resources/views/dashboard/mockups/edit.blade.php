@@ -1057,18 +1057,21 @@
                 const savedTemplate = templatesData.find(t => t.id === id);
                 // FRONT
                 if (front) {
-
+                    console.log(front)
                     loadAndBind(window.canvasFront, front, 'front', savedTemplate?.pivot.positions.front_x ? savedTemplate : null,id);
                     document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
                 }
 
                 // BACK
                 if (back) {
+                    console.log(back)
+
                     loadAndBind(window.canvasBack, back, 'back', savedTemplate?.pivot.positions.back_x ? savedTemplate : null,id);
                     document.getElementById('editorBackWrapper')?.classList.remove('d-none');
                 }
 
                 if (none) {
+                    console.log(none)
                     loadAndBind(window.canvasNone, none, 'none', savedTemplate?.pivot.positions.none_x ? savedTemplate : null,id);
                     document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
                 }
