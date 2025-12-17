@@ -353,9 +353,6 @@ class MockupService extends BaseService
                         $model->templates()->attach($templateId, $pivotData);
                     }
                 }
-
-                // clear old generated media
-                $model->clearMediaCollection('generated_mockups');
             }
 
             // 3️⃣ handle media uploads
