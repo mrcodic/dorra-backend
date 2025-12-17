@@ -210,21 +210,6 @@ class MockupService extends BaseService
             return $model;
         });
         $this->handleFiles($model);
-        $mockups = Mockup::query()
-            ->whereKeyNot($model->id)
-            ->where('category_id',$model->category_id)
-            ->whereHas('templates', function ($query) use ($model) {
-                $query->whereIn('templates.id',$model->templates->pluck('id')->toArray());
-            })->get();
-        $modelTemplateIds = $model->templates->pluck('id')->map(fn($v) => (string)$v)->sort()->values()->all();
-
-        $matchingMockups = $mockups->filter(function ($m) use ($modelTemplateIds) {
-            $tplIds = $m->templates->pluck('id')->map(fn($v) => (string)$v)->sort()->values()->all();
-            return $tplIds === $modelTemplateIds;
-        });
-
-        dd($matchingMockups);
-
 
         HandleMockupFilesJob::dispatch($model);
         return $model;
