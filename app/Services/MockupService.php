@@ -256,7 +256,7 @@ class MockupService extends BaseService
                     ->filter()
                     ->values()
                     ->all();
-dd($missingColors);
+
                 if (empty($missingColors)) continue; // ما فيش جديد
 
                 // 🔄 حدّث pivot بالألوان الجديدة
