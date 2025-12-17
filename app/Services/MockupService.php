@@ -4,6 +4,8 @@ namespace App\Services;
 
 
 use App\Enums\Mockup\TypeEnum;
+use App\Jobs\HandleMockupFilesJob;
+use App\Models\Mockup;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\MockupRepositoryInterface;
@@ -48,6 +50,7 @@ class MockupService extends BaseService
                 ])
             ])
             ->get();
+
         $colors = $mockups
             ->flatMap(fn ($mockup) => $mockup->templates
                 ->filter(fn($template) => $template->id == $templateId)
@@ -80,7 +83,6 @@ class MockupService extends BaseService
             ->values();
 
 
-
         if ($requested) {
             $media = $media->filter(function ($m) use ($requested) {
                 $hex = $m->getCustomProperty('hex');
@@ -88,10 +90,36 @@ class MockupService extends BaseService
             });
         }
 
-        $front = $media->first(fn($m) => $m->getCustomProperty('side') === 'front')?->getFullUrl();
-        $back  = $media->first(fn($m) => $m->getCustomProperty('side') === 'back')?->getFullUrl();
-        $none  = $media->first(fn($m) => $m->getCustomProperty('side') === 'none')?->getFullUrl();
-        $urls = array_values(array_filter([$front, $back,$none]));
+        $pickBySide = function ($media, string $side): array {
+            $items = $media
+                ->filter(fn($m) => $m->getCustomProperty('side') === $side)
+                ->sortBy('id') // optional: ترتيب ثابت
+                ->values();
+
+            if ($items->isEmpty()) return [];
+
+            $modelIds = $items->pluck('model_id')->unique()->values();
+
+            if ($modelIds->count() === 1) {
+                return [$items->first()->getFullUrl()];
+            }
+
+            $urls = [];
+            foreach ($modelIds as $mid) {
+                $m = $items->firstWhere('model_id', $mid);
+                if ($m) $urls[] = $m->getFullUrl();
+            }
+
+            return $urls;
+        };
+
+        $front = $pickBySide($media, 'front');
+        $back  = $pickBySide($media, 'back');
+        $none  = $pickBySide($media, 'none');
+
+
+        $urls = array_values(array_merge($front, $back, $none));
+
 
         return [
             'colors' => $colors,
@@ -152,14 +180,8 @@ class MockupService extends BaseService
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $model = $this->handleTransaction(function () use ($validatedData) {
-
             $model = $this->repository->create($validatedData);
-
             $model->types()->attach(Arr::get($validatedData, 'types') ?? []);
-
-            $templatesInput = collect(Arr::get($validatedData, 'templates', []));
-
-            if ($templatesInput->isNotEmpty()) {
                 collect($validatedData['templates'])->each(function ($template) use ($model) {
                     $templateId = $template['template_id'] ?? null;
                     if (!$templateId) return;
@@ -171,14 +193,12 @@ class MockupService extends BaseService
 
                     $colors = Arr::get($template, 'colors', []);
 
-
-                    // ✅ sanitize colors
                     $colors = collect($colors)
                         ->filter(fn ($c) => is_string($c) && preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $c))
                         ->values()
                         ->all();
 
-                    // ✅ avoid duplicates on pivot
+
                     $model->templates()->syncWithoutDetaching([
                         $templateId => [
                             'positions' => $positions,
@@ -187,108 +207,26 @@ class MockupService extends BaseService
                     ]);
                 });
 
-                // مهم عشان pivot values تبقى موجودة
-                $model->load(['templates', 'types', 'category']);
-
-                $this->handleFiles($model);
-
-                foreach ($model->templates as $template) {
-
-                    $pivotPositions = $template->pivot->positions ?? [];
-                    $pivotColors    = $template->pivot->colors ?? [];
-
-                    // pivot colors could be json string in some setups
-                    if (is_string($pivotColors)) {
-                        $pivotColors = json_decode($pivotColors, true) ?: [];
-                    }
-                    if (!is_array($pivotColors)) $pivotColors = [];
-
-                    // لو مفيش ألوان مختارة: إمّا تعمل نسخة واحدة بدون لون أو تتخطى
-                    $colorsToRender = count($pivotColors) ? $pivotColors : [null];
-
-                    collect($model->types)->each(function ($type) use ($model, $template, $pivotPositions, $colorsToRender) {
-                        $sideName = strtolower($type->value->name);
-
-                        // ----- base & mask media -----
-                        $baseMedia = $model->getMedia('mockups')
-                            ->first(fn ($m) =>
-                                $m->getCustomProperty('side') === $sideName &&
-                                $m->getCustomProperty('role') === 'base'
-                            );
-
-                        $maskMedia = $model->getMedia('mockups')
-                            ->first(fn ($m) =>
-                                $m->getCustomProperty('side') === $sideName &&
-                                $m->getCustomProperty('role') === 'mask'
-                            );
-
-                        if (!$baseMedia || !$maskMedia) {
-                            return;
-                        }
-
-                        $designMedia = ($sideName === 'back')
-                            ? $template->getFirstMedia('back_templates')
-                            : $template->getFirstMedia('templates');
-
-                        if (!$designMedia || !$designMedia->getPath()) {
-                            throw new \Exception("Missing design media for {$sideName}");
-                        }
-
-                        $basePath = $baseMedia->getPath();
-                        [$baseWidth, $baseHeight] = getimagesize($basePath);
-
-                        // القيم جاية كنِسَب 0..1 من مساحة الموكاب
-                        $xPct  = (float)($pivotPositions[$sideName . '_x']      ?? 0.5);
-                        $yPct  = (float)($pivotPositions[$sideName . '_y']      ?? 0.5);
-                        $wPct  = (float)($pivotPositions[$sideName . '_width']  ?? 0.4);
-                        $hPct  = (float)($pivotPositions[$sideName . '_height'] ?? 0.4);
-                        $angle = (float)($pivotPositions[$sideName . '_angle']  ?? 0);
-
-                        $printW = max(1, (int) round($wPct * $baseWidth));
-                        $printH = max(1, (int) round($hPct * $baseHeight));
-
-                        $centerX = $xPct * $baseWidth;
-                        $centerY = $yPct * $baseHeight;
-
-                        $printX = (int) round($centerX - $printW / 2);
-                        $printY = (int) round($centerY - $printH / 2);
-
-                        if ($printW <= 0) $printW = (int) round($baseWidth * 0.3);
-                        if ($printH <= 0) $printH = (int) round($baseHeight * 0.3);
-
-                        // ✅ IMPORTANT: generate ONE image per color for THIS template
-                        foreach ($colorsToRender as $hex) {
-                            $binary = (new MockupRenderer())->render([
-                                'base_path'   => $basePath,
-                                'shirt_path'  => $maskMedia->getPath(),
-                                'design_path' => $designMedia->getPath(),
-                                'print_x'     => $printX,
-                                'print_y'     => $printY,
-                                'print_w'     => $printW,
-                                'print_h'     => $printH,
-                                'angle'       => $angle ?? 0,
-                                'hex'         => $hex, // ✅ template color (not first mockup)
-                            ]);
-
-                            $safeHex = $hex ? ltrim(strtolower($hex), '#') : 'no-color';
-
-                            $model
-                                ->addMediaFromString($binary)
-                                ->usingFileName("mockup_{$sideName}_tpl{$template->id}_{$safeHex}.png")
-                                ->withCustomProperties([
-                                    'side'        => $sideName,
-                                    'template_id' => $template->id,
-                                    'hex'         => $hex,
-                                ])
-                                ->toMediaCollection('generated_mockups');
-                        }
-                    });
-                }
-            }
-
             return $model;
         });
+        $this->handleFiles($model);
+        $mockups = Mockup::query()
+            ->whereKeyNot($model->id)
+            ->where('category_id',$model->category_id)
+            ->whereHas('templates', function ($query) use ($model) {
+                $query->whereIn('templates.id',$model->templates->pluck('id')->toArray());
+            })->get();
+        $modelTemplateIds = $model->templates->pluck('id')->map(fn($v) => (string)$v)->sort()->values()->all();
 
+        $matchingMockups = $mockups->filter(function ($m) use ($modelTemplateIds) {
+            $tplIds = $m->templates->pluck('id')->map(fn($v) => (string)$v)->sort()->values()->all();
+            return $tplIds === $modelTemplateIds;
+        });
+
+        dd($matchingMockups);
+
+
+        HandleMockupFilesJob::dispatch($model);
         return $model;
     }
 
