@@ -156,7 +156,7 @@ class HandleMockupFilesJob implements ShouldQueue
                 ->values()
                 ->all();
 
-            $colorsToRenderForNew = $newColors->all();
+            $colorsToRenderForNew = !empty($missingForNew) ? $missingForNew : $newColors->all();
 
             $model->templates()->updateExistingPivot($templateId, [
                 'colors' => array_values(array_unique(
