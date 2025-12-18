@@ -153,11 +153,11 @@ class TemplateService extends BaseService
             $query = $query
                 ->whereStatus(StatusEnum::LIVE)
                 ->where(function ($q) {
-                    $q->where('approach', 'with_editor')
+                    $q->where('approach', '!=', 'without_editor')
                     ->orWhere(function ($q) {
                         $q->where('approach', 'without_editor')
                             ->whereHas('mockups',function ($query){
-                                $query->where('category_id',request('product_without_category_id') ??$this->productRepository->query()->find(request('product_id'))?->category_id);
+                                $query->where('category_id',request('product_without_category_id') ?? $this->productRepository->query()->find(request('product_id'))?->category_id);
                             });
                     });
                 });
