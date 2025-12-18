@@ -428,6 +428,11 @@
                 }
 
                 renderSelectedColors(currentCard);
+                const templateIndex = currentCard.dataset.index;
+                const templateId = currentCard.dataset.id;
+
+                buildTemplateColorInputs(currentCard, templateIndex,templateId);
+
                 pickrInstance.hide();
             });
 
@@ -473,6 +478,11 @@
             if (!currentCard || !currentCard.selectedColors) return;
             currentCard.selectedColors = currentCard.selectedColors.filter(c => c !== hex);
             renderSelectedColors(currentCard);
+            const templateIndex = currentCard.dataset.index;
+            const templateId = currentCard.dataset.id;
+            buildTemplateColorInputs(currentCard, templateIndex,templateId);
+
+
         };
 
         // Render colors inside a card
@@ -482,21 +492,24 @@
 
             if (!ul || !container) return;
 
+            // مسح الحالي قبل إعادة البناء
             ul.innerHTML = '';
             container.innerHTML = '';
 
             (card.selectedColors || []).forEach(c => {
+                // عنصر العرض
                 const li = document.createElement('li');
                 li.innerHTML = `
-                <div class="selected-color-wrapper position-relative">
-                    <div class="selected-color-dot" style="background-color: #fff;">
-                        <div class="selected-color-inner" style="background-color: ${c};"></div>
-                    </div>
-                    <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
+            <div class="selected-color-wrapper position-relative">
+                <div class="selected-color-dot" style="background-color: #fff;">
+                    <div class="selected-color-inner" style="background-color: ${c};"></div>
                 </div>
-            `;
+                <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
+            </div>
+        `;
                 ul.appendChild(li);
 
+                // hidden input لتحديث الفورم
                 const hiddenInput = document.createElement('input');
                 hiddenInput.type  = 'hidden';
                 hiddenInput.name  = 'colors[]';
@@ -504,6 +517,32 @@
                 container.appendChild(hiddenInput);
             });
         }
+        function buildTemplateColorInputs(card, templateIndex, templateId) {
+            console.log(templateId)
+            const container = card.querySelector('.colorsInputContainer');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            (card.selectedColors || []).forEach(color => {
+                const input = document.createElement('input');
+                const inputId = document.createElement('input');
+                input.type  = 'hidden';
+                inputId.type  = 'hidden';
+                input.name  = `templates[${templateIndex}][colors][]`;
+                inputId.name  = `templates[${templateIndex}][template_id]`;
+                inputId.value  = templateId;
+                input.value = color.toLowerCase(); // توحيد اللون
+                const inputColors = document.createElement('input');
+                inputColors.type = 'hidden';
+                inputColors.name = 'colors[]';
+                inputColors.value = color.toLowerCase();
+                container.appendChild(input);
+                container.appendChild(inputColors);
+                container.appendChild(inputId);
+            });
+        }
+
         const templatesData = @json($model->templates ?? []);
 
         // Map: template_id -> colors[]
@@ -686,10 +725,10 @@
                     writeSideInputs(html, index, side, p);
                 });
 
-                const colors = getSelectedColors(currentId, tpl);
-                colors.forEach(c => {
-                    html.push(`<input type="hidden" name="templates[${index}][colors][]" value="${c}">`);
-                });
+                // const colors = getSelectedColors(currentId, tpl);
+                // colors.forEach(c => {
+                //     html.push(`<input type="hidden" name="templates[${index}][colors][]" value="${c}">`);
+                // });
             });
 
             // 2️⃣ if selected template is new → add it (always send defaults if canvas not ready)
@@ -717,9 +756,9 @@
         }
 
         // قبل حفظ الفورم:
-        $('form').on('submit', function () {
-            buildHiddenTemplateInputs();
-        });
+        // $('form').on('submit', function () {
+        //     buildHiddenTemplateInputs();
+        // });
 
 
 
@@ -755,7 +794,7 @@
             }
 
 
-            function buildTemplateInnerCard(tpl) {
+            function buildTemplateInnerCard(tpl, index = 0) {
                 const id = String(tpl.id);
                 const isAttached = attachedTemplateIds.has(id);
 
@@ -775,6 +814,7 @@
                 return `
       <div class="template-card h-100 position-relative"
            data-id="${id}"
+           data-index="${index}"
            data-front="${front}"
            data-back="${back}"
            data-none="${none}">
@@ -834,10 +874,10 @@
                 const maxInline = 3;
                 const visible = templates.slice(0, maxInline);
 
-                visible.forEach(function (tpl) {
+                visible.forEach(function (tpl, index) {
                     const cardHtml = `
                     <div class="col-12 col-md-4 col-lg-3">
-                        ${buildTemplateInnerCard(tpl)}
+                        ${buildTemplateInnerCard(tpl, index)}
                     </div>
                 `;
                     $templatesCardsContainer.append(cardHtml);
@@ -880,10 +920,10 @@
                     return;
                 }
 
-                templates.forEach(function (tpl) {
+                templates.forEach(function (tpl , index) {
                     const cardHtml = `
                     <div class="col-6 col-md-4 mb-2">
-                        ${buildTemplateInnerCard(tpl)}
+                        ${buildTemplateInnerCard(tpl , index)}
                     </div>
                 `;
                     $modalContainer.append(cardHtml);

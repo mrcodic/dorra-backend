@@ -5,14 +5,11 @@ namespace App\Services;
 
 use App\Enums\Mockup\TypeEnum;
 use App\Jobs\HandleMockupFilesJob;
-use App\Models\Mockup;
 use App\Repositories\Base\BaseRepositoryInterface;
-use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\MockupRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Services\Mockup\MockupRenderer;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Cache;
 
 class MockupService extends BaseService
 {
@@ -32,12 +29,14 @@ class MockupService extends BaseService
         $templateId  = request('template_id');
         $color       = request('color');
 
+
         $categoryId = $productType === 'category'
             ? $categoryId
             : $this->productRepository
                 ->query()
                 ->whereId($categoryId)
                 ->value('category_id');
+
 
         $mockups = $this->repository
             ->query()
@@ -76,21 +75,18 @@ class MockupService extends BaseService
             ->values()
             ->all();
 
+
         $requestedColor = $color
-            ? (str_starts_with($color, '#')
-                ? strtolower($color)
-                : '#'.strtolower($color))
+            ? (str_starts_with($color, '#') ? strtolower($color) : '#'.strtolower($color))
             : null;
 
         $activeColor = $requestedColor ?? (count($colors) ? strtolower($colors[0]) : null);
 
         $media = $mockups
-            ->filter(fn ($mockup) =>
-            $mockup->templates->contains('id', $templateId)
-            )
+            ->filter(fn ($mockup) => $mockup->templates->contains('id', $templateId))
             ->flatMap(function ($mockup) use ($templateId, $activeColor) {
 
-                return $mockup->media
+                $mockupMedia = $mockup->media
                     ->where('collection_name', 'generated_mockups')
                     ->filter(function ($m) use ($templateId, $activeColor) {
 
@@ -101,10 +97,17 @@ class MockupService extends BaseService
                         $hex = strtolower($m->getCustomProperty('hex', ''));
 
                         return !$activeColor || $hex === strtolower($activeColor);
-                    })
-                    ->groupBy(fn ($m) =>
-                        $m->model_id.'_'.$m->getCustomProperty('side')
-                    )
+                    });
+
+                $sides = $mockupMedia->pluck('custom_properties.side')->unique();
+                if ($sides->contains('front') && $sides->contains('back')) {
+                    return $mockupMedia
+                        ->groupBy(fn ($m) => $m->model_id.'_'.$m->getCustomProperty('side'))
+                        ->flatten();
+                }
+
+                return $mockupMedia
+                    ->groupBy(fn ($m) => $m->model_id.'_'.$m->getCustomProperty('side'))
                     ->map(fn ($group) => $group->first());
             })
             ->values();

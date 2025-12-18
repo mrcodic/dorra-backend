@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 
 class HandleMockupFilesJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, SerializesModels,Queueable;
+    use Dispatchable, InteractsWithQueue, SerializesModels, Queueable;
 
     public function __construct(public Mockup $mockup)
     {
@@ -138,6 +138,45 @@ class HandleMockupFilesJob implements ShouldQueue
                 ->unique()
                 ->values()
                 ->all();
+
+            // تحديد الألوان المحذوفة
+            $removedColors = collect($oldColors ?? [])
+                ->diff($newColors)
+                ->values()
+                ->all();
+
+            // مسح اللون المحذوف من جميع mockups الأخرى
+            foreach ($removedColors as $hex) {
+                $otherMockups = Mockup::query()
+                    ->where('category_id', $model->category_id)
+                    ->whereKeyNot($model->id)
+                    ->whereHas('templates', fn($q) => $q->where('templates.id', $templateId))
+                    ->with('templates')
+                    ->get();
+
+                foreach ($otherMockups as $otherMockup) {
+                    $otherTemplate = $otherMockup->templates->firstWhere('id', $templateId);
+                    if (!$otherTemplate) continue;
+
+                    $colors = collect($otherTemplate->pivot->colors ?? [])
+                        ->filter(fn($c) => strtolower($c) !== strtolower($hex))
+                        ->values()
+                        ->all();
+
+                    // تحديث pivot بدون اللون المحذوف
+                    $otherMockup->templates()->updateExistingPivot($templateId, [
+                        'colors' => $colors
+                    ]);
+
+                    // مسح الصور القديمة الخاصة بالتمبلت واللون ده فقط
+                    $otherMockup->getMedia('generated_mockups')
+                        ->filter(fn($media) =>
+                            $media->getCustomProperty('template_id') === $templateId &&
+                            strtolower($media->getCustomProperty('hex')) === strtolower($hex)
+                        )
+                        ->each(fn($media) => $media->delete());
+                }
+            }
 
             // تحديث التمبلت الجديد
             $missingForNew = collect($allColors)->diff($newColors)->values()->all();
