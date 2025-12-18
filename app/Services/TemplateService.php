@@ -153,7 +153,7 @@ class TemplateService extends BaseService
             $query = $query
                 ->whereStatus(StatusEnum::LIVE)
                 ->where(function ($q) {
-                    $q->where('approach', '!=', 'without_editor')
+                    $q->where('approach', 'with_editor')
                     ->orWhere(function ($q) {
                         $q->where('approach', 'without_editor')
                             ->whereHas('mockups',function ($query){
