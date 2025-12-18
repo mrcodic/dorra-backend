@@ -54,11 +54,10 @@ class MockupService extends BaseService
         $colors = $mockups
             ->flatMap(fn ($mockup) => $mockup->templates
                 ->filter(fn($template) => $template->id == $templateId)
-                ->map(function ($tpl) use ($templateId) {
+                ->map(function ($tpl) {
                     $c = $tpl->pivot->colors ?? [];
                     if (is_string($c)) $c = json_decode($c, true) ?: [];
                     return is_array($c) ? $c : [];
-
                 }))
             ->flatten()
             ->filter()
@@ -70,30 +69,28 @@ class MockupService extends BaseService
             ? (str_starts_with($color, '#') ? strtolower($color) : '#'.strtolower($color))
             : null;
 
+        $defaultColor = $requested ?? ($colors[0] ?? null);
+
         $media = $mockups
             ->filter(fn ($mockup) => $mockup->templates->contains('id', $templateId))
             ->flatMap(fn ($mockup) =>
             $mockup->media
                 ->where('collection_name', 'generated_mockups')
-                ->filter(function ($m) use ($colors) {
-                    $hex = strtolower($m->getCustomProperty('hex', ''));
-                    return $hex && in_array($hex, array_map('strtolower', $colors));
-                })
             )
             ->values();
 
-
-        if ($requested) {
-            $media = $media->filter(function ($m) use ($requested) {
+        if ($defaultColor) {
+            $media = $media->filter(function ($m) use ($defaultColor) {
                 $hex = $m->getCustomProperty('hex');
-                return is_string($hex) && strtolower($hex) === $requested;
+                return is_string($hex) && strtolower($hex) === strtolower($defaultColor);
             });
         }
+
 
         $pickBySide = function ($media, string $side): array {
             $items = $media
                 ->filter(fn($m) => $m->getCustomProperty('side') === $side)
-                ->sortBy('id') // optional: ترتيب ثابت
+                ->sortBy('id') 
                 ->values();
 
             if ($items->isEmpty()) return [];
