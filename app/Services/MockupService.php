@@ -125,7 +125,7 @@ class MockupService extends BaseService
 
         return [
             'colors' => $colors,
-            'urls'   => $urls,     
+            'urls'   => $urls,
         ];
     }
 
