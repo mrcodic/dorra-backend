@@ -2,27 +2,29 @@
 
 namespace App\Jobs;
 
-use App\Enums\Mockup\TypeEnum;
 use App\Models\Mockup;
 use App\Models\Template;
 use App\Repositories\Interfaces\MockupRepositoryInterface;
 use App\Services\Mockup\MockupRenderer;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
 
 class HandleMockupFilesJob implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(public Mockup $mockup)
     {
-
     }
+
+    /**
+     * Render colors for specific mockup + template
+     */
     private function renderMockupColors(Mockup $mockup, Template $template, array $colors): void
     {
+        if (empty($colors)) return;
+
         $mockup->loadMissing(['types', 'media']);
 
         $positions = $template->pivot->positions ?? [];
@@ -91,7 +93,7 @@ class HandleMockupFilesJob implements ShouldQueue
                         ->toMediaCollection('generated_mockups');
 
                 } catch (\Throwable $e) {
-                    \Log::error("Render failed mockup {$mockup->id} {$hex}: ".$e->getMessage());
+                    Log::error("Render failed mockup {$mockup->id} {$hex}: ".$e->getMessage());
                 }
             }
         }
@@ -106,66 +108,54 @@ class HandleMockupFilesJob implements ShouldQueue
 
         $model->load(['templates', 'types', 'category', 'media']);
 
-        /** ------------------ 1️⃣ RENDER NEW MOCKUP ------------------ */
         foreach ($model->templates as $template) {
-            $this->renderMockupColors(
-                mockup: $model,
-                template: $template,
-                colors: $template->pivot->colors ?? []
-            );
-        }
 
-        /** ------------------ 2️⃣ SYNC OLD MOCKUPS ------------------ */
-        foreach ($model->templates as $template) {
             $templateId = $template->id;
 
-            // ألوان الموكاب الجديد
+            /** ------------------ COLORS FROM NEW MOCKUP ------------------ */
             $newColors = collect($template->pivot->colors ?? [])
                 ->filter()
                 ->unique();
 
-            // كل الموكابس القديمة
+            /** ------------------ LOAD OLD MOCKUPS ------------------ */
             $oldMockups = Mockup::query()
                 ->where('category_id', $model->category_id)
                 ->whereKeyNot($model->id)
                 ->whereHas('templates', fn ($q) =>
                 $q->where('templates.id', $templateId)
                 )
-                ->with(['templates'])
+                ->with(['templates', 'types', 'media'])
                 ->get();
 
-            // اجمع ألوان الموكابس القديمة
+            /** ------------------ COLORS FROM OLD MOCKUPS ------------------ */
             $oldColors = $oldMockups
                 ->flatMap(function ($m) use ($templateId) {
                     $tpl = $m->templates->firstWhere('id', $templateId);
-                    if (!$tpl) return [];
-                    return $tpl->pivot->colors ?? [];
+                    return $tpl?->pivot->colors ?? [];
                 })
                 ->filter()
                 ->unique();
 
-            // 🔥 كل الألوان الموحدة
+            /** ------------------ MERGE ALL COLORS ------------------ */
             $allColors = $newColors
                 ->merge($oldColors)
                 ->unique()
                 ->values()
                 ->all();
 
-            /** ------------------ UPDATE NEW MOCKUP ------------------ */
+            /** ================== UPDATE NEW MOCKUP ================== */
             $missingForNew = collect($allColors)
                 ->diff($newColors)
                 ->values()
                 ->all();
 
             if (!empty($missingForNew)) {
-                // update pivot
                 $model->templates()->updateExistingPivot($templateId, [
                     'colors' => array_values(array_unique(
                         array_merge($newColors->all(), $missingForNew)
                     )),
                 ]);
 
-                // render missing colors for NEW mockup
                 $this->renderMockupColors(
                     mockup: $model,
                     template: $template,
@@ -173,8 +163,9 @@ class HandleMockupFilesJob implements ShouldQueue
                 );
             }
 
-            /** ------------------ UPDATE OLD MOCKUPS ------------------ */
+            /** ================== UPDATE OLD MOCKUPS ================== */
             foreach ($oldMockups as $oldMockup) {
+
                 $oldTemplate = $oldMockup->templates->firstWhere('id', $templateId);
                 if (!$oldTemplate) continue;
 
@@ -189,22 +180,20 @@ class HandleMockupFilesJob implements ShouldQueue
                     ->all();
 
                 if (empty($missingForOld)) continue;
-
                 $oldMockup->templates()->updateExistingPivot($templateId, [
                     'colors' => array_values(array_unique(
                         array_merge($oldTplColors, $missingForOld)
                     )),
                 ]);
+                $oldTemplate = $oldMockup->templates->firstWhere('id', $templateId);
 
                 $this->renderMockupColors(
                     mockup: $oldMockup,
-                    template: $template,
+                    template: $oldTemplate,
                     colors: $missingForOld
                 );
+
             }
         }
-
     }
-
-
 }
