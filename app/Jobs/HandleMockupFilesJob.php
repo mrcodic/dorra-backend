@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Models\Mockup;
 use App\Models\Template;
-use App\Repositories\Interfaces\MockupRepositoryInterface;
 use App\Services\Mockup\MockupRenderer;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -110,7 +109,7 @@ class HandleMockupFilesJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(MockupRepositoryInterface $mockupRepository): void
+    public function handle(): void
     {
         $model = $this->mockup;
 
@@ -156,7 +155,7 @@ class HandleMockupFilesJob implements ShouldQueue
                 ->values()
                 ->all();
 
-            $colorsToRenderForNew = $newColors->all();
+            $colorsToRenderForNew = $allColors;
 
             $model->templates()->updateExistingPivot($templateId, [
                 'colors' => array_values(array_unique(
