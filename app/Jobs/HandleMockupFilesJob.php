@@ -180,19 +180,18 @@ class HandleMockupFilesJob implements ShouldQueue
                     ->all();
 
                 if (empty($missingForOld)) continue;
+
                 $oldMockup->templates()->updateExistingPivot($templateId, [
                     'colors' => array_values(array_unique(
                         array_merge($oldTplColors, $missingForOld)
                     )),
                 ]);
-                $oldTemplate = $oldMockup->templates->firstWhere('id', $templateId);
 
                 $this->renderMockupColors(
                     mockup: $oldMockup,
-                    template: $oldTemplate,
+                    template: $template,
                     colors: $missingForOld
                 );
-
             }
         }
     }
