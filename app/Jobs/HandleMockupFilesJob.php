@@ -120,6 +120,7 @@ class HandleMockupFilesJob implements ShouldQueue
 
             /** ------------------ COLORS FROM NEW MOCKUP ------------------ */
             $newColors = collect($template->pivot->colors ?? [])
+                ->map(fn($c) => strtolower($c))
                 ->filter()
                 ->unique();
 
@@ -139,6 +140,7 @@ class HandleMockupFilesJob implements ShouldQueue
                     $tpl = $m->templates->firstWhere('id', $templateId);
                     return $tpl?->pivot->colors ?? [];
                 })
+                ->map(fn($c) => strtolower($c))
                 ->filter()
                 ->unique();
 
