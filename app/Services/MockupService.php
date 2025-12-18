@@ -212,7 +212,7 @@ class MockupService extends BaseService
         });
         $this->handleFiles($model);
         $model->load(['templates', 'types', 'category', 'media']);
-        HandleMockupFilesJob::dispatch($model);
+        HandleMockupFilesJob::dispatch($model)->delay(now()->addSeconds(5));
         return $model;
     }
 
@@ -268,7 +268,7 @@ class MockupService extends BaseService
 
             $model->load(['templates', 'types', 'category', 'media']);
 
-            HandleMockupFilesJob::dispatch($model);
+            HandleMockupFilesJob::dispatch($model)->delay(now()->addSeconds(5));
 
             return $model;
         });

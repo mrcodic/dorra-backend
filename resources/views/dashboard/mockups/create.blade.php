@@ -376,7 +376,7 @@
                 $modalPagination.empty();
             }
 
-            function buildTemplateInnerCard(tpl) {
+            function buildTemplateInnerCard(tpl, index = 0) {
                 const id   = tpl.id;
                 const name = typeof tpl.name === 'object'
                     ? (tpl.name[locale] ?? Object.values(tpl.name)[0])
@@ -401,6 +401,7 @@
                 return `
                 <div class="template-card h-100"
                      data-id="${id}"
+                     data-index="${index}"
                      data-front="${front}"
                      data-back="${back}"
                      data-none="${none}"
@@ -462,10 +463,10 @@
                 const maxInline = 3;
                 const visible   = templates.slice(0, maxInline);
 
-                visible.forEach(function (tpl) {
+                visible.forEach(function (tpl, index) {
                     const cardHtml = `
                     <div class="col-12 col-md-4 col-lg-3">
-                        ${buildTemplateInnerCard(tpl)}
+                        ${buildTemplateInnerCard(tpl, index)}
                     </div>
                 `;
                     $templatesCardsContainer.append(cardHtml);
@@ -506,10 +507,10 @@
                     return;
                 }
 
-                templates.forEach(function (tpl) {
+                templates.forEach(function (tpl, index) {
                     const cardHtml = `
                     <div class="col-6 col-md-4 mb-2">
-                        ${buildTemplateInnerCard(tpl)}
+                        ${buildTemplateInnerCard(tpl, index)}
                     </div>
                 `;
                     $modalContainer.append(cardHtml);
@@ -808,9 +809,9 @@
                         });
 
                     // COLORS
-                    selectedColors.forEach(color => {
-                        html += `<input type="hidden" name="templates[${index}][colors][]" value="${color}">`;
-                    });
+                    // selectedColors.forEach(color => {
+             //            html += `<input type="hidden" name="templates[${index}][colors][]" value="${color}">`;
+             //        });
 
                     container.insertAdjacentHTML('beforeend', html);
                 });
@@ -1461,15 +1462,19 @@
             pickrInstance.on('save', (color) => {
                 if (!currentCard) return;
 
-                const hex = color.toHEXA().toString();
+                const hex = color.toHEXA().toString().toLowerCase();
 
-                // Store colors array in the card itself
                 if (!currentCard.selectedColors) currentCard.selectedColors = [];
+
                 if (!currentCard.selectedColors.includes(hex)) {
                     currentCard.selectedColors.push(hex);
                 }
 
+                const templateIndex = currentCard.dataset.index;
+
                 renderSelectedColors(currentCard);
+                buildTemplateColorInputs(currentCard, templateIndex);
+
                 pickrInstance.hide();
             });
 
@@ -1510,8 +1515,15 @@
         // Remove color from current card
         window.removeColor = function (hex) {
             if (!currentCard || !currentCard.selectedColors) return;
-            currentCard.selectedColors = currentCard.selectedColors.filter(c => c !== hex);
+
+            currentCard.selectedColors = currentCard.selectedColors.filter(
+                c => c.toLowerCase() !== hex.toLowerCase()
+            );
+
+            const templateIndex = currentCard.dataset.index;
+
             renderSelectedColors(currentCard);
+            buildTemplateColorInputs(currentCard, templateIndex);
         };
 
         // Render colors inside a card
@@ -1543,6 +1555,26 @@
                 container.appendChild(hiddenInput);
             });
         }
+        function buildTemplateColorInputs(card, templateIndex) {
+            const container = card.querySelector('.colorsInputContainer');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            (card.selectedColors || []).forEach(color => {
+                const input = document.createElement('input');
+                input.type  = 'hidden';
+                input.name  = `templates[${templateIndex}][colors][]`;
+                input.value = color.toLowerCase(); // توحيد اللون
+                const inputColors = document.createElement('input');
+                inputColors.type = 'hidden';
+                inputColors.name = 'colors[]';
+                inputColors.value = color.toLowerCase();
+                container.appendChild(input);
+                container.appendChild(inputColors);
+            });
+        }
+
     </script>
 
 @endsection

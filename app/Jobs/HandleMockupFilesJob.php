@@ -25,15 +25,6 @@ class HandleMockupFilesJob implements ShouldQueue
         if (empty($colors)) return;
 
         $mockup->loadMissing(['types', 'media']);
-        $attempts = 0;
-        while ($attempts < 3) {
-            $design = $template->getFirstMedia('templates');
-            $backDesign = $template->getFirstMedia('back_templates');
-            if ($design && $design->getPath()) break;
-            usleep(500_000); // نص ثانية
-            $attempts++;
-            $mockup->refresh();
-        }
         $positions = $template->pivot->positions ?? [];
 
         foreach ($colors as $hex) {
