@@ -211,6 +211,7 @@ class MockupService extends BaseService
             return $model;
         });
         $this->handleFiles($model);
+        $model->load(['templates', 'types', 'category', 'media']);
         HandleMockupFilesJob::dispatch($model);
         return $model;
     }

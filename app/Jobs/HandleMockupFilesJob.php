@@ -26,7 +26,15 @@ class HandleMockupFilesJob implements ShouldQueue
         if (empty($colors)) return;
 
         $mockup->loadMissing(['types', 'media']);
-
+        $attempts = 0;
+        while ($attempts < 3) {
+            $design = $template->getFirstMedia('templates');
+            $backDesign = $template->getFirstMedia('back_templates');
+            if ($design && $design->getPath()) break;
+            usleep(500_000); // نص ثانية
+            $attempts++;
+            $mockup->refresh();
+        }
         $positions = $template->pivot->positions ?? [];
 
         foreach ($colors as $hex) {
@@ -106,7 +114,6 @@ class HandleMockupFilesJob implements ShouldQueue
     {
         $model = $this->mockup;
 
-        $model->load(['templates', 'types', 'category', 'media']);
 
         foreach ($model->templates as $template) {
 
@@ -144,14 +151,12 @@ class HandleMockupFilesJob implements ShouldQueue
                 ->all();
 
             /** ================== UPDATE NEW MOCKUP ================== */
-            /** ================== UPDATE NEW MOCKUP ================== */
             $missingForNew = collect($allColors)
                 ->diff($newColors)
                 ->values()
                 ->all();
 
-// لو first time، ensure at least render all newColors
-            $colorsToRenderForNew = !empty($missingForNew) ? $missingForNew : $newColors->all();
+            $colorsToRenderForNew = $newColors->all();
 
             $model->templates()->updateExistingPivot($templateId, [
                 'colors' => array_values(array_unique(
