@@ -189,10 +189,11 @@ class HandleMockupFilesJob implements ShouldQueue
 
                 $this->renderMockupColors(
                     mockup: $oldMockup,
-                    template: $template,
+                    template: $oldTemplate, 
                     colors: $missingForOld
                 );
             }
+
         }
     }
 }
