@@ -144,24 +144,26 @@ class HandleMockupFilesJob implements ShouldQueue
                 ->all();
 
             /** ================== UPDATE NEW MOCKUP ================== */
+            /** ================== UPDATE NEW MOCKUP ================== */
             $missingForNew = collect($allColors)
                 ->diff($newColors)
                 ->values()
                 ->all();
 
-            if (!empty($missingForNew)) {
-                $model->templates()->updateExistingPivot($templateId, [
-                    'colors' => array_values(array_unique(
-                        array_merge($newColors->all(), $missingForNew)
-                    )),
-                ]);
+// لو first time، ensure at least render all newColors
+            $colorsToRenderForNew = !empty($missingForNew) ? $missingForNew : $newColors->all();
 
-                $this->renderMockupColors(
-                    mockup: $model,
-                    template: $template,
-                    colors: $missingForNew
-                );
-            }
+            $model->templates()->updateExistingPivot($templateId, [
+                'colors' => array_values(array_unique(
+                    array_merge($newColors->all(), $missingForNew)
+                )),
+            ]);
+
+            $this->renderMockupColors(
+                mockup: $model,
+                template: $template,
+                colors: $colorsToRenderForNew
+            );
 
             /** ================== UPDATE OLD MOCKUPS ================== */
             foreach ($oldMockups as $oldMockup) {
@@ -189,7 +191,7 @@ class HandleMockupFilesJob implements ShouldQueue
 
                 $this->renderMockupColors(
                     mockup: $oldMockup,
-                    template: $oldTemplate, 
+                    template: $oldTemplate,
                     colors: $missingForOld
                 );
             }
