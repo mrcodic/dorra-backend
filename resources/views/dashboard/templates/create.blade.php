@@ -513,6 +513,7 @@ $mockupUpdateUrlTemplate = route('mockups.edit', ['mockup' => '__ID__']);
 
 @endsection
 @section('vendor-script')
+
 <script>
 
     $(function () {

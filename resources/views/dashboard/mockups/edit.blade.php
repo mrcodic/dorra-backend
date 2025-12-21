@@ -323,6 +323,8 @@
 @endsection
 
 @section('page-script')
+
+
     <script>
         // templates already attached to THIS mockup
         const attachedTemplateIds = new Set(@json(($model?->templates?->pluck('id') ?? collect())->values()));
@@ -1734,5 +1736,28 @@
     </script>
 
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const params = new URLSearchParams(window.location.search);
+            const templateId = params.get('template_id');
+            if (!templateId) return;
+
+            // 🕒 نحاول نلاقي الكارد كل نصف ثانية لمدة 10 ثواني
+            let attempts = 0;
+            const interval = setInterval(() => {
+                const card = document.querySelector(`.template-card[data-id="${templateId}"] .js-show-on-mockup`);
+                attempts++;
+
+                if (card) {
+                    clearInterval(interval);
+                    console.log('✅ Auto-loading template', templateId);
+                    card.click();
+                } else if (attempts > 20) { // 20 محاولة × 500ms = 10 ثواني
+                    clearInterval(interval);
+                    console.warn('⚠️ Template card not found for ID:', templateId);
+                }
+            }, 500);
+        });
+    </script>
 
 @endsection
