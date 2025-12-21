@@ -354,6 +354,21 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="col-md-12 form-group mb-2 mockupWrapper {{ $model->approach == 'without_editor' ? '' : 'd-none' }}">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div>
+                                            <h5 class="mb-0" style="color:#24B094;">Mockups</h5>
+                                            <small class="text-muted">Select a mockup to show this template on it.</small>
+                                        </div>
+                                        <span class="badge bg-light text-dark border">Optional</span>
+                                    </div>
+                                    <!-- where cards will render -->
+                                    <div id="mockupsCards" class="row g-2"></div>
+                                    <input type="hidden" name="mockup_id" id="selectedMockupId" value="">
+
+                                    <!-- hidden inputs to submit selected ids -->
+                                    <div id="mockupsHiddenInputs"></div>
+                                </div>
 
                                 <div class="position-relative mt-3 text-center">
                                     <hr class="opacity-75" style="border: 1px solid #24B094;">
@@ -582,6 +597,10 @@
         </div>
     </div>
 </section>
+@php
+    // لو route محتاج parameter اسمه mockup
+    $mockupEditUrlTemplate = route('mockups.edit', ['mockup' => '__MOCKUP__']);
+@endphp
 @endsection
 
 
@@ -592,6 +611,164 @@
 
 
 @section('page-script')
+
+
+    <script>
+        const attachedMockupIds = new Set(@json(($model?->mockups?->pluck('id') ?? collect())->values()));
+        $(function () {
+
+            const $cardsWrap  = $('#mockupsCards');
+
+
+
+
+            const $withCat    = $('#categoriesSelect');
+            const $withoutCat = $('#productsWithoutCategoriesSelect');
+
+            const $hiddenWrap = $('#mockupsHiddenInputs');
+
+            // keep selected ids (like select multiple)
+            const selected = new Set();
+
+            function syncHiddenInputs() {
+                $hiddenWrap.empty();
+                [...selected].forEach(id => {
+                    $hiddenWrap.append(`<input type="hidden" name="mockup_ids[]" value="${id}">`);
+                });
+            }
+
+            function renderMockupCards(items) {
+                $cardsWrap.empty();
+
+                if (!items.length) {
+                    $cardsWrap.append(`<div class="col-12 text-muted py-2">No mockups found</div>`);
+                    syncHiddenInputs();
+                    return;
+                }
+
+                items.forEach(mockup => {
+                    const id   = mockup.id;
+                    const editUrl = `{{ $mockupEditUrlTemplate }}`
+                        .replace('__MOCKUP__', id);
+
+                    const href = editUrl + `?template_id={{ $model->id }}`;
+
+                    const name = mockup.name ?? ('Mockup #' + id);
+                    const img =
+                        mockup?.images?.front?.base_url ||
+                        mockup?.images?.base_url ||
+                        "{{ asset('images/placeholder.svg') }}";
+
+                    const isSelected = selected.has(String(id)) || selected.has(Number(id));
+                    const isAttached = attachedMockupIds.has(id);
+
+                    $cardsWrap.append(`
+          <div class="col-12 col-md-4 col-lg-2">
+            <div class="mockup-card ${isSelected ? 'selected' : ''}" data-id="${id}">
+              <div class="card rounded-3 shadow-sm position-relative" style="border:1px solid #24B094;">
+
+                ${isAttached
+                        ? `<span class="badge bg-success position-absolute" style="top:10px;left:10px;">Attached</span>`
+                        : ''
+                    }
+
+                <div class="d-flex justify-content-center align-items-center"
+                     style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">
+                  <img src="${img}" class="mx-auto d-block"
+                       style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:8px;"
+                       alt="${name}">
+                </div>
+                <div class="card-body py-2">
+                  <h6 class="card-title mb-2 text-truncate">${name}</h6>
+
+                  <a href="${href}"
+                            class="btn btn-sm btn-primary w-100"
+                           >
+                     Show on Mockup
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `);
+                });
+
+                syncHiddenInputs();
+            }
+
+            function fetchMockups() {
+                const idsWithCat    = $withCat.val() || [];
+                const idsWithoutCat = $withoutCat.val() || [];
+                const allProductIds = [...idsWithCat, ...idsWithoutCat];
+
+                if (!allProductIds.length) {
+                    $cardsWrap.empty();
+                    $hiddenWrap.empty();
+                    selected.clear();
+                    return;
+                }
+                function getSelectedTypes() {
+                    return $('.type-checkbox:checked')
+                        .map(function () { return $(this).val(); })
+                        .get();
+                }
+
+                console.log(getSelectedTypes())
+
+                $.ajax({
+                    url: "{{ route('mockups.index') }}",
+                    type: "GET",
+                    traditional: false, // ✅ ensure proper array serialization
+                    data: {
+                        'product_ids[]': allProductIds,
+                        'types[]': getSelectedTypes(), // ✅ correct way
+                    },
+                    success: function (response) {
+                        const items = response?.data?.data || response?.data || response || [];
+                        const ids = new Set(items.map(x => String(x.id)));
+                        [...selected].forEach(id => { if (!ids.has(String(id))) selected.delete(id); });
+                        renderMockupCards(items);
+                    },
+                    error: function (xhr) {
+                        console.error("Error fetching mockups:", xhr.responseText);
+                        $cardsWrap.empty().append(`<div class="col-12 text-danger py-2">Failed to load mockups</div>`);
+                    }
+                });
+
+            }
+
+            // Toggle selection on card click
+            $(document).on('click', '.mockup-card', function () {
+                const id = String($(this).data('id'));
+
+                if (selected.has(id)) {
+                    selected.delete(id);
+                    $(this).removeClass('selected');
+                } else {
+                    selected.add(id);
+                    $(this).addClass('selected');
+                }
+
+                syncHiddenInputs();
+            });
+
+            $withCat.on('change', fetchMockups);
+            $withoutCat.on('change', fetchMockups);
+            $(document).on('change', '.type-checkbox', fetchMockups);
+
+
+            fetchMockups();
+        });
+        $(document).on('click', '.js-submit-mockup', function (e) {
+            e.preventDefault();
+            const id = $(this).data('id');
+            $('#selectedMockupId').val(id);
+            $('#addTemplateForm').submit();
+        });
+
+
+
+    </script>
     <script>
         function updateTemplateTypeDropzones() {
             const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox'))
