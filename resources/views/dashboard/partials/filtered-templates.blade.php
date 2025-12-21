@@ -21,14 +21,14 @@
                     @endcan
                     @can('product-templates_show')
                         @if($template->approach == 'with_editor')
-                        <li>
-                            <a class="dropdown-item"
-                               href="{{ config('services.editor_url') . 'templates/' . $template->id . '?is_clear'}}"
-                               target="_blank">
-                                <i data-feather="eye" class="me-1"></i>Show
-                            </a>
-                        </li>
-                            @endif
+                            <li>
+                                <a class="dropdown-item"
+                                   href="{{ config('services.editor_url') . 'templates/' . $template->id . '?is_clear'}}"
+                                   target="_blank">
+                                    <i data-feather="eye" class="me-1"></i>Show
+                                </a>
+                            </li>
+                        @endif
                     @endcan
                     @can('product-templates.change-status.publish_show')
                         <li>
@@ -94,7 +94,8 @@
                     @endcan
                 </ul>
             </div>
-            <div style="background-color: #F4F6F6;height:200px;border-radius:12px;padding: 15px;" class="d-flex justify-content-center align-items-center" >
+            <div style="background-color: #F4F6F6;height:200px;border-radius:12px;padding: 15px;"
+                 class="d-flex justify-content-center align-items-center">
                 <!-- Top Image --> <img
                     src="{{
     $template->getFirstMediaUrl('templates')
@@ -146,16 +147,18 @@
                                  style="width: 24px; height: 24px; background-color: {{$color}};"></div>
                         @endforeach
                     </div>
-                    {{-- Editor badge --}}
-                    <span class="badge p-75 px-2"
-                          style="background-color: {{ $template->approach === 'with_editor' ? '#0d6efd' : '#adb5bd' }}">
+                    <div class="d-flex gap-1">
+                        {{-- Editor badge --}}
+                        <span class="badge p-75 px-2"
+                              style="background-color: {{ $template->approach === 'with_editor' ? '#0d6efd' : '#adb5bd' }}">
             {{ $template->approach === 'with_editor' ? 'Editor' : 'No Editor' }}
         </span>
-                    <span class="badge p-75 px-2 template-status-label"  data-template-id="{{ $template->id }}"
+                        <span class="badge p-75 px-2 template-status-label" data-template-id="{{ $template->id }}"
 
-                          style="background-color: {{ $template->status->bgHex() }};color: {{ $template->status->textHex() }}">
+                              style="background-color: {{ $template->status->bgHex() }};color: {{ $template->status->textHex() }}">
                     {{ $template->status->label() }}
                 </span>
+                    </div>
 
                 </div>
             </div>
