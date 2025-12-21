@@ -234,27 +234,38 @@ class MockupService extends BaseService
 
             $model = $this->repository->update($validatedData, $id);
 
+            // Sync types (OK)
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
             $model->types()->sync($selectedTypeValues);
 
+            // Sync templates + pivot data
             $templatesInput = collect(Arr::get($validatedData, 'templates', []));
+
             if ($templatesInput->isNotEmpty()) {
                 $syncData = [];
+
                 $templatesInput->each(function ($template) use (&$syncData) {
                     $templateId = $template['template_id'] ?? null;
                     if (!$templateId) return;
 
+                    // Positions: everything except template_id & colors
                     $positions = collect($template)
                         ->except(['template_id', 'colors'])
-                        ->filter(fn($v) => $v !== null && $v !== '')
+                        ->filter(fn ($v) => $v !== null && $v !== '')
                         ->toArray();
 
+                    // Colors: normalize + validate
                     $colors = Arr::get($template, 'colors', []);
-                    if (is_string($colors)) $colors = json_decode($colors, true) ?: [];
-                    if (!is_array($colors)) $colors = [];
+                    if (is_string($colors)) {
+                        $colors = json_decode($colors, true) ?: [];
+                    }
+                    if (!is_array($colors)) {
+                        $colors = [];
+                    }
 
                     $colors = collect($colors)
-                        ->filter(fn($c) => is_string($c) && preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $c))
+                        ->filter(fn ($c) => is_string($c)
+                            && preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $c))
                         ->values()
                         ->all();
 
@@ -264,14 +275,10 @@ class MockupService extends BaseService
                     ];
                 });
 
-                foreach ($syncData as $templateId => $pivotData) {
-                    $existing = $model->templates()->where('template_id', $templateId)->exists();
-                    if ($existing) {
-                        $model->templates()->updateExistingPivot($templateId, $pivotData);
-                    } else {
-                        $model->templates()->attach($templateId, $pivotData);
-                    }
-                }
+                // ✅ This will attach or update pivot rows without detaching others
+                $model->templates()->syncWithoutDetaching($syncData);
+                // If you actually want to remove templates not in the form, use:
+                // $model->templates()->sync($syncData);
             }
 
             if (request()->allFiles()) {
@@ -287,7 +294,6 @@ class MockupService extends BaseService
 
         return $model;
     }
-
 
     /**
      * @param mixed $model

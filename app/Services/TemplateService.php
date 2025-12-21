@@ -198,6 +198,7 @@ class TemplateService extends BaseService
                 );
             }
 
+            $model->mockups()->attach($validatedData['mockup_ids'] ?? []);
             $model->types()->sync($validatedData['types']);
             $model->tags()->sync($validatedData['tags'] ?? []);
             $model->flags()->sync($validatedData['flags'] ?? []);
@@ -275,7 +276,12 @@ class TemplateService extends BaseService
         $validatedData['colors'] = $finalColors;
         $model = $this->handleTransaction(function () use ($validatedData, $id, $colors) {
             $model = $this->repository->update($validatedData, $id);
-
+            if ($validatedData['mockup_id']){
+                $model->mockups()->syncWithPivotValues(
+                    [$validatedData['mockup_id']] ?? [],
+                    ['positions' => []]
+                );
+            }
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
             $modelTypesValues   = $model->types->pluck('value.value')->toArray();
 
@@ -305,6 +311,7 @@ class TemplateService extends BaseService
             $model->types()->sync($validatedData['types']);
 
             $model->industries()->sync($validatedData['industry_ids'] ?? []);
+            $model->mockups()->sync($validatedData['mockup_ids'] ?? []);
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->categories()->sync($validatedData['category_ids'] ?? []);
             $model->tags()->sync($validatedData['tags'] ?? []);

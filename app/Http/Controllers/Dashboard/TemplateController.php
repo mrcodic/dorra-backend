@@ -119,10 +119,19 @@ class TemplateController extends DashboardController
         $rules = $this->updateRequestClass->rules($id);
         $validated = Validator::make($request->all(), $rules)->validate();
         $model = $this->service->updateResource($validated, $id);
+        if ($request->filled('mockup_id')){
+            return Response::api(data: [
+                "mockup_redirect_url" => route('mockups.edit', [
+                    'mockup' => $request->mockup_id,
+                    'template_id' => $model->id,
+                ])
+            ]);
+        }
         if ($request->boolean('go_to_editor')) {
             return Response::api(data: ['editor_url' => config('services.editor_url') . 'templates/' . $model->id . '?is_clear=1']);
         }
-            return Response::api(data: $this->resourceClass::make($model));
+
+        return Response::api(data: $this->resourceClass::make($model));
 
     }
 

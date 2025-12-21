@@ -571,7 +571,16 @@ $mockupUpdateUrlTemplate = route('mockups.edit', ['mockup' => '__ID__']);
   <div class="col-12 col-md-4 col-lg-2">
     <div class="mockup-card ${isSelected ? 'selected' : ''}" data-id="${id}">
       <div class="card rounded-3 shadow-sm" style="border:1px solid #24B094;">
+   <!-- ✅ checkbox overlay top-left -->
+                <div class="position-absolute" style="top:10px;left:10px;z-index:20;">
+                  <input
+                    class="form-check-input js-mockup-checkbox"
+                    type="checkbox"
+                    name="mockup_ids[]"
+                    value="${id}"
 
+                  />
+                </div>
         <div class="d-flex justify-content-center align-items-center"
              style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">
           <img src="${img}" class="mx-auto d-block"

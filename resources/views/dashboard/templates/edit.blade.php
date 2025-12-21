@@ -5,240 +5,240 @@
 @section('main-page-url', route("product-templates.index"))
 @section('sub-page-url', route('product-templates.edit',$model->id))
 @section('vendor-style')
-<!-- Vendor CSS Files -->
-<link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
+    <!-- Vendor CSS Files -->
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
 @endsection
 
 @section('content')
-<section id="multiple-column-form ">
-    <div class="row ">
-        <div class="col-12 ">
-            <div class="card">
-                <div class="card-body ">
-                    @php
-                    $preselectedIndustryIds = $model->industries->whereNull('parent_id')->pluck('id')->values();
-                    $preselectedSubIndustryIds = $model->industries->whereNotNull('parent_id')->pluck('id')->values();
-                    @endphp
+    <section id="multiple-column-form ">
+        <div class="row ">
+            <div class="col-12 ">
+                <div class="card">
+                    <div class="card-body ">
+                        @php
+                            $preselectedIndustryIds = $model->industries->whereNull('parent_id')->pluck('id')->values();
+                            $preselectedSubIndustryIds = $model->industries->whereNotNull('parent_id')->pluck('id')->values();
+                        @endphp
 
-                    <form id="editTemplateForm" enctype="multipart/form-data" method="post"
-                        action="{{ route('product-templates.update',$model->id) }}">
-                        @csrf
-                        @method("PUT")
-                        <div class="flex-grow-1">
-                            <div class="">
+                        <form id="editTemplateForm" enctype="multipart/form-data" method="post"
+                              action="{{ route('product-templates.update',$model->id) }}">
+                            @csrf
+                            @method("PUT")
+                            <div class="flex-grow-1">
+                                <div class="">
 
-                                @php
-                                $colors = collect($model->colors) ?? collect();
-                                $hasColors = $colors->isNotEmpty();
-                                @endphp
-{{--                                @if($model->approach == 'without_editor')--}}
-{{--                                <div class="col-md-12">--}}
-{{--                                    <div class="mb-2">--}}
-{{--                                        <label class="form-label label-text">Template Colors</label>--}}
+                                    @php
+                                        $colors = collect($model->colors) ?? collect();
+                                        $hasColors = $colors->isNotEmpty();
+                                    @endphp
+                                    {{--                                @if($model->approach == 'without_editor')--}}
+                                    {{--                                <div class="col-md-12">--}}
+                                    {{--                                    <div class="mb-2">--}}
+                                    {{--                                        <label class="form-label label-text">Template Colors</label>--}}
 
 
 
-{{--                                        <div class="color-repeater">--}}
-{{--                                            <div data-repeater-list="colors" class="row d-flex flex-wrap">--}}
-{{--                                                @forelse($colors as $color)--}}
+                                    {{--                                        <div class="color-repeater">--}}
+                                    {{--                                            <div data-repeater-list="colors" class="row d-flex flex-wrap">--}}
+                                    {{--                                                @forelse($colors as $color)--}}
 
-{{--                                                <div data-repeater-item class="col-12 col-md-6 col-lg-3">--}}
-{{--                                                    <div--}}
-{{--                                                        class="border rounded-3 p-1 d-flex flex-column align-items-start mt-1">--}}
+                                    {{--                                                <div data-repeater-item class="col-12 col-md-6 col-lg-3">--}}
+                                    {{--                                                    <div--}}
+                                    {{--                                                        class="border rounded-3 p-1 d-flex flex-column align-items-start mt-1">--}}
 
-{{--                                                        --}}{{-- Color value --}}
-{{--                                                        <div class="col-12">--}}
-{{--                                                            <label class="form-label label-text">Color Value--}}
-{{--                                                                <span--}}
-{{--                                                                    style="color: red; font-size: 20px;">*</span></label>--}}
-{{--                                                            <div class="d-flex gap-1 align-items-center">--}}
-{{--                                                                --}}{{-- Color picker --}}
-{{--                                                                <input type="color"--}}
-{{--                                                                    class="form-control rounded-circle color-picker border border-0"--}}
-{{--                                                                    style="max-width: 30px; padding: 0;"--}}
-{{--                                                                    value="{{ $color ?? '#000000' }}" />--}}
+                                    {{--                                                        --}}{{-- Color value --}}
+                                    {{--                                                        <div class="col-12">--}}
+                                    {{--                                                            <label class="form-label label-text">Color Value--}}
+                                    {{--                                                                <span--}}
+                                    {{--                                                                    style="color: red; font-size: 20px;">*</span></label>--}}
+                                    {{--                                                            <div class="d-flex gap-1 align-items-center">--}}
+                                    {{--                                                                --}}{{-- Color picker --}}
+                                    {{--                                                                <input type="color"--}}
+                                    {{--                                                                    class="form-control rounded-circle color-picker border border-0"--}}
+                                    {{--                                                                    style="max-width: 30px; padding: 0;"--}}
+                                    {{--                                                                    value="{{ $color ?? '#000000' }}" />--}}
 
-{{--                                                                --}}{{-- Text hex input (submitted) --}}
-{{--                                                                <input type="text" name="value"--}}
-{{--                                                                    class="form-control color-hex-input"--}}
-{{--                                                                    placeholder="#000000"--}}
-{{--                                                                    value="{{ $color ?? '#000000' }}"--}}
-{{--                                                                    pattern="^#([A-Fa-f0-9]{6})$" />--}}
-{{--                                                            </div>--}}
-{{--                                                            <small class="text-muted">--}}
-{{--                                                                Pick a color or type hex (e.g. #FFAA00).--}}
-{{--                                                            </small>--}}
-{{--                                                        </div>--}}
+                                    {{--                                                                --}}{{-- Text hex input (submitted) --}}
+                                    {{--                                                                <input type="text" name="value"--}}
+                                    {{--                                                                    class="form-control color-hex-input"--}}
+                                    {{--                                                                    placeholder="#000000"--}}
+                                    {{--                                                                    value="{{ $color ?? '#000000' }}"--}}
+                                    {{--                                                                    pattern="^#([A-Fa-f0-9]{6})$" />--}}
+                                    {{--                                                            </div>--}}
+                                    {{--                                                            <small class="text-muted">--}}
+                                    {{--                                                                Pick a color or type hex (e.g. #FFAA00).--}}
+                                    {{--                                                            </small>--}}
+                                    {{--                                                        </div>--}}
 
-{{--                                                        --}}{{-- Color image --}}
-{{--                                                        <div class="col-12 mt-1">--}}
-{{--                                                            <label class="form-label label-text">Color Image--}}
-{{--                                                                <span style="color: red; font-size: 20px;">*</span>--}}
-{{--                                                            </label>--}}
-{{--                                                            @php--}}
-{{--                                                            $mediaWithColor = $model--}}
-{{--                                                            ->getMedia('color_templates')--}}
-{{--                                                            ->first(fn ($media) =>--}}
-{{--                                                            $media->getCustomProperty('color_hex') ==$color);--}}
-{{--                                                            @endphp--}}
+                                    {{--                                                        --}}{{-- Color image --}}
+                                    {{--                                                        <div class="col-12 mt-1">--}}
+                                    {{--                                                            <label class="form-label label-text">Color Image--}}
+                                    {{--                                                                <span style="color: red; font-size: 20px;">*</span>--}}
+                                    {{--                                                            </label>--}}
+                                    {{--                                                            @php--}}
+                                    {{--                                                            $mediaWithColor = $model--}}
+                                    {{--                                                            ->getMedia('color_templates')--}}
+                                    {{--                                                            ->first(fn ($media) =>--}}
+                                    {{--                                                            $media->getCustomProperty('color_hex') ==$color);--}}
+                                    {{--                                                            @endphp--}}
 
-{{--                                                            <div class="dropzone color-dropzone border rounded p-2"--}}
-{{--                                                                style="cursor:pointer; min-height:100px;"--}}
-{{--                                                                data-existing-media='@json($mediaWithColor)'>--}}
-{{--                                                                <div class="dz-message" data-dz-message>--}}
-{{--                                                                    <span>Drop image or click</span>--}}
-{{--                                                                </div>--}}
-{{--                                                            </div>--}}
+                                    {{--                                                            <div class="dropzone color-dropzone border rounded p-2"--}}
+                                    {{--                                                                style="cursor:pointer; min-height:100px;"--}}
+                                    {{--                                                                data-existing-media='@json($mediaWithColor)'>--}}
+                                    {{--                                                                <div class="dz-message" data-dz-message>--}}
+                                    {{--                                                                    <span>Drop image or click</span>--}}
+                                    {{--                                                                </div>--}}
+                                    {{--                                                            </div>--}}
 
-{{--                                                            <input type="hidden" name="image_id"--}}
-{{--                                                                class="color-image-hidden"--}}
-{{--                                                                value="{{$mediaWithColor->id ?? ''}}">--}}
-{{--                                                        </div>--}}
+                                    {{--                                                            <input type="hidden" name="image_id"--}}
+                                    {{--                                                                class="color-image-hidden"--}}
+                                    {{--                                                                value="{{$mediaWithColor->id ?? ''}}">--}}
+                                    {{--                                                        </div>--}}
 
-{{--                                                        --}}{{-- Delete row --}}
-{{--                                                        <div class="col-12 text-center mt-1 ms-auto">--}}
-{{--                                                            <button type="button" class="btn btn-outline-danger"--}}
-{{--                                                                data-repeater-delete>--}}
-{{--                                                                <i data-feather="x" class="me-25"></i>--}}
-{{--                                                                Delete--}}
-{{--                                                            </button>--}}
-{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                                @empty--}}
-{{--                                                <div data-repeater-item class="col-12 col-md-6 col-lg-3">--}}
-{{--                                                    <div--}}
-{{--                                                        class="border rounded-3 p-1 d-flex flex-column align-items-start mt-1">--}}
+                                    {{--                                                        --}}{{-- Delete row --}}
+                                    {{--                                                        <div class="col-12 text-center mt-1 ms-auto">--}}
+                                    {{--                                                            <button type="button" class="btn btn-outline-danger"--}}
+                                    {{--                                                                data-repeater-delete>--}}
+                                    {{--                                                                <i data-feather="x" class="me-25"></i>--}}
+                                    {{--                                                                Delete--}}
+                                    {{--                                                            </button>--}}
+                                    {{--                                                        </div>--}}
+                                    {{--                                                    </div>--}}
+                                    {{--                                                </div>--}}
+                                    {{--                                                @empty--}}
+                                    {{--                                                <div data-repeater-item class="col-12 col-md-6 col-lg-3">--}}
+                                    {{--                                                    <div--}}
+                                    {{--                                                        class="border rounded-3 p-1 d-flex flex-column align-items-start mt-1">--}}
 
-{{--                                                        <div class="col-12">--}}
-{{--                                                            <label class="form-label label-text">Color Value--}}
-{{--                                                                *</label>--}}
-{{--                                                            <div class="d-flex gap-1 align-items-center">--}}
-{{--                                                                <input type="color"--}}
-{{--                                                                    class="form-control rounded-circle color-picker border-0"--}}
-{{--                                                                    style="max-width: 30px; padding: 0;"--}}
-{{--                                                                    value="#000000" />--}}
-{{--                                                                <input type="text" name="value"--}}
-{{--                                                                    class="form-control color-hex-input"--}}
-{{--                                                                    placeholder="#000000" value="#000000"--}}
-{{--                                                                    pattern="^#([A-Fa-f0-9]{6})$" />--}}
-{{--                                                            </div>--}}
-{{--                                                            <small class="text-muted">Pick a color or type--}}
-{{--                                                                hex (e.g. #FFAA00).</small>--}}
-{{--                                                        </div>--}}
+                                    {{--                                                        <div class="col-12">--}}
+                                    {{--                                                            <label class="form-label label-text">Color Value--}}
+                                    {{--                                                                *</label>--}}
+                                    {{--                                                            <div class="d-flex gap-1 align-items-center">--}}
+                                    {{--                                                                <input type="color"--}}
+                                    {{--                                                                    class="form-control rounded-circle color-picker border-0"--}}
+                                    {{--                                                                    style="max-width: 30px; padding: 0;"--}}
+                                    {{--                                                                    value="#000000" />--}}
+                                    {{--                                                                <input type="text" name="value"--}}
+                                    {{--                                                                    class="form-control color-hex-input"--}}
+                                    {{--                                                                    placeholder="#000000" value="#000000"--}}
+                                    {{--                                                                    pattern="^#([A-Fa-f0-9]{6})$" />--}}
+                                    {{--                                                            </div>--}}
+                                    {{--                                                            <small class="text-muted">Pick a color or type--}}
+                                    {{--                                                                hex (e.g. #FFAA00).</small>--}}
+                                    {{--                                                        </div>--}}
 
-{{--                                                        <div class="col-12 mt-1">--}}
-{{--                                                            <label class="form-label label-text">Color Image--}}
-{{--                                                                *--}}
-{{--                                                            </label>--}}
-{{--                                                            <div class="dropzone color-dropzone border rounded p-2"--}}
-{{--                                                                style="cursor:pointer; min-height:100px;"--}}
-{{--                                                                data-existing-media='null'>--}}
-{{--                                                                <div class="dz-message" data-dz-message>--}}
-{{--                                                                    <span>Drop image or click</span>--}}
-{{--                                                                </div>--}}
-{{--                                                            </div>--}}
-{{--                                                            <input type="hidden" name="image_id"--}}
-{{--                                                                class="color-image-hidden">--}}
-{{--                                                        </div>--}}
+                                    {{--                                                        <div class="col-12 mt-1">--}}
+                                    {{--                                                            <label class="form-label label-text">Color Image--}}
+                                    {{--                                                                *--}}
+                                    {{--                                                            </label>--}}
+                                    {{--                                                            <div class="dropzone color-dropzone border rounded p-2"--}}
+                                    {{--                                                                style="cursor:pointer; min-height:100px;"--}}
+                                    {{--                                                                data-existing-media='null'>--}}
+                                    {{--                                                                <div class="dz-message" data-dz-message>--}}
+                                    {{--                                                                    <span>Drop image or click</span>--}}
+                                    {{--                                                                </div>--}}
+                                    {{--                                                            </div>--}}
+                                    {{--                                                            <input type="hidden" name="image_id"--}}
+                                    {{--                                                                class="color-image-hidden">--}}
+                                    {{--                                                        </div>--}}
 
-{{--                                                        <div class="col-12 text-center mt-1 ms-auto">--}}
-{{--                                                            <button type="button" class="btn btn-outline-danger"--}}
-{{--                                                                data-repeater-delete>--}}
-{{--                                                                <i data-feather="x" class="me-25"></i>--}}
-{{--                                                                Delete--}}
-{{--                                                            </button>--}}
-{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                                @endforelse--}}
-{{--                                            </div>--}}
+                                    {{--                                                        <div class="col-12 text-center mt-1 ms-auto">--}}
+                                    {{--                                                            <button type="button" class="btn btn-outline-danger"--}}
+                                    {{--                                                                data-repeater-delete>--}}
+                                    {{--                                                                <i data-feather="x" class="me-25"></i>--}}
+                                    {{--                                                                Delete--}}
+                                    {{--                                                            </button>--}}
+                                    {{--                                                        </div>--}}
+                                    {{--                                                    </div>--}}
+                                    {{--                                                </div>--}}
+                                    {{--                                                @endforelse--}}
+                                    {{--                                            </div>--}}
 
-{{--                                            <div class="row mt-1">--}}
-{{--                                                <div class="col-12">--}}
-{{--                                                    <button type="button" class="w-100 rounded-3 p-1 text-dark"--}}
-{{--                                                        style="border: 2px dashed #CED5D4; background-color: #EBEFEF"--}}
-{{--                                                        data-repeater-create>--}}
-{{--                                                        <i data-feather="plus" class="me-25"></i>--}}
-{{--                                                        <span>Add New Color</span>--}}
-{{--                                                    </button>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                                @endif--}}
-                                <div class="position-relative mt-3 text-center">
-                                    <hr class="opacity-75" style="border: 1px solid #24B094;">
-                                    <span
-                                        class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
-                                        style="color: #24B094">
+                                    {{--                                            <div class="row mt-1">--}}
+                                    {{--                                                <div class="col-12">--}}
+                                    {{--                                                    <button type="button" class="w-100 rounded-3 p-1 text-dark"--}}
+                                    {{--                                                        style="border: 2px dashed #CED5D4; background-color: #EBEFEF"--}}
+                                    {{--                                                        data-repeater-create>--}}
+                                    {{--                                                        <i data-feather="plus" class="me-25"></i>--}}
+                                    {{--                                                        <span>Add New Color</span>--}}
+                                    {{--                                                    </button>--}}
+                                    {{--                                                </div>--}}
+                                    {{--                                            </div>--}}
+                                    {{--                                        </div>--}}
+                                    {{--                                    </div>--}}
+                                    {{--                                </div>--}}
+                                    {{--                                @endif--}}
+                                    <div class="position-relative mt-3 text-center">
+                                        <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                        <span
+                                            class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                            style="color: #24B094">
                                         Template Details
                                     </span>
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label class="label-text mb-1">Template Type</label>
-                                    <div class="row">
-                                        @foreach(\App\Models\Type::all(['id','value']) as $type)
-                                        <div class="col-md-4 mb-1">
-                                            <label class="radio-box">
-                                                <input class="form-check-input type-checkbox" type="checkbox"
-                                                    name="types[]" value="{{ $type->value }}"
-                                                    data-type-name="{{ strtolower($type->value->name) }}"
-                                                    @checked($model->types->contains($type->id))
-
-                                                >
-                                                <span>{{ $type->value->label() }}</span>
-                                            </label>
-                                        </div>
-                                        @endforeach
                                     </div>
-                                </div>
-                                <div class="row">
 
-                                    <div class="row" id="templateTypeDropzones">
-                                        @if($model->approach == 'without_editor')
-                                            <!-- FRONT -->
-                                            <div class="form-group mb-2 col-md-6 d-none" id="dz-front">
-                                                <label class="label-text mb-1">Template Image (Front)</label>
-                                                <div id="front-template-dropzone" class="dropzone border rounded p-3"
-                                                     style="cursor:pointer; min-height:150px;">
-                                                    <div class="dz-message">
-                                                        <span>Drop front image here or click</span>
-                                                    </div>
-                                                    <input type="hidden" name="template_image_front_id"
-                                                           id="uploadedFrontTemplateImage">
+                                    <div class="form-group mb-2">
+                                        <label class="label-text mb-1">Template Type</label>
+                                        <div class="row">
+                                            @foreach(\App\Models\Type::all(['id','value']) as $type)
+                                                <div class="col-md-4 mb-1">
+                                                    <label class="radio-box">
+                                                        <input class="form-check-input type-checkbox" type="checkbox"
+                                                               name="types[]" value="{{ $type->value }}"
+                                                               data-type-name="{{ strtolower($type->value->name) }}"
+                                                            @checked($model->types->contains($type->id))
+
+                                                        >
+                                                        <span>{{ $type->value->label() }}</span>
+                                                    </label>
                                                 </div>
-                                            </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    <div class="row">
 
-                                            <!-- BACK -->
-                                            <div class="form-group mb-2 col-md-6 d-none" id="dz-back">
-                                                <label class="label-text mb-1">Template Image (Back)</label>
-                                                <div id="back-template-dropzone" class="dropzone border rounded p-3"
-                                                     style="cursor:pointer; min-height:150px;">
-                                                    <div class="dz-message">
-                                                        <span>Drop back image here or click</span>
+                                        <div class="row" id="templateTypeDropzones">
+                                            @if($model->approach == 'without_editor')
+                                                <!-- FRONT -->
+                                                <div class="form-group mb-2 col-md-6 d-none" id="dz-front">
+                                                    <label class="label-text mb-1">Template Image (Front)</label>
+                                                    <div id="front-template-dropzone" class="dropzone border rounded p-3"
+                                                         style="cursor:pointer; min-height:150px;">
+                                                        <div class="dz-message">
+                                                            <span>Drop front image here or click</span>
+                                                        </div>
+                                                        <input type="hidden" name="template_image_front_id"
+                                                               id="uploadedFrontTemplateImage">
                                                     </div>
-                                                    <input type="hidden" name="template_image_back_id"
-                                                           id="uploadedBackTemplateImage">
-                                                </div>
-                                            </div>
-
-                                            <!-- NONE -->
-                                            <div class="form-group mb-2 col-md-6 d-none" id="dz-none">
-                                                <label class="label-text mb-1">Template Image (General)</label>
-                                                <div id="none-template-dropzone" class="dropzone border rounded p-3"
-                                                     style="cursor:pointer; min-height:150px;">
-                                                    <div class="dz-message">
-                                                        <span>Drop general image here or click</span>
-                                                    </div>
-                                                    <input type="hidden" name="template_image_none_id"
-                                                           id="uploadedNoneTemplateImage">
                                                 </div>
 
-                                            </div>
-                                        @endif
+                                                <!-- BACK -->
+                                                <div class="form-group mb-2 col-md-6 d-none" id="dz-back">
+                                                    <label class="label-text mb-1">Template Image (Back)</label>
+                                                    <div id="back-template-dropzone" class="dropzone border rounded p-3"
+                                                         style="cursor:pointer; min-height:150px;">
+                                                        <div class="dz-message">
+                                                            <span>Drop back image here or click</span>
+                                                        </div>
+                                                        <input type="hidden" name="template_image_back_id"
+                                                               id="uploadedBackTemplateImage">
+                                                    </div>
+                                                </div>
+
+                                                <!-- NONE -->
+                                                <div class="form-group mb-2 col-md-6 d-none" id="dz-none">
+                                                    <label class="label-text mb-1">Template Image (General)</label>
+                                                    <div id="none-template-dropzone" class="dropzone border rounded p-3"
+                                                         style="cursor:pointer; min-height:150px;">
+                                                        <div class="dz-message">
+                                                            <span>Drop general image here or click</span>
+                                                        </div>
+                                                        <input type="hidden" name="template_image_none_id"
+                                                               id="uploadedNoneTemplateImage">
+                                                    </div>
+
+                                                </div>
+                                            @endif
                                             <!-- MODEL  -->
                                             <div class="form-group mb-2 col-md-6 d-none" id="dz-model">
                                                 <label class="label-text mb-1">Template Model Image</label>
@@ -250,363 +250,363 @@
                                                     <input type="hidden" name="template_image_id" id="uploadedTemplateImage">
                                                 </div>
                                             </div>
+                                        </div>
+
+
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-md-6">
+                                            <label for="templateNameEn" class="label-text mb-1">Name (EN)</label>
+                                            <input type="text" id="templateNameEn" class="form-control" name="name[en]"
+                                                   value="{{ $model->getTranslation('name','en') }}"
+                                                   placeholder="Template Name in English">
+                                        </div>
+
+
+                                        <div class="col-md-6">
+                                            <label for="templateNameAr" class="label-text mb-1">Name (AR)</label>
+                                            <input type="text" id="templateNameAr" class="form-control" name="name[ar]"
+                                                   value="{{ $model->getTranslation('name','ar') }}"
+                                                   placeholder="Template Name in Arabic">
+                                        </div>
+
+
                                     </div>
 
 
-                                </div>
-                                <div class="row mb-2">
-                                <div class="col-md-6">
-                                    <label for="templateNameEn" class="label-text mb-1">Name (EN)</label>
-                                    <input type="text" id="templateNameEn" class="form-control" name="name[en]"
-                                           value="{{ $model->getTranslation('name','en') }}"
-                                           placeholder="Template Name in English">
-                                </div>
-
-
-                                    <div class="col-md-6">
-                                        <label for="templateNameAr" class="label-text mb-1">Name (AR)</label>
-                                        <input type="text" id="templateNameAr" class="form-control" name="name[ar]"
-                                            value="{{ $model->getTranslation('name','ar') }}"
-                                            placeholder="Template Name in Arabic">
-                                    </div>
-
-
-                                </div>
-
-
-                                {{-- <div class="form-group mb-2">--}}
+                                    {{-- <div class="form-group mb-2">--}}
                                     {{-- <label for="statusSelect" class="label-text mb-1">Status</label>--}}
                                     {{-- <select id="statusSelect" name="status" class="form-select select2">--}}
-                                        {{-- <option value="" disabled selected>Choose status</option>--}}
-                                        {{-- @foreach(\App\Enums\Template\StatusEnum::cases() as $status)--}}
-                                        {{-- <option value="{{ $status->value }}" @selected($status==$model->
-                                            status)>{{--}}
-                                            {{-- $status->label() }}</option>--}}
-                                        {{-- @endforeach--}}
-                                        {{-- </select>--}}
+                                    {{-- <option value="" disabled selected>Choose status</option>--}}
+                                    {{-- @foreach(\App\Enums\Template\StatusEnum::cases() as $status)--}}
+                                    {{-- <option value="{{ $status->value }}" @selected($status==$model->
+                                        status)>{{--}}
+                                    {{-- $status->label() }}</option>--}}
+                                    {{-- @endforeach--}}
+                                    {{-- </select>--}}
                                     {{-- </div>--}}
-                                <div class="row mb-2">
-                                    <div class="col-md-6">
-                                        <label for="templateDescription" class="label-text mb-1">Description
-                                            (AR)</label>
-                                        <textarea id="templateDescription" class="form-control" rows="3"
-                                            name="description[ar]"
-                                            placeholder="Template Description in Arabic">{{ $model->getTranslation('description','ar') }}</textarea>
+                                    <div class="row mb-2">
+                                        <div class="col-md-6">
+                                            <label for="templateDescription" class="label-text mb-1">Description
+                                                (AR)</label>
+                                            <textarea id="templateDescription" class="form-control" rows="3"
+                                                      name="description[ar]"
+                                                      placeholder="Template Description in Arabic">{{ $model->getTranslation('description','ar') }}</textarea>
+                                        </div>
+                                        <div class="col-md-6 ">
+                                            <label for="templateDescription" class="label-text mb-1">Description
+                                                (EN)</label>
+                                            <textarea id="templateDescription" class="form-control" rows="3"
+                                                      name="description[en]"
+                                                      placeholder="Template Description in English">{{ $model->getTranslation('description','en') }}</textarea>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6 ">
-                                        <label for="templateDescription" class="label-text mb-1">Description
-                                            (EN)</label>
-                                        <textarea id="templateDescription" class="form-control" rows="3"
-                                            name="description[en]"
-                                            placeholder="Template Description in English">{{ $model->getTranslation('description','en') }}</textarea>
-                                    </div>
-                                </div>
 
-                                <div class="position-relative mt-3 text-center">
-                                    <hr class="opacity-75" style="border: 1px solid #24B094;">
-                                    <span
-                                        class="d-none d-md-flex position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4"
-                                        style="color: #24B094;">
+                                    <div class="position-relative mt-3 text-center">
+                                        <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                        <span
+                                            class="d-none d-md-flex position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4"
+                                            style="color: #24B094;">
                                         Products & Categories
                                     </span>
-                                </div>
+                                    </div>
 
-                                <div class="row mb-2">
+                                    <div class="row mb-2">
 
-                                    <div class="col-md-6 form-group mb-2">
-                                        <label for="categoriesSelect" class="label-text mb-1">Products With
-                                            Categories</label>
-                                        <select id="categoriesSelect" class="form-select select2"
-                                            name="product_with_category" multiple>
-                                            @foreach($associatedData['product_with_categories'] as $category)
-                                            <option value="{{ $category->id }}" @selected($category->
+                                        <div class="col-md-6 form-group mb-2">
+                                            <label for="categoriesSelect" class="label-text mb-1">Products With
+                                                Categories</label>
+                                            <select id="categoriesSelect" class="form-select select2"
+                                                    name="product_with_category" multiple>
+                                                @foreach($associatedData['product_with_categories'] as $category)
+                                                    <option value="{{ $category->id }}" @selected($category->
                                                 load('products')->products->intersect($model->products)->isNotEmpty())>
-                                                {{ $category->getTranslation('name', app()->getLocale()) }}
-                                            </option>
+                                                        {{ $category->getTranslation('name', app()->getLocale()) }}
+                                                    </option>
 
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6 form-group mb-2">
-                                        <label for="productsSelect" class="label-text mb-1">Categories</label>
-                                        <select id="productsSelect" class="form-select select2" name="product_ids[]"
-                                            multiple>
-                                            @foreach($associatedData['products'] as $product)
-                                            <option value="{{ $product->id }}" @selected($model->
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 form-group mb-2">
+                                            <label for="productsSelect" class="label-text mb-1">Categories</label>
+                                            <select id="productsSelect" class="form-select select2" name="product_ids[]"
+                                                    multiple>
+                                                @foreach($associatedData['products'] as $product)
+                                                    <option value="{{ $product->id }}" @selected($model->
                                                 products->contains($product))>
-                                                {{ $product->getTranslation('name', app()->getLocale()) }}
-                                            </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label for="productsWithoutCategoriesSelect" class="label-text mb-1">Products
-                                        Without Categories</label>
-                                    <select id="productsWithoutCategoriesSelect" class="form-select select2"
-                                        name="category_ids[]" multiple>
-                                        @foreach($associatedData['product_without_categories'] as $category)
-                                        <option value="{{ $category->id }}" @selected($model->
-                                            categories->contains($category))>
-                                            {{ $category->getTranslation('name', app()->getLocale()) }}
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-12 form-group mb-2 mockupWrapper {{ $model->approach == 'without_editor' ? '' : 'd-none' }}">
-                                    <div class="d-flex align-items-center justify-content-between mb-2">
-                                        <div>
-                                            <h5 class="mb-0" style="color:#24B094;">Mockups</h5>
-                                            <small class="text-muted">Select a mockup to show this template on it.</small>
-                                        </div>
-                                        <span class="badge bg-light text-dark border">Optional</span>
-                                    </div>
-                                    <!-- where cards will render -->
-                                    <div id="mockupsCards" class="row g-2"></div>
-                                    <input type="hidden" name="mockup_id" id="selectedMockupId" value="">
-
-                                    <!-- hidden inputs to submit selected ids -->
-                                    <div id="mockupsHiddenInputs"></div>
-                                </div>
-
-                                <div class="position-relative mt-3 text-center">
-                                    <hr class="opacity-75" style="border: 1px solid #24B094;">
-                                    <span
-                                        class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
-                                        style="color: #24B094;">
-                                        Industry
-                                    </span>
-                                </div>
-
-                                <div class="row mb-2">
-
-                                    <div class="col-md-6 form-group mb-2">
-                                        <label for="industriesSelect" class="label-text mb-1">Industries</label>
-                                        <select id="industriesSelect" class="form-select select2" name="industry_ids[]"
-                                            multiple>
-                                            @foreach($associatedData['industries'] as $industry)
-                                            <option value="{{ $industry->id }}" @selected($model->
-                                                industries->contains($industry))>
-                                                {{ $industry->getTranslation('name', app()->getLocale()) }}
-                                            </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6 form-group mb-2">
-                                        <label for="subIndustriesSelect" class="label-text mb-1">Sub
-                                            Industries</label>
-                                        <select id="subIndustriesSelect" class="form-select select2"
-                                            name="industry_ids[]" multiple>
-                                            @foreach($associatedData['sub_industries'] as $industry)
-                                            <option value="{{ $industry->id }}" @selected($model->
-                                                industries->contains($industry))>
-                                                {{ $industry->getTranslation('name', app()->getLocale()) }}
-                                            </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-
-
-                                <div class="form-group mb-2">
-                                    <label for="tagsSelect" class="label-text mb-1">Tags</label>
-                                    <select id="tagsSelect" class="form-select select2" name="tags[]" multiple>
-                                        @foreach($associatedData['tags'] as $tag)
-                                        <option value="{{ $tag->id }}" @selected($model->tags->contains($tag))>
-                                            {{ $tag->getTranslation('name', app()->getLocale()) }}
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                @if($model->approach == 'with_editor')
-                                <div class="position-relative mt-3 text-center">
-                                    <hr class="opacity-75" style="border: 1px solid #24B094;">
-                                    <span
-                                        class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
-                                        style="color: #24B094;">
-                                        Design Specifications
-                                    </span>
-                                </div>
-                                {{-- Persisted resources (used on submit / ajax) --}}
-                                <input type="hidden" name="dimension_resource_ids" id="dimensionResourceIds">
-                                <input type="hidden" name="dimension_resource_types" id="dimensionResourceTypes">
-                                <div class="form-group mb-2">
-                                    <label for="orientation" class="label-text mb-1">Orientation</label>
-                                    <select id="orientation" class="form-select" name="orientation">
-                                        <option value="" disabled>
-                                            chooese orientation
-                                        </option>
-                                        @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
-                                        <option value="{{ $orientation->value }}" @selected($orientation==$model->
-                                            orientation) >
-                                            {{$orientation->label()}}
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-
-                                <div class="position-relative mt-3 text-center">
-                                    <hr class="opacity-75" style="border: 1px solid #24B094;">
-                                    <span
-                                        class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
-                                        style="color: #24B094;">
-                                        Guides Settings
-                                    </span>
-                                </div>
-                                <label class="label-text mb-1">Shape</label>
-                                <div class="row mb-2">
-                                    <div class="col-md-4">
-                                        <div class="form-group mb-2">
-                                            <input type="hidden" name="has_corner" id="has_corner_hidden"
-                                                value="{{ old('has_corner', $model->has_corner ?? '') }}">
-
-                                            <div class="d-flex gap-3">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="has_corner"
-                                                        id="shape_circle" value="0" @checked($model->has_corner == 0)
-                                                    >
-                                                    <label class="form-check-label" for="shape_circle">Circle</label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="has_corner"
-                                                        id="shape_other" value="1" @checked($model->has_corner == 1)
-
-                                                    >
-                                                    <label class="form-check-label" for="shape_other">Other</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group mb-2 d-none" id="cornersBox">
-                                            <label for="cornersSelect" class="label-text mb-1">Corners</label>
-                                            <select id="cornersSelect" class="form-select select2" name="border">
-                                                <option value="" selected>Choose Corner</option>
-                                                @foreach(\App\Enums\BorderEnum::cases() as $border)
-                                                <option value="{{ $border->value }}" @selected($border->value ==
-                                                    $model->border)
-                                                    >
-                                                    {{$border->label()}}
-                                                </option>
+                                                        {{ $product->getTranslation('name', app()->getLocale()) }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>
                                     </div>
 
-                                    <div class="col-md-4">
-                                        <div class="form-group mb-2">
-                                            <div class="form-check mb-2">
-
-                                                <input type="hidden" name="has_safety_area" value="0">
-                                                <input class="form-check-input" type="checkbox" id="hasSafetyArea"
-                                                    name="has_safety_area" value="1" {{ $model->has_safety_area ?
-                                                'checked' : '' }} >
-                                                <label class="form-check-label" for="hasSafetyArea">Enable
-                                                    Safety
-                                                    Area</label>
-                                            </div>
-
-                                            <div id="safetyAreaBox"
-                                                class="{{ old('has_safety_area') ? '' : 'd-none' }}">
-                                                <label for="safetyAreaSelect" class="label-text mb-1">Safety
-                                                    Area</label>
-                                                <select id="safetyAreaSelect" class="form-select select2"
-                                                    name="safety_area">
-                                                    @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
-                                                    <option value="{{ $area->value }}" @selected($area->value ==
-                                                        $model->safety_area) >
-                                                        {{ $area->label() }}
-                                                    </option>
-                                                    @endforeach
-                                                </select>
-                                                <small class="form-text text-muted">Padding inside the design
-                                                    area.</small>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {{-- Cut Margin (col-6) --}}
-                                    <div class="col-md-4">
-                                        <div class="form-group mb-2">
-                                            <div class="form-check mb-2">
-                                                {{-- send 0 when unchecked --}}
-                                                <input type="hidden" value="0">
-                                                <input class="form-check-input" type="checkbox" id="hasCutMargin"
-                                                    value="1" @checked((int) $model->cut_margin > 0) >
-                                                <label class="form-check-label" for="hasCutMargin">Enable Cut
-                                                    Margin</label>
-                                            </div>
-
-                                            <div id="cutMarginBox" class="{{ $model->cut_margin > 0 ? '' : 'd-none' }}">
-                                                <label for="cutMarginSelect" class="label-text mb-1">Cut
-                                                    Margin</label>
-                                                <select id="cutMarginSelect" class="form-select select2"
-                                                    name="cut_margin">
-
-                                                    @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
-                                                    <option value="{{ $area->value }}" @selected($area->value ==
-                                                        $model->cut_margin) >
-                                                        {{ $area->label() }}
-                                                    </option>
-                                                    @endforeach
-                                                </select>
-                                                {{-- <small class="form-text text-muted">Padding inside the design--}}
-                                                    {{-- area.</small>--}}
-                                            </div>
-                                        </div>
-                                    </div>
                                     <div class="form-group mb-2">
-                                        <label for="sizesSelect" class="label-text mb-1">Sizes</label>
-                                        <select id="sizesSelect" class="form-select" name="dimension_id">
-                                            <option value="" disabled>Select Size</option>
+                                        <label for="productsWithoutCategoriesSelect" class="label-text mb-1">Products
+                                            Without Categories</label>
+                                        <select id="productsWithoutCategoriesSelect" class="form-select select2"
+                                                name="category_ids[]" multiple>
+                                            @foreach($associatedData['product_without_categories'] as $category)
+                                                <option value="{{ $category->id }}" @selected($model->
+                                            categories->contains($category))>
+                                                    {{ $category->getTranslation('name', app()->getLocale()) }}
+                                                </option>
+                                            @endforeach
                                         </select>
-                                        <small class="form-text text-muted">
-                                            If no size is selected, the default 650×650 will be applied.
-                                        </small>
                                     </div>
+                                    <div class="col-md-12 form-group mb-2 mockupWrapper {{ $model->approach == 'without_editor' ? '' : 'd-none' }}">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <div>
+                                                <h5 class="mb-0" style="color:#24B094;">Mockups</h5>
+                                                <small class="text-muted">Select a mockup to show this template on it.</small>
+                                            </div>
+                                            <span class="badge bg-light text-dark border">Optional</span>
+                                        </div>
+                                        <!-- where cards will render -->
+                                        <div id="mockupsCards" class="row g-2"></div>
+                                        <input type="hidden" name="mockup_id" id="selectedMockupId" value="">
+
+                                        <!-- hidden inputs to submit selected ids -->
+                                        <div id="mockupsHiddenInputs"></div>
+                                    </div>
+
+                                    <div class="position-relative mt-3 text-center">
+                                        <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                        <span
+                                            class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                            style="color: #24B094;">
+                                        Industry
+                                    </span>
+                                    </div>
+
+                                    <div class="row mb-2">
+
+                                        <div class="col-md-6 form-group mb-2">
+                                            <label for="industriesSelect" class="label-text mb-1">Industries</label>
+                                            <select id="industriesSelect" class="form-select select2" name="industry_ids[]"
+                                                    multiple>
+                                                @foreach($associatedData['industries'] as $industry)
+                                                    <option value="{{ $industry->id }}" @selected($model->
+                                                industries->contains($industry))>
+                                                        {{ $industry->getTranslation('name', app()->getLocale()) }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 form-group mb-2">
+                                            <label for="subIndustriesSelect" class="label-text mb-1">Sub
+                                                Industries</label>
+                                            <select id="subIndustriesSelect" class="form-select select2"
+                                                    name="industry_ids[]" multiple>
+                                                @foreach($associatedData['sub_industries'] as $industry)
+                                                    <option value="{{ $industry->id }}" @selected($model->
+                                                industries->contains($industry))>
+                                                        {{ $industry->getTranslation('name', app()->getLocale()) }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group mb-2">
+                                        <label for="tagsSelect" class="label-text mb-1">Tags</label>
+                                        <select id="tagsSelect" class="form-select select2" name="tags[]" multiple>
+                                            @foreach($associatedData['tags'] as $tag)
+                                                <option value="{{ $tag->id }}" @selected($model->tags->contains($tag))>
+                                                    {{ $tag->getTranslation('name', app()->getLocale()) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    @if($model->approach == 'with_editor')
+                                        <div class="position-relative mt-3 text-center">
+                                            <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                            <span
+                                                class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                                style="color: #24B094;">
+                                        Design Specifications
+                                    </span>
+                                        </div>
+                                        {{-- Persisted resources (used on submit / ajax) --}}
+                                        <input type="hidden" name="dimension_resource_ids" id="dimensionResourceIds">
+                                        <input type="hidden" name="dimension_resource_types" id="dimensionResourceTypes">
+                                        <div class="form-group mb-2">
+                                            <label for="orientation" class="label-text mb-1">Orientation</label>
+                                            <select id="orientation" class="form-select" name="orientation">
+                                                <option value="" disabled>
+                                                    chooese orientation
+                                                </option>
+                                                @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
+                                                    <option value="{{ $orientation->value }}" @selected($orientation==$model->
+                                            orientation) >
+                                                        {{$orientation->label()}}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+
+                                        <div class="position-relative mt-3 text-center">
+                                            <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                            <span
+                                                class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                                style="color: #24B094;">
+                                        Guides Settings
+                                    </span>
+                                        </div>
+                                        <label class="label-text mb-1">Shape</label>
+                                        <div class="row mb-2">
+                                            <div class="col-md-4">
+                                                <div class="form-group mb-2">
+                                                    <input type="hidden" name="has_corner" id="has_corner_hidden"
+                                                           value="{{ old('has_corner', $model->has_corner ?? '') }}">
+
+                                                    <div class="d-flex gap-3">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="has_corner"
+                                                                   id="shape_circle" value="0" @checked($model->has_corner == 0)
+                                                            >
+                                                            <label class="form-check-label" for="shape_circle">Circle</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="has_corner"
+                                                                   id="shape_other" value="1" @checked($model->has_corner == 1)
+
+                                                            >
+                                                            <label class="form-check-label" for="shape_other">Other</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group mb-2 d-none" id="cornersBox">
+                                                    <label for="cornersSelect" class="label-text mb-1">Corners</label>
+                                                    <select id="cornersSelect" class="form-select select2" name="border">
+                                                        <option value="" selected>Choose Corner</option>
+                                                        @foreach(\App\Enums\BorderEnum::cases() as $border)
+                                                            <option value="{{ $border->value }}" @selected($border->value ==
+                                                    $model->border)
+                                                            >
+                                                                {{$border->label()}}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group mb-2">
+                                                    <div class="form-check mb-2">
+
+                                                        <input type="hidden" name="has_safety_area" value="0">
+                                                        <input class="form-check-input" type="checkbox" id="hasSafetyArea"
+                                                               name="has_safety_area" value="1" {{ $model->has_safety_area ?
+                                                'checked' : '' }} >
+                                                        <label class="form-check-label" for="hasSafetyArea">Enable
+                                                            Safety
+                                                            Area</label>
+                                                    </div>
+
+                                                    <div id="safetyAreaBox"
+                                                         class="{{ old('has_safety_area') ? '' : 'd-none' }}">
+                                                        <label for="safetyAreaSelect" class="label-text mb-1">Safety
+                                                            Area</label>
+                                                        <select id="safetyAreaSelect" class="form-select select2"
+                                                                name="safety_area">
+                                                            @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
+                                                                <option value="{{ $area->value }}" @selected($area->value ==
+                                                        $model->safety_area) >
+                                                                    {{ $area->label() }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                        <small class="form-text text-muted">Padding inside the design
+                                                            area.</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- Cut Margin (col-6) --}}
+                                            <div class="col-md-4">
+                                                <div class="form-group mb-2">
+                                                    <div class="form-check mb-2">
+                                                        {{-- send 0 when unchecked --}}
+                                                        <input type="hidden" value="0">
+                                                        <input class="form-check-input" type="checkbox" id="hasCutMargin"
+                                                               value="1" @checked((int) $model->cut_margin > 0) >
+                                                        <label class="form-check-label" for="hasCutMargin">Enable Cut
+                                                            Margin</label>
+                                                    </div>
+
+                                                    <div id="cutMarginBox" class="{{ $model->cut_margin > 0 ? '' : 'd-none' }}">
+                                                        <label for="cutMarginSelect" class="label-text mb-1">Cut
+                                                            Margin</label>
+                                                        <select id="cutMarginSelect" class="form-select select2"
+                                                                name="cut_margin">
+
+                                                            @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
+                                                                <option value="{{ $area->value }}" @selected($area->value ==
+                                                        $model->cut_margin) >
+                                                                    {{ $area->label() }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                        {{-- <small class="form-text text-muted">Padding inside the design--}}
+                                                        {{-- area.</small>--}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group mb-2">
+                                                <label for="sizesSelect" class="label-text mb-1">Sizes</label>
+                                                <select id="sizesSelect" class="form-select" name="dimension_id">
+                                                    <option value="" disabled>Select Size</option>
+                                                </select>
+                                                <small class="form-text text-muted">
+                                                    If no size is selected, the default 650×650 will be applied.
+                                                </small>
+                                            </div>
+                                        </div>
+
+
                                 </div>
-
-
-                            </div>
-                            @endif
-                        </div>
-
-
-                        <div class="d-flex flex-wrap-reverse gap-1 justify-content-between pt-2">
-                            <button type="reset" class="btn btn-outline-secondary" id="cancelButton">Cancel</button>
-                            <div class="d-flex gap-1">
-                                {{-- default: don't go to editor --}}
-                                <input type="hidden" name="go_to_editor" value="0" id="goToEditorFlag">
-
-                                @if($model->approach == 'with_editor')
-                                <button type="submit" class="btn btn-outline-secondary fs-5 js-go-editor">
-                                    <i data-feather="edit-3"></i> <span>Save & Edit Design</span>
-                                </button>
                                 @endif
-                                <button type="submit" class="btn btn-primary fs-5 saveChangesButton"
-                                    id="SaveChangesButton">
-                                    <span>Save Changes</span>
-                                    <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
-                                        role="status" aria-hidden="true"></span>
-                                </button>
                             </div>
-                        </div>
-                    </form>
+
+
+                            <div class="d-flex flex-wrap-reverse gap-1 justify-content-between pt-2">
+                                <button type="reset" class="btn btn-outline-secondary" id="cancelButton">Cancel</button>
+                                <div class="d-flex gap-1">
+                                    {{-- default: don't go to editor --}}
+                                    <input type="hidden" name="go_to_editor" value="0" id="goToEditorFlag">
+
+                                    @if($model->approach == 'with_editor')
+                                        <button type="submit" class="btn btn-outline-secondary fs-5 js-go-editor">
+                                            <i data-feather="edit-3"></i> <span>Save & Edit Design</span>
+                                        </button>
+                                    @endif
+                                    <button type="submit" class="btn btn-primary fs-5 saveChangesButton"
+                                            id="SaveChangesButton">
+                                        <span>Save Changes</span>
+                                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
+                                              role="status" aria-hidden="true"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
-@php
-    // لو route محتاج parameter اسمه mockup
-    $mockupEditUrlTemplate = route('mockups.edit', ['mockup' => '__MOCKUP__']);
-@endphp
+    </section>
+    @php
+        // لو route محتاج parameter اسمه mockup
+        $mockupEditUrlTemplate = route('mockups.edit', ['mockup' => '__MOCKUP__']);
+    @endphp
 @endsection
 
 
 @section('vendor-script')
-<script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
-<script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
 @endsection
 
 
@@ -614,63 +614,56 @@
 
 
     <script>
-        const attachedMockupIds = new Set(@json(($model?->mockups?->pluck('id') ?? collect())->values()));
+        // خليها Strings عشان ما يحصلش mismatch بين رقم/سترنج
+        const attachedMockupIds = new Set((@json(($model?->mockups?->pluck('id') ?? collect())->values())).map(String));
+
         $(function () {
-
             const $cardsWrap  = $('#mockupsCards');
-
-
-
-
             const $withCat    = $('#categoriesSelect');
             const $withoutCat = $('#productsWithoutCategoriesSelect');
 
-            const $hiddenWrap = $('#mockupsHiddenInputs');
-
-            // keep selected ids (like select multiple)
-            const selected = new Set();
-
-            function syncHiddenInputs() {
-                $hiddenWrap.empty();
-                [...selected].forEach(id => {
-                    $hiddenWrap.append(`<input type="hidden" name="mockup_ids[]" value="${id}">`);
-                });
-            }
+            // ✅ selected يبدأ بالمرفقات القديمة في edit
+            const selected = new Set([...attachedMockupIds]);
 
             function renderMockupCards(items) {
                 $cardsWrap.empty();
 
                 if (!items.length) {
                     $cardsWrap.append(`<div class="col-12 text-muted py-2">No mockups found</div>`);
-                    syncHiddenInputs();
                     return;
                 }
 
                 items.forEach(mockup => {
-                    const id   = mockup.id;
-                    const editUrl = `{{ $mockupEditUrlTemplate }}`
-                        .replace('__MOCKUP__', id);
-
-                    const href = editUrl + `?template_id={{ $model->id }}`;
-
+                    const id   = String(mockup.id);
                     const name = mockup.name ?? ('Mockup #' + id);
+                    // ✅ استخدم قالب route جاهز من Blade
+                    const editUrlTemplate = `{{ $mockupEditUrlTemplate }}`; // مثال: /admin/mockups/__MOCKUP__/edit
+                    const editUrl = editUrlTemplate.replace('__MOCKUP__', id);
+
+                    // ✅ أضف template_id كـ query parameter بشكل آمن
+                    const href = `${editUrl}?template_id={{ $model->id }}`;
                     const img =
                         mockup?.images?.front?.base_url ||
                         mockup?.images?.base_url ||
                         "{{ asset('images/placeholder.svg') }}";
 
-                    const isSelected = selected.has(String(id)) || selected.has(Number(id));
-                    const isAttached = attachedMockupIds.has(id);
+                    const isChecked = selected.has(id); // ✅ ده اللي هيتحكم في checked
 
                     $cardsWrap.append(`
           <div class="col-12 col-md-4 col-lg-2">
-            <div class="mockup-card ${isSelected ? 'selected' : ''}" data-id="${id}">
+            <div class="mockup-card ${isChecked ? 'selected' : ''}" data-id="${id}">
               <div class="card rounded-3 shadow-sm position-relative" style="border:1px solid #24B094;">
 
-                ${isAttached
-                        ? `<span class="badge bg-success position-absolute" style="top:10px;left:10px;">Attached</span>`
-                        : ''
-                    }
+                <!-- ✅ checkbox overlay top-left -->
+                <div class="position-absolute" style="top:10px;left:10px;z-index:20;">
+                  <input
+                    class="form-check-input js-mockup-checkbox"
+                    type="checkbox"
+                    name="mockup_ids[]"
+                    value="${id}"
+                    ${isChecked ? 'checked' : ''}
+                  />
+                </div>
 
                 <div class="d-flex justify-content-center align-items-center"
                      style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">
@@ -678,22 +671,24 @@
                        style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:8px;"
                        alt="${name}">
                 </div>
+
                 <div class="card-body py-2">
                   <h6 class="card-title mb-2 text-truncate">${name}</h6>
-
-                  <a href="${href}"
-                            class="btn btn-sm btn-primary w-100"
-                           >
-                     Show on Mockup
-                  </a>
+<a href="${href}" class="btn btn-sm btn-primary w-100 js-show-on-mockup"
+data-id="${id}"> Show on Mockup </a>
                 </div>
+
               </div>
             </div>
           </div>
         `);
                 });
+            }
 
-                syncHiddenInputs();
+            function getSelectedTypes() {
+                return $('.type-checkbox:checked').map(function () {
+                    return $(this).val();
+                }).get();
             }
 
             function fetchMockups() {
@@ -703,30 +698,24 @@
 
                 if (!allProductIds.length) {
                     $cardsWrap.empty();
-                    $hiddenWrap.empty();
                     selected.clear();
                     return;
                 }
-                function getSelectedTypes() {
-                    return $('.type-checkbox:checked')
-                        .map(function () { return $(this).val(); })
-                        .get();
-                }
-
-                console.log(getSelectedTypes())
 
                 $.ajax({
                     url: "{{ route('mockups.index') }}",
                     type: "GET",
-                    traditional: false, // ✅ ensure proper array serialization
                     data: {
                         'product_ids[]': allProductIds,
-                        'types[]': getSelectedTypes(), // ✅ correct way
+                        'types[]': getSelectedTypes(),
                     },
                     success: function (response) {
                         const items = response?.data?.data || response?.data || response || [];
+
+                        // اختياري: شيل أي selected مش موجود في النتائج
                         const ids = new Set(items.map(x => String(x.id)));
-                        [...selected].forEach(id => { if (!ids.has(String(id))) selected.delete(id); });
+                        [...selected].forEach(id => { if (!ids.has(id)) selected.delete(id); });
+
                         renderMockupCards(items);
                     },
                     error: function (xhr) {
@@ -734,41 +723,47 @@
                         $cardsWrap.empty().append(`<div class="col-12 text-danger py-2">Failed to load mockups</div>`);
                     }
                 });
-
             }
 
-            // Toggle selection on card click
-            $(document).on('click', '.mockup-card', function () {
-                const id = String($(this).data('id'));
+            // ✅ أهم جزء: لو uncheck → يتشال من selected وبالتالي مش هيتبعت
+            $(document).on('change', '.js-mockup-checkbox', function () {
+                const id = String(this.value);
+                if (this.checked) selected.add(id);
+                else selected.delete(id);
 
-                if (selected.has(id)) {
-                    selected.delete(id);
-                    $(this).removeClass('selected');
-                } else {
-                    selected.add(id);
-                    $(this).addClass('selected');
-                }
+                $(this).closest('.mockup-card').toggleClass('selected', this.checked);
+            });
 
-                syncHiddenInputs();
+            // (اختياري) click على الكارد يtoggle الـ checkbox (بدون اللينكات)
+            $(document).on('click', '.mockup-card', function (e) {
+                if ($(e.target).is('input, a, button')) return;
+                const $cb = $(this).find('.js-mockup-checkbox');
+                $cb.prop('checked', !$cb.prop('checked')).trigger('change');
+            });
+            $(document).on('click', '.js-show-on-mockup', function (e) {
+                e.preventDefault();
+
+                const mockupId = String($(this).data('id'));
+
+                // ✅ ابعت mockup_id
+                $('#selectedMockupId').val(mockupId);
+
+                // (اختياري) خلّي checkbox بتاعه checked كمان
+                const $card = $(this).closest('.mockup-card');
+                $card.find('.js-mockup-checkbox').prop('checked', true).trigger('change');
+
+                // ✅ ابعت الفورم
+                $('#editTemplateForm').submit();   // غيّر id الفورم لو اسمك مختلف
             });
 
             $withCat.on('change', fetchMockups);
             $withoutCat.on('change', fetchMockups);
             $(document).on('change', '.type-checkbox', fetchMockups);
 
-
             fetchMockups();
         });
-        $(document).on('click', '.js-submit-mockup', function (e) {
-            e.preventDefault();
-            const id = $(this).data('id');
-            $('#selectedMockupId').val(id);
-            $('#addTemplateForm').submit();
-        });
-
-
-
     </script>
+
     <script>
         function updateTemplateTypeDropzones() {
             const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox'))
@@ -869,7 +864,7 @@
                 dz.emit("complete", modelMockFile);
                 dz.files.push(modelMockFile);
                 @endif
-                this.on("success", function (file, response) {
+                    this.on("success", function (file, response) {
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedFrontTemplateImage").value = response.data.id;
@@ -906,7 +901,7 @@
                 dz.emit("complete", modelMockFile);
                 dz.files.push(modelMockFile);
                 @endif
-                this.on("success", function (file, response) {
+                    this.on("success", function (file, response) {
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedBackTemplateImage").value = response.data.id;
@@ -942,7 +937,7 @@
                 dz.emit("complete", modelMockFile);
                 dz.files.push(modelMockFile);
                 @endif
-                this.on("success", function (file, response) {
+                    this.on("success", function (file, response) {
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedNoneTemplateImage").value = response.data.id;
@@ -990,7 +985,7 @@
     </script>
 
     <script>
-    // keep color picker & text field in sync
+        // keep color picker & text field in sync
         document.addEventListener("input", (e) => {
             if (e.target.classList.contains("color-picker")) {
                 const picker = e.target;
@@ -1011,9 +1006,9 @@
                 }
             }
         });
-</script>
-<script>
-    Dropzone.autoDiscover = false;
+    </script>
+    <script>
+        Dropzone.autoDiscover = false;
 
         function initColorItem(item) {
             const dropzoneElement = item.querySelector('.color-dropzone');
@@ -1101,87 +1096,87 @@
             }
         }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        const $colorRepeater = $('.color-repeater');
+        document.addEventListener("DOMContentLoaded", function () {
+            const $colorRepeater = $('.color-repeater');
 
-        // 1) init Dropzone على العناصر الموجودة (ألوان قديمة)
-        $colorRepeater.find('[data-repeater-item]').each(function () {
-            initColorItem(this);
-        });
-
-        // 2) init jquery.repeater
-        if (window.$ && $.fn.repeater) {
-            $colorRepeater.repeater({
-                initEmpty: {{ $colors->isEmpty() ? 'true' : 'false' }},
-                show: function () {
-                    $(this).addClass('col-12 col-md-6 col-lg-3').hide().slideDown();
-
-                    const item = this;
-                    const dropzoneElement = item.querySelector('.color-dropzone');
-                    const hiddenInput = item.querySelector('.color-image-hidden');
-                    const colorPicker = item.querySelector('.color-picker');
-                    const hexInput = item.querySelector('.color-hex-input');
-
-                    if (dropzoneElement) {
-                        // 🧹 امسح أي DOM منسوخ من الصف القديم (previews, classes...)
-                        dropzoneElement.innerHTML =
-                            '<div class="dz-message" data-dz-message><span>Drop image or click</span></div>';
-
-                        dropzoneElement.classList.remove('dz-started', 'dz-max-files-reached');
-                        dropzoneElement.dataset.existingMedia = '';
-                    }
-
-                    // امسح قيمة الـ image_id
-                    if (hiddenInput) {
-                        hiddenInput.value = '';
-                    }
-
-                    // Reset للّون الافتراضي
-                    if (colorPicker) colorPicker.value = '#000000';
-                    if (hexInput) hexInput.value = '#000000';
-
-                    // init Dropzone + events
-                    initColorItem(item);
-
-                    if (window.feather) feather.replace();
-                },
-                hide: function (deleteElement) {
-                    const item = this;
-                    const hiddenInput = item.querySelector('.color-image-hidden');
-                    const mediaId = hiddenInput ? hiddenInput.value : null;
-
-                    // 🔥 لو في صورة مرتبطة باللون ده امسحها من السيرفر
-                    if (mediaId) {
-                        fetch("{{ url('api/v1/media') }}/" + mediaId, {
-                            method: "DELETE",
-                            headers: {
-                                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-                            }
-                        }).catch(function (err) {
-                            console.error("Failed to delete media:", err);
-                        });
-                    }
-
-                    // بعد الأنيميشن فعلياً شيل العنصر من الـ DOM ومن الـ array بتاعة repeater
-                    $(item).slideUp(function () {
-                        deleteElement(); // مهم جداً تستخدم deleteElement بدل $this.remove()
-                    });
-                }
+            // 1) init Dropzone على العناصر الموجودة (ألوان قديمة)
+            $colorRepeater.find('[data-repeater-item]').each(function () {
+                initColorItem(this);
             });
 
-            @if($colors->isEmpty())
-            const hasItems = $colorRepeater.find('[data-repeater-item]').length > 0;
-            if (!hasItems) {
-                $colorRepeater.find('[data-repeater-create]').first().trigger('click');
+            // 2) init jquery.repeater
+            if (window.$ && $.fn.repeater) {
+                $colorRepeater.repeater({
+                    initEmpty: {{ $colors->isEmpty() ? 'true' : 'false' }},
+                    show: function () {
+                        $(this).addClass('col-12 col-md-6 col-lg-3').hide().slideDown();
+
+                        const item = this;
+                        const dropzoneElement = item.querySelector('.color-dropzone');
+                        const hiddenInput = item.querySelector('.color-image-hidden');
+                        const colorPicker = item.querySelector('.color-picker');
+                        const hexInput = item.querySelector('.color-hex-input');
+
+                        if (dropzoneElement) {
+                            // 🧹 امسح أي DOM منسوخ من الصف القديم (previews, classes...)
+                            dropzoneElement.innerHTML =
+                                '<div class="dz-message" data-dz-message><span>Drop image or click</span></div>';
+
+                            dropzoneElement.classList.remove('dz-started', 'dz-max-files-reached');
+                            dropzoneElement.dataset.existingMedia = '';
+                        }
+
+                        // امسح قيمة الـ image_id
+                        if (hiddenInput) {
+                            hiddenInput.value = '';
+                        }
+
+                        // Reset للّون الافتراضي
+                        if (colorPicker) colorPicker.value = '#000000';
+                        if (hexInput) hexInput.value = '#000000';
+
+                        // init Dropzone + events
+                        initColorItem(item);
+
+                        if (window.feather) feather.replace();
+                    },
+                    hide: function (deleteElement) {
+                        const item = this;
+                        const hiddenInput = item.querySelector('.color-image-hidden');
+                        const mediaId = hiddenInput ? hiddenInput.value : null;
+
+                        // 🔥 لو في صورة مرتبطة باللون ده امسحها من السيرفر
+                        if (mediaId) {
+                            fetch("{{ url('api/v1/media') }}/" + mediaId, {
+                                method: "DELETE",
+                                headers: {
+                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            }).catch(function (err) {
+                                console.error("Failed to delete media:", err);
+                            });
+                        }
+
+                        // بعد الأنيميشن فعلياً شيل العنصر من الـ DOM ومن الـ array بتاعة repeater
+                        $(item).slideUp(function () {
+                            deleteElement(); // مهم جداً تستخدم deleteElement بدل $this.remove()
+                        });
+                    }
+                });
+
+                @if($colors->isEmpty())
+                const hasItems = $colorRepeater.find('[data-repeater-item]').length > 0;
+                if (!hasItems) {
+                    $colorRepeater.find('[data-repeater-create]').first().trigger('click');
+                }
+                @endif
             }
-            @endif
-        }
-    });
+        });
 
-</script>
+    </script>
 
-<script>
-    (function () {
+    <script>
+        (function () {
             const LOCALE = @json(app()->getLocale());
             const SUB_ROUTE = @json(route('sub-industries'));
             const PRESEL_PARENTS = @json($preselectedIndustryIds ?? []);
@@ -1239,12 +1234,12 @@
                 refreshSubs({preserveSelection: true});
             });
         })();
-</script>
+    </script>
 
 
 
-<script>
-    $(function () {
+    <script>
+        $(function () {
             const $circle = $('#shape_circle'); // value="0"
             const $other = $('#shape_other');  // value="1"
             const $hidden = $('#has_corner_hidden');
@@ -1310,11 +1305,11 @@
                 syncState();
             });
         });
-</script>
+    </script>
 
 
-<script>
-    $(function () {
+    <script>
+        $(function () {
             const $toggle = $('#hasSafetyArea');
             const $box = $('#safetyAreaBox');
             const $select = $('#safetyAreaSelect');
@@ -1343,9 +1338,9 @@
             $toggle.on('change', syncSafetyArea);
             syncSafetyArea(); // initial state
         });
-</script>
-<script>
-    $(function () {
+    </script>
+    <script>
+        $(function () {
             const $toggle = $('#hasCutMargin');
             const $box = $('#cutMarginBox');
             const $select = $('#cutMarginSelect');
@@ -1374,9 +1369,9 @@
             $toggle.on('change', syncCutMargin);
             syncCutMargin(); // initial state
         });
-</script>
-<script>
-    document.addEventListener('click', function (e) {
+    </script>
+    <script>
+        document.addEventListener('click', function (e) {
             const submitBtn = e.target.closest('button[type="submit"]');
             if (!submitBtn) return;
 
@@ -1390,10 +1385,10 @@
                 flag.value = '0';
             }
         });
-</script>
+    </script>
 
-<script>
-    // Build parallel arrays from current UI selections
+    <script>
+        // Build parallel arrays from current UI selections
         function buildDimensionPayloadFromUI() {
             const categoryIds = ($('#productsSelect').val() || []).map(String);               // categories
             const productIds = ($('#productsWithoutCategoriesSelect').val() || []).map(String); // products
@@ -1493,10 +1488,10 @@
             });
         }
 
-</script>
+    </script>
 
-<script>
-    // Listen for change on "Products With Categories"
+    <script>
+        // Listen for change on "Products With Categories"
         // Left: Products With Categories → updates right list, then refresh
         $('#categoriesSelect').on('change', function () {
             syncSelectedResourcesToHiddenInputs();
@@ -1550,10 +1545,10 @@
         });
 
 
-</script>
+    </script>
 
-<script>
-    const modelDropzone = new Dropzone("#template-dropzone", {
+    <script>
+        const modelDropzone = new Dropzone("#template-dropzone", {
             url: "{{ route('media.store') }}",
             paramName: "file",
             maxFiles: 1,
@@ -1653,9 +1648,9 @@
             // Initial state
             toggleCheckboxes();
         });
-</script>
-<script>
-    const modelMainDropzone = new Dropzone("#template-main-dropzone", {
+    </script>
+    <script>
+        const modelMainDropzone = new Dropzone("#template-main-dropzone", {
             url: "{{ route('media.store') }}",
             paramName: "file",
             maxFiles: 1,
@@ -1710,38 +1705,43 @@
         });
 
 
-</script>
+    </script>
 
 
-<script !src="">
-    handleAjaxFormSubmit("#editTemplateForm", {
+    <script !src="">
+        handleAjaxFormSubmit("#editTemplateForm", {
             successMessage: "Template updated successfully",
             onSuccess: function (response, $form) {
-                setTimeout(function () {
-                    window.location.href = '/product-templates';
-                }, 1000);
+
 
                 if (response.data.editor_url) {
                     window.open(response.data.editor_url, '_blank');
+                    return;
+
+                }  if (response.data.mockup_redirect_url) {
+                    window.open(response.data.mockup_redirect_url);
 
                 }
+                setTimeout(function () {
+                    window.location.href = '/product-templates';
+                }, 1000);
             }
         });
 
 
-</script>
-<script !src="">
-    $(document).ready(function () {
+    </script>
+    <script !src="">
+        $(document).ready(function () {
             const preselectedProductId = $('#productsSelect').val();
             if (preselectedProductId) {
                 $('#productsSelect').trigger('change');
             }
         });
 
-</script>
+    </script>
 
-<script>
-    $(document).ready(function () {
+    <script>
+        $(document).ready(function () {
             $('#industriesSelect').select2({
                 placeholder: "Choose Industries",
                 allowClear: true
@@ -1777,9 +1777,9 @@
 
         });
 
-</script>
-<script !src="">
-    function updateDeleteButtons(containerSelector) {
+    </script>
+    <script !src="">
+        function updateDeleteButtons(containerSelector) {
             $(containerSelector).find('[data-repeater-list]').each(function () {
                 var items = $(this).find('[data-repeater-item]');
                 items.each(function () {
@@ -1864,6 +1864,6 @@
             updateDeleteButtons($('.outer-repeater'));
             initializeImageUploaders($('.outer-repeater'));
         });
-</script>
+    </script>
 
 @endsection

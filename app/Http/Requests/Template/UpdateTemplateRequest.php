@@ -55,6 +55,10 @@ class UpdateTemplateRequest extends BaseRequest
             'category_ids.*' => ['integer', 'exists:categories,id'],
             'industry_ids' => ['nullable', 'array'],
             'industry_ids.*' => ['integer', 'exists:industries,id'],
+            'mockup_ids' => ['nullable', 'array'],
+            'mockup_ids.*' => ['nullable', 'exists:mockups,id'],
+            'mockup_id' => ['nullable'  ,'integer', 'exists:mockups,id'],
+
             'template_image_front_id' => [
                 'nullable','exists:media,id',
                 Rule::requiredIf(fn()=> in_array(TypeEnum::FRONT->value, (array)$this->input('types', []), true)),
