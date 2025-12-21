@@ -271,8 +271,14 @@
 
 
                             </div>
-                            <div class="col-md-12 form-group mb-2">
-
+                            <div class="col-md-12 form-group mb-2 mockupWrapper d-none">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <div>
+                                        <h5 class="mb-0" style="color:#24B094;">Mockups</h5>
+                                        <small class="text-muted">Select a mockup to show this template on it.</small>
+                                    </div>
+                                    <span class="badge bg-light text-dark border">Optional</span>
+                                </div>
                                 <!-- where cards will render -->
                                 <div id="mockupsCards" class="row g-2"></div>
                                 <input type="hidden" name="mockup_id" id="selectedMockupId" value="">
@@ -508,11 +514,22 @@ $mockupUpdateUrlTemplate = route('mockups.edit', ['mockup' => '__ID__']);
 @endsection
 @section('vendor-script')
 <script>
+
     $(function () {
+        const q = "{{ request()->query('q') }}";
+        const isWithoutEditor = (q === 'without' || q === 'without_editor');
+        const $cardsWrap  = $('#mockupsCards');
+        const $mockupWrap  = $('.mockupWrapper');
+
+        if (!isWithoutEditor) {
+            $cardsWrap.addClass('d-none');
+            $mockupWrap.addClass('d-none');
+            return;
+        }
+
             const $withCat    = $('#categoriesSelect');
             const $withoutCat = $('#productsWithoutCategoriesSelect');
 
-            const $cardsWrap  = $('#mockupsCards');
             const $hiddenWrap = $('#mockupsHiddenInputs');
 
             // keep selected ids (like select multiple)
@@ -526,6 +543,8 @@ $mockupUpdateUrlTemplate = route('mockups.edit', ['mockup' => '__ID__']);
             }
 
             function renderMockupCards(items) {
+                $mockupWrap.removeClass('d-none');
+
                 $cardsWrap.empty();
 
                 if (!items.length) {
@@ -551,6 +570,7 @@ $mockupUpdateUrlTemplate = route('mockups.edit', ['mockup' => '__ID__']);
   <div class="col-12 col-md-4 col-lg-2">
     <div class="mockup-card ${isSelected ? 'selected' : ''}" data-id="${id}">
       <div class="card rounded-3 shadow-sm" style="border:1px solid #24B094;">
+
         <div class="d-flex justify-content-center align-items-center"
              style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">
           <img src="${img}" class="mx-auto d-block"
@@ -598,16 +618,15 @@ $mockupUpdateUrlTemplate = route('mockups.edit', ['mockup' => '__ID__']);
                 $.ajax({
                     url: "{{ route('mockups.index') }}",
                     type: "GET",
-                    data: { product_ids: allProductIds,
-                    types: getSelectedTypes(),
+                    traditional: false, // ✅ ensure proper array serialization
+                    data: {
+                        'product_ids[]': allProductIds,
+                        'types[]': getSelectedTypes(), // ✅ correct way
                     },
                     success: function (response) {
                         const items = response?.data?.data || response?.data || response || [];
-
-                        // optional: remove selections that no longer exist
                         const ids = new Set(items.map(x => String(x.id)));
                         [...selected].forEach(id => { if (!ids.has(String(id))) selected.delete(id); });
-
                         renderMockupCards(items);
                     },
                     error: function (xhr) {
@@ -615,6 +634,7 @@ $mockupUpdateUrlTemplate = route('mockups.edit', ['mockup' => '__ID__']);
                         $cardsWrap.empty().append(`<div class="col-12 text-danger py-2">Failed to load mockups</div>`);
                     }
                 });
+
             }
 
             // Toggle selection on card click
@@ -634,23 +654,18 @@ $mockupUpdateUrlTemplate = route('mockups.edit', ['mockup' => '__ID__']);
 
             $withCat.on('change', fetchMockups);
             $withoutCat.on('change', fetchMockups);
+           $(document).on('change', '.type-checkbox', fetchMockups);
+
 
             fetchMockups();
         });
-        $(document).on('click', '.js-submit-mockup', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
+    $(document).on('click', '.js-submit-mockup', function (e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        $('#selectedMockupId').val(id);
+        $('#addTemplateForm').submit();
+    });
 
-            const id = $(this).data('id');
-            $('#selectedMockupId').val(id);
-
-            const $form = $(this).closest('form');
-
-            // لو عندك buildHiddenTemplateInputs على submit
-            $form.trigger('submit');
-
-            $form[0].submit();
-        });
 
 
 </script>
@@ -1251,25 +1266,49 @@ $mockupUpdateUrlTemplate = route('mockups.edit', ['mockup' => '__ID__']);
             // Let `handleAjaxFormSubmit()` take care of the actual submission
         });
 
-        handleAjaxFormSubmit("#addTemplateForm", {
-            successMessage: "Template created successfully",
-            onSuccess: function (response, $form) {
-                // Re-enable buttons & hide all loaders
-                $('.saveChangesButton').prop('disabled', false).find('.saveLoader').addClass('d-none');
-                if (response.data.redirect_url) {
-                    window.open(response.data.redirect_url, '_blank');
-                } else {
-                    setTimeout(function () {
-                        window.location.href = '/product-templates';
-                    }, 1000);
-                }
+    handleAjaxFormSubmit("#addTemplateForm", {
+        successMessage: "Template created successfully",
+        onSuccess: function (response, $form) {
 
-            },
-            onError: function () {
-                // Re-enable buttons & hide all loaders on error too
-                $('.saveChangesButton').prop('disabled', false).find('.saveLoader').addClass('d-none');
+            // Re-enable buttons & hide all loaders
+            $('.saveChangesButton')
+                .prop('disabled', false)
+                .find('.saveLoader')
+                .addClass('d-none');
+
+            // ✅ 1) Redirect to mockup edit if returned
+            const mockupUrl =
+                response?.data?.mockup_redirect_url ||
+                response?.mockup_redirect_url;
+
+            if (mockupUrl) {
+                window.location.href = mockupUrl; // or window.open(mockupUrl, '_blank');
+                return;
             }
-        });
+
+            // ✅ 2) Your existing editor redirect (if any)
+            const editorUrl =
+                response?.data?.redirect_url ||
+                response?.redirect_url;
+
+            if (editorUrl) {
+                window.open(editorUrl, '_blank');
+                return;
+            }
+
+            // ✅ 3) Default fallback
+            setTimeout(function () {
+                window.location.href = '/product-templates';
+            }, 1000);
+        },
+        onError: function () {
+            $('.saveChangesButton')
+                .prop('disabled', false)
+                .find('.saveLoader')
+                .addClass('d-none');
+        }
+    });
+
 
 </script>
 

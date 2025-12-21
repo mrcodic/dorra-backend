@@ -283,11 +283,23 @@ class TemplateService extends BaseService
                 != collect($modelTypesValues)->sort()->values()->all();
 
             if ($typesChanged) {
-                if (in_array(1, $selectedTypeValues) || in_array(3, $selectedTypeValues)) {
-                    $model->clearMediaCollection('templates');
-                }if (in_array(2, $selectedTypeValues) ) {
-                    $model->clearMediaCollection('back_templates');
+                $hasFront = in_array(1, $selectedTypeValues);
+                $hasBack  = in_array(2, $selectedTypeValues);
+                $hasNone  = in_array(3, $selectedTypeValues);
+
+                if (!($hasFront && $hasBack)) {
+                    if ($hasFront) {
+                        $model->clearMediaCollection('back_templates');
+                    }
+                    if ($hasBack) {
+                        $model->clearMediaCollection('templates');
+                    }
+                    if ($hasNone) {
+                        $model->clearMediaCollection('templates');
+                        $model->clearMediaCollection('back_templates');
+                    }
                 }
+
             }
 
             $model->types()->sync($validatedData['types']);
@@ -298,7 +310,7 @@ class TemplateService extends BaseService
             $model->tags()->sync($validatedData['tags'] ?? []);
             $model->flags()->sync($validatedData['flags'] ?? []);
 
-            if (!empty($validatedData['template_image_id'])) {
+            if (isset($validatedData['template_image_id'])) {
                 $model->getMedia('template_model_image')
                     ->where('id', '!=', $validatedData['template_image_id'])
                     ->each->delete();
@@ -310,16 +322,33 @@ class TemplateService extends BaseService
                         'collection_name' => 'template_model_image',
                     ]);
             }
-            if (!empty($validatedData['template_image_main_id'])) {
+            if (isset($validatedData['template_image_front_id']) || isset($validatedData['template_image_none_id'])) {
                 $model->getMedia('templates')
-                    ->where('id', '!=', $validatedData['template_image_main_id'])
+                    -> where(function ($query) use ($validatedData) {
+                        $query->where('id', '!=', $validatedData['template_image_front_id'])
+                            ->orWhere('id' ,'!=',$validatedData['template_image_none_id']);
+                    })
                     ->each->delete();
 
-                Media::where('id', $validatedData['template_image_main_id'])
+                Media::where(function ($query) use ($validatedData) {
+                    $query->whereKey($validatedData['template_image_front_id'])
+                        ->orWhere('id', $validatedData['template_image_none_id']);
+                })
                     ->update([
                         'model_type' => get_class($model),
                         'model_id' => $model->id,
                         'collection_name' => 'templates',
+                    ]);
+            }
+            if (isset($validatedData['template_image_back_id'])) {
+                $model->getMedia('back_templates')
+                    ->where('id', '!=', $validatedData['template_image_back_id'])
+                    ->each->delete();
+                Media::whereKey($validatedData['template_image_back_id'])
+                    ->update([
+                        'model_type' => get_class($model),
+                        'model_id' => $model->id,
+                        'collection_name' => 'back_templates',
                     ]);
             }
 

@@ -158,7 +158,16 @@ class MockupService extends BaseService
             }))
             ->when(request()->filled('product_ids'), fn($q) => $q->whereIn('category_id', request()->array('product_ids')))
             ->when(request()->filled('type'), fn($q) => $q->whereHas('types', fn($q) => $q->where('types.id', request('type'))))
-            ->when(request()->filled('types'), fn($q) => $q->whereHas('types', fn($q) => $q->whereIn('types.value', request('types'))))
+            ->when(request()->filled('types'), function ($query) {
+                $types = array_map('intval', request()->input('types'));
+                $query->whereHas('types', function ($q) use ($types) {
+                    $q->whereIn('types.value', $types);
+                }, '=', count($types));
+
+                $query->whereDoesntHave('types', function ($q) use ($types) {
+                    $q->whereNotIn('types.value', $types);
+                });
+            })
             ->when(request()->filled('search'), function ($q) {
                 $q->where('name', 'like', '%' . request('search') . '%');
             })

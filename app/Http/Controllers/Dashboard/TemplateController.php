@@ -102,7 +102,9 @@ class TemplateController extends DashboardController
     {
         $template = $this->templateService->storeResource($request->validated());
         if ($request->filled('mockup_id')){
-            return redirect()->route('mockups.edit', $request->mockup_id);
+            return Response::api(data: [
+                "mockup_redirect_url" => route('mockups.edit', $request->mockup_id)
+            ]);
         }
         return Response::api(data: [
             "redirect_url" =>

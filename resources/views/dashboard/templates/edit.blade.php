@@ -26,42 +26,7 @@
                         @method("PUT")
                         <div class="flex-grow-1">
                             <div class="">
-                                <div class="row">
-                                    @if($model->approach == 'without_editor')
-                                        @foreach($model->types as $type)
-                                            <div class="form-group mb-2 col-md-6">
-                                            <label class="label-text mb-1">Template Image ({{ $type->value->label() }})</label>
 
-                                            <!-- Dropzone container -->
-                                            <div id="template-main-dropzone" class="dropzone border rounded p-3"
-                                                 style="cursor:pointer; min-height:150px;">
-                                                <div class="dz-message" data-dz-message>
-                                                    <span>Drop image here or click to upload</span>
-                                                </div>
-                                            </div>
-
-                                            <!-- Hidden input for uploaded file id -->
-                                            <input type="hidden" name="template_image_main_id"
-                                                   id="uploadedMainTemplateImage">
-                                        </div>
-                                        @endforeach
-
-                                    @endif
-                                    <div class="form-group mb-2 {{ $model->approach == 'with_editor' ? 'col-md-12' :'col-md-6 '}}">
-                                        <label class="label-text mb-1">Template Model Image</label>
-
-                                        <!-- Dropzone container -->
-                                        <div id="template-dropzone" class="dropzone border rounded p-3"
-                                            style="cursor:pointer; min-height:150px;">
-                                            <div class="dz-message" data-dz-message>
-                                                <span>Drop image here or click to upload</span>
-                                            </div>
-                                        </div>
-
-                                        <!-- Hidden input for uploaded file id -->
-                                        <input type="hidden" name="template_image_id" id="uploadedTemplateImage">
-                                    </div>
-                                </div>
                                 @php
                                 $colors = collect($model->colors) ?? collect();
                                 $hasColors = $colors->isNotEmpty();
@@ -211,6 +176,7 @@
                                         Template Details
                                     </span>
                                 </div>
+
                                 <div class="form-group mb-2">
                                     <label class="label-text mb-1">Template Type</label>
                                     <div class="row">
@@ -228,6 +194,65 @@
                                         </div>
                                         @endforeach
                                     </div>
+                                </div>
+                                <div class="row">
+
+                                    <div class="row" id="templateTypeDropzones">
+                                        @if($model->approach == 'without_editor')
+                                            <!-- FRONT -->
+                                            <div class="form-group mb-2 col-md-6 d-none" id="dz-front">
+                                                <label class="label-text mb-1">Template Image (Front)</label>
+                                                <div id="front-template-dropzone" class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
+                                                    <div class="dz-message">
+                                                        <span>Drop front image here or click</span>
+                                                    </div>
+                                                    <input type="hidden" name="template_image_front_id"
+                                                           id="uploadedFrontTemplateImage">
+                                                </div>
+                                            </div>
+
+                                            <!-- BACK -->
+                                            <div class="form-group mb-2 col-md-6 d-none" id="dz-back">
+                                                <label class="label-text mb-1">Template Image (Back)</label>
+                                                <div id="back-template-dropzone" class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
+                                                    <div class="dz-message">
+                                                        <span>Drop back image here or click</span>
+                                                    </div>
+                                                    <input type="hidden" name="template_image_back_id"
+                                                           id="uploadedBackTemplateImage">
+                                                </div>
+                                            </div>
+
+                                            <!-- NONE -->
+                                            <div class="form-group mb-2 col-md-6 d-none" id="dz-none">
+                                                <label class="label-text mb-1">Template Image (General)</label>
+                                                <div id="none-template-dropzone" class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
+                                                    <div class="dz-message">
+                                                        <span>Drop general image here or click</span>
+                                                    </div>
+                                                    <input type="hidden" name="template_image_none_id"
+                                                           id="uploadedNoneTemplateImage">
+                                                </div>
+
+                                            </div>
+                                        @endif
+                                            <!-- MODEL  -->
+                                            <div class="form-group mb-2 col-md-6 d-none" id="dz-model">
+                                                <label class="label-text mb-1">Template Model Image</label>
+                                                <div id="template-dropzone" class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
+                                                    <div class="dz-message" data-dz-message>
+                                                        <span>Drop image here or click to upload</span>
+                                                    </div>
+                                                    <input type="hidden" name="template_image_id" id="uploadedTemplateImage">
+                                                </div>
+                                            </div>
+                                    </div>
+
+
                                 </div>
                                 <div class="row mb-2">
                                 <div class="col-md-6">
@@ -567,7 +592,227 @@
 
 
 @section('page-script')
-<script>
+    <script>
+        function updateTemplateTypeDropzones() {
+            const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox'))
+                .filter(cb => cb.checked)
+                .map(cb => cb.dataset.typeName);
+
+            const dzFront = document.getElementById("dz-front");
+            const dzBack = document.getElementById("dz-back");
+            const dzNone = document.getElementById("dz-none");
+            const dzModel = document.getElementById("dz-model");
+
+
+            [dzFront, dzBack, dzNone, dzModel].forEach(dz => {
+                if (dz) {
+                    dz.classList.add("d-none");
+                    dz.classList.remove("col-md-4", "col-md-6", "col-md-12");
+                }
+            });
+
+            const visibleDZ = [];
+
+            if (selectedTypes.includes("front") && dzFront) {
+                dzFront.classList.remove("d-none");
+                visibleDZ.push(dzFront);
+            }
+            if (selectedTypes.includes("back") && dzBack) {
+                dzBack.classList.remove("d-none");
+                visibleDZ.push(dzBack);
+            }
+            if (selectedTypes.includes("none") && dzNone) {
+                dzNone.classList.remove("d-none");
+                visibleDZ.push(dzNone);
+            }
+
+
+            if (visibleDZ.length > 0 && dzModel) {
+                dzModel.classList.remove("d-none");
+                visibleDZ.push(dzModel);
+            }
+            @if(request()->query('q') == 'with')
+            dzModel.classList.remove("d-none");
+
+            @endif
+
+
+            visibleDZ.forEach(dz => {
+                if (visibleDZ.length === 1) {
+                    dz.classList.add("col-md-12");
+                } else if (visibleDZ.length === 2) {
+                    dz.classList.add("col-md-6");
+                } else {
+                    dz.classList.add("col-md-4");
+                }
+            });
+        }
+
+
+        // trigger on checkbox change
+        document.querySelectorAll('.type-checkbox').forEach(cb => {
+            cb.addEventListener("change", updateTemplateTypeDropzones);
+        });
+
+        // initial run
+        updateTemplateTypeDropzones();
+
+    </script>
+    <script>
+        Dropzone.autoDiscover = false;
+
+        // 🔹 قائمة كل dropzones عشان نقدر نمسحها بسهولة
+        const templateDropzones = {
+            front: null,
+            back: null,
+            none: null,
+        };
+
+        // 🔹 FRONT Dropzone
+        templateDropzones.front = new Dropzone("#front-template-dropzone", {
+            url: "{{ route('media.store') }}",
+            paramName: "file",
+            maxFiles: 1,
+            acceptedFiles: "image/*",
+            headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+            addRemoveLinks: true,
+            init: function () {
+                let dz = this;
+                @if(!empty($media = $model->getFirstMedia('templates')) && $model->types->contains(\App\Enums\Template\TypeEnum::FRONT->value))
+                let modelMockFile = {
+                    name: "{{ $media->file_name }}",
+                    size: {{ $media->size ?? 12345 }},
+                    _hiddenInputId: "{{ $media->id }}"
+                };
+                document.getElementById("uploadedNoneTemplateImage").value = "{{ $media->id }}";
+
+
+                dz.emit("addedfile", modelMockFile);
+                dz.emit("thumbnail", modelMockFile, "{{ $media->getUrl() }}");
+                dz.emit("complete", modelMockFile);
+                dz.files.push(modelMockFile);
+                @endif
+                this.on("success", function (file, response) {
+                    if (response.success && response.data) {
+                        file._hiddenInputId = response.data.id;
+                        document.getElementById("uploadedFrontTemplateImage").value = response.data.id;
+                    }
+                });
+
+                this.on("removedfile", function (file) {
+                    document.getElementById("uploadedFrontTemplateImage").value = "";
+                });
+            },
+        });
+
+        // 🔹 BACK Dropzone
+        templateDropzones.back = new Dropzone("#back-template-dropzone", {
+            url: "{{ route('media.store') }}",
+            paramName: "file",
+            maxFiles: 1,
+            acceptedFiles: "image/*",
+            headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+            addRemoveLinks: true,
+            init: function () {
+                let dz = this;
+                @if(!empty($media = $model->getFirstMedia('back_templates')))
+                let modelMockFile = {
+                    name: "{{ $media->file_name }}",
+                    size: {{ $media->size ?? 12345 }},
+                    _hiddenInputId: "{{ $media->id }}"
+                };
+                document.getElementById("uploadedNoneTemplateImage").value = "{{ $media->id }}";
+
+
+                dz.emit("addedfile", modelMockFile);
+                dz.emit("thumbnail", modelMockFile, "{{ $media->getUrl() }}");
+                dz.emit("complete", modelMockFile);
+                dz.files.push(modelMockFile);
+                @endif
+                this.on("success", function (file, response) {
+                    if (response.success && response.data) {
+                        file._hiddenInputId = response.data.id;
+                        document.getElementById("uploadedBackTemplateImage").value = response.data.id;
+                    }
+                });
+                this.on("removedfile", function (file) {
+                    document.getElementById("uploadedBackTemplateImage").value = "";
+                });
+            },
+        });
+
+        // 🔹 NONE Dropzone
+        templateDropzones.none = new Dropzone("#none-template-dropzone", {
+            url: "{{ route('media.store') }}",
+            paramName: "file",
+            maxFiles: 1,
+            acceptedFiles: "image/*",
+            headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+            addRemoveLinks: true,
+            init: function () {
+                let dz = this;
+                @if(!empty($media = $model->getFirstMedia('templates')) && $model->types->contains(\App\Enums\Template\TypeEnum::NONE->value))
+                let modelMockFile = {
+                    name: "{{ $media->file_name }}",
+                    size: {{ $media->size ?? 12345 }},
+                    _hiddenInputId: "{{ $media->id }}"
+                };
+                document.getElementById("uploadedNoneTemplateImage").value = "{{ $media->id }}";
+
+
+                dz.emit("addedfile", modelMockFile);
+                dz.emit("thumbnail", modelMockFile, "{{ $media->getUrl() }}");
+                dz.emit("complete", modelMockFile);
+                dz.files.push(modelMockFile);
+                @endif
+                this.on("success", function (file, response) {
+                    if (response.success && response.data) {
+                        file._hiddenInputId = response.data.id;
+                        document.getElementById("uploadedNoneTemplateImage").value = response.data.id;
+                    }
+                });
+                this.on("removedfile", function (file) {
+                    document.getElementById("uploadedNoneTemplateImage").value = "";
+                });
+            },
+        });
+
+
+        // ✅ لما المستخدم يغير الأنواع (front/back/none)
+        function handleTypeChangeAndResetDZ() {
+            const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox'))
+                .filter(cb => cb.checked)
+                .map(cb => cb.dataset.typeName);
+
+            // الأنواع المتاحة
+            const allTypes = ['front', 'back', 'none'];
+
+            allTypes.forEach(type => {
+                const dz = templateDropzones[type];
+                const hiddenInput = document.getElementById(`uploaded${type.charAt(0).toUpperCase() + type.slice(1)}TemplateImage`);
+
+                // لو النوع مش متعلم عليه → امسح الملفات القديمة
+                if (!selectedTypes.includes(type)) {
+                    if (dz && dz.files.length > 0) {
+                        dz.removeAllFiles(true); // remove all files from dropzone
+                    }
+                    if (hiddenInput) hiddenInput.value = "";
+                }
+            });
+
+            // شغّل updateTemplateTypeDropzones() لتحديث العرض
+            if (typeof updateTemplateTypeDropzones === "function") {
+                updateTemplateTypeDropzones();
+            }
+        }
+
+        // ✅ اربط الحدث ده
+        document.querySelectorAll('.type-checkbox').forEach(cb => {
+            cb.addEventListener('change', handleTypeChangeAndResetDZ);
+        });
+    </script>
+
+    <script>
     // keep color picker & text field in sync
         document.addEventListener("input", (e) => {
             if (e.target.classList.contains("color-picker")) {

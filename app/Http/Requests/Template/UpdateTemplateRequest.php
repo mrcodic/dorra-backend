@@ -8,6 +8,7 @@ use App\Enums\SafetyAreaEnum;
 use App\Enums\Template\StatusEnum;
 use App\Enums\Template\TypeEnum;
 use App\Http\Requests\Base\BaseRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateTemplateRequest extends BaseRequest
 {
@@ -54,9 +55,19 @@ class UpdateTemplateRequest extends BaseRequest
             'category_ids.*' => ['integer', 'exists:categories,id'],
             'industry_ids' => ['nullable', 'array'],
             'industry_ids.*' => ['integer', 'exists:industries,id'],
-            'template_image_front_id' => ['sometimes','exists:media,id'],
-            'template_image_back_id' => ['sometimes','exists:media,id'],
-            'template_image_none_id' => ['sometimes','exists:media,id'],
+            'template_image_front_id' => [
+                'nullable','exists:media,id',
+                Rule::requiredIf(fn()=> in_array(TypeEnum::FRONT->value, (array)$this->input('types', []), true)),
+
+            ],
+            'template_image_back_id' => [
+                'nullable','exists:media,id',
+                Rule::requiredIf(fn()=> in_array(TypeEnum::BACK->value, (array)$this->input('types', []), true)),
+            ],
+            'template_image_none_id' => [
+                'nullable','exists:media,id',
+                Rule::requiredIf(fn()=> in_array(TypeEnum::NONE->value, (array)$this->input('types', []), true)),
+            ],
             'template_image_id' => ['required','exists:media,id'],
             'design_data' => ['sometimes', 'json'],
             'base64_preview_image' => ['sometimes', 'string'],

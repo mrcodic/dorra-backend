@@ -42,9 +42,21 @@ class StoreTemplateRequest extends BaseRequest
             'flags.*' => ['integer', 'exists:flags,id'],
             'types' => ['required', 'array'],
             'types.*' => ['integer', 'exists:types,id'],
-            'template_image_front_id' => ['nullable','exists:media,id'],
-            'template_image_back_id' => ['nullable','exists:media,id'],
-            'template_image_none_id' => ['nullable','exists:media,id'],
+            'template_image_front_id' => [
+                'nullable','exists:media,id',
+                Rule::requiredIf(fn()=> in_array(TypeEnum::FRONT->value, (array)$this->input('types', []), true)),
+
+            ],
+
+            'template_image_back_id' => [
+                'nullable','exists:media,id',
+                Rule::requiredIf(fn()=> in_array(TypeEnum::BACK->value, (array)$this->input('types', []), true)),
+            ],
+
+            'template_image_none_id' => [
+                'nullable','exists:media,id',
+                Rule::requiredIf(fn()=> in_array(TypeEnum::NONE->value, (array)$this->input('types', []), true)),
+            ],
             'template_image_id' => ['required','exists:media,id'],
             'design_data' => ['sometimes', 'json'],
             'design_back_data' => ['sometimes', 'json'],
