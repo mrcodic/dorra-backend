@@ -66,6 +66,10 @@
                             @endforeach
                         </div>
                     </div>
+                    <div class="mb-1 d-flex flex-wrap gap-1">
+                        <p style="display: inline">Created at: {{ $mockup->created_at->format('d/m/Y') }}</p>
+                        <p style="display: inline">Last update: {{ $mockup->updated_at->format('d/m/Y') }}</p>
+                    </div>
                 </div>
 
                 <div class="d-flex flex-wrap w-100 mt-1" style="gap:5px">
