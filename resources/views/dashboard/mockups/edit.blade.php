@@ -326,9 +326,10 @@
 
 
     <script>
-        // templates already attached to THIS mockup
-        const attachedTemplateIds = new Set(@json(($model?->templates?->pluck('id') ?? collect())->values()));
+        const attachedTemplateIdsRaw = @json(($model?->templates?->pluck('id') ?? collect())->values());
+        const attachedTemplateIds = new Set((attachedTemplateIdsRaw || []).map(id => String(id)));
     </script>
+
 
     <script>
         function capitalize(str) {
@@ -433,7 +434,7 @@
                 const templateIndex = currentCard.dataset.index;
                 const templateId = currentCard.dataset.id;
 
-                buildTemplateColorInputs(currentCard, templateIndex,templateId);
+                // buildTemplateColorInputs(currentCard, templateIndex,templateId);
 
                 pickrInstance.hide();
             });
@@ -482,7 +483,7 @@
             renderSelectedColors(currentCard);
             const templateIndex = currentCard.dataset.index;
             const templateId = currentCard.dataset.id;
-            buildTemplateColorInputs(currentCard, templateIndex,templateId);
+            // buildTemplateColorInputs(currentCard, templateIndex,templateId);
 
 
         };
@@ -494,54 +495,20 @@
 
             if (!ul || !container) return;
 
-            // مسح الحالي قبل إعادة البناء
             ul.innerHTML = '';
             container.innerHTML = '';
 
             (card.selectedColors || []).forEach(c => {
-                // عنصر العرض
                 const li = document.createElement('li');
                 li.innerHTML = `
-            <div class="selected-color-wrapper position-relative">
-                <div class="selected-color-dot" style="background-color: #fff;">
-                    <div class="selected-color-inner" style="background-color: ${c};"></div>
-                </div>
-                <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
-            </div>
-        `;
+                    <div class="selected-color-wrapper position-relative">
+                        <div class="selected-color-dot" style="background-color: #fff;">
+                            <div class="selected-color-inner" style="background-color: ${c};"></div>
+                        </div>
+                        <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
+                    </div>
+                `;
                 ul.appendChild(li);
-
-                // hidden input لتحديث الفورم
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type  = 'hidden';
-                hiddenInput.name  = 'colors[]';
-                hiddenInput.value = c;
-                container.appendChild(hiddenInput);
-            });
-        }
-        function buildTemplateColorInputs(card, templateIndex, templateId) {
-            console.log(templateId)
-            const container = card.querySelector('.colorsInputContainer');
-            if (!container) return;
-
-            container.innerHTML = '';
-
-            (card.selectedColors || []).forEach(color => {
-                const input = document.createElement('input');
-                const inputId = document.createElement('input');
-                input.type  = 'hidden';
-                inputId.type  = 'hidden';
-                input.name  = `templates[${templateIndex}][colors][]`;
-                inputId.name  = `templates[${templateIndex}][template_id]`;
-                inputId.value  = templateId;
-                input.value = color.toLowerCase(); // توحيد اللون
-                const inputColors = document.createElement('input');
-                inputColors.type = 'hidden';
-                inputColors.name = 'colors[]';
-                inputColors.value = color.toLowerCase();
-                container.appendChild(input);
-                container.appendChild(inputColors);
-                container.appendChild(inputId);
             });
         }
 
@@ -551,14 +518,14 @@
         const savedColorsById = new Map(
             (templatesData || []).map(t => {
                 let colors = t?.pivot?.colors ?? [];
-                // لو متخزن JSON string
                 if (typeof colors === 'string') {
                     try { colors = JSON.parse(colors); } catch(e) { colors = []; }
                 }
                 if (!Array.isArray(colors)) colors = [];
-                return [t.id, colors];
+                return [String(t.id), colors]; // <-- important
             })
         );
+
         function hydrateColorsForCard(cardEl) {
             if (!cardEl) return;
 
@@ -727,11 +694,15 @@
                     writeSideInputs(html, index, side, p);
                 });
 
-                // const colors = getSelectedColors(currentId, tpl);
-                // colors.forEach(c => {
-                //     html.push(`<input type="hidden" name="templates[${index}][colors][]" value="${c}">`);
-                // });
+                // ✅ ADD THIS BACK:
+                const colors = getSelectedColors(currentId, tpl);
+                colors.forEach(c => {
+                    html.push(
+                        `<input type="hidden" name="templates[${index}][colors][]" value="${String(c).toLowerCase()}">`
+                    );
+                });
             });
+
 
             // 2️⃣ if selected template is new → add it (always send defaults if canvas not ready)
             const existsInPrevious = selectedTemplateId
@@ -750,7 +721,9 @@
 
                 const colors = getSelectedColors(selectedTemplateId, {});
                 colors.forEach(c => {
-                    html.push(`<input type="hidden" name="templates[${index}][colors][]" value="${c}">`);
+                    html.push(
+                        `<input type="hidden" name="templates[${index}][colors][]" value="${String(c).toLowerCase()}">`
+                    );
                 });
             }
 
@@ -1077,10 +1050,10 @@
 
             $(document).on('click', '.js-show-on-mockup', function () {
                 const $cardWrapper = $(this).closest('.template-card');
-                const id = $cardWrapper.data('id');
+                const idStr = String($cardWrapper.data('id'));
                 const front = $cardWrapper.data('front');
-                const back = $cardWrapper.data('back');
-                const none = $cardWrapper.data('none');
+                const back  = $cardWrapper.data('back');
+                const none  = $cardWrapper.data('none');
 
                 // highlight selected card
                 $('#templatesCardsContainer').find('.template-card .card')
@@ -1092,43 +1065,57 @@
                     .css('border-color', '#0d6efd');
 
                 // store template_id
-                $('#selectedTemplateId').val(id);
+                $('#selectedTemplateId').val(idStr);
 
                 // find saved template positions from $model->templates
-                const templatesData = @json($model->templates ?? []);
-                const savedTemplate = templatesData.find(t => t.id === id);
+                const savedTemplate = templatesData.find(t => String(t.id) === idStr);
+                const savedPositions = savedTemplate ? savedTemplate.pivot.positions : null;
+
                 // FRONT
                 if (front) {
-                    console.log(front)
-                    loadAndBind(window.canvasFront, front, 'front', savedTemplate?.pivot.positions.front_x ? savedTemplate : null,id);
+                    loadAndBind(
+                        window.canvasFront,
+                        front,
+                        'front',
+                        savedPositions,
+                        idStr
+                    );
                     document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
                 }
 
                 // BACK
                 if (back) {
-                    console.log(back)
-
-                    loadAndBind(window.canvasBack, back, 'back', savedTemplate?.pivot.positions.back_x ? savedTemplate : null,id);
+                    loadAndBind(
+                        window.canvasBack,
+                        back,
+                        'back',
+                        savedPositions,
+                        idStr
+                    );
                     document.getElementById('editorBackWrapper')?.classList.remove('d-none');
                 }
 
+                // NONE
                 if (none) {
-                    console.log(none)
-                    loadAndBind(window.canvasNone, none, 'none', savedTemplate?.pivot.positions.none_x ? savedTemplate : null,id);
+                    loadAndBind(
+                        window.canvasNone,
+                        none,
+                        'none',
+                        savedPositions,
+                        idStr
+                    );
                     document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
                 }
+
                 // close modal if inside
                 if ($(this).closest('#templateModal').length) {
                     $('#templateModal').modal('hide');
                 }
             });
 
-// =========================
-// Save Positions (cards + modal)
-// =========================
-
-
-
+            // =========================
+            // Save Positions (cards + modal)
+            // =========================
 
             $(document).on('click', '.js-save-positions', function () {
                 if (typeof saveAllTemplatePositions === 'function') {
@@ -1331,7 +1318,7 @@
             }
         }
 
-        function loadAndBind(canvas, designUrl, type, savedPositions,templateId) {
+        function loadAndBind(canvas, designUrl, type, savedPositions, templateId) {
             clearTemplateDesigns(canvas, type);
 
             fabric.Image.fromURL(designUrl, function (img) {
@@ -1342,31 +1329,27 @@
                 });
 
                 img.templateType = type;
-                img.templateId = templateId;
+                img.templateId   = templateId;
 
                 const meta = canvas.__mockupMeta;
-                savedPositions = savedPositions?.pivot.positions;
+
                 if (savedPositions && meta) {
                     const prefix = type + '_';
-                    // center position in canvas
-                    const xPct = parseFloat(savedPositions[prefix + 'x'] ?? 0.5);
-                    const yPct = parseFloat(savedPositions[prefix + 'y'] ?? 0.5);
-                    const wPct = parseFloat(savedPositions[prefix + 'width'] ?? 0.4);
-                    const hPct = parseFloat(savedPositions[prefix + 'height'] ?? 0.4);
-                    const angle = parseFloat(savedPositions[prefix + 'angle'] ?? 0);
+                    const xPct  = parseFloat(savedPositions[prefix + 'x']      ?? 0.5);
+                    const yPct  = parseFloat(savedPositions[prefix + 'y']      ?? 0.5);
+                    const wPct  = parseFloat(savedPositions[prefix + 'width']  ?? 0.4);
+                    const hPct  = parseFloat(savedPositions[prefix + 'height'] ?? 0.4);
+                    const angle = parseFloat(savedPositions[prefix + 'angle']  ?? 0);
 
-                    // set center position
-                    img.left = meta.offsetLeft + meta.scaledWidth * xPct;
-                    img.top = meta.offsetTop + meta.scaledHeight * yPct;
+                    img.left   = meta.offsetLeft + meta.scaledWidth  * xPct;
+                    img.top    = meta.offsetTop  + meta.scaledHeight * yPct;
 
-                    // scale according to width percentage
-                    const scaleX = (wPct * meta.scaledWidth) / img.width;
+                    const scaleX = (wPct * meta.scaledWidth)  / img.width;
                     const scaleY = (hPct * meta.scaledHeight) / img.height;
-                    img.scaleX = img.scaleY = Math.min(scaleX, scaleY); // keep square scale, optional
+                    img.scaleX = img.scaleY = Math.min(scaleX, scaleY);
 
                     img.angle = angle;
                 } else {
-                    // default placement if no saved position
                     applyDefaultPlacement(img, canvas, meta);
                 }
 
@@ -1738,6 +1721,16 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('editMockupForm');
+            if (!form) return;
+
+            form.addEventListener('submit', function () {
+                if (typeof saveAllTemplatePositions === 'function') {
+                    saveAllTemplatePositions(); // sync canvas → DOM (if you still use it)
+                }
+                buildHiddenTemplateInputs();     // rebuild templates[..] payload
+            });
+
             const params = new URLSearchParams(window.location.search);
             const templateId = params.get('template_id');
             if (!templateId) return;

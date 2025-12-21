@@ -323,6 +323,9 @@
 @section('page-script')
 
     <script>
+        window.templatePositions = window.templatePositions || {};
+        var buildHiddenTemplateInputs;
+        var calculateObjectPercents;
         function cacheCurrentTemplatePositions() {
             window.savedTemplatePositions = window.savedTemplatePositions || {};
 
@@ -754,73 +757,55 @@
 // =========================
 // Save Positions (cards + modal)
 // =========================
-            function buildHiddenTemplateInputs() {
+            buildHiddenTemplateInputs = function () {
                 const container = document.getElementById("templatesHiddenContainer");
+                if (!container) return;
+
                 container.innerHTML = "";
 
-                const selectedTemplates = document.querySelectorAll('.template-card.selected');
-                console.log(selectedTemplates)
-                selectedTemplates.forEach((card, index) => {
-                    const templateId = card.dataset.id;
+                // بس التمبليتس اللي اتعلّم عليها selected من الكروت
+                const cards = document.querySelectorAll('.template-card.selected');
+
+                let index = 0;
+                cards.forEach(card => {
+                    const tplId = String(card.dataset.id);
+                    const positions = window.templatePositions[tplId] || {};
                     const selectedColors = card.selectedColors || [];
-                    let html = `<input type="hidden" name="templates[${index}][template_id]" value="${templateId}">`;
 
-                    function add(name, value) {
-                        html += `<input type="hidden" name="templates[${index}][${name}]" value="${value}">`;
-                    }
+                    // لو مفيش أي side متحفظ ليه، نعدّي
+                    if (!positions.front && !positions.back && !positions.none) return;
 
-                    // FRONT
-                    canvasFront?.getObjects()
-                        .filter(o => o.templateType === "front" )
-                        .forEach(obj => {
-                            const meta = canvasFront.__mockupMeta;
-                            const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
-                            add("front_x", xPct);
-                            add("front_y", yPct);
-                            add("front_width", wPct);
-                            add("front_height", hPct);
-                            add("front_angle", angle);
-                        });
+                    let html = `<div class="template-inputs" data-template-id="${tplId}">`;
+                    html += `<input type="hidden" name="templates[${index}][template_id]" value="${tplId}">`;
 
-                    // BACK
-                    canvasBack?.getObjects()
-                        .filter(o => o.templateType === "back")
-                        .forEach(obj => {
-                            const meta = canvasBack.__mockupMeta;
-                            const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
-                            add("back_x", xPct);
-                            add("back_y", yPct);
-                            add("back_width", wPct);
-                            add("back_height", hPct);
-                            add("back_angle", angle);
-                        });
+                    ['front', 'back', 'none'].forEach(side => {
+                        const p = positions[side];
+                        if (!p) return;
 
-                    // NONE
-                    canvasNone?.getObjects()
-                        .filter(o => o.templateType === "none")
-                        .forEach(obj => {
-                            const meta = canvasNone.__mockupMeta;
-                            const { xPct, yPct, wPct, hPct, angle } = calculateObjectPercents(obj, meta);
-                            add("none_x", xPct);
-                            add("none_y", yPct);
-                            add("none_width", wPct);
-                            add("none_height", hPct);
-                            add("none_angle", angle);
-                        });
+                        html += `<input type="hidden" class="template_x ${side}" name="templates[${index}][${side}_x]" value="${p.xPct}">`;
+                        html += `<input type="hidden" class="template_y ${side}" name="templates[${index}][${side}_y]" value="${p.yPct}">`;
+                        html += `<input type="hidden" class="template_width ${side}" name="templates[${index}][${side}_width]" value="${p.wPct}">`;
+                        html += `<input type="hidden" class="template_height ${side}" name="templates[${index}][${side}_height]" value="${p.hPct}">`;
+                        html += `<input type="hidden" class="template_angle ${side}" name="templates[${index}][${side}_angle]" value="${p.angle}">`;
+                    });
 
-                    // COLORS
-                    // selectedColors.forEach(color => {
-             //            html += `<input type="hidden" name="templates[${index}][colors][]" value="${color}">`;
-             //        });
+                    (selectedColors || []).forEach(color => {
+                        html += `<input type="hidden" name="templates[${index}][colors][]" value="${color}">`;
+                    });
+
+                    html += `</div>`;
 
                     container.insertAdjacentHTML('beforeend', html);
+                    index++;
                 });
-            }
 
-            function calculateObjectPercents(obj, meta) {
+                console.log('📝 Hidden inputs rebuilt from templatePositions:', window.templatePositions);
+            };
+
+            calculateObjectPercents = function (obj, meta) {
                 const center = obj.getCenterPoint();
-                const wReal = obj.width * obj.scaleX;
-                const hReal = obj.height * obj.scaleY;
+                const wReal  = (obj.width || 0) * (obj.scaleX || 1);
+                const hReal  = (obj.height || 0) * (obj.scaleY || 1);
 
                 return {
                     xPct: ((center.x - meta.offsetLeft) / meta.scaledWidth).toFixed(6),
@@ -829,28 +814,47 @@
                     hPct: (hReal / meta.scaledHeight).toFixed(6),
                     angle: obj.angle || 0
                 };
-            }
+            };
+
             // $('form').on('submit', function () {
             //     buildHiddenTemplateInputs();
             // });
 
 
+            // حفظ أماكن Template واحد
+            function savePositionsForTemplate(templateId) {
+                const id = String(templateId);
+                const canvases = {
+                    front: window.canvasFront,
+                    back:  window.canvasBack,
+                    none:  window.canvasNone,
+                };
+
+                Object.entries(canvases).forEach(([type, canvas]) => {
+                    if (!canvas || !canvas.__mockupMeta) return;
+
+                    const obj = canvas.getObjects().find(
+                        o => o.templateType === type && String(o.templateId) === id
+                    );
+                    if (!obj) return;
+
+                    updateTemplatePositionsFromObject(obj, type);
+                });
+
+                buildHiddenTemplateInputs();
+            }
+
             $(document).on('click', '.js-save-positions', function () {
-                console.log("Save Positions clicked");
+                const card = this.closest('.template-card');
+                if (!card) return;
 
-                // 1️⃣ Update positions from all canvases
-                if (typeof saveAllTemplatePositions === 'function') {
-                    buildHiddenTemplateInputs();
-                    saveAllTemplatePositions();
-                    cacheCurrentTemplatePositions();
+                const templateId = card.dataset.id;
+                if (!templateId) return;
 
-                }
+                // اعتبر إن التمبليت ده داخل في الحفظ
+                card.classList.add('selected');
 
-                // 2️⃣ Build hidden inputs inside form
-
-
-                // 3️⃣ Verify before submit
-                console.log("Hidden inputs:", $('#templatesHiddenContainer input').length);
+                savePositionsForTemplate(templateId);
 
                 Toastify({
                     text: "Positions saved successfully",
@@ -861,6 +865,7 @@
                     close: true,
                 }).showToast();
             });
+
 
         });
     </script>
@@ -921,45 +926,59 @@
             canvas.renderAll();
         }
 
-        function syncTemplateInputs(obj, type) {
-            const container = document.getElementById('templatesHiddenContainer');
-            if (!container) return;
+        // function syncTemplateInputs(obj, type) {
+        //     const container = document.getElementById('templatesHiddenContainer');
+        //     if (!container) return;
 
+        //     const canvas = obj.canvas;
+        //     const meta = canvas && canvas.__mockupMeta;
+        //     if (!meta) return;
+
+        //     const templateId = obj.templateId;
+
+        //     const templateContainer = container.querySelector(`.template-inputs[data-template-id="${templateId}"]`);
+        //     if (!templateContainer) return;
+
+        //     const xInput = templateContainer.querySelector(`.template_x.${type}`);
+        //     const yInput = templateContainer.querySelector(`.template_y.${type}`);
+        //     const widthInput = templateContainer.querySelector(`.template_width.${type}`);
+        //     const heightInput = templateContainer.querySelector(`.template_height.${type}`);
+        //     const angleInput = templateContainer.querySelector(`.template_angle.${type}`);
+        //     if (!xInput || !yInput || !widthInput || !heightInput || !angleInput) return;
+
+        //     const center = obj.getCenterPoint();
+        //     const wReal  = (obj.width || 0) * (obj.scaleX || 1);
+        //     const hReal  = (obj.height || 0) * (obj.scaleY || 1);
+
+        //     let xPct = (center.x - meta.offsetLeft) / meta.scaledWidth;
+        //     let yPct = (center.y - meta.offsetTop)  / meta.scaledHeight;
+        //     let wPct = wReal / meta.scaledWidth;
+        //     let hPct = hReal / meta.scaledHeight;
+
+        //     if (!Number.isFinite(xPct)) xPct = 0;
+        //     if (!Number.isFinite(yPct)) yPct = 0;
+        //     if (!Number.isFinite(wPct)) wPct = 0;
+        //     if (!Number.isFinite(hPct)) hPct = 0;
+
+        //     xInput.value      = xPct.toFixed(6);
+        //     yInput.value      = yPct.toFixed(6);
+        //     widthInput.value  = wPct.toFixed(6);
+        //     heightInput.value = hPct.toFixed(6);
+        //     angleInput.value  = String(obj.angle || 0);
+        // }
+        function updateTemplatePositionsFromObject(obj, type) {
             const canvas = obj.canvas;
-            const meta = canvas && canvas.__mockupMeta;
-            if (!meta) return;
+            const meta   = canvas && canvas.__mockupMeta;
+            const tplId  = obj.templateId;
+            if (!meta || !tplId) return;
 
-            const templateId = obj.templateId;
+            const pos = calculateObjectPercents(obj, meta);
 
-            const templateContainer = container.querySelector(`.template-inputs[data-template-id="${templateId}"]`);
-            if (!templateContainer) return;
-
-            const xInput = templateContainer.querySelector(`.template_x.${type}`);
-            const yInput = templateContainer.querySelector(`.template_y.${type}`);
-            const widthInput = templateContainer.querySelector(`.template_width.${type}`);
-            const heightInput = templateContainer.querySelector(`.template_height.${type}`);
-            const angleInput = templateContainer.querySelector(`.template_angle.${type}`);
-            if (!xInput || !yInput || !widthInput || !heightInput || !angleInput) return;
-
-            const center = obj.getCenterPoint();
-            const wReal  = (obj.width || 0) * (obj.scaleX || 1);
-            const hReal  = (obj.height || 0) * (obj.scaleY || 1);
-
-            let xPct = (center.x - meta.offsetLeft) / meta.scaledWidth;
-            let yPct = (center.y - meta.offsetTop)  / meta.scaledHeight;
-            let wPct = wReal / meta.scaledWidth;
-            let hPct = hReal / meta.scaledHeight;
-
-            if (!Number.isFinite(xPct)) xPct = 0;
-            if (!Number.isFinite(yPct)) yPct = 0;
-            if (!Number.isFinite(wPct)) wPct = 0;
-            if (!Number.isFinite(hPct)) hPct = 0;
-
-            xInput.value      = xPct.toFixed(6);
-            yInput.value      = yPct.toFixed(6);
-            widthInput.value  = wPct.toFixed(6);
-            heightInput.value = hPct.toFixed(6);
-            angleInput.value  = String(obj.angle || 0);
+            const key = String(tplId);
+            if (!window.templatePositions[key]) {
+                window.templatePositions[key] = {};
+            }
+            window.templatePositions[key][type] = pos;
         }
 
         function clearTemplateInputsForObject(type) {
@@ -1044,7 +1063,8 @@
             }
         }
 
-        function loadAndBind(canvas, designUrl, type,templateId) {
+        function loadAndBind(canvas, designUrl, type, templateId) {
+            // نمسح أي تصميم قديم لنفس الـ side
             clearTemplateDesigns(canvas, type);
 
             fabric.Image.fromURL(designUrl, function (img) {
@@ -1055,53 +1075,76 @@
                 });
 
                 img.templateType = type;
-                img.templateId = templateId;
+                img.templateId   = String(templateId);
 
-                const meta = canvas.__mockupMeta;
-                applyDefaultPlacement(img, canvas, meta);
+                const meta   = canvas.__mockupMeta;
+                const stored = (window.templatePositions[img.templateId] || {})[type];
+
+                if (meta && stored) {
+                    // 🟢 استخدم الإحداثيات المحفوظة
+                    const targetW = meta.scaledWidth  * parseFloat(stored.wPct);
+                    const targetH = meta.scaledHeight * parseFloat(stored.hPct);
+                    const centerX = meta.offsetLeft   + meta.scaledWidth  * parseFloat(stored.xPct);
+                    const centerY = meta.offsetTop    + meta.scaledHeight * parseFloat(stored.yPct);
+
+                    img.scaleX = targetW / img.width;
+                    img.scaleY = targetH / img.height;
+                    img.left   = centerX;
+                    img.top    = centerY;
+                    img.angle  = parseFloat(stored.angle) || 0;
+                } else {
+                    // أول مرة لهذا الـ template → مركز التيشيرت بحجم افتراضي
+                    applyDefaultPlacement(img, canvas, meta);
+                }
 
                 addDeleteControl(img, type);
-
                 canvas.add(img);
                 canvas.setActiveObject(img);
                 canvas.renderAll();
 
-                syncTemplateInputs(img, type);
+                // أول sync → نخزن القيم
+                if (meta) {
+                    updateTemplatePositionsFromObject(img, type);
+                    buildHiddenTemplateInputs();
+                }
             });
         }
 
-        function saveAllTemplatePositions() {
-            if (window.canvasFront) {
-                window.canvasFront.getObjects().forEach(obj => {
-                    if (obj.templateType === 'front') {
-                        syncTemplateInputs(obj, 'front');
-                    }
-                });
-            }
 
-            if (window.canvasBack) {
-                console.log('Canvas', window.canvasBack.getObjects());
+        // function saveAllTemplatePositions() {
+        //     if (window.canvasFront) {
+        //         window.canvasFront.getObjects().forEach(obj => {
+        //             if (obj.templateType === 'front') {
+        //                 syncTemplateInputs(obj, 'front');
+        //             }
+        //         });
+        //     }
 
-                window.canvasBack.getObjects().forEach(obj => {
-                    if (obj.templateType === 'back') {
-                        syncTemplateInputs(obj, 'back');
-                    }
-                });
-            }
+        //     if (window.canvasBack) {
+        //         console.log('Canvas', window.canvasBack.getObjects());
 
-            if (window.canvasNone) {
-                window.canvasNone.getObjects().forEach(obj => {
-                    if (obj.templateType === 'none') {
-                        syncTemplateInputs(obj, 'none');
-                    }
-                });
-            }
-        }
+        //         window.canvasBack.getObjects().forEach(obj => {
+        //             if (obj.templateType === 'back') {
+        //                 syncTemplateInputs(obj, 'back');
+        //             }
+        //         });
+        //     }
+
+        //     if (window.canvasNone) {
+        //         window.canvasNone.getObjects().forEach(obj => {
+        //             if (obj.templateType === 'none') {
+        //                 syncTemplateInputs(obj, 'none');
+        //             }
+        //         });
+        //     }
+        // }
 
         function bindCanvasUpdates(canvas, type) {
             canvas.on('object:modified', function (e) {
                 const obj = e.target;
-                syncTemplateInputs(obj, type);
+                // syncTemplateInputs(obj, type);
+                updateTemplatePositionsFromObject(obj, type);
+                buildHiddenTemplateInputs();
             });
         }
 
@@ -1345,6 +1388,30 @@
         // =========================
         // MAIN IMAGE UPLOAD + FORM SUBMIT
         // =========================
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('addMockupForm');
+            if (!form) return;
+
+            form.addEventListener('submit', function () {
+                // لو في أي template ظاهر حاليًا اتحرك ولسه متسجلش بالزر
+                // هنحدّث templatePositions من الـ canvases
+                ['front', 'back', 'none'].forEach(type => {
+                    const canvas = (type === 'front') ? window.canvasFront :
+                                (type === 'back')  ? window.canvasBack  :
+                                                        window.canvasNone;
+
+                    if (!canvas || !canvas.__mockupMeta) return;
+
+                    canvas.getObjects().forEach(obj => {
+                        if (!obj.templateId || obj.templateType !== type) return;
+                        updateTemplatePositionsFromObject(obj, type);
+                    });
+                });
+
+                buildHiddenTemplateInputs();
+            });
+        });
+
         $(document).ready(function () {
             handleAjaxFormSubmit("#addMockupForm", {
                 successMessage: "Mockup Created Successfully",
@@ -1470,12 +1537,10 @@
                     currentCard.selectedColors.push(hex);
                 }
 
-                const templateIndex = currentCard.dataset.index;
-
                 renderSelectedColors(currentCard);
-                buildTemplateColorInputs(currentCard, templateIndex);
-
+                buildHiddenTemplateInputs(); // sync الألوان مع الـ hidden inputs
                 pickrInstance.hide();
+
             });
 
             // Handle clear
@@ -1513,17 +1578,18 @@
         });
 
         // Remove color from current card
-        window.removeColor = function (hex) {
-            if (!currentCard || !currentCard.selectedColors) return;
+        window.removeColor = function (hex, btn) {
+            const card = btn.closest('.template-card');
+            if (!card) return;
 
-            currentCard.selectedColors = currentCard.selectedColors.filter(
+            if (!card.selectedColors) card.selectedColors = [];
+
+            card.selectedColors = card.selectedColors.filter(
                 c => c.toLowerCase() !== hex.toLowerCase()
             );
 
-            const templateIndex = currentCard.dataset.index;
-
-            renderSelectedColors(currentCard);
-            buildTemplateColorInputs(currentCard, templateIndex);
+            renderSelectedColors(card);
+            buildHiddenTemplateInputs(); // نحدّث templates[..][colors][] بناءً على التغييرات
         };
 
         // Render colors inside a card
@@ -1543,7 +1609,7 @@
                     <div class="selected-color-dot" style="background-color: #fff;">
                         <div class="selected-color-inner" style="background-color: ${c};"></div>
                     </div>
-                    <button type="button" onclick="removeColor('${c}')" class="remove-color-btn">×</button>
+                    <button type="button" onclick="removeColor('${c}', this)" class="remove-color-btn">×</button>
                 </div>
             `;
                 ul.appendChild(li);
