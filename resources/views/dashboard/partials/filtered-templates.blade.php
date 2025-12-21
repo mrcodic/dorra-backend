@@ -147,20 +147,24 @@
                                  style="width: 24px; height: 24px; background-color: {{$color}};"></div>
                         @endforeach
                     </div>
+
                     <div class="d-flex gap-1">
                         {{-- Editor badge --}}
                         <span class="badge p-75 px-2"
                               style="background-color: {{ $template->approach === 'with_editor' ? '#0d6efd' : '#adb5bd' }}">
             {{ $template->approach === 'with_editor' ? 'Editor' : 'No Editor' }}
         </span>
-                        <span class="badge p-75 px-2 template-status-label" data-template-id="{{ $template->id }}"
 
-                              style="background-color: {{ $template->status->bgHex() }};color: {{ $template->status->textHex() }}">
-                    {{ $template->status->label() }}
-                </span>
+                        {{-- Status badge --}}
+                        <span class="badge p-75 px-2 template-status-label"
+                              data-template-id="{{ $template->id }}"
+                              style="background-color: {{ $template->status->bgHex() }};
+                     color: {{ $template->status->textHex() }}">
+            {{ $template->status->label() }}
+        </span>
                     </div>
-
                 </div>
+
             </div>
         </div>
     </div>
