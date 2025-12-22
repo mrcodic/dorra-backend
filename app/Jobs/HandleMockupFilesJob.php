@@ -183,12 +183,12 @@ class HandleMockupFilesJob implements ShouldQueue
             // تحديث التمبلت الجديد
             $missingForNew = collect($allColors)->diff($newColors)->values()->all();
             $colorsToRenderForNew = $allColors;
-
-            $model->templates()->updateExistingPivot($templateId, [
-                'colors' => array_values(array_unique(
-                    array_merge($newColors->all(), $missingForNew)
-                )),
-            ]);
+//
+//            $model->templates()->updateExistingPivot($templateId, [
+//                'colors' => array_values(array_unique(
+//                    array_merge($newColors->all(), $missingForNew)
+//                )),
+//            ]);
 
             // مسح الصور القديمة الخاصة بالتمبلت ده فقط قبل الرندر
             $model->getMedia('generated_mockups')
