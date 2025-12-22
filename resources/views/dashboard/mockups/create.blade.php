@@ -687,43 +687,52 @@
                     .removeClass('border-primary shadow-lg')
                     .css('border-color', '#24B094');
 
-                // If clicked from the modal
+                // If clicked from the modal → swap with last card from main
                 if ($(this).closest('#templateModal').length) {
-                    $cardWrapper.remove();
+                    const $mainContainer  = $('#templatesCardsContainer');
+                    const $modalContainer = $('#templates-modal-container');
 
-                    const cardHtml = `<div class="col-12 col-md-4 col-lg-3">
-            ${buildTemplateInnerCard({
-                        id: id,
-                        source_design_svg: front ?? none,
-                        back_base64_preview_image: back,
-                        name: name
-                    })}
-        </div>`;
+                    // الكارت اللي اتضغط عليه (في المودال)
+                    const $modalCard = $(this).closest('.template-card');
+                    const $modalCol  = $modalCard.closest('[class*="col-"]');
 
-                    $('#templatesCardsContainer').prepend(cardHtml);
+                    // 🟢 احفظ موقع الكارت داخل المودال (عشان نحط مكانه الكارت اللي هيخرج من برا)
+                    const $nextSibling = $modalCol.next();
+                    const $placeholder = $('<div class="__swap_placeholder__"></div>');
+                    $modalCol.before($placeholder);
 
-                    // Move last card if more than 3
-                    const $cards = $('#templatesCardsContainer .template-card').not('.show-more');
-                    if ($cards.length > 3) {
-                        const $lastCard = $cards.last();
-                        const lastId = $lastCard.data('id');
-                        const lastFront = $lastCard.data('front') ?? $lastCard.data('none');
-                        const lastBack = $lastCard.data('back');
-                        const lastName = $lastCard.find('.card-title').text();
+                    // 🟢 هات آخر كارت من التلاتة اللي برا (بدون show-more)
+                    const $mainCards = $mainContainer.find('.template-card').not('.show-more');
+                    if (!$mainCards.length) return;
 
-                        $lastCard.remove();
+                    const $lastMainCard = $mainCards.last();
+                    const $lastMainCol  = $lastMainCard.closest('[class*="col-"]');
 
-                        const modalCardHtml = `<div class="col-6 col-md-4 mb-2">
-                ${buildTemplateInnerCard({
-                            id: lastId,
-                            source_design_svg: lastFront,
-                            back_base64_preview_image: lastBack,
-                            name: lastName
-                        })}
-            </div>`;
+                    // 🟢 جهّز الكارت الأخير للدخول في المودال
+                    $lastMainCol
+                        .removeClass('col-12 col-md-4 col-lg-3')
+                        .addClass('col-6 col-md-4 mb-2');
 
-                        $('#templates-modal-container').prepend(modalCardHtml);
+                    // 🟢 أضفه في نفس مكان الكارت اللي هيخرج من المودال
+                    if ($nextSibling.length) {
+                        $nextSibling.before($lastMainCol);
+                    } else {
+                        $modalContainer.append($lastMainCol);
                     }
+
+                    // 🟢 الآن احذف كارت المودال نفسه من المودال
+                    $modalCol.remove();
+
+                    // 🟢 جهّز الكارت اللي كان في المودال ليدخل أول التلاتة برا
+                    $modalCol
+                        .removeClass('col-6 col-md-4 mb-2')
+                        .addClass('col-12 col-md-4 col-lg-3');
+
+                    // 🟢 ضيفه في أول القائمة برا
+                    $mainContainer.prepend($modalCol);
+
+                    // 🟢 اقفل المودال
+                    $('#templateModal').modal('hide');
                 }
 
                 // Highlight newly added/existing card

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Mockup;
 
 
 use App\Enums\Mockup\TypeEnum;
@@ -8,6 +8,7 @@ use App\Jobs\HandleMockupFilesJob;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\MockupRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
+use App\Services\BaseService;
 use App\Services\Mockup\MockupRenderer;
 use Illuminate\Support\Arr;
 
@@ -275,10 +276,14 @@ class MockupService extends BaseService
                     ];
                 });
 
-                // ✅ This will attach or update pivot rows without detaching others
-                $model->templates()->syncWithoutDetaching($syncData);
-                // If you actually want to remove templates not in the form, use:
-                // $model->templates()->sync($syncData);
+                foreach ($syncData as $templateId => $pivotData) {
+                    $existing = $model->templates()->where('template_id', $templateId)->exists();
+                    if ($existing) {
+                        $model->templates()->updateExistingPivot($templateId, $pivotData);
+                    } else {
+                        $model->templates()->attach($templateId, $pivotData);
+                    }
+                }
             }
 
             if (request()->allFiles()) {

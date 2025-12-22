@@ -10,7 +10,7 @@ use App\Http\Resources\MockupResource;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Repositories\Interfaces\TypeRepositoryInterface;
-use App\Services\MockupService;
+use App\Services\Mockup\MockupService;
 use Illuminate\Support\Facades\Response;
 use App\Http\Requests\Mockup\{StoreMockupRequest, UpdateMockupEditorRequest, UpdateMockupRequest};
 
