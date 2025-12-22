@@ -16,7 +16,10 @@ class HandleMockupFilesJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, SerializesModels, Queueable;
 
-    public function __construct(public Mockup $mockup)
+    public function __construct(
+        public Mockup $mockup
+    ,public bool $propagateToOthers = false
+    )
     {
     }
 

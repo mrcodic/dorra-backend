@@ -276,14 +276,10 @@ class MockupService extends BaseService
                     ];
                 });
 
-                foreach ($syncData as $templateId => $pivotData) {
-                    $existing = $model->templates()->where('template_id', $templateId)->exists();
-                    if ($existing) {
-                        $model->templates()->updateExistingPivot($templateId, $pivotData);
-                    } else {
-                        $model->templates()->attach($templateId, $pivotData);
-                    }
-                }
+                // ✅ This will attach or update pivot rows without detaching others
+                $model->templates()->syncWithoutDetaching($syncData);
+                // If you actually want to remove templates not in the form, use:
+                // $model->templates()->sync($syncData);
             }
 
             if (request()->allFiles()) {
@@ -292,7 +288,7 @@ class MockupService extends BaseService
 
             $model->load(['templates', 'types', 'category', 'media']);
 
-            HandleMockupFilesJob::dispatch($model)->delay(now()->addSeconds(5));
+            HandleMockupFilesJob::dispatch($model,false)->delay(now()->addSeconds(5));
 
             return $model;
         });
