@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shared;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MediaResource;
 use App\Models\Admin;
+use App\Services\FontService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -13,7 +14,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 class FontController extends Controller
 {
     public ?string $activeGuard;
-    public function __construct()
+    public function __construct(public FontService $fontService)
     {
         $this->activeGuard = getActiveGuard();
 
@@ -44,10 +45,10 @@ class FontController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'file' => [
-                'required',
-                'file',
-            ],
+            'name' => ['required', 'string', 'max:255',],
+            'font_styles' => ['required', 'array'],
+            'font_styles.*.id' => ['required', 'integer', 'exists:font_styles,id'],
+            'font_styles.*.file' => ['required', 'integer', 'exists:font_styles,id'],
         ]);
 
 

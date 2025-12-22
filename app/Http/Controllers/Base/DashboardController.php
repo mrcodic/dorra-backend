@@ -47,8 +47,7 @@ class DashboardController extends Controller
     {
         $data = $this->service->getAll($this->getRelations('index'), $this->usePagination);
         $associatedData = $this->getAssociatedData('index');
-        if (request()->expectsJson())
-        {
+        if (request()->expectsJson()) {
 
             return Response::api(data: $this->resourceClass ? $this->resourceClass::collection($data) : $data);
         }
@@ -82,7 +81,10 @@ class DashboardController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate($this->storeRequestClass->rules());
+        $validatedData = $request->validate($this->storeRequestClass->rules(),
+            $this->storeRequestClass->messages(),
+            $this->storeRequestClass->attributes()
+        );
         $model = $this->service->storeResource($validatedData, $this->relationsToStore, $this->getRelations('store'));
         return $this->resourceClass ? Response::api(data: $this->resourceClass::make($model))
             : Response::api(data: $model);
