@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Mockup;
+namespace App\Services;
 
 
 use App\Enums\Mockup\TypeEnum;
