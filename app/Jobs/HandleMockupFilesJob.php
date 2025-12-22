@@ -18,7 +18,6 @@ class HandleMockupFilesJob implements ShouldQueue
 
     public function __construct(
         public Mockup $mockup
-    ,public bool $propagateToOthers = false
     )
     {
     }
@@ -202,6 +201,7 @@ class HandleMockupFilesJob implements ShouldQueue
                 colors: $colorsToRenderForNew
             );
 
+
             // تحديث mockups قديمة
             foreach ($oldMockups as $oldMockup) {
 
@@ -228,7 +228,7 @@ class HandleMockupFilesJob implements ShouldQueue
                 }
 
                 // تحديث الـpositions لو اتغيرت
-                $pivotData['positions'] = $template->pivot->positions ?? [];
+//                $pivotData['positions'] = $template->pivot->positions ?? [];
 
                 // مسح الصور القديمة الخاصة بالتمبلت ده فقط
                 $oldMockup->getMedia('generated_mockups')

@@ -288,7 +288,7 @@ class MockupService extends BaseService
 
             $model->load(['templates', 'types', 'category', 'media']);
 
-            HandleMockupFilesJob::dispatch($model,false)->delay(now()->addSeconds(5));
+            HandleMockupFilesJob::dispatch($model)->delay(now()->addSeconds(5));
 
             return $model;
         });
