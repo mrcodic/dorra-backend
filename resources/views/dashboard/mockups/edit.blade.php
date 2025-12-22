@@ -297,6 +297,29 @@
         </div>
         @include("modals.templates.template-modal")
     </section>
+    <!-- Remove Color Modal -->
+    <div class="modal fade" id="removeColorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-3 shadow">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Remove Color from Mockups</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">This color exists in other mockups using the same template. Do you want to remove it from all of them?</p>
+
+                    <div id="relatedMockupsList" class="border rounded p-3 bg-light" style="max-height: 300px; overflow-y: auto;">
+                        <div class="text-center text-muted">Loading mockups...</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmRemoveColor">Yes, remove from all</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- users list ends -->
 @endsection
 
@@ -516,23 +539,111 @@
             card.dataset.colors = JSON.stringify(card.selectedColors || []);
         }
 
+        let pendingColorData = null;
+
         $(document).on('click', '.remove-color-btn', function () {
             const card = this.closest('.template-card');
             const hex = this.dataset.color;
             if (!card || !hex) return;
 
-            // Remove color from memory
+            const templateId = card.dataset.id;
+            const savedColors = savedColorsById.get(String(templateId)) || [];
+
+            // 🔹 لو اللون مش من الألوان القديمة (يعني لسه المستخدم ضافه)
+            if (!savedColors.includes(hex)) {
+                // احذف اللون محليًا بدون مودال
+                card.selectedColors = (card.selectedColors || []).filter(c => c !== hex);
+                renderSelectedColors(card);
+                buildHiddenTemplateInputs();
+
+
+                return; // ❌ متفتحش المودال
+            }
+
+            // 🔸 اللون قديم → افتح المودال
+            const mockupId = $('#mockupId').val() || '{{ $model->id ?? "" }}';
+            const categoryId = '{{ $model->category->id ?? "" }}';
+            pendingColorData = { card, hex, templateId, mockupId };
+
+            $('#removeColorModal').modal('show');
+
+            const $list = $('#relatedMockupsList');
+            $list.html('<div class="text-center text-muted py-3">Loading mockups...</div>');
+
+            $.ajax({
+                url: `/mockups`,
+                type: 'GET',
+                data: {
+                    template_id: templateId,
+                    category_id: categoryId,
+                    mockup_id: mockupId,
+                    color: hex,
+                },
+                success: function (res) {
+                    const mockups = res?.data?.data || [];
+
+                    if (!mockups.length) {
+                        $list.html('<div class="text-center text-muted py-3">No other mockups found for this template.</div>');
+                        return;
+                    }
+
+                    const html = mockups.map(m => {
+                        const img = m.images?.front?.base_url || m.images?.back?.base_url || "{{ asset('images/placeholder.svg') }}";
+                        const colors = (m.colors || []).map(c => `
+                    <span class="d-inline-block me-1"
+                          style="width:18px;height:18px;border-radius:50%;background:${c};border:1px solid #ccc"></span>
+                `).join('');
+
+                        const types = (m.types || []).map(t => `<span class="badge bg-dark me-1">${t.label}</span>`).join('');
+
+                        return `
+                    <div class="d-flex align-items-center border-bottom py-2">
+                        <img src="${img}" alt="${m.name}" class="rounded me-3" style="width:70px;height:70px;object-fit:cover;">
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">${m.name || 'Untitled Mockup'}</div>
+                            <div class="text-muted small mb-1">${types}</div>
+                        </div>
+                    </div>
+                `;
+                    }).join('');
+
+                    $list.html(html);
+                },
+                error: function () {
+                    $list.html('<div class="text-danger text-center py-3">Failed to load mockups.</div>');
+                }
+            });
+        });
+
+
+        // عند تأكيد الحذف
+        $('#confirmRemoveColor').on('click', function () {
+            if (!pendingColorData) return;
+
+            const { card, hex } = pendingColorData;
+            const $btn = $(this);
+            $btn.prop('disabled', true).text('Updating...');
+
+            // 🔹 إزالة اللون من الذاكرة
             card.selectedColors = (card.selectedColors || []).filter(c => c !== hex);
 
-            // Update dataset for reference
-            card.dataset.colors = JSON.stringify(card.selectedColors);
-
-            // Update UI
+            // 🔹 إعادة بناء عرض الألوان في البطاقة
             renderSelectedColors(card);
 
-            // 🔄 Rebuild the hidden inputs in the main form
+            // 🔹 تحديث الـ hidden inputs في الفورم (اللي بتتحفظ بعدين)
             buildHiddenTemplateInputs();
+
+            // 🔹 إغلاق المودال
+            $('#removeColorModal').modal('hide');
+
+            // 🔹 رجّع الزرار لحالته الطبيعية
+            $btn.prop('disabled', false).text('Yes, remove from all');
+
+
+            // 🔹 تنظيف البيانات المؤقتة
+            pendingColorData = null;
         });
+
 
         const templatesData = @json($model->templates ?? []);
 
@@ -1143,8 +1254,52 @@
 
                 // close modal if inside
                 if ($(this).closest('#templateModal').length) {
+                    const $mainContainer  = $('#templatesCardsContainer');
+                    const $modalContainer = $('#templates-modal-container');
+
+                    // الكارت اللي اتضغط عليه (في المودال)
+                    const $modalCard = $(this).closest('.template-card');
+                    const $modalCol  = $modalCard.closest('[class*="col-"]');
+
+                    // 🟢 احفظ موقع الكارت داخل المودال (عشان نحط مكانه الكارت اللي هيخرج من برا)
+                    const $nextSibling = $modalCol.next();
+                    const $placeholder = $('<div class="__swap_placeholder__"></div>');
+                    $modalCol.before($placeholder);
+
+                    // 🟢 هات آخر كارت من التلاتة اللي برا (بدون show-more)
+                    const $mainCards = $mainContainer.find('.template-card').not('.show-more');
+                    if (!$mainCards.length) return;
+
+                    const $lastMainCard = $mainCards.last();
+                    const $lastMainCol  = $lastMainCard.closest('[class*="col-"]');
+
+                    // 🟢 جهّز الكارت الأخير للدخول في المودال
+                    $lastMainCol
+                        .removeClass('col-12 col-md-4 col-lg-3')
+                        .addClass('col-6 col-md-4 mb-2');
+
+                    // 🟢 أضفه في نفس مكان الكارت اللي هيخرج من المودال
+                    if ($nextSibling.length) {
+                        $nextSibling.before($lastMainCol);
+                    } else {
+                        $modalContainer.append($lastMainCol);
+                    }
+
+                    // 🟢 الآن احذف كارت المودال نفسه من المودال
+                    $modalCol.remove();
+
+                    // 🟢 جهّز الكارت اللي كان في المودال ليدخل أول التلاتة برا
+                    $modalCol
+                        .removeClass('col-6 col-md-4 mb-2')
+                        .addClass('col-12 col-md-4 col-lg-3');
+
+                    // 🟢 ضيفه في أول القائمة برا
+                    $mainContainer.prepend($modalCol);
+
+                    // 🟢 اقفل المودال
                     $('#templateModal').modal('hide');
                 }
+
             });
 
             // =========================

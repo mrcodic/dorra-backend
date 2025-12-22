@@ -157,6 +157,21 @@ class MockupService extends BaseService
             ->when(request()->filled('template_id'), fn($q) => $q->whereHas('templates', function ($query) {
                 $query->where('templates.id', request('template_id'));
             }))
+            ->when(
+                request()->filled('template_id') &&
+                request()->filled('category_id') &&
+                request()->filled('color')
+                && request()->filled('mockup_id'),
+                fn($q) => $q
+                    ->whereKeyNot(request('mockup_id'))
+                    ->where('category_id', request('category_id'))
+                    ->whereHas('templates', function ($query) {
+                        $query
+                            ->where('templates.id', request('template_id'))
+                            ->whereJsonContains('mockup_template.colors', request('color'));
+                    })
+            )
+
             ->when(request()->filled('product_ids'), fn($q) => $q->whereIn('category_id', request()->array('product_ids')))
             ->when(request()->filled('type'), fn($q) => $q->whereHas('types', fn($q) => $q->where('types.id', request('type'))))
             ->when(request()->filled('types'), function ($query) {
