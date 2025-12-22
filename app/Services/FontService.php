@@ -13,5 +13,13 @@ class FontService extends BaseService
 
     }
 
+    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
+    {
+        $model = $this->repository->create($validatedData);
+        $fontStyles = $model->fontStyles()->createMany($validatedData['font_styles']);
+        return $model;
+
+    }
+
 
 }

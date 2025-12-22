@@ -15,7 +15,7 @@
     {{ $template->approach === 'with_editor' ? 'With Editor' : 'Without Editor' }}
 </span>
 
-        @can('product-templates_delete')
+            @can('product-templates_delete')
                 <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox"
                        value="{{ $template->id }}" name="selected_templates[]">
             @endcan             <!-- Action Icon with Dropdown (Top Right) -->
@@ -29,7 +29,7 @@
                         <li><a class="dropdown-item" href="{{ route('product-templates.edit',$template->id) }}"><i
                                     data-feather="edit-3" class="me-1"></i>Edit</a></li>
                     @endcan
-                        @can('product-templates_show')
+                    @can('product-templates_show')
                         @if($template->approach == 'with_editor')
                             <li><a class="dropdown-item"
                                    href="{{ config('services.editor_url') . 'templates/' . $template->id . '?is_clear'}}"
@@ -62,7 +62,7 @@
                             </form>
                         </li>
                     @endcan
-                        @can('product-templates.change-status.live_show')
+                    @can('product-templates.change-status.live_show')
                         <li>
                             <form class="change-status-form"
                                   action="{{ route('product-templates.change-status.show',['id'=>$template->id, 'status'=>$template->status->value])                         }}"
@@ -101,19 +101,23 @@
                                 Type:</p>
                             @foreach( $template->types as $type)
                                 <span class="badge text-light p-75 px-2 template-status-label "
-                                      style="background-color: #222245">                             {{ $type->value->label()}}                         </span>
-                            @endforeach                         </div>
+                                      style="background-color: #222245">                             {{ $type->value->label()}}
+                                </span>
+                            @endforeach
+                        </div>
                     </div>
                 </div> <!-- Tags -->
                 <div class="mb-1 d-flex flex-wrap gap-1"><p style="display: inline">Created
                         at: {{ $template->created_at->format('d/m/Y') }}</p>
-                    <p style="display: inline">Last update: {{ $template->updated_at->format('d/m/Y') }}</p></div>
+                    <p style="display: inline">Last update: {{ $template->updated_at->format('d/m/Y') }}</p>
+                </div>
                 <div class="d-flex flex-wrap justify-content-start gap-1 mb-1"
                      style="min-height: 44px;">
                     @foreach($template->tags as $tag)
                         <span class="text-black"
                               style="background-color: #FCF8FC; padding: 8px; border-radius: 8px; display: inline-block;">
-                            {{ $tag->getTranslation('name', app()->getLocale()) }}                 </span>
+                            {{ $tag->getTranslation('name', app()->getLocale()) }}
+                        </span>
                     @endforeach
                 </div> <!-- Palette and Status -->
                 <div class="d-flex justify-content-between align-items-center mb-1">
