@@ -201,7 +201,7 @@
                         <div class="row">
                        <div class="row">
                            <div class="form-group mb-2 col-md-6">
-                               <label  class="label-text mb-1">Nme</label>
+                               <label  class="label-text mb-1">Name</label>
 
                                <input type="text" id="templateName" class="form-control" name="name"
                                       placeholder="Mockup Name">

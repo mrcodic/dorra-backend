@@ -28,7 +28,8 @@
                     @can('product-templates_update')
                         <li><a class="dropdown-item" href="{{ route('product-templates.edit',$template->id) }}"><i
                                     data-feather="edit-3" class="me-1"></i>Edit</a></li>
-                    @endcan                     @can('product-templates_show')
+                    @endcan
+                        @can('product-templates_show')
                         @if($template->approach == 'with_editor')
                             <li><a class="dropdown-item"
                                    href="{{ config('services.editor_url') . 'templates/' . $template->id . '?is_clear'}}"
