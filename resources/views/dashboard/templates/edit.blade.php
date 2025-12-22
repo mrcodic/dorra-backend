@@ -856,7 +856,7 @@ data-id="${id}"> Show on Mockup </a>
                     size: {{ $media->size ?? 12345 }},
                     _hiddenInputId: "{{ $media->id }}"
                 };
-                document.getElementById("uploadedNoneTemplateImage").value = "{{ $media->id }}";
+                document.getElementById("uploadedFrontTemplateImage").value = "{{ $media->id }}";
 
 
                 dz.emit("addedfile", modelMockFile);
@@ -893,7 +893,7 @@ data-id="${id}"> Show on Mockup </a>
                     size: {{ $media->size ?? 12345 }},
                     _hiddenInputId: "{{ $media->id }}"
                 };
-                document.getElementById("uploadedNoneTemplateImage").value = "{{ $media->id }}";
+                document.getElementById("uploadedBackTemplateImage").value = "{{ $media->id }}";
 
 
                 dz.emit("addedfile", modelMockFile);
