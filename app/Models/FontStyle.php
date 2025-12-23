@@ -13,4 +13,8 @@ class FontStyle extends Model implements HasMedia
         'name',
         'font_id',
     ];
+    public function font(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Font::class);
+    }
 }

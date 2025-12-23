@@ -204,100 +204,106 @@
                             <input type="text" id="templateName" class="form-control" name="name"
                                 placeholder="Mockup Name">
                         </div>
-
-                        {{-- Select Product --}}
-                        <div class="form-group mb-2 col-12">
-                            <label for="productsSelect" class="label-text mb-1">Product</label>
-                            <select id="productsSelect" name="category_id" class="form-select">
-                                <option value="" disabled selected>Choose product</option>
-                                @foreach($associatedData['products'] as $product)
-                                <option value="{{ $product->id }}">
-                                    {{ $product->getTranslation('name', app()->getLocale()) }}
-                                </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    {{-- Mockup type --}}
-                    <div class="form-group mb-2">
                         <div class="row">
-                            @foreach($associatedData['types'] as $type)
-                            <div class="col-md-4 mb-1">
-                                <label class="radio-box">
-                                    <input class="form-check-input type-checkbox" type="checkbox" name="types[]"
-                                        value="{{ $type->value }}"
-                                        data-type-name="{{ strtolower($type->value->name) }}">
-                                    <span>{{ $type->value->label() }}</span>
-                                </label>
+
+                            <div class="form-group mb-2 col-md-2">
+                                <input type="text" id="templateName" class="form-control" name="name"
+                                    placeholder="Mockup Name">
                             </div>
-                            @endforeach
+
+                            {{-- Select Product --}}
+                            <div class="form-group mb-2 col-12">
+                                <label for="productsSelect" class="label-text mb-1">Product</label>
+                                <select id="productsSelect" name="category_id" class="form-select">
+                                    <option value="" disabled selected>Choose product</option>
+                                    @foreach($associatedData['products'] as $product)
+                                    <option value="{{ $product->id }}">
+                                        {{ $product->getTranslation('name', app()->getLocale()) }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        {{-- Mockup type --}}
+                        <div class="form-group mb-2">
+                            <div class="row">
+                                @foreach($associatedData['types'] as $type)
+                                <div class="col-md-4 mb-1">
+                                    <label class="radio-box">
+                                        <input class="form-check-input type-checkbox" type="checkbox" name="types[]"
+                                            value="{{ $type->value }}"
+                                            data-type-name="{{ strtolower($type->value->name) }}">
+                                        <span>{{ $type->value->label() }}</span>
+                                    </label>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        {{-- mockup Canvas --}}
+                        <!-- العمود الشمال: يحتوي fixed-block + fileInputsContainer (البلوكات تتحط هنا) -->
+                        <div class="row">
+                            <div id="left-column" class="col-md-12">
+                                <!-- fixed-block يبقى مكان الإشارة لفانكشنك -->
+                                <div id="fixed-block"></div>
+
+                                <!-- الحاوية اللى بتضيف لها الفانكشن البلوكات (لو مش موجودة بالفعل) -->
+                                <div id="fileInputsContainer" class="row g-1"></div>
+                            </div>
+                        </div>
+                        <!-- العمود اليمين: الـ editor / preview -->
+                        <div class="row">
+                            <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorFrontWrapper">
+                                <label class="label-text">Mockup Editor (Front)</label>
+                                <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="480"
+                                    width="480"></canvas>
+                            </div>
+                            <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorBackWrapper">
+                                <label class="label-text">Mockup Editor (Back)</label>
+                                <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="480"
+                                    width="480"></canvas>
+                            </div>
+
+                            <div class="d-none" id="editorNoneWrapper">
+                                <label class="label-text">Mockup Editor (General)</label>
+                                <canvas id="mockupCanvasNone" class="w-100" height="300"
+                                    style="border:1px solid #ccc;"></canvas>
+                            </div>
+                        </div>
+
+
+
+
+                        <div class="form-group mb-2 d-none" id="templatesCardsWrapper">
+                            <label class="form-label mb-1">Choose Template</label>
+                            <div id="templatesCardsContainer"
+                                class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm">
+                            </div>
+                            <input type="hidden" name="template_id" id="selectedTemplateId">
+
                         </div>
                     </div>
 
-                    {{-- mockup Canvas --}}
-                    <!-- العمود الشمال: يحتوي fixed-block + fileInputsContainer (البلوكات تتحط هنا) -->
-                    <div class="row">
-                        <div id="left-column" class="col-md-12">
-                            <!-- fixed-block يبقى مكان الإشارة لفانكشنك -->
-                            <div id="fixed-block"></div>
 
-                            <!-- الحاوية اللى بتضيف لها الفانكشن البلوكات (لو مش موجودة بالفعل) -->
-                            <div id="fileInputsContainer" class="row g-1"></div>
+                    {{-- <div class="mb-2">
+                        <label class="label-text mb-1 d-block">Colors</label>
+                        <div class="d-flex flex-wrap align-items-center gap-1">
+                            <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
+
+                            <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>
                         </div>
+                        <div id="colorsInputContainer"></div>
+                    </div> --}}
+
+                    <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
+                            <span class="btn-text">Create</span>
+                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
+                                role="status" aria-hidden="true"></span>
+                        </button>
                     </div>
-                    <!-- العمود اليمين: الـ editor / preview -->
-                    <div class="row">
-                        <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorFrontWrapper">
-                            <label class="label-text">Mockup Editor (Front)</label>
-                            <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="480"
-                                width="480"></canvas>
-                        </div>
-                        <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorBackWrapper">
-                            <label class="label-text">Mockup Editor (Back)</label>
-                            <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="480"
-                                width="480"></canvas>
-                        </div>
-
-                        <div class="d-none" id="editorNoneWrapper">
-                            <label class="label-text">Mockup Editor (General)</label>
-                            <canvas id="mockupCanvasNone" class="w-100" height="300"
-                                style="border:1px solid #ccc;"></canvas>
-                        </div>
-                    </div>
-
-
-
-
-                    <div class="form-group mb-2 d-none" id="templatesCardsWrapper">
-                        <label class="form-label mb-1">Choose Template</label>
-                        <div id="templatesCardsContainer"
-                            class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm">
-                        </div>
-                        <input type="hidden" name="template_id" id="selectedTemplateId">
-
-                    </div>
-                </div>
-
-
-                {{-- <div class="mb-2">
-                    <label class="label-text mb-1 d-block">Colors</label>
-                    <div class="d-flex flex-wrap align-items-center gap-1">
-                        <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
-
-                        <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>
-                    </div>
-                    <div id="colorsInputContainer"></div>
-                </div> --}}
-
-                <div class="modal-footer border-top-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
-                        <span class="btn-text">Create</span>
-                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                            aria-hidden="true"></span>
-                    </button>
-                </div>
 
             </form>
         </div>

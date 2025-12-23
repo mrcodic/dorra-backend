@@ -20,6 +20,7 @@ class FontStyleResource extends JsonResource
             'file' => $this->whenLoaded('media', function () {
                 return MediaResource::make($this->media->first());
             }),
+            'font' => FontResource::make($this->whenLoaded('font')),
         ];
     }
 }
