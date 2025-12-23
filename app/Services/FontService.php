@@ -25,6 +25,7 @@ class FontService extends BaseService
         });
         return $model->load('fontStyles');
     }
+
     public function update($validatedData, $font)
     {
         $font->update([
@@ -32,21 +33,20 @@ class FontService extends BaseService
         ]);
 
         collect($validatedData['font_styles'])->each(function ($style) use ($font) {
-            $fontStyle = $font->fontStyles()->find($style['id']);
 
-            if ($fontStyle) {
-                $fontStyle->update([
-                    'name' => $style['name'],
-                ]);
+            $fontStyle =    $font->fontStyles()->updateOrCreate([
+                'id' => Arr::get($style, 'id'),
+            ], [
+                'name' => $style['name'],
+            ]);
 
-                if (!empty($style['file'])) {
-                    handleMediaUploads($style['file'], $fontStyle, clearExisting: true);
-                }
+            if (!empty($style['file'])) {
+                handleMediaUploads($style['file'], $fontStyle, clearExisting: true);
             }
+
         });
         return $font->load('fontStyles');
     }
-
 
 
 }

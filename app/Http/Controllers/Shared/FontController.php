@@ -59,9 +59,9 @@ class FontController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255',],
             'font_styles' => ['required', 'array'],
-            'font_styles.*.id' => ['required', 'integer', 'exists:font_styles,id'],
+            'font_styles.*.id' => ['sometimes', 'integer', 'exists:font_styles,id'],
             'font_styles.*.name' => ['required', 'string', 'max:255'],
-            'font_styles.*.file' => ['nullable', 'file'],
+            'font_styles.*.file' => ['required_without:font_styles.*.id', 'file'],
         ]);
         $this->fontService->update($validated,$font);
         return Response::api();
