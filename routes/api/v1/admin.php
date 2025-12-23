@@ -34,5 +34,5 @@ Route::apiResource('/products', ProductController::class)
         'index' => 'admin.products.index',
         'show' => 'admin.products.show',
     ]);
-
+Route::delete('fonts/styles/{font_style}', [FontController::class, 'destroyFontStyle']);
 Route::apiResource('fonts', FontController::class)->only(['store', 'index','destroy']);
