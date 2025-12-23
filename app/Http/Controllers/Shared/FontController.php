@@ -23,7 +23,7 @@ class FontController extends Controller
 
     public function index()
     {
-        $fonts = $this->fontService->getAll(['fontStyles.media']);
+        $fonts = $this->fontService->getAll(['fontStyles.media' ,'fontStyles.font']);
         return Response::api(data: FontResource::collection($fonts)->response()->getData(true));
 
     }
@@ -51,7 +51,7 @@ class FontController extends Controller
 
     public function show($id)
     {
-        $font = $this->fontService->showResource($id,['fontStyles.media']);
+        $font = $this->fontService->showResource($id,['fontStyles.media','fontStyles.font']);
         return Response::api(data: FontResource::make($font));
     }
     public function update(Request $request,Font $font)
