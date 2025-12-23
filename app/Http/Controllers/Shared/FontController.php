@@ -33,9 +33,9 @@ class FontController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255',],
-            'font_style_name' => ['required', 'string', 'max:255'],
-            'font_style_file' => ['required', 'file'],
-            'font_id' => ['sometimes', 'integer', 'exists:fonts,id'],
+            'font_styles' => ['required', 'array'],
+            'font_styles.*.name' => ['required', 'string', 'max:255'],
+            'font_styles.*.file' => ['required', 'file'],
         ]);
         $font = $this->fontService->storeResource($validated);
         return Response::api(data: FontResource::make($font)->response()->getData(true));
@@ -46,15 +46,16 @@ class FontController extends Controller
         $font = $this->fontService->showResource($id,['fontStyles.media']);
         return Response::api(data: FontResource::make($font));
     }
-    public function update(Request $request,Font $font, FontStyle $fontStyle)
+    public function update(Request $request,Font $font)
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255',],
-            'font_style_name' => ['required', 'string', 'max:255'],
-            'font_style_file' => ['required', 'file'],
-            'font_id' => ['sometimes', 'integer', 'exists:fonts,id'],
+            'font_styles' => ['required', 'array'],
+            'font_styles.*.id' => ['required', 'integer', 'exists:font_styles,id'],
+            'font_styles.*.name' => ['required', 'string', 'max:255'],
+            'font_styles.*.file' => ['nullable', 'file'],
         ]);
-        $this->fontService->update($validated,$font,$fontStyle);
+        $this->fontService->update($validated,$font);
         return Response::api();
     }
 

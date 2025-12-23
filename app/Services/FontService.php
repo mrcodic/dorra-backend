@@ -16,21 +16,37 @@ class FontService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        $model = $this->repository->query()
-            ->firstOrCreate(['id' => Arr::get($validatedData,'font_id')],$validatedData);
-        $fontStyle = $model->fontStyles()->create([
-            'name' => $validatedData['font_style_name'],
-        ]);
-        handleMediaUploads($validatedData['font_style_file'], $fontStyle);
+        $model = $this->repository->create($validatedData);
+        collect($validatedData['font_styles'])->each(function ($style) use ($model, $validatedData) {
+            $fontStyle = $model->fontStyles()->create([
+                'name' => $style['name'],
+            ]);
+            handleMediaUploads($style['file'], $fontStyle);
+        });
         return $model->load('fontStyles');
-
     }
-    public function update($validatedData, $font, $fontStyle)
+    public function update($validatedData, $font)
     {
-        $font->update($validatedData);
-        $fontStyle->update(['name' => $validatedData['font_style_name'],]);
-        handleMediaUploads($validatedData['font_style_file'], $fontStyle,clearExisting: true);
+        $font->update([
+            'name' => $validatedData['name'],
+        ]);
+
+        collect($validatedData['font_styles'])->each(function ($style) use ($font) {
+            $fontStyle = $font->fontStyles()->find($style['id']);
+
+            if ($fontStyle) {
+                $fontStyle->update([
+                    'name' => $style['name'],
+                ]);
+
+                if (!empty($style['file'])) {
+                    handleMediaUploads($style['file'], $fontStyle, clearExisting: true);
+                }
+            }
+        });
+        return $font->load('fontStyles');
     }
+
 
 
 }

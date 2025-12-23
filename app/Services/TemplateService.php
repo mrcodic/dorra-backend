@@ -156,9 +156,15 @@ class TemplateService extends BaseService
                     $q->where('approach', '!=', 'without_editor')
                     ->orWhere(function ($q) {
                         $q->where('approach', 'without_editor')
-                            ->whereHas('mockups',function ($query){
-                                $query->where('category_id',request('product_without_category_id') ?? $this->productRepository->query()->find(request('product_id'))?->category_id);
+                            ->whereHas('mockups', function ($q) {
+                                $categoryId =
+                                    request('product_without_category_id')
+                                    ?? $this->productRepository->query()->find(request('product_id'))?->category_id;
+
+                                $q->where('mockups.category_id', $categoryId)
+                                    ->whereNotNull('mockup_template.colors');
                             });
+
                     });
                 });
 
