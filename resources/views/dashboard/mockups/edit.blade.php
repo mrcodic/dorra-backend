@@ -1034,6 +1034,7 @@
                 }
 
                 templates.forEach(function (tpl , index) {
+
                     const cardHtml = `
                     <div class="col-6 col-md-4 mb-2">
                         ${buildTemplateInnerCard(tpl , index)}
@@ -1041,7 +1042,11 @@
                 `;
                     $modalContainer.append(cardHtml);
                 });
-
+                setTimeout(() => {
+                    $modalContainer.find('.template-card').each(function () {
+                        hydrateColorsForCard(this);
+                    });
+                }, 50);
             }
 
             function renderModalPagination() {
