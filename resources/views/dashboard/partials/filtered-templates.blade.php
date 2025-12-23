@@ -9,16 +9,19 @@
           background-color: {{ $template->approach === 'with_editor' ? '#198754' : '#6c757d' }};
           color: #fff;
           z-index: 2;
-          left: 50px;
+          left: 80px;
 
       ">
-    {{ $template->approach === 'with_editor' ? 'With Editor' : 'Without Editor' }}
-</span>
+    {{ $template->approach === 'with_editor' ? 'With Editor' : 'Without Editor' }}     </span>
+                @can('product-templates_delete')
+                    <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox"
+                           value="{{ $template->id }}" name="selected_templates[]">
+                @endcan
 
-            @can('product-templates_delete')
-                <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox"
-                       value="{{ $template->id }}" name="selected_templates[]">
-            @endcan             <!-- Action Icon with Dropdown (Top Right) -->
+
+
+
+            <!-- Action Icon with Dropdown (Top Right) -->
             <div class="dropdown position-absolute top-0 end-0 m-1">
                 <button class="btn btn-sm  border-0" type="button" id="actionDropdown{{ $template->id }}"
                         data-bs-toggle="dropdown" aria-expanded="false" style="background-color:#F9FDFC"><i
