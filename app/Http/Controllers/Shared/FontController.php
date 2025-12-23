@@ -35,7 +35,15 @@ class FontController extends Controller
             'name' => ['required', 'string', 'max:255',],
             'font_styles' => ['required', 'array'],
             'font_styles.*.name' => ['required', 'string', 'max:255'],
-            'font_styles.*.file' => ['required', 'file'],
+            'font_styles.*.file' => [
+                'required',
+                'file',
+                'mimetypes:font/ttf,font/otf,font/woff,font/woff2,
+                application/x-font-ttf,application/x-font-otf,application/x-font-woff,application/font-sfnt,application/vnd.ms-fontobject,
+                application/octet-stream,application/vnd.ms-opentype',
+                'max:10240',
+            ],
+
         ]);
         $font = $this->fontService->storeResource($validated);
         return Response::api(data: FontResource::make($font)->response()->getData(true));
