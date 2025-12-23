@@ -271,7 +271,9 @@
                             <label class="form-label mb-1">Choose Template</label>
                             <div id="templatesCardsContainer"
                                 class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm">
+
                             </div>
+
                             <input type="hidden" name="template_id" id="selectedTemplateId">
 
                         </div>
@@ -494,7 +496,7 @@
                         <button
                             type="button"
                             id="showMoreTemplates"
-                            class="btn btn-outline-primary">Show All Templates</button>
+                            class="btn btn-outline-primary js-open-templates-modal">Show All Templates</button>
                     </div>
                 `;
                     $templatesCardsContainer.append(showMoreHtml);
@@ -1297,7 +1299,7 @@
                         <label class="form-label label-text">${typeLabel} Base Image</label>
                         <input type="file" name="${type}_base_image" id="${type}-base-input"
                             class="d-none" accept="image/*">
-    
+
                         <div class="upload-card upload-area" data-input-id="${type}-base-input">
                             <div class="upload-content">
                                 <i data-feather="upload" class="mb-2"></i>
@@ -1306,12 +1308,12 @@
                             </div>
                         </div>
                     </div>
-    
+
                     <div class="mb-2">
                         <label class="form-label label-text">${typeLabel} Mask Image</label>
                         <input type="file" name="${type}_mask_image" id="${type}-mask-input"
                             class="d-none" accept="image/*">
-    
+
                         <div class="upload-card upload-area" data-input-id="${type}-mask-input">
                             <div class="upload-content">
                                 <i data-feather="upload" class="mb-2"></i>
