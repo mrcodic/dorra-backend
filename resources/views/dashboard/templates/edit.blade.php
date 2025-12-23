@@ -644,7 +644,8 @@
                     const href = `${editUrl}?template_id={{ $model->id }}`;
                     const img =
                         mockup?.images?.front?.base_url ||
-                        mockup?.images?.base_url ||
+                        mockup?.images?.back?.base_url ||
+                        mockup?.images?.none?.base_url ||
                         "{{ asset('images/placeholder.svg') }}";
 
                     const isChecked = selected.has(id); // ✅ ده اللي هيتحكم في checked
