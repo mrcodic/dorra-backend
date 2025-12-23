@@ -846,7 +846,7 @@ data-id="${id}"> Show on Mockup </a>
             url: "{{ route('media.store') }}",
             paramName: "file",
             maxFiles: 1,
-            acceptedFiles: "image/*",
+            acceptedFiles: "image/jpeg,image/png",
             headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
             addRemoveLinks: true,
             init: function () {
@@ -883,7 +883,7 @@ data-id="${id}"> Show on Mockup </a>
             url: "{{ route('media.store') }}",
             paramName: "file",
             maxFiles: 1,
-            acceptedFiles: "image/*",
+            acceptedFiles: "image/jpeg,image/png",
             headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
             addRemoveLinks: true,
             init: function () {
@@ -919,7 +919,7 @@ data-id="${id}"> Show on Mockup </a>
             url: "{{ route('media.store') }}",
             paramName: "file",
             maxFiles: 1,
-            acceptedFiles: "image/*",
+            acceptedFiles: "image/jpeg,image/png",
             headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
             addRemoveLinks: true,
             init: function () {
