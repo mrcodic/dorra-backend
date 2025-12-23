@@ -1161,14 +1161,16 @@
             // Show Remaining → افتح المودال
             // =========================
             $templatesCardsContainer.on('click', '.js-open-templates-modal', function () {
-                // باقي العناصر من أول صفحة
-                const remaining = firstPageTemplates.slice(3);
-
-                renderModalTemplates(remaining, false);
-                renderModalPagination();
+                // ✅ لو المودال متبني بالفعل (وفيه عناصر) افتحه بس
+                if ($modalContainer.children().length === 0) {
+                    const remaining = firstPageTemplates.slice(3);
+                    renderModalTemplates(remaining, false);
+                    renderModalPagination();
+                }
 
                 $modal.modal('show');
             });
+
             // =========================
             // Modal: Load More
             // =========================
@@ -1273,46 +1275,35 @@
                     const $mainContainer  = $('#templatesCardsContainer');
                     const $modalContainer = $('#templates-modal-container');
 
-                    // الكارت اللي اتضغط عليه (في المودال)
                     const $modalCard = $(this).closest('.template-card');
                     const $modalCol  = $modalCard.closest('[class*="col-"]');
 
-                    // 🟢 احفظ موقع الكارت داخل المودال (عشان نحط مكانه الكارت اللي هيخرج من برا)
-                    const $nextSibling = $modalCol.next();
-                    const $placeholder = $('<div class="__swap_placeholder__"></div>');
-                    $modalCol.before($placeholder);
+                    // placeholder مكان كارت المودال
+                    const $ph = $('<div class="__swap_ph__"></div>');
+                    $modalCol.before($ph);
 
-                    // 🟢 هات آخر كارت من التلاتة اللي برا (بدون show-more)
+                    // آخر كارت من التلاتة اللي برا (بدون show-more)
                     const $mainCards = $mainContainer.find('.template-card').not('.show-more');
                     if (!$mainCards.length) return;
 
                     const $lastMainCard = $mainCards.last();
                     const $lastMainCol  = $lastMainCard.closest('[class*="col-"]');
 
-                    // 🟢 جهّز الكارت الأخير للدخول في المودال
-                    $lastMainCol
+                    // 1) دخل آخر كارت برا إلى نفس مكان كارت المودال
+                    $lastMainCol.detach()
                         .removeClass('col-12 col-md-4 col-lg-3')
                         .addClass('col-6 col-md-4 mb-2');
 
-                    // 🟢 أضفه في نفس مكان الكارت اللي هيخرج من المودال
-                    if ($nextSibling.length) {
-                        $nextSibling.before($lastMainCol);
-                    } else {
-                        $modalContainer.append($lastMainCol);
-                    }
+                    $ph.replaceWith($lastMainCol); // ✅ هنا اتأكدنا انه اتحط مكانه فعلاً
 
-                    // 🟢 الآن احذف كارت المودال نفسه من المودال
-                    $modalCol.remove();
-
-                    // 🟢 جهّز الكارت اللي كان في المودال ليدخل أول التلاتة برا
-                    $modalCol
+                    // 2) خرج كارت المودال وادخله أول التلاتة برا
+                    $modalCol.detach()
                         .removeClass('col-6 col-md-4 mb-2')
                         .addClass('col-12 col-md-4 col-lg-3');
 
-                    // 🟢 ضيفه في أول القائمة برا
                     $mainContainer.prepend($modalCol);
 
-                    // 🟢 اقفل المودال
+                    // (اختياري) اقفل المودال
                     $('#templateModal').modal('hide');
                 }
 
