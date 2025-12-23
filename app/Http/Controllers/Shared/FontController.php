@@ -38,10 +38,33 @@ class FontController extends Controller
             'font_styles.*.file' => [
                 'required',
                 'file',
-//                'mimes:ttf,otf,woff,woff2,eot',
-//                'max:10240', // 10MB
+                function ($attribute, $value, $fail) {
 
+                    $allowedExts = ['ttf', 'otf', 'woff', 'woff2', 'eot'];
+                    $allowedMimes = [
+                        'font/ttf',
+                        'font/otf',
+                        'font/woff',
+                        'font/woff2',
+                        'application/x-font-ttf',
+                        'application/x-font-otf',
+                        'application/x-font-woff',
+                        'application/font-sfnt',
+                        'application/vnd.ms-fontobject',
+                        'application/vnd.ms-opentype',
+                        'application/octet-stream',
+                    ];
+
+                    $ext = strtolower($value->getClientOriginalExtension());
+                    $mime = $value->getMimeType();
+
+                    if (!in_array($ext, $allowedExts) && !in_array($mime, $allowedMimes)) {
+                        $fail('The ' . $attribute . ' must be a valid font file (TTF, OTF, WOFF, WOFF2, EOT).');
+                    }
+                },
+                'max:10240',
             ],
+
 
         ]);
 
@@ -62,10 +85,33 @@ class FontController extends Controller
             'font_styles.*.id' => ['sometimes', 'integer', 'exists:font_styles,id'],
             'font_styles.*.name' => ['required', 'string', 'max:255'],
             'font_styles.*.file' => ['required_without:font_styles.*.id', 'file',
-//                'mimetypes:font/ttf,font/otf,font/woff,font/woff2,
-//                application/x-font-ttf,application/x-font-otf,application/x-font-woff,application/font-sfnt,application/vnd.ms-fontobject,
-//                application/octet-stream,application/vnd.ms-opentype',
-                ],
+                function ($attribute, $value, $fail) {
+
+                    $allowedExts = ['ttf', 'otf', 'woff', 'woff2', 'eot'];
+                    $allowedMimes = [
+                        'font/ttf',
+                        'font/otf',
+                        'font/woff',
+                        'font/woff2',
+                        'application/x-font-ttf',
+                        'application/x-font-otf',
+                        'application/x-font-woff',
+                        'application/font-sfnt',
+                        'application/vnd.ms-fontobject',
+                        'application/vnd.ms-opentype',
+                        'application/octet-stream',
+                    ];
+
+                    $ext = strtolower($value->getClientOriginalExtension());
+                    $mime = $value->getMimeType();
+
+                    if (!in_array($ext, $allowedExts) && !in_array($mime, $allowedMimes)) {
+                        $fail('The ' . $attribute . ' must be a valid font file (TTF, OTF, WOFF, WOFF2, EOT).');
+                    }
+                },
+                'max:10240',
+
+            ],
         ]);
         $this->fontService->update($validated,$font);
         return Response::api();
