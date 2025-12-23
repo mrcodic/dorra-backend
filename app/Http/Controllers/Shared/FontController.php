@@ -44,28 +44,15 @@ class FontController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+       $validated =  $request->validate([
             'name' => ['required', 'string', 'max:255',],
             'font_styles' => ['required', 'array'],
-            'font_styles.*.id' => ['required', 'integer', 'exists:font_styles,id'],
+            'font_styles.*.name' => ['required', 'string', 'max:255'],
             'font_styles.*.file' => ['required', 'integer', 'exists:font_styles,id'],
         ]);
+       $font = $this->fontService->storeResource($validated);
 
-
-
-        $isAdminRoute = request()->is('api/v1/admin/*');
-
-        if ($isAdminRoute) {
-            $model = Admin::first() ?? Admin::find(8);
-            $collection = "web_fonts";
-        } else {
-            $model = auth($this->activeGuard)->user();
-            $collection = "{$this->activeGuard}_fonts";
-        }
-
-        $media = handleMediaUploads($request->file('file'), $model, $collection);
-
-        return Response::api(data: MediaResource::make($media)->response()->getData(true));
+//        return Response::api(data: MediaResource::make($media)->response()->getData(true));
     }
     public function destroy($mediaId)
     {

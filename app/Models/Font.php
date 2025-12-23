@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Font extends Model
 {
@@ -10,4 +11,8 @@ class Font extends Model
         'name',
     ];
 
+    public function fontStyles(): HasMany
+    {
+        return $this->hasMany(FontStyle::class);
+    }
 }

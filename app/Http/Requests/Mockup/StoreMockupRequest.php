@@ -106,7 +106,8 @@ class StoreMockupRequest extends BaseRequest
     public function attributes()
     {
         return [
-            'templates' => 'positions'
+            'templates' => 'positions',
+            'category_id' => 'product_id'
         ];
     }
 

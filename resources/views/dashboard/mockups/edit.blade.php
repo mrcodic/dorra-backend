@@ -201,12 +201,37 @@
                         </span>
                     </div>
                     <div class="row">
-                        <div class="form-group mb-2 col-md-3">
-                            <input type="text" id="templateName" class="form-control" name="name"
-                                placeholder="Mockup Name" value="{{ $model->name }}">
+                        <div class="row">
+
+                            <div class="form-group mb-2 col-md-6">
+                                <label  class="label-text mb-1">Name</label>
+                                <input type="text" id="templateName" class="form-control" name="name"
+                                       placeholder="Mockup Name" value="{{ $model->name }}">
+                            </div>
+                            <div class="form-group mb-2 col-6">
+                                <label for="productsSelect" class="label-text mb-1">Product</label>
+                                <select id="productsSelect" name="category_id" class="form-select">
+                                    <option value="" disabled selected>Choose product</option>
+                                    @foreach($associatedData['products'] as $product)
+                                        <option value="{{ $product->id }}" @selected($product->id == $model->category_id)>
+                                            {{ $product->getTranslation('name', app()->getLocale()) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
 
-                        <div class="form-group mb-2 col-md-9">
+                        <div class="form-group mb-2 d-none" id="templatesCardsWrapper">
+                            <label class="form-label mb-1">Choose Template</label>
+
+                            {{-- هنا هتنضاف الكروت بالـ JS --}}
+                            <div id="templatesCardsContainer"
+                                 class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm"></div>
+                            <input type="hidden" name="template_id" id="selectedTemplateId">
+                            <div id="templatesHiddenContainer"></div>
+
+                        </div>
+                        <div class="form-group mb-2 col-md-12">
                             <div class="row">
                                 @foreach($associatedData['types'] as $type)
                                 <div class="col-md-4 mb-1">
@@ -249,28 +274,6 @@
                         </div>
                     </div>
 
-                    <div class="form-group mb-2">
-                        <label for="productsSelect" class="label-text mb-1">Product</label>
-                        <select id="productsSelect" name="category_id" class="form-select">
-                            <option value="" disabled selected>Choose product</option>
-                            @foreach($associatedData['products'] as $product)
-                            <option value="{{ $product->id }}" @selected($product->id == $model->category_id)>
-                                {{ $product->getTranslation('name', app()->getLocale()) }}
-                            </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="form-group mb-2 d-none" id="templatesCardsWrapper">
-                        <label class="form-label mb-1">Choose Template</label>
-
-                        {{-- هنا هتنضاف الكروت بالـ JS --}}
-                        <div id="templatesCardsContainer"
-                            class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm"></div>
-                        <input type="hidden" name="template_id" id="selectedTemplateId">
-                        <div id="templatesHiddenContainer"></div>
-
-                    </div>
 
                 </div>
 
@@ -609,7 +612,7 @@
                                         <div class="text-muted small mb-1">${types}</div>
                                     </div>
                                 </div>
-                            </div>     
+                            </div>
                 `;
                     }).join('');
 
