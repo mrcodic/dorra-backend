@@ -1151,6 +1151,8 @@
         function bindCanvasUpdates(canvas, type) {
             canvas.on('object:modified', function (e) {
                 const obj = e.target;
+                const card = document.querySelector(`.template-card[data-id="${obj.templateId}"]`);
+                if (card) card.classList.add('selected');
                 // syncTemplateInputs(obj, type);
                 updateTemplatePositionsFromObject(obj, type);
                 buildHiddenTemplateInputs();
