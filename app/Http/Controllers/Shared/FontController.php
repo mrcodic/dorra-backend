@@ -38,13 +38,13 @@ class FontController extends Controller
             'font_styles.*.file' => [
                 'required',
                 'file',
-                'mimetypes:font/ttf,font/otf,font/woff,font/woff2,
-                application/x-font-ttf,application/x-font-otf,application/x-font-woff,application/font-sfnt,application/vnd.ms-fontobject,
-                application/octet-stream,application/vnd.ms-opentype',
-                'max:10240',
+//                'mimes:ttf,otf,woff,woff2,eot',
+//                'max:10240', // 10MB
+
             ],
 
         ]);
+
         $font = $this->fontService->storeResource($validated);
         return Response::api(data: FontResource::make($font));
     }
@@ -62,9 +62,9 @@ class FontController extends Controller
             'font_styles.*.id' => ['sometimes', 'integer', 'exists:font_styles,id'],
             'font_styles.*.name' => ['required', 'string', 'max:255'],
             'font_styles.*.file' => ['required_without:font_styles.*.id', 'file',
-                'mimetypes:font/ttf,font/otf,font/woff,font/woff2,
-                application/x-font-ttf,application/x-font-otf,application/x-font-woff,application/font-sfnt,application/vnd.ms-fontobject,
-                application/octet-stream,application/vnd.ms-opentype',
+//                'mimetypes:font/ttf,font/otf,font/woff,font/woff2,
+//                application/x-font-ttf,application/x-font-otf,application/x-font-woff,application/font-sfnt,application/vnd.ms-fontobject,
+//                application/octet-stream,application/vnd.ms-opentype',
                 ],
         ]);
         $this->fontService->update($validated,$font);
