@@ -41,6 +41,23 @@ class FontController extends Controller
         return Response::api(data: FontResource::make($font)->response()->getData(true));
     }
 
+    public function show($id)
+    {
+        $font = $this->fontService->showResource($id,['fontStyles.media']);
+        return Response::api(data: FontResource::make($font));
+    }
+    public function update(Request $request,Font $font, FontStyle $fontStyle)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255',],
+            'font_style_name' => ['required', 'string', 'max:255'],
+            'font_style_file' => ['required', 'file'],
+            'font_id' => ['sometimes', 'integer', 'exists:fonts,id'],
+        ]);
+        $this->fontService->update($validated,$font,$fontStyle);
+        return Response::api();
+    }
+
     public function destroy(Font $font)
     {
         $font->delete();
@@ -53,7 +70,7 @@ class FontController extends Controller
     {
         $fontStyle->delete();
         return Response::api(message: "Font Style deleted successfully.");
-        
+
     }
 
 }

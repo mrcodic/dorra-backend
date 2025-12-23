@@ -25,6 +25,12 @@ class FontService extends BaseService
         return $model->load('fontStyles');
 
     }
+    public function update($validatedData, $font, $fontStyle)
+    {
+        $font->update($validatedData);
+        $fontStyle->update(['name' => $validatedData['font_style_name'],]);
+        handleMediaUploads($validatedData['font_style_file'], $fontStyle,clearExisting: true);
+    }
 
 
 }
