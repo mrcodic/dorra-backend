@@ -272,7 +272,6 @@
                         </div>
                     </div>
 
-
                     <div class="form-group mb-2 d-none" id="templatesCardsWrapper">
                         <label class="form-label mb-1">Choose Template</label>
                         <div id="templatesCardsContainer"
@@ -280,24 +279,6 @@
                         <input type="hidden" name="template_id" id="selectedTemplateId">
 
                         <div id="templatesHiddenContainer"></div>
-                    </div>
-                    <div class="form-group mb-2 col-md-3">
-                        <input type="text" id="templateName" class="form-control" name="name" placeholder="Mockup Name">
-                    </div>
-
-                    <div class="form-group mb-2 col-md-9">
-                        <div class="row">
-                            @foreach($associatedData['types'] as $type)
-                            <div class="col-md-4 mb-1">
-                                <label class="radio-box">
-                                    <input class="form-check-input type-checkbox" type="checkbox" name="types[]"
-                                        value="{{ $type->value }}"
-                                        data-type-name="{{ strtolower($type->value->name) }}">
-                                    <span>{{ $type->value->label() }}</span>
-                                </label>
-                            </div>
-                            @endforeach
-                        </div>
                     </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-start">
