@@ -1375,7 +1375,7 @@ $mockupUpdateUrlTemplate = route('mockups.edit', ['mockup' => '__ID__']);
             paramName: "file",
             maxFiles: 1,
             maxFilesize: 1, // MB
-            acceptedFiles: "image/*",
+            acceptedFiles: "image/jpeg,image/png",
             headers: {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}"
             },
@@ -1407,7 +1407,7 @@ $mockupUpdateUrlTemplate = route('mockups.edit', ['mockup' => '__ID__']);
             paramName: "file",
             maxFiles: 1,
             maxFilesize: 1, // MB
-            acceptedFiles: "image/*",
+            acceptedFiles: "image/jpeg,image/png",
             headers: {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}"
             },
@@ -1439,7 +1439,7 @@ $mockupUpdateUrlTemplate = route('mockups.edit', ['mockup' => '__ID__']);
             paramName: "file",
             maxFiles: 1,
             maxFilesize: 1, // MB
-            acceptedFiles: "image/*",
+            acceptedFiles: "image/jpeg,image/png",
             headers: {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}"
             },
