@@ -46,7 +46,7 @@ class FontController extends Controller
 
         ]);
         $font = $this->fontService->storeResource($validated);
-        return Response::api(data: FontResource::make($font)->response()->getData(true));
+        return Response::api(data: FontResource::make($font));
     }
 
     public function show($id)
