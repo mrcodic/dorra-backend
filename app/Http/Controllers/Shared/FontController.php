@@ -61,7 +61,11 @@ class FontController extends Controller
             'font_styles' => ['required', 'array'],
             'font_styles.*.id' => ['sometimes', 'integer', 'exists:font_styles,id'],
             'font_styles.*.name' => ['required', 'string', 'max:255'],
-            'font_styles.*.file' => ['required_without:font_styles.*.id', 'file'],
+            'font_styles.*.file' => ['required_without:font_styles.*.id', 'file',
+                'mimetypes:font/ttf,font/otf,font/woff,font/woff2,
+                application/x-font-ttf,application/x-font-otf,application/x-font-woff,application/font-sfnt,application/vnd.ms-fontobject,
+                application/octet-stream,application/vnd.ms-opentype',
+                ],
         ]);
         $this->fontService->update($validated,$font);
         return Response::api();
