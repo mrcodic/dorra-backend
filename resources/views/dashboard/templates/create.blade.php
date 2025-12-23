@@ -561,7 +561,8 @@ $mockupUpdateUrlTemplate = route('mockups.edit', ['mockup' => '__ID__']);
                     // choose an image (adjust to your response shape)
                     const img =
                         mockup?.images?.front?.base_url ||
-                        mockup?.images?.base_url ||
+                        mockup?.images?.back?.base_url ||
+                        mockup?.images?.none?.base_url ||
                         "{{ asset('images/placeholder.svg') }}";
 
                     const isSelected = selected.has(String(id)) || selected.has(Number(id));
