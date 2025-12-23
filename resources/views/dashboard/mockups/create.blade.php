@@ -273,32 +273,33 @@
                 </div>
 
 
+                {{-- <div class="mb-2">
+                    <label class="label-text mb-1 d-block">Colors</label>
+                    <div class="d-flex flex-wrap align-items-center gap-1">
+                        <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
 
-        </div>
+                        <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>
+                    </div>
+                    <div id="colorsInputContainer"></div>
+                </div> --}}
 
-
-        {{-- <div class="mb-2">
-            <label class="label-text mb-1 d-block">Colors</label>
-            <div class="d-flex flex-wrap align-items-center gap-1">
-                <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
-
-                <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>
-            </div>
-            <div id="colorsInputContainer"></div>
-        </div> --}}
-
-        <div class="modal-footer border-top-0">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
-                <span class="btn-text">Create</span>
-                <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                    aria-hidden="true"></span>
-            </button>
-        </div>
-
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
+                        <span class="btn-text">Create</span>
+                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
+                              aria-hidden="true"></span>
+                    </button>
+                </div>
+       
         </form>
     </div>
-    </div>
+
+        </div>
+
+
+
+
     @include("modals.templates.template-modal")
 </section>
 <!-- users list ends -->
