@@ -58,7 +58,7 @@ class StoreMockupRequest extends BaseRequest
             'templates.*.none_width'   => ['nullable', 'numeric', 'min:0'],
             'templates.*.none_height'  => ['nullable', 'numeric', 'min:0'],
             'templates.*.none_angle'   => ['nullable', 'numeric'],
-            'templates.*.colors'   => ['nullable', 'array'],
+            'templates.*.colors'   => ['required', 'array'],
             'front_base_image' => [
                 Rule::requiredIf(in_array(1, $types)),
                 'image',

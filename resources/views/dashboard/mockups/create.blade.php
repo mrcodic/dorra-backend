@@ -198,38 +198,14 @@
                         </span>
                     </div>
                     <div class="row">
-                        <div class="row">
-                            <div class="form-group mb-2 col-md-6">
-                                <label class="label-text mb-1">Name</label>
 
-                                <input type="text" id="templateName" class="form-control" name="name"
-                                    placeholder="Mockup Name">
-                            </div>
-                            <div class="form-group mb-2 col-6">
-                                <label for="productsSelect" class="label-text mb-1">Product</label>
-                                <select id="productsSelect" name="category_id" class="form-select">
-                                    <option value="" disabled selected>Choose product</option>
-                                    @foreach($associatedData['products'] as $product)
-                                    <option value="{{ $product->id }}">
-                                        {{ $product->getTranslation('name', app()->getLocale()) }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                            </div>
+                        <div class="form-group mb-2 col-md-2">
+                            <input type="text" id="templateName" class="form-control" name="name"
+                                placeholder="Mockup Name">
                         </div>
 
 
-                        <div class="form-group mb-2 d-none" id="templatesCardsWrapper">
-                            <label class="form-label mb-1">Choose Template</label>
-                            <div id="templatesCardsContainer"
-                                class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm"></div>
-                            <input type="hidden" name="template_id" id="selectedTemplateId">
-
-                            <div id="templatesHiddenContainer"></div>
-                        </div>
-
-
-                        <div class="form-group mb-2 col-md-12">
+                        <div class="form-group mb-2 col-md-9">
                             <div class="row">
                                 @foreach($associatedData['types'] as $type)
                                 <div class="col-md-4 mb-1">
@@ -272,6 +248,20 @@
                         </div>
                     </div>
 
+                    <div class="form-group mb-2 col-12">
+                        <label for="productsSelect" class="label-text mb-1">Product</label>
+                        <select id="productsSelect" name="category_id" class="form-select">
+                            <option value="" disabled selected>Choose product</option>
+                            @foreach($associatedData['products'] as $product)
+                            <option value="{{ $product->id }}">
+                                {{ $product->getTranslation('name', app()->getLocale()) }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+
                     <div class="form-group mb-2 d-none" id="templatesCardsWrapper">
                         <label class="form-label mb-1">Choose Template</label>
                         <div id="templatesCardsContainer"
@@ -281,33 +271,7 @@
                         <div id="templatesHiddenContainer"></div>
                     </div>
                 </div>
-                <div class="d-flex justify-content-between align-items-start">
-                    <!-- العمود الشمال: يحتوي fixed-block + fileInputsContainer (البلوكات تتحط هنا) -->
-                    <div id="left-column" class="d-flex flex-column" style="width:60%;">
-                        <!-- fixed-block يبقى مكان الإشارة لفانكشنك -->
-                        <div id="fixed-block"></div>
 
-                        <!-- الحاوية اللى بتضيف لها الفانكشن البلوكات (لو مش موجودة بالفعل) -->
-                        <div id="fileInputsContainer"></div>
-                    </div>
-
-                    <!-- العمود اليمين: الـ editor / preview -->
-                    <div class="d-flex flex-column gap-2 justify-content-between">
-                        <div class="mt-2 d-none" id="editorFrontWrapper" style="width:auto">
-                            <label class="label-text">Mockup Editor (Front)</label>
-                            <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="300"></canvas>
-                        </div>
-                        <div class="mt-2 d-none" id="editorBackWrapper" style="width:auto">
-                            <label class="label-text">Mockup Editor (Back)</label>
-                            <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="300"></canvas>
-                        </div>
-
-                        <div class="mt-2 d-none" id="editorNoneWrapper" style="width: auto">
-                            <label class="label-text">Mockup Editor (General)</label>
-                            <canvas id="mockupCanvasNone" height="300" style="border:1px solid #ccc;"></canvas>
-                        </div>
-                    </div>
-                </div>
 
 
         </div>
@@ -655,15 +619,15 @@
             // Show Remaining → افتح المودال
             // =========================
             $templatesCardsContainer.on('click', '.js-open-templates-modal', function () {
-                // باقي العناصر من أول صفحة
-                const remaining = firstPageTemplates.slice(3);
-
-                renderModalTemplates(remaining, false);
-                renderModalPagination();
+                // ✅ لو المودال متبني بالفعل (وفيه عناصر) افتحه بس
+                if ($modalContainer.children().length === 0) {
+                    const remaining = firstPageTemplates.slice(3);
+                    renderModalTemplates(remaining, false);
+                    renderModalPagination();
+                }
 
                 $modal.modal('show');
             });
-
             // =========================
             // Modal: Load More
             // =========================
@@ -734,46 +698,35 @@
                     const $mainContainer  = $('#templatesCardsContainer');
                     const $modalContainer = $('#templates-modal-container');
 
-                    // الكارت اللي اتضغط عليه (في المودال)
                     const $modalCard = $(this).closest('.template-card');
                     const $modalCol  = $modalCard.closest('[class*="col-"]');
 
-                    // 🟢 احفظ موقع الكارت داخل المودال (عشان نحط مكانه الكارت اللي هيخرج من برا)
-                    const $nextSibling = $modalCol.next();
-                    const $placeholder = $('<div class="__swap_placeholder__"></div>');
-                    $modalCol.before($placeholder);
+                    // placeholder مكان كارت المودال
+                    const $ph = $('<div class="__swap_ph__"></div>');
+                    $modalCol.before($ph);
 
-                    // 🟢 هات آخر كارت من التلاتة اللي برا (بدون show-more)
+                    // آخر كارت من التلاتة اللي برا (بدون show-more)
                     const $mainCards = $mainContainer.find('.template-card').not('.show-more');
                     if (!$mainCards.length) return;
 
                     const $lastMainCard = $mainCards.last();
                     const $lastMainCol  = $lastMainCard.closest('[class*="col-"]');
 
-                    // 🟢 جهّز الكارت الأخير للدخول في المودال
-                    $lastMainCol
+                    // 1) دخل آخر كارت برا إلى نفس مكان كارت المودال
+                    $lastMainCol.detach()
                         .removeClass('col-12 col-md-4 col-lg-3')
                         .addClass('col-6 col-md-4 mb-2');
 
-                    // 🟢 أضفه في نفس مكان الكارت اللي هيخرج من المودال
-                    if ($nextSibling.length) {
-                        $nextSibling.before($lastMainCol);
-                    } else {
-                        $modalContainer.append($lastMainCol);
-                    }
+                    $ph.replaceWith($lastMainCol); // ✅ هنا اتأكدنا انه اتحط مكانه فعلاً
 
-                    // 🟢 الآن احذف كارت المودال نفسه من المودال
-                    $modalCol.remove();
-
-                    // 🟢 جهّز الكارت اللي كان في المودال ليدخل أول التلاتة برا
-                    $modalCol
+                    // 2) خرج كارت المودال وادخله أول التلاتة برا
+                    $modalCol.detach()
                         .removeClass('col-6 col-md-4 mb-2')
                         .addClass('col-12 col-md-4 col-lg-3');
 
-                    // 🟢 ضيفه في أول القائمة برا
                     $mainContainer.prepend($modalCol);
 
-                    // 🟢 اقفل المودال
+                    // (اختياري) اقفل المودال
                     $('#templateModal').modal('hide');
                 }
 

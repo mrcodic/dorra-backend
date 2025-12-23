@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\Interfaces\FontRepositoryInterface;
+use Illuminate\Support\Arr;
 
 class FontService extends BaseService
 {
@@ -15,10 +16,20 @@ class FontService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        $model = $this->repository->create($validatedData);
-        $fontStyles = $model->fontStyles()->createMany($validatedData['font_styles']);
-        return $model;
+        $model = $this->repository->query()
+            ->firstOrCreate(['id' => Arr::get($validatedData,'font_id')],$validatedData);
+        $fontStyle = $model->fontStyles()->create([
+            'name' => $validatedData['font_style_name'],
+        ]);
+        handleMediaUploads($validatedData['font_style_file'], $fontStyle);
+        return $model->load('fontStyles');
 
+    }
+    public function update($validatedData, $font, $fontStyle)
+    {
+        $font->update($validatedData);
+        $fontStyle->update(['name' => $validatedData['font_style_name'],]);
+        handleMediaUploads($validatedData['font_style_file'], $fontStyle,clearExisting: true);
     }
 
 
