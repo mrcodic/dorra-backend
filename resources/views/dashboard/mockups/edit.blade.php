@@ -201,37 +201,15 @@
                         </span>
                     </div>
                     <div class="row">
-                        <div class="row">
 
-                            <div class="form-group mb-2 col-md-6">
-                                <label  class="label-text mb-1">Name</label>
+
+                            <div class="form-group mb-2 col-md-2">
+
                                 <input type="text" id="templateName" class="form-control" name="name"
                                        placeholder="Mockup Name" value="{{ $model->name }}">
                             </div>
-                            <div class="form-group mb-2 col-6">
-                                <label for="productsSelect" class="label-text mb-1">Product</label>
-                                <select id="productsSelect" name="category_id" class="form-select">
-                                    <option value="" disabled selected>Choose product</option>
-                                    @foreach($associatedData['products'] as $product)
-                                        <option value="{{ $product->id }}" @selected($product->id == $model->category_id)>
-                                            {{ $product->getTranslation('name', app()->getLocale()) }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
 
-                        <div class="form-group mb-2 d-none" id="templatesCardsWrapper">
-                            <label class="form-label mb-1">Choose Template</label>
-
-                            {{-- هنا هتنضاف الكروت بالـ JS --}}
-                            <div id="templatesCardsContainer"
-                                 class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm"></div>
-                            <input type="hidden" name="template_id" id="selectedTemplateId">
-                            <div id="templatesHiddenContainer"></div>
-
-                        </div>
-                        <div class="form-group mb-2 col-md-12">
+                        <div class="form-group mb-2 col-md-9">
                             <div class="row">
                                 @foreach($associatedData['types'] as $type)
                                 <div class="col-md-4 mb-1">
@@ -245,34 +223,58 @@
                                 @endforeach
                             </div>
                         </div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-start">
-                        <!-- العمود الشمال: يحتوي fixed-block + fileInputsContainer (البلوكات تتحط هنا) -->
-                        <div id="left-column" class="d-flex flex-column" style="width:60%;">
-                            <!-- fixed-block يبقى مكان الإشارة لفانكشنك -->
-                            <div id="fixed-block"></div>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <!-- العمود الشمال: يحتوي fixed-block + fileInputsContainer (البلوكات تتحط هنا) -->
+                            <div id="left-column" class="d-flex flex-column" style="width:60%;">
+                                <!-- fixed-block يبقى مكان الإشارة لفانكشنك -->
+                                <div id="fixed-block"></div>
 
-                            <!-- الحاوية اللى بتضيف لها الفانكشن البلوكات (لو مش موجودة بالفعل) -->
-                            <div id="fileInputsContainer"></div>
+                                <!-- الحاوية اللى بتضيف لها الفانكشن البلوكات (لو مش موجودة بالفعل) -->
+                                <div id="fileInputsContainer"></div>
+                            </div>
+
+                            <!-- العمود اليمين: الـ editor / preview -->
+                            <div class="d-flex flex-column gap-2 justify-content-between">
+                                <div class="mt-2 d-none" id="editorFrontWrapper" style="width:auto">
+                                    <label class="label-text">Mockup Editor (Front)</label>
+                                    <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="300"></canvas>
+                                </div>
+                                <div class="mt-2 d-none" id="editorBackWrapper" style="width:auto">
+                                    <label class="label-text">Mockup Editor (Back)</label>
+                                    <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="300"></canvas>
+                                </div>
+
+                                <div class="mt-2 d-none" id="editorNoneWrapper" style="width: auto">
+                                    <label class="label-text">Mockup Editor (General)</label>
+                                    <canvas id="mockupCanvasNone" height="300" style="border:1px solid #ccc;"></canvas>
+                                </div>
+                            </div>
                         </div>
-
-                        <!-- العمود اليمين: الـ editor / preview -->
-                        <div class="d-flex flex-column gap-2 justify-content-between">
-                            <div class="mt-2 d-none" id="editorFrontWrapper" style="width:auto">
-                                <label class="label-text">Mockup Editor (Front)</label>
-                                <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="300"></canvas>
-                            </div>
-                            <div class="mt-2 d-none" id="editorBackWrapper" style="width:auto">
-                                <label class="label-text">Mockup Editor (Back)</label>
-                                <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="300"></canvas>
-                            </div>
-
-                            <div class="mt-2 d-none" id="editorNoneWrapper" style="width: auto">
-                                <label class="label-text">Mockup Editor (General)</label>
-                                <canvas id="mockupCanvasNone" height="300" style="border:1px solid #ccc;"></canvas>
-                            </div>
-                        </div>
                     </div>
+                    <div class="form-group mb-2 col-12">
+                        <label for="productsSelect" class="label-text mb-1">Product</label>
+                        <select id="productsSelect" name="category_id" class="form-select">
+                            <option value="" disabled selected>Choose product</option>
+                            @foreach($associatedData['products'] as $product)
+                                <option value="{{ $product->id }}" @selected($product->id == $model->category_id)>
+                                    {{ $product->getTranslation('name', app()->getLocale()) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    <div class="form-group mb-2 d-none" id="templatesCardsWrapper">
+                        <label class="form-label mb-1">Choose Template</label>
+
+                        {{-- هنا هتنضاف الكروت بالـ JS --}}
+                        <div id="templatesCardsContainer"
+                             class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm"></div>
+                        <input type="hidden" name="template_id" id="selectedTemplateId">
+                        <div id="templatesHiddenContainer"></div>
+
+                    </div>
+
 
 
                 </div>
