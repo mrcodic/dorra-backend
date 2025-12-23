@@ -88,26 +88,26 @@
     }
 
     /* كل بلوك ياخد سطر كامل ويتكدس عموديًا */
-    .type-block {
+    /* .type-block {
         display: block !important;
         width: 100% !important;
         box-sizing: border-box;
         margin-bottom: .75rem;
-    }
+    } */
 
     /* لو الـ inner d-flex موجود داخل البلوك فهو هعرض Base | Mask جنب بعض */
-    .type-block>.d-flex {
+    /* .type-block>.d-flex {
         display: flex;
         gap: 1rem;
         align-items: flex-start;
-    }
+    } */
 
     /* تأكد أن الحاوية اليسرى عمودية */
-    #left-column {
+    /* #left-column {
         display: flex !important;
         flex-direction: column !important;
         gap: .75rem;
-    }
+    } */
 
     /* لو محتاج تجاويف داخل البلوكات */
     .upload-card {
@@ -189,86 +189,93 @@
             <form id="addMockupForm" enctype="multipart/form-data" action="{{ route('mockups.store') }}">
                 @csrf
                 <div class="modal-body flex-grow-1">
-                    <div class="position-relative text-center mb-2">
+                    {{-- <div class="position-relative text-center mb-2">
                         <hr class="opacity-75" style="border: 1px solid #24B094;">
                         <span
                             class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
                             style="color: #24B094">
                             Mockup Details
                         </span>
-                    </div>
+                    </div> --}}
                     <div class="row">
-
-                        <div class="form-group mb-2 col-md-2">
+                        {{-- Mockup name --}}
+                        <div class="form-group mb-2 col-12">
+                            <label for="mockupName" class="label-text mb-1">Mockup Name</label>
                             <input type="text" id="templateName" class="form-control" name="name"
                                 placeholder="Mockup Name">
                         </div>
 
-
-                        <div class="form-group mb-2 col-md-9">
-                            <div class="row">
-                                @foreach($associatedData['types'] as $type)
-                                <div class="col-md-4 mb-1">
-                                    <label class="radio-box">
-                                        <input class="form-check-input type-checkbox" type="checkbox" name="types[]"
-                                            value="{{ $type->value }}"
-                                            data-type-name="{{ strtolower($type->value->name) }}">
-                                        <span>{{ $type->value->label() }}</span>
-                                    </label>
-                                </div>
+                        {{-- Select Product --}}
+                        <div class="form-group mb-2 col-12">
+                            <label for="productsSelect" class="label-text mb-1">Product</label>
+                            <select id="productsSelect" name="category_id" class="form-select">
+                                <option value="" disabled selected>Choose product</option>
+                                @foreach($associatedData['products'] as $product)
+                                <option value="{{ $product->id }}">
+                                    {{ $product->getTranslation('name', app()->getLocale()) }}
+                                </option>
                                 @endforeach
-                            </div>
+                            </select>
                         </div>
                     </div>
-                    <div class="d-flex justify-content-between align-items-start">
-                        <!-- العمود الشمال: يحتوي fixed-block + fileInputsContainer (البلوكات تتحط هنا) -->
-                        <div id="left-column" class="d-flex flex-column" style="width:60%;">
+
+                    {{-- Mockup type --}}
+                    <div class="form-group mb-2">
+                        <div class="row">
+                            @foreach($associatedData['types'] as $type)
+                            <div class="col-md-4 mb-1">
+                                <label class="radio-box">
+                                    <input class="form-check-input type-checkbox" type="checkbox" name="types[]"
+                                        value="{{ $type->value }}"
+                                        data-type-name="{{ strtolower($type->value->name) }}">
+                                    <span>{{ $type->value->label() }}</span>
+                                </label>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- mockup Canvas --}}
+                    <!-- العمود الشمال: يحتوي fixed-block + fileInputsContainer (البلوكات تتحط هنا) -->
+                    <div class="row">
+                        <div id="left-column" class="col-md-12">
                             <!-- fixed-block يبقى مكان الإشارة لفانكشنك -->
                             <div id="fixed-block"></div>
 
                             <!-- الحاوية اللى بتضيف لها الفانكشن البلوكات (لو مش موجودة بالفعل) -->
-                            <div id="fileInputsContainer"></div>
+                            <div id="fileInputsContainer" class="row g-1"></div>
+                        </div>
+                    </div>
+                    <!-- العمود اليمين: الـ editor / preview -->
+                    <div class="row">
+                        <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorFrontWrapper">
+                            <label class="label-text">Mockup Editor (Front)</label>
+                            <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="480"
+                                width="480"></canvas>
+                        </div>
+                        <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorBackWrapper">
+                            <label class="label-text">Mockup Editor (Back)</label>
+                            <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="480"
+                                width="480"></canvas>
                         </div>
 
-                        <!-- العمود اليمين: الـ editor / preview -->
-                        <div class="d-flex flex-column gap-2 justify-content-between">
-                            <div class="mt-2 d-none" id="editorFrontWrapper" style="width:auto">
-                                <label class="label-text">Mockup Editor (Front)</label>
-                                <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="300"></canvas>
-                            </div>
-                            <div class="mt-2 d-none" id="editorBackWrapper" style="width:auto">
-                                <label class="label-text">Mockup Editor (Back)</label>
-                                <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="300"></canvas>
-                            </div>
-
-                            <div class="mt-2 d-none" id="editorNoneWrapper" style="width: auto">
-                                <label class="label-text">Mockup Editor (General)</label>
-                                <canvas id="mockupCanvasNone" height="300" style="border:1px solid #ccc;"></canvas>
-                            </div>
+                        <div class="d-none" id="editorNoneWrapper">
+                            <label class="label-text">Mockup Editor (General)</label>
+                            <canvas id="mockupCanvasNone" class="w-100" height="300"
+                                style="border:1px solid #ccc;"></canvas>
                         </div>
                     </div>
 
-                    <div class="form-group mb-2 col-12">
-                        <label for="productsSelect" class="label-text mb-1">Product</label>
-                        <select id="productsSelect" name="category_id" class="form-select">
-                            <option value="" disabled selected>Choose product</option>
-                            @foreach($associatedData['products'] as $product)
-                            <option value="{{ $product->id }}">
-                                {{ $product->getTranslation('name', app()->getLocale()) }}
-                            </option>
-                            @endforeach
-                        </select>
-                    </div>
 
 
 
                     <div class="form-group mb-2 d-none" id="templatesCardsWrapper">
                         <label class="form-label mb-1">Choose Template</label>
                         <div id="templatesCardsContainer"
-                            class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm"></div>
+                            class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm">
+                        </div>
                         <input type="hidden" name="template_id" id="selectedTemplateId">
 
-                        <div id="templatesHiddenContainer"></div>
                     </div>
                 </div>
 
@@ -288,14 +295,14 @@
                     <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
                         <span class="btn-text">Create</span>
                         <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                              aria-hidden="true"></span>
+                            aria-hidden="true"></span>
                     </button>
                 </div>
-       
-        </form>
-    </div>
 
+            </form>
         </div>
+
+    </div>
 
 
 
@@ -485,14 +492,11 @@
                 // لو عندنا أكتر من 3 → زر Show Remaining
                 if (templates.length > maxInline) {
                     const showMoreHtml = `
-                    <div class="template-card cursor-pointer show-more">
-                        <div class="card rounded-3 shadow-sm show-more-card js-open-templates-modal" tabindex="0" style="border:1px solid #24B094;">
-                            <div class="d-flex justify-content-center align-items-center gap-1"
-                             style="background-color:#F4F6F6; height:310px; width:270px; border-radius:12px; padding:10px; color: #24B094; font-size: 16px; overflow:hidden;">
-                                <span>Show more Templates</span>
-                                <span class="show-more-arrow" aria-hidden="true" style="font-size:16px;">➜</span>
-                            </div>
-                        </div>
+                    <div class="text-center">
+                        <button
+                            type="button"
+                            id="showMoreTemplates"
+                            class="btn btn-outline-primary">Show All Templates</button>
                     </div>
                 `;
                     $templatesCardsContainer.append(showMoreHtml);
@@ -1285,44 +1289,42 @@
                 const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
 
                 const block = document.createElement('div');
-                block.classList.add('type-block');
+                block.className = 'col-md-6';
                 block.id = `${type}-file-block`;
 
                 block.innerHTML = `
-            <div class="d-flex justify-content-between gap-4">
-                <div>
-                    <label class="form-label label-text">${typeLabel} Base Image</label>
-                    <input type="file" name="${type}_base_image" id="${type}-base-input"
-                        class="d-none" accept="image/*">
-
-                    <div class="upload-card upload-area" data-input-id="${type}-base-input">
-                        <div class="upload-content">
-                            <i data-feather="upload" class="mb-2"></i>
-                            <p>${typeLabel} Base Image: Drag file here or click to upload</p>
-                            <div class="preview mt-1"></div>
+                    <label for="mockupTypLabel" class="label-text">${typeLabel}</label>
+                    <hr style="height: 2px; background-color: #CED5D4;"/>
+                    <div class="mb-2">
+                        <label class="form-label label-text">${typeLabel} Base Image</label>
+                        <input type="file" name="${type}_base_image" id="${type}-base-input"
+                            class="d-none" accept="image/*">
+    
+                        <div class="upload-card upload-area" data-input-id="${type}-base-input">
+                            <div class="upload-content">
+                                <i data-feather="upload" class="mb-2"></i>
+                                <p>${typeLabel} Base Image: Drag file here or click to upload</p>
+                                <div class="preview mt-1"></div>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div>
-                    <label class="form-label label-text">${typeLabel} Mask Image</label>
-                    <input type="file" name="${type}_mask_image" id="${type}-mask-input"
-                        class="d-none" accept="image/*">
-
-                    <div class="upload-card upload-area" data-input-id="${type}-mask-input">
-                        <div class="upload-content">
-                            <i data-feather="upload" class="mb-2"></i>
-                            <p>${typeLabel} Mask Image: Drag file here or click to upload</p>
-                            <div class="preview mt-1"></div>
+    
+                    <div class="mb-2">
+                        <label class="form-label label-text">${typeLabel} Mask Image</label>
+                        <input type="file" name="${type}_mask_image" id="${type}-mask-input"
+                            class="d-none" accept="image/*">
+    
+                        <div class="upload-card upload-area" data-input-id="${type}-mask-input">
+                            <div class="upload-content">
+                                <i data-feather="upload" class="mb-2"></i>
+                                <p>${typeLabel} Mask Image: Drag file here or click to upload</p>
+                                <div class="preview mt-1"></div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
         `;
 
-                const target = document.getElementById("fixed-block");
-                removeCanvasByType(type);
-                target.before(block);
+                document.getElementById('fileInputsContainer').appendChild(block);
             });
 
             feather.replace();
