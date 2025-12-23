@@ -205,12 +205,6 @@
                                 placeholder="Mockup Name">
                         </div>
                         <div class="row">
-
-                            <div class="form-group mb-2 col-md-2">
-                                <input type="text" id="templateName" class="form-control" name="name"
-                                    placeholder="Mockup Name">
-                            </div>
-
                             {{-- Select Product --}}
                             <div class="form-group mb-2 col-12">
                                 <label for="productsSelect" class="label-text mb-1">Product</label>
