@@ -107,7 +107,7 @@ class MainController extends Controller
 
     public function fonts()
     {
-        return Response::api(data: FontResource::collection($this->fontService->getAll(['fontStyles'])));
+        return Response::api(data: FontResource::collection($this->fontService->getAll(['fontStyles.media'])));
 
     }
     public function countries()
