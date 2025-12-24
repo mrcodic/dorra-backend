@@ -1,11 +1,14 @@
 <?php
 
+use App\Enums\Template\StatusEnum;
+use App\Http\Controllers\Api\V1\User\ShippingAddress\ShippingController;
 use App\Http\Controllers\Dashboard\{AdminController,
     BoardController,
     CategoryController,
     DiscountCodeController,
     FaqController,
     FlagController,
+    FontController,
     IndustryController,
     InventoryController,
     InvoiceController,
@@ -29,11 +32,8 @@ use App\Http\Controllers\Dashboard\{AdminController,
     SubIndustryController,
     TagController,
     TemplateController,
-    UserController
-};
-use App\Enums\Template\StatusEnum;
-use App\Http\Controllers\Api\V1\User\ShippingAddress\ShippingController;
-use App\Http\Controllers\Shared\{CommentController,FontController,LibraryAssetController};
+    UserController};
+use App\Http\Controllers\Shared\{CommentController, LibraryAssetController};
 use App\Http\Controllers\Shared\General\MainController;
 use App\Http\Middleware\AutoCheckPermission;
 use Illuminate\Http\Request;
