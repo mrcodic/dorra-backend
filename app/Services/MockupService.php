@@ -291,14 +291,7 @@ class MockupService extends BaseService
                     ];
                 });
 
-                foreach ($syncData as $templateId => $pivotData) {
-                    $existing = $model->templates()->where('template_id', $templateId)->exists();
-                    if ($existing) {
-                        $model->templates()->updateExistingPivot($templateId, $pivotData);
-                    } else {
-                        $model->templates()->attach($templateId, $pivotData);
-                    }
-                }
+                $model->templates()->syncWithoutDetaching($syncData);
             }
 
             if (request()->allFiles()) {
