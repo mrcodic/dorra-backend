@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Repositories\Implementations\StationStatusRepository;
 use App\Services\FlagService;
+use App\Services\FontService;
 use App\Services\MockupService;
 use App\Http\Resources\{CategoryResource,
     CountryCodeResource,
@@ -18,6 +19,7 @@ use App\Http\Resources\{CategoryResource,
     DimensionResource,
     FlagResource,
     FolderResource,
+    FontResource,
     MediaResource,
     MockupResource,
     Product\ProductResource,
@@ -79,6 +81,7 @@ class MainController extends Controller
         public IndustryRepositoryInterface    $industryRepository,
         public SocialLinkRepositoryInterface $socialLinkRepository,
         public MockupService $mockupService,
+        public FontService $fontService,
 
     )
     {
@@ -99,6 +102,12 @@ class MainController extends Controller
     public function mockups()
     {
         return Response::api(data: $this->mockupService->getMockups());
+
+    }
+
+    public function fonts()
+    {
+        return Response::api(data: FontResource::collection($this->fontService->getAll(['fontStyles'])));
 
     }
     public function countries()
