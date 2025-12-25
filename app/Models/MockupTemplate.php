@@ -24,6 +24,7 @@ class MockupTemplate extends Pivot
     ];
     protected $attributes = [
           'colors' => '[]',
+          'positions' => '[]',
     ];
 
     public function mockup()
