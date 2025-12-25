@@ -23,7 +23,6 @@ class MockupTemplate extends Pivot
         'colors'
     ];
     protected $attributes = [
-        'positions' => '[]',
           'colors' => '[]',
     ];
 

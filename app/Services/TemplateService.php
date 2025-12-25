@@ -270,6 +270,26 @@ class TemplateService extends BaseService
         return $model->load($relationsToLoad);
     }
 
+    private function defaultPositionsForTypes(array $typeIds): array
+    {
+        $sides = [];
+
+        if (in_array(1, $typeIds, true)) $sides[] = 'front';
+        if (in_array(2, $typeIds, true)) $sides[] = 'back';
+        if (in_array(3, $typeIds, true)) $sides[] = 'none';
+
+        if (!$sides) $sides = ['front','back','none'];
+
+        $pos = [];
+        foreach ($sides as $side) {
+            $pos["{$side}_x"]      = 0.5;
+            $pos["{$side}_y"]      = 0.5;
+            $pos["{$side}_width"]  = 0.4;
+            $pos["{$side}_height"] = 0.4;
+            $pos["{$side}_angle"]  = 0;
+        }
+        return $pos;
+    }
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
@@ -282,12 +302,17 @@ class TemplateService extends BaseService
         $validatedData['colors'] = $finalColors;
         $model = $this->handleTransaction(function () use ($validatedData, $id, $colors) {
             $model = $this->repository->update($validatedData, $id);
-            if ($validatedData['mockup_id']){
+            if (!empty($validatedData['mockup_id'])) {
+
+                $selectedTypeValues = Arr::get($validatedData, 'types', []);
+                $positions = $this->defaultPositionsForTypes($selectedTypeValues);
+
                 $model->mockups()->syncWithPivotValues(
-                    [$validatedData['mockup_id']] ?? [],
-                    ['positions' => []]
+                    [(int) $validatedData['mockup_id']],
+                    ['positions' => $positions]
                 );
             }
+
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
             $modelTypesValues   = $model->types->pluck('value.value')->toArray();
 
