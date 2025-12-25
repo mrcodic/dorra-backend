@@ -198,9 +198,12 @@ class TemplateService extends BaseService
             $model->industries()->sync($validatedData['industry_ids'] ?? []);
             $model->categories()->sync($validatedData['category_ids'] ?? []);
             if ($validatedData['mockup_id']){
+                $selectedTypeValues = Arr::get($validatedData, 'types', []);
+                $positions = $this->defaultPositionsForTypes($selectedTypeValues);
+
                 $model->mockups()->syncWithPivotValues(
-                    [$validatedData['mockup_id']] ?? [],
-                    ['positions' => []]
+                    [(int) $validatedData['mockup_id']],
+                    ['positions' => $positions]
                 );
             }
 
@@ -302,7 +305,7 @@ class TemplateService extends BaseService
         $validatedData['colors'] = $finalColors;
         $model = $this->handleTransaction(function () use ($validatedData, $id, $colors) {
             $model = $this->repository->update($validatedData, $id);
-            if (!empty($validatedData['mockup_id'])) {
+            if (!empty($validatedData['mockup_id']) && !$model->mockups->contains($validatedData['mockup_id'])) {
 
                 $selectedTypeValues = Arr::get($validatedData, 'types', []);
                 $positions = $this->defaultPositionsForTypes($selectedTypeValues);

@@ -286,10 +286,27 @@ class MockupService extends BaseService
 
         return $model;
     }
+    private function syncTemplatesSmart($model, array $syncData, bool $typesChanged)
+    {
+        $requestIds = collect(array_keys($syncData))->map('strval');
+        $dbIds = $model->templates()->pluck('templates.id')->map('strval');
+        $toAttach = $requestIds->diff($dbIds);
+        $toDetach = $requestIds->intersect($dbIds);
+        if ($toDetach->isNotEmpty()) {
+            $model->templates()->detach($toDetach->all());
+        }
+
+        foreach ($toAttach as $id) {
+            $model->templates()->attach($id, $syncData[$id]);
+        }
+
+        if ($typesChanged || $toAttach->isNotEmpty() || $toDetach->isNotEmpty()) {
+            $model->clearMediaCollection('generated_mockups');
+        }
+    }
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
-
         $model = $this->handleTransaction(function () use ($id, $validatedData) {
 
             $model = $this->repository->update($validatedData, $id);
@@ -341,8 +358,7 @@ class MockupService extends BaseService
                     ];
                 });
                 if ($typesChanged) {
-                    $model->templates()->sync($syncData);
-                    $model->clearMediaCollection('generated_mockups');
+                    $this->syncTemplatesSmart($model, $syncData, true);
                 }else{
                     $model->templates()->syncWithoutDetaching($syncData);
 
