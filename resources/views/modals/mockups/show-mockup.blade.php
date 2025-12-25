@@ -9,7 +9,7 @@
             <div class="modal-body flex-grow-1">
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                     <!-- Mockup Images Section -->
-                    <div class="mockup-images-container d-flex flex-column gap-3">
+                    <div class="mockup-images-container d-flex flex-wrap gap-1">
                         <!-- Images will be inserted here dynamically -->
                     </div>
 
@@ -24,7 +24,6 @@
               align-items: center;
               gap: 8px;
               " class="colors-container">
-
                     </div>
                 </div>
             </div>
