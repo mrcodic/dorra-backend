@@ -341,6 +341,7 @@ class MockupService extends BaseService
                 });
                 if ($typesChanged) {
                     $model->templates()->sync($syncData);
+                    $model->clearMediaCollection('generated_mockups');
                 }else{
                     $model->templates()->syncWithoutDetaching($syncData);
 
