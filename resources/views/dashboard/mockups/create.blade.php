@@ -120,55 +120,7 @@
         --anim-ease: cubic-bezier(.2, .9, .3, 1);
     }
 
-    /* first position of text and arrow */
-    .show-more-text,
-    .show-more-arrow {
-        display: inline-block;
-        vertical-align: middle;
-        transition: transform var(--anim-duration) var(--anim-ease), opacity var(--anim-duration) var(--anim-ease);
-    }
-
-    /* first position of the arrow is hidden and come from right */
-    .show-more-arrow {
-        opacity: 0;
-        transform: translateX(10px) scale(0.9);
-        pointer-events: none;
-    }
-
-    /* text is in the same position */
-    .show-more-text {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
-
-    /* on focus or hover: the text go to left and the arrow come from right */
-    .show-more-card:hover .show-more-text,
-    .show-more-card:focus .show-more-text,
-    .show-more-card:focus-within .show-more-text {
-        opacity: 0;
-        transform: translateX(-30px) scale(0.95);
-    }
-
-    .show-more-card:hover .show-more-arrow,
-    .show-more-card:focus .show-more-arrow,
-    .show-more-card:focus-within .show-more-arrow {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
-
-    /* the movement of the arrow is delayed */
-    .show-more-arrow {
-        font-size: 22px;
-        margin-left: 6px;
-        transition-delay: 80ms;
-    }
-
-    .show-more-text {
-        transition-delay: 0ms;
-    }
-
-    /* on hover: some shadow and movement of the arrow */
-    .show-more-card:hover {
+    .show-more:hover {
         transform: translateY(-4px);
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
         transition: transform 180ms var(--anim-ease), box-shadow 180ms var(--anim-ease);
@@ -264,11 +216,10 @@
 
 
                     <div class="form-group my-2 d-none" id="templatesCardsWrapper">
-                        <label class="form-label mb-1">Choose Template</label>
-                        <div id="templatesCardsContainer"
-                            class="d-flex align-items-center gap-1 p-1 bg-white border rounded-3 shadow-sm"></div>
-                        <input type="hidden" name="template_id" id="selectedTemplateId">
-
+                        <label class="form-label mb-2">Choose Template</label>
+                        <div id="templatesCardsContainer" class="row g-1 p-1 bg-white border rounded-3 shadow-sm">
+                        </div>
+                        <input type="hidden" name="template_id" id="selectedTemplateId" class="col-md-3">
                         <div id="templatesHiddenContainer"></div>
                     </div>
                 </div>
@@ -476,7 +427,7 @@
 
                 visible.forEach(function (tpl, index) {
                     const cardHtml = `
-                    <div class="col-12 col-md-4 col-lg-3">
+                    <div class="col-12 col-md-4">
                         ${buildTemplateInnerCard(tpl, index)}
                     </div>
                 `;
@@ -486,14 +437,9 @@
                 // لو عندنا أكتر من 3 → زر Show Remaining
                 if (templates.length > maxInline) {
                     const showMoreHtml = `
-                    <div class="template-card cursor-pointer show-more">
-                        <div class="card rounded-3 shadow-sm show-more-card js-open-templates-modal" tabindex="0" style="border:1px solid #24B094;">
-                            <div class="d-flex justify-content-center align-items-center gap-1"
-                             style="background-color:#F4F6F6; height:310px; width:270px; border-radius:12px; padding:10px; color: #24B094; font-size: 16px; overflow:hidden;">
-                                <span>Show more Templates</span>
-                                <span class="show-more-arrow" aria-hidden="true" style="font-size:16px;">➜</span>
-                            </div>
-                        </div>
+                    <div class="template-card cursor-pointer d-flex justify-content-center justify-content-md-end">
+                        <span class="template-card cursor-pointer show-more rounded-2 py-1 px-2 shadow-sm show-more-card js-open-templates-modal" tabindex="0" style="border:1px solid #24B094;">
+                            Show more Templates</span>
                     </div>
                 `;
                     $templatesCardsContainer.append(showMoreHtml);
@@ -520,7 +466,7 @@
 
                 templates.forEach(function (tpl, index) {
                     const cardHtml = `
-                    <div class="col-6 col-md-4 mb-2">
+                    <div class="col-12 col-md-6 col-lg-4">
                         ${buildTemplateInnerCard(tpl, index)}
                     </div>
                 `;
