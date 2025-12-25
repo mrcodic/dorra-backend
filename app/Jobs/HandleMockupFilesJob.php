@@ -191,9 +191,9 @@ class HandleMockupFilesJob implements ShouldQueue
 //            ]);
 
             // مسح الصور القديمة الخاصة بالتمبلت ده فقط قبل الرندر
-            $model->getMedia('generated_mockups')
-                ->filter(fn($media) => $media->getCustomProperty('template_id') === $templateId)
-                ->each(fn($media) => $media->delete());
+//            $model->getMedia('generated_mockups')
+//                ->filter(fn($media) => $media->getCustomProperty('template_id') === $templateId)
+//                ->each(fn($media) => $media->delete());
 
             $this->renderMockupColors(
                 mockup: $model,
