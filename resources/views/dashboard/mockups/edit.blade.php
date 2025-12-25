@@ -389,6 +389,7 @@
                 }
                 // Call toggleCheckboxes to render the block
                 toggleCheckboxes();
+                buildHiddenTemplateInputs();
                 // Wait a tick to ensure the block exists in DOM
                 setTimeout(() => {
                     preloadFile(

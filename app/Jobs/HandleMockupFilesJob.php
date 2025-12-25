@@ -17,89 +17,10 @@ class HandleMockupFilesJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, SerializesModels, Queueable;
 
     public function __construct(
-        public Mockup $mockup
+        public Mockup $mockup,
+        public        $type = 'update',
     )
     {
-    }
-
-    /**
-     * Render colors for specific mockup + template
-     */
-    private function renderMockupColors(Mockup $mockup, Template $template, array $colors): void
-    {
-        if (empty($colors)) return;
-
-        $mockup->loadMissing(['types', 'media']);
-        $positions = $template->pivot->positions ?? [];
-
-        foreach ($colors as $hex) {
-            foreach ($mockup->types as $type) {
-
-                $side = strtolower($type->value->name);
-
-                $base = $mockup->getMedia('mockups')
-                    ->first(fn($m) =>
-                        $m->getCustomProperty('side') === $side &&
-                        $m->getCustomProperty('role') === 'base'
-                    );
-
-                $mask = $mockup->getMedia('mockups')
-                    ->first(fn($m) =>
-                        $m->getCustomProperty('side') === $side &&
-                        $m->getCustomProperty('role') === 'mask'
-                    );
-
-                if (!$base || !$mask) continue;
-
-                $design = $side === 'back'
-                    ? $template->getFirstMedia('back_templates')
-                    : $template->getFirstMedia('templates');
-
-                if (!$design || !$design->getPath()) continue;
-
-                [$baseW, $baseH] = getimagesize($base->getPath());
-
-                $xPct  = (float)($positions["{$side}_x"] ?? 0.5);
-                $yPct  = (float)($positions["{$side}_y"] ?? 0.5);
-                $wPct  = (float)($positions["{$side}_width"] ?? 0.4);
-                $hPct  = (float)($positions["{$side}_height"] ?? 0.4);
-                $angle = (float)($positions["{$side}_angle"] ?? 0);
-
-                $printW = max(1, (int) round($wPct * $baseW));
-                $printH = max(1, (int) round($hPct * $baseH));
-                $printX = (int) round($xPct * $baseW - $printW / 2);
-                $printY = (int) round($yPct * $baseH - $printH / 2);
-
-                try {
-                    $binary = (new MockupRenderer())->render([
-                        'base_path'   => $base->getPath(),
-                        'shirt_path'  => $mask->getPath(),
-                        'design_path' => $design->getPath(),
-                        'print_x'     => $printX,
-                        'print_y'     => $printY,
-                        'print_w'     => $printW,
-                        'print_h'     => $printH,
-                        'angle'       => $angle,
-                        'hex'         => $hex,
-                    ]);
-
-                    $safeHex = ltrim(strtolower($hex), '#');
-
-                    $mockup->addMediaFromString($binary)
-                        ->usingFileName("mockup_{$side}_tpl{$template->id}_{$safeHex}.png")
-                        ->withCustomProperties([
-                            'side'        => $side,
-                            'template_id' => $template->id,
-                            'hex'         => $hex,
-                            'category_id' => $mockup->category_id,
-                        ])
-                        ->toMediaCollection('generated_mockups');
-
-                } catch (\Throwable $e) {
-                    Log::error("Render failed mockup {$mockup->id} {$hex}: ".$e->getMessage());
-                }
-            }
-        }
     }
 
     /**
@@ -172,8 +93,7 @@ class HandleMockupFilesJob implements ShouldQueue
 
                     // مسح الصور القديمة الخاصة بالتمبلت واللون ده فقط
                     $otherMockup->getMedia('generated_mockups')
-                        ->filter(fn($media) =>
-                            $media->getCustomProperty('template_id') === $templateId &&
+                        ->filter(fn($media) => $media->getCustomProperty('template_id') === $templateId &&
                             strtolower($media->getCustomProperty('hex')) === strtolower($hex)
                         )
                         ->each(fn($media) => $media->delete());
@@ -183,17 +103,19 @@ class HandleMockupFilesJob implements ShouldQueue
             // تحديث التمبلت الجديد
             $missingForNew = collect($allColors)->diff($newColors)->values()->all();
             $colorsToRenderForNew = $allColors;
-//
-//            $model->templates()->updateExistingPivot($templateId, [
-//                'colors' => array_values(array_unique(
-//                    array_merge($newColors->all(), $missingForNew)
-//                )),
-//            ]);
+            if ($this->type === 'create') {
+                $model->templates()->updateExistingPivot($templateId, [
+                    'colors' => array_values(array_unique(
+                        array_merge($newColors->all(), $missingForNew)
+                    )),
+                ]);
+            }
+
 
             // مسح الصور القديمة الخاصة بالتمبلت ده فقط قبل الرندر
-//            $model->getMedia('generated_mockups')
-//                ->filter(fn($media) => $media->getCustomProperty('template_id') === $templateId)
-//                ->each(fn($media) => $media->delete());
+            $model->getMedia('generated_mockups')
+                ->filter(fn($media) => $media->getCustomProperty('template_id') === $templateId)
+                ->each(fn($media) => $media->delete());
 
             $this->renderMockupColors(
                 mockup: $model,
@@ -243,6 +165,84 @@ class HandleMockupFilesJob implements ShouldQueue
                     template: $oldTemplate,
                     colors: array_merge($oldTplColors, $missingForOld)
                 );
+            }
+        }
+    }
+
+    /**
+     * Render colors for specific mockup + template
+     */
+    private function renderMockupColors(Mockup $mockup, Template $template, array $colors): void
+    {
+        if (empty($colors)) return;
+
+        $mockup->loadMissing(['types', 'media']);
+        $positions = $template->pivot->positions ?? [];
+
+        foreach ($colors as $hex) {
+            foreach ($mockup->types as $type) {
+
+                $side = strtolower($type->value->name);
+
+                $base = $mockup->getMedia('mockups')
+                    ->first(fn($m) => $m->getCustomProperty('side') === $side &&
+                        $m->getCustomProperty('role') === 'base'
+                    );
+
+                $mask = $mockup->getMedia('mockups')
+                    ->first(fn($m) => $m->getCustomProperty('side') === $side &&
+                        $m->getCustomProperty('role') === 'mask'
+                    );
+
+                if (!$base || !$mask) continue;
+
+                $design = $side === 'back'
+                    ? $template->getFirstMedia('back_templates')
+                    : $template->getFirstMedia('templates');
+
+                if (!$design || !$design->getPath()) continue;
+
+                [$baseW, $baseH] = getimagesize($base->getPath());
+
+                $xPct = (float)($positions["{$side}_x"] ?? 0.5);
+                $yPct = (float)($positions["{$side}_y"] ?? 0.5);
+                $wPct = (float)($positions["{$side}_width"] ?? 0.4);
+                $hPct = (float)($positions["{$side}_height"] ?? 0.4);
+                $angle = (float)($positions["{$side}_angle"] ?? 0);
+
+                $printW = max(1, (int)round($wPct * $baseW));
+                $printH = max(1, (int)round($hPct * $baseH));
+                $printX = (int)round($xPct * $baseW - $printW / 2);
+                $printY = (int)round($yPct * $baseH - $printH / 2);
+
+                try {
+                    $binary = (new MockupRenderer())->render([
+                        'base_path' => $base->getPath(),
+                        'shirt_path' => $mask->getPath(),
+                        'design_path' => $design->getPath(),
+                        'print_x' => $printX,
+                        'print_y' => $printY,
+                        'print_w' => $printW,
+                        'print_h' => $printH,
+                        'angle' => $angle,
+                        'hex' => $hex,
+                    ]);
+
+                    $safeHex = ltrim(strtolower($hex), '#');
+
+                    $mockup->addMediaFromString($binary)
+                        ->usingFileName("mockup_{$side}_tpl{$template->id}_{$safeHex}.png")
+                        ->withCustomProperties([
+                            'side' => $side,
+                            'template_id' => $template->id,
+                            'hex' => $hex,
+                            'category_id' => $mockup->category_id,
+                        ])
+                        ->toMediaCollection('generated_mockups');
+
+                } catch (\Throwable $e) {
+                    Log::error("Render failed mockup {$mockup->id} {$hex}: " . $e->getMessage());
+                }
             }
         }
     }

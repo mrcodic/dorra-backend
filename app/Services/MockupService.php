@@ -236,7 +236,7 @@ class MockupService extends BaseService
         });
         $this->handleFiles($model);
         $model->load(['templates', 'types', 'category', 'media']);
-        HandleMockupFilesJob::dispatch($model)->delay(now()->addSeconds(5));
+        HandleMockupFilesJob::dispatch($model,'create')->delay(now()->addSeconds(5));
         return $model;
     }
 
@@ -289,6 +289,7 @@ class MockupService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
+
         $model = $this->handleTransaction(function () use ($id, $validatedData) {
 
             $model = $this->repository->update($validatedData, $id);
