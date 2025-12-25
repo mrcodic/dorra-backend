@@ -17,7 +17,7 @@ class MockupService extends BaseService
     public BaseRepositoryInterface $repository;
 
     public function __construct(MockupRepositoryInterface $repository, public MockupRenderer $renderer
-        ,public ProductRepositoryInterface $productRepository
+        , public ProductRepositoryInterface               $productRepository
     )
     {
         parent::__construct($repository);
@@ -25,10 +25,10 @@ class MockupService extends BaseService
 
     public function getMockups(): array
     {
-        $categoryId  = request('product_id');
+        $categoryId = request('product_id');
         $productType = request('type');
-        $templateId  = request('template_id');
-        $color       = request('color');
+        $templateId = request('template_id');
+        $color = request('color');
 
 
         $categoryId = $productType === 'category'
@@ -41,16 +41,14 @@ class MockupService extends BaseService
 
         $mockups = $this->repository
             ->query()
-            ->when($categoryId, fn ($q) => $q->whereCategoryId($categoryId))
-            ->when($templateId, fn ($q) =>
-            $q->whereHas('templates', fn ($qq) =>
-            $qq->where('templates.id', $templateId)
+            ->when($categoryId, fn($q) => $q->whereCategoryId($categoryId))
+            ->when($templateId, fn($q) => $q->whereHas('templates', fn($qq) => $qq->where('templates.id', $templateId)
             )
             )
             ->with([
                 'templates:id',
                 'types:id,value',
-                'media' => fn ($q) => $q->whereIn('collection_name', [
+                'media' => fn($q) => $q->whereIn('collection_name', [
                     'mockups',
                     'generated_mockups',
                     'templates',
@@ -60,9 +58,8 @@ class MockupService extends BaseService
             ->get();
 
         $colors = $mockups
-            ->flatMap(fn ($mockup) =>
-            $mockup->templates
-                ->filter(fn ($tpl) => $tpl->id == $templateId)
+            ->flatMap(fn($mockup) => $mockup->templates
+                ->filter(fn($tpl) => $tpl->id == $templateId)
                 ->flatMap(function ($tpl) {
                     $c = $tpl->pivot->colors ?? [];
                     if (is_string($c)) {
@@ -78,13 +75,13 @@ class MockupService extends BaseService
 
 
         $requestedColor = $color
-            ? (str_starts_with($color, '#') ? strtolower($color) : '#'.strtolower($color))
+            ? (str_starts_with($color, '#') ? strtolower($color) : '#' . strtolower($color))
             : null;
 
         $activeColor = $requestedColor ?? (count($colors) ? strtolower($colors[0]) : null);
 
         $media = $mockups
-            ->filter(fn ($mockup) => $mockup->templates->contains('id', $templateId))
+            ->filter(fn($mockup) => $mockup->templates->contains('id', $templateId))
             ->flatMap(function ($mockup) use ($templateId, $activeColor) {
 
                 $mockupMedia = $mockup->media
@@ -103,33 +100,33 @@ class MockupService extends BaseService
                 $sides = $mockupMedia->pluck('custom_properties.side')->unique();
                 if ($sides->contains('front') && $sides->contains('back')) {
                     return $mockupMedia
-                        ->groupBy(fn ($m) => $m->model_id.'_'.$m->getCustomProperty('side'))
+                        ->groupBy(fn($m) => $m->model_id . '_' . $m->getCustomProperty('side'))
                         ->flatten();
                 }
 
                 return $mockupMedia
-                    ->groupBy(fn ($m) => $m->model_id.'_'.$m->getCustomProperty('side'))
-                    ->map(fn ($group) => $group->first());
+                    ->groupBy(fn($m) => $m->model_id . '_' . $m->getCustomProperty('side'))
+                    ->map(fn($group) => $group->first());
             })
             ->values();
 
         $pickBySide = function ($media, string $side): array {
             return $media
-                ->filter(fn ($m) => $m->getCustomProperty('side') === $side)
-                ->map(fn ($m) => $m->getFullUrl())
+                ->filter(fn($m) => $m->getCustomProperty('side') === $side)
+                ->map(fn($m) => $m->getFullUrl())
                 ->values()
                 ->all();
         };
 
         $front = $pickBySide($media, 'front');
-        $back  = $pickBySide($media, 'back');
-        $none  = $pickBySide($media, 'none');
+        $back = $pickBySide($media, 'back');
+        $none = $pickBySide($media, 'none');
 
         $urls = array_values(array_merge($front, $back, $none));
 
         return [
             'colors' => $colors,
-            'urls'   => $urls,
+            'urls' => $urls,
         ];
     }
 
@@ -171,7 +168,6 @@ class MockupService extends BaseService
                             ->whereJsonContains('mockup_template.colors', request('color'));
                     })
             )
-
             ->when(request()->filled('product_ids'), fn($q) => $q->whereIn('category_id', request()->array('product_ids')))
             ->when(request()->filled('type'), fn($q) => $q->whereHas('types', fn($q) => $q->where('types.id', request('type'))))
             ->when(request()->filled('types'), function ($query) {
@@ -211,98 +207,36 @@ class MockupService extends BaseService
         $model = $this->handleTransaction(function () use ($validatedData) {
             $model = $this->repository->create($validatedData);
             $model->types()->attach(Arr::get($validatedData, 'types') ?? []);
-                collect($validatedData['templates'])->each(function ($template) use ($model) {
-                    $templateId = $template['template_id'] ?? null;
-                    if (!$templateId) return;
+            collect($validatedData['templates'])->each(function ($template) use ($model) {
+                $templateId = $template['template_id'] ?? null;
+                if (!$templateId) return;
 
-                    $positions = collect($template)
-                        ->except(['template_id', 'colors'])
-                        ->filter(fn ($value) => !is_null($value))
-                        ->toArray();
+                $positions = collect($template)
+                    ->except(['template_id', 'colors'])
+                    ->filter(fn($value) => !is_null($value))
+                    ->toArray();
 
-                    $colors = Arr::get($template, 'colors', []);
+                $colors = Arr::get($template, 'colors', []);
 
-                    $colors = collect($colors)
-                        ->filter(fn ($c) => is_string($c) && preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $c))
-                        ->values()
-                        ->all();
+                $colors = collect($colors)
+                    ->filter(fn($c) => is_string($c) && preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $c))
+                    ->values()
+                    ->all();
 
 
-                    $model->templates()->syncWithoutDetaching([
-                        $templateId => [
-                            'positions' => $positions,
-                            'colors'    => $colors,
-                        ],
-                    ]);
-                });
+                $model->templates()->syncWithoutDetaching([
+                    $templateId => [
+                        'positions' => $positions,
+                        'colors' => $colors,
+                    ],
+                ]);
+            });
 
             return $model;
         });
         $this->handleFiles($model);
         $model->load(['templates', 'types', 'category', 'media']);
         HandleMockupFilesJob::dispatch($model)->delay(now()->addSeconds(5));
-        return $model;
-    }
-
-    public function updateResource($validatedData, $id, $relationsToLoad = [])
-    {
-        $model = $this->handleTransaction(function () use ($id, $validatedData) {
-
-            $model = $this->repository->update($validatedData, $id);
-
-            // Sync types (OK)
-            $selectedTypeValues = Arr::get($validatedData, 'types', []);
-            $model->types()->sync($selectedTypeValues);
-
-            // Sync templates + pivot data
-            $templatesInput = collect(Arr::get($validatedData, 'templates', []));
-
-            if ($templatesInput->isNotEmpty()) {
-                $syncData = [];
-
-                $templatesInput->each(function ($template) use (&$syncData) {
-                    $templateId = $template['template_id'] ?? null;
-                    if (!$templateId) return;
-
-                    // Positions: everything except template_id & colors
-                    $positions = collect($template)
-                        ->except(['template_id', 'colors'])
-                        ->filter(fn ($v) => $v !== null && $v !== '')
-                        ->toArray();
-
-                    // Colors: normalize + validate
-                    $colors = Arr::get($template, 'colors', []);
-                    if (is_string($colors)) {
-                        $colors = json_decode($colors, true) ?: [];
-                    }
-                    if (!is_array($colors)) {
-                        $colors = [];
-                    }
-
-                    $colors = collect($colors)
-                        ->filter(fn ($c) => is_string($c)
-                            && preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $c))
-                        ->values()
-                        ->all();
-
-                    $syncData[$templateId] = [
-                        'positions' => $positions,
-                        'colors'    => $colors,
-                    ];
-                });
-
-                $model->templates()->syncWithoutDetaching($syncData);
-            }
-
-            if (request()->allFiles()) {
-                $this->handleFiles($model, true);
-            }
-
-            $model->load(['templates', 'types', 'category', 'media']);
-            HandleMockupFilesJob::dispatch($model)->delay(now()->addSeconds(5));
-
-            return $model;
-        });
         return $model;
     }
 
@@ -350,6 +284,78 @@ class MockupService extends BaseService
             });
         });
 
+        return $model;
+    }
+
+    public function updateResource($validatedData, $id, $relationsToLoad = [])
+    {
+        $model = $this->handleTransaction(function () use ($id, $validatedData) {
+
+            $model = $this->repository->update($validatedData, $id);
+
+            // Sync types (OK)
+
+            $selectedTypeValues = Arr::get($validatedData, 'types', []);
+            $modelTypesValues = $model->types->pluck('value.value')->toArray();
+
+
+            $typesChanged = collect($selectedTypeValues)->sort()->values()->all()
+                != collect($modelTypesValues)->sort()->values()->all();
+
+            $model->types()->sync($selectedTypeValues);
+            // Sync templates + pivot data
+            $templatesInput = collect(Arr::get($validatedData, 'templates', []));
+
+            if ($templatesInput->isNotEmpty()) {
+                $syncData = [];
+
+                $templatesInput->each(function ($template) use (&$syncData) {
+                    $templateId = $template['template_id'] ?? null;
+                    if (!$templateId) return;
+
+                    // Positions: everything except template_id & colors
+                    $positions = collect($template)
+                        ->except(['template_id', 'colors'])
+                        ->filter(fn($v) => $v !== null && $v !== '')
+                        ->toArray();
+
+                    // Colors: normalize + validate
+                    $colors = Arr::get($template, 'colors', []);
+                    if (is_string($colors)) {
+                        $colors = json_decode($colors, true) ?: [];
+                    }
+                    if (!is_array($colors)) {
+                        $colors = [];
+                    }
+
+                    $colors = collect($colors)
+                        ->filter(fn($c) => is_string($c)
+                            && preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $c))
+                        ->values()
+                        ->all();
+
+                    $syncData[$templateId] = [
+                        'positions' => $positions,
+                        'colors' => $colors,
+                    ];
+                });
+                if ($typesChanged) {
+                    $model->templates()->sync($syncData);
+                }else{
+                    $model->templates()->syncWithoutDetaching($syncData);
+
+                }
+            }
+
+            if (request()->allFiles()) {
+                $this->handleFiles($model, true);
+            }
+
+            $model->load(['templates', 'types', 'category', 'media']);
+            HandleMockupFilesJob::dispatch($model)->delay(now()->addSeconds(5));
+
+            return $model;
+        });
         return $model;
     }
 
