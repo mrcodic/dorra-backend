@@ -162,7 +162,7 @@ class TemplateService extends BaseService
                                         ?? $this->productRepository->query()->find(request('product_id'))?->category_id;
 
                                     $q->where('mockups.category_id', $categoryId)
-                                        ->whereNotNull('mockup_template.colors');
+                                        ->where('mockup_template.colors','!=','[]');
                                 });
 
                         });
