@@ -154,18 +154,18 @@ class TemplateService extends BaseService
                 ->whereStatus(StatusEnum::LIVE)
                 ->where(function ($q) {
                     $q->where('approach', '!=', 'without_editor')
-                    ->orWhere(function ($q) {
-                        $q->where('approach', 'without_editor')
-                            ->whereHas('mockups', function ($q) {
-                                $categoryId =
-                                    request('product_without_category_id')
-                                    ?? $this->productRepository->query()->find(request('product_id'))?->category_id;
+                        ->orWhere(function ($q) {
+                            $q->where('approach', 'without_editor')
+                                ->whereHas('mockups', function ($q) {
+                                    $categoryId =
+                                        request('product_without_category_id')
+                                        ?? $this->productRepository->query()->find(request('product_id'))?->category_id;
 
-                                $q->where('mockups.category_id', $categoryId)
-                                    ->whereNotNull('mockup_template.colors');
-                            });
+                                    $q->where('mockups.category_id', $categoryId)
+                                        ->whereNotNull('mockup_template.colors');
+                                });
 
-                    });
+                        });
                 });
 
 
@@ -207,7 +207,20 @@ class TemplateService extends BaseService
                 );
             }
 
-            $model->mockups()->attach($validatedData['mockup_ids'] ?? []);
+            $mockupIds = $validatedData['mockup_ids'] ?? [];
+            $selectedTypeValues = Arr::get($validatedData, 'types', []);
+
+            if (!empty($mockupIds)) {
+                $positions = $this->defaultPositionsForTypes($selectedTypeValues);
+
+                $pivotData = collect($mockupIds)->mapWithKeys(function ($mockupId) use ($positions) {
+                    return [
+                        (int) $mockupId => ['positions' => $positions],
+                    ];
+                })->toArray();
+
+                $model->mockups()->syncWithoutDetaching($pivotData);
+            }
             $model->types()->sync($validatedData['types']);
             $model->tags()->sync($validatedData['tags'] ?? []);
             $model->flags()->sync($validatedData['flags'] ?? []);
@@ -345,7 +358,20 @@ class TemplateService extends BaseService
             $model->types()->sync($validatedData['types']);
 
             $model->industries()->sync($validatedData['industry_ids'] ?? []);
-            $model->mockups()->sync($validatedData['mockup_ids'] ?? []);
+            $mockupIds = $validatedData['mockup_ids'] ?? [];
+            $selectedTypeValues = Arr::get($validatedData, 'types', []);
+
+            if (!empty($mockupIds)) {
+                $positions = $this->defaultPositionsForTypes($selectedTypeValues);
+
+                $pivotData = collect($mockupIds)->mapWithKeys(function ($mockupId) use ($positions) {
+                    return [
+                        (int) $mockupId => ['positions' => $positions],
+                    ];
+                })->toArray();
+
+                $model->mockups()->sync($pivotData);
+            }
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->categories()->sync($validatedData['category_ids'] ?? []);
             $model->tags()->sync($validatedData['tags'] ?? []);
