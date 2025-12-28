@@ -308,9 +308,10 @@ class MockupService extends BaseService
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->handleTransaction(function () use ($id, $validatedData) {
-
+            $before = $this->repository->find($id);
+            $oldCategoryId = $before->category_id;
             $model = $this->repository->update($validatedData, $id);
-
+            $categoryChanged = (int)$oldCategoryId !== (int)($validatedData['category_id'] ?? $model->category_id);
             // Sync types (OK)
 
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
@@ -357,7 +358,7 @@ class MockupService extends BaseService
                         'colors' => $colors,
                     ];
                 });
-                if ($typesChanged) {
+                if ($typesChanged || $categoryChanged) {
                     $this->syncTemplatesSmart($model, $syncData, true);
                 }else{
                     $model->templates()->syncWithoutDetaching($syncData);
