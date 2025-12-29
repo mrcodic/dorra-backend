@@ -439,9 +439,9 @@ class MockupService extends BaseService
             ->whereHas('templates', fn($q) => $q->where('templates.id', $templateId))
             ->with('templates')
             ->get();
+
         foreach ($mockups as $mockup) {
             $tpl = $mockup->templates->firstWhere('id', $templateId);
-
             if (!$tpl) continue;
             $colors = collect($tpl->pivot->colors ?? [])
                 ->map(fn($c) => strtolower($c))
@@ -450,13 +450,14 @@ class MockupService extends BaseService
                 ->values()
                 ->all();
 
+
             $mockup->templates()->updateExistingPivot($templateId, [
                 'colors' => $colors,
             ]);
 
             $mockup->getMedia('generated_mockups')
                 ->filter(fn($media) =>
-                    (int)$media->getCustomProperty('template_id') === $templateId
+                   $media->getCustomProperty('template_id') === $templateId
                     && strtolower((string)$media->getCustomProperty('hex')) === $hex
                 )
                 ->each(fn($media) => $media->delete());
