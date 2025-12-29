@@ -641,10 +641,25 @@
                 buildHiddenTemplateInputs();
 
                 $('#removeColorModal').modal('hide');
+                Toastify({
+                    text: "Color removed Successfully.",
+                    duration: 1000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    close: true,
+                }).showToast();
                 pendingColorData = null;
             },
             error: function() {
-                alert('Failed to remove color.');
+                Toastify({
+                    text: "Failed to remove color.",
+                    duration: 1000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    close: true,
+                }).showToast();
             },
             complete: function() {
                 $btn.prop('disabled', false).text('Yes, remove from all');
