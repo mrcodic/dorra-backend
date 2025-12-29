@@ -29,7 +29,10 @@ class UpdateMockupRequest extends BaseRequest
      */
     public function rules($id): array
     {
+
         $types = $this->input('types', []);
+        $categoryChanged = $this->has('category_id')
+            && ($this->input('category_id') !== optional($id)->category_id);
         return [
             'name' => [
                 'required',
@@ -59,7 +62,11 @@ class UpdateMockupRequest extends BaseRequest
             'templates.*.none_width'   => ['nullable', 'numeric', 'min:0'],
             'templates.*.none_height'  => ['nullable', 'numeric', 'min:0'],
             'templates.*.none_angle'   => ['nullable', 'numeric'],
-            'templates.*.colors'   => ['required', 'array'],
+            'templates.*.colors' => [
+                Rule::requiredIf($categoryChanged),
+                'nullable',
+                'array',
+            ],
 
             'front_mask_image' => [
                 Rule::requiredIf(in_array(1, $types)),
