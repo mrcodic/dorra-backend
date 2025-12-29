@@ -299,11 +299,12 @@ class TemplateService extends BaseService
         $pos = [];
         foreach ($sides as $side) {
             $pos["{$side}_x"]      = 0.5;
-            $pos["{$side}_y"]      = 0.514583;
-            $pos["{$side}_width"]  = 0.350000;
-            $pos["{$side}_height"] = 0.233333;
+            $pos["{$side}_y"]      = 0.507031;
+            $pos["{$side}_width"]  = 0.264844;
+            $pos["{$side}_height"] = 0.176563;
             $pos["{$side}_angle"]  = 0;
         }
+
         return $pos;
     }
 
