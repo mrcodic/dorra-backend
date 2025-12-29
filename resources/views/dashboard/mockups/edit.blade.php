@@ -561,7 +561,6 @@
             const mockupId = $('#mockupId').val() || '{{ $model->id ?? "" }}';
             const categoryId = '{{ $model->category->id ?? "" }}';
             pendingColorData = { card, hex, templateId, mockupId };
-
             $('#removeColorModal').modal('show');
 
             const $list = $('#relatedMockupsList');
@@ -616,33 +615,42 @@
 
 
         // عند تأكيد الحذف
-        $('#confirmRemoveColor').on('click', function () {
-            if (!pendingColorData) return;
+    $('#confirmRemoveColor').on('click', function () {
 
-            const { card, hex } = pendingColorData;
-            const $btn = $(this);
-            $btn.prop('disabled', true).text('Updating...');
+        if (!pendingColorData) return;
+        const { card, hex, templateId } = pendingColorData;
+        console.log(templateId)
+        const categoryId = '{{ $model->category->id ?? "" }}';
+        const $btn = $(this);
 
-            // 🔹 إزالة اللون من الذاكرة
-            card.selectedColors = (card.selectedColors || []).filter(c => c !== hex);
+        $btn.prop('disabled', true).text('Updating...');
 
-            // 🔹 إعادة بناء عرض الألوان في البطاقة
-            renderSelectedColors(card);
+        $.ajax({
+            url: "{{ route('mockups.remove-color') }}",
+            type: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                category_id: categoryId,
+                template_id: templateId,
+                color: hex,
+            },
+            success: function(res) {
+                // ✅ بعد نجاح السيرفر: احذف محليًا
+                card.selectedColors = (card.selectedColors || []).filter(c => c !== hex);
+                renderSelectedColors(card);
+                buildHiddenTemplateInputs();
 
-            // 🔹 تحديث الـ hidden inputs في الفورم (اللي بتتحفظ بعدين)
-            buildHiddenTemplateInputs();
-
-            // 🔹 إغلاق المودال
-            $('#removeColorModal').modal('hide');
-
-            // 🔹 رجّع الزرار لحالته الطبيعية
-            $btn.prop('disabled', false).text('Yes, remove from all');
-
-
-            // 🔹 تنظيف البيانات المؤقتة
-            pendingColorData = null;
+                $('#removeColorModal').modal('hide');
+                pendingColorData = null;
+            },
+            error: function() {
+                alert('Failed to remove color.');
+            },
+            complete: function() {
+                $btn.prop('disabled', false).text('Yes, remove from all');
+            }
         });
-
+    });
 
         const templatesData = @json($model->templates ?? []);
 

@@ -427,4 +427,40 @@ class MockupService extends BaseService
     {
         return auth('web')->user()->recentMockups()->take(5)->get();
     }
+
+    public function removeColor($data): void
+    {
+        $categoryId = (int) $data['category_id'];
+        $templateId =$data['template_id'];
+        $hex        = strtolower($data['color']);
+
+        $mockups = $this->repository->query()
+            ->where('category_id', $categoryId)
+            ->whereHas('templates', fn($q) => $q->where('templates.id', $templateId))
+            ->with('templates')
+            ->get();
+        foreach ($mockups as $mockup) {
+            $tpl = $mockup->templates->firstWhere('id', $templateId);
+
+            if (!$tpl) continue;
+            $colors = collect($tpl->pivot->colors ?? [])
+                ->map(fn($c) => strtolower($c))
+                ->filter()
+                ->reject(fn($c) => $c === $hex)
+                ->values()
+                ->all();
+
+            $mockup->templates()->updateExistingPivot($templateId, [
+                'colors' => $colors,
+            ]);
+
+            $mockup->getMedia('generated_mockups')
+                ->filter(fn($media) =>
+                    (int)$media->getCustomProperty('template_id') === $templateId
+                    && strtolower((string)$media->getCustomProperty('hex')) === $hex
+                )
+                ->each(fn($media) => $media->delete());
+        }
+
+    }
 }

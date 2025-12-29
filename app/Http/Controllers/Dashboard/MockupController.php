@@ -7,10 +7,12 @@ use App\Http\Controllers\Base\DashboardController;
 
 
 use App\Http\Resources\MockupResource;
+
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Repositories\Interfaces\TypeRepositoryInterface;
 use App\Services\MockupService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use App\Http\Requests\Mockup\{StoreMockupRequest, UpdateMockupEditorRequest, UpdateMockupRequest};
 
@@ -108,5 +110,14 @@ class MockupController extends DashboardController
         return Response::api(data: MockupResource::make($mockup));
 
     }
-
+    public function removeColor(Request $request)
+    {
+        $data = $request->validate([
+            'category_id' => ['required', 'integer'],
+            'template_id' => ['required', 'string'],
+            'color'       => ['required', 'string'],
+        ]);
+        $this->mockupService->removeColor($data);
+        return Response::api();
+    }
 }

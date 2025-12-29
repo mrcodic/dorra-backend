@@ -334,6 +334,10 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
 
         Route::controller(MockupController::class)->group(function () {
+            // routes/web.php
+            Route::post('mockups/remove-color', 'removeColor')
+                ->name('mockups.remove-color');
+
             Route::get('mockups', 'index')->name('mockups.index');
             Route::get('mockups/{mockup}', 'showAndUpdateRecent');
             Route::get('recent-mockups', 'recentMockups');
