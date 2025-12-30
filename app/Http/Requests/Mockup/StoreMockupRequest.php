@@ -28,10 +28,7 @@ class StoreMockupRequest extends BaseRequest
 
     public function rules()
     {
-        dd($this->route('mockup'));
         $types = $this->input('types', []);
-        $categoryChanged = $this->has('category_id')
-            && ($this->input('category_id') !== optional($this->route('mockup'))->category_id);
         return [
             'name' => [
                 'required',
