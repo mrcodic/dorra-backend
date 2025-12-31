@@ -9,6 +9,7 @@ use App\Models\FontStyle;
 use App\Rules\ValidFontFile;
 use App\Services\FontService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 
 
@@ -78,11 +79,18 @@ class FontController extends Controller
 
     }
 
+
     public function destroyFontStyle(FontStyle $fontStyle)
     {
-        $fontStyle->delete();
+        DB::transaction(function () use ($fontStyle) {
+            $font = $fontStyle->font;
+            $fontStyle->delete();
+            if ($font && $font->fontStyles()->count() === 0) {
+                $font->delete();
+            }
+        });
         return Response::api(message: "Font Style deleted successfully.");
-
     }
+
 
 }
