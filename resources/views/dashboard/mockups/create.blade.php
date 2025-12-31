@@ -1550,6 +1550,7 @@
             if (!ul || !container) return;
 
             ul.innerHTML = '';
+            ul.classList.add('list-unstyled', 'm-0', 'p-0');
             container.innerHTML = '';
 
             (card.selectedColors || []).forEach(c => {

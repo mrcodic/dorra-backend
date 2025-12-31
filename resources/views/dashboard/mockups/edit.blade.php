@@ -518,6 +518,7 @@
 
             ul.innerHTML = '';
             container.innerHTML = '';
+            ul.classList.add('list-unstyled', 'm-0', 'p-0');
 
             (card.selectedColors || []).forEach(c => {
                 const li = document.createElement('li');
