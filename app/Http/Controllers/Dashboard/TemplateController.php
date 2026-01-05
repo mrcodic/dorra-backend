@@ -245,18 +245,13 @@ class TemplateController extends DashboardController
 
     public function import(Request $request)
     {
-     $request->validate([
+        $request->validate([
             'file'   => ['required','file','mimes:xlsx,xls,csv,txt'],
             'images' => ['required','file','mimes:zip'],
         ]);
-        $request->validate([
-            'file'   => ['required','file','mimes:xlsx,xls,csv'],
-            'images' => ['required','file','mimes:zip'],
-        ]);
 
-        $batch = (string) Str::uuid();
+        $batch = (string) \Illuminate\Support\Str::uuid();
 
-        // ✅ store on default disk (local) under imports/{batch}/
         $excelRel = $request->file('file')->storeAs(
             "imports/$batch",
             'sheet.'.$request->file('file')->getClientOriginalExtension()
@@ -267,11 +262,14 @@ class TemplateController extends DashboardController
             'images.zip'
         );
 
-        ImportTemplatesFromExcel::dispatch(
-            $excelRel,
-            $zipRel
-        );
-        return Response::api();
+        ImportTemplatesFromExcel::dispatch($excelRel, $zipRel);
+
+        return Response::api(
+            data:[
+            'batch' => $batch,
+            'status' => 'queued',
+        ]);
     }
+
 
 }

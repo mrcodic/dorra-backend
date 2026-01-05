@@ -3,32 +3,39 @@
 namespace App\Jobs;
 
 use App\Services\TemplateService;
-use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Http\UploadedFile;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ImportTemplatesFromExcel implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Queueable;
 
-    public string $excelPath;
-    public string $zipPath;
+    public function __construct(
+        public string $excelRel, // imports/{batch}/sheet.csv
+        public string $zipRel    // imports/{batch}/images.zip
+    ) {}
 
-    public function __construct(string $excelPath, string $zipPath)
+    public function handle(TemplateService $service): void
     {
-        $this->excelPath = $excelPath;
-        $this->zipPath   = $zipPath;
-    }
+        // ✅ تحويل للـ absolute path
+        $excelAbs = Storage::disk('local')->path($this->excelRel);
+        $zipAbs   = Storage::disk('local')->path($this->zipRel);
 
-    public function handle(TemplateService $service)
-    {
-        $service->importExcel(
-            new UploadedFile($this->excelPath, basename($this->excelPath)),
-            new UploadedFile($this->zipPath, basename($this->zipPath))
-        );
+        if (!file_exists($excelAbs) || !file_exists($zipAbs)) {
+            Log::error('Import files missing', [
+                'excelRel' => $this->excelRel,
+                'zipRel' => $this->zipRel,
+                'excelAbs' => $excelAbs,
+                'zipAbs' => $zipAbs,
+            ]);
+            return;
+        }
+
+        // ✅ استدعي service function جديدة تستقبل paths
+        $service->importExcelFromPaths($excelAbs, $zipAbs);
     }
 }
+
 

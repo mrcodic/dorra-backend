@@ -580,15 +580,15 @@ class TemplateService extends BaseService
     }
 
 
-    public function importExcel(UploadedFile $sheet, UploadedFile $zipFile): array
+    public function importExcelFromPaths(string $excelAbs, string $zipAbs): array
     {
         $created = 0;
         $skipped = [];
         $batch   = (string) Str::uuid();
 
-        // 1) Read sheet
-        $sheets = Excel::toArray([], $sheet);
-        $rows = $sheets[0] ?? [];
+        // ✅ اقرأ الإكسيل من path
+        $sheets = Excel::toArray([], $excelAbs);
+        $rows   = $sheets[0] ?? [];
 
         if (count($rows) < 2) {
             return [
@@ -620,7 +620,7 @@ class TemplateService extends BaseService
         if (!is_dir($tmpDir)) mkdir($tmpDir, 0775, true);
 
         $zip = new \ZipArchive();
-        if ($zip->open($zipFile->getRealPath()) !== true) {
+        if ($zip->open($zipAbs) !== true) {
             return [
                 'batch' => $batch,
                 'created' => 0,
