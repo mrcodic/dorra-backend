@@ -602,7 +602,7 @@ class TemplateService extends BaseService
 
 
         $headers  = array_map(fn($h) => strtolower(trim((string)$h)), $rows[0]);
-        $required = ['name_en','name_ar','image','type'];
+        $required = ['name_en','name_ar','image','type','model_image'];
 
         $missing = array_values(array_diff($required, $headers));
         if ($missing) {
@@ -716,6 +716,28 @@ class TemplateService extends BaseService
                 'ar' => $nameAR,
                 'en' => $nameEn,
             ],'approach' => 'without_editor',]);
+            $modelCollection = 'template_model_image';
+            $modelImage = strtolower(trim((string)($row[$idx['model_image']] ?? '')));
+
+            if ($modelImage !== '') {
+                $modelBase = strtolower(basename(str_replace('\\', '/', $modelImage)));
+                $srcModel = $filesIndex[$modelBase] ?? null;
+
+                if (!$srcModel || !file_exists($srcModel)) {
+                    $skipped[] = "Row $rowNum: model_image not found in zip ($modelBase)";
+                } else {
+                    $dstModel = $stagingDir . DIRECTORY_SEPARATOR . ('model_' . $modelBase);
+                    @copy($srcModel, $dstModel);
+
+                    if (!file_exists($dstModel)) {
+                        $skipped[] = "Row $rowNum: failed to stage model_image ($modelBase)";
+                    } else {
+                        $template->addMedia($dstModel)
+                            ->usingFileName($modelBase)
+                            ->toMediaCollection($modelCollection);
+                    }
+                }
+            }
 
             // Attach types (typeables table)
             $typeIds = array_values(array_unique(array_filter(array_map(
