@@ -602,7 +602,7 @@ class TemplateService extends BaseService
 
 
         $headers  = array_map(fn($h) => strtolower(trim((string)$h)), $rows[0]);
-        $required = ['name','image','type'];
+        $required = ['name_en','name_ar','image','type'];
 
         $missing = array_values(array_diff($required, $headers));
         if ($missing) {
@@ -676,8 +676,9 @@ class TemplateService extends BaseService
         foreach (array_slice($rows, 1) as $r => $row) {
             $rowNum = $r + 2;
 
-            $name = trim((string)($row[$idx['name']] ?? ''));
-            if ($name === '') {
+            $nameEn = trim((string)($row[$idx['name_en']] ?? ''));
+            $nameAR = trim((string)($row[$idx['name_ar']] ?? ''));
+            if ($nameEn === '') {
                 $skipped[] = "Row $rowNum: missing name";
                 continue;
             }
@@ -711,7 +712,10 @@ class TemplateService extends BaseService
             }
 
             // Create template
-            $template = Template::create(['name' => $name,'approach' => 'without_editor',]);
+            $template = Template::create(['name' => [
+                'ar' => $nameAR,
+                'en' => $nameEn,
+            ],'approach' => 'without_editor',]);
 
             // Attach types (typeables table)
             $typeIds = array_values(array_unique(array_filter(array_map(
