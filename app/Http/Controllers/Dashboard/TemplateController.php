@@ -240,4 +240,17 @@ class TemplateController extends DashboardController
         return $this->resourceClass::make($template);
 
     }
+
+    public function import(Request $request)
+    {
+        $data = $request->validate([
+            'file'   => ['required','file','mimes:xlsx,xls,csv,txt'],
+            'images' => ['required','file','mimes:zip'],
+        ]);
+
+     $this->templateService->importExcel($data['file'], $data['images']);
+
+        return Response::api();
+    }
+
 }

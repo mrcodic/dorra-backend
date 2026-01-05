@@ -23,7 +23,7 @@ class StoreTemplateRequest extends BaseRequest
     {
         return [
             'name.en' => ['required', 'string', 'max:255'],
-            'name.ar' => ['required', 'string', 'max:255'],
+            'name.ar' => ['nullable', 'string', 'max:255'],
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
             'type' => ['sometimes', 'in:' . TypeEnum::getValuesAsString()],

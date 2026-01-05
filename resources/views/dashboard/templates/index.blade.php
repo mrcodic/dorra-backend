@@ -87,6 +87,16 @@
                         Create Template
                     </a>
                     @endcan
+
+                    {{-- upload excel button --}}
+                    @can('product-templates_create')
+                        <button type="button" class="btn btn-primary col-12 col-md-3 col-lg-2"
+                                data-bs-toggle="modal" data-bs-target="#importExcelModal">
+                            <i data-feather="upload"></i>
+                            Import Excel
+                        </button>
+                    @endcan
+
                 </div>
 
                 {{-- Divider --}}
@@ -141,6 +151,7 @@
 
     </div>
 @include("modals.templates.template-editor-modal")
+@include("modals.templates.import")
     @include('modals.delete',[
     'id' => 'deleteTemplateModal',
     'formId' => 'deleteTemplateForm',
@@ -316,5 +327,5 @@
             });
         });
 </script>
-
+@stack("scripts")
 @endsection

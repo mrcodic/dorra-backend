@@ -8,12 +8,18 @@ use App\Enums\Template\StatusEnum;
 use App\Enums\Template\TypeEnum;
 use App\Jobs\ProcessBase64Image;
 use App\Models\Admin;
+use App\Models\Template;
 use App\Repositories\Base\BaseRepositoryInterface;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use App\Repositories\Interfaces\{CategoryRepositoryInterface, ProductRepositoryInterface, TemplateRepositoryInterface};
+use Maatwebsite\Excel\Facades\Excel;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use ZipArchive;
 
 class TemplateService extends BaseService
 {
@@ -573,4 +579,191 @@ class TemplateService extends BaseService
         });
     }
 
+
+    public function importExcel(UploadedFile $sheet, UploadedFile $zipFile): array
+    {
+        $created = 0;
+        $skipped = [];
+        $batch   = (string) Str::uuid();
+
+        // 1) Read sheet
+        $sheets = Excel::toArray([], $sheet);
+        $rows = $sheets[0] ?? [];
+
+        if (count($rows) < 2) {
+            return [
+                'batch' => $batch,
+                'created' => 0,
+                'skipped_count' => 1,
+                'skipped' => ['Excel/CSV is empty'],
+            ];
+        }
+
+        $headers  = array_map(fn($h) => strtolower(trim((string)$h)), $rows[0]);
+        $required = ['name','image','type'];
+
+        $missing = array_values(array_diff($required, $headers));
+        if ($missing) {
+            return [
+                'batch' => $batch,
+                'created' => 0,
+                'skipped_count' => 1,
+                'skipped' => ['Missing headers: '.implode(', ', $missing)],
+                'found_headers' => $headers,
+            ];
+        }
+
+        $idx = array_flip($headers);
+
+        // 2) Unzip -> tmp
+        $tmpDir = storage_path("app/tmp/import/$batch");
+        if (!is_dir($tmpDir)) mkdir($tmpDir, 0775, true);
+
+        $zip = new \ZipArchive();
+        if ($zip->open($zipFile->getRealPath()) !== true) {
+            return [
+                'batch' => $batch,
+                'created' => 0,
+                'skipped_count' => 1,
+                'skipped' => ['Invalid ZIP file'],
+            ];
+        }
+        $zip->extractTo($tmpDir);
+        $zip->close();
+
+        // 3) Index images in zip (recursive)
+        $allowedExt = ['png','jpg','jpeg','webp'];
+        $filesIndex = []; // filename => fullpath
+
+        $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($tmpDir));
+        foreach ($rii as $file) {
+            if ($file->isDir()) continue;
+            $ext = strtolower($file->getExtension());
+            if (!in_array($ext, $allowedExt)) continue;
+
+            $filesIndex[strtolower($file->getBasename())] = $file->getPathname();
+        }
+
+        // 4) Maps
+        $collectionMap = [
+            'front' => 'templates',
+            'back'  => 'back_templates',
+            'none'  => 'templates',
+        ];
+
+        // ids in your types table
+        $typeIdMap = [
+            'front' => 1,
+            'back'  => 2,
+            'none'  => 3,
+        ];
+
+        // 5) Staging dir (avoid "file does not exist")
+        $stagingDir = storage_path("app/import_staging/$batch");
+        if (!is_dir($stagingDir)) mkdir($stagingDir, 0775, true);
+
+        // 6) Loop rows
+        foreach (array_slice($rows, 1) as $r => $row) {
+            $rowNum = $r + 2;
+
+            $name = trim((string)($row[$idx['name']] ?? ''));
+            if ($name === '') {
+                $skipped[] = "Row $rowNum: missing name";
+                continue;
+            }
+
+            // ✅ images first
+            $imageCells = array_values(array_filter(array_map(
+                fn($v) => strtolower(trim((string)$v)),
+                explode(',', (string)($row[$idx['image']] ?? ''))
+            )));
+
+            if (empty($imageCells)) {
+                $skipped[] = "Row $rowNum: missing image";
+                continue;
+            }
+
+            // ✅ types (FIXED: read BEFORE using)
+            $typeCells = array_values(array_filter(array_map(
+                fn($v) => strtolower(trim((string)$v)),
+                explode(',', (string)($row[$idx['type']] ?? ''))
+            )));
+
+            if (empty($typeCells)) {
+                $typeCells = ['none'];
+            }
+
+            // ✅ pair by index
+            $pairCount = min(count($imageCells), count($typeCells));
+            if ($pairCount === 0) {
+                $skipped[] = "Row $rowNum: missing image/type";
+                continue;
+            }
+
+            // Create template
+            $template = Template::create(['name' => $name,'approach' => 'without_editor',]);
+
+            // Attach types (typeables table)
+            $typeIds = array_values(array_unique(array_filter(array_map(
+                fn($t) => $typeIdMap[$t] ?? null,
+                $typeCells
+            ))));
+
+            if (!empty($typeIds)) {
+                $template->types()->sync($typeIds);
+            }
+
+            // Add media per (image,type) pair
+            for ($i = 0; $i < $pairCount; $i++) {
+                $img     = $imageCells[$i];
+                $typeKey = $typeCells[$i];
+
+                $imgBase = strtolower(basename(str_replace('\\','/',$img)));
+
+                $src = $filesIndex[$imgBase] ?? null;
+                if (!$src || !file_exists($src)) {
+                    $skipped[] = "Row $rowNum: image not found in zip ($imgBase)";
+                    continue;
+                }
+
+                $collection = $collectionMap[$typeKey] ?? null;
+                if (!$collection) {
+                    $skipped[] = "Row $rowNum: invalid type ($typeKey)";
+                    continue;
+                }
+
+                // copy to staging
+                $dst = $stagingDir . DIRECTORY_SEPARATOR . $imgBase;
+                @copy($src, $dst);
+
+                if (!file_exists($dst)) {
+                    $skipped[] = "Row $rowNum: failed to stage file ($imgBase)";
+                    continue;
+                }
+
+                $template->addMedia($dst)
+                    ->usingFileName($imgBase)
+                    ->toMediaCollection($collection);
+            }
+
+            // mismatch report (optional)
+            if (count($imageCells) !== count($typeCells)) {
+                $skipped[] = "Row $rowNum: count mismatch images("
+                    .count($imageCells).") types(".count($typeCells).")";
+            }
+
+            $created++;
+        }
+
+        // 7) Cleanup
+        File::deleteDirectory($tmpDir);
+        File::deleteDirectory($stagingDir);
+
+        return [
+            'batch' => $batch,
+            'created' => $created,
+            'skipped_count' => count($skipped),
+            'skipped' => $skipped,
+        ];
+    }
 }

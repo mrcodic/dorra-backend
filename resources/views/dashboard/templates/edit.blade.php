@@ -648,8 +648,6 @@
                         mockup?.images?.none?.base_url ||
                         "{{ asset('images/placeholder.svg') }}";
 
-                    const isChecked = selected.has(id); // ✅ ده اللي هيتحكم في checked
-
                     $cardsWrap.append(`
           <div class="col-12 col-md-4 col-lg-2">
             <div class="mockup-card ${isChecked ? 'selected' : ''}" data-id="${id}">
@@ -785,6 +783,7 @@ data-id="${id}"> Show on Mockup </a>
             });
 
             const visibleDZ = [];
+            console.log(selectedTypes.includes("front"),dzFront)
 
             if (selectedTypes.includes("front") && dzFront) {
                 dzFront.classList.remove("d-none");
@@ -833,7 +832,6 @@ data-id="${id}"> Show on Mockup </a>
     </script>
     <script>
         Dropzone.autoDiscover = false;
-
         // 🔹 قائمة كل dropzones عشان نقدر نمسحها بسهولة
         const templateDropzones = {
             front: null,

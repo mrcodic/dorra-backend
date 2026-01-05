@@ -212,6 +212,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::put('/product-templates/{id}/change-status/{status}', [TemplateController::class, 'changeStatus'])
             ->whereIn('status', StatusEnum::values())
             ->name('product-templates.change-status.show');
+        Route::post('/product-templates/import', [TemplateController::class, 'import'])
+            ->name('product-templates.import');
         Route::resource('/product-templates', TemplateController::class);
 
         Route::controller(ProfileController::class)->prefix('profile')->group(function () {
