@@ -67,8 +67,9 @@
                     <!-- ✅ ID added -->
                     <button type="submit" class="btn btn-primary" id="importExcelSubmitBtn">
                         <i data-feather="check"></i>
-                        Upload
+                        <span class="btn-text">Upload</span>
                     </button>
+
                 </div>
             </form>
 
@@ -80,39 +81,66 @@
     <script>
         (function () {
             const $form = $('#importExcelForm');
+            const $btn  = $('#importExcelSubmitBtn');
+            const originalHtml = $btn.html();
+
+            function setLoading(loading) {
+                if (loading) {
+                    $btn.prop('disabled', true).addClass('disabled');
+                    $btn.html(`
+          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          Uploading...
+        `);
+                } else {
+                    $btn.prop('disabled', false).removeClass('disabled');
+                    $btn.html(originalHtml);
+                }
+            }
+
             $form.on('submit', function (e) {
                 e.preventDefault();
+
                 const url = $form.attr('action');
-                const fd = new FormData(this);
+                const fd  = new FormData(this);
+
+                setLoading(true);
 
                 $.ajax({
-                    url: url,
+                    url,
                     method: 'POST',
                     data: fd,
                     processData: false,
                     contentType: false,
+
                     success: function (res) {
+                        setLoading(false);
+
                         Toastify({
                             text: "Process run on Background!",
-                            duration: 1000,
+                            duration: 2000,
                             gravity: "top",
                             position: "right",
                             backgroundColor: "#28a745",
                             close: true,
                         }).showToast();
-                        $("#importExcelModal").modal("hide");
-                        location.reload()
 
+                        // Bootstrap 5 (لو عندك BS5)
+                        const modalEl = document.getElementById('importExcelModal');
+                        const instance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                        instance.hide();
+
+                        // اختياري: reload بعد ما المودال يقفل
+                        setTimeout(() => location.reload(), 300);
                     },
-                    error: function (xhr) {
 
-                        // try to show validation/server error message
+                    error: function (xhr) {
+                        setLoading(false);
+
                         let msg = 'Import failed.';
                         try {
                             const json = xhr.responseJSON;
                             msg = json?.message || msg;
 
-                            // Laravel validation errors
                             if (json?.errors) {
                                 const firstKey = Object.keys(json.errors)[0];
                                 if (firstKey && json.errors[firstKey]?.[0]) {
@@ -120,22 +148,20 @@
                                 }
                             }
                         } catch {}
+
                         Toastify({
-                            text: `${msg}`,
-                            duration: 1000,
+                            text: msg,
+                            duration: 3000,
                             gravity: "top",
                             position: "right",
-                            backgroundColor: "#28a745",
+                            backgroundColor: "#dc3545", // ✅ احمر للخطأ
                             close: true,
                         }).showToast();
-
                     }
                 });
             });
-
-
-
         })();
     </script>
+
 @endpush
 
