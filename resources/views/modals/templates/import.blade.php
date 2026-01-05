@@ -80,54 +80,8 @@
     <script>
         (function () {
             const $form = $('#importExcelForm');
-            const $submitBtn = $('#importExcelSubmitBtn');
-
-            const $loading = $('#importExcelLoading');
-            const $result  = $('#importExcelResult');
-            const $errorBox = $('#importExcelError');
-            const $errorMsg = $('#importExcelErrorMsg');
-
-            const $batch = $('#importBatch');
-            const $created = $('#importCreated');
-            const $skippedCount = $('#importSkippedCount');
-
-            const $skippedBox = $('#importSkippedBox');
-            const $skippedList = $('#importSkippedList');
-
-            const $copyBtn = $('#copyImportReportBtn');
-            const $copyText = $('#importReportText');
-
-            function resetUI() {
-                $loading.addClass('d-none');
-                $result.addClass('d-none');
-                $errorBox.addClass('d-none');
-                $errorMsg.text('');
-
-                $skippedBox.addClass('d-none');
-                $skippedList.empty();
-
-                $batch.text('');
-                $created.text('');
-                $skippedCount.text('');
-
-                $copyText.val('');
-            }
-
-            function setLoading(isLoading) {
-                if (isLoading) {
-                    $loading.removeClass('d-none');
-                    $submitBtn.prop('disabled', true).addClass('disabled');
-                } else {
-                    $loading.addClass('d-none');
-                    $submitBtn.prop('disabled', false).removeClass('disabled');
-                }
-            }
-
             $form.on('submit', function (e) {
                 e.preventDefault();
-                resetUI();
-                setLoading(true);
-
                 const url = $form.attr('action');
                 const fd = new FormData(this);
 
@@ -138,40 +92,19 @@
                     processData: false,
                     contentType: false,
                     success: function (res) {
-                        setLoading(false);
+                        Toastify({
+                            text: "Process run on Background!",
+                            duration: 1000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#28a745",
+                            close: true,
+                        }).showToast();
+                        $("#importExcelModal").modal("hide");
+                        location.reload()
 
-                        // expected:
-                        // { status:200, success:true, message:"...", data:{batch,created,skipped_count,skipped:[]} }
-                        const data = res?.data || {};
-
-                        // $batch.text(data.batch ?? '-');
-                        $created.text(data.created ?? 0);
-                        $skippedCount.text(data.skipped_count ?? 0);
-
-                        // render skipped
-                        const skipped = Array.isArray(data.skipped) ? data.skipped : [];
-                        if (skipped.length) {
-                            $skippedBox.removeClass('d-none');
-                            skipped.forEach(item => {
-                                $skippedList.append(`<li>${String(item)}</li>`);
-                            });
-                        }
-
-                        // build copy report
-                        const report = [
-                            `Import Templates Report`,
-                            // `Batch: ${data.batch ?? '-'}`,
-                            `Created: ${data.created ?? 0}`,
-                            `Skipped: ${data.skipped_count ?? 0}`,
-                            skipped.length ? `Skipped list:\n- ${skipped.join('\n- ')}` : `Skipped list: (none)`
-                        ].join('\n');
-
-                        $copyText.val(report);
-
-                        $result.removeClass('d-none');
                     },
                     error: function (xhr) {
-                        setLoading(false);
 
                         // try to show validation/server error message
                         let msg = 'Import failed.';
@@ -187,41 +120,21 @@
                                 }
                             }
                         } catch {}
+                        Toastify({
+                            text: `${msg}`,
+                            duration: 1000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#28a745",
+                            close: true,
+                        }).showToast();
 
-                        $errorMsg.text(msg);
-                        $errorBox.removeClass('d-none');
                     }
                 });
             });
 
-            // copy
-            $copyBtn.on('click', async function () {
-                const text = $copyText.val() || '';
-                if (!text) return;
 
-                try {
-                    await navigator.clipboard.writeText(text);
-                    // optional tiny feedback
-                    $copyBtn.text('Copied!');
-                    setTimeout(() => $copyBtn.text('Copy Report'), 1200);
-                } catch (e) {
-                    // fallback
-                    $copyText.removeClass('d-none').focus().select();
-                    document.execCommand('copy');
-                    $copyText.addClass('d-none');
-                }
-            });
 
-            // reset when modal opens
-            $('#importExcelModal').on('shown.bs.modal', function () {
-                resetUI();
-            });
-
-            // reset files when modal closed (optional)
-            $('#importExcelModal').on('hidden.bs.modal', function () {
-                resetUI();
-                $form[0].reset();
-            });
         })();
     </script>
 @endpush
