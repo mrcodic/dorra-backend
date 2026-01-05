@@ -13,7 +13,19 @@ enum TypeEnum : int
     case NONE = 3;
 
 
+    public function key(): string
+    {
+        return match ($this) {
+            self::FRONT => 'front',
+            self::BACK  => 'back',
+            self::NONE  => 'none',
+        };
+    }
 
+    public static function keys(): array
+    {
+        return array_map(fn(self $e) => $e->key(), self::cases());
+    }
     public function label()
     {
         return match ($this) {

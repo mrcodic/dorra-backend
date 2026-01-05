@@ -654,10 +654,19 @@ class TemplateService extends BaseService
         ];
 
         // ids in your types table
-        $typeIdMap = Type::query()
+        $valueToId = Type::query()
             ->whereIn('value', TypeEnum::values())
-            ->pluck('id', 'value')
+            ->pluck('id', 'value')   // [value => id]
             ->toArray();
+
+
+        $typeIdMap = [];
+        foreach (TypeEnum::cases() as $e) {
+            $typeIdMap[$e->key()] = $valueToId[$e->value] ?? null;
+        }
+
+
+        $typeIdMap = array_filter($typeIdMap);
 
         // 5) Staging dir (avoid "file does not exist")
         $stagingDir = storage_path("app/import_staging/$batch");
