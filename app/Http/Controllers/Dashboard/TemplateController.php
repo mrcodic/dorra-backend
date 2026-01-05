@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Enums\HttpEnum;
 use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Base\DashboardController;
+use App\Jobs\ImportTemplatesFromExcel;
 use App\Models\Template;
 use App\Http\Requests\Template\{StoreTemplateRequest,
     UpdateTemplateEditorRequest,
@@ -243,13 +244,17 @@ class TemplateController extends DashboardController
 
     public function import(Request $request)
     {
-        $data = $request->validate([
+  $request->validate([
             'file'   => ['required','file','mimes:xlsx,xls,csv,txt'],
             'images' => ['required','file','mimes:zip'],
         ]);
+        $excelPath = $request->file('file')->store('imports');
+        $zipPath   = $request->file('images')->store('imports');
 
-     $this->templateService->importExcel($data['file'], $data['images']);
-
+        ImportTemplatesFromExcel::dispatch(
+            storage_path('app/'.$excelPath),
+            storage_path('app/'.$zipPath)
+        );
         return Response::api();
     }
 
