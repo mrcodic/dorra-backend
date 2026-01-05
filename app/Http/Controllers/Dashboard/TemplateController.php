@@ -7,6 +7,7 @@ use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Base\DashboardController;
 use App\Jobs\ImportTemplatesFromExcel;
 use App\Models\Template;
+use Illuminate\Support\Str;
 use App\Http\Requests\Template\{StoreTemplateRequest,
     UpdateTemplateEditorRequest,
     UpdateTemplateRequest
@@ -244,16 +245,31 @@ class TemplateController extends DashboardController
 
     public function import(Request $request)
     {
-  $request->validate([
+     $request->validate([
             'file'   => ['required','file','mimes:xlsx,xls,csv,txt'],
             'images' => ['required','file','mimes:zip'],
         ]);
-        $excelPath = $request->file('file')->store('imports');
-        $zipPath   = $request->file('images')->store('imports');
+        $request->validate([
+            'file'   => ['required','file','mimes:xlsx,xls,csv'],
+            'images' => ['required','file','mimes:zip'],
+        ]);
+
+        $batch = (string) Str::uuid();
+
+        // ✅ store on default disk (local) under imports/{batch}/
+        $excelRel = $request->file('file')->storeAs(
+            "imports/$batch",
+            'sheet.'.$request->file('file')->getClientOriginalExtension()
+        );
+
+        $zipRel = $request->file('images')->storeAs(
+            "imports/$batch",
+            'images.zip'
+        );
 
         ImportTemplatesFromExcel::dispatch(
-            storage_path('app/'.$excelPath),
-            storage_path('app/'.$zipPath)
+            $excelRel,
+            $zipRel
         );
         return Response::api();
     }
