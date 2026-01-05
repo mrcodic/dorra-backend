@@ -243,6 +243,8 @@ class TemplateController extends DashboardController
 
     }
 
+
+
     public function import(Request $request)
     {
         $request->validate([
@@ -250,26 +252,28 @@ class TemplateController extends DashboardController
             'images' => ['required','file','mimes:zip'],
         ]);
 
-        $batch = (string) \Illuminate\Support\Str::uuid();
+        $batch = (string) Str::uuid();
 
         $excelRel = $request->file('file')->storeAs(
             "imports/$batch",
-            'sheet.'.$request->file('file')->getClientOriginalExtension()
+            'sheet.' . $request->file('file')->getClientOriginalExtension(),
+            'local'
         );
 
         $zipRel = $request->file('images')->storeAs(
             "imports/$batch",
-            'images.zip'
+            'images.zip',
+            'local'
         );
 
-        ImportTemplatesFromExcel::dispatch($excelRel, $zipRel);
+        ImportTemplatesFromExcel::dispatch($excelRel, $zipRel, $batch);
 
-        return Response::api(
-            data:[
-            'batch' => $batch,
+        return Response::api(data: [
+            'batch'  => $batch,
             'status' => 'queued',
         ]);
     }
+
 
 
 }

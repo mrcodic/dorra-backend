@@ -580,13 +580,12 @@ class TemplateService extends BaseService
     }
 
 
-    public function importExcelFromPaths(string $excelAbs, string $zipAbs): array
+    public function importExcelFromPaths(string $excelAbs, string $zipAbs, string $batch): array
     {
         $created = 0;
         $skipped = [];
-        $batch   = (string) Str::uuid();
 
-        // ✅ اقرأ الإكسيل من path
+        // ✅ اقرأ من path
         $sheets = Excel::toArray([], $excelAbs);
         $rows   = $sheets[0] ?? [];
 
@@ -598,6 +597,8 @@ class TemplateService extends BaseService
                 'skipped' => ['Excel/CSV is empty'],
             ];
         }
+
+
 
         $headers  = array_map(fn($h) => strtolower(trim((string)$h)), $rows[0]);
         $required = ['name','image','type'];
