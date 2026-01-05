@@ -9,6 +9,7 @@ use App\Enums\Template\TypeEnum;
 use App\Jobs\ProcessBase64Image;
 use App\Models\Admin;
 use App\Models\Template;
+use App\Models\Type;
 use App\Repositories\Base\BaseRepositoryInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
@@ -653,11 +654,10 @@ class TemplateService extends BaseService
         ];
 
         // ids in your types table
-        $typeIdMap = [
-            'front' => 1,
-            'back'  => 2,
-            'none'  => 3,
-        ];
+        $typeIdMap = Type::query()
+            ->whereIn('value', TypeEnum::values())
+            ->pluck('id', 'value')
+            ->toArray();
 
         // 5) Staging dir (avoid "file does not exist")
         $stagingDir = storage_path("app/import_staging/$batch");
@@ -709,6 +709,7 @@ class TemplateService extends BaseService
                 fn($t) => $typeIdMap[$t] ?? null,
                 $typeCells
             ))));
+
 
             if (!empty($typeIds)) {
                 $template->types()->sync($typeIds);
