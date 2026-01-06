@@ -21,6 +21,7 @@ class CartItemResource extends JsonResource
         $sub  = (float) $this->getAttribute('sub_total');
         $val  = (float) ($lastOffer?->getRawOriginal('value') ?? 0);
         $after = $lastOffer ? round($sub * (1 - ($val / 100)), 2) : null;
+        dd($item->price);
         return [
             'id' => $this->id,
             'type' => $this->when($item, class_basename($item)),
