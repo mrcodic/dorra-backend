@@ -70,7 +70,7 @@ class CartController extends Controller
             'quantity' => ['required_without:product_price_id', 'integer', 'min:1'],
             'product_price_id' => [
                 Rule::requiredIf(function () use ($cartItem) {
-                    return $cartItem && $cartItem->cartable->has_custom_prices;
+                    return $cartItem && $cartItem->cartable?->has_custom_prices;
                 }),
                 'integer',
                 'exists:product_prices,id',
