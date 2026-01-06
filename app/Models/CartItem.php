@@ -31,13 +31,13 @@ class CartItem extends Model
     public function getSubTotalAfterOfferAttribute(): float
     {
         $sub = (float) $this->sub_total;
-        $val = (float) optional($this->cartable->lastOffer)->getRawOriginal('value');
+        $val = (float) optional($this->cartable?->lastOffer)->getRawOriginal('value');
         return $val > 0 ? $sub * (1 -( $val / 100)) : $sub;
     }
     public function getOfferAmountAttribute(): float
     {
         $sub = (float) $this->sub_total;
-        $val = (float) optional($this->cartable->lastOffer)->getRawOriginal('value');
+        $val = (float) optional($this->cartable?->lastOffer)->getRawOriginal('value');
         return $val > 0 ? $sub * $val / 100 : 0;
     }
 
