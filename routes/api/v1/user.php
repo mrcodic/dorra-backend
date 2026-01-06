@@ -182,6 +182,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     });
 
     Route::get('templates', [TemplateController::class, 'index']);
+    Route::get('templates/{template}/download', [TemplateController::class, 'download']);
     Route::get('templates/{template}', [TemplateController::class, 'show']);
 
 
