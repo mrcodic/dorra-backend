@@ -175,7 +175,7 @@ class CartService extends BaseService
                     ]);
                 },
                 'items.itemable' => function ($query) {
-                    $query->select(['id', 'name']);
+                    $query->select(['id', 'name','price']);
                 },
                 'items.itemable.products',
                 'items.product.category'
