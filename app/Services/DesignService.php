@@ -65,7 +65,7 @@ class DesignService extends BaseService
                 return $design->load([
                     'designable.prices',
                     'media',
-                    'template:id',
+                    'template:id,price',
                     'designable.specifications.options',
                     'specifications.options',
                     'productPrice',
