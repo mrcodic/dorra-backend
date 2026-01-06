@@ -29,6 +29,7 @@ class Template extends Model implements HasMedia
         'design_data',
         'design_back_data',
         'description',
+        'price',
         'is_landing',
         'colors',
         'orientation',

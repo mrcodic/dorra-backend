@@ -44,7 +44,8 @@ class Design extends Model implements HasMedia
         'description',
         'designable_id',
         'designable_type',
-        'orientation'
+        'orientation',
+        'price',
     ];
     protected $attributes = [
         'quantity' => 1,

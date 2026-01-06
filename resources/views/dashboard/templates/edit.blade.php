@@ -301,7 +301,17 @@
                                                       placeholder="Template Description in English">{{ $model->getTranslation('description','en') }}</textarea>
                                         </div>
                                     </div>
-
+                                    <div class="row mb-2">
+                                        <div class="col-md-12">
+                                            <label for="templatePrice" class="label-text mb-1">
+                                                Price</label>
+                                            <input id="templatePrice" class="form-control" type="number"
+                                                   name="price" placeholder="Template Price" value="{{ $model->price }}"
+                                                   step="0.01"
+                                                   min="0"
+                                            />
+                                        </div>
+                                    </div>
                                     <div class="position-relative mt-3 text-center">
                                         <hr class="opacity-75" style="border: 1px solid #24B094;">
                                         <span
