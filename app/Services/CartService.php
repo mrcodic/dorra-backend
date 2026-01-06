@@ -67,8 +67,8 @@ class CartService extends BaseService
                 $request->cartable_type = $design->designable_type;
             }
             $product = $request->cartable_type === 'App\\Models\\Product'
-                ? $this->productRepository->find($request->cartable_id)
-                : $this->categoryRepository->find($request->cartable_id);
+                ? $this->productRepository->query()->find($request->cartable_id)
+                : $this->categoryRepository->query()->find($request->cartable_id);
 
             $template = $request->getTemplate();
 
