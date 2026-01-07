@@ -148,7 +148,6 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Available Places</label>
                             @php
-                                use App\Models\Inventory;
                                 $assignedIds = $model->inventories?->pluck('id')->all() ?? [];
                                 $parent = $model->inventories->first()?->parent ?? $model->inventories->first();
 
@@ -159,7 +158,7 @@
                                     ->get() ?? collect();
 
                                 $selected = !empty($assignedIds)
-                                    ? Inventory::query()->whereIn('id', $assignedIds)->get(['id','name','is_available'])
+                                    ? App\Models\Inventory::query()->whereIn('id', $assignedIds)->get(['id','name','is_available'])
                                     : collect();
 
                                 $options = $selected->concat($available)->unique('id')->sortBy('name');
