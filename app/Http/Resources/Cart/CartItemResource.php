@@ -40,7 +40,10 @@ class CartItemResource extends JsonResource
             'price_after_offer' => is_null($after) ? null : sprintf('%.2f', round($after, 2)),
             'quantity' => $this->quantity,
             'color' => $this->color,
-
+            'item_type' => [
+                'value' => $this->type->value,
+                'label' => $this->type->label(),
+            ],
         ];
     }
 }

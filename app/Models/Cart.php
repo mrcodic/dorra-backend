@@ -52,7 +52,9 @@ class Cart extends Model
         });
     }
 
-    public function addItem(Model $itemable, $quantity, $specsSum, $productPrice, $productPriceId, $subTotal, $cartable_id, $cartable_type,$color): CartItem
+    public function addItem(Model $itemable, $quantity, $specsSum, $productPrice,
+                            $productPriceId, $subTotal, $cartable_id, $cartable_type,
+                            $color,$type): CartItem
     {
         return $this->items()->create([
             'itemable_id' => $itemable->id,
@@ -65,6 +67,7 @@ class Cart extends Model
             'product_price' => $productPrice,
             'quantity' => $quantity ?? 1,
             'color' => $color,
+            'type' => $type,
         ]);
     }
 

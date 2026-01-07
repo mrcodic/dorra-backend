@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Item\TypeEnum;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,8 +24,11 @@ class OrderItem extends Model
         'product_price_id',
         'quantity',
         'color',
+        'type',
     ];
-
+    protected $casts = [
+        'type' => TypeEnum::class
+    ];
     public function totalPrice(): Attribute
     {
         return Attribute::get(function ($value) {

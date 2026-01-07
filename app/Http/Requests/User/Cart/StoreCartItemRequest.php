@@ -3,6 +3,7 @@
 namespace App\Http\Requests\User\Cart;
 
 use App\Enums\HttpEnum;
+use App\Enums\Item\TypeEnum;
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\CartItem;
 use App\Models\Category;
@@ -48,11 +49,18 @@ class StoreCartItemRequest extends BaseRequest
         $cartableType = $this->cartable_type;
         $cartable     = $this->cartable();
         $hasSpecs     = (bool) $cartable?->specifications()->exists();
+        $type = (int) $this->input('type');
         return [
-            'design_id' => ['required_without:template_id', 'string', 'exists:designs,id'],
-            'template_id' => ['required_without:design_id', 'string', 'exists:templates,id'],
-            'cartable_type' => ['sometimes', 'in:' . Product::class . ',' . Category::class],
+            'type' =>['required',Rule::in(TypeEnum::values())],
+            'design_id' => ['required_without:template_id',
+                'prohibited_with:template_id', 'string', 'exists:designs,id'],
+            'template_id' => ['required_without:design_id', 'string',
+                'prohibited_with:design_id','exists:templates,id'],
+            'cartable_type' => [
+                Rule::requiredIf($type == TypeEnum::PRINT->value),
+                'sometimes', 'in:' . Product::class . ',' . Category::class],
             'cartable_id' => [
+                Rule::requiredIf($type == TypeEnum::PRINT->value),
                 'sometimes',
                 'integer',
                 Rule::when(
@@ -62,24 +70,30 @@ class StoreCartItemRequest extends BaseRequest
                 ),
             ],
             'product_price_id' => [
-                Rule::requiredIf(function () {
+                Rule::requiredIf(function () use($type){
                     $cartable = Product::find($this->cartable_id) ?? Category::find($this->cartable_id);
-                    return $cartable && $cartable->prices()->exists();
+                    return $cartable && $cartable->prices()->exists() && $type == TypeEnum::PRINT->value;
                 }),
                 'exists:product_prices,id',
             ],
             'specs' => [
-                Rule::requiredIf($hasSpecs),
+                Rule::requiredIf(function () use($hasSpecs,$type){
+                    return $hasSpecs && $type == TypeEnum::PRINT->value;
+                }),
                 'array',
                 $hasSpecs ? 'min:1' : 'sometimes',
             ],
             'specs.*.id' => [
-                Rule::requiredIf($hasSpecs),
+                Rule::requiredIf(function () use($hasSpecs,$type){
+                    return $hasSpecs && $type == TypeEnum::PRINT->value;
+                }),
                 'integer',
                 'exists:product_specifications,id',
             ],
             'specs.*.option' => [
-                Rule::requiredIf($hasSpecs),
+                Rule::requiredIf(function () use($hasSpecs,$type){
+                    return $hasSpecs && $type == TypeEnum::PRINT->value;
+                }),
                 'integer',
                 'exists:product_specification_options,id',
             ],

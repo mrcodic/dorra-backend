@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Item\TypeEnum;
 use App\Observers\CartItemObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
@@ -23,21 +24,25 @@ class CartItem extends Model
         'product_price',
         'product_price_id',
         'quantity',
-        'color'
+        'color',
+        'type'
     ];
     protected $table = 'cart_items';
-    protected $appends = ['sub_total_after_offer','offer_amount'];
-
+    protected $appends = ['sub_total_after_offer', 'offer_amount'];
+    protected $casts = [
+        'type' => TypeEnum::class
+    ];
     public function getSubTotalAfterOfferAttribute(): float
     {
-        $sub = (float) $this->sub_total;
-        $val = (float) optional($this->cartable?->lastOffer)->getRawOriginal('value');
-        return $val > 0 ? $sub * (1 -( $val / 100)) : $sub;
+        $sub = (float)$this->sub_total;
+        $val = (float)optional($this->cartable?->lastOffer)->getRawOriginal('value');
+        return $val > 0 ? $sub * (1 - ($val / 100)) : $sub;
     }
+
     public function getOfferAmountAttribute(): float
     {
-        $sub = (float) $this->sub_total;
-        $val = (float) optional($this->cartable?->lastOffer)->getRawOriginal('value');
+        $sub = (float)$this->sub_total;
+        $val = (float)optional($this->cartable?->lastOffer)->getRawOriginal('value');
         return $val > 0 ? $sub * $val / 100 : 0;
     }
 

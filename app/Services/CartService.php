@@ -61,32 +61,42 @@ class CartService extends BaseService
                 ]);
             }
             $design = $request->getDesign();
-
-            if ($request->design_id) {
-                $request->cartable_id = $design->designable_id;
-                $request->cartable_type = $design->designable_type;
-            }
-            $product = $request->cartable_type === 'App\\Models\\Product'
-                ? $this->productRepository->query()->find($request->cartable_id)
-                : $this->categoryRepository->query()->find($request->cartable_id);
-
             $template = $request->getTemplate();
 
-            $priceDetails = $this->calculatePriceDetails($validatedData, $product, $design);
+            if ($request->type == \App\Enums\Item\TypeEnum::PRINT->value) {
+                if ($request->design_id) {
+                    $request->cartable_id = $design->designable_id;
+                    $request->cartable_type = $design->designable_type;
+                }
+                $product = $request->cartable_type === 'App\\Models\\Product'
+                    ? $this->productRepository->query()->find($request->cartable_id)
+                    : $this->categoryRepository->query()->find($request->cartable_id);
 
-            $cartItem = $cart->addItem(
-                $design ?? $template,
-                Arr::get($priceDetails, 'quantity'),
-                $priceDetails['specs_sum'],
-                $priceDetails['product_price'],
-                $priceDetails['product_price_id'],
-                $priceDetails['sub_total'],
-                $request->cartable_id,
-                $request->cartable_type,
-                $request->color,
-            );
 
-            $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
+                $priceDetails = $this->calculatePriceDetails($validatedData, $product, $design);
+
+                $cartItem = $cart->addItem(
+                    $design ?? $template,
+                    Arr::get($priceDetails, 'quantity'),
+                    $priceDetails['specs_sum'],
+                    $priceDetails['product_price'],
+                    $priceDetails['product_price_id'],
+                    $priceDetails['sub_total'],
+                    $request->cartable_id,
+                    $request->cartable_type,
+                    $request->color,
+                    \App\Enums\Item\TypeEnum::tryFrom($request->type),
+                );
+
+                $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
+            }else{
+              $cart->addItem(
+                    $design ?? $template,
+                   type: \App\Enums\Item\TypeEnum::tryFrom($request->type),
+                );
+
+            }
+
 
             return $cart;
         });
@@ -175,7 +185,7 @@ class CartService extends BaseService
                     ]);
                 },
                 'items.itemable' => function ($query) {
-                    $query->select(['id', 'name','price']);
+                    $query->select(['id', 'name', 'price']);
                 },
                 'items.itemable.products',
                 'items.product.category'
