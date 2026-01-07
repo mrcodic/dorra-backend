@@ -2,16 +2,17 @@
 
 namespace App\DTOs\Payment\Fawry;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class PaymentRequestData
 {
     public function __construct(
         public $order,
-        public $requestData,
         public $user,
         public $guest,
         public $method,
+        public $requestData = null,
     )
     {
     }
@@ -20,10 +21,11 @@ class PaymentRequestData
     {
         return new self(
             order: $data['order'],
-            requestData: $data['requestData'],
             user: $data['user'],
             guest: $data['guest'],
             method: $data['method'],
+            requestData: Arr::get($data, 'requestData'),
+
         );
     }
 
@@ -70,10 +72,10 @@ class PaymentRequestData
 
         $merchantCode = config('services.fawry.merchant_code');
         $merchantRef = str_replace('#', '', $this->order->order_number);
-        $returnUrl =(string) config('services.fawry.redirection_url');
-        $webhookUrl =(string) config('services.fawry.webhook_url');
-        $profileId = (string) $this->user?->id ?? $this->guest?->id ?? '';
-        $phone = $this->requestData->full_phone_number;
+        $returnUrl = (string)config('services.fawry.redirection_url');
+        $webhookUrl = (string)config('services.fawry.webhook_url');
+        $profileId = (string)$this->user?->id ?? $this->guest?->id ?? '';
+        $phone = $this->requestData?->full_phone_number ?? $this->user?->phone_number ?? '01000000000';
         $signature = generateFawrySignature(
             merchantCode: $merchantCode,
             merchantRefNum: $merchantRef,
@@ -87,17 +89,18 @@ class PaymentRequestData
         return [
             'merchantCode' => $merchantCode,
             'merchantRefNum' => $merchantRef,
-            'customerMobile' =>  preg_replace('/^2(01)/', '$1', (string) $phone) ??'01000000000',
-            'customerEmail' => $this->requestData->email,
-            'customerName' => trim($this->requestData->first_name . ' ' . $this->requestData->last_name),
+            'customerMobile' => preg_replace('/^2(01)/', '$1', (string)$phone) ?? '01000000000',
+            'customerEmail' => $this->requestData?->email ?? $this->user?->email ?? 'johndoe@gmail.com',
+            'customerName' => trim($this->requestData?->first_name . ' ' . $this->requestData?->last_name)
+                ?? $this->user?->name ?? 'John Doe',
             'customerProfileId' => $profileId,
             'paymentExpiry' => now()->addDays(2)->valueOf(),
             'language' => $language,
             'chargeItems' => $allItems,
 
-            'paymentMethod' =>(string) $this->method,
+            'paymentMethod' => (string)$this->method,
             'returnUrl' => $returnUrl,
-            'authCaptureModePayment'=> false,
+            'authCaptureModePayment' => false,
             'signature' => $signature,
             'orderWebHookUrl' => $webhookUrl,
         ];

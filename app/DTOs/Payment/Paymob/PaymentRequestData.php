@@ -2,6 +2,7 @@
 
 namespace App\DTOs\Payment\Paymob;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class PaymentRequestData
@@ -9,22 +10,22 @@ class PaymentRequestData
 
     public function __construct(
         public $order,
-        public $requestData,
         public $user,
         public $guest,
         public $method,
-
-
+        public $requestData,
     ){}
 
     public static function fromArray(array $data): self
     {
         return new self(
             order: $data['order'],
-            requestData: $data['requestData'],
             user: $data['user'],
             guest: $data['guest'],
             method: $data['method'],
+            requestData: Arr::get($data, 'requestData'),
+
+
         );
     }
 
@@ -68,10 +69,10 @@ class PaymentRequestData
             'amount' =>collect($allItems)->sum('amount'),
             'method' => $this->method,
             'billing' => [
-                'first_name' => $this->requestData->first_name,
-                'last_name' => $this->requestData->last_name,
-                'email' => $this->requestData->email,
-                'phone_number' =>  $this->requestData->full_phone_number,
+                'first_name' => $this->requestData?->first_name ?? 'John',
+                'last_name' => $this->requestData?->last_name ?? 'Doe',
+                'email' => $this->requestData?->email ?? 'johndoe@gmail.com',
+                'phone_number' =>  $this->requestData?->full_phone_number ?? '01000000000',
                 'country' => 'EG',
                 'city' => 'Cairo',
                 'state' => 'Cairo',
@@ -82,9 +83,9 @@ class PaymentRequestData
                 'postal_code' => 'N/A',
             ],
             'customer' => [
-                'first_name' =>   $this->requestData->first_name,
-                'last_name' =>  $this->requestData->last_name,
-                'email' => $this->requestData->email,
+                'first_name' => $this->requestData?->first_name ?? 'John',
+                'last_name' => $this->requestData?->last_name ?? 'Doe',
+                'email' => $this->requestData?->email ?? 'johndoe@gmail.com',
             ],
                 'items' => $allItems,
 
