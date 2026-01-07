@@ -72,7 +72,7 @@ class DesignResource extends JsonResource
                 'label' => $this->orientation?->label(),
             ],
             'design_price' => $this->price,
-            'visible_download_btn' => $this->when($this->price,true),
+            'visible_download_btn' => (bool) $this->price,
 
 //            'is_added_to_cart' => $this->isAddedToCart(),
         ];
