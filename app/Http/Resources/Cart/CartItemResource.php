@@ -41,8 +41,8 @@ class CartItemResource extends JsonResource
             'quantity' => $this->quantity,
             'color' => $this->color,
             'item_type' => [
-                'value' => $this->type->value,
-                'label' => $this->type->label(),
+                'value' => $this->type?->value,
+                'label' => $this->type?->label(),
             ],
         ];
     }
