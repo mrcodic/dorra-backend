@@ -40,13 +40,13 @@ class StoreCartItemRequest extends BaseRequest
             ? Design::find($this->design_id)
             : null;
 
-        if ($template && !$template->price) {
+        if ($template && is_null($template->price)) {
             throw ValidationException::withMessages([
                 'template_id' => ['Selected template has no price.'],
             ]);
         }
 
-        if ($design && !$design->price) {
+        if ($design && is_null($design->price)) {
             throw ValidationException::withMessages([
                 'design_id' => ['Selected design has no price.'],
             ]);
