@@ -56,10 +56,9 @@ class StoreCartItemRequest extends BaseRequest
             'template_id' => ['required_without:design_id', 'string', 'exists:templates,id'],
             'cartable_type' => [
                 Rule::requiredIf($type == TypeEnum::PRINT->value),
-                'sometimes', 'in:' . Product::class . ',' . Category::class],
+                 'in:' . Product::class . ',' . Category::class],
             'cartable_id' => [
                 Rule::requiredIf($type == TypeEnum::PRINT->value),
-                'sometimes',
                 'integer',
                 Rule::when(
                     $cartableType === Product::class,
