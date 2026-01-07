@@ -63,12 +63,12 @@ class CheckoutRequest extends FormRequest
         return [
             'payment_method_id' => 'exists:payment_methods,id',
             'discount_code_id' => ['nullable', 'exists:discount_codes,id'],
-            'country_code_id' => ['required', 'exists:country_codes,id'],
-            'first_name' => ['required', 'string'],
-            'last_name' => ['required', 'string'],
-            'email' => ['required', 'email'],
+            'country_code_id' => ['sometimes', 'exists:country_codes,id'],
+            'first_name' => ['sometimes', 'string'],
+            'last_name' => ['sometimes', 'string'],
+            'email' => ['sometimes', 'email'],
             'full_phone_number' => ['nullable', 'string', (new Phone())->country($isoCode)->mobile()],
-            'type' => ['required', 'in:' . OrderTypeEnum::getValuesAsString()],
+            'type' => ['sometimes', 'in:' . OrderTypeEnum::getValuesAsString()],
 
 
             'shipping_address_id' => [

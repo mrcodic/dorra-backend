@@ -3,6 +3,7 @@
 namespace App\Services;
 
 
+use App\Enums\Item\TypeEnum;
 use App\DTOs\Order\{OrderAddressData, OrderData, PickupContactData};
 use App\DTOs\Payment\Paymob\PaymentRequestData;
 use App\Enums\Order\{OrderTypeEnum, StatusEnum};
@@ -614,7 +615,6 @@ class OrderService extends BaseService
     }
 
 
-
     public function checkout($request)
     {
         $idempotencyKey = $request->header('Idempotency-Key');
@@ -645,7 +645,7 @@ class OrderService extends BaseService
 
             return [
                 'order' => [
-                    'id'     => $existingOrder->id,
+                    'id' => $existingOrder->id,
                     'number' => $existingOrder->order_number,
                     'status' => $existingOrder->status,
                 ],
@@ -670,7 +670,7 @@ class OrderService extends BaseService
             ]);
         }
 
-        $subTotal = $cart->items->sum(fn ($item) => $item->sub_total_after_offer ?? $item->sub_total);
+        $subTotal = $cart->items->sum(fn($item) => $item->sub_total_after_offer ?? $item->sub_total);
 
         // create order + items + address inside transaction
         $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request, $idempotencyKey) {
@@ -689,7 +689,7 @@ class OrderService extends BaseService
 
             return [
                 'order' => [
-                    'id'     => $order->id,
+                    'id' => $order->id,
                     'number' => $order->order_number,
                 ],
                 'paymentDetails' => [],
@@ -708,7 +708,7 @@ class OrderService extends BaseService
 
         return [
             'order' => [
-                'id'     => $order->id,
+                'id' => $order->id,
                 'number' => $order->order_number,
             ],
             'paymentDetails' => $paymentDetails,
@@ -729,17 +729,18 @@ class OrderService extends BaseService
 
         // order items
         $orderItems = $order->orderItems()->createMany(
-            $cart->items->map(fn ($item) => [
-                'orderable_id'      => $item->cartable_id,
-                'orderable_type'    => $item->cartable_type,
-                'quantity'          => $item->quantity,
-                'product_price'     => $item->product_price,
-                'itemable_id'       => $item->itemable_id,
-                'itemable_type'     => $item->itemable_type,
-                'specs_price'       => $item->specs_price,
-                'sub_total'         => $item->sub_total_after_offer ?: $item->sub_total,
-                'product_price_id'  => $item->product_price_id,
-                'color'             => $item->color,
+            $cart->items->map(fn($item) => [
+                'orderable_id' => $item->cartable_id,
+                'orderable_type' => $item->cartable_type,
+                'quantity' => $item->quantity,
+                'product_price' => $item->product_price,
+                'itemable_id' => $item->itemable_id,
+                'itemable_type' => $item->itemable_type,
+                'specs_price' => $item->specs_price,
+                'sub_total' => $item->sub_total_after_offer ?: $item->sub_total,
+                'product_price_id' => $item->product_price_id,
+                'color' => $item->color,
+                'type' => $item->type,
             ])->toArray()
         );
 
@@ -752,28 +753,32 @@ class OrderService extends BaseService
             }
 
             $cartItem->loadMissing(['specs.productSpecification', 'specs.productSpecificationOption']);
-
-            $cartItem->specs->each(function ($spec) use ($orderItem) {
-                $orderItem->specs()->create([
-                    'spec_name'                 => $spec->productSpecification?->name,
-                    'option_name'               => $spec->productSpecificationOption?->value,
-                    'option_price'              => $spec->productSpecificationOption?->price,
-                    'product_specification_id'  => $spec->productSpecification?->id,
-                    'spec_option_id'            => $spec->productSpecificationOption?->id,
-                ]);
-            });
+            if ($cartItem->specs->isNotEmpty()) {
+                $cartItem->specs->each(function ($spec) use ($orderItem) {
+                    $orderItem->specs()->create([
+                        'spec_name' => $spec->productSpecification?->name,
+                        'option_name' => $spec->productSpecificationOption?->value,
+                        'option_price' => $spec->productSpecificationOption?->price,
+                        'product_specification_id' => $spec->productSpecification?->id,
+                        'spec_option_id' => $spec->productSpecificationOption?->id,
+                    ]);
+                });
+            }
         });
-
-        // address / pickup
-        $order->orderAddress()->create(
-            OrderAddressData::fromRequest($request)
-        );
-
-        if (OrderTypeEnum::from($request->type) === OrderTypeEnum::PICKUP) {
-            $order->pickupContact()->create(
-                PickupContactData::fromRequest($request)
+        $allDownload = $cart->items->every(fn($item) => $item == TypeEnum::DOWNLOAD);
+        if ($allDownload){
+            // address / pickup
+            $order->orderAddress()->create(
+                OrderAddressData::fromRequest($request)
             );
+
+            if (OrderTypeEnum::from($request->type) === OrderTypeEnum::PICKUP) {
+                $order->pickupContact()->create(
+                    PickupContactData::fromRequest($request)
+                );
+            }
         }
+
 
         return $order;
     }
@@ -790,10 +795,10 @@ class OrderService extends BaseService
         }
 
         $cart->update([
-            'price'             => 0,
-            'discount_amount'   => 0,
-            'delivery_amount'   => 0,
-            'discount_code_id'  => null,
+            'price' => 0,
+            'discount_amount' => 0,
+            'delivery_amount' => 0,
+            'discount_code_id' => null,
         ]);
     }
 
@@ -808,31 +813,30 @@ class OrderService extends BaseService
 
         $dto = $gatewayCode === 'fawry'
             ? \App\DTOs\Payment\Fawry\PaymentRequestData::fromArray([
-                'order'       => $order,
+                'order' => $order,
                 'requestData' => $request,
-                'user'        => $user,
-                'guest'       => $order->orderAddress ?? $order->pickupContact,
-                'method'      => $paymentMethod->code,
+                'user' => $user,
+                'guest' => $order->orderAddress ?? $order->pickupContact,
+                'method' => $paymentMethod->code,
             ])
             : PaymentRequestData::fromArray([
-                'order'       => $order,
+                'order' => $order,
                 'requestData' => $request,
-                'user'        => $user,
-                'guest'       => $order->orderAddress ?? $order->pickupContact,
-                'method'      => $paymentMethod,
+                'user' => $user,
+                'guest' => $order->orderAddress ?? $order->pickupContact,
+                'method' => $paymentMethod,
             ]);
 
         // Extra context for some gateways (only available for new orders flow)
         $meta = array_filter([
-            'order'        => $order,
-            'user'         => $user,
-            'cart'         => $cart,
+            'order' => $order,
+            'user' => $user,
+            'cart' => $cart,
             'discountCode' => $discountCode,
-        ], fn ($v) => $v !== null);
+        ], fn($v) => $v !== null);
 
         return $paymentGatewayStrategy->pay($dto->toArray(), $meta);
     }
-
 
 
     public function trackOrder($id)

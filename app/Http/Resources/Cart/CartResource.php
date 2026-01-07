@@ -22,6 +22,7 @@ class CartResource extends JsonResource
         return [
             "id" => $this->id,
             "items" => CartItemResource::collection($this->whenLoaded('items')),
+            "all_items_are_download" => $this->items->every(fn($item) => $item == \App\Enums\Item\TypeEnum::DOWNLOAD),
             'sub_total' => $subAfter,
             'total' =>round(getTotalPrice($this->discountCode ?? 0, $subAfter, $this->delivery_amount),2),
             'tax' => [
