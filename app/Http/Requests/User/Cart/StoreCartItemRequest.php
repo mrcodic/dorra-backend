@@ -51,6 +51,16 @@ class StoreCartItemRequest extends BaseRequest
                 'design_id' => ['Selected design has no price.'],
             ]);
         }
+        $map = [
+            'product' => \App\Models\Product::class,
+            'category' => \App\Models\Category::class,
+        ];
+
+        if (isset($map[$this->cartable_type])) {
+            $this->merge([
+                'cartable_type' => $map[$this->cartable_type],
+            ]);
+        }
     }
 
     private function cartable(): Category|Product|null
@@ -229,18 +239,6 @@ class StoreCartItemRequest extends BaseRequest
         return $this->product;
     }
 
-    protected function prepareForValidation()
-    {
-        $map = [
-            'product' => \App\Models\Product::class,
-            'category' => \App\Models\Category::class,
-        ];
 
-        if (isset($map[$this->cartable_type])) {
-            $this->merge([
-                'cartable_type' => $map[$this->cartable_type],
-            ]);
-        }
-    }
 
 }
