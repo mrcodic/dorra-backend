@@ -331,11 +331,9 @@ class CartService extends BaseService
         return $message;
     }
 
-    public function priceDetails($itemId)
+    public function priceDetails($cartItem)
     {
-        return $this->cartItemRepository->query()
-            ->select(['id', 'cartable_id', 'cartable_type', 'quantity', 'sub_total', 'itemable_id', 'itemable_type', 'product_price'])
-            ->findOrFail($itemId)?->load([
+        return $cartItem?->load([
                 'itemable:id', 'itemable.media', 'product',
                 'cartable' => function (MorphTo $cartable) {
                     $cartable->constrain([

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\User\Cart;
 
 use App\Enums\HttpEnum;
+use App\Enums\Item\TypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Cart\{StoreCartItemRequest, UpdateCartItemRequest};
 use App\Http\Resources\Cart\{CartItemResource, CartResource};
@@ -11,11 +12,21 @@ use App\Services\CartService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\{Rule, ValidationException};
+use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 class CartController extends Controller
 {
     public function __construct(public CartService $cartService)
     {
+    }
+
+    private function abortIfDownload(CartItem $cartItem)
+    {
+        if ($cartItem->type == TypeEnum::DOWNLOAD) {
+            abort(HttpResponse::HTTP_FORBIDDEN,
+                'This action is not allowed for download items.');
+
+        }
     }
 
     public function store(StoreCartItemRequest $request)
@@ -63,8 +74,8 @@ class CartController extends Controller
 
     public function addQuantity(Request $request, $itemId)
     {
-        $cartItem = CartItem::find($itemId);
-
+        $cartItem = CartItem::findOrFail($itemId);
+        $this->abortIfDownload($cartItem);
         $request->validate([
             'quantity' => ['required_without:product_price_id', 'integer', 'min:1'],
             'product_price_id' => [
@@ -87,14 +98,21 @@ class CartController extends Controller
 
     public function priceDetails($itemId)
     {
-        $itemSpecs = $this->cartService->priceDetails($itemId);
+        $cartItem = CartItem::query()
+            ->select(['id', 'cartable_id', 'cartable_type', 'quantity',
+                'sub_total', 'itemable_id', 'itemable_type', 'product_price'])
+            ->findOrFail($itemId);
+        $this->abortIfDownload($cartItem);
+        $itemSpecs = $this->cartService->priceDetails($cartItem);
         return Response::api(data: new CartItemResource($itemSpecs));
     }
 
     public function updatePriceDetails(UpdateCartItemRequest $request, $itemId)
     {
+        $cartItem = CartItem::findOrFail($itemId);
+        $this->abortIfDownload($cartItem);
         $result = $this->cartService->updatePriceDetails($request->validated(), $itemId);
-        return Response::api(message: $result[0],data: new CartItemResource($result[1]));
+        return Response::api(message: $result[0], data: new CartItemResource($result[1]));
     }
 
     public function checkItem(Request $request)
