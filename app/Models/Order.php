@@ -31,7 +31,8 @@ class Order extends Model
         'status',
         'is_already_printed',
         'inventory_id',
-        'idempotency_key'
+        'idempotency_key',
+        'all_items_are_download'
     ];
 
     protected $casts = [

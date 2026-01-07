@@ -720,10 +720,11 @@ class OrderService extends BaseService
      */
     protected function createOrderFromCart($cart, $discountCode, $subTotal, $request, string $idempotencyKey)
     {
+        $allDownload = $cart->items->every(fn($item) => $item == TypeEnum::DOWNLOAD);
         $order = $this->repository->query()->create(
             array_merge(
                 OrderData::fromCart($subTotal, $discountCode, $cart),
-                ['idempotency_key' => $idempotencyKey]
+                ['idempotency_key' => $idempotencyKey,'all_items_are_download' => $allDownload]
             )
         );
 
@@ -765,7 +766,6 @@ class OrderService extends BaseService
                 });
             }
         });
-        $allDownload = $cart->items->every(fn($item) => $item == TypeEnum::DOWNLOAD);
         if ($allDownload){
             // address / pickup
             $order->orderAddress()->create(
