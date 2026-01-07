@@ -27,10 +27,10 @@ class UpdateOrderRequest extends BaseRequest
     public function rules($id): array
     {
         return [
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255'],
-            'phone' => ['required', 'string', 'max:255'],
+            'first_name' => ['sometimes', 'string', 'max:255'],
+            'last_name' => ['sometimes', 'string', 'max:255'],
+            'email' => ['sometimes', 'string', 'email', 'max:255'],
+            'phone' => ['sometimes', 'string', 'max:255'],
             'status' => ['nullable'],
             'inventory_ids' => ['nullable','array'],
             'inventory_ids.*' => ['integer', 'exists:inventories,id'],

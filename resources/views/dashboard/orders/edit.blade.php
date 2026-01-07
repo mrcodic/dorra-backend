@@ -43,78 +43,80 @@
                 @php
                     $address = $model->orderAddress;
                 @endphp
-                <!-- Left Column -->
+                    <!-- Left Column -->
                 @if($address)
-                <div class="col-12 col-md-4">
-                    <!-- Customer Details -->
-                    <h5 class="mb-2 fs-16 text-black">Customer Details</h5>
+                    <div class="col-12 col-md-4">
+                        <!-- Customer Details -->
+                        <h5 class="mb-2 fs-16 text-black">Customer Details</h5>
 
-                    <div class="mb-2">
-                        <label class="form-label fw-bold">First Name</label>
-                        <input type="text" class="form-control" name="first_name"
-                               value="{{ $model->orderAddress?->first_name }}">
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label fw-bold">Last Name</label>
-                        <input type="text" class="form-control" name="last_name"
-                               value="{{ $model->orderAddress?->last_name }}">
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label fw-bold">Email</label>
-                        <input type="email" class="form-control" name="email"
-                               value="{{ $model->orderAddress?->email }}">
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label fw-bold">Phone</label>
-                        <input type="text" class="form-control" name="phone" value="{{ $model->orderAddress?->phone }}">
-                    </div>
-
-
-                    <!-- Shipping Details -->
-
-
-                    @if($address)
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="mb-0 fs-16 text-black">
-                                {{ $address?->type === 'pickup' ? 'Pickup Details' : 'Shipping Details' }}
-                            </h5>
-
-                            <button type="button" class="lined-btn" data-bs-toggle="modal"
-                                    data-bs-target="#editOrderShippingModal">
-                                Edit
-                            </button>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold">First Name</label>
+                            <input type="text" class="form-control" name="first_name"
+                                   value="{{ $model->orderAddress?->first_name }}">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold">Last Name</label>
+                            <input type="text" class="form-control" name="last_name"
+                                   value="{{ $model->orderAddress?->last_name }}">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold">Email</label>
+                            <input type="email" class="form-control" name="email"
+                                   value="{{ $model->orderAddress?->email }}">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold">Phone</label>
+                            <input type="text" class="form-control" name="phone"
+                                   value="{{ $model->orderAddress?->phone }}">
                         </div>
 
-                        <span class="text-black fs-16 fw-bold mb-1">
+
+                        <!-- Shipping Details -->
+
+
+                        @if($address)
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0 fs-16 text-black">
+                                    {{ $address?->type === 'pickup' ? 'Pickup Details' : 'Shipping Details' }}
+                                </h5>
+
+                                <button type="button" class="lined-btn" data-bs-toggle="modal"
+                                        data-bs-target="#editOrderShippingModal">
+                                    Edit
+                                </button>
+                            </div>
+
+                            <span class="text-black fs-16 fw-bold mb-1">
                     {{ $address?->type === 'pickup' ? 'Location:' : 'Address:' }}
                 </span>
 
-                        <div class="border rounded p-2 mb-2 text-black text-break">
-                            @if($address?->type === 'pickup')
-                                {{ $address->location_name }}<br>
-                                {{ $address?->state }}, {{ $address?->country }}
-                            @else
-                                {{ $address?->address_line }}, {{ $address?->address_label }}<br>
-                                {{ $address?->state }}, {{ $address->country }}
-                            @endif
-                        </div>
-                    @endif
-                    <span class="text-black fs-16 fw-bold mb-1">Delivery Instructions:</span>
-                    <div class="border rounded p-1 mb-2 text-black fs-5">
+                            <div class="border rounded p-2 mb-2 text-black text-break">
+                                @if($address?->type === 'pickup')
+                                    {{ $address->location_name }}<br>
+                                    {{ $address?->state }}, {{ $address?->country }}
+                                @else
+                                    {{ $address?->address_line }}, {{ $address?->address_label }}<br>
+                                    {{ $address?->state }}, {{ $address->country }}
+                                @endif
+                            </div>
+                        @endif
+                        <span class="text-black fs-16 fw-bold mb-1">Delivery Instructions:</span>
+                        <div class="border rounded p-1 mb-2 text-black fs-5">
 
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                        labore
-                        et dolore magna aliqua.
-                    </div>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                            labore
+                            et dolore magna aliqua.
+                        </div>
 
-                    <div class="rounded p-1 d-flex align-items-center text-black" style="background-color: #FCF8FC;">
-                        <i data-feather="truck" class="me-2"></i>
-                        <div>
-                            <p class="fs-4">Estimated delivery time</p>
-                            <div class="fs-16">Tomorrow, 2:00 PM - 4:00 PM</div>
+                        <div class="rounded p-1 d-flex align-items-center text-black"
+                             style="background-color: #FCF8FC;">
+                            <i data-feather="truck" class="me-2"></i>
+                            <div>
+                                <p class="fs-4">Estimated delivery time</p>
+                                <div class="fs-16">Tomorrow, 2:00 PM - 4:00 PM</div>
+                            </div>
                         </div>
                     </div>
-                </div>
                 @endif
                 <!-- Right Column -->
                 <div class="col-12 col-md-8">
@@ -134,51 +136,51 @@
                     </select>
                     @if($address)
 
-                    <div class="row g-3 align-items-end">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Inventory</label>
-                            <select class="form-select" id="inventory_id">
-                                <option value="" selected disabled>— Select Inventory —</option>
-                                @foreach ($associatedData['inventories'] as $inventory)
-                                    <option
-                                        value="{{ $inventory->id }}" @selected($model->inventories->first()?->parent->id == $inventory->id)>{{ $inventory->name }}</option>
-                                @endforeach
-                            </select>
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Inventory</label>
+                                <select class="form-select" id="inventory_id">
+                                    <option value="" selected disabled>— Select Inventory —</option>
+                                    @foreach ($associatedData['inventories'] as $inventory)
+                                        <option
+                                            value="{{ $inventory->id }}" @selected($model->inventories->first()?->parent->id == $inventory->id)>{{ $inventory->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Available Places</label>
+                                @php
+                                    $assignedIds = $model->inventories?->pluck('id')->all() ?? [];
+                                    $parent = $model->inventories->first()?->parent ?? $model->inventories->first();
+
+                                    $available = $parent?->children()
+                                        ->select('id','name','is_available')
+                                        ->whereNotNull('parent_id')
+                                        ->where('is_available', 1)
+                                        ->get() ?? collect();
+
+                                    $selected = !empty($assignedIds)
+                                        ? App\Models\Inventory::query()->whereIn('id', $assignedIds)->get(['id','name','is_available'])
+                                        : collect();
+
+                                    $options = $selected->concat($available)->unique('id')->sortBy('name');
+                                @endphp
+
+                                <select class="form-select select2" name="inventory_ids[]" id="place_id"
+                                        data-placeholder="Search place…" multiple>
+                                    @forelse($options as $opt)
+                                        <option value="{{ $opt->id }}" @selected(in_array($opt->id, $assignedIds))>
+                                            {{ $opt->name }}{{ $opt->is_available ? '' : ' (occupied)' }}
+                                        </option>
+                                    @empty
+                                        <option value="" disabled>— No places —</option>
+                                    @endforelse
+                                </select>
+
+
+                            </div>
                         </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Available Places</label>
-                            @php
-                                $assignedIds = $model->inventories?->pluck('id')->all() ?? [];
-                                $parent = $model->inventories->first()?->parent ?? $model->inventories->first();
-
-                                $available = $parent?->children()
-                                    ->select('id','name','is_available')
-                                    ->whereNotNull('parent_id')
-                                    ->where('is_available', 1)
-                                    ->get() ?? collect();
-
-                                $selected = !empty($assignedIds)
-                                    ? App\Models\Inventory::query()->whereIn('id', $assignedIds)->get(['id','name','is_available'])
-                                    : collect();
-
-                                $options = $selected->concat($available)->unique('id')->sortBy('name');
-                            @endphp
-
-                            <select class="form-select select2" name="inventory_ids[]" id="place_id"
-                                    data-placeholder="Search place…" multiple>
-                                @forelse($options as $opt)
-                                    <option value="{{ $opt->id }}" @selected(in_array($opt->id, $assignedIds))>
-                                        {{ $opt->name }}{{ $opt->is_available ? '' : ' (occupied)' }}
-                                    </option>
-                                @empty
-                                    <option value="" disabled>— No places —</option>
-                                @endforelse
-                            </select>
-
-
-                        </div>
-                    </div>
                     @endif
                     <h5 class="fw-bold mt-3 mb-1 fs-16 text-black">Items</h5>
                     @foreach ($model->orderItems as $orderItem)
@@ -195,6 +197,13 @@
                                     <div>
                                         <div class="fw-bold text-black fs-16">
                                             {{ $product->name ?? 'No Product Found' }}
+                                            @php
+                                                $isDownload = $orderItem->type == \App\Enums\Item\TypeEnum::DOWNLOAD;
+                                            @endphp
+
+                                            <span class="badge ms-1 {{ $isDownload ? 'bg-info' : 'bg-success' }}">
+        {{ $isDownload ? 'Download' : 'Print' }}
+    </span>
                                         </div>
                                         <div class="text-dark fs-5">
                                             Qty: {{ $orderItem->quantity }}
