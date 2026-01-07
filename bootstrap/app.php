@@ -64,7 +64,11 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->expectsJson()) {
                 return Response::api(
                     HttpEnum::FORBIDDEN,
-                    message: 'You are not allowed to perform this action.'
+                    message: 'You are not allowed to perform this action.',
+                    errors:[
+                        'access' =>['You are not allowed to perform this action.']
+                    ]
+
                 );
             }
         });
@@ -73,7 +77,10 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($e->getStatusCode() === HttpResponse::HTTP_FORBIDDEN && $request->expectsJson()) {
                 return Response::api(
                     HttpEnum::FORBIDDEN,
-                    message: $e->getMessage() ?: 'Forbidden'
+                    message: $e->getMessage() ?: 'Forbidden',
+                    errors:[
+                        'access' =>['You are not allowed to perform this action.']]
+
                 );
             }
         });
