@@ -30,6 +30,29 @@ class StoreCartItemRequest extends BaseRequest
     }
 
 
+    public function prepareForValidation(): void
+    {
+        $template = $this->template_id
+            ? Template::find($this->template_id)
+            : null;
+
+        $design = $this->design_id
+            ? Design::find($this->design_id)
+            : null;
+
+        if ($template && !$template->price) {
+            throw ValidationException::withMessages([
+                'template_id' => ['Selected template has no price.'],
+            ]);
+        }
+
+        if ($design && !$design->price) {
+            throw ValidationException::withMessages([
+                'design_id' => ['Selected design has no price.'],
+            ]);
+        }
+    }
+
     private function cartable(): Category|Product|null
     {
         return $this->cartable_type === Product::class
@@ -100,8 +123,7 @@ class StoreCartItemRequest extends BaseRequest
 
     public function passedValidation()
     {
-        $this->template = Template::find($this->template_id);
-        $this->design = Design::find($this->design_id);
+
         $this->product = $this->cartable_type === Product::class
             ? Product::find($this->cartable_id)
             : Category::find($this->cartable_id);
