@@ -32,11 +32,11 @@ class StoreCartItemRequest extends BaseRequest
 
     public function prepareForValidation(): void
     {
-        $template = $this->template_id
+        $template = $this->template = $this->template_id
             ? Template::find($this->template_id)
             : null;
 
-        $design = $this->design_id
+        $design = $this->design =$this->design_id
             ? Design::find($this->design_id)
             : null;
 
