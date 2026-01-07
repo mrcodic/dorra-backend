@@ -174,7 +174,6 @@
                             </select>
 
 
-
                         </div>
                     </div>
 
@@ -297,8 +296,9 @@
             </div>
         </form>
     </div>
-    @include("modals.orders.edit-shipping-details",['model' => $model])
-
+    @if($address)
+        @include("modals.orders.edit-shipping-details",['model' => $model])
+    @endif
 @endsection
 
 
@@ -382,7 +382,6 @@
                     console.error('Failed to load places', e);
                 }
             }
-
 
 
             // on change
@@ -493,14 +492,14 @@
                 }
             });
             $(document).on("change", ".address-state-select", function () {
-                const stateId    = $(this).val();
+                const stateId = $(this).val();
                 const zoneSelect = $(".address-zone-select");
 
                 if (stateId) {
                     $.ajax({
                         url: "{{ route('zones') }}",
                         method: "GET",
-                        data: { "filter[state_id]": stateId },
+                        data: {"filter[state_id]": stateId},
                         success: function (response) {
                             zoneSelect.empty().append('<option value="" disabled selected>Select a Zone</option>');
                             $.each(response.data, function (_, zone) {
@@ -515,7 +514,6 @@
                     zoneSelect.empty().append('<option value="" disabled selected>Select a Zone</option>');
                 }
             });
-
 
 
             // Clear validation when modal is closed
