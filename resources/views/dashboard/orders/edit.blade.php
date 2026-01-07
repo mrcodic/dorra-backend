@@ -40,6 +40,9 @@
             @csrf
             @method("PUT")
             <div class="row">
+                @php
+                    $address = $model->orderAddress;
+                @endphp
                 <!-- Left Column -->
                 @if($address)
                 <div class="col-12 col-md-4">
@@ -68,9 +71,7 @@
 
 
                     <!-- Shipping Details -->
-                    @php
-                        $address = $model->orderAddress;
-                    @endphp
+
 
                     @if($address)
                         <div class="d-flex justify-content-between align-items-center mb-2">
