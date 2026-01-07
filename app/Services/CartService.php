@@ -77,6 +77,7 @@ class CartService extends BaseService
 
                 $cartItem = $cart->addItem(
                     $design ?? $template,
+                    \App\Enums\Item\TypeEnum::tryFrom($request->type),
                     Arr::get($priceDetails, 'quantity'),
                     $priceDetails['specs_sum'],
                     $priceDetails['product_price'],
@@ -85,7 +86,6 @@ class CartService extends BaseService
                     $request->cartable_id,
                     $request->cartable_type,
                     $request->color,
-                    \App\Enums\Item\TypeEnum::tryFrom($request->type),
                 );
 
                 $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
