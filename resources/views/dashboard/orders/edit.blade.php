@@ -41,6 +41,7 @@
             @method("PUT")
             <div class="row">
                 <!-- Left Column -->
+                @if($model->items->every(fn($item)=> $item->type != \App\Enums\Item\TypeEnum::DOWNLOAD))
                 <div class="col-12 col-md-4">
                     <!-- Customer Details -->
                     <h5 class="mb-2 fs-16 text-black">Customer Details</h5>
@@ -113,6 +114,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
                 <!-- Right Column -->
                 <div class="col-12 col-md-8">
                     <div class="p-1 rounded" style="background-color: #FCF8FC;">
@@ -129,6 +131,7 @@
                             </option>
                         @endforeach
                     </select>
+                    @if($model->items->every(fn($item)=> $item->type != \App\Enums\Item\TypeEnum::DOWNLOAD))
 
                     <div class="row g-3 align-items-end">
                         <div class="col-md-6">
@@ -176,8 +179,7 @@
 
                         </div>
                     </div>
-
-
+                    @endif
                     <h5 class="fw-bold mt-3 mb-1 fs-16 text-black">Items</h5>
                     @foreach ($model->orderItems as $orderItem)
                         @php
@@ -296,7 +298,7 @@
             </div>
         </form>
     </div>
-    @if($address)
+    @if($model->items->every(fn($item)=> $item->type != \App\Enums\Item\TypeEnum::DOWNLOAD))
         @include("modals.orders.edit-shipping-details",['model' => $model])
     @endif
 @endsection
