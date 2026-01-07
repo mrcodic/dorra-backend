@@ -92,7 +92,7 @@ class CartService extends BaseService
             } else {
                 $cart->addItem(
                     $design ?? $template,
-                    sub_total: $design->price ?? $template->price,
+                    subTotal: $design->price ?? $template->price,
                     type: \App\Enums\Item\TypeEnum::tryFrom($request->type),
                 );
 
