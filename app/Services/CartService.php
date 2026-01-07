@@ -89,10 +89,11 @@ class CartService extends BaseService
                 );
 
                 $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
-            }else{
-              $cart->addItem(
+            } else {
+                $cart->addItem(
                     $design ?? $template,
-                   type: \App\Enums\Item\TypeEnum::tryFrom($request->type),
+                    sub_total: $design->price ?? $template->price,
+                    type: \App\Enums\Item\TypeEnum::tryFrom($request->type),
                 );
 
             }
