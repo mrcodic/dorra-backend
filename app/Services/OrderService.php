@@ -766,7 +766,7 @@ class OrderService extends BaseService
                 });
             }
         });
-        if ($allDownload){
+        if (!$allDownload){
             // address / pickup
             $order->orderAddress()->create(
                 OrderAddressData::fromRequest($request)
