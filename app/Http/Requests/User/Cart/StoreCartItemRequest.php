@@ -45,7 +45,6 @@ class StoreCartItemRequest extends BaseRequest
                 'template_id' => ['Selected template has no price.'],
             ]);
         }
-dd($design);
         if ($design && is_null($design->price)) {
             throw ValidationException::withMessages([
                 'design_id' => ['Selected design has no price.'],
