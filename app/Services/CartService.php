@@ -90,6 +90,7 @@ class CartService extends BaseService
 
                 $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
             } else {
+                dd($design,$template);
                 $cart->addItem(
                     $design ?? $template,
                     subTotal: $design?->price ?? $template?->price,
