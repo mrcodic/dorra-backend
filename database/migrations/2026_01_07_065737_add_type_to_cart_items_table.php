@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('cart_items', function (Blueprint $table) {
-            $table->tinyInteger('type')->nullable();
+            $table->tinyInteger('type')->nullable()->after('color');
         });
     }
 

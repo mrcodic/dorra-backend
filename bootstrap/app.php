@@ -4,6 +4,7 @@ use App\Enums\HttpEnum;
 
 use App\Models\Cart;
 
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -56,6 +59,25 @@ return Application::configure(basePath: dirname(__DIR__))
                 );
             }
         });
+
+        $exceptions->render(function (AuthorizationException $e, $request) {
+            if ($request->expectsJson()) {
+                return Response::api(
+                    HttpEnum::FORBIDDEN,
+                    message: 'You are not allowed to perform this action.'
+                );
+            }
+        });
+
+        $exceptions->render(function (HttpException $e, $request) {
+            if ($e->getStatusCode() === HttpResponse::HTTP_FORBIDDEN && $request->expectsJson()) {
+                return Response::api(
+                    HttpEnum::FORBIDDEN,
+                    message: $e->getMessage() ?: 'Forbidden'
+                );
+            }
+        });
+
         $exceptions->render(function (Throwable $e, $request) {
 
                 if ($e instanceof NotFoundHttpException || $e instanceof ModelNotFoundException) {

@@ -100,7 +100,7 @@ class CartController extends Controller
     {
         $cartItem = CartItem::query()
             ->select(['id', 'cartable_id', 'cartable_type', 'quantity',
-                'sub_total', 'itemable_id', 'itemable_type', 'product_price'])
+                'sub_total', 'itemable_id', 'itemable_type', 'product_price','type'])
             ->findOrFail($itemId);
         $this->abortIfDownload($cartItem);
         $itemSpecs = $this->cartService->priceDetails($cartItem);
