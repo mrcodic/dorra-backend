@@ -52,10 +52,8 @@ class StoreCartItemRequest extends BaseRequest
         $type = (int) $this->input('type');
         return [
             'type' =>['required',Rule::in(TypeEnum::values())],
-            'design_id' => ['required_without:template_id',
-                'prohibited_if:template_id', 'string', 'exists:designs,id'],
-            'template_id' => ['required_without:design_id', 'string',
-                'prohibited_if:design_id','exists:templates,id'],
+            'design_id' => ['required_without:template_id', 'string', 'exists:designs,id'],
+            'template_id' => ['required_without:design_id', 'string', 'exists:templates,id'],
             'cartable_type' => [
                 Rule::requiredIf($type == TypeEnum::PRINT->value),
                 'sometimes', 'in:' . Product::class . ',' . Category::class],
