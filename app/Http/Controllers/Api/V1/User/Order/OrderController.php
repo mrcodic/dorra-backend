@@ -85,7 +85,7 @@ class OrderController extends Controller
         $itemable = $orderItem->itemable;
 
         $sides = $itemable->types
-            ->map(fn ($type) => strtolower($type->key()))
+            ->map(fn ($type) => strtolower($type->value->key()))
             ->unique()
             ->values();
         $mediaFront = $itemable->getFirstMedia('templates');
