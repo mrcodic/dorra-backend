@@ -83,27 +83,45 @@ class OrderController extends Controller
         ]);
         $format = $data['format'];
         $itemable = $orderItem->itemable;
+
+        $sides = $itemable->types
+            ->map(fn ($type) => strtolower($type->key()))
+            ->unique()
+            ->values();
         $mediaFront = $itemable->getFirstMedia('templates');
         $mediaBack  = $itemable->getFirstMedia('back_templates');
 
-        $sides = $itemable->types->pluck('value')->flatMap(fn ($type) => [$type->key()]);
-        $sides->each(function ($side) use ($format,$itemable, $mediaFront, $mediaBack) {
-            $targetSide = $side === 'none' ? 'front' : $side;
-            $conversion = "{$targetSide}_{$format}";
+        if ($sides->count() === 1) {
+            $side = $sides->first();
+            return $this->downloadSingleSide($itemable, $side, $format, $mediaFront, $mediaBack);
+        }
+    }
 
-        $media = $targetSide === 'front' ? $mediaFront : $mediaBack;
-        $path  = $media?->getPath($conversion);
+    protected function downloadSingleSide($template, $side, $format, $mediaFront, $mediaBack)
+    {
+        $side = $side === 'none' ? 'front' : $side;
 
-        $filename = "template-{$itemable->id}-{$targetSide}.{$format}";
+        $media = $side === 'front' ? $mediaFront : $mediaBack;
+
+        if (! $media) abort(404, "$side image not found.");
+
+        $conversion = "{$side}_{$format}";
+
+        // If PDF requested, force original (or generate PDF yourself)
+//        if ($format === 'pdf') {
+//            return $this->returnPdf($template, $side, $media);
+//        }
+
+        // Path to conversion
+        $path = $media->getPath($conversion);
+
+        $ext = $format === 'jpg' ? 'jpeg' : $format;
+
+        $filename = "template-{$template->id}-{$side}.{$ext}";
 
         return response()->download($path, $filename, [
-            'Content-Type' => "image/{$format}",
+            'Content-Type' => "image/{$ext}",
         ]);
-        });
-
-
-
-
-
     }
+
 }

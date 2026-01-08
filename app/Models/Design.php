@@ -242,10 +242,6 @@ class Design extends Model implements HasMedia
             ->format('svg')
             ->performOnCollections('templates');
 
-        $this->addMediaConversion('front_pdf')
-            ->format('pdf')
-            ->performOnCollections('templates');
-
 
         $this->addMediaConversion('back_png')
             ->format('png')
@@ -256,11 +252,8 @@ class Design extends Model implements HasMedia
             ->performOnCollections('back_templates');
         $this->addMediaConversion('back_svg')
             ->format('svg')
-            ->performOnCollections('templates');
+            ->performOnCollections('back_templates');
 
-        $this->addMediaConversion('back_pdf')
-            ->format('pdf')
-            ->performOnCollections('templates');
     }
-    
+
 }
