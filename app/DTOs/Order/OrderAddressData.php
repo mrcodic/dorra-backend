@@ -10,7 +10,7 @@ class OrderAddressData
 {
     public static function fromRequest($request): array
     {
-        $type = OrderTypeEnum::from($request->type);
+        $type = $request->type ? OrderTypeEnum::from($request->type) : null;
 
         $location = $type === OrderTypeEnum::PICKUP
             ? Location::find($request->location_id)

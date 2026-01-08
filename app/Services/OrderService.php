@@ -766,6 +766,7 @@ class OrderService extends BaseService
                 });
             }
         });
+        dd(!$allDownload);
         if (!$allDownload){
             // address / pickup
             $order->orderAddress()->create(
