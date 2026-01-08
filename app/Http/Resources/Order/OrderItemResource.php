@@ -21,7 +21,7 @@ class OrderItemResource extends JsonResource
            'product_name' => $this->product?->name,
            'quantity' => $this->quantity,
             'color' => $this->color,
-            'total_price' => $this->total_price,
+            'total_price' => $this->sub_total,
             'design_image' => $this->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($this->itemable)))),
             'specs' => OrderItemSpecResource::collection($this->whenLoaded('specs')),
             'item_type' => [
