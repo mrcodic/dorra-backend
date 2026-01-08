@@ -238,20 +238,12 @@ class Design extends Model implements HasMedia
             ->format('jpg')
             ->performOnCollections('templates');
 
-        $this->addMediaConversion('front_svg')
-            ->format('svg')
-            ->performOnCollections('templates');
-
-
         $this->addMediaConversion('back_png')
             ->format('png')
             ->performOnCollections('back_templates');
 
         $this->addMediaConversion('back_jpg')
             ->format('jpg')
-            ->performOnCollections('back_templates');
-        $this->addMediaConversion('back_svg')
-            ->format('svg')
             ->performOnCollections('back_templates');
 
     }
