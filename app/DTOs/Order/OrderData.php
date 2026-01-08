@@ -2,6 +2,7 @@
 
 namespace App\DTOs\Order;
 
+use App\Enums\Item\TypeEnum;
 use App\Enums\Order\StatusEnum;
 use App\Models\Guest;
 use Illuminate\Support\Facades\Auth;
@@ -10,6 +11,7 @@ class OrderData
 {
     public static function fromCart($subTotal, $discountCode,$cart): array
     {
+        $allDownload = $cart->items->every(fn($item) => $item->type == TypeEnum::DOWNLOAD);
 
         return [
             'user_id' => Auth::guard('sanctum')?->id(),
@@ -19,7 +21,7 @@ class OrderData
             'discount_amount' => getDiscountAmount($discountCode ?? 0, $subTotal),
             'offer_amount' => $cart->items->sum('offer_amount'),
             'delivery_amount' => $cart->delivery_amount ?? 0,
-            'tax_amount' => getPriceAfterTax(setting('tax'), $subTotal),
+            'tax_amount' => !$allDownload ? getPriceAfterTax(setting('tax'), $subTotal) : 0,
             'total_price' =>round(getTotalPrice($discountCode ?? 0, $subTotal, $cart->delivery_amount),2),
             'status' => StatusEnum::PENDING,
         ];
