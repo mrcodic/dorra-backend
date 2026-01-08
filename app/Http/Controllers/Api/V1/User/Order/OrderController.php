@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Checkout\CheckoutRequest;
 use App\Http\Resources\LocationResource;
 use App\Http\Resources\Order\OrderResource;
+use App\Models\OrderItem;
 use App\Services\LocationService;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
@@ -73,5 +74,26 @@ class OrderController extends Controller
     public function cancelOrder($id)
     {
      $this->orderService->cancelOrder($id);
+    }
+
+    public function downloadItem(OrderItem $orderItem)
+    {
+        $itemable = $orderItem->itemable;
+        $sides = $itemable->types->pluck('value.key')->toArray();
+        dd($sides);
+//        $targetSide = $side === 'none' ? 'front' : $side;
+//
+//        $conversion = "{$targetSide}_{$format}"; // ex: front_png, back_jpeg
+//
+//        $media = $targetSide === 'front' ? $mediaFront : $mediaBack;
+//        $path  = $media->getPath($conversion); // generates conversion if needed
+//
+//        $filename = "template-{$template->id}-{$targetSide}.{$extension}";
+//
+//        return response()->download($path, $filename, [
+//            'Content-Type' => "image/{$extension}",
+//        ]);
+
+
     }
 }

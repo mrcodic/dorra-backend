@@ -54,10 +54,6 @@ class TemplateController extends Controller
 
     }
 
-    public function download()
-    {
-
-    }
 
 
 }
