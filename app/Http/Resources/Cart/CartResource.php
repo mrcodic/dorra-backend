@@ -25,7 +25,7 @@ class CartResource extends JsonResource
             "items" => CartItemResource::collection($this->whenLoaded('items')),
             "all_items_are_download" => $isDownload,
             'sub_total' => $subAfter,
-            'total' => round(getTotalPrice($this->discountCode ?? 0, $subAfter, $this->delivery_amount), 2),
+            'total' => round(getTotalPrice($this->discountCode ?? 0, $subAfter, $this->delivery_amount, $isDownload), 2),
             'tax' => [
                 'ratio' => !$isDownload ? setting('tax') * 100 : 0 . "%",
                 'value' => !$isDownload ? getPriceAfterTax(setting('tax'), $subAfter) : 0,

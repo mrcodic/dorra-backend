@@ -22,7 +22,7 @@ class OrderData
             'offer_amount' => $cart->items->sum('offer_amount'),
             'delivery_amount' => $cart->delivery_amount ?? 0,
             'tax_amount' => !$allDownload ? getPriceAfterTax(setting('tax'), $subTotal) : 0,
-            'total_price' =>round(getTotalPrice($discountCode ?? 0, $subTotal, $cart->delivery_amount),2),
+            'total_price' =>round(getTotalPrice($discountCode ?? 0, $subTotal, $cart->delivery_amount, $allDownload),2),
             'status' => StatusEnum::PENDING,
         ];
     }

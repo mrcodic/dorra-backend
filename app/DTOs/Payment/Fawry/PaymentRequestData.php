@@ -49,8 +49,8 @@ class PaymentRequestData
             ];
         }
 
-        if (setting('tax') > 0) {
-            $taxAmount = getPriceAfterTax(setting('tax'), $this->order->subtotal);
+        if ($this->order->tax_amount > 0) {
+            $taxAmount = $this->order->tax_amount;
             $extraItems[] = [
                 'itemId' => (string)Str::uuid(),
                 'description' => 'Tax',
