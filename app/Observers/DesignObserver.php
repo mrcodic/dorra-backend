@@ -57,7 +57,10 @@ class DesignObserver
         }
 
     }
-
+    public function deleting(Design $design): void
+    {
+        $design->cartItems()->detach();
+    }
     /**
      * Handle the Design "deleted" event.
      */
