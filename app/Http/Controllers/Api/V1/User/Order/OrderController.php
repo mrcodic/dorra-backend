@@ -80,7 +80,7 @@ class OrderController extends Controller
     {
         $itemable = $orderItem->itemable;
         $sides = $itemable->types->pluck('value.key')->toArray();
-        dd($sides,$itemable->types->pluck('value')->map(function ($type){
+        dd($sides,$itemable->types->pluck('value')->flatMap(function ($type){
             return [
                 $type->key()
             ];
