@@ -76,27 +76,33 @@ class OrderController extends Controller
      $this->orderService->cancelOrder($id);
     }
 
-    public function downloadItem(OrderItem $orderItem)
+    public function downloadItem(OrderItem $orderItem,Request $request)
     {
+       $data = $request->validate([
+            'format' => ['required','in:pdf,jpg,png,svg,'],
+        ]);
+        $format = $data['format'];
         $itemable = $orderItem->itemable;
-        $sides = $itemable->types->pluck('value.key')->toArray();
-        dd($sides,$itemable->types->pluck('value')->flatMap(function ($type){
-            return [
-                $type->key()
-            ];
-        }));
-//        $targetSide = $side === 'none' ? 'front' : $side;
-//
-//        $conversion = "{$targetSide}_{$format}"; // ex: front_png, back_jpeg
-//
-//        $media = $targetSide === 'front' ? $mediaFront : $mediaBack;
-//        $path  = $media->getPath($conversion); // generates conversion if needed
-//
-//        $filename = "template-{$template->id}-{$targetSide}.{$extension}";
-//
-//        return response()->download($path, $filename, [
-//            'Content-Type' => "image/{$extension}",
-//        ]);
+        $mediaFront = $itemable->getFirstMedia('templates');
+        $mediaBack  = $itemable->getFirstMedia('back_templates');
+        
+        $sides = $itemable->types->pluck('value')->flatMap(fn ($type) => [$type->key()]);
+        $sides->each(function ($side) use ($format,$itemable, $mediaFront, $mediaBack) {
+            $targetSide = $side === 'none' ? 'front' : $side;
+            $conversion = "{$targetSide}_{$format}";
+
+        $media = $targetSide === 'front' ? $mediaFront : $mediaBack;
+        $path  = $media->getPath($conversion);
+
+        $filename = "template-{$itemable->id}-{$targetSide}.{$format}";
+
+        return response()->download($path, $filename, [
+            'Content-Type' => "image/{$format}",
+        ]);
+        });
+
+
+
 
 
     }
