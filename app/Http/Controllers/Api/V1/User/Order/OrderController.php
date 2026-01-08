@@ -80,7 +80,11 @@ class OrderController extends Controller
     {
         $itemable = $orderItem->itemable;
         $sides = $itemable->types->pluck('value.key')->toArray();
-        dd($sides,$itemable->types->pluck('value')->toArray());
+        dd($sides,$itemable->types->pluck('value')->map(function ($type){
+            return [
+                $type->key
+            ];
+        }));
 //        $targetSide = $side === 'none' ? 'front' : $side;
 //
 //        $conversion = "{$targetSide}_{$format}"; // ex: front_png, back_jpeg
