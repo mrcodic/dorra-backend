@@ -82,7 +82,7 @@ class OrderController extends Controller
         $sides = $itemable->types->pluck('value.key')->toArray();
         dd($sides,$itemable->types->pluck('value')->map(function ($type){
             return [
-                $type->key
+                $type->key()
             ];
         }));
 //        $targetSide = $side === 'none' ? 'front' : $side;
