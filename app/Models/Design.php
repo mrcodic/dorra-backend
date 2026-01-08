@@ -227,4 +227,40 @@ class Design extends Model implements HasMedia
             default => $this->getNoneImageUrl(),
         };
     }
+    public function registerMediaConversions(\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
+    {
+
+        $this->addMediaConversion('front_png')
+            ->format('png')
+            ->performOnCollections('templates');
+
+        $this->addMediaConversion('front_jpg')
+            ->format('jpg')
+            ->performOnCollections('templates');
+
+        $this->addMediaConversion('front_svg')
+            ->format('svg')
+            ->performOnCollections('templates');
+
+        $this->addMediaConversion('front_pdf')
+            ->format('pdf')
+            ->performOnCollections('templates');
+
+
+        $this->addMediaConversion('back_png')
+            ->format('png')
+            ->performOnCollections('back_templates');
+
+        $this->addMediaConversion('back_jpg')
+            ->format('jpg')
+            ->performOnCollections('back_templates');
+        $this->addMediaConversion('back_svg')
+            ->format('svg')
+            ->performOnCollections('templates');
+
+        $this->addMediaConversion('back_pdf')
+            ->format('pdf')
+            ->performOnCollections('templates');
+    }
+    
 }
