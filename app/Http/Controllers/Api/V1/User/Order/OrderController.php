@@ -85,14 +85,14 @@ class OrderController extends Controller
         $itemable = $orderItem->itemable;
         $mediaFront = $itemable->getFirstMedia('templates');
         $mediaBack  = $itemable->getFirstMedia('back_templates');
-        
+
         $sides = $itemable->types->pluck('value')->flatMap(fn ($type) => [$type->key()]);
         $sides->each(function ($side) use ($format,$itemable, $mediaFront, $mediaBack) {
             $targetSide = $side === 'none' ? 'front' : $side;
             $conversion = "{$targetSide}_{$format}";
 
         $media = $targetSide === 'front' ? $mediaFront : $mediaBack;
-        $path  = $media->getPath($conversion);
+        $path  = $media?->getPath($conversion);
 
         $filename = "template-{$itemable->id}-{$targetSide}.{$format}";
 
