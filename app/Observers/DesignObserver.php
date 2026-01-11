@@ -67,7 +67,7 @@ class DesignObserver
      */
     public function deleted(Design $design): void
     {
-        $design->owner?->cart->items()->delete();
+        $design->owner?->cart?->items()->delete();
     }
 
     /**
