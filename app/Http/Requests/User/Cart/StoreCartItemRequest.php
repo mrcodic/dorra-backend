@@ -82,6 +82,7 @@ class StoreCartItemRequest extends BaseRequest
         $cartable     = $this->cartable();
         $hasSpecs     = (bool) $cartable?->specifications()->exists();
         $type = (int) $this->input('type', TypeEnum::PRINT->value);
+        dd($this->design->designable);
         return [
             'type' =>['sometimes',Rule::in(TypeEnum::values())],
             'design_id' => ['required_without:template_id', 'string', 'exists:designs,id'],
