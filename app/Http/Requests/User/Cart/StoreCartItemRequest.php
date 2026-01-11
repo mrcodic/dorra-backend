@@ -90,7 +90,7 @@ class StoreCartItemRequest extends BaseRequest
                 Rule::requiredIf(fn() => $type == TypeEnum::PRINT->value && !$this->design?->designable ),
                  'in:' . Product::class . ',' . Category::class],
             'cartable_id' => [
-                Rule::requiredIf(fn() => $type == TypeEnum::PRINT->value  && $this->design?->designable ),
+                Rule::requiredIf(fn() => $type == TypeEnum::PRINT->value  && !$this->design?->designable ),
                 'integer',
                 Rule::when(
                     $cartableType === Product::class,
