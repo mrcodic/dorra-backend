@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Checkout\CheckoutRequest;
 use App\Http\Resources\LocationResource;
 use App\Http\Resources\Order\OrderResource;
+use App\Models\Design;
 use App\Models\OrderItem;
 use App\Services\LocationService;
 use App\Services\OrderService;
@@ -85,15 +86,21 @@ class OrderController extends Controller
 
         $format   = $data['format'];
         $itemable = $orderItem->itemable;
+        if ($itemable instanceof Design)
+        {
+            $mediaFront = $itemable->getFirstMedia('designs');
+            $mediaBack  = $itemable->getFirstMedia('back_designs');
+        }else{
+            $mediaFront = $itemable->getFirstMedia('templates');
+            $mediaBack  = $itemable->getFirstMedia('back_templates');
+        }
 
         $sides = $itemable->types
             ->map(fn ($type) => strtolower($type->value->key()))
             ->unique()
             ->values();
 
-        $mediaFront = $itemable->getFirstMedia('templates');
-        dd($orderItem->itemable,  $mediaFront);
-        $mediaBack  = $itemable->getFirstMedia('back_templates');
+
 
         // One side only (front OR back OR none)
         if ($sides->count() === 1) {
