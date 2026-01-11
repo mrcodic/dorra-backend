@@ -157,6 +157,7 @@ class OrderController extends Controller
 
         // Path to conversion
         $path = $media->getPath($conversion);
+        dd($path);
 
         if (! file_exists($path)) {
             abort(404, "$side {$format} conversion not found.");
