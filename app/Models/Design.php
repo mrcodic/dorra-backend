@@ -232,19 +232,19 @@ class Design extends Model implements HasMedia
 
         $this->addMediaConversion('front_png')
             ->format('png')
-            ->performOnCollections('templates');
+            ->performOnCollections('designs');
 
         $this->addMediaConversion('front_jpg')
             ->format('jpg')
-            ->performOnCollections('templates');
+            ->performOnCollections('designs');
 
         $this->addMediaConversion('back_png')
             ->format('png')
-            ->performOnCollections('back_templates');
+            ->performOnCollections('back_designs');
 
         $this->addMediaConversion('back_jpg')
             ->format('jpg')
-            ->performOnCollections('back_templates');
+            ->performOnCollections('back_designs');
 
     }
 

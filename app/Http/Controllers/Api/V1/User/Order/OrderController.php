@@ -135,7 +135,7 @@ class OrderController extends Controller
             abort(404, "$side {$format} conversion not found.");
         }
 
-        $ext      = $format;
+        $ext      = $format === 'jpg' ? 'jpeg' : $format;
         $filename = "template-{$template->id}-{$side}.{$ext}";
 
         return response()->download($path, $filename, [
@@ -149,7 +149,7 @@ class OrderController extends Controller
             abort(404, 'No images found for this template.');
         }
 
-        $ext = $format ;
+        $ext = $format === 'jpg' ? 'jpeg' : $format;
 
         $files = [];
 
