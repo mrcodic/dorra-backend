@@ -162,32 +162,26 @@ class Template extends Model implements HasMedia
         return $this->getFirstMediaUrl('templates') ?: asset('images/default-product.png');
     }
 
-    public function registerMediaConversions(\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
+    public function registerMediaConversions($media = null): void
     {
-
         $this->addMediaConversion('front_png')
             ->format('png')
-            ->performOnCollections('templates');
+            ->performOnCollections('templates')
+            ->nonQueued();
 
         $this->addMediaConversion('front_jpg')
             ->format('jpg')
-            ->performOnCollections('templates');
-
-        $this->addMediaConversion('front_svg')
-            ->format('svg')
-            ->performOnCollections('templates');
-
+            ->performOnCollections('templates')
+            ->nonQueued();
 
         $this->addMediaConversion('back_png')
             ->format('png')
-            ->performOnCollections('back_templates');
+            ->performOnCollections('back_templates')
+            ->nonQueued();
 
         $this->addMediaConversion('back_jpg')
             ->format('jpg')
-            ->performOnCollections('back_templates');
-        $this->addMediaConversion('back_svg')
-            ->format('svg')
-            ->performOnCollections('back_templates');
-
+            ->performOnCollections('back_templates')
+            ->nonQueued();
     }
 }

@@ -156,11 +156,9 @@ class OrderController extends Controller
         if ($mediaFront) {
             $convFront = "front_{$format}";
             $pathFront = $mediaFront->getPath($convFront);
-            $media = $template->getFirstMedia('designs');
-            dd($media->generated_conversions, $media->getPath(), $media->getPath('front_png'));
 
-            if (! file_exists($pathFront)) {
-                abort(404, 'Front image conversion not found.');
+            if (! $pathFront || ! is_file($pathFront)) {
+                $pathFront = $mediaFront->getPath();
             }
 
             $files[$pathFront] = "template-{$template->id}-front.{$ext}";
@@ -170,10 +168,10 @@ class OrderController extends Controller
             $convBack = "back_{$format}";
             $pathBack = $mediaBack->getPath($convBack);
 
-            if (! file_exists($pathBack)) {
-                abort(404, 'Back image conversion not found.');
-            }
 
+            if (! $pathBack || ! is_file($pathBack)) {
+                $pathBack = $mediaBack->getPath();
+            }
             $files[$pathBack] = "template-{$template->id}-back.{$ext}";
         }
 
