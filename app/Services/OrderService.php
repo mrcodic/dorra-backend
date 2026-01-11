@@ -665,7 +665,7 @@ class OrderService extends BaseService
 
         if ($selectedPaymentMethod->code == 'cash_on_delivery' && $allDownload)
         {
-            ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'paymentMethod' => 'You cannot use this payment method because all item with type download.',
             ]);
         }
