@@ -663,6 +663,7 @@ class OrderService extends BaseService
             ]);
         }
         $allDownload = $cart->items->every(fn($item) => $item->type == TypeEnum::DOWNLOAD);
+        dd($allDownload, $selectedPaymentMethod->code);
         if ($selectedPaymentMethod->code == 'cash_on_delivery' && $allDownload)
         {
             ValidationException::withMessages([
