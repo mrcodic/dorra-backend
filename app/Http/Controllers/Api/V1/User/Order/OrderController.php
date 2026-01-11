@@ -97,7 +97,7 @@ class OrderController extends Controller
     public function downloadItem(OrderItem $orderItem, Request $request)
     {
         $hasPaidTransaction = $orderItem->order->transactions()
-            ->where('status', \App\Enums\Payment\StatusEnum::PAID)
+            ->where('payment_status', \App\Enums\Payment\StatusEnum::PAID)
             ->exists();
         $hasOrderItem = $orderItem->order->user == $request->user();
 
