@@ -628,6 +628,7 @@ class OrderService extends BaseService
         $user = auth('sanctum')->user();
         $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
 
+
         // 1) If we already have an order for this idempotency key → only (re)trigger payment
         $existingOrder = $this->repository->query()
             ->where('idempotency_key', $idempotencyKey)
@@ -661,6 +662,13 @@ class OrderService extends BaseService
                 'cart' => ['Your cart is empty.'],
             ]);
         }
+        $allDownload = $cart->items->every(fn($item) => $item->type == TypeEnum::DOWNLOAD);
+        if ($selectedPaymentMethod->code == 'cash_on_delivery' && $allDownload)
+        {
+            ValidationException::withMessages([
+                'paymentMethod' => 'You cannot use this payment method because all item with type download.',
+            ]);
+        }
 
         // validate discount code
         $discountCode = $cart->discountCode;
@@ -673,13 +681,14 @@ class OrderService extends BaseService
         $subTotal = $cart->items->sum(fn($item) => $item->sub_total_after_offer ?? $item->sub_total);
 
         // create order + items + address inside transaction
-        $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request, $idempotencyKey) {
+        $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request, $idempotencyKey, $allDownload) {
             return $this->createOrderFromCart(
                 cart: $cart,
                 discountCode: $discountCode,
                 subTotal: $subTotal,
                 request: $request,
                 idempotencyKey: $idempotencyKey,
+                allDownload: $allDownload
             );
         });
         $this->clearCartAfterCashOnDelivery($cart);
@@ -717,9 +726,8 @@ class OrderService extends BaseService
     /**
      * Creates order + items + specs + address/pickup from the cart.
      */
-    protected function createOrderFromCart($cart, $discountCode, $subTotal, $request, string $idempotencyKey)
+    protected function createOrderFromCart($cart, $discountCode, $subTotal, $request, string $idempotencyKey, $allDownload)
     {
-        $allDownload = $cart->items->every(fn($item) => $item->type == TypeEnum::DOWNLOAD);
         $order = $this->repository->query()->create(
             array_merge(
                 OrderData::fromCart($subTotal, $discountCode, $cart),
