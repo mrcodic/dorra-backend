@@ -92,7 +92,7 @@ class OrderController extends Controller
             ->values();
 
         $mediaFront = $itemable->getFirstMedia('templates');
-        dd($mediaFront);
+        dd($orderItem->itemable,  $mediaFront);
         $mediaBack  = $itemable->getFirstMedia('back_templates');
 
         // One side only (front OR back OR none)
