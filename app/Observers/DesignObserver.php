@@ -6,6 +6,7 @@ use App\Models\Cart;
 use App\Models\Design;
 
 use App\Jobs\CopyDesignMediaJob;
+use Illuminate\Support\Facades\Log;
 
 class DesignObserver
 {
@@ -59,14 +60,14 @@ class DesignObserver
     }
     public function deleting(Design $design): void
     {
-        $design->user?->cartItems()->detach();
+
     }
     /**
      * Handle the Design "deleted" event.
      */
     public function deleted(Design $design): void
     {
-        //
+        $design->owner?->cartItems()->detach();
     }
 
     /**
