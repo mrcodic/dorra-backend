@@ -157,7 +157,7 @@ class OrderController extends Controller
 
         // Path to conversion
         $path = $media->getPath($conversion);
-    
+
         if (! file_exists($path)) {
             abort(404, "$side {$format} conversion not found.");
         }
@@ -165,9 +165,7 @@ class OrderController extends Controller
         $ext      = $format;
         $filename = "template-{$template->id}-{$side}.{$ext}";
 
-        return response()->download($path, $filename, [
-            'Content-Type' => "image/{$ext}",
-        ]);
+        return response()->download($path, $filename);
     }
 
     protected function downloadBothSidesAsZip($template, $format, $mediaFront, $mediaBack)
