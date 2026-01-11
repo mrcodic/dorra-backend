@@ -126,10 +126,10 @@ class OrderController extends Controller
             abort(404, "$side image not found.");
         }
 
-        $conversion = "{$side}_{$format}";
+//        $conversion = "{$side}_{$format}";
 
         // Path to conversion
-        $path = $media->getPath($conversion);
+        $path = $media->getPath();
 
         if (! file_exists($path)) {
             abort(404, "$side {$format} conversion not found.");
