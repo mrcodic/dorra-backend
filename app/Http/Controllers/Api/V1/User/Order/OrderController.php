@@ -96,6 +96,14 @@ class OrderController extends Controller
 
     public function downloadItem(OrderItem $orderItem, Request $request)
     {
+        $hasPaidTransaction = $order->transactions()
+            ->where('status', StatusEnum::PAID) // 2
+            ->exists();
+
+        if (! $hasPaidTransaction) {
+            abort(403, 'This order is not paid yet.');
+
+        }
         $data = $request->validate([
             'format' => ['required', 'in:jpg,png'],
         ]);

@@ -77,7 +77,7 @@ Route::prefix('ship-blu/')->controller(ShippingController::class)->group(functio
     Route::get('webhook', 'handleWebhook');
 });
 
-Route::get('/fonts',[MainController::Class,'fonts']);
+Route::get('/fonts', [MainController::Class, 'fonts']);
 
 Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::post('contact-us', [MainController::class, 'contactUs'])->name('contact-us');
