@@ -118,7 +118,6 @@ class DesignService extends BaseService
         if (isset($validatedData['back_base64_preview_image'])) {
             ProcessBase64Image::dispatch($validatedData['back_base64_preview_image'], $model, 'back_designs');
         }
-        dd($model);
         return $model->load($relationsToLoad);
     }
 
