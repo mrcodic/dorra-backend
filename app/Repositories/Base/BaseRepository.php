@@ -42,7 +42,6 @@ class BaseRepository implements BaseRepositoryInterface
     {
         $record = $this->model->findOrFail($id);
         $record->update($data);
-        dd($record);
         return $record;
     }
 
