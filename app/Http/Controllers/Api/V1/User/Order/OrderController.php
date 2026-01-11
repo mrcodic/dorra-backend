@@ -156,6 +156,8 @@ class OrderController extends Controller
         if ($mediaFront) {
             $convFront = "front_{$format}";
             $pathFront = $mediaFront->getPath($convFront);
+            $media = $template->getFirstMedia('designs');
+            dd($media->generated_conversions, $media->getPath(), $media->getPath('front_png'));
 
             if (! file_exists($pathFront)) {
                 abort(404, 'Front image conversion not found.');
