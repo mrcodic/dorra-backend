@@ -656,14 +656,14 @@ class OrderService extends BaseService
 
         // 2) No existing order → create one from cart
         $cart = $this->cartService->getCurrentUserOrGuestCart();
-
+        $allDownload = $cart->items->every(fn($item) => $item->type == TypeEnum::DOWNLOAD);
+        dd($allDownload, $selectedPaymentMethod->code);
         if (!$cart || $cart->items->isEmpty()) {
             throw ValidationException::withMessages([
                 'cart' => ['Your cart is empty.'],
             ]);
         }
-        $allDownload = $cart->items->every(fn($item) => $item->type == TypeEnum::DOWNLOAD);
-        dd($allDownload, $selectedPaymentMethod->code);
+
         if ($selectedPaymentMethod->code == 'cash_on_delivery' && $allDownload)
         {
             ValidationException::withMessages([
