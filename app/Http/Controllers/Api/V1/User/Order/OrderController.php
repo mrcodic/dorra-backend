@@ -77,6 +77,22 @@ class OrderController extends Controller
     {
      $this->orderService->cancelOrder($id);
     }
+    protected function getConversionName(string $side, string $format): string
+    {
+        $side = strtolower($side);    // front / back / none
+        $fmt  = strtolower($format);  // jpg / png
+
+        if ($side === 'none') {
+            $side = 'front';
+        }
+
+        if ($side === 'front') {
+            return $fmt === 'jpg' ? 'front_jpg' : 'front_png';
+        }
+
+        // back
+        return $fmt === 'jpg' ? 'back_jpg' : 'back_png';
+    }
 
     public function downloadItem(OrderItem $orderItem, Request $request)
     {
@@ -126,10 +142,10 @@ class OrderController extends Controller
             abort(404, "$side image not found.");
         }
 
-//        $conversion = "{$side}_{$format}";
+        $conversion = $this->getConversionName($side, $format);
 
         // Path to conversion
-        $path = $media->getPath();
+        $path = $media->getPath($conversion);
 
         if (! file_exists($path)) {
             abort(404, "$side {$format} conversion not found.");
