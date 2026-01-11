@@ -103,7 +103,6 @@ class DesignService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
-        dd($validatedData,$id);
         $model = $this->repository->update($validatedData, $id);
         if (isset($validatedData['specs'])) {
             collect($validatedData['specs'])->each(function ($spec) use ($model) {
