@@ -121,6 +121,7 @@ class OrderController extends Controller
         $side = $side === 'none' ? 'front' : $side;
 
         $media = $side === 'front' ? $mediaFront : $mediaBack;
+        dd($side,$media);
 
         if (! $media) {
             abort(404, "$side image not found.");
