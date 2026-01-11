@@ -99,7 +99,7 @@ class OrderController extends Controller
         $hasPaidTransaction = $orderItem->order->transactions()
             ->where('payment_status', \App\Enums\Payment\StatusEnum::PAID)
             ->exists();
-        $hasOrderItem = $orderItem->order->user == $request->user();
+        $hasOrderItem = $orderItem->order->user->id == $request->user()->id;
 
         if (!$hasPaidTransaction) {
             abort(403, 'This order is not paid yet.');
