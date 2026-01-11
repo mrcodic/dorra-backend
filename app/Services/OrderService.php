@@ -682,11 +682,10 @@ class OrderService extends BaseService
                 idempotencyKey: $idempotencyKey,
             );
         });
+        $this->clearCartAfterCashOnDelivery($cart);
 
         // 3) Cash on delivery → no online payment
         if ($selectedPaymentMethod->code === 'cash_on_delivery') {
-            $this->clearCartAfterCashOnDelivery($cart);
-
             return [
                 'order' => [
                     'id' => $order->id,
