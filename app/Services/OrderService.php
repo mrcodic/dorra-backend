@@ -669,7 +669,6 @@ class OrderService extends BaseService
                 'paymentMethod' => 'You cannot use this payment method because all item with type download.',
             ]);
         }
-        dd($allDownload,$cart->items);
 
         // validate discount code
         $discountCode = $cart->discountCode;
