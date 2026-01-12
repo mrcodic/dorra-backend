@@ -138,9 +138,11 @@ class MainController extends Controller
 
     public function adminCheck()
     {
-        if (auth()->check()) {
+        if (auth('web')->check()) {
             return response()->json(['message' => 'authenticated.'], 200);
         }
+        return response()->json(['message' => 'Unauthenticated.'], 401);
+
     }
 
     public function tags()
