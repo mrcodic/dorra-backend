@@ -106,6 +106,7 @@ class Template extends Model implements HasMedia
     {
         return $this->morphToMany(Tag::class, 'taggable')->withTimestamps();
     }
+
     public function industries()
     {
         return $this->morphToMany(Industry::class, 'industryable', 'industryables')->withTimestamps();
@@ -115,6 +116,7 @@ class Template extends Model implements HasMedia
     {
         return $this->morphToMany(Flag::class, 'flaggable')->withTimestamps();
     }
+
     public function mockups()
     {
         return $this->belongsToMany(
@@ -123,7 +125,7 @@ class Template extends Model implements HasMedia
 
         )
             ->using(MockupTemplate::class)
-            ->withPivot(['id','positions','colors'])
+            ->withPivot(['id', 'positions', 'colors'])
             ->withTimestamps();
     }
 
@@ -160,5 +162,26 @@ class Template extends Model implements HasMedia
         return $this->getFirstMediaUrl('templates') ?: asset('images/default-product.png');
     }
 
+    public function registerMediaConversions($media = null): void
+    {
+        $this->addMediaConversion('front_png')
+            ->format('png')
+            ->performOnCollections('templates')
+            ->nonQueued();
 
+        $this->addMediaConversion('front_jpg')
+            ->format('jpg')
+            ->performOnCollections('templates')
+            ->nonQueued();
+
+        $this->addMediaConversion('back_png')
+            ->format('png')
+            ->performOnCollections('back_templates')
+            ->nonQueued();
+
+        $this->addMediaConversion('back_jpg')
+            ->format('jpg')
+            ->performOnCollections('back_templates')
+            ->nonQueued();
+    }
 }

@@ -9,11 +9,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Checkout\CheckoutRequest;
 use App\Http\Resources\LocationResource;
 use App\Http\Resources\Order\OrderResource;
+use App\Models\Design;
+use App\Models\OrderItem;
 use App\Services\LocationService;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Response;
+use ZipArchive;
 
 
 class OrderController extends Controller
@@ -74,4 +77,153 @@ class OrderController extends Controller
     {
      $this->orderService->cancelOrder($id);
     }
+    protected function getConversionName(string $side, string $format): string
+    {
+        $side = strtolower($side);    // front / back / none
+        $fmt  = strtolower($format);  // jpg / png
+
+        if ($side === 'none') {
+            $side = 'front';
+        }
+
+        if ($side === 'front') {
+            return $fmt === 'jpg' ? 'front_jpg' : 'front_png';
+        }
+
+        // back
+        return $fmt === 'jpg' ? 'back_jpg' : 'back_png';
+    }
+
+    public function downloadItem(OrderItem $orderItem, Request $request)
+    {
+        $hasPaidTransaction = $orderItem->order->transactions()
+            ->where('payment_status', \App\Enums\Payment\StatusEnum::PAID)
+            ->exists();
+        $hasOrderItem = $orderItem->order->user->id == $request->user()->id;
+
+        if (!$hasPaidTransaction) {
+            abort(403, 'This order is not paid yet.');
+        }
+        if (!$hasOrderItem) {
+            abort(403, 'This order is not belongs to you.');
+        }
+        $data = $request->validate([
+            'format' => ['required', 'in:jpg,png'],
+        ]);
+
+        $format   = $data['format'];
+        $itemable = $orderItem->itemable;
+        if ($itemable instanceof Design)
+        {
+            $mediaFront = $itemable->getFirstMedia('designs');
+            $mediaBack  = $itemable->getFirstMedia('back_designs');
+        }else{
+            $mediaFront = $itemable->getFirstMedia('templates');
+            $mediaBack  = $itemable->getFirstMedia('back_templates');
+        }
+
+        $sides = $itemable->types
+            ->map(fn ($type) => strtolower($type->value->key()))
+            ->unique()
+            ->values();
+
+
+
+        // One side only (front OR back OR none)
+        if ($sides->count() === 1) {
+            $side = $sides->first();
+            return $this->downloadSingleSide($itemable, $side, $format, $mediaFront, $mediaBack);
+        }
+
+        // Two sides (front + back) => download as ZIP
+        if ($sides->count() > 1) {
+            return $this->downloadBothSidesAsZip($itemable, $format, $mediaFront, $mediaBack);
+        }
+
+        abort(404, 'No sides found for this template.');
+    }
+
+    protected function downloadSingleSide($template, $side, $format, $mediaFront, $mediaBack)
+    {
+        $side = $side === 'none' ? 'front' : $side;
+
+        $media = $side === 'front' ? $mediaFront : $mediaBack;
+
+        if (! $media) {
+            abort(404, "$side image not found.");
+        }
+
+        $conversion = $this->getConversionName($side, $format);
+
+        // Path to conversion
+        $path = $media->getPath($conversion);
+
+        if (! file_exists($path)) {
+            abort(404, "$side {$format} conversion not found.");
+        }
+
+        $ext      = $format;
+        $filename = "template-{$template->id}-{$side}.{$ext}";
+
+        return response()->download($path, $filename);
+    }
+
+    protected function downloadBothSidesAsZip($template, $format, $mediaFront, $mediaBack)
+    {
+        if (! $mediaFront && ! $mediaBack) {
+            abort(404, 'No images found for this template.');
+        }
+
+        $ext = $format;
+
+        $files = [];
+
+        if ($mediaFront) {
+            $convFront = "front_{$format}";
+            $pathFront = $mediaFront->getPath($convFront);
+
+            if (! $pathFront || ! is_file($pathFront)) {
+                $pathFront = $mediaFront->getPath();
+            }
+
+            $files[$pathFront] = "template-{$template->id}-front.{$ext}";
+        }
+
+        if ($mediaBack) {
+            $convBack = "back_{$format}";
+            $pathBack = $mediaBack->getPath($convBack);
+
+
+            if (! $pathBack || ! is_file($pathBack)) {
+                $pathBack = $mediaBack->getPath();
+            }
+            $files[$pathBack] = "template-{$template->id}-back.{$ext}";
+        }
+
+        if (empty($files)) {
+            abort(404, 'No valid images found for this template.');
+        }
+
+        $zipFileName = "template-{$template->id}-sides.zip";
+        $zipPath     = storage_path("app/tmp/{$zipFileName}");
+
+        if (! is_dir(dirname($zipPath))) {
+            mkdir(dirname($zipPath), 0755, true);
+        }
+
+        $zip = new ZipArchive();
+
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            abort(500, 'Cannot create ZIP file.');
+        }
+
+        foreach ($files as $filePath => $nameInZip) {
+            $zip->addFile($filePath, $nameInZip);
+        }
+
+        $zip->close();
+
+        return response()->download($zipPath, $zipFileName)->deleteFileAfterSend(true);
+    }
+
 }

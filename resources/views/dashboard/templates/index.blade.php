@@ -89,13 +89,13 @@
                     @endcan
 
                     {{-- upload excel button --}}
-                    @can('product-templates_create')
-                        <button type="button" class="btn btn-primary col-12 col-md-3 col-lg-2"
-                                data-bs-toggle="modal" data-bs-target="#importExcelModal">
-                            <i data-feather="upload"></i>
-                            Import Excel
-                        </button>
-                    @endcan
+{{--                    @can('product-templates_create')--}}
+{{--                        <button type="button" class="btn btn-primary col-12 col-md-3 col-lg-2"--}}
+{{--                                data-bs-toggle="modal" data-bs-target="#importExcelModal">--}}
+{{--                            <i data-feather="upload"></i>--}}
+{{--                            Import Excel--}}
+{{--                        </button>--}}
+{{--                    @endcan--}}
 
                 </div>
 

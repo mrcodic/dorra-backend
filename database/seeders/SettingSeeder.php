@@ -14,6 +14,7 @@ class SettingSeeder extends Seeder
             // General
             ['key' => 'phone', 'value' => '01060538209', 'group' => 'general_setting'],
             ['key' => 'store_email', 'value' => 'dorraprint@gmail.com', 'group' => 'general_setting'],
+            ['key' => 'enable_design_payment', 'value' => true, 'group' => 'general_setting'],
             ['key' => 'order_format', 'value' => '#ORD'],
             ['key' => 'delivery', 'value' => 30],
             ['key' => 'shipping_visibility', 'value' => true, 'group' => 'visibility_sections_landing'],

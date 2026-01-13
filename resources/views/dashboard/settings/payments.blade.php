@@ -107,6 +107,39 @@
                 </div>
             </div>
         </form>
+        <hr class="my-3"/>
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <h4 class="mb-0">Design Payment</h4>
+        </div>
+        <form action="{{ route('landing-sections.update') }}"
+              method="POST"
+              id="designForm"
+              class="design-toggle-form">
+            @csrf
+            @method('PUT')
+
+            {{-- What setting to toggle --}}
+            <input type="hidden" name="key" value="enable_design_payment">
+            {{-- Single source of truth submitted to backend --}}
+            <input type="hidden" name="value" id="design-value"
+                   value="{{ setting('enable_design_payment') ? 1 : 0 }}">
+
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="fw-bold text-black">Enable Payment</span>
+                </div>
+                <div class="form-check form-switch">
+                    {{-- keep checkbox UNNAMED; JS writes hidden value before submit --}}
+                    <input
+                        class="form-check-input design-toggle"
+                        type="checkbox"
+                        id="design-enabled"
+                        @checked(setting('enable_design_payment'))
+                    >
+                    <label class="form-check-label" for="design-enabled"></label>
+                </div>
+            </div>
+        </form>
 
     </div>
 @endsection
@@ -171,6 +204,38 @@
             const form   = document.getElementById('shippingForm');
             const toggle = document.getElementById('shipping-enabled');
             const hidden = document.getElementById('shipping-value');
+
+            if (!form || !toggle || !hidden) return;
+
+            // prevent double submits
+            let inFlight = false;
+
+            toggle.addEventListener('change', function () {
+                if (inFlight) return;
+                hidden.value = this.checked ? 1 : 0;
+                inFlight = true;
+                form.requestSubmit();
+                // small cooldown; your handleAjaxFormSubmit will clear quickly
+                setTimeout(() => { inFlight = false; }, 800);
+            });
+        })();
+    </script>
+ <script>
+
+        handleAjaxFormSubmit(".design-toggle-form", {
+            successMessage: "Design setting updated",
+            resetForm: false,
+            onSuccess: function () {
+                location.reload();
+            },
+
+        });
+
+        // When user toggles, write the value and submit
+        (function () {
+            const form   = document.getElementById('designForm');
+            const toggle = document.getElementById('design-enabled');
+            const hidden = document.getElementById('design-value');
 
             if (!form || !toggle || !hidden) return;
 

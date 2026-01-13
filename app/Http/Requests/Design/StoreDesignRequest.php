@@ -91,7 +91,7 @@ class StoreDesignRequest extends BaseRequest
                     return $fail("The selected product is not associated with the selected template.");
                 }
             }],
-            'designable_type' => ['nullable', 'string', 'in:App\\Models\\Product,App\\Models\\Category'],
+            'designable_type' => ['required', 'string', 'in:App\\Models\\Product,App\\Models\\Category'],
             'user_id' => ['nullable', 'exists:users,id'],
             'guest_id' => ['nullable', 'exists:guests,id'],
             'dimension_id' => [
@@ -170,7 +170,7 @@ class StoreDesignRequest extends BaseRequest
             'designable_id' => $this->product_id,
             'design_data' => $template?->design_data ?? $this->input('design_data'),
             'design_back_data' => $template?->design_back_data ?? $this->input('design_back_data'),
-            'price' => $template->price,
+            'price' => $template?->price,
             'name' =>$template
                 ? [
                 'en' => $template->getTranslation('name', 'en'),

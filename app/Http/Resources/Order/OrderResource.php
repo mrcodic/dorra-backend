@@ -50,9 +50,12 @@ class OrderResource extends JsonResource
             'sub_total' => $this->subtotal,
             'total' => $this->total_price,
             'tax' => [
-                'ratio' => setting('tax') * 100 . "%",
-                'value' => getPriceAfterTax(setting('tax'), $this->orderItems->pluck('total_price')->sum()),
+                'ratio' => $this->tax_amount && $this->total_price
+                    ? ($this->tax_amount / ($this->total_price - $this->tax_amount)) * 100
+                    : 0,
+                'value' => $this->tax_amount,
             ],
+
             'delivery' => $this->delivery_amount,
             'discount' => [
                 'ratio' => round($paidRatio * 100) . '%',

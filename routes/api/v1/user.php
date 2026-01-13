@@ -77,7 +77,7 @@ Route::prefix('ship-blu/')->controller(ShippingController::class)->group(functio
     Route::get('webhook', 'handleWebhook');
 });
 
-Route::get('/fonts',[MainController::Class,'fonts']);
+Route::get('/fonts', [MainController::Class, 'fonts']);
 
 Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::post('contact-us', [MainController::class, 'contactUs'])->name('contact-us');
@@ -176,13 +176,14 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
 
         Route::get('trash', [MainController::class, 'trash'])->name('trash');
 
-        Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
         Route::post('cancel-order/{order}', [OrderController::class, 'cancelOrder']);
         Route::post('buy-order-again', [PaymentController::class, 'buyOrderAgain']);
+        Route::post('orders/items/{orderItem}/download', [OrderController::class, 'downloadItem']);
+        Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
+
     });
 
     Route::get('templates', [TemplateController::class, 'index']);
-    Route::get('templates/{template}/download', [TemplateController::class, 'download']);
     Route::get('templates/{template}', [TemplateController::class, 'show']);
 
 

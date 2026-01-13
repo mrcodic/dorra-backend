@@ -628,6 +628,7 @@ class OrderService extends BaseService
         $user = auth('sanctum')->user();
         $selectedPaymentMethod = $this->paymentMethodRepository->find($request->payment_method_id);
 
+
         // 1) If we already have an order for this idempotency key → only (re)trigger payment
         $existingOrder = $this->repository->query()
             ->where('idempotency_key', $idempotencyKey)
@@ -655,10 +656,17 @@ class OrderService extends BaseService
 
         // 2) No existing order → create one from cart
         $cart = $this->cartService->getCurrentUserOrGuestCart();
-
+        $allDownload = $cart->items->every(fn($item) => $item->type == TypeEnum::DOWNLOAD);
         if (!$cart || $cart->items->isEmpty()) {
             throw ValidationException::withMessages([
                 'cart' => ['Your cart is empty.'],
+            ]);
+        }
+
+        if ($selectedPaymentMethod->code == 'cash_on_delivery' && $allDownload)
+        {
+            throw ValidationException::withMessages([
+                'paymentMethod' => 'You cannot use this payment method because all items with type download.',
             ]);
         }
 
@@ -673,20 +681,20 @@ class OrderService extends BaseService
         $subTotal = $cart->items->sum(fn($item) => $item->sub_total_after_offer ?? $item->sub_total);
 
         // create order + items + address inside transaction
-        $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request, $idempotencyKey) {
+        $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request, $idempotencyKey, $allDownload) {
             return $this->createOrderFromCart(
                 cart: $cart,
                 discountCode: $discountCode,
                 subTotal: $subTotal,
                 request: $request,
                 idempotencyKey: $idempotencyKey,
+                allDownload: $allDownload
             );
         });
+        $this->clearCartAfterCashOnDelivery($cart);
 
         // 3) Cash on delivery → no online payment
         if ($selectedPaymentMethod->code === 'cash_on_delivery') {
-            $this->clearCartAfterCashOnDelivery($cart);
-
             return [
                 'order' => [
                     'id' => $order->id,
@@ -718,9 +726,8 @@ class OrderService extends BaseService
     /**
      * Creates order + items + specs + address/pickup from the cart.
      */
-    protected function createOrderFromCart($cart, $discountCode, $subTotal, $request, string $idempotencyKey)
+    protected function createOrderFromCart($cart, $discountCode, $subTotal, $request, string $idempotencyKey, $allDownload)
     {
-        $allDownload = $cart->items->every(fn($item) => $item == TypeEnum::DOWNLOAD);
         $order = $this->repository->query()->create(
             array_merge(
                 OrderData::fromCart($subTotal, $discountCode, $cart),

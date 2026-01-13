@@ -227,4 +227,27 @@ class Design extends Model implements HasMedia
             default => $this->getNoneImageUrl(),
         };
     }
+    public function registerMediaConversions($media = null): void
+    {
+        $this->addMediaConversion('front_png')
+            ->format('png')
+            ->performOnCollections('designs')
+            ->nonQueued();
+
+        $this->addMediaConversion('front_jpg')
+            ->format('jpg')
+            ->performOnCollections('designs')
+            ->nonQueued();
+
+        $this->addMediaConversion('back_png')
+            ->format('png')
+            ->performOnCollections('back_designs')
+            ->nonQueued();
+
+        $this->addMediaConversion('back_jpg')
+            ->format('jpg')
+            ->performOnCollections('back_designs')
+            ->nonQueued();
+    }
+
 }

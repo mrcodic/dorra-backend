@@ -16,18 +16,19 @@ class CartResource extends JsonResource
     public function toArray(Request $request): array
     {
         $subAfter = round(
-            $this->items->sum(fn ($item) => $item->sub_total_after_offer ?? $item->sub_total),
+            $this->items->sum(fn($item) => $item->sub_total_after_offer ?? $item->sub_total),
             2
         );
+        $isDownload = $this->items->every(fn($item) => $item->type == \App\Enums\Item\TypeEnum::DOWNLOAD);
         return [
             "id" => $this->id,
             "items" => CartItemResource::collection($this->whenLoaded('items')),
-            "all_items_are_download" => $this->items->every(fn($item) => $item->type == \App\Enums\Item\TypeEnum::DOWNLOAD),
+            "all_items_are_download" => $isDownload,
             'sub_total' => $subAfter,
-            'total' =>round(getTotalPrice($this->discountCode ?? 0, $subAfter, $this->delivery_amount),2),
+            'total' => round(getTotalPrice($this->discountCode ?? 0, $subAfter, $this->delivery_amount, $isDownload), 2),
             'tax' => [
-                'ratio' => setting('tax') * 100 . "%",
-                'value' => getPriceAfterTax(setting('tax'), $subAfter),
+                'ratio' => !$isDownload ? setting('tax') * 100 : 0 . "%",
+                'value' => !$isDownload ? getPriceAfterTax(setting('tax'), $subAfter) : 0,
             ],
             'delivery' => $this->delivery_amount,
             'discount' => [
@@ -46,7 +47,7 @@ class CartResource extends JsonResource
                         ) . '%'
                     )
                     : '0%',
-                'value' =>getDiscountAmount($this->discountCode, $this->price)  ?? 0,
+                'value' => getDiscountAmount($this->discountCode, $this->price) ?? 0,
             ],
 
         ];
