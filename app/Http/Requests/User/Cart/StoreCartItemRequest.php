@@ -40,12 +40,12 @@ class StoreCartItemRequest extends BaseRequest
             ? Design::find($this->design_id)
             : null;
 
-        if ($template && is_null($template->price)) {
+        if ($template && is_null($template->price) && $this->type == TypeEnum::DOWNLOAD->value) {
             throw ValidationException::withMessages([
                 'template_id' => ['Selected template has no price.'],
             ]);
         }
-        if ($design && is_null($design->price)) {
+        if ($design && is_null($design->price) && $this->type == TypeEnum::DOWNLOAD->value) {
             throw ValidationException::withMessages([
                 'design_id' => ['Selected design has no price.'],
             ]);
