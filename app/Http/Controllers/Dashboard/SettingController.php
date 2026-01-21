@@ -36,23 +36,11 @@ class SettingController extends Controller
         return view("dashboard.settings.details", get_defined_vars());
     }
 
-    public function editDetails(Request $request,SettingRepositoryInterface $settingRepository)
+    public function editDetails(Request $request, SettingRepositoryInterface $settingRepository)
     {
         $validated = $request->validate([
-
-            'phone' => [
-                'sometimes',
-                'string',
-                'max:20',
-                'regex:/^\+?[0-9\s().-]{7,20}$/',
-            ],
-
-            'store_email' => [
-                'sometimes',
-                'string',
-                'max:254',
-                'email:rfc',
-            ],
+            'phone' => ['sometimes','string','max:20','regex:/^\+?[0-9\s().-]{7,20}$/'],
+            'store_email' => ['sometimes','string','max:254','email:rfc'],
             'order_format' => ['sometimes','string','max:5'],
             'free_credits_limit' => ['sometimes','numeric','min:0'],
         ], [
@@ -60,13 +48,30 @@ class SettingController extends Controller
             'store_email.email'  => 'Enter a valid email address (e.g. support@example.com).',
         ]);
 
-        $rows = collect(['phone','store_email','order_format','free_credits_limit'])
+        $keys = ['phone','store_email','order_format','free_credits_limit'];
+
+
+        $payload = collect($keys)
             ->filter(fn ($k) => array_key_exists($k, $validated))
-            ->map(fn ($k) => ['key' => $k, 'value' => $validated[$k]])
-            ->values()
+            ->mapWithKeys(fn ($k) => [$k => $validated[$k]])
             ->all();
-        $settingRepository->query()->upsert($rows, ['key'], ['value']);
+
+        if (!empty($payload)) {
+
+            $existingKeys = $settingRepository->query()
+                ->whereIn('key', array_keys($payload))
+                ->pluck('key')
+                ->all();
+
+            foreach ($existingKeys as $key) {
+                $settingRepository->query()
+                    ->where('key', $key)
+                    ->update(['value' => $payload[$key]]);
+            }
+        }
+
         Cache::forget('app_settings');
+
         return Response::api();
     }
 
