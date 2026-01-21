@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Shared\LibraryAssetController;
 use App\Http\Middleware\LocalizationMiddleware;
 use App\Http\Middleware\TrackVisits;
 use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
@@ -14,6 +15,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     Folder\FolderController,
     Industry\IndustryController,
     Invitation\InvitationController,
+    Logo\LogoController,
     Order\OrderController,
     Payment\PaymentController,
     Product\ProductController,
@@ -25,8 +27,7 @@ use App\Http\Controllers\Api\V1\User\{Auth\LoginController,
     ShippingAddress\ShippingController,
     Team\TeamController,
     Template\TemplateController,
-    Review\ReviewController
-};
+    Review\ReviewController};
 use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\General\MainController;
 use Illuminate\Support\Facades\Route;
@@ -180,6 +181,9 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
         Route::post('buy-order-again', [PaymentController::class, 'buyOrderAgain']);
         Route::post('orders/items/{orderItem}/download', [OrderController::class, 'downloadItem']);
         Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
+
+        Route::apiResource('logos', LogoController::class)->only(['index', 'store']);
+        Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
 
     });
 
