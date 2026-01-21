@@ -81,6 +81,8 @@ Route::prefix('ship-blu/')->controller(ShippingController::class)->group(functio
 Route::get('/fonts', [MainController::Class, 'fonts']);
 Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
 Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");
+Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
+
 
 Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::post('contact-us', [MainController::class, 'contactUs'])->name('contact-us');
@@ -185,7 +187,6 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
         Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
 
         Route::apiResource('logos', LogoController::class)->only(['index', 'store']);
-        Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
 
     });
 
