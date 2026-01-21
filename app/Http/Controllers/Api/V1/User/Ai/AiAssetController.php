@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\User\Logo;
+namespace App\Http\Controllers\Api\V1\User\Ai;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MediaResource;
@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Response;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 
-class LogoController extends Controller
+class AiAssetController extends Controller
 {
     public ?string $activeGuard;
     public function __construct()
@@ -21,7 +21,7 @@ class LogoController extends Controller
     public function index(Request $request)
    {
        $media = Media::query()->whereMorphedTo('model',$request->user())
-           ->whereCollectionName("logo_assets")
+           ->whereCollectionName("ai_assets")
            ->latest()
            ->paginate();
        return Response::api(data: MediaResource::collection($media)->response()->getData(true));
@@ -32,7 +32,7 @@ class LogoController extends Controller
         $request->validate(['file' => ['required','file',  'mimetypes:image/jpeg,image/png,image/svg+xml',
             'mimes:jpg,jpeg,png,svg',
             ]]);
-        $media = handleMediaUploads($request->file('file'),$request->user(),'logo_assets');
+        $media = handleMediaUploads($request->file('file'),$request->user(),'ai_assets');
         return Response::api(data: MediaResource::make($media)->response()->getData(true));
 
    }
