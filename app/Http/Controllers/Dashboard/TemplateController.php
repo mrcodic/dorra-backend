@@ -205,7 +205,6 @@ class TemplateController extends DashboardController
     {
         $media = $this->templateService->storeTemplateAssets($request);
         return Response::api(data: MediaResource::make($media));
-
     }
 
     public function search(Request $request)

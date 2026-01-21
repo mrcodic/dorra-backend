@@ -8,8 +8,10 @@ use App\DTOs\Template\TemplateData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Template\StoreTemplateRequest;
 use App\Http\Requests\Template\UpdateTemplateRequest;
+use App\Http\Resources\MediaResource;
 use App\Http\Resources\Template\TemplateResource;
 use App\Services\TemplateService;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
 
@@ -55,5 +57,17 @@ class TemplateController extends Controller
     }
 
 
+    public function templateAssets()
+    {
+        $media = $this->templateService->templateAssets();
+        return Response::api(data: MediaResource::collection($media)->response()->getData(true));
+
+    }
+
+    public function storeTemplateAssets(Request $request)
+    {
+        $media = $this->templateService->storeTemplateAssets($request);
+        return Response::api(data: MediaResource::make($media));
+    }
 
 }

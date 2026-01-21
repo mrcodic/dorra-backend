@@ -534,7 +534,7 @@ class TemplateService extends BaseService
     public function templateAssets()
     {
         return Media::query()
-            ->whereMorphedTo('model',auth(getActiveGuard())->user() ?? Admin::first()->user())
+            ->whereMorphedTo('model',auth(getActiveGuard())->user() ?? Admin::first())
             ->whereCollectionName("template_assets")
             ->latest()
             ->paginate();
