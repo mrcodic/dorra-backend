@@ -534,7 +534,7 @@ class TemplateService extends BaseService
     public function templateAssets()
     {
         return Media::query()
-            ->whereMorphedTo('model',auth(getActiveGuard())->user() ?? Admin::first())
+            ->whereMorphedTo('model',auth(getActiveGuard())->user() ?? getAuthOrGuest() ?? Admin::first())
             ->whereCollectionName("template_assets")
             ->latest()
             ->paginate();
@@ -544,7 +544,7 @@ class TemplateService extends BaseService
     {
         $validated = $request->validate(["file" => "required|file|mimes:svg"]);
 
-        return handleMediaUploads($validated['file'],auth(getActiveGuard())->user() ?? Admin::first(),"template_assets");
+        return handleMediaUploads($validated['file'],auth(getActiveGuard())->user() ?? getAuthOrGuest()  ?? Admin::first(),"template_assets");
 
     }
 

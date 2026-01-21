@@ -22,8 +22,9 @@ class LibraryAssetController extends Controller
 
     public function index()
     {
-        $media = Media::query()->whereMorphedTo('model', auth($this->activeGuard)->user() ?? Admin::first())
-            ->whereCollectionName("{$this->activeGuard}_assets")
+        $media = Media::query()->whereMorphedTo('model',
+            auth($this->activeGuard)->user() ?? getAuthOrGuest()  ?? Admin::first())
+            ->whereCollectionName(($this->activeGuard ?? 'guest') . '_assets')
             ->latest()
             ->get();
         return Response::api(data: MediaResource::collection($media)->response()->getData(true));
@@ -34,7 +35,9 @@ class LibraryAssetController extends Controller
         $request->validate(['file' => ['required', 'file', 'mimetypes:image/jpeg,image/png,image/svg+xml',
             'mimes:jpg,jpeg,png,svg',
         ]]);
-        $media = handleMediaUploads($request->file('file'), auth($this->activeGuard)->user() ?? Admin::first(), "{$this->activeGuard}_assets");
+        $media = handleMediaUploads($request->file('file'),
+            auth($this->activeGuard)->user() ?? getAuthOrGuest()  ?? Admin::first(),
+            ($this->activeGuard ?? 'guest') . '_assets');
         return Response::api(data: MediaResource::make($media)->response()->getData(true));
 
     }
