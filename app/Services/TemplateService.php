@@ -533,8 +533,10 @@ class TemplateService extends BaseService
 
     public function templateAssets()
     {
+        $notAuth = request()->is('api/v1/admin/*');
+        $model = $notAuth ? Admin::first() : getAuthOrGuest();
         return Media::query()
-            ->whereMorphedTo('model',auth(getActiveGuard())->user() ?? getAuthOrGuest() ?? Admin::first())
+            ->whereMorphedTo('model',$model)
             ->whereCollectionName("template_assets")
             ->latest()
             ->paginate();
@@ -543,8 +545,9 @@ class TemplateService extends BaseService
     public function storeTemplateAssets($request)
     {
         $validated = $request->validate(["file" => "required|file|mimes:svg"]);
-
-        return handleMediaUploads($validated['file'],auth(getActiveGuard())->user() ?? getAuthOrGuest()  ?? Admin::first(),"template_assets");
+        $notAuth = request()->is('api/v1/admin/*');
+        $model = $notAuth ? Admin::first() : getAuthOrGuest();
+        return handleMediaUploads($validated['file'],$model,"template_assets");
 
     }
 

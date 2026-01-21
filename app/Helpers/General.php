@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 function getAuthOrGuest()
 {
-    $user = auth('sanctum')->user();
+    $user = auth(getActiveGuard())->user();
 
     if ($user) {
         return $user;
