@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class AuthService
 {
@@ -177,6 +178,15 @@ class AuthService
         }
 
         DB::transaction(function () use ($guest, $user) {
+            Media::query()
+                ->where('model_type', get_class($guest))
+                ->where('model_id', $guest->id)
+                ->where('collection_name', 'guest_assets')
+                ->update([
+                    'model_type' => get_class($user),
+                    'model_id'   => $user->id,
+                    'collection_name' => 'sanctum_assets',
+                ]);
             $guestCart      = $guest->cart()->first();
             $guestCartItems = $guestCart
                 ? $guestCart->items()->with(['specs'])->get()
