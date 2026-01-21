@@ -35,6 +35,7 @@ class LibraryAssetController extends Controller
         $request->validate(['file' => ['required', 'file', 'mimetypes:image/jpeg,image/png,image/svg+xml',
             'mimes:jpg,jpeg,png,svg',
         ]]);
+        dd("Dsdssds");
         dd(auth($this->activeGuard)->user() ?? getAuthOrGuest()  ?? Admin::first());
         $media = handleMediaUploads($request->file('file'),
             auth($this->activeGuard)->user() ?? getAuthOrGuest()  ?? Admin::first(),
