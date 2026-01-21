@@ -54,17 +54,17 @@ class SettingController extends Controller
                 'email:rfc',
             ],
             'order_format' => ['sometimes','string','max:5'],
+            'free_credits_limit' => ['sometimes','numeric','min:0'],
         ], [
             'phone.regex'        => 'Enter a valid phone number (e.g. +201234567890).',
             'store_email.email'  => 'Enter a valid email address (e.g. support@example.com).',
         ]);
 
-        $rows = collect(['phone','store_email','order_format'])
+        $rows = collect(['phone','store_email','order_format','free_credits_limit'])
             ->filter(fn ($k) => array_key_exists($k, $validated))
             ->map(fn ($k) => ['key' => $k, 'value' => $validated[$k]])
             ->values()
             ->all();
-
         $settingRepository->query()->upsert($rows, ['key'], ['value']);
         Cache::forget('app_settings');
         return Response::api();

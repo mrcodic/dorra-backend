@@ -16,6 +16,7 @@ class SettingSeeder extends Seeder
             ['key' => 'store_email', 'value' => 'dorraprint@gmail.com', 'group' => 'general_setting'],
             ['key' => 'enable_design_payment', 'value' => true, 'group' => 'general_setting'],
             ['key' => 'order_format', 'value' => '#ORD'],
+            ['key' => 'free_credits_limit', 'value' => 50],
             ['key' => 'delivery', 'value' => 30],
             ['key' => 'shipping_visibility', 'value' => true, 'group' => 'visibility_sections_landing'],
             ['key' => 'tax', 'value' => 0.1],
