@@ -79,6 +79,8 @@ Route::prefix('ship-blu/')->controller(ShippingController::class)->group(functio
 });
 
 Route::get('/fonts', [MainController::Class, 'fonts']);
+Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
+Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");
 
 Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::post('contact-us', [MainController::class, 'contactUs'])->name('contact-us');
@@ -189,8 +191,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
 
     Route::get('templates', [TemplateController::class, 'index']);
     Route::get('templates/{template}', [TemplateController::class, 'show']);
-    Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
-    Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");
+
 
     Route::prefix("landing/")->controller(LandingController::class)->group(function () {
         Route::get('carousels', 'carousels');
