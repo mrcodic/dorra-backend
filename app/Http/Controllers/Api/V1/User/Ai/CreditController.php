@@ -12,7 +12,7 @@ class CreditController extends Controller
     public function status(Request $request)
     {
         $user = $request->user();
-        $freeLimit = Setting::value('free_credits_limit');
+        $freeLimit = Setting::whereKey('free_credits_limit')->value();
         $freeUsed = $user->free_credits_used;
         $freeLeft = max(0, $freeLimit - $freeUsed);
         return Response::api([
