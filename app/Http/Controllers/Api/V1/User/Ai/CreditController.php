@@ -15,7 +15,7 @@ class CreditController extends Controller
         $freeLimit = Setting::whereKey('free_credits_limit')->value('value');
         $freeUsed = $user->free_credits_used;
         $freeLeft = max(0, $freeLimit - $freeUsed);
-        return Response::api([
+        return Response::api(data:[
             'free_credits' => [
                 'limit' => $freeLimit,
                 'used' => $freeUsed,
