@@ -15,16 +15,26 @@ class CreditController extends Controller
     public function status(Request $request)
     {
         $user = $request->user();
-        $freeLimit = Setting::where('key','free_credits_limit')->value('value');
+        $freeLimit = Setting::where('key', 'free_credits_limit')->value('value');
         $freeUsed = $user->free_credits_used;
         $freeLeft = max(0, $freeLimit - $freeUsed);
-        return Response::api(data:[
+
+        $walletBalance = $user->wallet?->balance ?? 0;
+
+        $walletUsed = (int)$user->wallet
+            ? $user->wallet->walletTransactions()
+                ->where('type', 'debit')
+                ->sum('amount') * -1
+            : 0;
+        return Response::api(data: [
             'free_credits' => [
-                'limit' => $freeLimit,
                 'used' => $freeUsed,
                 'left' => $freeLeft,
             ],
-            'wallet_credits' => $user->wallet?->balance,
+            'wallet_credits' => [
+                'used' => $walletUsed,
+                'left' => $walletUsed,
+            ],
             'total_credits_left' => $freeLeft + $user->wallet?->balance,
         ]);
     }
@@ -33,21 +43,21 @@ class CreditController extends Controller
     {
         $request->validate([
             'tokens' => 'required|integer|min:1',
-            'type' => ['required','in:logo_generation,image_generation']
+            'type' => ['required', 'in:logo_generation,image_generation']
         ]);
 
         $user = $request->user();
 
-        $tokensPerCredit = (int) Setting::where('key','tokens_per_credit')->value('value');
-        $freeLimit = (int) Setting::where('key','free_credits_limit')->value('value');
+        $tokensPerCredit = (int)Setting::where('key', 'tokens_per_credit')->value('value');
+        $freeLimit = (int)Setting::where('key', 'free_credits_limit')->value('value');
 
-        $creditsNeeded = (int) ceil($request->tokens / $tokensPerCredit);
+        $creditsNeeded = (int)ceil($request->tokens / $tokensPerCredit);
 
 
         $freeLeft = max(0, $freeLimit - $user->free_credits_used);
 
         if ($freeLeft + $user->wallet->balance < $creditsNeeded) {
-            return Response::api(HttpEnum::PAYMENT_REQUIRED,"Insufficient credits",errors:[
+            return Response::api(HttpEnum::PAYMENT_REQUIRED, "Insufficient credits", errors: [
                 "payment" => "Insufficient credits"
             ]);
         }
@@ -65,8 +75,8 @@ class CreditController extends Controller
             }
         });
 
-        return Response::api(data:[
-            'credits_used' => (int) ceil($request->tokens / $tokensPerCredit)
+        return Response::api(data: [
+            'credits_used' => (int)ceil($request->tokens / $tokensPerCredit)
         ]);
     }
 
