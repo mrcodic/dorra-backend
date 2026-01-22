@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Resources\PlanResource;
 use App\Services\PlanService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
 class PlanController extends Controller
@@ -18,5 +19,14 @@ class PlanController extends Controller
     {
         $activePlans = $this->planService->activePlans();
         return Response::api(data: PlanResource::collection($activePlans));
+    }
+
+    public function subscribe(Request $request)
+    {
+        $validateData = $request->validate([
+            'plan_id' => ['required','integer','exists:plans,id']
+        ]);
+        $this->planService->subscribe($validateData);
+        return Response::api(message: "Subscribed successfully");
     }
 }

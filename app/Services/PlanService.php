@@ -15,6 +15,12 @@ class PlanService extends BaseService
 
     }
 
+    public function subscribe($validateData)
+    {
+      $plan = $this->repository->find($validateData['plan_id']);
+
+    }
+
     public function activePlans()
     {
         return $this->repository->query()->whereIsActive(true)->get();
