@@ -3,7 +3,6 @@
 namespace App\Services;
 
 
-
 use App\Repositories\Interfaces\PlanRepositoryInterface;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -14,6 +13,11 @@ class PlanService extends BaseService
     {
         parent::__construct($repository);
 
+    }
+
+    public function activePlans()
+    {
+        return $this->repository->query()->whereIsActive(true)->get();
     }
 
     public function getData()
@@ -33,7 +37,6 @@ class PlanService extends BaseService
                     $query->whereRaw('1 = 0');
                 }
             })
-
             ->orderBy('created_at', request('created_at', 'desc'));
 
         return DataTables::of($plans)
@@ -42,8 +45,8 @@ class PlanService extends BaseService
             })
             ->addColumn('action', function ($plan) {
                 return [
-                    'can_edit' => (bool) auth()->user()->hasPermissionTo('plans_update'),
-                    'can_delete' => (bool) auth()->user()->hasPermissionTo('plans_delete'),
+                    'can_edit' => (bool)auth()->user()->hasPermissionTo('plans_update'),
+                    'can_delete' => (bool)auth()->user()->hasPermissionTo('plans_delete'),
                 ];
             })
             ->make();

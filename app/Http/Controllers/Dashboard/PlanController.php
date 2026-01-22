@@ -3,33 +3,26 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
-use App\Http\Resources\AdminResource;
-use App\Repositories\Interfaces\RoleRepositoryInterface;
-use App\Services\AdminService;
+use App\Services\PlanService;
 use App\Http\Requests\Admin\{StoreAdminRequest, UpdateAdminRequest};
 
 
 
 class PlanController extends DashboardController
 {
-   public function __construct(public AdminService $adminService, public RoleRepositoryInterface $roleRepository)
+   public function __construct(public PlanService $planService)
    {
-       parent::__construct($adminService);
+       parent::__construct($planService);
        $this->storeRequestClass = new StoreAdminRequest();
        $this->updateRequestClass = new UpdateAdminRequest();
-       $this->indexView = 'admins.index';
+       $this->indexView = 'plans.index';
        $this->usePagination = true;
-       $this->assoiciatedData = [
-           'index' => [
-               'roles' => $this->roleRepository->all(),
-           ]
-       ];
-       $this->resourceTable = 'admins';
-       $this->resourceClass = AdminResource::class;
+       $this->resourceTable = 'plans';
+       $this->resourceClass = PlanResource::class;
    }
 
     public function getData()
     {
-        return $this->adminService->getData();
+        return $this->planService->getData();
    }
 }

@@ -252,8 +252,9 @@
         },
         {
             "name": "Plans",
-            "icon": "printer.svg",
-            "slug": ""
+            "icon": "Invoice.svg",
+            "slug": "",
+            "url": "/plans"
         }
     ]
 }

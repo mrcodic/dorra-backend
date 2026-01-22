@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\V1\User\{Ai\AiAssetController,
     Invitation\InvitationController,
     Order\OrderController,
     Payment\PaymentController,
+    Plan\PlanController,
     Product\ProductController,
     Profile\PasswordController,
     Profile\ProfileController,
@@ -188,9 +189,11 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
         Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
 
         Route::apiResource('ai-assets', AiAssetController::class)->only(['index', 'store']);
+
         Route::get('credits', [CreditController::class, 'status']);
         Route::post('credits/consume', [CreditController::class, 'consume']);
 
+        Route::get('plans', PlanController::class);
     });
 
     Route::get('templates', [TemplateController::class, 'index']);
