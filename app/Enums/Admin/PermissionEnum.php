@@ -161,7 +161,11 @@ enum PermissionEnum: string
     case TEMPLATES_DRAFTED_SHOW   = 'product-templates.change-status.draft_show';
     case TEMPLATES_LIVE_SHOW      = 'product-templates.change-status.live_show';
     case CAMPAIGNS = 'users.campaigns_show';
-
+    // Plans
+    case SHOW_PLANS = 'plans_show';
+    case CREATE_PLANS = 'plans_create';
+    case DELETE_PLANS = 'plans_delete';
+    case UPDATE_PLANS = 'plans_update';
 
     public function group(): array
     {
@@ -209,6 +213,7 @@ enum PermissionEnum: string
             'inventories'         => 'Inventories',
             'station-statuses'    => 'Custom Statuses',
             'users.campaigns'    => 'Campaigns',
+            'plans'    => 'Plans',
             default               => Str::headline(str_replace('-', ' ', $this->groupKey())),
         };
     }

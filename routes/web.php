@@ -19,6 +19,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
     OfferController,
     OrderController,
     PermissionController,
+    PlanController,
     ProductController,
     ProductSpecificationController,
     ProfileController,
@@ -279,7 +280,11 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         });
         Route::resource('/inventories', InventoryController::class);
 
-
+        Route::group(['prefix' => 'plans', 'as' => 'plans.', 'controller' => PlanController::class,], (function () {
+            Route::get('/data', [PlanController::class, 'getData'])->name('data');
+            Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+        }));
+        Route::resource('/plans', PlanController::class);
     });
 
     Route::prefix('api/v1/')->group(function () {
@@ -358,4 +363,4 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
     });
 
 });
-Route::view('test','dashboard.test');
+Route::view('test', 'dashboard.test');
