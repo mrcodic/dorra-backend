@@ -189,6 +189,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
 
         Route::apiResource('ai-assets', AiAssetController::class)->only(['index', 'store']);
         Route::get('credits', [CreditController::class, 'status']);
+        Route::post('credits/consume', [CreditController::class, 'consume']);
 
     });
 
