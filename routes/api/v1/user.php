@@ -4,6 +4,7 @@ use App\Http\Controllers\Shared\LibraryAssetController;
 use App\Http\Middleware\LocalizationMiddleware;
 use App\Http\Middleware\TrackVisits;
 use App\Http\Controllers\Api\V1\User\{Ai\AiAssetController,
+    Ai\CreditController,
     Auth\LoginController,
     Auth\LogoutController,
     Auth\OtpController,
@@ -187,6 +188,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
         Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
 
         Route::apiResource('ai-assets', AiAssetController::class)->only(['index', 'store']);
+        Route::get('credits', [CreditController::class, 'status']);
 
     });
 

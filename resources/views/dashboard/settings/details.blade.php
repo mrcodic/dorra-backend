@@ -47,7 +47,7 @@
             <button class="btn profile-tab active" data-target="tab1">Profile</button>
             <button class="btn profile-tab" data-target="tab2">Social Media Platforms</button>
             <button class="btn profile-tab" data-target="tab4">Order Format</button>
-            <button class="btn profile-tab" data-target="tab5">Logo Free Credits</button>
+            <button class="btn profile-tab" data-target="tab5">Ai Credits</button>
         </div>
 
         {{-- Right Side: Tab Content --}}
@@ -207,14 +207,20 @@
             <div id="tab5" class="tab-section">
                 <form class="profileSettingsForm" method="post" action="{{ route('settings-edit-details') }}">
                     @csrf
-                    <h4 class="mb-2">Logo Free Credits Limit</h4>
+                    <h4 class="mb-2">Ai Credits</h4>
                     <div class="row mb-2">
                         <div class="col-md-6">
-                            <label for="prefix" class="form-label">Count</label>
+                            <label for="prefix" class="form-label">Tokens Count Per Credit</label>
+                            <input type="text" name="tokens_per_credit" id="prefix" value="{{ setting('tokens_per_credit') }}"
+                                   class="form-control" placeholder="e.g. 50"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="prefix" class="form-label">Free Credits Limit</label>
                             <input type="text" name="free_credits_limit" id="prefix" value="{{ setting('free_credits_limit') }}"
                                    class="form-control" placeholder="e.g. 50"/>
                         </div>
                     </div>
+
                     <div class="d-flex justify-content-end mt-2">
                         <button class="btn btn-outline-secondary me-1" type="reset">Discard Changes</button>
                         <button class="btn btn-primary" type="submit">Save</button>

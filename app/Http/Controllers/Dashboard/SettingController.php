@@ -43,12 +43,13 @@ class SettingController extends Controller
             'store_email' => ['sometimes','string','max:254','email:rfc'],
             'order_format' => ['sometimes','string','max:5'],
             'free_credits_limit' => ['sometimes','numeric','min:0'],
+            'tokens_per_credit' => ['sometimes','numeric','min:0'],
         ], [
             'phone.regex'        => 'Enter a valid phone number (e.g. +201234567890).',
             'store_email.email'  => 'Enter a valid email address (e.g. support@example.com).',
         ]);
 
-        $keys = ['phone','store_email','order_format','free_credits_limit'];
+        $keys = ['phone','store_email','order_format','free_credits_limit','tokens_per_credit'];
 
 
         $payload = collect($keys)

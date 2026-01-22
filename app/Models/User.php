@@ -43,6 +43,7 @@ class User extends Authenticatable implements HasMedia
         'is_mobile_notifications_enabled',
         'last_login_ip',
         'last_login_at',
+        'free_credits_used',
     ];
 
     /**
@@ -167,5 +168,10 @@ class User extends Authenticatable implements HasMedia
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function wallet(): BelongsTo
+    {
+        return $this->belongsTo(Wallet::class);
     }
 }
