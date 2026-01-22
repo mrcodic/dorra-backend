@@ -170,8 +170,8 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(Order::class);
     }
 
-    public function wallet(): BelongsTo
+    public function wallet(): HasOne
     {
-        return $this->belongsTo(Wallet::class);
+        return $this->hasOne(Wallet::class);
     }
 }
