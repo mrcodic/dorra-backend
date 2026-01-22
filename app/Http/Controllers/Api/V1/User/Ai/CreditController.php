@@ -38,7 +38,8 @@ class CreditController extends Controller
 
         $user = $request->user();
 
-        $tokensPerCredit = (int) Setting::where('key','tokens_per_credit')->value('value');
+        $tokensPerCredit =Setting::where('key','tokens_per_credit')->value('value');
+        dd($tokensPerCredit);
         $freeLimit = (int) Setting::where('key','free_credits_limit')->value('value');
 
         $creditsNeeded = (int) max(1,ceil($request->tokens / $tokensPerCredit));
