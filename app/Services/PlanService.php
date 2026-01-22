@@ -36,6 +36,8 @@ class PlanService extends BaseService
                 } else {
                     $query->whereRaw('1 = 0');
                 }
+            })->when(request()->filled('status'), function ($query) {
+                $query->whereIsActive(request()->input('status'));
             })
             ->orderBy('created_at', request('created_at', 'desc'));
 

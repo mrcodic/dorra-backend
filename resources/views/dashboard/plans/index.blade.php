@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Admins')
-@section('main-page', 'Admins')
+@section('title', 'Plans')
+@section('main-page', 'Plans')
 
 @section('vendor-style')
 {{-- Page Css files --}}
@@ -27,30 +27,30 @@
     @media (max-width: 768px) {
 
         /* Hide the last 4 columns on mobile */
-        .admin-list-table th:nth-child(5),
-        .admin-list-table th:nth-child(6),
-        .admin-list-table th:nth-child(7),
-        .admin-list-table th:nth-child(8),
-        .admin-list-table th:nth-child(9) {
+        .plan-list-table th:nth-child(5),
+        .plan-list-table th:nth-child(6),
+        .plan-list-table th:nth-child(7),
+        .plan-list-table th:nth-child(8),
+        .plan-list-table th:nth-child(9) {
             display: none !important;
         }
 
-        .admin-list-table tbody tr:not(.details-row) td:nth-child(5),
-        .admin-list-table tbody tr:not(.details-row) td:nth-child(6),
-        .admin-list-table tbody tr:not(.details-row) td:nth-child(7),
-        .admin-list-table tbody tr:not(.details-row) td:nth-child(8),
-        .admin-list-table tbody tr:not(.details-row) td:nth-child(9) {
+        .plan-list-table tbody tr:not(.details-row) td:nth-child(5),
+        .plan-list-table tbody tr:not(.details-row) td:nth-child(6),
+        .plan-list-table tbody tr:not(.details-row) td:nth-child(7),
+        .plan-list-table tbody tr:not(.details-row) td:nth-child(8),
+        .plan-list-table tbody tr:not(.details-row) td:nth-child(9) {
             display: none !important;
         }
 
         /* Style for clickable rows */
-        .admin-list-table tbody tr:not(.details-row) {
+        .plan-list-table tbody tr:not(.details-row) {
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
 
         /* Add expand indicator to the role column */
-        .admin-list-table tbody tr:not(.details-row) td:nth-child(1) {
+        .plan-list-table tbody tr:not(.details-row) td:nth-child(1) {
             position: relative;
             padding-left: 20px !important;
         }
@@ -144,7 +144,7 @@
         </div>
         <div class="card-datatable table-responsive pt-0">
             <div class="px-1 d-flex flex-wrap justify-content-between align-items-center gap-1">
-                <form action="" method="get" class="d-flex me-1 position-relative col-12 col-md-6 search-form">
+                <form action="" method="get" class="d-flex me-1 position-relative col-12 col-md-8 search-form">
                     <i data-feather="search" class="position-absolute top-50 translate-middle-y mx-1 text-muted"></i>
                     <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
                         id="search-category-form" placeholder="Search here" style="height: 38px;">
@@ -157,45 +157,34 @@
                 </form>
 
                 <div class="col-12 col-md-2">
-                    <select name="role_id" class="form-select filter-role" id="roleSelect">
-                        <option value="" selected disabled>Role</option>
-                        <option value="">All</option>
-                        @foreach($associatedData['roles'] as $role)
-                        <option value="{{ $role->id }}">{{ $role->getTranslation('name',app()->getLocale())}}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-12 col-md-2">
                     <select name="status" class="form-select filter-status">
                         <option value="" selected disabled>Status</option>
                         <option value="">All</option>
-                        <option value="0">Blocked</option>
+                        <option value="0">Inactive</option>
                         <option value="1">Active</option>
                     </select>
                 </div>
-                @can('admins_create')
-                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addAdminModal">
-                        Add New Admin
+                @can('plans_create')
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addPlanModal">
+                        Add New Plan
                     </button>
                 @endcan
             </div>
         </div>
 
-        <table class="admin-list-table table">
+        <table class="plan-list-table table">
             <thead class="table-light">
                 <tr>
 
                     <th>
-                        <input type="checkbox" id="select-all-checkbox" class="form-check-input" @disabled(!auth()->user()->hasPermissionTo('admins_delete'))>
+                        <input type="checkbox" id="select-all-checkbox" class="form-check-input" @disabled(!auth()->user()->hasPermissionTo('plans_delete'))>
                     </th>
 
                     <th>ID</th>
-                    <th>IMAGE</th>
                     <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Join Date</th>
+                    <th>Price</th>
+                    <th>Credits</th>
+                    <th>Active</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -203,22 +192,22 @@
                 <!-- DataTable will populate this dynamically -->
             </tbody>
         </table>
-        @can('admins_delete')
+        @can('plans_delete')
             <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
 
                 <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
                      style="z-index: 10;">
-                    <p id="selected-count-text">0 Admins are selected</p>
+                    <p id="selected-count-text">0 Plans are selected</p>
                     <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
-                            data-bs-target="#deleteAdminsModal"
+                            data-bs-target="#deletePlansModal"
                             class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
                         <i data-feather="trash-2"></i> Delete Selected
                     </button>
                     <form style="display: none;" id="bulk-delete-form" method="POST"
-                          action="{{ route('admins.bulk-delete') }}">
+                          action="{{ route('plans.bulk-delete') }}">
                         @csrf
                         <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
-                                data-bs-target="#deleteAdminsModal"
+                                data-bs-target="#deletePlansModal"
                                 class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
                             <i data-feather="trash-2"></i> Delete Selected
                         </button>
@@ -230,18 +219,18 @@
         @endcan
     </div>
     </div>
-    @include('modals/admins/add-admin')
-    @include('modals/admins/edit-admin')
+    @include('modals/plans/add-plan')
+    @include('modals/plans/edit-plan')
 
     @include('modals.delete',[
-    'id' => 'deleteAdminModal',
-    'formId' => 'deleteAdminForm',
-    'title' => 'Delete Admin',
+    'id' => 'deletePlanModal',
+    'formId' => 'deletePlanForm',
+    'title' => 'Delete Plan',
     ])
     @include('modals.delete',[
-    'id' => 'deleteAdminsModal',
+    'id' => 'deletePlansModal',
     'formId' => 'bulk-delete-form',
-    'title' => 'Delete Admins',
+    'title' => 'Delete Plans',
     'confirmText' => 'Are you sure you want to delete this items?',
     ])
     <!-- list and filter end -->
@@ -275,8 +264,9 @@
 <script src="https://unpkg.com/feather-icons"></script>
 
 <script>
-    const adminsDataUrl = "{{ route('admins.data') }}";
-    const adminsCreateUrl = "{{ route('admins.create') }}";
+    const plansDataUrl = "{{ route('plans.data') }}";
+    console.log("plans", plansDataUrl)
+    const plansCreateUrl = "{{ route('plans.create') }}";
     const defaultImage ="{{ asset("images/default-user.png") }}";
     const locale = "{{ app()->getLocale() }}";
 </script>
@@ -320,7 +310,7 @@
     }
 
     // Accordion click handler with event delegation
-    $(document).on('click.accordion', '.admin-list-table tbody tr:not(.details-row)', function(e) {
+    $(document).on('click.accordion', '.plan-list-table tbody tr:not(.details-row)', function(e) {
         // Prevent accordion when clicking interactive elements
         if ($(e.target).is('input, button, a, .btn') ||
             $(e.target).closest('input, button, a, .btn').length > 0) {
@@ -334,7 +324,7 @@
     // Initialize accordion after DataTable draw
     function initAccordion() {
         if ($(window).width() <= 768) {
-            $('.admin-list-table tbody tr:not(.details-row)').each(function() {
+            $('.plan-list-table tbody tr:not(.details-row)').each(function() {
                 const $row = $(this);
 
                 // Remove existing details and icons first
@@ -396,7 +386,7 @@
     });
 
     // On DataTable events
-    $(document).on('draw.dt', '.admin-list-table', function () {
+    $(document).on('draw.dt', '.plan-list-table', function () {
         $('#bulk-delete-container').hide();
         $('#select-all-checkbox').prop('checked', false);
 
@@ -417,7 +407,7 @@
         const count = selectedCheckboxes.length;
 
         if (count > 0) {
-            $('#selected-count-text').text(`${count} Admin${count > 1 ? 's are' : ' is'} selected`);
+            $('#selected-count-text').text(`${count} Plan${count > 1 ? 's are' : ' is'} selected`);
             $('#bulk-delete-container').show();
         } else {
             $('#bulk-delete-container').hide();
@@ -432,13 +422,13 @@
 </script>
 
 {{-- Page js files --}}
-<script src="{{ asset('js/scripts/pages/app-admin-list.js') }}?v={{ time() }}"></script>
+<script src="{{ asset('js/scripts/pages/app-plan-list.js') }}?v={{ time() }}"></script>
 
 <script>
     // Backup accordion handler in case the main one doesn't work
 $(document).ready(function() {
     // Alternative click handler
-    $(document).off('click.accordion').on('click.accordion', '.admin-list-table tbody tr:not(.details-row)', function(e) {
+    $(document).off('click.accordion').on('click.accordion', '.plan-list-table tbody tr:not(.details-row)', function(e) {
         console.log('Accordion clicked'); // Debug log
 
         if ($(window).width() <= 768) {

@@ -102,6 +102,12 @@
 
         },
         {
+            "name": "Plans",
+            "icon": "business-plan.png",
+            "slug": "",
+            "url": "/plans"
+        },
+        {
             "name": "Orders",
             "icon": "orders.svg",
             "slug": "",
@@ -249,12 +255,7 @@
             ],
             "modalTarget": ""
 
-        },
-        {
-            "name": "Plans",
-            "icon": "Invoice.svg",
-            "slug": "",
-            "url": "/plans"
         }
+
     ]
 }
