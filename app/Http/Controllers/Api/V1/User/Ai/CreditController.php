@@ -21,8 +21,8 @@ class CreditController extends Controller
 
         $walletBalance = $user->wallet?->balance ?? 0;
 
-        $walletUsed = (int)$user->wallet
-            ? $user->wallet->walletTransactions()
+        $walletUsed = $user->wallet
+            ? (int) $user->wallet->walletTransactions()
                 ->where('type', 'debit')
                 ->sum('amount') * -1
             : 0;
