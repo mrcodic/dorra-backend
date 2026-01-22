@@ -29,11 +29,13 @@ class CreditController extends Controller
         return Response::api(data: [
             'free_credits' => [
                 'used' => $freeUsed,
-                'left' => $freeLeft,
+                'available' => $freeLeft,
+                'total' => $freeLimit,
             ],
             'wallet_credits' => [
                 'used' => $walletUsed,
-                'left' => $walletUsed,
+                'available' => $walletBalance,
+                'total' => $walletUsed + $walletBalance,
             ],
             'total_credits_left' => $freeLeft + $user->wallet?->balance,
         ]);
