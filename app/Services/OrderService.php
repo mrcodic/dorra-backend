@@ -821,6 +821,7 @@ class OrderService extends BaseService
         $dto = $gatewayCode === 'fawry'
             ? \App\DTOs\Payment\Fawry\PaymentRequestData::fromArray([
                 'order' => $order,
+                'type' => 'order',
                 'user' => $user,
                 'guest' => $order->orderAddress ?? $order->pickupContact,
                 'method' => $paymentMethod->code,

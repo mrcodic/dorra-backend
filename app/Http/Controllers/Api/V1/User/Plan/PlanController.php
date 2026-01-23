@@ -24,9 +24,10 @@ class PlanController extends Controller
     public function subscribe(Request $request)
     {
         $validateData = $request->validate([
-            'plan_id' => ['required','integer','exists:plans,id']
+            'plan_id' => ['required', 'integer', 'exists:plans,id'],
+            'payment_method_id' => ['required', 'integer', 'exists:payment_methods,id']
         ]);
-        $this->planService->subscribe($validateData);
-        return Response::api(message: "Subscribed successfully");
+        $data = $this->planService->subscribe($validateData);
+        return Response::api(message: "Subscribed successfully", data: $data);
     }
 }

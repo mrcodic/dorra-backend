@@ -3,13 +3,20 @@
 namespace App\Services;
 
 
+use App\DTOs\Payment\Fawry\PaymentRequestData;
+use App\Repositories\Implementations\PaymentMethodRepository;
 use App\Repositories\Interfaces\PlanRepositoryInterface;
+use App\Services\Payment\PaymentGatewayFactory;
 use Yajra\DataTables\Facades\DataTables;
 
 class PlanService extends BaseService
 {
 
-    public function __construct(PlanRepositoryInterface $repository)
+    public function __construct(PlanRepositoryInterface        $repository,
+                                public PaymentMethodRepository $paymentMethodRepository,
+                                public PaymentGatewayFactory   $paymentFactory,
+
+    )
     {
         parent::__construct($repository);
 
@@ -17,7 +24,17 @@ class PlanService extends BaseService
 
     public function subscribe($validateData)
     {
-      $plan = $this->repository->find($validateData['plan_id']);
+        $plan = $this->repository->find($validateData['plan_id']);
+        $paymentMethod = $this->paymentMethodRepository->find($validateData['payment_method_id']);
+        $gatewayCode = $paymentMethod->paymentGateway->code;
+        $paymentGatewayStrategy = $this->paymentFactory->make($gatewayCode);
+        $dto = PaymentRequestData::fromArray([
+            'plan' => $plan,
+            'type' => 'plan',
+            'user' => auth()->user(),
+            'method' => $paymentMethod->code,
+        ]);
+      return  $paymentGatewayStrategy->pay($dto->toArray());
 
     }
 
