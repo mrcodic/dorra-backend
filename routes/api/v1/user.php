@@ -194,7 +194,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
         Route::post('credits/consume', [CreditController::class, 'consume']);
 
         Route::get('plans', PlanController::class);
-        Route::get('plans/subscribe', [PlanController::class,'subscribe']);
+        Route::post('plans/subscribe', [PlanController::class,'subscribe']);
     });
 
     Route::get('templates', [TemplateController::class, 'index']);
