@@ -13,8 +13,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('transactions', function (Blueprint $table) {
-//            $table->dropForeign(['order_id']);
-//            $table->dropColumn('order_id');
+            $table->dropForeign(['order_id']);
+            $table->dropColumn('order_id');
             $table->after('id',function ($table){
                 $table->string('payable_type')->nullable();
                 $table->unsignedBigInteger('payable_id')->nullable();
@@ -32,7 +32,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('transactions', function (Blueprint $table) {
-//            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->dropIndex(['payable_type', 'payable_id']);
             $table->dropColumn(['payable_type', 'payable_id']);
         });

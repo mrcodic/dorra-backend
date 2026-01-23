@@ -36,7 +36,7 @@ class PlanController extends Controller
 
     public function transaction($transaction)
     {
-        $transaction = Transaction::whereTrasactionId($transaction)->first();
+        $transaction = Transaction::whereTransactionId($transaction)->first();
         if ($transaction->payable_type == Plan::class) {
             WalletService::credit($transaction->user
                 ,$transaction->payable->price,
