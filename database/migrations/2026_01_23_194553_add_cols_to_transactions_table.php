@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,9 +15,13 @@ return new class extends Migration
         Schema::table('transactions', function (Blueprint $table) {
             $table->dropForeign(['order_id']);
             $table->dropColumn('order_id');
-            $table->string('payable_type')->nullable();
-            $table->unsignedBigInteger('payable_id')->nullable();
-            $table->index(['payable_type', 'payable_id']);
+            $table->after('id',function ($table){
+                $table->string('payable_type')->nullable();
+                $table->unsignedBigInteger('payable_id')->nullable();
+                $table->index(['payable_type', 'payable_id']);
+                $table->foreignIdFor(User::class)->nullable()->constrained()->nullOnDelete();
+            });
+
 
         });
     }

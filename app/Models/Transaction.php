@@ -7,6 +7,8 @@ use App\Observers\TransactionObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+
 #[ObservedBy(TransactionObserver::class)]
 
 class Transaction extends Model
@@ -16,8 +18,13 @@ class Transaction extends Model
         'payment_status' => StatusEnum::class,
     ];
 
-    public function order(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(Order::class);
+        return $this->belongsTo(User::class);
+    }
+
+    public function payable(): MorphTo
+    {
+        return $this->morphTo();
     }
 }

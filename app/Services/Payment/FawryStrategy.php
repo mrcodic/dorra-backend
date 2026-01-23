@@ -147,6 +147,16 @@ use Illuminate\Support\Facades\Log;
     {
         $transaction = Transaction::create(
             [
+                'amount' => $orderData['amount'],
+                'payment_method' => $paymentMethod,
+                'payment_status' => StatusEnum::PENDING,
+                'transaction_id' => $orderData['order_id'],
+                'response_message' => json_encode($orderData),
+                'success_url' => request()->success_url ?? $this->callback,
+                'failure_url' => request()->failure_url ?? $this->callback,
+                'pending_url' => request()->pending_url ?? $this->callback,
+                'expiration_date' => now()->addDays(2),
+                'user_id' => request()->user()?->id,
                 'payable_type' => match ($data['type']) {
                     'order' => Order::class,
                     'plan' => Plan::class,
@@ -158,15 +168,6 @@ use Illuminate\Support\Facades\Log;
                     'plan' => Arr::get($data, 'plan')?->id,
                     default => null,
                 },
-                'amount' => $orderData['amount'],
-                'payment_method' => $paymentMethod,
-                'payment_status' => StatusEnum::PENDING,
-                'transaction_id' => $orderData['order_id'],
-                'response_message' => json_encode($orderData),
-                'success_url' => request()->success_url ?? $this->callback,
-                'failure_url' => request()->failure_url ?? $this->callback,
-                'pending_url' => request()->pending_url ?? $this->callback,
-                'expiration_date' => now()->addDays(2),
             ]);
 
         return [

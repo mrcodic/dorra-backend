@@ -6,11 +6,13 @@ namespace App\Http\Controllers\Api\V1\User\Payment;
 use App\Enums\Payment\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaymentResource;
+use App\Models\Plan;
 use App\Models\Transaction;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use App\Repositories\Interfaces\PaymentMethodRepositoryInterface;
 use App\Services\CartService;
 use App\Services\Payment\PaymentGatewayFactory;
+use App\Services\Wallet\WalletService;
 use App\Traits\HandlesTryCatch;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -111,7 +113,6 @@ class PaymentController extends Controller
     }
 
 
-
     /**
      * @param $transaction
      * @param mixed $paymentMethod
@@ -142,6 +143,7 @@ class PaymentController extends Controller
 
         });
     }
+
     /**
      * @throws \Exception
      */
@@ -189,7 +191,6 @@ class PaymentController extends Controller
     }
 
 
-
     public function handlePaymobRedirect(Request $request): RedirectResponse
     {
         $requestedData = $request->all();
@@ -216,76 +217,75 @@ class PaymentController extends Controller
         $requestedData = $request->all();
         $statusCode = data_get($requestedData, 'statusCode');
         $orderStatus = data_get($requestedData, 'orderStatus');
-        $merchantRef =  data_get($requestedData, 'merchantRefNumber');
-        $paymentMethod =  data_get($requestedData, 'paymentMethod');
-        $referenceNumber =  data_get($requestedData, 'referenceNumber');
+        $merchantRef = data_get($requestedData, 'merchantRefNumber');
+        $paymentMethod = data_get($requestedData, 'paymentMethod');
+        $referenceNumber = data_get($requestedData, 'referenceNumber');
 
         $transaction = Transaction::where('transaction_id', $merchantRef)->first();
 
         if (!$transaction) {
             return redirect()->back();
         }
-        if ($orderStatus == 'PAID' && $statusCode == 200)
-        {
-            if ($paymentMethod == 'MWALLET'){
+        if ($orderStatus == 'PAID' && $statusCode == 200) {
+            if ($paymentMethod == 'MWALLET') {
                 $transaction->update([
                     'wallet_reference' => $referenceNumber
                 ]);
             }
             return redirect()->to($transaction->success_url);
-        }elseif ($orderStatus == 'UNPAID' && $paymentMethod == 'PayAtFawry')
-        {
+        } elseif ($orderStatus == 'UNPAID' && $paymentMethod == 'PayAtFawry') {
             $transaction->update([
-               'kiosk_reference' => $referenceNumber
+                'kiosk_reference' => $referenceNumber
             ]);
-            return redirect()->to($transaction->pending_url."&referenceNumber=$referenceNumber");
-        }else{
+            return redirect()->to($transaction->pending_url . "&referenceNumber=$referenceNumber");
+        } else {
             return redirect()->to($transaction->failure_url);
         }
     }
+
     private function verifySignature(array $payload): bool
     {
-        $mustRequestParams = ['fawryRefNumber','merchantRefNumber','paymentAmount','orderAmount','orderStatus','paymentMethod','messageSignature'];
+        $mustRequestParams = ['fawryRefNumber', 'merchantRefNumber', 'paymentAmount', 'orderAmount', 'orderStatus', 'paymentMethod', 'messageSignature'];
         foreach ($mustRequestParams as $param) {
             if (!array_key_exists($param, $payload)) return false;
         }
 
-        $secureKey = (string) config('services.fawry.secret_key');
+        $secureKey = (string)config('services.fawry.secret_key');
 
 
-        $paymentAmount = number_format((float) $payload['paymentAmount'], 2, '.', '');
-        $orderAmount   = number_format((float) $payload['orderAmount'],   2, '.', '');
+        $paymentAmount = number_format((float)$payload['paymentAmount'], 2, '.', '');
+        $orderAmount = number_format((float)$payload['orderAmount'], 2, '.', '');
 
 
         $paymentRef = $payload['paymentRefrenceNumber'] ?? '';
 
-        $raw = ($payload['fawryRefNumber']    ?? '')
+        $raw = ($payload['fawryRefNumber'] ?? '')
             . ($payload['merchantRefNumber'] ?? '')
             . $paymentAmount
             . $orderAmount
-            . ($payload['orderStatus']   ?? '')
+            . ($payload['orderStatus'] ?? '')
             . ($payload['paymentMethod'] ?? '')
             . $paymentRef
             . $secureKey;
 
         $calc = hash('sha256', $raw);
-        return hash_equals($calc, (string) $payload['messageSignature']);
+        return hash_equals($calc, (string)$payload['messageSignature']);
     }
 
     public function handleFawryCallback(Request $request)
     {
         $payload = $request->all();
-        Log::info('Fawry webhook payload',$payload);
+        Log::info('Fawry webhook payload', $payload);
 
         if (!$this->verifySignature($payload)) {
             Log::warning('Fawry webhook invalid signature');
             return response()->json(['error' => 'invalid signature'], 400);
         }
 
-        $merchantRef   = $payload['merchantRefNumber'] ?? null;
-        $fawryRef      = $payload['fawryRefNumber']    ?? null;
-        $status        = strtoupper((string) ($payload['orderStatus'] ?? ''));
-        $paymentMethod = strtoupper((string) ($payload['paymentMethod'] ?? ''));
+        $merchantRef = $payload['merchantRefNumber'] ?? null;
+        $fawryRef = $payload['fawryRefNumber'] ?? null;
+        $status = strtoupper((string)($payload['orderStatus'] ?? ''));
+        $paymentMethod = strtoupper((string)($payload['paymentMethod'] ?? ''));
 
         if (!$merchantRef && !$fawryRef) {
             abort(404, 'Missing search parameters');
@@ -309,21 +309,26 @@ class PaymentController extends Controller
         }
 
         $paymentStatus = match ($status) {
-            'PAID'                           => StatusEnum::PAID,
+            'PAID' => StatusEnum::PAID,
             'EXPIRED', 'CANCELLED', 'FAILED' => StatusEnum::UNPAID,
-            default                          => StatusEnum::PENDING,
+            default => StatusEnum::PENDING,
         };
 
         $updates = [
-            'payment_status'   => $paymentStatus,
-            'payment_method'   => $transaction->payment_method ?: $paymentMethod,
+            'payment_status' => $paymentStatus,
+            'payment_method' => $transaction->payment_method ?: $paymentMethod,
             'response_message' => json_encode($payload, JSON_UNESCAPED_UNICODE),
         ];
 
         $transaction->update($updates);
+        if ($status == 'PAID' && $transaction->payable_type == Plan::class) {
+            WalletService::credit($transaction->user
+                ,$transaction->payable->price,
+                "purchase plan {$transaction->payable->name}");
+        }
 
         if ($paymentStatus === StatusEnum::PAID) {
-             $this->resetCart($transaction,$payload['paymentMethod'],StatusEnum::PAID,$payload);
+            $this->resetCart($transaction, $payload['paymentMethod'], StatusEnum::PAID, $payload);
         }
 
         return response()->json(['message' => 'Webhook processed']);

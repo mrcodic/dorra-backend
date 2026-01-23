@@ -195,6 +195,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
 
         Route::get('plans', PlanController::class);
         Route::post('plans/subscribe', [PlanController::class,'subscribe']);
+        Route::post('make-transaction-paid/{id}', [PlanController::class,'transaction']);
     });
 
     Route::get('templates', [TemplateController::class, 'index']);

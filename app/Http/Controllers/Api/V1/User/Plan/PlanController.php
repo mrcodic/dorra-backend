@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Api\V1\User\Plan;
 use App\Http\Controllers\Controller;
 
 use App\Http\Resources\PlanResource;
+use App\Models\Plan;
+use App\Models\Transaction;
 use App\Services\PlanService;
+use App\Services\Wallet\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
@@ -29,5 +32,16 @@ class PlanController extends Controller
         ]);
         $data = $this->planService->subscribe($validateData);
         return Response::api(message: "Subscribed successfully", data: $data);
+    }
+
+    public function transaction($transaction)
+    {
+        $transaction = Transaction::whereTrasactionId($transaction)->first();
+        if ($transaction->payable_type == Plan::class) {
+            WalletService::credit($transaction->user
+                ,$transaction->payable->price,
+                "purchase plan {$transaction->payable->name}");
+        }
+        return "done";
     }
 }
