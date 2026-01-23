@@ -30,11 +30,11 @@ class PlanService extends BaseService
         $paymentGatewayStrategy = $this->paymentFactory->make($gatewayCode);
         $dto = PaymentRequestData::fromArray([
             'plan' => $plan,
-            'type' => 'plan',
             'user' => auth()->user(),
             'method' => $paymentMethod->code,
         ]);
-      return  $paymentGatewayStrategy->pay($dto->toArray());
+
+      return  $paymentGatewayStrategy->pay($dto->toArray(),['plan' => $plan,'type' => 'plan']);
 
     }
 

@@ -821,7 +821,6 @@ class OrderService extends BaseService
         $dto = $gatewayCode === 'fawry'
             ? \App\DTOs\Payment\Fawry\PaymentRequestData::fromArray([
                 'order' => $order,
-                'type' => 'order',
                 'user' => $user,
                 'guest' => $order->orderAddress ?? $order->pickupContact,
                 'method' => $paymentMethod->code,
@@ -838,6 +837,7 @@ class OrderService extends BaseService
         // Extra context for some gateways (only available for new orders flow)
         $meta = array_filter([
             'order' => $order,
+            'type' => 'order',
             'user' => $user,
             'cart' => $cart,
             'discountCode' => $discountCode,

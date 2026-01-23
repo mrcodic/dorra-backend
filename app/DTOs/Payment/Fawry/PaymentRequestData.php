@@ -10,7 +10,6 @@ class PaymentRequestData
     public function __construct(
         public $user,
         public $method,
-        public $type,
         public $order = null,
         public $plan = null,
         public $guest = null,
@@ -22,7 +21,6 @@ class PaymentRequestData
         return new self(
             user: $data['user'],
             method: $data['method'],
-            type: $data['type'],
             order: Arr::get($data, 'order'),
             plan: Arr::get($data, 'plan'),
             guest: Arr::get($data, 'guest'),
