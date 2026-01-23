@@ -32,7 +32,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
+//            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->dropIndex(['payable_type', 'payable_id']);
             $table->dropColumn(['payable_type', 'payable_id']);
         });
