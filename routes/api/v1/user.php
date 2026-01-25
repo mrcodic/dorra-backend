@@ -29,7 +29,8 @@ use App\Http\Controllers\Api\V1\User\{Ai\AiAssetController,
     ShippingAddress\ShippingController,
     Team\TeamController,
     Template\TemplateController,
-    Review\ReviewController};
+    Review\ReviewController,
+    Wallet\WalletController};
 use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\General\MainController;
 use Illuminate\Support\Facades\Route;
