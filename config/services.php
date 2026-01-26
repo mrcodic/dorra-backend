@@ -83,6 +83,9 @@ return [
         'base' => rtrim(env('SHIPBLU_BASE_URL', 'https://api.shipblu.com'), '/'),
         'webhook_secret' => env('SHIPBLU_WEBHOOK_SECRET'),
     ],
+    'google_genai' => [
+        'api_key' => env('GOOGLE_API_KEY'),
+    ],
 
     'editor_url' => env('FRONT_END_EDITOR_URL'),
     'site_url' => env('FRONT_END_URL'),

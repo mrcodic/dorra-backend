@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Shared\General;
 use App\Enums\Product\UnitEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dimension\StoreDimensionRequest;
+use App\Models\Admin;
 use App\Models\Category;
 use App\Models\Product;
 use App\Repositories\Implementations\StationStatusRepository;
@@ -91,6 +92,9 @@ class MainController extends Controller
     public function removeMedia(Media $media)
     {
         if (empty($media->model_type) && empty($media->model_id)) {
+            $notAuth = request()->is('api/v1/admin/*');
+            $user = $notAuth ? Admin::first() : getAuthOrGuest();
+            abort_unless((int) $media->model->id === (int) $user->id, 403);
             $media->deleteQuietly();
         } else {
             $media->delete();

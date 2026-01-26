@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\User\Ai;
 use App\Enums\HttpEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Services\Ai\GenAiImageService;
 use App\Services\Wallet\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +23,7 @@ class CreditController extends Controller
         $walletBalance = $user->wallet?->balance ?? 0;
 
         $walletUsed = $user->wallet
-            ? (int) $user->wallet->walletTransactions()
+            ? (int)$user->wallet->walletTransactions()
                 ->where('type', 'debit')
                 ->sum('amount') * -1
             : 0;
@@ -40,6 +41,36 @@ class CreditController extends Controller
             'used_credits' => $freeUsed + $walletUsed,
             'available_credits' => $freeLeft + $walletBalance,
             'total_credits' => $freeLeft + $walletBalance + $freeUsed + $walletUsed,
+        ]);
+    }
+
+    public function generateImage(Request $request, GenAiImageService $genAiImageService)
+    {
+        $data = $request->validate([
+            'prompt' => ['required', 'string'],
+            'negative_prompt' => ['nullable', 'string'],
+        ]);
+
+        $apiKey = config('services.google_genai.api_key');
+        if (!$apiKey) {
+            return response()->json(['error' => ['Missing GOOGLE_API_KEY']], 500);
+        }
+
+
+        $res = $genAiImageService->generate($data['prompt'], $data['negative_prompt'] ?? null);
+
+        if (!$res['ok']) {
+            return Response::api(status: $res['status'], errors: [
+                'error' => [$res['error']]
+            ]);
+        }
+
+        return Response::api([
+            'images' => $res['images'],
+            'model' => $res['model'],
+            'usage' => $res['usage'],
+            'promptFeedback' => $res['promptFeedback'],
+            'arabicNote' => $res['arabicNote'],
         ]);
     }
 

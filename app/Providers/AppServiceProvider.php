@@ -4,14 +4,10 @@ namespace App\Providers;
 
 use App\Enums\HttpEnum;
 use App\Models\Admin;
-use App\Models\Product;
+use App\Services\Ai\GenAiImageService;
 use App\Services\SMS\SmsInterface;
 use App\Services\SMS\SmsMisrService;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Response;
@@ -34,6 +30,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->app->bind(GenAiImageService::class, function () {
+            $apiKey = config('services.google_genai.api_key');
+            return new GenAiImageService($apiKey);
+        });
         Fortify::authenticateUsing(function (Request $request) {
         $request->validate([
             'email'    => ['required','email'],
