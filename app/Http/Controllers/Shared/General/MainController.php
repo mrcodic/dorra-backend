@@ -105,6 +105,18 @@ class MainController extends Controller
         return Response::api();
     }
 
+    public function removeMediaFromDashboard(Media $media)
+    {
+        if (empty($media->model_type) && empty($media->model_id)) {
+            $media->deleteQuietly();
+        } else {
+            $media->delete();
+        }
+
+        return Response::api();
+    }
+
+
     public function mockups()
     {
         return Response::api(data: $this->mockupService->getMockups());
