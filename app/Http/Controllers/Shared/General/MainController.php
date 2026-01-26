@@ -31,7 +31,8 @@ use App\Http\Resources\{CategoryResource,
     TagResource,
     TeamResource,
     Template\TemplateResource,
-    Template\TypeResource};
+    Template\TypeResource
+};
 use App\Models\CountryCode;
 use App\Models\GlobalAsset;
 use App\Models\Type;
@@ -46,7 +47,8 @@ use App\Repositories\Interfaces\{CategoryRepositoryInterface,
     SocialLinkRepositoryInterface,
     StateRepositoryInterface,
     TemplateRepositoryInterface,
-    ZoneRepositoryInterface};
+    ZoneRepositoryInterface
+};
 use App\Services\CategoryService;
 use App\Services\DesignService;
 use App\Services\FolderService;
@@ -64,25 +66,25 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 class MainController extends Controller
 {
     public function __construct(
-        public CountryRepositoryInterface   $countryRepository,
-        public StateRepositoryInterface     $stateRepository,
-        public CategoryService              $categoryService,
-        public TagService                   $tagService,
-        public FlagService                  $flagService,
-        public DesignService                $designService,
-        public FolderService                $folderService,
-        public DimensionRepositoryInterface $dimensionRepository,
-        public TeamService                  $teamService,
-        public ProductRepositoryInterface   $productRepository,
-        public TemplateRepositoryInterface  $templateRepository,
-        public CategoryRepositoryInterface  $categoryRepository,
-        public StationStatusRepository      $stationStatusRepository,
-        public ZoneRepositoryInterface        $zoneRepository,
-        public SettingRepositoryInterface      $settingRepository,
-        public IndustryRepositoryInterface    $industryRepository,
+        public CountryRepositoryInterface    $countryRepository,
+        public StateRepositoryInterface      $stateRepository,
+        public CategoryService               $categoryService,
+        public TagService                    $tagService,
+        public FlagService                   $flagService,
+        public DesignService                 $designService,
+        public FolderService                 $folderService,
+        public DimensionRepositoryInterface  $dimensionRepository,
+        public TeamService                   $teamService,
+        public ProductRepositoryInterface    $productRepository,
+        public TemplateRepositoryInterface   $templateRepository,
+        public CategoryRepositoryInterface   $categoryRepository,
+        public StationStatusRepository       $stationStatusRepository,
+        public ZoneRepositoryInterface       $zoneRepository,
+        public SettingRepositoryInterface    $settingRepository,
+        public IndustryRepositoryInterface   $industryRepository,
         public SocialLinkRepositoryInterface $socialLinkRepository,
-        public MockupService $mockupService,
-        public FontService $fontService,
+        public MockupService                 $mockupService,
+        public FontService                   $fontService,
 
     )
     {
@@ -90,13 +92,11 @@ class MainController extends Controller
 
 
     public function removeMedia(Media $media)
-    {     $notAuth = request()->is('api/v1/admin/*');
+    {
+        $notAuth = request()->is('api/v1/admin/*');
         $user = $notAuth ? Admin::first() : getAuthOrGuest();
-        dd($media->model_id , (int) $user->id,$media->model_id,$media->model_type);
+        abort_unless((int)$media->model_id === (int)$user->id, 403);
         if (empty($media->model_type) && empty($media->model_id)) {
-
-
-            abort_unless((int) $media->model_id === (int) $user->id, 403);
             $media->deleteQuietly();
         } else {
             $media->delete();
@@ -113,11 +113,12 @@ class MainController extends Controller
 
     public function fonts()
     {
-        return Response::api(data: FontResource::collection($this->fontService->getAll(['fontStyles.media','fontStyles.font'],
-            true,perPage: request('per_page'))
+        return Response::api(data: FontResource::collection($this->fontService->getAll(['fontStyles.media', 'fontStyles.font'],
+            true, perPage: request('per_page'))
         )->response()->getData());
 
     }
+
     public function countries()
     {
         return Response::api(data: CountryResource::collection($this->countryRepository->all()));
@@ -127,6 +128,7 @@ class MainController extends Controller
     {
         return Response::api(data: StateResource::collection($this->stateRepository->getWithFilters()));
     }
+
     public function zones()
     {
         return Response::api(data: StateResource::collection($this->zoneRepository->getWithFilters()));
@@ -177,8 +179,8 @@ class MainController extends Controller
 
     public function addMedia(Request $request, $modelName = null, $model = null)
     {
-        $modelId = (int) $model;
-        $class   = 'App\\Models\\' . Str::studly($modelName);
+        $modelId = (int)$model;
+        $class = 'App\\Models\\' . Str::studly($modelName);
         $model = $modelName && $modelId ? $class::find($modelId) : null;
         $media = handleMediaUploads($request->allFiles(), $model, clearExisting: true);
         return Response::api(data: MediaResource::make($media));
