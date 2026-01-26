@@ -92,7 +92,7 @@ class MainController extends Controller
     public function removeMedia(Media $media)
     {     $notAuth = request()->is('api/v1/admin/*');
         $user = $notAuth ? Admin::first() : getAuthOrGuest();
-        dd($media->model_id === (int) $user->id);
+        dd($media->model_id , (int) $user->id,$media->model_id,$media->model_type);
         if (empty($media->model_type) && empty($media->model_id)) {
 
 
