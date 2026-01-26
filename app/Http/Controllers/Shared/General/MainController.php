@@ -94,6 +94,8 @@ class MainController extends Controller
         if (empty($media->model_type) && empty($media->model_id)) {
             $notAuth = request()->is('api/v1/admin/*');
             $user = $notAuth ? Admin::first() : getAuthOrGuest();
+            dd($media->model_id === (int) $user->id);
+            
             abort_unless((int) $media->model_id === (int) $user->id, 403);
             $media->deleteQuietly();
         } else {
