@@ -264,7 +264,7 @@
                                                         {{-- Mobile Image En Upload --}}
                                                         <label class="form-label mt-1">Mobile Image En</label>
                                                         <div class="dropzone mobile-dropzone"></div>
-                                                        <small class="text d-block mb-2">Recommended: 375×672 px, max 2
+                                                        <small class="text d-block mb-2">Recommended: 768*660 px, max 2
                                                             MB</small>
 
                                                         <div class="upload-wrapper">
@@ -285,7 +285,7 @@
                                                         {{-- Mobile Image Ar Upload --}}
                                                         <label class="form-label mt-1">Mobile Image Ar</label>
                                                         <div class="dropzone mobile-ar-dropzone"></div>
-                                                        <small class="text d-block mb-2">Recommended: 375×672 px, max 2
+                                                        <small class="text d-block mb-2">Recommended: 768*660 px, max 2
                                                             MB</small>
 
                                                         <div class="upload-wrapper">
