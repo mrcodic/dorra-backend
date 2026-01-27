@@ -75,7 +75,7 @@ class AuthService
         ));
 
 
-        $url = $request->query('url', '/Home');
+        $url = $request->query('url', 'Home');
         $nonce = Str::random(32);
         session(['oauth_nonce' => $nonce]);
 
@@ -144,8 +144,7 @@ class AuthService
             }
 
 
-            $redirectUrl = $state['url'] ? config('services.site_url').$state['url'] : (config('services.site_url') . 'Home');
-dd($redirectUrl, $state['url'],config('services.site_url') . 'Home');
+            $redirectUrl = config('services.site_url').$state['url'];
             $cookieValue = request()->cookie('dorra_auth_cookie_id') ?? ($state['cid'] ?? null);
 
             if ($cookieValue) {

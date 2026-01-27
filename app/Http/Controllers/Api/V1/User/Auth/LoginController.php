@@ -41,7 +41,6 @@ class LoginController extends Controller
         }
 
         $redirectUrl = $data['redirectUrl'] ?config('services.site_url').$data['redirectUrl']: 'fdfsfd';
-dd($redirectUrl, $data['redirectUrl']);
         return redirect()->away($redirectUrl)->withCookie(cookie(
             name: 'dorra_auth_token',
             value: $data['user']->token,
