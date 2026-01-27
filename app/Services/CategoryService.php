@@ -129,11 +129,18 @@ class CategoryService extends BaseService
                                         'collection_name' => 'categorySpecificationOptions',
                                     ]);
                             }
-                            if (isset($option['product_image_id'])) {
-                                Media::where('id', $option['product_image_id'])
-                                    ->update([
+                            if (!empty($option['product_image_id'])) {
+                                $media = Media::find($option['product_image_id']);
 
-                                    ]);
+                                if ($media) {
+                                    $custom = (array) ($media->custom_properties ?? []);
+                                    $custom['spec_option_id'] = $productOption->id;
+                                    $custom['specification_id'] = $productSpecification->id;
+                                    $custom['product_id'] = $product->id;
+
+                                    $media->custom_properties = $custom;
+                                    $media->save();
+                                }
                             }
                         });
                     }
