@@ -145,7 +145,7 @@ class AuthService
 
 
             $redirectUrl = $state['url'] ? config('services.site_url').$state['url'] : (config('services.site_url') . 'Home');
-dd($redirectUrl);
+dd($redirectUrl, $state['url'],config('services.site_url') . 'Home');
             $cookieValue = request()->cookie('dorra_auth_cookie_id') ?? ($state['cid'] ?? null);
 
             if ($cookieValue) {
