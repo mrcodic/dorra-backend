@@ -129,6 +129,12 @@ class CategoryService extends BaseService
                                         'collection_name' => 'categorySpecificationOptions',
                                     ]);
                             }
+                            if (isset($option['product_image_id'])) {
+                                Media::where('id', $option['product_image_id'])
+                                    ->update([
+
+                                    ]);
+                            }
                         });
                     }
 
