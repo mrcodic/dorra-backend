@@ -30,14 +30,14 @@ class LoginController extends Controller
 
     public function handleGoogleCallback(Request $request)
     {
-        $user = $this->authService->handleGoogleCallback();
-        if (!$user) {
+        $data = $this->authService->handleGoogleCallback();
+        if (!$data['user']) {
             return Response::api(HttpEnum::BAD_REQUEST, message: "Bad Request", errors: ['message' => 'something went wrong, please try again.']);
 
         }
-        return  redirect()->away(config('services.site_url').'Home')->withCookie(cookie(
+        return  redirect()->away($data['redirectUrl'] ?? config('services.site_url').'Home')->withCookie(cookie(
             name: 'dorra_auth_token',
-            value: $user->token,
+            value: $data['user']->token,
             minutes: 60 * 24 * 7,
             path: '/',
             domain: '.dorraprint.com',
