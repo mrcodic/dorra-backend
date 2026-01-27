@@ -40,7 +40,7 @@ class LoginController extends Controller
             );
         }
 
-        $redirectUrl = config('services.site_url').$data['redirectUrl'] ?? (config('services.site_url') . 'Home');
+        $redirectUrl = $data['redirectUrl'] ?config('services.site_url').$data['redirectUrl']: (config('services.site_url') . 'Home');
 
         return redirect()->away($redirectUrl)->withCookie(cookie(
             name: 'dorra_auth_token',
