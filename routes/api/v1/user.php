@@ -49,7 +49,7 @@ Route::prefix('password')->group(function () {
 
 Route::prefix('login')->controller(LoginController::class)->group(function () {
     Route::post('/', LoginController::class);
-    Route::get('/google', 'redirectToGoogle')->middleware(EnsureFrontendRequestsAreStateful::class);
+    Route::post('/google', 'redirectToGoogle')->middleware(EnsureFrontendRequestsAreStateful::class);
     Route::get('/google/callback', 'handleGoogleCallback')->middleware(EnsureFrontendRequestsAreStateful::class);
     Route::get('/apple/callback', 'appleCallback');
 });
