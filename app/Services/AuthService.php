@@ -76,7 +76,6 @@ class AuthService
 
 
         $url = $request->query('url', '/Home');
-dd($url);
         $nonce = Str::random(32);
         session(['oauth_nonce' => $nonce]);
 
