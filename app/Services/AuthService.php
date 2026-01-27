@@ -14,6 +14,7 @@ use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Traits\OtpTrait;
 use Exception;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -57,29 +58,60 @@ class AuthService
         return $user;
     }
 
-    public function redirectToGoogle()
+
+    public function redirectToGoogle(Request $request)
     {
-        $cookie = request()->cookie('dorra_auth_cookie_id') ?? (string) Str::uuid();
-        Cookie::queue(cookie('dorra_auth_cookie_id', $cookie, 60*24*30, '/', config('session.domain'), true, false, 'none'));
+        // cookie id (tracking / guest)
+        $cookieId = $request->cookie('dorra_auth_cookie_id') ?? (string) Str::uuid();
+
+        Cookie::queue(cookie(
+            name: 'dorra_auth_cookie_id',
+            value: $cookieId,
+            minutes: 60 * 24 * 30,
+            path: '/',
+            domain: config('session.domain'),
+            secure: true,
+            httpOnly: false,
+            sameSite: 'None'
+        ));
+
+
+        $url = $request->query('url', '/Home');
+
+        $nonce = Str::random(32);
+        session(['oauth_nonce' => $nonce]);
+
+        $statePayload = [
+            'cid'   => $cookieId,
+            'url'   => $url,
+            'nonce' => $nonce,
+            'ts'    => time(),
+        ];
+
+        $state = rtrim(
+            strtr(base64_encode(json_encode($statePayload, JSON_UNESCAPED_SLASHES)), '+/', '-_'),
+            '='
+        );
 
         return Socialite::driver('google')
             ->stateless()
-            ->with(['state' => base64_encode($cookie)])
+            ->with(['state' => $state])
             ->redirect();
-
-//        return Socialite::driver('google')->stateless()->redirect();
     }
 
-    public function handleGoogleCallback(): false|User|null
+
+
+    public function handleGoogleCallback(): array|false
     {
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
-            $user = $this->userRepository->findByEmail($googleUser->getEmail());
 
-            $nameParts = explode(' ', $googleUser->getName());
-            $firstName = $nameParts[0] ?? '';
-            $lastName = $nameParts[1] ?? '';
             $email = $googleUser->getEmail();
+            $user  = $this->userRepository->findByEmail($email);
+
+            $nameParts = preg_split('/\s+/', trim((string) $googleUser->getName()));
+            $firstName = $nameParts[0] ?? '';
+            $lastName  = $nameParts[1] ?? '';
 
             if (!$user) {
                 $user = $this->userRepository->create([
@@ -104,17 +136,56 @@ class AuthService
             $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(10))->plainTextToken;
             $user->token = $plainTextToken;
 
-            $stateCookie = request('state') ? base64_decode(request('state')) : null;
-            $cookieValue = request()->cookie('dorra_auth_cookie_id') ?? $stateCookie;
 
-            $this->migrateGuestDataToUser($user, $cookieValue);
+            $state = $this->decodeState(request('state'));
 
-            return $user;
+
+            $expectedNonce = session('oauth_nonce');
+            if ($state && !empty($state['nonce']) && $expectedNonce && $state['nonce'] !== $expectedNonce) {
+                throw new \RuntimeException('Invalid oauth state nonce');
+            }
+
+
+            $redirectUrl = $state['url'] ?? (config('services.site_url') . 'Home');
+
+            $cookieValue = request()->cookie('dorra_auth_cookie_id') ?? ($state['cid'] ?? null);
+
+            if ($cookieValue) {
+                $this->migrateGuestDataToUser($user, $cookieValue);
+            }
+
+            session()->forget('oauth_nonce');
+
+            return [
+                'user' => $user,
+                'redirectUrl' => $redirectUrl,
+            ];
+
         } catch (Exception $exception) {
             Log::error($exception->getMessage());
             return false;
         }
     }
+    private function decodeState(?string $state): ?array
+    {
+        if (!$state) return null;
+
+        try {
+            // base64url -> base64
+            $b64 = strtr($state, '-_', '+/');
+            $pad = strlen($b64) % 4;
+            if ($pad) $b64 .= str_repeat('=', 4 - $pad);
+
+            $json = base64_decode($b64, true);
+            if ($json === false) return null;
+
+            $data = json_decode($json, true);
+            return is_array($data) ? $data : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
 
     public function login($validatedData): ?User
     {

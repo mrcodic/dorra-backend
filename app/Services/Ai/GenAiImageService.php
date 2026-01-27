@@ -226,4 +226,23 @@ class GenAiImageService
     {
         Cache::put($this->breakerKey($model), 1, $this->breakerTtlSec);
     }
+// داخل GenAiImageService
+    public function estimateTokens(string $prompt, ?string $negativePrompt = null, int $outputImages = 1, bool $hasInputImage = false): int
+    {
+        $text = trim($prompt) . "\n" . trim((string)$negativePrompt);
+
+        // rough text estimate: ~1 token لكل 4 chars (تقريب)
+        $textTokens = (int)ceil(mb_strlen($text) / 4);
+
+        $inputImageTokens  = $hasInputImage ? 560 : 0;        // لو عندك input image
+        $outputImageTokens = 1120 * $outputImages;            // 1024x1024
+
+        // + margin buffer (اختياري) عشان التقدير مايبقاش أقل بزيادة
+        $buffer = 100;
+
+        return $textTokens + $inputImageTokens + $outputImageTokens + $buffer;
+    }
+
+
+
 }

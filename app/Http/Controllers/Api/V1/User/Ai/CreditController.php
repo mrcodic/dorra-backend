@@ -51,18 +51,105 @@ class CreditController extends Controller
             'negative_prompt' => ['nullable', 'string'],
         ]);
 
-        $apiKey = config('services.google_genai.api_key');
-        if (!$apiKey) {
-            return response()->json(['error' => ['Missing GOOGLE_API_KEY']], 500);
+        $user = $request->user();
+
+        $tokensPerCredit = (int) Setting::where('key', 'tokens_per_credit')->value('value');
+        $freeLimit       = (int) Setting::where('key', 'free_credits_limit')->value('value');
+
+        // 1) Estimate tokens BEFORE calling Gemini
+        $estimatedTokens = $genAiImageService->estimateTokens(
+            $data['prompt'],
+            $data['negative_prompt'] ?? null,
+            outputImages: 1,
+            hasInputImage: false
+        );
+
+        $estimatedCredits = (int) ceil($estimatedTokens / max(1, $tokensPerCredit));
+
+        // 2) Reserve/Deduct credits atomically
+        $reserved = ['free' => 0, 'wallet' => 0];
+
+        DB::beginTransaction();
+        try {
+            // lock user row
+            $lockedUser = $user->newQuery()->lockForUpdate()->findOrFail($user->id);
+
+            // lock wallet row (لو wallet ممكن تكون null اعمل create/ensure)
+            $wallet = $lockedUser->wallet()->lockForUpdate()->first();
+            $walletBalance = $wallet?->balance ?? 0;
+
+            $freeLeft = max(0, $freeLimit - (int)$lockedUser->free_credits_used);
+
+            if ($freeLeft + $walletBalance < $estimatedCredits) {
+                DB::rollBack();
+                return Response::api(HttpEnum::PAYMENT_REQUIRED, "Insufficient credits", errors: [
+                    "payment" => "Insufficient credits"
+                ]);
+            }
+
+            // consume free first
+            if ($freeLeft > 0) {
+                $useFree = min($freeLeft, $estimatedCredits);
+                $lockedUser->increment('free_credits_used', $useFree);
+                $reserved['free'] = $useFree;
+                $estimatedCredits -= $useFree;
+            }
+
+            // then wallet
+            if ($estimatedCredits > 0) {
+                WalletService::debit($lockedUser, $estimatedCredits, 'image_generation');
+                $reserved['wallet'] = $estimatedCredits;
+            }
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw $e;
         }
 
-
+        // 3) Call Gemini بعد ما ضمنّا الخصم
         $res = $genAiImageService->generate($data['prompt'], $data['negative_prompt'] ?? null);
 
+        // 4) لو فشل: Refund
         if (!$res['ok']) {
+            DB::transaction(function () use ($user, $reserved) {
+                $lockedUser = $user->newQuery()->lockForUpdate()->findOrFail($user->id);
+
+                if ($reserved['free'] > 0) {
+                    // رجّع free_credits_used
+                    $lockedUser->decrement('free_credits_used', $reserved['free']);
+                }
+                if ($reserved['wallet'] > 0) {
+                    // لازم يكون عندك credit/reversal
+                    WalletService::credit($lockedUser, $reserved['wallet'], 'image_generation_refund');
+                }
+            });
+
             return Response::api(status: $res['status'], errors: [
                 'error' => [$res['error']]
             ]);
+        }
+
+        // 5) Reconcile with actual usage (لو متاح)
+        $actualTokens = (int) data_get($res, 'usage.totalTokenCount', 0);
+        if ($actualTokens > 0) {
+            $actualCredits = (int) ceil($actualTokens / max(1, $tokensPerCredit));
+            $reservedTotal = $reserved['free'] + $reserved['wallet'];
+
+            if ($actualCredits < $reservedTotal) {
+                $refund = $reservedTotal - $actualCredits;
+
+                DB::transaction(function () use ($user, $refund, $freeLimit) {
+                    $lockedUser = $user->newQuery()->lockForUpdate()->findOrFail($user->id);
+
+                    // رجّع للـ wallet أولاً (أسهل في الإدارة)
+                    WalletService::credit($lockedUser, $refund, 'image_generation_refund_adjust');
+                });
+            }
+
+            // لو actualCredits > reservedTotal:
+            // - يا إما تخصم الفرق (لو متاح)
+            // - يا إما تعتبره buffer وتسيبه (أنا أنصح تخصم الفرق لو متاح)
         }
 
         return Response::api([
