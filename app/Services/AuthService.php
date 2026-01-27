@@ -143,7 +143,7 @@ class AuthService
             if ($state && !empty($state['nonce']) && $expectedNonce && $state['nonce'] !== $expectedNonce) {
                 throw new \RuntimeException('Invalid oauth state nonce');
             }
-
+dd($state['url'],$state);
 
             $redirectUrl = $state['url'] ?? (config('services.site_url') . 'Home');
 
