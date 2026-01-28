@@ -30,6 +30,12 @@ class CategoryResource extends JsonResource
             'main_image' => $this->whenLoaded('media', function () {
                 return MediaResource::make($this->getFirstMedia('categories'));
             }),
+            'mobile_banner' => $this->whenLoaded('media', function () {
+                return MediaResource::make($this->getFirstMedia('mobile_banner'));
+            }),
+            'website_banner' => $this->whenLoaded('media', function () {
+                return MediaResource::make($this->getFirstMedia('website_banner'));
+            }),
             'all_product_images' => $this->whenLoaded('media', function () {
                 return MediaResource::collection($this->getMedia('category_extra_images'));
             }),
