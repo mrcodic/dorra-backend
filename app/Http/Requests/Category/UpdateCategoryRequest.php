@@ -42,6 +42,8 @@ class UpdateCategoryRequest extends BaseRequest
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
             'image_id' => ['nullable', 'exists:media,id'],
+            'website_banner_id' => ['required', 'exists:media,id'],
+            'mobile_banner_id' => ['required', 'exists:media,id'],
             'has_mockup' => ['required', 'boolean'],
         ];
     }

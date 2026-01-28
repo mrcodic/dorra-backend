@@ -73,6 +73,24 @@ class CategoryService extends BaseService
                     'collection_name' => 'categories',
                 ]);
         }
+        if (isset($validatedData['image_id'])) {
+            Media::where('id', $validatedData['image_id'])
+                ->update([
+                    'model_type' => get_class($product),
+                    'model_id' => $product->id,
+                    'collection_name' => 'product_main_image',
+                ]);
+
+        }
+        if (isset($validatedData['mobile_banner_id'])) {
+            Media::where('id', $validatedData['mobile_banner_id'])
+                ->update([
+                    'model_type' => get_class($product),
+                    'model_id' => $product->id,
+                    'collection_name' => 'mobile_banner',
+                ]);
+
+        }
         return $model->load($relationsToLoad);
     }
 
@@ -367,6 +385,26 @@ class CategoryService extends BaseService
                     'collection_name' => 'categories',
                 ]);
         }
+        if (Arr::has($validatedData, 'mobile_banner_id') && !is_null($validatedData['mobile_banner_id'])) {
+            $model->clearMediaCollection('mobile_banner');
+
+            Media::where('id', $validatedData['mobile_banner_id'])
+                ->update([
+                    'model_type' => get_class($model),
+                    'model_id' => $model->id,
+                    'collection_name' => 'mobile_banner',
+                ]);
+        }
+        if (Arr::has($validatedData, 'website_banner_id') && !is_null($validatedData['website_banner_id'])) {
+            $model->clearMediaCollection('website_banner');
+            Media::where('id', $validatedData['website_banner_id'])
+                ->update([
+                    'model_type' => get_class($model),
+                    'model_id' => $model->id,
+                    'collection_name' => 'website_banner',
+                ]);
+        }
+
         if (Arr::has($validatedData, 'sub_image_id') && !is_null($validatedData['sub_image_id'])) {
             $model->clearMediaCollection('categories');
             Media::where('id', $validatedData['sub_image_id'])
