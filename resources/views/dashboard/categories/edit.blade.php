@@ -176,6 +176,56 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-2">
+                                                <label class="form-label label-text" for="website-image-banner-dropzone">
+                                                    Category Banner (Website) <span
+                                                        style="color: red; font-size: 20px;">*</span>
+                                                </label>
+
+                                                <!-- Dropzone Container -->
+                                                <div id="website-image-banner-dropzone" class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
+                                                    <div class="dz-message" data-dz-message>
+                                                        <span>Drop image here or click to upload</span>
+                                                    </div>
+                                                </div>
+
+
+                                                <span class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 1920×520 px
+                                            </span>
+                                                <!-- ✅ Hidden input outside Dropzone -->
+                                                <input type="hidden" name="website_banner_id" id="uploadedImageWebsiteBanner"
+                                                       value="{{ $model->getFirstMedia('website_banner')?->id ?? '' }}">
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-2">
+                                                <label class="form-label label-text" for="mobile-image-banner-dropzone">
+                                                    Category Banner (Mobile) <span
+                                                        style="color: red; font-size: 20px;">*</span>
+                                                </label>
+
+                                                <!-- Dropzone Container -->
+                                                <div id="mobile-image-banner-dropzone" class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
+                                                    <div class="dz-message" data-dz-message>
+                                                        <span>Drop image here or click to upload</span>
+                                                    </div>
+                                                </div>
+
+
+                                                <span class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 375*504 px
+                                            </span>
+                                                <!-- ✅ Hidden input outside Dropzone -->
+                                                <input type="hidden" name="mobile_banner_id" id="uploadedImageMobileBanner"
+                                                       value="{{ $model->getFirstMedia('mobile_banner')?->id ?? '' }}">
+
+                                            </div>
+                                        </div>
                                         {{-- Product Colors --}}
                                         {{--                                        <div class="col-md-12">--}}
                                         {{--                                            <div class="mb-2">--}}
@@ -926,6 +976,115 @@
 
     {{--        });--}}
     {{--    </script>--}}
+    <script>
+        Dropzone.autoDiscover = false;
+
+
+        const websiteDropzone = new Dropzone("#website-image-banner-dropzone", {
+            url: "{{ route('media.store') }}",
+            paramName: "file",
+            maxFiles: 1,
+            maxFilesize: 1, // MB
+            acceptedFiles: "image/*",
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            addRemoveLinks: true,
+            dictDefaultMessage: "Drop image here or click to upload",
+            init: function () {
+                let dz = this;
+
+                // ✅ Show existing image if editing
+                @if(!empty($media = $model->getFirstMedia('website_banner')))
+                let websiteMockFile = {
+                    name: "{{ $media->file_name }}",
+                    size: {{ $media->size ?? 12345 }},
+                    _hiddenInputId: "{{ $media->id }}"
+                };
+
+                dz.emit("addedfile", websiteMockFile);
+                dz.emit("thumbnail", websiteMockFile, "{{ $media->getUrl() }}");
+                dz.emit("complete", websiteMockFile);
+                dz.files.push(websiteMockFile);
+                @endif
+
+                dz.on("success", function (file, response) {
+                    if (response?.data?.id) {
+                        file._hiddenInputId = response.data.id;
+                        document.getElementById("uploadedImageWebsiteBanner").value = response.data.id;
+                    }
+                });
+
+                dz.on("removedfile", function (file) {
+                    if (file._hiddenInputId) {
+                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                            method: "DELETE",
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+                        let hiddenInput = document.getElementById("uploadedImageWebsiteBanner");
+                        if (hiddenInput.value == file._hiddenInputId) {
+                            hiddenInput.value = "";
+                        }
+                    }
+                });
+            }
+        });
+        const mobileDropzone = new Dropzone("#mobile-image-banner-dropzone", {
+            url: "{{ route('media.store') }}",
+            paramName: "file",
+            maxFiles: 1,
+            maxFilesize: 1, // MB
+            acceptedFiles: "image/*",
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            addRemoveLinks: true,
+            dictDefaultMessage: "Drop image here or click to upload",
+            init: function () {
+                let dz = this;
+
+                // ✅ Show existing image if editing
+                @if(!empty($media = $model->getFirstMedia('mobile_banner')))
+                let mobileMockFile = {
+                    name: "{{ $media->file_name }}",
+                    size: {{ $media->size ?? 12345 }},
+                    _hiddenInputId: "{{ $media->id }}"
+                };
+
+                dz.emit("addedfile", mobileMockFile);
+                dz.emit("thumbnail", mobileMockFile, "{{ $media->getUrl() }}");
+                dz.emit("complete", mobileMockFile);
+                dz.files.push(mobileMockFile);
+                @endif
+
+                dz.on("success", function (file, response) {
+                    if (response?.data?.id) {
+                        file._hiddenInputId = response.data.id;
+                        document.getElementById("uploadedImageMobileBanner").value = response.data.id;
+                    }
+                });
+
+                dz.on("removedfile", function (file) {
+                    if (file._hiddenInputId) {
+                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                            method: "DELETE",
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+                        let hiddenInput = document.getElementById("uploadedImageMobileBanner");
+                        if (hiddenInput.value == file._hiddenInputId) {
+                            hiddenInput.value = "";
+                        }
+                    }
+                });
+            }
+        });
+
+
+    </script>
     <script>
         $(document).ready(function () {
             var $outerRepeater = $('.outer-repeater');
