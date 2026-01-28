@@ -1089,7 +1089,7 @@
         console.log(jQuery.fn.jquery);
 
         $(document).ready(function () {
-            refreshAllOptionImageSelects();
+
             const form = $("#category-form");
             let currentStep = 0;
 
