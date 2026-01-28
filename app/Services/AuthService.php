@@ -190,8 +190,8 @@ class AuthService
         $user->update(['last_login_at' => now()]);
 
         $expiresAt = ($validatedData['remember'] ?? false)
-            ? now()->addDays(30)
-            : now()->addHours(10);
+            ? now()->addDays(60)
+            : now()->addDays(30);
 
         $plainTextToken = $user->createToken($user->email, expiresAt: $expiresAt)->plainTextToken;
         $user->token = $plainTextToken;
