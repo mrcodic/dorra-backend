@@ -26,6 +26,58 @@
                         <span class="image-hint small">
                             Max size: 1MB | Dimensions: 512x512 px
                         </span>
+                    <div class="row my-1">
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <label class="form-label label-text" for="edit-website-image-banner-dropzone">
+                                    Category Banner (Website) <span
+                                        style="color: red; font-size: 20px;">*</span>
+                                </label>
+
+                                <!-- Dropzone Container -->
+                                <div id="edit-website-image-banner-dropzone" class="dropzone border rounded p-3"
+                                     style="cursor:pointer; min-height:150px;">
+                                    <div class="dz-message" data-dz-message>
+                                        <span>Drop image here or click to upload</span>
+                                    </div>
+                                </div>
+
+
+                                <span class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 1920×520 px
+                                            </span>
+                                <!-- ✅ Hidden input outside Dropzone -->
+                                <input type="hidden" name="website_banner_id" id="editUploadedImageWebsiteBanner"
+                                      >
+
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <label class="form-label label-text" for="edit-mobile-image-banner-dropzone">
+                                    Category Banner (Mobile) <span
+                                        style="color: red; font-size: 20px;">*</span>
+                                </label>
+
+                                <!-- Dropzone Container -->
+                                <div id="edit-mobile-image-banner-dropzone" class="dropzone border rounded p-3"
+                                     style="cursor:pointer; min-height:150px;">
+                                    <div class="dz-message" data-dz-message>
+                                        <span>Drop image here or click to upload</span>
+                                    </div>
+                                </div>
+
+
+                                <span class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 375*504 px
+                                            </span>
+                                <!-- ✅ Hidden input outside Dropzone -->
+                                <input type="hidden" name="mobile_banner_id" id="editUploadedImageMobileBanner"
+                                       >
+
+                            </div>
+                        </div>
+                    </div>
 
                         <!-- Upload Progress -->
                         <div id="edit-upload-progress" class="progress mt-2 d-none w-50">
@@ -133,6 +185,88 @@
             // On remove -> clear hidden input
 
         },
+    });
+
+</script>
+<script>
+    Dropzone.autoDiscover = false;
+
+    const editWebsiteDropzone = new Dropzone("#edit-website-image-banner-dropzone", {
+        url: "{{ route('media.store') }}",
+        paramName: "file",
+        maxFiles: 1,
+        maxFilesize: 1,
+        acceptedFiles: "image/*",
+        headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
+        addRemoveLinks: true,
+        init: function () {
+            this.on("success", function (file, response) {
+                if (response.success && response.data) {
+                    file._hiddenInputId = response.data.id;
+                    document.getElementById("editUploadedImageWebsiteBanner").value = response.data.id;
+
+                }
+            });
+
+            this.on("removedfile", function (file) {
+                document.getElementById("editUploadedImageWebsiteBanner").value = "";
+                if (file._hiddenInputId) {
+                    fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                        method: "DELETE",
+                        headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content}
+                    });
+                }
+                document.getElementById("uploaded-image-main").classList.add("d-none");
+            });
+        }
+    });
+
+    // Manual remove
+    document.getElementById("remove-image-main").addEventListener("click", function () {
+        editWebsiteDropzone.removeAllFiles(true);
+        document.getElementById("uploadedImageMain").value = "";
+        document.getElementById("uploaded-image-main").classList.add("d-none");
+    });
+
+</script>
+<script>
+    Dropzone.autoDiscover = false;
+
+    const mobileDropzone = new Dropzone("#edit-mobile-image-banner-dropzone", {
+        url: "{{ route('media.store') }}",
+        paramName: "file",
+        maxFiles: 1,
+        maxFilesize: 1,
+        acceptedFiles: "image/*",
+        headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
+        addRemoveLinks: true,
+        init: function () {
+            this.on("success", function (file, response) {
+                if (response.success && response.data) {
+                    file._hiddenInputId = response.data.id;
+                    document.getElementById("editUploadedImageMobileBanner").value = response.data.id;
+
+                }
+            });
+
+            this.on("removedfile", function (file) {
+                document.getElementById("editUploadedImageMobileBanner").value = "";
+                if (file._hiddenInputId) {
+                    fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                        method: "DELETE",
+                        headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content}
+                    });
+                }
+                document.getElementById("uploaded-image-main").classList.add("d-none");
+            });
+        }
+    });
+
+    // Manual remove
+    document.getElementById("remove-image-main").addEventListener("click", function () {
+        mobileDropzone.removeAllFiles(true);
+        document.getElementById("uploadedImageMain").value = "";
+        document.getElementById("uploaded-image-main").classList.add("d-none");
     });
 
 </script>

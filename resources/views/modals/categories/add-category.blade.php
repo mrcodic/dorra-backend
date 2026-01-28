@@ -27,10 +27,11 @@
                     <span class="image-hint small text-end">
                         Max size: 1MB | Dimensions: 512x512 px
                     </span>
+                    <div class="row my-1">
                     <div class="col-md-6">
                         <div class="mb-2">
                             <label class="form-label label-text" for="website-image-banner-dropzone">
-                                Category Banner (Website) <span
+                                Product Banner (Website) <span
                                     style="color: red; font-size: 20px;">*</span>
                             </label>
 
@@ -54,7 +55,7 @@
                     <div class="col-md-6">
                         <div class="mb-2">
                             <label class="form-label label-text" for="mobile-image-banner-dropzone">
-                                Category Banner (Mobile) <span
+                                Product Banner (Mobile) <span
                                     style="color: red; font-size: 20px;">*</span>
                             </label>
 
@@ -74,6 +75,7 @@
                             <input type="hidden" name="mobile_banner_id" id="uploadedImageMobileBanner">
 
                         </div>
+                    </div>
                     </div>
                     <!-- Name in Arabic and English -->
                     <div class="row my-1">
