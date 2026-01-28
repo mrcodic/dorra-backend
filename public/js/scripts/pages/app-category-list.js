@@ -121,7 +121,7 @@ const dt_user_table = $(".category-list-table").DataTable({
 data-mobile_image="${row.mobile_banner}"
 data-website_image_id="${row.website_banner_id}"
 data-mobile_image_id="${row.mobile_banner_id}"
-   data-image_id="${row.mobileImageId}"
+   data-image_id="${row.imageId}"
    data-description_en="${row.description_en}"
    data-description_ar="${row.description_ar}"
    data-subcategories="${row.children.map(child => child.name)}"
