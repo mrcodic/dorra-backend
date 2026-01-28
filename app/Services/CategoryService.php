@@ -149,6 +149,25 @@ class CategoryService extends BaseService
                         'collection_name' => 'category_model_image',
                     ]);
             }
+            if (isset($validatedData['website_banner_id'])) {
+
+                Media::where('id', $validatedData['website_banner_id'])
+                    ->update([
+                        'model_type' => get_class($product),
+                        'model_id' => $product->id,
+                        'collection_name' => 'website_banner',
+                    ]);
+            }
+            if (isset($validatedData['mobile_banner_id'])) {
+
+                Media::where('id', $validatedData['mobile_banner_id'])
+                    ->update([
+                        'model_type' => get_class($product),
+                        'model_id' => $product->id,
+                        'collection_name' => 'mobile_banner',
+                    ]);
+
+            }
             if (isset($validatedData['images_ids'])) {
                 collect($validatedData['images_ids'])->each(function ($imageId) use ($product) {
                     Media::where('id', $imageId)
@@ -311,15 +330,7 @@ class CategoryService extends BaseService
                     ]);
 
             }
-            if (isset($validatedData['website_banner_id'])) {
 
-                Media::where('id', $validatedData['website_banner_id'])
-                    ->update([
-                        'model_type' => get_class($product),
-                        'model_id' => $product->id,
-                        'collection_name' => 'website_banner',
-                    ]);
-            }
             if (isset($validatedData['images_ids'])) {
                 collect($validatedData['images_ids'])->each(function ($imageId) use ($product) {
                     Media::where('id', $imageId)
