@@ -120,7 +120,7 @@ class IndustryService extends BaseService
 
         $relation = $typeToRelation[$industriableType] ?? null;
 
-        return $this->repository->query()
+        $query = $this->repository->query()
             ->whereNull('parent_id')
 
             ->whereHas('templates', function ($tq) use ($industriableId, $relation) {
@@ -130,32 +130,71 @@ class IndustryService extends BaseService
                 }
             })
 
+            // ✅ count لكل parent فقط (مش مجموع children)
             ->withCount([
                 'templates as templates_count' => function ($tq) use ($industriableId, $relation) {
                     if ($relation && $industriableId) {
-                        $tq->whereStatus(StatusEnum::LIVE)->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
+                        $tq->whereStatus(StatusEnum::LIVE)
+                            ->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
                     }
                 }
             ])
 
+            // ✅ مهم: نحمّل IDs للـ templates (parent + children) عشان نعمل unique count
             ->with([
+                'templates' => function ($tq) use ($industriableId, $relation) {
+                    $tq->select('templates.id')
+                        ->whereStatus(StatusEnum::LIVE)
+                        ->when($relation && $industriableId, function ($qq) use ($relation, $industriableId) {
+                            $qq->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
+                        });
+                },
+
                 'children' => function ($q) use ($industriableId, $relation) {
                     $q->whereHas('templates', function ($tq) use ($industriableId, $relation) {
                         if ($relation && $industriableId) {
-                            $tq->whereStatus(StatusEnum::LIVE)->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
+                            $tq->whereStatus(StatusEnum::LIVE)
+                                ->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
                         }
-                    })->withCount([
-                        'templates as templates_count' => function ($tq) use ($industriableId, $relation) {
-                            if ($relation && $industriableId) {
-                                $tq->whereStatus(StatusEnum::LIVE)->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
+                    })
+                        ->withCount([
+                            'templates as templates_count' => function ($tq) use ($industriableId, $relation) {
+                                if ($relation && $industriableId) {
+                                    $tq->whereStatus(StatusEnum::LIVE)
+                                        ->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
+                                }
                             }
-                        }
-                    ]);
+                        ])
+                        // ✅ تحميل IDs للـ templates الخاصة بالأطفال
+                        ->with([
+                            'templates' => function ($tq) use ($industriableId, $relation) {
+                                $tq->select('templates.id')
+                                    ->whereStatus(StatusEnum::LIVE)
+                                    ->when($relation && $industriableId, function ($qq) use ($relation, $industriableId) {
+                                        $qq->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
+                                    });
+                            }
+                        ]);
                 }
             ])
+            ->latest();
 
-            ->latest()
-            ->get();
+        $industries = $query->get();
+
+        // ✅ unique across parent + children (بدون تكرار)
+        $industries->each(function ($industry) {
+            $parentIds = $industry->templates?->pluck('id') ?? collect();
+
+            $childrenIds = $industry->children
+                ->flatMap(fn ($child) => $child->templates?->pluck('id') ?? collect());
+
+            $industry->unique_templates_count = $parentIds
+                ->merge($childrenIds)
+                ->unique()
+                ->count();
+        });
+
+        return $industries;
     }
 
     public function getSubIndustries($request)
