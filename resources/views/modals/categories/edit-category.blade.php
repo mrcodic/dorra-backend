@@ -232,7 +232,7 @@
 <script>
     Dropzone.autoDiscover = false;
 
-    const mobileDropzone = new Dropzone("#edit-mobile-image-banner-dropzone", {
+    const editMobileDropzone = new Dropzone("#edit-mobile-image-banner-dropzone", {
         url: "{{ route('media.store') }}",
         paramName: "file",
         maxFiles: 1,
@@ -264,7 +264,7 @@
 
     // Manual remove
     document.getElementById("remove-image-main").addEventListener("click", function () {
-        mobileDropzone.removeAllFiles(true);
+        editMobileDropzone.removeAllFiles(true);
         document.getElementById("uploadedImageMain").value = "";
         document.getElementById("uploaded-image-main").classList.add("d-none");
     });
