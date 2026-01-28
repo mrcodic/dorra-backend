@@ -96,6 +96,7 @@ class UpdateProductWithoutCategoryRequest extends BaseRequest
             'specifications.*.specification_options.*.value_ar' => 'required_with:specifications|string',
             'specifications.*.specification_options.*.price' => 'nullable|numeric|min:1',
             'specifications.*.specification_options.*.option_image' => ['nullable', 'exists:media,id'],
+            'specifications.*.specification_options.*.product_image_id' => ['nullable', 'exists:media,id'],
             'dimensions'=>['required_without:custom_dimensions', 'array'],
             'dimensions.*' =>['sometimes', 'integer', 'exists:dimensions,id'],
             'custom_dimensions'=>['required_without:dimensions', 'array'],

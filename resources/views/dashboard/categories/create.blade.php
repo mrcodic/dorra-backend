@@ -873,22 +873,37 @@
         function refreshAllOptionImageSelects() {
             const images = window.__PRODUCT_IMAGES__ || [];
 
-            document.querySelectorAll('.option-image-from-product').forEach(select => {
-                const current = select.value; // keep selection if possible
-                // rebuild options
-                select.innerHTML = `<option value="">— Select image —</option>` + images.map(img =>
-                    `<option value="${img.id}" data-img="${img.url}">${img.name}</option>`
-                ).join('');
+            // collect current selections per select
+            const selects = Array.from(document.querySelectorAll('.option-image-from-product'));
 
-                // restore
+            // selected image ids in all selects
+            const picked = new Set(
+                selects.map(s => s.value).filter(v => v)
+            );
+
+            selects.forEach(select => {
+                const current = select.value; // keep current selection visible in its own select
+
+                select.innerHTML =
+                    `<option value="">— Select image —</option>` +
+                    images
+                        .filter(img => {
+                            // hide if picked by another select
+                            if (!img.id) return true;
+                            if (img.id == current) return true;        // keep my selected
+                            return !picked.has(String(img.id));        // hide if selected elsewhere
+                        })
+                        .map(img => `<option value="${img.id}" data-img="${img.url}">${img.name}</option>`)
+                        .join('');
+
+                // restore current selection if still exists
                 if (current) select.value = current;
             });
 
-            // re-init select2 with thumbnails (idempotent-ish)
+            // re-init select2 safely
             if (window.$ && $.fn.select2) {
                 $('.option-image-from-product').each(function () {
-                    // destroy if already initialized
-                    // if ($(this).data('select2')) $(this).select2('destroy');
+                    if ($(this).data('select2')) $(this).select2('destroy');
 
                     $(this).select2({
                         width: '100%',
@@ -896,22 +911,21 @@
                             if (!opt.id) return opt.text;
                             const url = $(opt.element).data('img');
                             if (!url) return opt.text;
-                            const $el = $(
+                            return $(
                                 `<span style="display:flex;align-items:center;gap:8px;">
               <img src="${url}" style="width:32px;height:32px;object-fit:cover;border-radius:6px;" />
               <span>${opt.text}</span>
             </span>`
                             );
-                            return $el;
                         },
                         templateSelection: function (opt) {
-                            if (!opt.id) return opt.text;
                             return opt.text;
                         }
                     });
                 });
             }
         }
+
 
         // when user selects image -> set hidden input
         document.addEventListener('change', function (e) {
@@ -923,6 +937,7 @@
 
             const hidden = wrapper.querySelector('.option-product-image-id');
             if (hidden) hidden.value = sel.value || '';
+            refreshAllOptionImageSelects();
         });
 
         function initOptionDropzones() {

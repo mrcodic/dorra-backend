@@ -109,15 +109,51 @@ class IndustryService extends BaseService
 
     public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10, $counts = [])
     {
+        $industriableId   = request('industriable_id');
+        $industriableType = request('industriable_type');
+
+        $typeToRelation = [
+            'product'  => 'products',
+            'category' => 'categories',
+        ];
+
+        $relation = $typeToRelation[$industriableType] ?? null;
+
         return $this->repository->query()
-                ->with([
-                    'children' => function ($q) {
-                        $q->withCount('templates');
-                    }
-                ])
-            ->withCount(['templates'])
             ->whereNull('parent_id')
-           ->latest()->get();
+
+            ->whereHas('templates', function ($tq) use ($industriableId, $relation) {
+                if ($relation && $industriableId) {
+                    $tq->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
+                }
+            })
+
+            ->withCount([
+                'templates as templates_count' => function ($tq) use ($industriableId, $relation) {
+                    if ($relation && $industriableId) {
+                        $tq->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
+                    }
+                }
+            ])
+
+            ->with([
+                'children' => function ($q) use ($industriableId, $relation) {
+                    $q->whereHas('templates', function ($tq) use ($industriableId, $relation) {
+                        if ($relation && $industriableId) {
+                            $tq->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
+                        }
+                    })->withCount([
+                        'templates as templates_count' => function ($tq) use ($industriableId, $relation) {
+                            if ($relation && $industriableId) {
+                                $tq->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
+                            }
+                        }
+                    ]);
+                }
+            ])
+
+            ->latest()
+            ->get();
     }
 
     public function getSubIndustries($request)

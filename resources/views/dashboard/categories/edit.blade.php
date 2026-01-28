@@ -722,7 +722,8 @@
                                                                                                 @if($model->getMedia('category_extra_images')->isNotEmpty())
                                                                                                     @foreach($model->getMedia('category_extra_images') as $media)
                                                                                                         <option
-                                                                                                            value="{{  $media->id }}" @selected($media->custom_properties['spec_option_id'])>{{  $media->file_name }}</option>
+                                                                                                            value="{{  $media->id }}" @selected(($media->getCustomProperty('spec_option_id') ?? null) == $option->id)>{{  $media->file_name }}
+                                                                                                        </option>
                                                                                                     @endforeach
                                                                                                 @endif
                                                                                             </select>
@@ -948,6 +949,13 @@
 @endsection
 
 @section('page-script')
+    <script !src="">
+        $(document).on("click", "[data-repeater-create]", function () {
+            setTimeout(() => {
+                refreshAllOptionImageSelects(); // ✅ add this
+            }, 200); // slight delay to ensure DOM updated
+        });
+    </script>
     {{--    <script>--}}
     {{--        // keep color picker & text field in sync--}}
     {{--        document.addEventListener("input", (e) => {--}}
@@ -1262,44 +1270,42 @@
             const images = window.__PRODUCT_IMAGES__ || [];
 
             document.querySelectorAll('.option-image-from-product').forEach(select => {
-                const current = select.value; // keep selection if possible
-                // rebuild options
-                select.innerHTML = `<option value="">— Select image —</option>` + images.map(img =>
-                    `<option value="${img.id}" data-img="${img.url}">${img.name}</option>`
-                ).join('');
+                const current = select.value; // keep current selection
 
-                // restore
+                select.innerHTML =
+                    `<option value="">— Select image —</option>` +
+                    images.map(img =>
+                        `<option value="${img.id}" data-img="${img.url}">${img.name}</option>`
+                    ).join('');
+
+                // restore selection
                 if (current) select.value = current;
             });
 
-            // re-init select2 with thumbnails (idempotent-ish)
             if (window.$ && $.fn.select2) {
                 $('.option-image-from-product').each(function () {
-                    // destroy if already initialized
-                    // if ($(this).data('select2')) $(this).select2('destroy');
+                    // ✅ prevent double init
+                    if ($(this).hasClass('select2-hidden-accessible')) return;
 
                     $(this).select2({
                         width: '100%',
+                        dropdownParent: $(this).parent(),
                         templateResult: function (opt) {
                             if (!opt.id) return opt.text;
                             const url = $(opt.element).data('img');
                             if (!url) return opt.text;
-                            const $el = $(
-                                `<span style="display:flex;align-items:center;gap:8px;">
-              <img src="${url}" style="width:32px;height:32px;object-fit:cover;border-radius:6px;" />
-              <span>${opt.text}</span>
-            </span>`
-                            );
-                            return $el;
-                        },
-                        templateSelection: function (opt) {
-                            if (!opt.id) return opt.text;
-                            return opt.text;
+                            return $(`
+                      <span style="display:flex;align-items:center;gap:8px;">
+                        <img src="${url}" style="width:32px;height:32px;object-fit:cover;border-radius:6px;" />
+                        <span>${opt.text}</span>
+                      </span>
+                    `);
                         }
                     });
                 });
             }
         }
+
 
         const multiDropzone = new Dropzone("#multi-dropzone", {
             url: "{{ route('media.store') }}",   // backend route for image upload
@@ -1314,6 +1320,12 @@
             dictDefaultMessage: "Drag images here or click to upload",
             init: function () {
                 let dz = this;
+                window.__PRODUCT_IMAGES__ = window.__PRODUCT_IMAGES__ || [];
+                window.__PRODUCT_IMAGES__.push({
+                    id: "{{ $media->id }}",
+                    url: "{{ $media->getUrl() }}",
+                    name: "{{ $media->file_name }}",
+                });
 
                 // ✅ Show existing images if editing
                     @if($model->getMedia('category_extra_images')->isNotEmpty())
@@ -1363,7 +1375,13 @@
                         hiddenInput.id = "hidden-image-" + response.data.id;
                         document.querySelector("#multi-uploaded-images").appendChild(hiddenInput);
 
-                        // ✅ refresh all option selects
+                        window.__PRODUCT_IMAGES__ = window.__PRODUCT_IMAGES__ || [];
+
+                        // ✅ avoid duplicates
+                        if (!window.__PRODUCT_IMAGES__.some(x => String(x.id) === String(response.data.id))) {
+                            window.__PRODUCT_IMAGES__.push({ id: response.data.id, url: imgUrl, name: response.data.file_name });
+                        }
+
                         refreshAllOptionImageSelects();
                     }
                 });
