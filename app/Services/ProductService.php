@@ -207,6 +207,18 @@ class ProductService extends BaseService
                     'model_id' => $product->id,
                     'collection_name' => 'product_main_image',
                 ]);
+            Media::where('id', $validatedData['mobile_banner_id'])
+                ->update([
+                    'model_type' => get_class($product),
+                    'model_id' => $product->id,
+                    'collection_name' => 'mobile_banner',
+                ]);
+            Media::where('id', $validatedData['website_banner_id'])
+                ->update([
+                    'model_type' => get_class($product),
+                    'model_id' => $product->id,
+                    'collection_name' => 'website_banner',
+                ]);
             if (isset($validatedData['image_model_id'])) {
                 Media::where('id', $validatedData['image_model_id'])
                     ->update([
@@ -364,6 +376,24 @@ class ProductService extends BaseService
                         'model_type' => get_class($product),
                         'model_id' => $product->id,
                         'collection_name' => 'product_main_image',
+                    ]);
+
+            }
+            if (isset($validatedData['mobile_banner_id'])) {
+                Media::where('id', $validatedData['mobile_banner_id'])
+                    ->update([
+                        'model_type' => get_class($product),
+                        'model_id' => $product->id,
+                        'collection_name' => 'mobile_banner',
+                    ]);
+
+            }
+            if (isset($validatedData['website_banner_id'])) {
+                Media::where('id', $validatedData['website_banner_id'])
+                    ->update([
+                        'model_type' => get_class($product),
+                        'model_id' => $product->id,
+                        'collection_name' => 'website_banner',
                     ]);
 
             }
