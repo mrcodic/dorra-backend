@@ -130,13 +130,13 @@ class IndustryService extends BaseService
                 }
             })
 
-//            ->withCount([
-//                'templates as templates_count' => function ($tq) use ($industriableId, $relation) {
-//                    if ($relation && $industriableId) {
-//                        $tq->whereStatus(StatusEnum::LIVE)->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
-//                    }
-//                }
-//            ])
+            ->withCount([
+                'templates as templates_count' => function ($tq) use ($industriableId, $relation) {
+                    if ($relation && $industriableId) {
+                        $tq->whereStatus(StatusEnum::LIVE)->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
+                    }
+                }
+            ])
 
             ->with([
                 'children' => function ($q) use ($industriableId, $relation) {
