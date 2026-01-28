@@ -90,6 +90,14 @@ class CategoryService extends BaseService
                     'collection_name' => 'mobile_banner',
                 ]);
 
+        }       if (isset($validatedData['website_banner_id'])) {
+            Media::where('id', $validatedData['website_banner_id'])
+                ->update([
+                    'model_type' => get_class($model),
+                    'model_id' => $model->id,
+                    'collection_name' => 'website_banner',
+                ]);
+
         }
         return $model->load($relationsToLoad);
     }
