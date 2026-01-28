@@ -19,7 +19,6 @@ class CategoryResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        dd($this->getFirstMedia('mobile_banner'));
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
