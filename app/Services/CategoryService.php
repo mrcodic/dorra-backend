@@ -375,6 +375,8 @@ class CategoryService extends BaseService
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->repository->update($validatedData, $id);
+        dd($model,$validatedData);
+
         if (Arr::has($validatedData, 'image_id') && !is_null($validatedData['image_id'])) {
             Media::where('id', $validatedData['image_id'])
                 ->update([
