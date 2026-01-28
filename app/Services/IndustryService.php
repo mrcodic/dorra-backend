@@ -3,6 +3,7 @@
 namespace App\Services;
 
 
+use App\Enums\Template\StatusEnum;
 use App\Repositories\Interfaces\IndustryRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Yajra\DataTables\DataTables;
@@ -124,14 +125,15 @@ class IndustryService extends BaseService
 
             ->whereHas('templates', function ($tq) use ($industriableId, $relation) {
                 if ($relation && $industriableId) {
-                    $tq->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
+                    $tq->whereStatus(StatusEnum::LIVE)
+                        ->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
                 }
             })
 
             ->withCount([
                 'templates as templates_count' => function ($tq) use ($industriableId, $relation) {
                     if ($relation && $industriableId) {
-                        $tq->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
+                        $tq->whereStatus(StatusEnum::LIVE)->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
                     }
                 }
             ])
@@ -140,12 +142,12 @@ class IndustryService extends BaseService
                 'children' => function ($q) use ($industriableId, $relation) {
                     $q->whereHas('templates', function ($tq) use ($industriableId, $relation) {
                         if ($relation && $industriableId) {
-                            $tq->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
+                            $tq->whereStatus(StatusEnum::LIVE)->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
                         }
                     })->withCount([
                         'templates as templates_count' => function ($tq) use ($industriableId, $relation) {
                             if ($relation && $industriableId) {
-                                $tq->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
+                                $tq->whereStatus(StatusEnum::LIVE)->whereHas($relation, fn ($rq) => $rq->where('referenceable_id', $industriableId));
                             }
                         }
                     ]);
