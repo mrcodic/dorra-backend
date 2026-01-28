@@ -143,12 +143,12 @@ class ProductService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-       $colors = Arr::get($validatedData, 'colors');
+        $colors = Arr::get($validatedData, 'colors');
         $finalColors = collect($colors)->flatMap(function ($color) {
-           return [
-            $color['value'],
-           ];
-       })->toArray();
+            return [
+                $color['value'],
+            ];
+        })->toArray();
         $validatedData['colors'] = $finalColors;
         return $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad,$colors) {
             $product = $this->repository->create($validatedData);
@@ -194,20 +194,6 @@ class ProductService extends BaseService
                                         'collection_name' => 'productSpecificationOptions',
                                     ]);
                             }
-                            if (!empty($option['product_image_id'])) {
-                                $media = Media::find($option['product_image_id']);
-
-                                if ($media) {
-                                    $custom = (array) ($media->custom_properties ?? []);
-                                    $custom['spec_option_id'] = $productOption->id;
-                                    $custom['specification_id'] = $productSpecification->id;
-                                    $custom['product_id'] = $product->id;
-
-                                    $media->custom_properties = $custom;
-                                    $media->save();
-                                }
-                            }
-
                         });
 
                     }
@@ -304,7 +290,7 @@ class ProductService extends BaseService
             }
 
 
-                if (!empty($validatedData['specifications'])) {
+            if (!empty($validatedData['specifications'])) {
                 $submittedSpecIds = collect($validatedData['specifications'])->map(function ($specification) use ($product) {
                     $productSpecification = $product->specifications()->updateOrCreate(
                         [

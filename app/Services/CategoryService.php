@@ -39,8 +39,8 @@ class CategoryService extends BaseService
                     $query->whereHas('templates',function ($query){
                         $query->where('product_template.template_id',request('template_id'));
                     })->orWhereHas('products.templates',function ($query){
-                            $query->where('product_template.template_id',request('template_id'));
-                        });;
+                        $query->where('product_template.template_id',request('template_id'));
+                    });;
                 });
 
 
@@ -129,19 +129,6 @@ class CategoryService extends BaseService
                                         'collection_name' => 'categorySpecificationOptions',
                                     ]);
                             }
-                            if (!empty($option['product_image_id'])) {
-                                $media = Media::find($option['product_image_id']);
-
-                                if ($media) {
-                                    $custom = (array) ($media->custom_properties ?? []);
-                                    $custom['spec_option_id'] = $productOption->id;
-                                    $custom['specification_id'] = $productSpecification->id;
-                                    $custom['product_id'] = $product->id;
-
-                                    $media->custom_properties = $custom;
-                                    $media->save();
-                                }
-                            }
                         });
                     }
 
@@ -198,7 +185,6 @@ class CategoryService extends BaseService
 
     public function updateProductWithoutCategories($id, $validatedData)
     {
-
         $colors = Arr::get($validatedData, 'colors');
         $finalColors = collect($colors)->flatMap(function ($color) {
             return [
@@ -253,7 +239,7 @@ class CategoryService extends BaseService
                     );
 
 
-                    $submittedOptionIds = collect($specification['specification_options'] ?? [])->map(function ($option) use ($productSpecification,$product) {
+                    $submittedOptionIds = collect($specification['specification_options'] ?? [])->map(function ($option) use ($productSpecification) {
                         $productOption = $productSpecification->options()->updateOrCreate(
                             ['id' => $option['id'] ?? null],
                             [
@@ -272,20 +258,6 @@ class CategoryService extends BaseService
                                 'collection_name' => 'categorySpecificationOptions',
                             ]);
                         }
-                        if (!empty($option['product_image_id'])) {
-                            $media = Media::find($option['product_image_id']);
-
-                            if ($media) {
-                                $custom = (array) ($media->custom_properties ?? []);
-                                $custom['spec_option_id'] = $productOption->id;
-                                $custom['specification_id'] = $productSpecification->id;
-                                $custom['product_id'] = $product->id;
-
-                                $media->custom_properties = $custom;
-                                $media->save();
-                            }
-                        }
-
 
                         return $productOption->id;
                     })->toArray();

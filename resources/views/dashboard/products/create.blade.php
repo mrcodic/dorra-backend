@@ -638,19 +638,6 @@
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
-                                                                                <div class="col-md-12 mt-1">
-                                                                                    <label class="form-label label-text">Choose from Product Images</label>
-
-                                                                                    <select name="product_image_id" class="form-select option-image-from-product">
-                                                                                        <option value="">— Select image —</option>
-                                                                                    </select>
-
-                                                                                    <!-- this will be sent to backend -->
-{{--                                                                                    <input type="hidden" name="product_image_id" class="option-product-image-id" value="">--}}
-                                                                                </div>
-
-                                                                                <hr class="my-2"/>
-
                                                                             </div>
                                                                         </div>
 
@@ -851,58 +838,7 @@
 
     <script>
         Dropzone.autoDiscover = false; // prevent auto init
-        function refreshAllOptionImageSelects() {
-            const images = window.__PRODUCT_IMAGES__ || [];
 
-            document.querySelectorAll('.option-image-from-product').forEach(select => {
-                const current = select.value; // keep selection if possible
-                // rebuild options
-                select.innerHTML = `<option value="">— Select image —</option>` + images.map(img =>
-                    `<option value="${img.id}" data-img="${img.url}">${img.name}</option>`
-                ).join('');
-
-                // restore
-                if (current) select.value = current;
-            });
-
-            // re-init select2 with thumbnails (idempotent-ish)
-            if (window.$ && $.fn.select2) {
-                $('.option-image-from-product').each(function () {
-                    // destroy if already initialized
-                    // if ($(this).data('select2')) $(this).select2('destroy');
-
-                    $(this).select2({
-                        width: '100%',
-                        templateResult: function (opt) {
-                            if (!opt.id) return opt.text;
-                            const url = $(opt.element).data('img');
-                            if (!url) return opt.text;
-                            const $el = $(
-                                `<span style="display:flex;align-items:center;gap:8px;">
-              <img src="${url}" style="width:32px;height:32px;object-fit:cover;border-radius:6px;" />
-              <span>${opt.text}</span>
-            </span>`
-                            );
-                            return $el;
-                        },
-                        templateSelection: function (opt) {
-                            if (!opt.id) return opt.text;
-                            return opt.text;
-                        }
-                    });
-                });
-            }
-        }
-        document.addEventListener('change', function (e) {
-            const sel = e.target.closest('.option-image-from-product');
-            if (!sel) return;
-
-            const wrapper = sel.closest('[data-repeater-item]');
-            if (!wrapper) return;
-
-            const hidden = wrapper.querySelector('.option-product-image-id');
-            if (hidden) hidden.value = sel.value || '';
-        });
         function initOptionDropzones() {
             document.querySelectorAll(".option-dropzone").forEach((element) => {
                 if (element.dropzone) return; // prevent duplicate init
@@ -957,7 +893,6 @@
         $(document).on("click", "[data-repeater-create]", function () {
             setTimeout(() => {
                 initOptionDropzones();
-                refreshAllOptionImageSelects();
             }, 200); // slight delay to ensure DOM updated
         });
     </script>
@@ -977,46 +912,43 @@
             addRemoveLinks: true,
             dictDefaultMessage: "Drag images here or click to upload",
             init: function () {
-                window.__PRODUCT_IMAGES__ = window.__PRODUCT_IMAGES__ || []; // [{id, url}]
-
                 this.on("success", function (file, response) {
                     if (response.success && response.data) {
+                        // save file id on the file object
                         file._hiddenInputId = response.data.id;
 
-                        // ✅ store in global list (need url)
-                        const imgUrl = response.data.url || response.data.original_url || response.data.path;
-                        window.__PRODUCT_IMAGES__.push({ id: response.data.id, url: imgUrl, name: response.data.file_name });
-
-                        // hidden input (existing)
+                        // append hidden input for each uploaded file
                         let hiddenInput = document.createElement("input");
                         hiddenInput.type = "hidden";
                         hiddenInput.name = "images_ids[]";
                         hiddenInput.value = response.data.id;
                         hiddenInput.id = "hidden-image-" + response.data.id;
+
                         document.querySelector("#multi-uploaded-images").appendChild(hiddenInput);
 
-                        // ✅ refresh all option selects
-                        refreshAllOptionImageSelects();
+
                     }
                 });
+
                 this.on("removedfile", function (file) {
                     if (file._hiddenInputId) {
-                        // remove from registry
-                        window.__PRODUCT_IMAGES__ = (window.__PRODUCT_IMAGES__ || []).filter(x => x.id !== file._hiddenInputId);
-
                         // remove hidden input
                         let hiddenInput = document.getElementById("hidden-image-" + file._hiddenInputId);
                         if (hiddenInput) hiddenInput.remove();
 
-                        refreshAllOptionImageSelects();
+                        // remove preview
+                        let previewImg = document.getElementById("preview-image-" + file._hiddenInputId);
+                        if (previewImg) previewImg.remove();
 
+                        // delete from server
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
-                            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
                         });
                     }
                 });
-
             }
         });
     </script>
