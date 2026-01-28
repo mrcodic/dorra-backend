@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\V1\User\{Ai\AiAssetController,
     Team\TeamController,
     Template\TemplateController,
     Review\ReviewController,
+    Variant\VariantController,
     Wallet\WalletController};
 use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\General\MainController;
@@ -227,6 +228,8 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::get('industries', [IndustryController::class, 'index'])->name('industries');
     Route::get('sub-industries', [IndustryController::class, 'getSubIndustries'])->name('sub-industries');
     Route::get('mockups', [MainController::class, 'mockups'])->name('mockups');
+    Route::get('variants', [VariantController::class, 'index'])->name('variants');
+
 });
 
 
