@@ -26,7 +26,9 @@
                 <div class="card">
 
                     <div class="card-body">
-                        <form id="product-form" class="form" action="{{ route('product-without-categories.update',$model->id) }}" method="POST" enctype="multipart/form-data">
+                        <form id="product-form" class="form"
+                              action="{{ route('product-without-categories.update',$model->id) }}" method="POST"
+                              enctype="multipart/form-data">
                             @csrf
                             @method("PUT")
                             <input type="hidden" name="is_has_category" value="0">
@@ -47,8 +49,10 @@
                                     <div class="d-flex flex-column gap-1">
                                         <h5 style="color: #121212">Show “Add to Cart” Button</h5>
                                         <p style="color: #424746">
-                                            When the checkbox is selected, the product can be added directly to the cart without customization.
-                                            If it’s not selected, the product must be customized before being added to cart.
+                                            When the checkbox is selected, the product can be added directly to the cart
+                                            without customization.
+                                            If it’s not selected, the product must be customized before being added to
+                                            cart.
                                         </p>
                                     </div>
                                 </div>
@@ -65,7 +69,8 @@
                                     <div class="d-flex flex-column gap-1">
                                         <h5 style="color: #121212">Show “Customize Design” Button</h5>
                                         <p style="color: #424746">
-                                            When the checkbox is selected, the product can be customized before being added to cart.
+                                            When the checkbox is selected, the product can be customized before being
+                                            added to cart.
                                         </p>
                                     </div>
                                 </div>
@@ -77,10 +82,12 @@
                                         Details</a>
                                 </li>
                                 <li class="nav-item" style="width: 30%;">
-                                    <a class="nav-link" data-step="1" href="#" style="font-size: 14px;">Quantity & Price</a>
+                                    <a class="nav-link" data-step="1" href="#" style="font-size: 14px;">Quantity &
+                                        Price</a>
                                 </li>
                                 <li class="nav-item" style="width: 30%;">
-                                    <a class="nav-link" data-step="2" href="#" style="font-size: 14px;">Product Specs</a>
+                                    <a class="nav-link" data-step="2" href="#" style="font-size: 14px;">Product
+                                        Specs</a>
                                 </li>
                             </ul>
 
@@ -92,45 +99,62 @@
                                         <!-- Product Name EN/AR -->
                                         <div class="col-md-6">
                                             <div class="mb-1">
-                                                <label class="form-label label-text" for="product-name-en">Product Name (EN)</label>
-                                                <input type="text" id="product-name-en" value="{{ $model->getTranslation('name','en') }}" class="form-control" name="name[en]" placeholder="Product Name (EN)"/>
+                                                <label class="form-label label-text" for="product-name-en">Product Name
+                                                    (EN)</label>
+                                                <input type="text" id="product-name-en"
+                                                       value="{{ $model->getTranslation('name','en') }}"
+                                                       class="form-control" name="name[en]"
+                                                       placeholder="Product Name (EN)"/>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-1">
-                                                <label class="form-label label-text" for="product-name-ar">Product Name (AR)</label>
-                                                <input type="text" id="product-name-ar" value="{{ $model->getTranslation('name','ar') }}" class="form-control" name="name[ar]" placeholder="Product Name (AR)"/>
+                                                <label class="form-label label-text" for="product-name-ar">Product Name
+                                                    (AR)</label>
+                                                <input type="text" id="product-name-ar"
+                                                       value="{{ $model->getTranslation('name','ar') }}"
+                                                       class="form-control" name="name[ar]"
+                                                       placeholder="Product Name (AR)"/>
                                             </div>
                                         </div>
 
                                         <!-- Description EN/AR -->
                                         <div class="col-md-6">
                                             <div class="mb-1">
-                                                <label class="form-label label-text" for="description-en">Product Description (EN)</label>
-                                                <textarea name="description[en]" id="description-en" class="form-control" placeholder="Product Description (EN)">{{ $model->getTranslation('description','en') }}</textarea>
+                                                <label class="form-label label-text" for="description-en">Product
+                                                    Description (EN)</label>
+                                                <textarea name="description[en]" id="description-en"
+                                                          class="form-control"
+                                                          placeholder="Product Description (EN)">{{ $model->getTranslation('description','en') }}</textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-1">
-                                                <label class="form-label label-text" for="description-ar">Product Description (AR)</label>
-                                                <textarea name="description[ar]" id="description-ar" class="form-control" placeholder="Product Description (AR)">{{ $model->getTranslation('description','ar') }}</textarea>
+                                                <label class="form-label label-text" for="description-ar">Product
+                                                    Description (AR)</label>
+                                                <textarea name="description[ar]" id="description-ar"
+                                                          class="form-control"
+                                                          placeholder="Product Description (AR)">{{ $model->getTranslation('description','ar') }}</textarea>
                                             </div>
                                         </div>
 
                                         <!-- Main Image Upload -->
                                         <div class="col-md-12">
                                             <div class="mb-2">
-                                                <label class="form-label label-text" for="product-image-main">Product Image (main)</label>
+                                                <label class="form-label label-text" for="product-image-main">Product
+                                                    Image (main)</label>
 
                                                 <!-- Dropzone Container -->
-                                                <div id="product-main-dropzone" class="dropzone border rounded p-3" style="cursor:pointer; min-height:150px;">
+                                                <div id="product-main-dropzone" class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
                                                     <div class="dz-message" data-dz-message>
                                                         <span>Drop image here or click to upload</span>
                                                     </div>
                                                 </div>
 
                                                 <!-- Hidden input: prefilled if editing -->
-                                                <input type="hidden" name="image_id" id="uploadedImage" value="{{ $model->getFirstMedia('categories')?->id ?? '' }}">
+                                                <input type="hidden" name="image_id" id="uploadedImage"
+                                                       value="{{ $model->getFirstMedia('categories')?->id ?? '' }}">
 
                                                 <span class="image-hint small text-end">
                             Max size: 1MB | Dimensions: 512x512 px
@@ -177,171 +201,174 @@
                                             </div>
                                         </div>
                                         {{-- Product Colors --}}
-{{--                                        <div class="col-md-12">--}}
-{{--                                            <div class="mb-2">--}}
-{{--                                                <label class="form-label label-text">Product Colors</label>--}}
+                                        {{--                                        <div class="col-md-12">--}}
+                                        {{--                                            <div class="mb-2">--}}
+                                        {{--                                                <label class="form-label label-text">Product Colors</label>--}}
 
-{{--                                                @php--}}
-{{--                                                    $colors = collect($model->colors) ?? collect();--}}
-{{--                                                    $hasColors = $colors->isNotEmpty();--}}
-{{--                                                @endphp--}}
+                                        {{--                                                @php--}}
+                                        {{--                                                    $colors = collect($model->colors) ?? collect();--}}
+                                        {{--                                                    $hasColors = $colors->isNotEmpty();--}}
+                                        {{--                                                @endphp--}}
 
-{{--                                                <div class="color-repeater">--}}
-{{--                                                    <div data-repeater-list="colors">--}}
-{{--                                                        @forelse($colors as $color)--}}
+                                        {{--                                                <div class="color-repeater">--}}
+                                        {{--                                                    <div data-repeater-list="colors">--}}
+                                        {{--                                                        @forelse($colors as $color)--}}
 
-{{--                                                            <div data-repeater-item>--}}
-{{--                                                                <div class="row align-items-start mt-1">--}}
+                                        {{--                                                            <div data-repeater-item>--}}
+                                        {{--                                                                <div class="row align-items-start mt-1">--}}
 
-{{--                                                                    --}}{{-- Color value --}}
-{{--                                                                    <div class="col-md-12">--}}
-{{--                                                                        <label class="form-label label-text">Color Value--}}
-{{--                                                                            *</label>--}}
-{{--                                                                        <div class="d-flex gap-1 align-items-center">--}}
-{{--                                                                            --}}{{-- Color picker --}}
-{{--                                                                            <input--}}
-{{--                                                                                type="color"--}}
-{{--                                                                                class="form-control rounded-circle color-picker border border-0"--}}
-{{--                                                                                style="max-width: 30px; padding: 0;"--}}
-{{--                                                                                value="{{ $color ?? '#000000' }}"--}}
-{{--                                                                            />--}}
+                                        {{--                                                                    --}}{{-- Color value --}}
+                                        {{--                                                                    <div class="col-md-12">--}}
+                                        {{--                                                                        <label class="form-label label-text">Color Value--}}
+                                        {{--                                                                            *</label>--}}
+                                        {{--                                                                        <div class="d-flex gap-1 align-items-center">--}}
+                                        {{--                                                                            --}}{{-- Color picker --}}
+                                        {{--                                                                            <input--}}
+                                        {{--                                                                                type="color"--}}
+                                        {{--                                                                                class="form-control rounded-circle color-picker border border-0"--}}
+                                        {{--                                                                                style="max-width: 30px; padding: 0;"--}}
+                                        {{--                                                                                value="{{ $color ?? '#000000' }}"--}}
+                                        {{--                                                                            />--}}
 
-{{--                                                                            --}}{{-- Text hex input (submitted) --}}
-{{--                                                                            <input--}}
-{{--                                                                                type="text"--}}
-{{--                                                                                name="value"--}}
-{{--                                                                                class="form-control color-hex-input"--}}
-{{--                                                                                placeholder="#000000"--}}
-{{--                                                                                value="{{ $color ?? '#000000' }}"--}}
-{{--                                                                                pattern="^#([A-Fa-f0-9]{6})$"--}}
-{{--                                                                            />--}}
-{{--                                                                        </div>--}}
-{{--                                                                        <small class="text-muted">--}}
-{{--                                                                            Pick a color or type hex (e.g. #FFAA00).--}}
-{{--                                                                        </small>--}}
-{{--                                                                    </div>--}}
+                                        {{--                                                                            --}}{{-- Text hex input (submitted) --}}
+                                        {{--                                                                            <input--}}
+                                        {{--                                                                                type="text"--}}
+                                        {{--                                                                                name="value"--}}
+                                        {{--                                                                                class="form-control color-hex-input"--}}
+                                        {{--                                                                                placeholder="#000000"--}}
+                                        {{--                                                                                value="{{ $color ?? '#000000' }}"--}}
+                                        {{--                                                                                pattern="^#([A-Fa-f0-9]{6})$"--}}
+                                        {{--                                                                            />--}}
+                                        {{--                                                                        </div>--}}
+                                        {{--                                                                        <small class="text-muted">--}}
+                                        {{--                                                                            Pick a color or type hex (e.g. #FFAA00).--}}
+                                        {{--                                                                        </small>--}}
+                                        {{--                                                                    </div>--}}
 
-{{--                                                                    --}}{{-- Color image --}}
-{{--                                                                    <div class="col-md-12 mt-1">--}}
-{{--                                                                        <label class="form-label label-text">Color Image *--}}
-{{--                                                                        </label>--}}
-{{--                                                                        @php--}}
-{{--                                                                            $mediaWithColor = $model--}}
-{{--                                                                                 ->getMedia('category_extra_images')--}}
-{{--                                                                                 ->first(fn ($media) => $media->getCustomProperty('color_hex') ==$color);--}}
-{{--                                                                        @endphp--}}
+                                        {{--                                                                    --}}{{-- Color image --}}
+                                        {{--                                                                    <div class="col-md-12 mt-1">--}}
+                                        {{--                                                                        <label class="form-label label-text">Color Image *--}}
+                                        {{--                                                                        </label>--}}
+                                        {{--                                                                        @php--}}
+                                        {{--                                                                            $mediaWithColor = $model--}}
+                                        {{--                                                                                 ->getMedia('category_extra_images')--}}
+                                        {{--                                                                                 ->first(fn ($media) => $media->getCustomProperty('color_hex') ==$color);--}}
+                                        {{--                                                                        @endphp--}}
 
-{{--                                                                        <div--}}
-{{--                                                                            class="dropzone color-dropzone border rounded p-2"--}}
-{{--                                                                            style="cursor:pointer; min-height:100px;"--}}
-{{--                                                                            data-existing-media='@json($mediaWithColor)'>--}}
-{{--                                                                            <div class="dz-message" data-dz-message>--}}
-{{--                                                                                <span>Drop image or click</span>--}}
-{{--                                                                            </div>--}}
-{{--                                                                        </div>--}}
+                                        {{--                                                                        <div--}}
+                                        {{--                                                                            class="dropzone color-dropzone border rounded p-2"--}}
+                                        {{--                                                                            style="cursor:pointer; min-height:100px;"--}}
+                                        {{--                                                                            data-existing-media='@json($mediaWithColor)'>--}}
+                                        {{--                                                                            <div class="dz-message" data-dz-message>--}}
+                                        {{--                                                                                <span>Drop image or click</span>--}}
+                                        {{--                                                                            </div>--}}
+                                        {{--                                                                        </div>--}}
 
-{{--                                                                        <input type="hidden"--}}
-{{--                                                                               name="image_id"--}}
-{{--                                                                               class="color-image-hidden"--}}
-{{--                                                                               value="{{$mediaWithColor->id ?? ''}}">--}}
-{{--                                                                    </div>--}}
+                                        {{--                                                                        <input type="hidden"--}}
+                                        {{--                                                                               name="image_id"--}}
+                                        {{--                                                                               class="color-image-hidden"--}}
+                                        {{--                                                                               value="{{$mediaWithColor->id ?? ''}}">--}}
+                                        {{--                                                                    </div>--}}
 
-{{--                                                                    --}}{{-- Delete row --}}
-{{--                                                                    <div class="col-md-2 text-center mt-1 ms-auto">--}}
-{{--                                                                        <button type="button"--}}
-{{--                                                                                class="btn btn-outline-danger"--}}
-{{--                                                                                data-repeater-delete>--}}
-{{--                                                                            <i data-feather="x" class="me-25"></i>--}}
-{{--                                                                            Delete--}}
-{{--                                                                        </button>--}}
-{{--                                                                    </div>--}}
-{{--                                                                </div>--}}
-{{--                                                            </div>--}}
-{{--                                                        @empty--}}
-{{--                                                            <div data-repeater-item>--}}
-{{--                                                                <div class="row align-items-start mt-1">--}}
+                                        {{--                                                                    --}}{{-- Delete row --}}
+                                        {{--                                                                    <div class="col-md-2 text-center mt-1 ms-auto">--}}
+                                        {{--                                                                        <button type="button"--}}
+                                        {{--                                                                                class="btn btn-outline-danger"--}}
+                                        {{--                                                                                data-repeater-delete>--}}
+                                        {{--                                                                            <i data-feather="x" class="me-25"></i>--}}
+                                        {{--                                                                            Delete--}}
+                                        {{--                                                                        </button>--}}
+                                        {{--                                                                    </div>--}}
+                                        {{--                                                                </div>--}}
+                                        {{--                                                            </div>--}}
+                                        {{--                                                        @empty--}}
+                                        {{--                                                            <div data-repeater-item>--}}
+                                        {{--                                                                <div class="row align-items-start mt-1">--}}
 
-{{--                                                                    <div class="col-md-12">--}}
-{{--                                                                        <label class="form-label label-text">Color Value--}}
-{{--                                                                            *</label>--}}
-{{--                                                                        <div class="d-flex gap-1 align-items-center">--}}
-{{--                                                                            <input--}}
-{{--                                                                                type="color"--}}
-{{--                                                                                class="form-control rounded-circle color-picker border border-0"--}}
-{{--                                                                                style="max-width: 30px; padding: 0;"--}}
-{{--                                                                                value="#000000"--}}
-{{--                                                                            />--}}
-{{--                                                                            <input--}}
-{{--                                                                                type="text"--}}
-{{--                                                                                name="value"--}}
-{{--                                                                                class="form-control color-hex-input"--}}
-{{--                                                                                placeholder="#000000"--}}
-{{--                                                                                value="#000000"--}}
-{{--                                                                                pattern="^#([A-Fa-f0-9]{6})$"--}}
-{{--                                                                            />--}}
-{{--                                                                        </div>--}}
-{{--                                                                        <small class="text-muted">Pick a color or type--}}
-{{--                                                                            hex (e.g. #FFAA00).</small>--}}
-{{--                                                                    </div>--}}
+                                        {{--                                                                    <div class="col-md-12">--}}
+                                        {{--                                                                        <label class="form-label label-text">Color Value--}}
+                                        {{--                                                                            *</label>--}}
+                                        {{--                                                                        <div class="d-flex gap-1 align-items-center">--}}
+                                        {{--                                                                            <input--}}
+                                        {{--                                                                                type="color"--}}
+                                        {{--                                                                                class="form-control rounded-circle color-picker border border-0"--}}
+                                        {{--                                                                                style="max-width: 30px; padding: 0;"--}}
+                                        {{--                                                                                value="#000000"--}}
+                                        {{--                                                                            />--}}
+                                        {{--                                                                            <input--}}
+                                        {{--                                                                                type="text"--}}
+                                        {{--                                                                                name="value"--}}
+                                        {{--                                                                                class="form-control color-hex-input"--}}
+                                        {{--                                                                                placeholder="#000000"--}}
+                                        {{--                                                                                value="#000000"--}}
+                                        {{--                                                                                pattern="^#([A-Fa-f0-9]{6})$"--}}
+                                        {{--                                                                            />--}}
+                                        {{--                                                                        </div>--}}
+                                        {{--                                                                        <small class="text-muted">Pick a color or type--}}
+                                        {{--                                                                            hex (e.g. #FFAA00).</small>--}}
+                                        {{--                                                                    </div>--}}
 
-{{--                                                                    <div class="col-md-12 mt-1">--}}
-{{--                                                                        <label class="form-label label-text">Color Image *--}}
-{{--                                                                        </label>--}}
-{{--                                                                        <div--}}
-{{--                                                                            class="dropzone color-dropzone border rounded p-2"--}}
-{{--                                                                            style="cursor:pointer; min-height:100px;"--}}
-{{--                                                                            data-existing-media='null'>--}}
-{{--                                                                            <div class="dz-message" data-dz-message>--}}
-{{--                                                                                <span>Drop image or click</span>--}}
-{{--                                                                            </div>--}}
-{{--                                                                        </div>--}}
-{{--                                                                        <input type="hidden" name="image_id"--}}
-{{--                                                                               class="color-image-hidden">--}}
-{{--                                                                    </div>--}}
+                                        {{--                                                                    <div class="col-md-12 mt-1">--}}
+                                        {{--                                                                        <label class="form-label label-text">Color Image *--}}
+                                        {{--                                                                        </label>--}}
+                                        {{--                                                                        <div--}}
+                                        {{--                                                                            class="dropzone color-dropzone border rounded p-2"--}}
+                                        {{--                                                                            style="cursor:pointer; min-height:100px;"--}}
+                                        {{--                                                                            data-existing-media='null'>--}}
+                                        {{--                                                                            <div class="dz-message" data-dz-message>--}}
+                                        {{--                                                                                <span>Drop image or click</span>--}}
+                                        {{--                                                                            </div>--}}
+                                        {{--                                                                        </div>--}}
+                                        {{--                                                                        <input type="hidden" name="image_id"--}}
+                                        {{--                                                                               class="color-image-hidden">--}}
+                                        {{--                                                                    </div>--}}
 
-{{--                                                                    <div class="col-md-2 text-center mt-1 ms-auto">--}}
-{{--                                                                        <button type="button"--}}
-{{--                                                                                class="btn btn-outline-danger"--}}
-{{--                                                                                data-repeater-delete>--}}
-{{--                                                                            <i data-feather="x" class="me-25"></i>--}}
-{{--                                                                            Delete--}}
-{{--                                                                        </button>--}}
-{{--                                                                    </div>--}}
-{{--                                                                </div>--}}
-{{--                                                            </div>--}}
-{{--                                                        @endforelse--}}
-{{--                                                    </div>--}}
+                                        {{--                                                                    <div class="col-md-2 text-center mt-1 ms-auto">--}}
+                                        {{--                                                                        <button type="button"--}}
+                                        {{--                                                                                class="btn btn-outline-danger"--}}
+                                        {{--                                                                                data-repeater-delete>--}}
+                                        {{--                                                                            <i data-feather="x" class="me-25"></i>--}}
+                                        {{--                                                                            Delete--}}
+                                        {{--                                                                        </button>--}}
+                                        {{--                                                                    </div>--}}
+                                        {{--                                                                </div>--}}
+                                        {{--                                                            </div>--}}
+                                        {{--                                                        @endforelse--}}
+                                        {{--                                                    </div>--}}
 
-{{--                                                    <div class="row mt-1">--}}
-{{--                                                        <div class="col-12">--}}
-{{--                                                            <button type="button"--}}
-{{--                                                                    class="w-100 rounded-3 p-1 text-dark"--}}
-{{--                                                                    style="border: 2px dashed #CED5D4; background-color: #EBEFEF"--}}
-{{--                                                                    data-repeater-create>--}}
-{{--                                                                <i data-feather="plus" class="me-25"></i>--}}
-{{--                                                                <span>Add New Color</span>--}}
-{{--                                                            </button>--}}
-{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
+                                        {{--                                                    <div class="row mt-1">--}}
+                                        {{--                                                        <div class="col-12">--}}
+                                        {{--                                                            <button type="button"--}}
+                                        {{--                                                                    class="w-100 rounded-3 p-1 text-dark"--}}
+                                        {{--                                                                    style="border: 2px dashed #CED5D4; background-color: #EBEFEF"--}}
+                                        {{--                                                                    data-repeater-create>--}}
+                                        {{--                                                                <i data-feather="plus" class="me-25"></i>--}}
+                                        {{--                                                                <span>Add New Color</span>--}}
+                                        {{--                                                            </button>--}}
+                                        {{--                                                        </div>--}}
+                                        {{--                                                    </div>--}}
+                                        {{--                                                </div>--}}
+                                        {{--                                            </div>--}}
+                                        {{--                                        </div>--}}
 
 
                                         <!-- Multiple Images Upload -->
                                         <div class="col-md-12">
                                             <div class="mb-2">
-                                                <label class="form-label label-text" for="product-images">Product Images</label>
+                                                <label class="form-label label-text" for="product-images">Product
+                                                    Images</label>
 
                                                 <!-- Dropzone container -->
-                                                <div id="multi-dropzone" class="dropzone border rounded p-3" style="cursor:pointer; min-height:150px;">
+                                                <div id="multi-dropzone" class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
                                                     <div class="dz-message" data-dz-message>
                                                         <i data-feather="upload" class="mb-2"></i>
                                                         <p>Drag images here or click to upload</p>
                                                     </div>
                                                 </div>
                                                 <input type="hidden" name="images_ids[]" id="images_ids">
-                                                <div id="multi-uploaded-images" class="mt-3 d-flex flex-wrap gap-2"></div>
+                                                <div id="multi-uploaded-images"
+                                                     class="mt-3 d-flex flex-wrap gap-2"></div>
 
                                                 <span class="image-hint small text-end">
                             Max size: 1MB | Dimensions: 512x512 px
@@ -350,14 +377,14 @@
                                         </div>
 
 
-
                                         <!-- Tags -->
                                         <div class="col-md-12">
                                             <div class="mb-1">
                                                 <label class="form-label label-text" for="tags">Tags</label>
                                                 <select name="tags[]" id="tags" class="select2 form-select" multiple>
                                                     @foreach($associatedData['tags'] as $tag)
-                                                        <option value="{{ $tag->id }}" @if(in_array($tag->id, $model->tags->pluck('id')->toArray())) selected @endif >{{ $tag->name }}</option>
+                                                        <option value="{{ $tag->id }}"
+                                                                @if(in_array($tag->id, $model->tags->pluck('id')->toArray())) selected @endif >{{ $tag->name }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -368,11 +395,19 @@
                                             <div class="mb-1">
                                                 <label class="form-label label-text">Product Size</label>
                                                 <!-- Standard Dimensions -->
-                                                <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2" id="standard-dimensions-container">
+                                                <div
+                                                    class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2"
+                                                    id="standard-dimensions-container">
                                                     @foreach($dimensions as $dimension)
-                                                        <div class="form-check option-box rounded border py-1 d-flex justify-content-center align-items-center" style="width: 100px">
-                                                            <input class="form-check-input me-1" type="checkbox" name="dimensions[]" id="dimension-checkbox-{{ $dimension['id'] }}" value="{{ $dimension['id'] }}" @checked($model->dimensions->contains($dimension->id)) />
-                                                            <label class="form-check-label mb-0" for="dimension-checkbox-{{ $dimension['id'] }}">
+                                                        <div
+                                                            class="form-check option-box rounded border py-1 d-flex justify-content-center align-items-center"
+                                                            style="width: 100px">
+                                                            <input class="form-check-input me-1" type="checkbox"
+                                                                   name="dimensions[]"
+                                                                   id="dimension-checkbox-{{ $dimension['id'] }}"
+                                                                   value="{{ $dimension['id'] }}" @checked($model->dimensions->contains($dimension->id)) />
+                                                            <label class="form-check-label mb-0"
+                                                                   for="dimension-checkbox-{{ $dimension['id'] }}">
                                                                 {{ $dimension['name'] }}
                                                             </label>
                                                         </div>
@@ -384,7 +419,9 @@
                                                     <!-- Custom dimensions from sessionStorage will be injected here -->
                                                 </div>
                                             </div>
-                                            <button type="button" class="upload-card w-100 mt-1" data-bs-toggle="modal" data-bs-target="#addSizeModal">Add Custom Size</button>
+                                            <button type="button" class="upload-card w-100 mt-1" data-bs-toggle="modal"
+                                                    data-bs-target="#addSizeModal">Add Custom Size
+                                            </button>
                                         </div>
                                     </div>
                                     <!-- Has Mockup -->
@@ -411,24 +448,33 @@
                                     <!-- Price Option Toggle -->
                                     <div class="col-md-12">
                                         <div class="mb-1">
-                                            <label class="form-label label-text d-block">Quantity & Price Options</label>
+                                            <label class="form-label label-text d-block">Quantity & Price
+                                                Options</label>
                                             <label class="form-label label-text mt-2">Quantity Type</label>
                                             <div class="row gap-1 d-flex flex-column flex-md-row" style="margin: 2px;">
                                                 <div class="col border rounded-3 p-1">
                                                     <div class="form-check form-check-inline">
-                                                        <input class="form-check-input" type="radio" name="has_custom_prices" id="customPrice" value="1" @checked($model->has_custom_prices == 1)>
+                                                        <input class="form-check-input" type="radio"
+                                                               name="has_custom_prices" id="customPrice"
+                                                               value="1" @checked($model->has_custom_prices == 1)>
                                                         <div>
-                                                            <label class="form-check-label label-text d-block" for="customPrice">Add Quantity Manually</label>
-                                                            <label class="form-check-label text-dark" for="customPrice">Custom Prices</label>
+                                                            <label class="form-check-label label-text d-block"
+                                                                   for="customPrice">Add Quantity Manually</label>
+                                                            <label class="form-check-label text-dark" for="customPrice">Custom
+                                                                Prices</label>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="col border rounded-3 p-1">
                                                     <div class="form-check form-check-inline">
-                                                        <input class="form-check-input " type="radio" name="has_custom_prices" id="defaultPrice" value="0" @checked($model->has_custom_prices == 0)>
+                                                        <input class="form-check-input " type="radio"
+                                                               name="has_custom_prices" id="defaultPrice"
+                                                               value="0" @checked($model->has_custom_prices == 0)>
                                                         <div>
-                                                            <label class="form-check-label label-text d-block" for="customPrice">Default Quantity</label>
-                                                            <label class="form-check-label text-dark" for="defaultPrice">Default Price</label>
+                                                            <label class="form-check-label label-text d-block"
+                                                                   for="customPrice">Default Quantity</label>
+                                                            <label class="form-check-label text-dark"
+                                                                   for="defaultPrice">Default Price</label>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -437,7 +483,8 @@
                                     </div>
 
                                     <!-- Custom Prices -->
-                                    <div class="col-md-12" id="custom-price-section" style="{{  $model->has_custom_prices == 1 ? '': 'display: none;' }}">
+                                    <div class="col-md-12" id="custom-price-section"
+                                         style="{{  $model->has_custom_prices == 1 ? '': 'display: none;' }}">
                                         <div class="card">
                                             <div class="card-body">
                                                 <div class="invoice-repeater">
@@ -448,18 +495,28 @@
                                                                     <div class="col-md-4">
                                                                         <div class="mb-1">
                                                                             <label class="form-label label-text">Quantity</label>
-                                                                            <input type="number" name="quantity" value="{{ $price->quantity }}" class="form-control" placeholder="Add Quantity"/>
+                                                                            <input type="number" name="quantity"
+                                                                                   value="{{ $price->quantity }}"
+                                                                                   class="form-control"
+                                                                                   placeholder="Add Quantity"/>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-4">
                                                                         <div class="mb-1">
-                                                                            <label class="form-label label-text">Price (EGP)</label>
-                                                                            <input type="text" name="price" value="{{ $price->price }}" class="form-control" placeholder="Add Price"/>
+                                                                            <label class="form-label label-text">Price
+                                                                                (EGP)</label>
+                                                                            <input type="text" name="price"
+                                                                                   value="{{ $price->price }}"
+                                                                                   class="form-control"
+                                                                                   placeholder="Add Price"/>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-4">
                                                                         <div class="mb-1">
-                                                                            <button type="button" class="btn btn-outline-danger text-nowrap px-1" style="display: none" data-repeater-delete>
+                                                                            <button type="button"
+                                                                                    class="btn btn-outline-danger text-nowrap px-1"
+                                                                                    style="display: none"
+                                                                                    data-repeater-delete>
                                                                                 <i data-feather="x" class="me-25"></i>
                                                                                 <span>Delete</span>
                                                                             </button>
@@ -473,18 +530,26 @@
                                                                     <div class="col-md-4">
                                                                         <div class="mb-1">
                                                                             <label class="form-label label-text">Quantity</label>
-                                                                            <input type="number" name="quantity" class="form-control" placeholder="Add Quantity"/>
+                                                                            <input type="number" name="quantity"
+                                                                                   class="form-control"
+                                                                                   placeholder="Add Quantity"/>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-4">
                                                                         <div class="mb-1">
-                                                                            <label class="form-label label-text">Price (EGP)</label>
-                                                                            <input type="text" name="price" class="form-control" placeholder="Add Price"/>
+                                                                            <label class="form-label label-text">Price
+                                                                                (EGP)</label>
+                                                                            <input type="text" name="price"
+                                                                                   class="form-control"
+                                                                                   placeholder="Add Price"/>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-4">
                                                                         <div class="mb-1">
-                                                                            <button type="button" class="btn btn-outline-danger text-nowrap px-1" style="display: none" data-repeater-delete>
+                                                                            <button type="button"
+                                                                                    class="btn btn-outline-danger text-nowrap px-1"
+                                                                                    style="display: none"
+                                                                                    data-repeater-delete>
                                                                                 <i data-feather="x" class="me-25"></i>
                                                                                 <span>Delete</span>
                                                                             </button>
@@ -496,7 +561,10 @@
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-12">
-                                                            <button type="button" class="w-100  rounded-3 p-1 bg-white text-dark" style="border:2px dashed #CED5D4;" data-repeater-create>
+                                                            <button type="button"
+                                                                    class="w-100  rounded-3 p-1 bg-white text-dark"
+                                                                    style="border:2px dashed #CED5D4;"
+                                                                    data-repeater-create>
                                                                 <i data-feather="plus" class="me-25"></i> <span>Add New Quantity</span>
                                                             </button>
                                                         </div>
@@ -507,10 +575,14 @@
                                     </div>
 
                                     <!-- Default Price -->
-                                    <div class="col-md-12" id="default-price-section" style="{{ $model->has_custom_prices == 0 ? '' : 'display:none;' }}">
+                                    <div class="col-md-12" id="default-price-section"
+                                         style="{{ $model->has_custom_prices == 0 ? '' : 'display:none;' }}">
                                         <div class="mb-1">
-                                            <label class="form-label label-text" for="base_price">Original Price (EGP) (Per Item)</label>
-                                            <input type="text" id="base_price" name="base_price" value="{{ $model->base_price }}" class="form-control" placeholder="Original Price"/>
+                                            <label class="form-label label-text" for="base_price">Original Price (EGP)
+                                                (Per Item)</label>
+                                            <input type="text" id="base_price" name="base_price"
+                                                   value="{{ $model->base_price }}" class="form-control"
+                                                   placeholder="Original Price"/>
                                         </div>
                                     </div>
                                     <div class="d-flex justify-content-end gap-2">
@@ -532,57 +604,93 @@
                                                 @endphp
                                                     <!-- Outer Repeater for Specifications -->
                                                 <div class="outer-repeater">
-                                                    <div class="{{ $hasSpecs ? '' :'d-none' }}" data-repeater-list="specifications">
+                                                    <div class="{{ $hasSpecs ? '' :'d-none' }}"
+                                                         data-repeater-list="specifications">
                                                         @forelse($model->specifications as $specification)
                                                             <div data-repeater-item>
-                                                                <input type="hidden" name="id" value="{{ $specification->id }}">
+                                                                <input type="hidden" name="id"
+                                                                       value="{{ $specification->id }}">
 
                                                                 <!-- Specification Fields -->
                                                                 <div class="row mt-1">
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
-                                                                            <label class="form-label label-text">Name (EN)</label>
-                                                                            <input type="text" name="name_en" value="{{ $specification->getTranslation('name','en') }}" class="form-control" placeholder="Specification Name (EN)"/>
+                                                                            <label class="form-label label-text">Name
+                                                                                (EN)</label>
+                                                                            <input type="text" name="name_en"
+                                                                                   value="{{ $specification->getTranslation('name','en') }}"
+                                                                                   class="form-control"
+                                                                                   placeholder="Specification Name (EN)"/>
                                                                         </div>
                                                                     </div>
 
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
-                                                                            <label class="form-label label-text">Name (AR)</label>
-                                                                            <input type="text" name="name_ar" value="{{ $specification->getTranslation('name','ar') }}" class="form-control" placeholder="Specification Name (AR)"/>
+                                                                            <label class="form-label label-text">Name
+                                                                                (AR)</label>
+                                                                            <input type="text" name="name_ar"
+                                                                                   value="{{ $specification->getTranslation('name','ar') }}"
+                                                                                   class="form-control"
+                                                                                   placeholder="Specification Name (AR)"/>
                                                                         </div>
                                                                     </div>
                                                                     <!-- Inner Repeater for Specification Options -->
-                                                                    <div class="inner-repeater" data-init-empty="{{ $specification->options->isEmpty() ? 'true' : 'false' }}">
+                                                                    <div class="inner-repeater"
+                                                                         data-init-empty="{{ $specification->options->isEmpty() ? 'true' : 'false' }}">
                                                                         <div data-repeater-list="specification_options">
                                                                             @foreach($specification->options as $option)
                                                                                 <div data-repeater-item>
-                                                                                    <input type="hidden" name="id" value="{{ $option->id }}">
+                                                                                    <input type="hidden" name="id"
+                                                                                           value="{{ $option->id }}">
 
-                                                                                    <div class="row d-flex flex-column flex-md-row gap-1 gap-md-0 mt-2">
+                                                                                    <div
+                                                                                        class="row d-flex flex-column flex-md-row gap-1 gap-md-0 mt-2">
                                                                                         <!-- Option Name (EN) -->
                                                                                         <div class="col">
-                                                                                            <label class="form-label label-text">Value (EN)</label>
-                                                                                            <input type="text" name="value_en" value="{{ $option->getTranslation('value','en') }}" class="form-control" placeholder="Option (EN)"/>
+                                                                                            <label
+                                                                                                class="form-label label-text">Value
+                                                                                                (EN)</label>
+                                                                                            <input type="text"
+                                                                                                   name="value_en"
+                                                                                                   value="{{ $option->getTranslation('value','en') }}"
+                                                                                                   class="form-control"
+                                                                                                   placeholder="Option (EN)"/>
                                                                                         </div>
 
                                                                                         <!-- Option Name (AR) -->
                                                                                         <div class="col">
-                                                                                            <label class="form-label label-text">Value (AR)</label>
-                                                                                            <input type="text" name="value_ar" value="{{ $option->getTranslation('value','ar') }}" class="form-control" placeholder="Option (AR)"/>
+                                                                                            <label
+                                                                                                class="form-label label-text">Value
+                                                                                                (AR)</label>
+                                                                                            <input type="text"
+                                                                                                   name="value_ar"
+                                                                                                   value="{{ $option->getTranslation('value','ar') }}"
+                                                                                                   class="form-control"
+                                                                                                   placeholder="Option (AR)"/>
                                                                                         </div>
 
                                                                                         <!-- Option Price -->
                                                                                         <div class="col">
-                                                                                            <label class="form-label label-text">Price (EGP) (Optional)</label>
-                                                                                            <input type="text" value="{{ $option->price }}" name="price" class="form-control" placeholder="Price"/>
+                                                                                            <label
+                                                                                                class="form-label label-text">Price
+                                                                                                (EGP) (Optional)</label>
+                                                                                            <input type="text"
+                                                                                                   value="{{ $option->price }}"
+                                                                                                   name="price"
+                                                                                                   class="form-control"
+                                                                                                   placeholder="Price"/>
                                                                                         </div>
                                                                                     </div>
-                                                                                    <div class="row d-flex align-items-end mt-2">
+                                                                                    <div
+                                                                                        class="row d-flex align-items-end mt-2">
                                                                                         <!-- Option Image -->
                                                                                         <div class="col-md-12">
-                                                                                            <label class="form-label label-text">Option Image</label>
-                                                                                            <div class="dropzone option-dropzone" data-existing-media='{{ json_encode($option->image ? [
+                                                                                            <label
+                                                                                                class="form-label label-text">Option
+                                                                                                Image</label>
+                                                                                            <div
+                                                                                                class="dropzone option-dropzone"
+                                                                                                data-existing-media='{{ json_encode($option->image ? [
                                                                         "id" => $option->image->id,
                                                                         "file_name" => $option->image->file_name,
                                                                         "size" => $option->image->size,
@@ -590,16 +698,45 @@
                                                                     ] : null) }}'>
                                                                                             </div>
 
-                                                                                            <input type="hidden" name="option_image" class="uploadedImage" value="{{ $option->image?->id }}">
+                                                                                            <input type="hidden"
+                                                                                                   name="option_image"
+                                                                                                   class="uploadedImage"
+                                                                                                   value="{{ $option->image?->id }}">
                                                                                         </div>
                                                                                         <span
                                                                                             class="image-hint small text-end">
                                                 Max size: 1MB | Dimensions: 200x200 px
                                             </span>
+                                                                                        <div class="col-md-12 mt-1">
+                                                                                            <label
+                                                                                                class="form-label label-text">Choose
+                                                                                                from Product
+                                                                                                Images</label>
 
-                                                                                        <div class="col-12 text-end mt-1 mb-2">
-                                                                                            <button type="button" class="btn btn-outline-danger" data-repeater-delete>
-                                                                                                <i data-feather="x" class="me-25"></i>
+                                                                                            <select
+                                                                                                name="product_image_id"
+                                                                                                class="form-select option-image-from-product">
+                                                                                                <option value="">—
+                                                                                                    Select image —
+                                                                                                </option>
+                                                                                                @if($model->getMedia('category_extra_images')->isNotEmpty())
+                                                                                                    @foreach($model->getMedia('category_extra_images') as $media)
+                                                                                                        <option
+                                                                                                            value="{{  $media->id }}" @selected($media->custom_properties['spec_option_id'])>{{  $media->file_name }}</option>
+                                                                                                    @endforeach
+                                                                                                @endif
+                                                                                            </select>
+
+                                                                                            <!-- this will be sent to backend -->
+                                                                                            {{--                                                                                    <input type="hidden" name="product_image_id" class="option-product-image-id" value="">--}}
+                                                                                        </div>
+                                                                                        <div
+                                                                                            class="col-12 text-end mt-1 mb-2">
+                                                                                            <button type="button"
+                                                                                                    class="btn btn-outline-danger"
+                                                                                                    data-repeater-delete>
+                                                                                                <i data-feather="x"
+                                                                                                   class="me-25"></i>
                                                                                                 Delete Value
                                                                                             </button>
                                                                                         </div>
@@ -611,7 +748,9 @@
                                                                         <!-- Add Option Button -->
                                                                         <div class="row">
                                                                             <div class="col-12">
-                                                                                <button type="button" class="btn primary-text-color bg-white mt-2" data-repeater-create>
+                                                                                <button type="button"
+                                                                                        class="btn primary-text-color bg-white mt-2"
+                                                                                        data-repeater-create>
                                                                                     <i data-feather="plus"></i>
                                                                                     <span> Add New Value</span>
                                                                                 </button>
@@ -622,7 +761,9 @@
 
                                                                     <!-- Delete Specification Button -->
                                                                     <div class="col-12 text-end mt-1 mb-2">
-                                                                        <button type="button" class="btn btn-outline-danger" data-repeater-delete>
+                                                                        <button type="button"
+                                                                                class="btn btn-outline-danger"
+                                                                                data-repeater-delete>
                                                                             <i data-feather="x" class="me-25"></i>
                                                                             Delete Spec
                                                                         </button>
@@ -634,15 +775,21 @@
                                                                 <div class="row mt-1">
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
-                                                                            <label class="form-label label-text">Name (EN)</label>
-                                                                            <input type="text" name="name_en" class="form-control" placeholder="Specification Name (EN)"/>
+                                                                            <label class="form-label label-text">Name
+                                                                                (EN)</label>
+                                                                            <input type="text" name="name_en"
+                                                                                   class="form-control"
+                                                                                   placeholder="Specification Name (EN)"/>
                                                                         </div>
                                                                     </div>
 
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
-                                                                            <label class="form-label label-text">Name (AR)</label>
-                                                                            <input type="text" name="name_ar" class="form-control" placeholder="Specification Name (AR)"/>
+                                                                            <label class="form-label label-text">Name
+                                                                                (AR)</label>
+                                                                            <input type="text" name="name_ar"
+                                                                                   class="form-control"
+                                                                                   placeholder="Specification Name (AR)"/>
                                                                         </div>
                                                                     </div>
 
@@ -650,38 +797,77 @@
                                                                     <div class="inner-repeater">
                                                                         <div data-repeater-list="specification_options">
                                                                             <div data-repeater-item>
-                                                                                <div class="row d-flex align-items-end mt-2">
+                                                                                <div
+                                                                                    class="row d-flex align-items-end mt-2">
                                                                                     <div class="col">
-                                                                                        <label class="form-label label-text">Value (EN)</label>
-                                                                                        <input type="text" name="value_en" class="form-control" placeholder="Option (EN)"/>
+                                                                                        <label
+                                                                                            class="form-label label-text">Value
+                                                                                            (EN)</label>
+                                                                                        <input type="text"
+                                                                                               name="value_en"
+                                                                                               class="form-control"
+                                                                                               placeholder="Option (EN)"/>
                                                                                     </div>
 
                                                                                     <div class="col">
-                                                                                        <label class="form-label label-text">Value (AR)</label>
-                                                                                        <input type="text" name="value_ar" class="form-control" placeholder="Option (AR)"/>
+                                                                                        <label
+                                                                                            class="form-label label-text">Value
+                                                                                            (AR)</label>
+                                                                                        <input type="text"
+                                                                                               name="value_ar"
+                                                                                               class="form-control"
+                                                                                               placeholder="Option (AR)"/>
                                                                                     </div>
 
                                                                                     <div class="col">
-                                                                                        <label class="form-label label-text">Price (EGP) (Optional)</label>
-                                                                                        <input type="text" name="price" class="form-control" placeholder="Price"/>
+                                                                                        <label
+                                                                                            class="form-label label-text">Price
+                                                                                            (EGP) (Optional)</label>
+                                                                                        <input type="text" name="price"
+                                                                                               class="form-control"
+                                                                                               placeholder="Price"/>
                                                                                     </div>
                                                                                 </div>
 
-                                                                                <div class="row d-flex align-items-end mt-2">
+                                                                                <div
+                                                                                    class="row d-flex align-items-end mt-2">
                                                                                     <div class="col-md-12">
-                                                                                        <label class="form-label label-text">Option Image</label>
-                                                                                        <div class="dropzone option-dropzone"></div>
-                                                                                        <input type="hidden" name="option_image" class="uploadedImage">
+                                                                                        <label
+                                                                                            class="form-label label-text">Option
+                                                                                            Image</label>
+                                                                                        <div
+                                                                                            class="dropzone option-dropzone"></div>
+                                                                                        <input type="hidden"
+                                                                                               name="option_image"
+                                                                                               class="uploadedImage">
                                                                                     </div>
                                                                                 </div>
                                                                                 <span
                                                                                     class="image-hint small text-end">
                                                 Max size: 1MB | Dimensions: 200x200 px
                                             </span>
+                                                                                <div class="col-md-12 mt-1">
+                                                                                    <label
+                                                                                        class="form-label label-text">Choose
+                                                                                        from Product Images</label>
+
+                                                                                    <select name="product_image_id"
+                                                                                            class="form-select option-image-from-product">
+                                                                                        <option value="">— Select image
+                                                                                            —
+                                                                                        </option>
+                                                                                    </select>
+
+                                                                                    <!-- this will be sent to backend -->
+                                                                                    {{--                                                                                    <input type="hidden" name="product_image_id" class="option-product-image-id" value="">--}}
+                                                                                </div>
                                                                                 <!-- ✅ Delete Value Button -->
                                                                                 <div class="col-12 text-end mt-1 mb-2">
-                                                                                    <button type="button" class="btn btn-outline-danger" data-repeater-delete>
-                                                                                        <i data-feather="x" class="me-25"></i>
+                                                                                    <button type="button"
+                                                                                            class="btn btn-outline-danger"
+                                                                                            data-repeater-delete>
+                                                                                        <i data-feather="x"
+                                                                                           class="me-25"></i>
                                                                                         Delete Value
                                                                                     </button>
                                                                                 </div>
@@ -692,7 +878,9 @@
                                                                         <!-- Add Option Button -->
                                                                         <div class="row">
                                                                             <div class="col-12">
-                                                                                <button type="button" class="btn primary-text-color bg-white mt-2" data-repeater-create>
+                                                                                <button type="button"
+                                                                                        class="btn primary-text-color bg-white mt-2"
+                                                                                        data-repeater-create>
                                                                                     <i data-feather="plus"></i>
                                                                                     <span>Add New Value</span>
                                                                                 </button>
@@ -701,7 +889,9 @@
                                                                     </div>
 
                                                                     <div class="col-12 text-end mt-1 mb-2">
-                                                                        <button type="button" class="btn btn-outline-danger" data-repeater-delete>
+                                                                        <button type="button"
+                                                                                class="btn btn-outline-danger"
+                                                                                data-repeater-delete>
                                                                             <i data-feather="x" class="me-25"></i>
                                                                             Delete Spec
                                                                         </button>
@@ -714,7 +904,9 @@
                                                     <!-- Add New Specification Button -->
                                                     <div class="row">
                                                         <div class="col-12">
-                                                            <button type="button" class="w-100 rounded-3 p-1 text-dark" style="border: 2px dashed #CED5D4; background-color: #EBEFEF" data-repeater-create>
+                                                            <button type="button" class="w-100 rounded-3 p-1 text-dark"
+                                                                    style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
+                                                                    data-repeater-create>
                                                                 <i data-feather="plus" class="me-25"></i> <span>Add New Spec</span>
                                                             </button>
                                                         </div>
@@ -727,9 +919,12 @@
                                     <!-- Submit -->
                                     <div class="col-12 d-flex justify-content-end gap-1">
                                         <button type="button" class="btn btn-secondary prev-tab">Back</button>
-                                        <button type="submit" class="btn btn-primary me-1 saveChangesButton" id="SaveChangesButton">
+                                        <button type="submit" class="btn btn-primary me-1 saveChangesButton"
+                                                id="SaveChangesButton">
                                             <span class="btn-text">Edit Product</span>
-                                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
+                                            <span id="saveLoader"
+                                                  class="spinner-border spinner-border-sm d-none saveLoader"
+                                                  role="status" aria-hidden="true"></span>
                                         </button>
                                     </div>
                                 </div>
@@ -753,179 +948,179 @@
 @endsection
 
 @section('page-script')
-{{--    <script>--}}
-{{--        // keep color picker & text field in sync--}}
-{{--        document.addEventListener("input", (e) => {--}}
-{{--            if (e.target.classList.contains("color-picker")) {--}}
-{{--                const picker = e.target;--}}
-{{--                const text = picker.closest(".d-flex").querySelector(".color-hex-input");--}}
-{{--                text.value = picker.value.toUpperCase();--}}
-{{--            }--}}
+    {{--    <script>--}}
+    {{--        // keep color picker & text field in sync--}}
+    {{--        document.addEventListener("input", (e) => {--}}
+    {{--            if (e.target.classList.contains("color-picker")) {--}}
+    {{--                const picker = e.target;--}}
+    {{--                const text = picker.closest(".d-flex").querySelector(".color-hex-input");--}}
+    {{--                text.value = picker.value.toUpperCase();--}}
+    {{--            }--}}
 
-{{--            if (e.target.classList.contains("color-hex-input")) {--}}
-{{--                const text = e.target;--}}
-{{--                const picker = text.closest(".d-flex").querySelector(".color-picker");--}}
-{{--                let val = text.value.trim().toUpperCase();--}}
+    {{--            if (e.target.classList.contains("color-hex-input")) {--}}
+    {{--                const text = e.target;--}}
+    {{--                const picker = text.closest(".d-flex").querySelector(".color-picker");--}}
+    {{--                let val = text.value.trim().toUpperCase();--}}
 
-{{--                if (!val.startsWith("#")) val = "#" + val;--}}
-{{--                text.value = val;--}}
+    {{--                if (!val.startsWith("#")) val = "#" + val;--}}
+    {{--                text.value = val;--}}
 
-{{--                if (/^#([0-9A-F]{6})$/.test(val)) {--}}
-{{--                    picker.value = val;--}}
-{{--                }--}}
-{{--            }--}}
-{{--        });--}}
-{{--    </script>--}}
-{{--    <script>--}}
-{{--        Dropzone.autoDiscover = false;--}}
+    {{--                if (/^#([0-9A-F]{6})$/.test(val)) {--}}
+    {{--                    picker.value = val;--}}
+    {{--                }--}}
+    {{--            }--}}
+    {{--        });--}}
+    {{--    </script>--}}
+    {{--    <script>--}}
+    {{--        Dropzone.autoDiscover = false;--}}
 
-{{--        function initColorItem(item) {--}}
-{{--            const dropzoneElement = item.querySelector('.color-dropzone');--}}
-{{--            const hiddenInput = item.querySelector('.color-image-hidden');--}}
+    {{--        function initColorItem(item) {--}}
+    {{--            const dropzoneElement = item.querySelector('.color-dropzone');--}}
+    {{--            const hiddenInput = item.querySelector('.color-image-hidden');--}}
 
-{{--            if (!dropzoneElement || !hiddenInput) return;--}}
-{{--            if (dropzoneElement.dropzone) return; // prevent double init--}}
+    {{--            if (!dropzoneElement || !hiddenInput) return;--}}
+    {{--            if (dropzoneElement.dropzone) return; // prevent double init--}}
 
-{{--            const existingMedia = dropzoneElement.dataset.existingMedia--}}
-{{--                ? JSON.parse(dropzoneElement.dataset.existingMedia)--}}
-{{--                : null;--}}
+    {{--            const existingMedia = dropzoneElement.dataset.existingMedia--}}
+    {{--                ? JSON.parse(dropzoneElement.dataset.existingMedia)--}}
+    {{--                : null;--}}
 
-{{--            const dz = new Dropzone(dropzoneElement, {--}}
-{{--                url: "{{ route('media.store') }}",--}}
-{{--                paramName: "file",--}}
-{{--                maxFiles: 1,--}}
-{{--                maxFilesize: 1, // MB--}}
-{{--                acceptedFiles: "image/*",--}}
-{{--                headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},--}}
-{{--                addRemoveLinks: true,--}}
-{{--                dictDefaultMessage: "Drop image or click",--}}
-{{--                init: function () {--}}
-{{--                    const dropzone = this;--}}
+    {{--            const dz = new Dropzone(dropzoneElement, {--}}
+    {{--                url: "{{ route('media.store') }}",--}}
+    {{--                paramName: "file",--}}
+    {{--                maxFiles: 1,--}}
+    {{--                maxFilesize: 1, // MB--}}
+    {{--                acceptedFiles: "image/*",--}}
+    {{--                headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},--}}
+    {{--                addRemoveLinks: true,--}}
+    {{--                dictDefaultMessage: "Drop image or click",--}}
+    {{--                init: function () {--}}
+    {{--                    const dropzone = this;--}}
 
-{{--                    if (existingMedia) {--}}
-{{--                        const mockFile = {--}}
-{{--                            name: existingMedia.file_name,--}}
-{{--                            size: existingMedia.size,--}}
-{{--                            _hiddenInputId: existingMedia.id--}}
-{{--                        };--}}
+    {{--                    if (existingMedia) {--}}
+    {{--                        const mockFile = {--}}
+    {{--                            name: existingMedia.file_name,--}}
+    {{--                            size: existingMedia.size,--}}
+    {{--                            _hiddenInputId: existingMedia.id--}}
+    {{--                        };--}}
 
-{{--                        dropzone.emit("addedfile", mockFile);--}}
-{{--                        dropzone.emit("thumbnail", mockFile, existingMedia.original_url);--}}
-{{--                        dropzone.emit("complete", mockFile);--}}
-{{--                        dropzone.files.push(mockFile);--}}
+    {{--                        dropzone.emit("addedfile", mockFile);--}}
+    {{--                        dropzone.emit("thumbnail", mockFile, existingMedia.original_url);--}}
+    {{--                        dropzone.emit("complete", mockFile);--}}
+    {{--                        dropzone.files.push(mockFile);--}}
 
-{{--                        hiddenInput.value = existingMedia.id;--}}
-{{--                    }--}}
+    {{--                        hiddenInput.value = existingMedia.id;--}}
+    {{--                    }--}}
 
-{{--                    // ✅ success upload--}}
-{{--                    dropzone.on("success", function (file, response) {--}}
-{{--                        if (response.success && response.data) {--}}
-{{--                            file._hiddenInputId = response.data.id;--}}
-{{--                            hiddenInput.value = response.data.id;--}}
-{{--                        }--}}
-{{--                    });--}}
+    {{--                    // ✅ success upload--}}
+    {{--                    dropzone.on("success", function (file, response) {--}}
+    {{--                        if (response.success && response.data) {--}}
+    {{--                            file._hiddenInputId = response.data.id;--}}
+    {{--                            hiddenInput.value = response.data.id;--}}
+    {{--                        }--}}
+    {{--                    });--}}
 
-{{--                    // ✅ removed file--}}
-{{--                    dropzone.on("removedfile", function (file) {--}}
-{{--                        if (hiddenInput.value == file._hiddenInputId) {--}}
-{{--                            hiddenInput.value = "";--}}
-{{--                        }--}}
+    {{--                    // ✅ removed file--}}
+    {{--                    dropzone.on("removedfile", function (file) {--}}
+    {{--                        if (hiddenInput.value == file._hiddenInputId) {--}}
+    {{--                            hiddenInput.value = "";--}}
+    {{--                        }--}}
 
-{{--                        if (file._hiddenInputId) {--}}
-{{--                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {--}}
-{{--                                method: "DELETE",--}}
-{{--                                headers: {--}}
-{{--                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content--}}
-{{--                                }--}}
-{{--                            });--}}
-{{--                        }--}}
-{{--                    });--}}
-{{--                }--}}
-{{--            });--}}
-
-
-{{--            const colorPicker = item.querySelector('.color-picker');--}}
-{{--            const hexInput = item.querySelector('.color-hex-input');--}}
-
-{{--            if (colorPicker && hexInput) {--}}
-{{--                colorPicker.addEventListener('input', function () {--}}
-{{--                    const hex = this.value.toUpperCase();--}}
-{{--                    hexInput.value = hex;--}}
-{{--                });--}}
-
-{{--                hexInput.addEventListener('input', function () {--}}
-{{--                    let v = this.value.toUpperCase();--}}
-{{--                    if (!v.startsWith('#')) v = '#' + v;--}}
-{{--                    this.value = v;--}}
-
-{{--                    if (/^#([0-9A-F]{6})$/.test(v)) {--}}
-{{--                        colorPicker.value = v;--}}
-{{--                    }--}}
-{{--                });--}}
-{{--            }--}}
-{{--        }--}}
-
-{{--        document.addEventListener("DOMContentLoaded", function () {--}}
-{{--            const $colorRepeater = $('.color-repeater');--}}
-
-{{--            // 1) init Dropzone على العناصر الموجودة (ألوان قديمة)--}}
-{{--            $colorRepeater.find('[data-repeater-item]').each(function () {--}}
-{{--                initColorItem(this);--}}
-{{--            });--}}
-
-{{--            // 2) init jquery.repeater--}}
-{{--            if (window.$ && $.fn.repeater) {--}}
-{{--                $colorRepeater.repeater({--}}
-{{--                    initEmpty: {{ $colors->isEmpty() ? 'true' : 'false' }},--}}
-{{--                    show: function () {--}}
-{{--                        $(this).slideDown();--}}
-
-{{--                        const item           = this;--}}
-{{--                        const dropzoneElement = item.querySelector('.color-dropzone');--}}
-{{--                        const hiddenInput     = item.querySelector('.color-image-hidden');--}}
-{{--                        const colorPicker     = item.querySelector('.color-picker');--}}
-{{--                        const hexInput        = item.querySelector('.color-hex-input');--}}
-
-{{--                        if (dropzoneElement) {--}}
-{{--                            // 🧹 1) امسح أي DOM منسوخ من الصف القديم (previews, classes...)--}}
-{{--                            dropzoneElement.innerHTML =--}}
-{{--                                '<div class="dz-message" data-dz-message><span>Drop image or click</span></div>';--}}
-
-{{--                            dropzoneElement.classList.remove('dz-started', 'dz-max-files-reached');--}}
-{{--                            // امسح أي media منسوخ--}}
-{{--                            dropzoneElement.dataset.existingMedia = '';--}}
-{{--                        }--}}
-
-{{--                        // 2) امسح قيمة الـ image_id--}}
-{{--                        if (hiddenInput) {--}}
-{{--                            hiddenInput.value = '';--}}
-{{--                        }--}}
-
-{{--                        // 3) Reset للّون الافتراضي--}}
-{{--                        if (colorPicker) colorPicker.value = '#000000';--}}
-{{--                        if (hexInput)    hexInput.value    = '#000000';--}}
-
-{{--                        // 4) الآن نعمل init للـ Dropzone + events بتاعة اللون--}}
-{{--                        initColorItem(item);--}}
-
-{{--                        if (window.feather) feather.replace();--}}
-{{--                    },--}}
-{{--                    hide: function (deleteElement) {--}}
-{{--                        $(this).slideUp(deleteElement);--}}
-{{--                    }--}}
-{{--                });--}}
+    {{--                        if (file._hiddenInputId) {--}}
+    {{--                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {--}}
+    {{--                                method: "DELETE",--}}
+    {{--                                headers: {--}}
+    {{--                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content--}}
+    {{--                                }--}}
+    {{--                            });--}}
+    {{--                        }--}}
+    {{--                    });--}}
+    {{--                }--}}
+    {{--            });--}}
 
 
-{{--                @if($colors->isEmpty())--}}
-{{--                const hasItems = $colorRepeater.find('[data-repeater-item]').length > 0;--}}
-{{--                if (!hasItems) {--}}
-{{--                    $colorRepeater.find('[data-repeater-create]').first().trigger('click');--}}
-{{--                }--}}
-{{--                @endif--}}
-{{--            }--}}
+    {{--            const colorPicker = item.querySelector('.color-picker');--}}
+    {{--            const hexInput = item.querySelector('.color-hex-input');--}}
 
-{{--        });--}}
-{{--    </script>--}}
+    {{--            if (colorPicker && hexInput) {--}}
+    {{--                colorPicker.addEventListener('input', function () {--}}
+    {{--                    const hex = this.value.toUpperCase();--}}
+    {{--                    hexInput.value = hex;--}}
+    {{--                });--}}
+
+    {{--                hexInput.addEventListener('input', function () {--}}
+    {{--                    let v = this.value.toUpperCase();--}}
+    {{--                    if (!v.startsWith('#')) v = '#' + v;--}}
+    {{--                    this.value = v;--}}
+
+    {{--                    if (/^#([0-9A-F]{6})$/.test(v)) {--}}
+    {{--                        colorPicker.value = v;--}}
+    {{--                    }--}}
+    {{--                });--}}
+    {{--            }--}}
+    {{--        }--}}
+
+    {{--        document.addEventListener("DOMContentLoaded", function () {--}}
+    {{--            const $colorRepeater = $('.color-repeater');--}}
+
+    {{--            // 1) init Dropzone على العناصر الموجودة (ألوان قديمة)--}}
+    {{--            $colorRepeater.find('[data-repeater-item]').each(function () {--}}
+    {{--                initColorItem(this);--}}
+    {{--            });--}}
+
+    {{--            // 2) init jquery.repeater--}}
+    {{--            if (window.$ && $.fn.repeater) {--}}
+    {{--                $colorRepeater.repeater({--}}
+    {{--                    initEmpty: {{ $colors->isEmpty() ? 'true' : 'false' }},--}}
+    {{--                    show: function () {--}}
+    {{--                        $(this).slideDown();--}}
+
+    {{--                        const item           = this;--}}
+    {{--                        const dropzoneElement = item.querySelector('.color-dropzone');--}}
+    {{--                        const hiddenInput     = item.querySelector('.color-image-hidden');--}}
+    {{--                        const colorPicker     = item.querySelector('.color-picker');--}}
+    {{--                        const hexInput        = item.querySelector('.color-hex-input');--}}
+
+    {{--                        if (dropzoneElement) {--}}
+    {{--                            // 🧹 1) امسح أي DOM منسوخ من الصف القديم (previews, classes...)--}}
+    {{--                            dropzoneElement.innerHTML =--}}
+    {{--                                '<div class="dz-message" data-dz-message><span>Drop image or click</span></div>';--}}
+
+    {{--                            dropzoneElement.classList.remove('dz-started', 'dz-max-files-reached');--}}
+    {{--                            // امسح أي media منسوخ--}}
+    {{--                            dropzoneElement.dataset.existingMedia = '';--}}
+    {{--                        }--}}
+
+    {{--                        // 2) امسح قيمة الـ image_id--}}
+    {{--                        if (hiddenInput) {--}}
+    {{--                            hiddenInput.value = '';--}}
+    {{--                        }--}}
+
+    {{--                        // 3) Reset للّون الافتراضي--}}
+    {{--                        if (colorPicker) colorPicker.value = '#000000';--}}
+    {{--                        if (hexInput)    hexInput.value    = '#000000';--}}
+
+    {{--                        // 4) الآن نعمل init للـ Dropzone + events بتاعة اللون--}}
+    {{--                        initColorItem(item);--}}
+
+    {{--                        if (window.feather) feather.replace();--}}
+    {{--                    },--}}
+    {{--                    hide: function (deleteElement) {--}}
+    {{--                        $(this).slideUp(deleteElement);--}}
+    {{--                    }--}}
+    {{--                });--}}
+
+
+    {{--                @if($colors->isEmpty())--}}
+    {{--                const hasItems = $colorRepeater.find('[data-repeater-item]').length > 0;--}}
+    {{--                if (!hasItems) {--}}
+    {{--                    $colorRepeater.find('[data-repeater-create]').first().trigger('click');--}}
+    {{--                }--}}
+    {{--                @endif--}}
+    {{--            }--}}
+
+    {{--        });--}}
+    {{--    </script>--}}
     <script>
         $(document).ready(function () {
             var $outerRepeater = $('.outer-repeater');
@@ -970,7 +1165,7 @@
                 },
                 hide: function (deleteElement) {
                     var $item = $(this);
-                    $item.slideUp(deleteElement, function() {
+                    $item.slideUp(deleteElement, function () {
                         var $specList = $item.closest('.outer-repeater').find('[data-repeater-list="specifications"]');
                         var $items = $specList.find('[data-repeater-item]').not(':hidden');
 
@@ -1063,6 +1258,49 @@
     <script>
         Dropzone.autoDiscover = false;
 
+        function refreshAllOptionImageSelects() {
+            const images = window.__PRODUCT_IMAGES__ || [];
+
+            document.querySelectorAll('.option-image-from-product').forEach(select => {
+                const current = select.value; // keep selection if possible
+                // rebuild options
+                select.innerHTML = `<option value="">— Select image —</option>` + images.map(img =>
+                    `<option value="${img.id}" data-img="${img.url}">${img.name}</option>`
+                ).join('');
+
+                // restore
+                if (current) select.value = current;
+            });
+
+            // re-init select2 with thumbnails (idempotent-ish)
+            if (window.$ && $.fn.select2) {
+                $('.option-image-from-product').each(function () {
+                    // destroy if already initialized
+                    // if ($(this).data('select2')) $(this).select2('destroy');
+
+                    $(this).select2({
+                        width: '100%',
+                        templateResult: function (opt) {
+                            if (!opt.id) return opt.text;
+                            const url = $(opt.element).data('img');
+                            if (!url) return opt.text;
+                            const $el = $(
+                                `<span style="display:flex;align-items:center;gap:8px;">
+              <img src="${url}" style="width:32px;height:32px;object-fit:cover;border-radius:6px;" />
+              <span>${opt.text}</span>
+            </span>`
+                            );
+                            return $el;
+                        },
+                        templateSelection: function (opt) {
+                            if (!opt.id) return opt.text;
+                            return opt.text;
+                        }
+                    });
+                });
+            }
+        }
+
         const multiDropzone = new Dropzone("#multi-dropzone", {
             url: "{{ route('media.store') }}",   // backend route for image upload
             paramName: "file",
@@ -1101,34 +1339,50 @@
                     document.querySelector("#multi-uploaded-images").appendChild(input);
                 }
                 @endforeach
-                @endif
+                    @endif
 
-
+                    window.__PRODUCT_IMAGES__ = window.__PRODUCT_IMAGES__ || [];
                 // ✅ On upload success
                 dz.on("success", function (file, response) {
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
 
+                        // ✅ store in global list (need url)
+                        const imgUrl = response.data.url || response.data.original_url || response.data.path;
+                        window.__PRODUCT_IMAGES__.push({
+                            id: response.data.id,
+                            url: imgUrl,
+                            name: response.data.file_name
+                        });
+
+                        // hidden input (existing)
                         let hiddenInput = document.createElement("input");
                         hiddenInput.type = "hidden";
                         hiddenInput.name = "images_ids[]";
                         hiddenInput.value = response.data.id;
                         hiddenInput.id = "hidden-image-" + response.data.id;
                         document.querySelector("#multi-uploaded-images").appendChild(hiddenInput);
+
+                        // ✅ refresh all option selects
+                        refreshAllOptionImageSelects();
                     }
                 });
 
                 // ✅ On remove
                 dz.on("removedfile", function (file) {
                     if (file._hiddenInputId) {
+                        // remove from registry
+                        window.__PRODUCT_IMAGES__ = (window.__PRODUCT_IMAGES__ || []).filter(x => x.id !== file._hiddenInputId);
+
+                        // remove hidden input
                         let hiddenInput = document.getElementById("hidden-image-" + file._hiddenInputId);
                         if (hiddenInput) hiddenInput.remove();
 
+                        refreshAllOptionImageSelects();
+
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            }
+                            headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content}
                         });
                     }
                 });
