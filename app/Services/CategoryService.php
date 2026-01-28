@@ -376,7 +376,6 @@ class CategoryService extends BaseService
     {
         $model = $this->repository->update($validatedData, $id);
         if (Arr::has($validatedData, 'image_id') && !is_null($validatedData['image_id'])) {
-            $model->clearMediaCollection('categories');
             Media::where('id', $validatedData['image_id'])
                 ->update([
                     'model_type' => get_class($model),
@@ -385,7 +384,6 @@ class CategoryService extends BaseService
                 ]);
         }
         if (Arr::has($validatedData, 'mobile_banner_id') && !is_null($validatedData['mobile_banner_id'])) {
-            $model->clearMediaCollection('mobile_banner');
 
             Media::where('id', $validatedData['mobile_banner_id'])
                 ->update([
@@ -395,7 +393,7 @@ class CategoryService extends BaseService
                 ]);
         }
         if (Arr::has($validatedData, 'website_banner_id') && !is_null($validatedData['website_banner_id'])) {
-            $model->clearMediaCollection('website_banner');
+            $model->clearMediaCollection('');
             Media::where('id', $validatedData['website_banner_id'])
                 ->update([
                     'model_type' => get_class($model),
