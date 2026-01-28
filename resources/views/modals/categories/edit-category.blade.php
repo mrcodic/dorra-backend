@@ -82,16 +82,7 @@
                         <div id="edit-upload-progress" class="progress mt-2 d-none w-50">
                             <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
                         </div>
-
-                        <!-- Uploaded Image Preview -->
-                        <div id="edit-uploaded-image"
-                            class="uploaded-image d-none position-relative mt-1 d-flex align-items-center gap-2">
-                            <img src="" id="edit-preview-image" alt="Uploaded" class="img-fluid rounded"
-                                style="width: 50px; height: 50px; object-fit: cover;">
-                            <div id="edit-file-details" class="file-details">
-                                <div class="file-name fw-bold"></div>
-                                <div class="file-size text-muted small"></div>
-                            </div>
+                    
                     </div>
                     <!-- Name and Description Fields -->
                     <div class="row my-1">
