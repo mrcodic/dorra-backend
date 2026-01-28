@@ -466,6 +466,10 @@ class CategoryService extends BaseService
             ->addColumn('imageId', function ($category) {
                 return $category->getFirstMedia('categories')?->id;
             })
+            ->addColumn('website_banner', fn($c) => $c->getFirstMediaUrl('website_banner'))
+            ->addColumn('mobile_banner', fn($c) => $c->getFirstMediaUrl('mobile_banner'))
+            ->addColumn('website_banner_id', fn($c) => $c->getFirstMedia('website_banner')?->id)
+            ->addColumn('mobile_banner_id', fn($c) => $c->getFirstMedia('mobile_banner')?->id)
             ->addColumn('added_date', function ($category) {
                 return $category->created_at?->format('d/n/Y');
             })

@@ -30,7 +30,7 @@
                         <div class="col-md-6">
                             <div class="mb-2">
                                 <label class="form-label label-text" for="edit-website-image-banner-dropzone">
-                                    Category Banner (Website) <span
+                                    Product Banner (Website) <span
                                         style="color: red; font-size: 20px;">*</span>
                                 </label>
 
@@ -47,15 +47,14 @@
                                                 Max size: 1MB | Dimensions: 1920×520 px
                                             </span>
                                 <!-- ✅ Hidden input outside Dropzone -->
-                                <input type="hidden" name="website_banner_id" id="editUploadedImageWebsiteBanner"
-                                      >
+                                <input type="hidden" name="website_banner_id" id="editUploadedImageWebsiteBanner">
 
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-2">
                                 <label class="form-label label-text" for="edit-mobile-image-banner-dropzone">
-                                    Category Banner (Mobile) <span
+                                    Product Banner (Mobile) <span
                                         style="color: red; font-size: 20px;">*</span>
                                 </label>
 

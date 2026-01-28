@@ -22,7 +22,7 @@ const dt_user_table = $(".category-list-table").DataTable({
         {
             data: "id",
             name: "categories.id",
-            orderable:false,
+            orderable: false,
             searchable: false,
             render: function (data, type, row) {
                 return row?.action?.can_delete
@@ -50,7 +50,11 @@ const dt_user_table = $(".category-list-table").DataTable({
                 if (Array.isArray(data)) {
                     items = data;
                 } else if (typeof data === "string" && data.trim() !== "") {
-                    try { items = JSON.parse(data); } catch { items = []; }
+                    try {
+                        items = JSON.parse(data);
+                    } catch {
+                        items = [];
+                    }
                 }
 
                 // clean & ensure strings
@@ -62,7 +66,7 @@ const dt_user_table = $(".category-list-table").DataTable({
                 if (!items.length) return "-";
 
                 const esc = s => String(s).replace(/[&<>"']/g, m => ({
-                    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+                    "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
                 }[m]));
 
                 return `
@@ -82,8 +86,8 @@ const dt_user_table = $(".category-list-table").DataTable({
 
             searchable: false,
             render: function (data, type, row) {
-                const canShow   = row?.action?.can_show   ?? false;
-                const canEdit   = row?.action?.can_edit   ?? false;
+                const canShow = row?.action?.can_show ?? false;
+                const canEdit = row?.action?.can_edit ?? false;
                 const canDelete = row?.action?.can_delete ?? false;
                 const btns = [];
 
@@ -107,14 +111,16 @@ const dt_user_table = $(".category-list-table").DataTable({
                 </a>`);
                 }
                 if (canEdit) {
-                btns.push(` <a href="#" class="edit-details"
+                    btns.push(` <a href="#" class="edit-details"
    data-id="${data}"
    data-name_ar="${row.name_ar}"
    data-name_en="${row.name_en}"
    data-has_mockup="${row.has_mockup}"
    data-image="${row.image}"
-   data-website_image_id="${row.imageId}"
-   data-mobile_image_id="${row.websiteImageId}"
+ data-website_image="${row.website_banner}"
+data-mobile_image="${row.mobile_banner}"
+data-website_image_id="${row.website_banner_id}"
+data-mobile_image_id="${row.mobile_banner_id}"
    data-image_id="${row.mobileImageId}"
    data-description_en="${row.description_en}"
    data-description_ar="${row.description_ar}"
@@ -315,12 +321,31 @@ $(document).ready(function () {
         });
     });
 
+    function preloadDropzoneImage(dropzone, imageUrl, imageId, hiddenInputId) {
+        if (!imageUrl) return;
+
+        const mockFile = {
+            name: "Existing Image",
+            size: 123456,
+            accepted: true
+        };
+
+        dropzone.emit("addedfile", mockFile);
+        dropzone.emit("thumbnail", mockFile, imageUrl);
+        dropzone.emit("complete", mockFile);
+
+        mockFile._hiddenInputId = imageId;
+        dropzone.files.push(mockFile);
+
+        document.getElementById(hiddenInputId).value = imageId;
+    }
+
 // ================== VIEW DETAILS ==================
     // One handler for BOTH view + edit
     $(document).on("click", ".view-details, .edit-details", function (e) {
         const $btn = $(this);
         const action = $btn.data("action") || "modal";
-        const url    = $btn.data("url");
+        const url = $btn.data("url");
         const modalId = $btn.data("modal") || ($btn.hasClass("edit-details") ? "#editCategoryModal" : "#showCategoryModal");
 
         if (action === "redirect" && url) {
@@ -332,9 +357,44 @@ $(document).ready(function () {
         // Open modal path
         e.preventDefault();
 
+        if (modalId === "#editCategoryModal") {
+
+
+// Clear old previews
+            editDropzone.removeAllFiles(true);
+            editWebsiteDropzone.removeAllFiles(true);
+            editMobileDropzone.removeAllFiles(true);
+
+
+// Main Image
+            preloadDropzoneImage(
+                editDropzone,
+                $btn.data("image"),
+                $btn.data("image_id"),
+                "editUploadedImage"
+            );
+
+
+// Website Banner
+            preloadDropzoneImage(
+                editWebsiteDropzone,
+                $btn.data("website_image"),
+                $btn.data("website_image_id"),
+                "editUploadedImageWebsiteBanner"
+            );
+
+
+// Mobile Banner
+            preloadDropzoneImage(
+                editMobileDropzone,
+                $btn.data("mobile_image"),
+                $btn.data("mobile_image_id"),
+                "editUploadedImageMobileBanner"
+            );
+        }
         // Pull row data (for subcategories)
-        const table  = $(".category-list-table").DataTable();
-        const row    = $btn.closest("tr");
+        const table = $(".category-list-table").DataTable();
+        const row = $btn.closest("tr");
         const rowData = table.row(row).data() || {};
         const loc = window.locale || "en";
 
@@ -365,7 +425,8 @@ $(document).ready(function () {
                 has_mockup: "#has_mockup",
                 imgId: "#image-id",
                 subs: "#subcategories-container",
-                extra: () => {} // nothing special
+                extra: () => {
+                } // nothing special
             },
             "#editCategoryModal": {
                 nameAr: "#edit-category-name-ar",
@@ -379,7 +440,9 @@ $(document).ready(function () {
                 id: "#edit-category-id",
                 imgId: null, // not present in your edit modal
                 subs: "#subcategories-container",
-                extra: () => { $("#editCategoryModal #edit-uploaded-image").removeClass("d-none"); }
+                extra: () => {
+                    $("#editCategoryModal #edit-uploaded-image").removeClass("d-none");
+                }
             }
         };
 
