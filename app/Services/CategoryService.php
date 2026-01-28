@@ -76,8 +76,8 @@ class CategoryService extends BaseService
         if (isset($validatedData['image_id'])) {
             Media::where('id', $validatedData['image_id'])
                 ->update([
-                    'model_type' => get_class($product),
-                    'model_id' => $product->id,
+                    'model_type' => get_class($model),
+                    'model_id' => $model->id,
                     'collection_name' => 'product_main_image',
                 ]);
 
@@ -85,8 +85,8 @@ class CategoryService extends BaseService
         if (isset($validatedData['mobile_banner_id'])) {
             Media::where('id', $validatedData['mobile_banner_id'])
                 ->update([
-                    'model_type' => get_class($product),
-                    'model_id' => $product->id,
+                    'model_type' => get_class($model),
+                    'model_id' => $model->id,
                     'collection_name' => 'mobile_banner',
                 ]);
 
