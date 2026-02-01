@@ -545,7 +545,7 @@
                                                                                 (EN) <span
                                                                                     style="color: red; font-size: 20px;">*</span></label>
                                                                             <input type="text" name="name_en"
-                                                                                   class="form-control"
+                                                                                   class="form-control spec-name-en"
                                                                                    placeholder="Specification Name (EN)"/>
                                                                         </div>
                                                                     </div>
@@ -574,7 +574,7 @@
                                                                                                 style="color: red; font-size: 20px;">*</span></label>
                                                                                         <input type="text"
                                                                                                name="value_en"
-                                                                                               class="form-control"
+                                                                                               class="form-control option-value-en"
                                                                                                placeholder="Option (EN)"/>
                                                                                     </div>
 
@@ -716,6 +716,9 @@
 
                                         </div>
                                     </div>
+                                    <label class="form-label label-text mt-2">Variants</label>
+
+                                    <div id="variants-container" class="mt-2"></div>
                                 </div>
                                 <!--third tab content end -->
 
@@ -733,6 +736,141 @@
 @endsection
 
 @section('page-script')
+    <script>
+        function generateVariants() {
+            let specs = [];
+
+            // Collect all specifications
+            $('[data-repeater-list="specifications"] > [data-repeater-item]').each(function () {
+                let specName = $(this).find('.spec-name-en').val().trim();
+                let options = [];
+
+                $(this).find('.option-value-en').each(function () {
+                    let val = $(this).val().trim();
+                    if (val) options.push(val);
+                });
+
+                if (specName && options.length) {
+                    specs.push({ name: specName, options: options });
+                }
+            });
+
+            if (specs.length === 0) {
+                $('#variants-container').html('');
+                return;
+            }
+
+            // 🔥 CARTESIAN PRODUCT
+            function cartesian(arr) {
+                return arr.reduce((a, b) =>
+                        a.flatMap(d => b.options.map(e => [...d, { spec: b.name, value: e }])),
+                    [[]]
+                );
+            }
+
+            let combinations = cartesian(specs);
+
+            renderVariants(combinations);
+        }
+        function collectExistingVariantImages() {
+            let map = {};
+
+            $('.variant-box').each(function () {
+                let code = $(this).find('.variant-code-input').val();
+                let imageId = $(this).find('.variant-image-input').val();
+                console.log(imageId,code)
+                if (code && imageId) {
+                    map[code] = imageId;
+                }
+            });
+
+            return map;
+        }
+
+        function renderVariants(combinations) {
+
+            let existingImages = collectExistingVariantImages(); // 🧠 SAVE STATE
+
+            let html = '<div class="row">';
+
+            combinations.forEach((combo, index) => {
+
+                let variantCode = combo.map(c =>
+                    c.value.replace(/\s+/g, '').toLowerCase()
+                ).join('_');
+
+                let displayTitle = combo.map(c => c.value).join(' / ');
+
+                let savedImageId = existingImages[variantCode] || '';
+
+                html += `
+        <div class="col-md-3 mb-2">
+            <div class="variant-box border rounded p-2 h-100">
+
+                <div class="fw-bold small text-muted">${displayTitle}</div>
+
+                <div class="dropzone variant-dropzone" data-code="${variantCode}">
+                    <div class="dz-message">Upload Variant Image</div>
+                </div>
+
+                <input type="hidden" class="variant-code-input" name="variants[${index}][code]" value="${variantCode}" />
+                <input type="hidden" class="variant-image-input" name="variants[${index}][image]" value="${savedImageId}" />
+
+            </div>
+        </div>`;
+            });
+
+            html += '</div>';
+
+            $('#variants-container').html(html);
+
+            initVariantDropzones(existingImages); // 🔥 PASS SAVED DATA
+        }
+
+        function initVariantDropzones(existingImages = {}) {
+
+
+            $('.variant-dropzone').each(function () {
+
+                let box = $(this).closest('.variant-box');
+                let hiddenInput = box.find('.variant-image-input');
+                let code = box.find('.variant-code-input').val();
+
+                let dz = new Dropzone(this, {
+                    url: "{{ route('media.store') }}",
+                    maxFiles: 1,
+                    acceptedFiles: "image/*",
+                    addRemoveLinks: true,
+                    headers: {
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                    },
+                    success: function (file, response) {
+                        hiddenInput.val(response.data.id);
+                        file._imageId = response.data.id;
+                    }
+                });
+
+                // 🔁 Restore existing image preview
+                if (existingImages[code]) {
+                    let mockFile = { name: "Image", size: 12345 };
+                    dz.emit("addedfile", mockFile);
+                    dz.emit("thumbnail", mockFile, `/api/v1/media/${existingImages[code]}`);
+                    dz.emit("complete", mockFile);
+                    mockFile._imageId = existingImages[code];
+                }
+
+            });
+        }
+
+        $(document).on('keyup change', '.option-value-en, .spec-name-en', function () {
+            generateVariants();
+        });
+
+        $(document).on('click', '[data-repeater-create], [data-repeater-delete]', function () {
+            setTimeout(generateVariants, 300); // wait for DOM update
+        });
+
+    </script>
 
     <script>
         // keep color picker & text field in sync

@@ -10,6 +10,7 @@ use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\DimensionRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\ProductSpecificationRepositoryInterface;
+use App\Repositories\Interfaces\VariantRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
@@ -30,6 +31,7 @@ class ProductService extends BaseService
                                 public ProductSpecificationRepositoryInterface $specificationRepository,
                                 public DimensionRepositoryInterface            $dimensionRepository,
                                 public CategoryRepositoryInterface             $categoryRepository,
+                                public VariantRepositoryInterface   $variantRepository,
     )
     {
         $this->relations = ['category', 'tags', 'reviews', 'saves' => function ($query) {
@@ -152,6 +154,25 @@ class ProductService extends BaseService
         $validatedData['colors'] = $finalColors;
         return $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad,$colors) {
             $product = $this->repository->create($validatedData);
+
+            $variantsData = collect(Arr::get($validatedData, 'variants', []));
+            $variantsData->each(function ($variantData) use ($product) {
+
+                $variant = $this->variantRepository->create([
+                    'key' => $variantData['code'],
+                    'variantable_id' => $product->id,
+                    'variantable_type' => get_class($product),
+                ]);
+
+
+                Media::where('id', $variantData['image'])
+                    ->update([
+                        'model_id'   => $variant->id,
+                        'model_type' => \App\Models\Variant::class,
+                        'collection_name' => 'variants'
+                    ]);
+
+            });
             $product->load($this->relations);
             $product->tags()->sync($validatedData['tags'] ?? []);
             if (!empty($validatedData['dimensions'])) {
