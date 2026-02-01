@@ -13,10 +13,11 @@ class VariantController extends Controller
 {
     public function index(Request $request, VariantRepositoryInterface $variantRepository)
     {
-        $variant = $variantRepository->query()->where('key', $request->key)
-            ->whereVariantableId($request->variantable_id)
-            ->whereVariantableType($request->variantable_type)
-            ->first();
+        $variant = $variantRepository->query()
+            ->when($request->key, fn($query, $key) => $query->where('key', $key))
+            ->when($request->variantable_id, fn($query, $id) => $query->where('variantable_id', $id))
+            ->when($request->variantable_type, fn($query, $type) => $query->where('variantable_type', $type))
+            ->firstOrFail();
         $media = $variant->media()->first();
 
         return Response::api(
