@@ -1145,6 +1145,12 @@
             }
         });
 
+        // Trigger variants update when deleting spec or option
+        $(document).on('click', '[data-repeater-delete]', function () {
+            setTimeout(() => {
+                generateVariants();
+            }, 50);
+        });
 
     </script>
     {{--    <script>--}}

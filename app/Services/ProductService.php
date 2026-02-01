@@ -285,7 +285,9 @@ class ProductService extends BaseService
 
             $product = $this->repository->update($validatedData, $id);
             $variantsData = collect(Arr::get($validatedData, 'variants', []));
-            $variantsData->each(function ($variantData) use ($product) {
+            $submittedVariantIds = [];
+
+            $variantsData->each(function ($variantData) use ($product,&$submittedVariantIds) {
 
                 $variant = $this->variantRepository->query()->updateOrCreate(
                     ['id' => $variantData['id'] ?? null],
@@ -295,6 +297,7 @@ class ProductService extends BaseService
                         'variantable_type' => get_class($product),
                     ]);
 
+                $submittedVariantIds[] = $variant->id;
 
                 Media::where('id', $variantData['image'])
                     ->update([
@@ -303,6 +306,10 @@ class ProductService extends BaseService
                         'collection_name' => 'variants'
                     ]);
 
+            });
+            $product->variants()->whereNotIn('id', $submittedVariantIds)->each(function ($variant) {
+                $variant->clearMediaCollection();
+                $variant->delete();
             });
             $product->load($this->relations);
             $product->tags()->sync($validatedData['tags'] ?? []);

@@ -954,7 +954,11 @@
                 generateVariants(); // builds UI using DB variants
             }
         });
-
+        $(document).on('click', '[data-repeater-delete]', function () {
+            setTimeout(() => {
+                generateVariants();
+            }, 50);
+        });
 
     </script>
 

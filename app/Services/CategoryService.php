@@ -107,10 +107,9 @@ class CategoryService extends BaseService
         $validatedData['colors'] = $finalColors;
         return $this->handleTransaction(function () use ($validatedData, $colors) {
             $product = $this->repository->create($validatedData);
-            $submittedVariantIds = [];
             $variantsData = collect(Arr::get($validatedData, 'variants', []));
 
-            $variantsData->each(function ($variantData) use ($product, &$submittedVariantIds) {
+            $variantsData->each(function ($variantData) use ($product) {
 
                 $variant = $this->variantRepository->create([
                     'key' => $variantData['code'],
@@ -118,18 +117,14 @@ class CategoryService extends BaseService
                     'variantable_type' => get_class($product),
                 ]);
 
-                $submittedVariantIds[] = $variant->id;
-                Media::where('id', $variantData['image'])
-                    ->update([
-                        'model_id' => $variant->id,
-                        'model_type' => \App\Models\Variant::class,
-                        'collection_name' => 'variants'
-                    ]);
 
-            });
-            $product->variants()->whereNotIn('id', $submittedVariantIds)->each(function ($variant) {
-                $variant->clearMediaCollection();
-                $variant->delete();
+                    Media::where('id', $variantData['image'])
+                        ->update([
+                            'model_id'   => $variant->id,
+                            'model_type' => \App\Models\Variant::class,
+                            'collection_name' => 'variants'
+                        ]);
+
             });
             $product->tags()->sync($validatedData['tags'] ?? []);
             if (!empty($validatedData['dimensions'])) {
@@ -241,21 +236,21 @@ class CategoryService extends BaseService
             $product = $this->repository->update($validatedData, $id);
             $submittedVariantIds = [];
             $variantsData = collect(Arr::get($validatedData, 'variants', []));
-            $variantsData->each(function ($variantData) use ($product, &$submittedVariantIds) {
+            $variantsData->each(function ($variantData) use ($product,&$submittedVariantIds) {
 
                 $variant = $this->variantRepository->query()->updateOrCreate(
                     ['id' => $variantData['id'] ?? null],
                     [
-                        'key' => $variantData['code'],
-                        'variantable_id' => $product->id,
-                        'variantable_type' => get_class($product),
-                    ]);
+                    'key' => $variantData['code'],
+                    'variantable_id' => $product->id,
+                    'variantable_type' => get_class($product),
+                ]);
 
                 $submittedVariantIds[] = $variant->id;
 
                 Media::where('id', $variantData['image'])
                     ->update([
-                        'model_id' => $variant->id,
+                        'model_id'   => $variant->id,
                         'model_type' => \App\Models\Variant::class,
                         'collection_name' => 'variants'
                     ]);

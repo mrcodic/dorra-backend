@@ -862,7 +862,11 @@
         $(document).on('click', '[data-repeater-create], [data-repeater-delete]', function () {
             setTimeout(generateVariants, 300); // wait for DOM update
         });
-
+        $(document).on('click', '[data-repeater-delete]', function () {
+            setTimeout(() => {
+                generateVariants();
+            }, 50);
+        });
     </script>
     {{--     <script>--}}
     {{--           document.addEventListener("DOMContentLoaded", function () {--}}
