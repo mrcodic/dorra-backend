@@ -81,6 +81,10 @@ class Product extends Model implements HasMedia
     {
         return $this->belongsTo(Category::class, 'sub_category_id');
     }
+    public function variants(): MorphMany
+    {
+        return $this->morphMany(Variant::class, 'variantable');
+    }
 
     public function tags(): MorphToMany
     {

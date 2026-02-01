@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\DimensionRepositoryInterface;
+use App\Repositories\Interfaces\VariantRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
@@ -15,15 +16,16 @@ use Yajra\DataTables\DataTables;
 class CategoryService extends BaseService
 {
     public function __construct(CategoryRepositoryInterface         $repository,
-                                public DimensionRepositoryInterface $dimensionRepository,)
+                                public DimensionRepositoryInterface $dimensionRepository,
+                                public VariantRepositoryInterface   $variantRepository)
     {
         parent::__construct($repository);
     }
 
     public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10, $counts = [])
     {
-        $paginate =  request()->boolean('paginate');
-        $perPage =  request('per_page');
+        $paginate = request()->boolean('paginate');
+        $perPage = request('per_page');
         $query = $this->repository->query()
             ->withLastOfferId()
             ->with($relations)
@@ -35,11 +37,11 @@ class CategoryService extends BaseService
                 $query->where('is_has_category', request('is_has_category', 0));
             })
             ->when(request()->filled('template_id'), function ($query) {
-                $query->where(function ($query){
-                    $query->whereHas('templates',function ($query){
-                        $query->where('product_template.template_id',request('template_id'));
-                    })->orWhereHas('products.templates',function ($query){
-                        $query->where('product_template.template_id',request('template_id'));
+                $query->where(function ($query) {
+                    $query->whereHas('templates', function ($query) {
+                        $query->where('product_template.template_id', request('template_id'));
+                    })->orWhereHas('products.templates', function ($query) {
+                        $query->where('product_template.template_id', request('template_id'));
                     });;
                 });
 
@@ -81,7 +83,8 @@ class CategoryService extends BaseService
                     'collection_name' => 'mobile_banner',
                 ]);
 
-        }       if (isset($validatedData['website_banner_id'])) {
+        }
+        if (isset($validatedData['website_banner_id'])) {
             Media::where('id', $validatedData['website_banner_id'])
                 ->update([
                     'model_type' => get_class($model),
@@ -102,8 +105,27 @@ class CategoryService extends BaseService
             ];
         })->toArray();
         $validatedData['colors'] = $finalColors;
-        return $this->handleTransaction(function () use ($validatedData,$colors) {
+        return $this->handleTransaction(function () use ($validatedData, $colors) {
             $product = $this->repository->create($validatedData);
+            $variantsData = collect(Arr::get($validatedData, 'variants', []));
+
+            $variantsData->each(function ($variantData) use ($product) {
+
+                $variant = $this->variantRepository->create([
+                    'key' => $variantData['code'],
+                    'variantable_id' => $product->id,
+                    'variantable_type' => get_class($product),
+                ]);
+
+
+                    Media::where('id', $variantData['image'])
+                        ->update([
+                            'model_id'   => $variant->id,
+                            'model_type' => \App\Models\Variant::class,
+                            'collection_name' => 'variants'
+                        ]);
+
+            });
             $product->tags()->sync($validatedData['tags'] ?? []);
             if (!empty($validatedData['dimensions'])) {
                 $product->dimensions()->syncWithoutDetaching($validatedData['dimensions']);
@@ -210,7 +232,7 @@ class CategoryService extends BaseService
             ];
         })->toArray();
         $validatedData['colors'] = $finalColors;
-        return $this->handleTransaction(function () use ($id, $validatedData,$colors) {
+        return $this->handleTransaction(function () use ($id, $validatedData, $colors) {
 
             $product = $this->repository->update($validatedData, $id);
             $product->tags()->sync($validatedData['tags'] ?? []);
@@ -358,8 +380,8 @@ class CategoryService extends BaseService
                 $media = Media::find($color['image_id']);
 
                 $media->update([
-                    'model_type'      => get_class($product),
-                    'model_id'        => $product->id,
+                    'model_type' => get_class($product),
+                    'model_id' => $product->id,
                     'collection_name' => 'category_extra_images',
                 ]);
                 $media->setCustomProperty('color_hex', $color['value']);
@@ -423,7 +445,7 @@ class CategoryService extends BaseService
     {
         $locale = app()->getLocale();
         $categories = $this->repository
-            ->query(['id', 'name', 'description', 'created_at', 'is_has_category','has_mockup'])
+            ->query(['id', 'name', 'description', 'created_at', 'is_has_category', 'has_mockup'])
             ->with(['products', 'children'])
             ->withCount(['children', 'products'])
             ->when(request()->filled('search_value'), function ($query) use ($locale) {
@@ -484,9 +506,9 @@ class CategoryService extends BaseService
                 return $admin->getFirstMediaUrl('categories') ?: asset("images/default-user.png");
             })->addColumn('action', function () {
                 return [
-                    'can_show' => (bool) auth()->user()->hasPermissionTo('categories_show'),
-                    'can_edit' => (bool) auth()->user()->hasPermissionTo('categories_update'),
-                    'can_delete' => (bool) auth()->user()->hasPermissionTo('categories_delete'),
+                    'can_show' => (bool)auth()->user()->hasPermissionTo('categories_show'),
+                    'can_edit' => (bool)auth()->user()->hasPermissionTo('categories_update'),
+                    'can_delete' => (bool)auth()->user()->hasPermissionTo('categories_delete'),
                 ];
             })
             ->make(true);
@@ -497,7 +519,7 @@ class CategoryService extends BaseService
     {
         $locale = app()->getLocale();
         $categories = $this->repository
-            ->query(['id', 'name', 'description','parent_id', 'created_at'])
+            ->query(['id', 'name', 'description', 'parent_id', 'created_at'])
             ->with(['parent'])
             ->withCount(['subCategoryProducts'])
             ->whereNotNull('parent_id')
@@ -547,9 +569,9 @@ class CategoryService extends BaseService
             })
             ->addColumn('action', function () {
                 return [
-                    'can_show' => (bool) auth()->user()->hasPermissionTo('sub-categories_show'),
-                    'can_edit' => (bool) auth()->user()->hasPermissionTo('sub-categories_update'),
-                    'can_delete' => (bool) auth()->user()->hasPermissionTo('sub-categories_delete'),
+                    'can_show' => (bool)auth()->user()->hasPermissionTo('sub-categories_show'),
+                    'can_edit' => (bool)auth()->user()->hasPermissionTo('sub-categories_update'),
+                    'can_delete' => (bool)auth()->user()->hasPermissionTo('sub-categories_delete'),
                 ];
             })
             ->make();

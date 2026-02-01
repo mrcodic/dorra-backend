@@ -67,6 +67,10 @@ class Category extends Model implements HasMedia
         return $this->morphToMany(Design::class, 'designable', 'designables')
             ->withTimestamps();
     }
+    public function variants(): MorphMany
+    {
+        return $this->morphMany(Variant::class, 'variantable');
+    }
 
     public function products(): HasMany
     {

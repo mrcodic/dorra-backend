@@ -11,19 +11,19 @@
                 </div>
                 <div class="modal-body flex-grow-1">
 
-                        <!-- Image Upload -->
-                        <div class="mb-1">
-                            <label class="form-label label-text">Image*</label>
-                            <div id="edit-category-dropzone"
-                                class="d-flex align-items-center justify-content-center dropzone rounded p-3 text-center"
-                                style="border: 2px dashed rgba(0, 0, 0, 0.3);">
-                                <div class="dz-message" data-dz-message>
-                                    <span>Drop photo here or click to upload</span>
-                                </div>
+                    <!-- Image Upload -->
+                    <div class="mb-1">
+                        <label class="form-label label-text">Image*</label>
+                        <div id="edit-category-dropzone"
+                             class="d-flex align-items-center justify-content-center dropzone rounded p-3 text-center"
+                             style="border: 2px dashed rgba(0, 0, 0, 0.3);">
+                            <div class="dz-message" data-dz-message>
+                                <span>Drop photo here or click to upload</span>
                             </div>
-                            <input type="hidden" name="image_id" id="editUploadedImage">
                         </div>
-                        <span class="image-hint small">
+                        <input type="hidden" name="image_id" id="editUploadedImage">
+                    </div>
+                    <span class="image-hint small">
                             Max size: 1MB | Dimensions: 512x512 px
                         </span>
                     <div class="row my-1">
@@ -72,18 +72,17 @@
                                             </span>
                                 <!-- ✅ Hidden input outside Dropzone -->
                                 <input type="hidden" name="mobile_banner_id" id="editUploadedImageMobileBanner"
-                                       >
+                                >
 
                             </div>
                         </div>
                     </div>
 
-                        <!-- Upload Progress -->
-                        <div id="edit-upload-progress" class="progress mt-2 d-none w-50">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                        </div>
-                    
+                    <!-- Upload Progress -->
+                    <div id="edit-upload-progress" class="progress mt-2 d-none w-50">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
                     </div>
+
                     <!-- Name and Description Fields -->
                     <div class="row my-1">
                         <div class="col-md-6">
@@ -100,12 +99,12 @@
                         <div class="col-lg-6">
                             <label class="form-label label-text">Description (EN)</label>
                             <textarea class="form-control" id="edit-category-description-en" name="description[en]"
-                                rows="2"></textarea>
+                                      rows="2"></textarea>
                         </div>
                         <div class="col-lg-6">
                             <label class="form-label label-text">Description (AR)</label>
                             <textarea class="form-control" id="edit-category-description-ar" name="description[ar]"
-                                rows="2"></textarea>
+                                      rows="2"></textarea>
                         </div>
                     </div>
 
@@ -119,19 +118,20 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer border-top-0">
-                    <button type="button" class="btn btn-outline-secondary fs-5" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="editSaveChangesButton">
-                        <span class="btn-text">Save Changes</span>
-                        <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                            aria-hidden="true"></span>
-                    </button>
-                </div>
+
+                    <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-outline-secondary fs-5" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="editSaveChangesButton">
+                            <span class="btn-text">Save Changes</span>
+                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
+                                  aria-hidden="true"></span>
+                        </button>
+                    </div>
 
             </form>
         </div>
     </div>
+</div>
 </div>
 
 <script !src="">
