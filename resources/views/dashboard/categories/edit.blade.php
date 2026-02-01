@@ -1,13 +1,23 @@
 @extends('layouts/contentLayoutMaster')
 @php
-    $dimensions = \App\Models\Dimension::query()
-    ->where('is_custom', false)
-    ->orWhereHas('categories', function ($q) use ($model) {
-    $q->where('dimensionable_id', $model->id)->where('dimensionable_type', get_class($model));
-    })
-    ->get(['id', 'name']);
+        $dimensions = \App\Models\Dimension::query()
+        ->where('is_custom', false)
+        ->orWhereHas('categories', function ($q) use ($model) {
+        $q->where('dimensionable_id', $model->id)->where('dimensionable_type', get_class($model));
+        })
+        ->get(['id', 'name']);
 
+        $variantsForJs = $model->variants->mapWithKeys(function ($variant) {
+            $media = $variant->media->first();
 
+            return [
+                $variant->key => [
+                    'id' => $variant->id,
+                    'image' => $media?->id,
+                    'image_url' => $media?->original_url,
+                ]
+            ];
+        });
 @endphp
 @section('title', 'Edit Products')
 @section('main-page', 'Products')
@@ -543,7 +553,7 @@
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
                                                                             <label class="form-label label-text">Name (EN)</label>
-                                                                            <input type="text" name="name_en" value="{{ $specification->getTranslation('name','en') }}" class="form-control" placeholder="Specification Name (EN)"/>
+                                                                            <input type="text" name="name_en" value="{{ $specification->getTranslation('name','en') }}" class="form-control spec-name-en" placeholder="Specification Name (EN)"/>
                                                                         </div>
                                                                     </div>
 
@@ -564,7 +574,7 @@
                                                                                         <!-- Option Name (EN) -->
                                                                                         <div class="col">
                                                                                             <label class="form-label label-text">Value (EN)</label>
-                                                                                            <input type="text" name="value_en" value="{{ $option->getTranslation('value','en') }}" class="form-control" placeholder="Option (EN)"/>
+                                                                                            <input type="text" name="value_en" value="{{ $option->getTranslation('value','en') }}" class="form-control option-value-en" placeholder="Option (EN)"/>
                                                                                         </div>
 
                                                                                         <!-- Option Name (AR) -->
@@ -636,7 +646,7 @@
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
                                                                             <label class="form-label label-text">Name (EN)</label>
-                                                                            <input type="text" name="name_en" class="form-control" placeholder="Specification Name (EN)"/>
+                                                                            <input type="text" name="name_en" class="form-control spec-name-en" placeholder="Specification Name (EN)"/>
                                                                         </div>
                                                                     </div>
 
@@ -654,7 +664,7 @@
                                                                                 <div class="row d-flex align-items-end mt-2">
                                                                                     <div class="col">
                                                                                         <label class="form-label label-text">Value (EN)</label>
-                                                                                        <input type="text" name="value_en" class="form-control" placeholder="Option (EN)"/>
+                                                                                        <input type="text" name="value_en" class="form-control option-value-en" placeholder="Option (EN)"/>
                                                                                     </div>
 
                                                                                     <div class="col">
@@ -723,6 +733,9 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <label class="form-label label-text mt-2">Variants</label>
+
+                                        <div id="variants-container" class="mt-2"></div>
                                     </div>
 
                                     <!-- Submit -->
@@ -754,6 +767,197 @@
 @endsection
 
 @section('page-script')
+    <script>
+        window.existingVariantsFromDB = @json($variantsForJs);
+    </script>
+
+
+    <script>
+
+        function generateVariants() {
+            let specs = [];
+
+            // Collect all specifications
+            $('[data-repeater-list="specifications"] > [data-repeater-item]').each(function () {
+                let specName = $(this).find('.spec-name-en').val().trim();
+                let options = [];
+
+                $(this).find('.option-value-en').each(function () {
+                    let val = $(this).val().trim();
+                    if (val) options.push(val);
+                });
+
+                if (specName && options.length) {
+                    specs.push({name: specName, options: options});
+                }
+            });
+
+            if (specs.length === 0) {
+                $('#variants-container').html('');
+                return;
+            }
+
+            // 🔥 CARTESIAN PRODUCT
+            function cartesian(arr) {
+                return arr.reduce((a, b) =>
+                        a.flatMap(d => b.options.map(e => [...d, {spec: b.name, value: e}])),
+                    [[]]
+                );
+            }
+
+            let combinations = cartesian(specs);
+
+            renderVariants(combinations);
+        }
+
+        function collectExistingVariantImages() {
+            let map = {...window.existingVariantsFromDB};
+
+            $('.variant-box').each(function () {
+                let code = $(this).find('.variant-code-input').val();
+                let imageId = $(this).find('.variant-image-input').val();
+                let variantId = $(this).find('input[name*="[id]"]').val();
+
+                if (code) {
+                    map[code] = {
+                        ...(map[code] || {}),   // keep previous data
+                        image: imageId || null,
+                        id: variantId || map[code]?.id || null,
+                    };
+                }
+            });
+
+            return map;
+        }
+
+
+        function renderVariants(combinations) {
+
+            let existingImages = collectExistingVariantImages(); // 🧠 SAVE STATE
+
+            let html = '<div class="row">';
+
+            combinations.forEach((combo, index) => {
+
+                let variantCode = combo.map(c =>
+                    c.value.replace(/\s+/g, '').toLowerCase()
+                ).join('_');
+
+                let displayTitle = combo.map(c => c.value).join(' / ');
+
+                let existing = existingImages[variantCode] || {};
+                let savedImageId = existing.image || '';
+                let savedVariantId = existing.id || '';
+
+
+                html += `
+        <div class="col-md-3 mb-2">
+            <div class="variant-box border rounded p-2 h-100">
+
+                <div class="fw-bold small text-muted">${displayTitle}</div>
+
+                <div class="dropzone variant-dropzone" data-code="${variantCode}">
+                    <div class="dz-message">Upload Variant Image</div>
+                </div>
+
+                <input type="hidden" class="variant-code-input" name="variants[${index}][code]" value="${variantCode}" />
+                <input type="hidden" class="variant-image-input" name="variants[${index}][image]" value="${savedImageId}" />
+                <input type="hidden" name="variants[${index}][id]" value="${savedVariantId}" />
+
+            </div>
+        </div>`;
+            });
+
+            html += '</div>';
+
+            $('#variants-container').html(html);
+
+            initVariantDropzones(existingImages); // 🔥 PASS SAVED DATA
+        }
+
+        function initVariantDropzones(existingImages = {}) {
+
+
+            $('.variant-dropzone').each(function () {
+
+                let box = $(this).closest('.variant-box');
+                let hiddenInput = box.find('.variant-image-input');
+                let code = box.find('.variant-code-input').val();
+
+                let dz = new Dropzone(this, {
+                    url: "{{ route('media.store') }}",
+                    maxFiles: 1,
+                    acceptedFiles: "image/*",
+                    addRemoveLinks: true,
+                    headers: {
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                    },
+                    success: function (file, response) {
+                        hiddenInput.val(response.data.id);
+                        file._imageId = response.data.id;
+                    },
+                    removedfile: function (file) {
+
+                        // remove preview from UI
+                        if (file.previewElement) {
+                            file.previewElement.remove();
+                        }
+
+                        let mediaId = file._imageId;
+
+                        // clear hidden input
+                        hiddenInput.val('');
+
+                        if (!mediaId) return;
+
+
+                        fetch(`/api/v1/media/${mediaId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+                                "Accept": "application/json"
+                            }
+                        })
+                            .then(res => res.json())
+                            .then(() => console.log("Media deleted:", mediaId))
+                            .catch(err => console.error("Delete failed", err));
+                    }
+                });
+
+                // 🔁 Restore existing image preview
+                if (existingImages[code]?.image) {
+                    let imageId = existingImages[code].image;
+                    let imageUrl = existingImages[code].image_url;
+
+                    let mockFile = { name: "Image", size: 12345 };
+
+                    dz.emit("addedfile", mockFile);
+                    dz.emit("thumbnail", mockFile, imageUrl);
+                    dz.emit("complete", mockFile);
+                    mockFile._imageId = imageId;
+                }
+
+
+            });
+        }
+
+        $(document).on('keyup change', '.option-value-en, .spec-name-en', function () {
+            generateVariants();
+        });
+
+        $(document).on('click', '[data-repeater-create], [data-repeater-delete]', function () {
+            setTimeout(generateVariants, 300); // wait for DOM update
+        });
+
+        $(document).ready(function () {
+            if (Object.keys(window.existingVariantsFromDB || {}).length) {
+                generateVariants(); // builds UI using DB variants
+            }
+        });
+
+
+    </script>
+
     {{--    <script>--}}
     {{--        // keep color picker & text field in sync--}}
     {{--        document.addEventListener("input", (e) => {--}}

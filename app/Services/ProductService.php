@@ -284,6 +284,26 @@ class ProductService extends BaseService
         return $this->handleTransaction(function () use ($id, $validatedData,$colors) {
 
             $product = $this->repository->update($validatedData, $id);
+            $variantsData = collect(Arr::get($validatedData, 'variants', []));
+            $variantsData->each(function ($variantData) use ($product) {
+
+                $variant = $this->variantRepository->query()->updateOrCreate(
+                    ['id' => $variantData['id'] ?? null],
+                    [
+                        'key' => $variantData['code'],
+                        'variantable_id' => $product->id,
+                        'variantable_type' => get_class($product),
+                    ]);
+
+
+                Media::where('id', $variantData['image'])
+                    ->update([
+                        'model_id'   => $variant->id,
+                        'model_type' => \App\Models\Variant::class,
+                        'collection_name' => 'variants'
+                    ]);
+
+            });
             $product->load($this->relations);
             $product->tags()->sync($validatedData['tags'] ?? []);
             if (!empty($validatedData['dimensions'])) {

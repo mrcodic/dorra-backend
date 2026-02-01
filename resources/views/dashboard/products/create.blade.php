@@ -623,7 +623,8 @@
                                                                                                name="option_image"
                                                                                                class="option-image-hidden">
                                                                                     </div>
-                                                                                    <span class="image-hint small text-end">
+                                                                                    <span
+                                                                                        class="image-hint small text-end">
                                                 Max size: 1MB | Dimensions: 200x200 px
                                             </span>
                                                                                     <!-- ❌ Delete Option Button -->
@@ -688,7 +689,9 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <label class="form-label label-text mt-2">Variants</label>
 
+                                        <div id="variants-container" class="mt-2"></div>
                                         <!-- Free Shipping -->
                                         {{-- <div class="col-md-12 col-12 mb-2">--}}
                                         {{-- <div class="form-check form-switch">--}}
@@ -716,9 +719,7 @@
 
                                         </div>
                                     </div>
-                                    <label class="form-label label-text mt-2">Variants</label>
 
-                                    <div id="variants-container" class="mt-2"></div>
                                 </div>
                                 <!--third tab content end -->
 
@@ -751,7 +752,7 @@
                 });
 
                 if (specName && options.length) {
-                    specs.push({ name: specName, options: options });
+                    specs.push({name: specName, options: options});
                 }
             });
 
@@ -763,7 +764,7 @@
             // 🔥 CARTESIAN PRODUCT
             function cartesian(arr) {
                 return arr.reduce((a, b) =>
-                        a.flatMap(d => b.options.map(e => [...d, { spec: b.name, value: e }])),
+                        a.flatMap(d => b.options.map(e => [...d, {spec: b.name, value: e}])),
                     [[]]
                 );
             }
@@ -772,13 +773,14 @@
 
             renderVariants(combinations);
         }
+
         function collectExistingVariantImages() {
             let map = {};
 
             $('.variant-box').each(function () {
                 let code = $(this).find('.variant-code-input').val();
                 let imageId = $(this).find('.variant-image-input').val();
-                console.log(imageId,code)
+                console.log(imageId, code)
                 if (code && imageId) {
                     map[code] = imageId;
                 }
@@ -852,7 +854,7 @@
 
                 // 🔁 Restore existing image preview
                 if (existingImages[code]) {
-                    let mockFile = { name: "Image", size: 12345 };
+                    let mockFile = {name: "Image", size: 12345};
                     dz.emit("addedfile", mockFile);
                     dz.emit("thumbnail", mockFile, `/api/v1/media/${existingImages[code]}`);
                     dz.emit("complete", mockFile);

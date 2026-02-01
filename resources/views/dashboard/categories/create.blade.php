@@ -709,6 +709,8 @@
 
 @section('page-script')
     <script>
+        window.variantImageMemory = {};
+
         function generateVariants() {
             let specs = [];
 
@@ -745,19 +747,20 @@
             renderVariants(combinations);
         }
         function collectExistingVariantImages() {
-            let map = {};
+            let map = { ...window.variantImageMemory }; // 💾 MEMORY FIRST
 
             $('.variant-box').each(function () {
                 let code = $(this).find('.variant-code-input').val();
                 let imageId = $(this).find('.variant-image-input').val();
-                console.log(imageId,code)
-                if (code && imageId) {
-                    map[code] = imageId;
+
+                if (code && imageId && !map[code]) {
+                    map[code] = { id: imageId };
                 }
             });
 
             return map;
         }
+
 
         function renderVariants(combinations) {
 
@@ -802,6 +805,7 @@
         function initVariantDropzones(existingImages = {}) {
 
 
+
             $('.variant-dropzone').each(function () {
 
                 let box = $(this).closest('.variant-box');
@@ -817,19 +821,36 @@
                         "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
                     },
                     success: function (file, response) {
-                        hiddenInput.val(response.data.id);
-                        file._imageId = response.data.id;
+                        let mediaId = response.data.id;
+                        let imageUrl = response.data.original_url ?? response.data.url;
+
+                        hiddenInput.val(mediaId);
+                        file._imageId = mediaId;
+
+                        // 🧠 SAVE IN MEMORY
+                        window.variantImageMemory[code] = {
+                            id: mediaId,
+                            url: imageUrl
+                        };
                     }
+
                 });
 
                 // 🔁 Restore existing image preview
-                if (existingImages[code]) {
+                if (existingImages[code]?.id) {
+                    let imageId = existingImages[code].id;
+                    let imageUrl = existingImages[code].url
+                        ?? `/api/v1/media/${imageId}`; // fallback for edit
+
                     let mockFile = { name: "Image", size: 12345 };
+
                     dz.emit("addedfile", mockFile);
-                    dz.emit("thumbnail", mockFile, `/api/v1/media/${existingImages[code]}`);
+                    dz.emit("thumbnail", mockFile, imageUrl);
                     dz.emit("complete", mockFile);
-                    mockFile._imageId = existingImages[code];
+
+                    mockFile._imageId = imageId;
                 }
+
 
             });
         }
