@@ -78,7 +78,9 @@ class CreditController extends Controller
             $freeLeft        = max(0, $freeLimit - (int)$lockedUser->free_credits_used);
 
             if (($freeLeft + $availableWallet) < $estimatedCredits) {
-                throw new \RuntimeException('INSUFFICIENT_CREDITS');
+                return Response::api(HttpEnum::PAYMENT_REQUIRED, "Insufficient credits", errors: [
+                    "payment" => "Insufficient credits"
+                ]);
             }
 
             // Use free credits first
@@ -91,7 +93,7 @@ class CreditController extends Controller
 
             // Reserve wallet credits
             if ($estimatedCredits > 0) {
-                WalletService::reserve($lockedUser, $estimatedCredits, 'image_generation');
+                WalletService::reserve($lockedUser, $estimatedCredits, $data['type']);
                 $reserved['wallet'] = $estimatedCredits;
             }
 
@@ -112,7 +114,7 @@ class CreditController extends Controller
         try {
             $res = $genAiImageService->generate($data['prompt'], $data['negative_prompt'] ?? null);
         } catch (\Throwable $e) {
-            DB::transaction(function () use ($user, $reserved) {
+            DB::transaction(function () use ($user, $reserved,$data) {
                 $lockedUser = $user->newQuery()->lockForUpdate()->findOrFail($user->id);
 
                 if ($reserved['free'] > 0) {
@@ -120,7 +122,7 @@ class CreditController extends Controller
                 }
 
                 if ($reserved['wallet'] > 0) {
-                    WalletService::release($lockedUser, $reserved['wallet'], 'image_generation_exception');
+                    WalletService::release($lockedUser, $reserved['wallet'], $data['type'].'_exception');
                 }
             });
 
@@ -129,7 +131,7 @@ class CreditController extends Controller
 
         /** ================= FAILURE → RELEASE ================= */
         if (!$res['ok']) {
-            DB::transaction(function () use ($user, $reserved) {
+            DB::transaction(function () use ($user, $reserved, $data) {
                 $lockedUser = $user->newQuery()->lockForUpdate()->findOrFail($user->id);
 
                 if ($reserved['free'] > 0) {
@@ -137,7 +139,7 @@ class CreditController extends Controller
                 }
 
                 if ($reserved['wallet'] > 0) {
-                    WalletService::release($lockedUser, $reserved['wallet'], 'image_generation_fail');
+                    WalletService::release($lockedUser, $reserved['wallet'], $data['type'].'_fail');
                 }
             });
 
@@ -152,7 +154,7 @@ class CreditController extends Controller
         if ($actualTokens > 0) {
             $actualCredits = (int) ceil($actualTokens / max(1, $tokensPerCredit));
 
-            DB::transaction(function () use ($user, $actualCredits, $reserved, $freeLimit) {
+            DB::transaction(function () use ($user, $actualCredits, $reserved, $freeLimit, $data) {
 
                 $lockedUser = $user->newQuery()->lockForUpdate()->findOrFail($user->id);
                 $wallet     = $lockedUser->wallet()->lockForUpdate()->firstOrFail();
@@ -170,13 +172,13 @@ class CreditController extends Controller
                     $remainingToCharge -= $freeUsed;
 
                     if ($remainingToCharge > 0) {
-                        WalletService::capture($lockedUser, $remainingToCharge, 'image_generation');
+                        WalletService::capture($lockedUser, $remainingToCharge, $data['type']);
                     }
 
                     $walletNeeded = max(0, $actualCredits - $reserved['free']);
                     $walletExcess = $reserved['wallet'] - $walletNeeded;
                     if ($walletExcess > 0) {
-                        WalletService::release($lockedUser, $walletExcess, 'image_generation_adjust');
+                        WalletService::release($lockedUser, $walletExcess, $data['type'].'_adjust');
                     }
 
                     if ($unusedFree > 0) {
@@ -190,7 +192,7 @@ class CreditController extends Controller
                     $extraNeeded = $actualCredits - $totalReserved;
 
                     if ($reserved['wallet'] > 0) {
-                        WalletService::capture($lockedUser, $reserved['wallet'], 'image_generation');
+                        WalletService::capture($lockedUser, $reserved['wallet'], $data['type']);
                     }
 
                     $freeLeft = max(0, $freeLimit - (int)$lockedUser->free_credits_used);
@@ -202,7 +204,7 @@ class CreditController extends Controller
                     }
 
                     if ($extraNeeded > 0) {
-                        WalletService::debit($lockedUser, $extraNeeded, 'image_generation_overuse');
+                        WalletService::debit($lockedUser, $extraNeeded, $data['type'].'_overuse');
                     }
                 }
             });
@@ -217,45 +219,5 @@ class CreditController extends Controller
         ]);
     }
 
-    public function consume(Request $request)
-    {
-        $request->validate([
-            'tokens' => 'required|integer|min:1',
-            'type' => ['required', 'in:logo_generation,image_generation']
-        ]);
-
-        $user = $request->user();
-
-        $tokensPerCredit = (int)Setting::where('key', 'tokens_per_credit')->value('value');
-        $freeLimit = (int)Setting::where('key', 'free_credits_limit')->value('value');
-
-        $creditsNeeded = (int)ceil($request->tokens / $tokensPerCredit);
-
-
-        $freeLeft = max(0, $freeLimit - $user->free_credits_used);
-
-        if ($freeLeft + $user->wallet->balance < $creditsNeeded) {
-            return Response::api(HttpEnum::PAYMENT_REQUIRED, "Insufficient credits", errors: [
-                "payment" => "Insufficient credits"
-            ]);
-        }
-
-        DB::transaction(function () use ($user, $creditsNeeded, $freeLeft, $request) {
-
-            if ($freeLeft > 0) {
-                $useFree = min($freeLeft, $creditsNeeded);
-                $user->increment('free_credits_used', $useFree);
-                $creditsNeeded -= $useFree;
-            }
-
-            if ($creditsNeeded > 0) {
-                WalletService::debit($user, $creditsNeeded, $request->type);
-            }
-        });
-
-        return Response::api(data: [
-            'credits_used' => (int)ceil($request->tokens / $tokensPerCredit)
-        ]);
-    }
 
 }
