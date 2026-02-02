@@ -1055,6 +1055,9 @@
                 <input type="hidden" name="variants[${index}][id]" value="${savedVariantId}" />
 
             </div>
+  <span class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 512x512 px
+                                            </span>
         </div>`;
             });
 

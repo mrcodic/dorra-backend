@@ -792,6 +792,9 @@
                 <input type="hidden" class="variant-image-input" name="variants[${index}][image]" value="${savedImageId}" />
 
             </div>
+  <span class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 512x512 px
+                                            </span>
         </div>`;
             });
 
