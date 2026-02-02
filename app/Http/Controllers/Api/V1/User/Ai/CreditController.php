@@ -49,6 +49,7 @@ class CreditController extends Controller
         $data = $request->validate([
             'prompt' => ['required', 'string'],
             'negative_prompt' => ['nullable', 'string'],
+            'type' => ['required', 'in:logo_generation,image_generation']
         ]);
 
         $user = $request->user();
@@ -75,12 +76,12 @@ class CreditController extends Controller
 
             $availableWallet = $wallet->balance - $wallet->reserved_balance;
             $freeLeft = max(0, $freeLimit - (int)$lockedUser->free_credits_used);
-//            if ($freeLeft + $availableWallet < $estimatedCredits) {
-//                DB::rollBack();
-//                return Response::api(HttpEnum::PAYMENT_REQUIRED, "Insufficient credits", errors: [
-//                    "payment" => "Insufficient credits"
-//                ]);
-//            }
+            if ($freeLeft + $availableWallet < $estimatedCredits) {
+                DB::rollBack();
+                return Response::api(HttpEnum::PAYMENT_REQUIRED, "Insufficient credits", errors: [
+                    "payment" => "Insufficient credits"
+                ]);
+            }
 
             // Use free credits first
             if ($freeLeft > 0) {
@@ -149,7 +150,6 @@ class CreditController extends Controller
             });
         }
 
-        /** ================= SUCCESS ================= */
         return Response::api(data: [
             'images' => $res['images'],
             'model' => $res['model'],

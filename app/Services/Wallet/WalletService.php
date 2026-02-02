@@ -38,9 +38,9 @@ class WalletService extends BaseService
     {
         DB::transaction(function () use ($user, $credits, $source) {
             $wallet = $user->wallet()->lockForUpdate()->firstOrFail();
-//            if (($wallet->balance - $wallet->reserved_balance) < $credits) {
-//                throw new \Exception("Insufficient available credits");
-//            }
+            if (($wallet->balance - $wallet->reserved_balance) < $credits) {
+                throw new \Exception("Insufficient available credits");
+            }
 
             $wallet->increment('reserved_balance', $credits);
 
