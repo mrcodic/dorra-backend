@@ -20,8 +20,8 @@ class WalletController extends Controller
 
     public function __invoke()
     {
-        $wallet = auth()->user()->wallet->load('walletTransactions');
-        return Response::api(data: WalletResource::make($wallet));
+        $wallet = auth()->user()->wallet?->load('walletTransactions');
+        return Response::api(data: $wallet ? WalletResource::make($wallet):[]);
     }
 
 }
