@@ -64,7 +64,6 @@ class CreditController extends Controller
         );
 
         $estimatedCredits = (int) ceil($estimatedTokens / max(1, $tokensPerCredit));
-        $estimatedCredits = (int) ceil(1 / max(1, $tokensPerCredit));
 
         $reserved = ['free' => 0, 'wallet' => 0];
 
@@ -77,12 +76,12 @@ class CreditController extends Controller
             $availableWallet = $wallet->balance - $wallet->reserved_balance;
             $freeLeft = max(0, $freeLimit - (int)$lockedUser->free_credits_used);
 
-//            if ($freeLeft + $availableWallet < $estimatedCredits) {
-//                DB::rollBack();
-//                return Response::api(HttpEnum::PAYMENT_REQUIRED, "Insufficient credits", errors: [
-//                    "payment" => "Insufficient credits"
-//                ]);
-//            }
+            if ($freeLeft + $availableWallet < $estimatedCredits) {
+                DB::rollBack();
+                return Response::api(HttpEnum::PAYMENT_REQUIRED, "Insufficient credits", errors: [
+                    "payment" => "Insufficient credits"
+                ]);
+            }
 
             // Use free credits first
             if ($freeLeft > 0) {
