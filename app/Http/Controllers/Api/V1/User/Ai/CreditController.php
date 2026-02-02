@@ -68,18 +68,17 @@ class CreditController extends Controller
         $reserved = ['free' => 0, 'wallet' => 0];
 
         /** ================= RESERVE PHASE ================= */
-        DB::beginTransaction();
         try {
-            $lockedUser = $user->newQuery()->lockForUpdate()->findOrFail($user->id);
-            $wallet = $lockedUser->wallet()->lockForUpdate()->firstOrFail();
+            DB::beginTransaction();
 
-            $availableWallet = $wallet->balance - $wallet->reserved_balance;
-            $freeLeft = max(0, $freeLimit - (int)$lockedUser->free_credits_used);
-            if ($freeLeft + $availableWallet < $estimatedCredits) {
-                DB::rollBack();
-                return Response::api(HttpEnum::PAYMENT_REQUIRED, "Insufficient credits", errors: [
-                    "payment" => "Insufficient credits"
-                ]);
+            $lockedUser = $user->newQuery()->lockForUpdate()->findOrFail($user->id);
+            $wallet     = $lockedUser->wallet()->lockForUpdate()->firstOrFail();
+
+            $availableWallet = max(0, $wallet->balance - $wallet->reserved_balance);
+            $freeLeft        = max(0, $freeLimit - (int)$lockedUser->free_credits_used);
+
+            if (($freeLeft + $availableWallet) < $estimatedCredits) {
+                throw new \RuntimeException('INSUFFICIENT_CREDITS');
             }
 
             // Use free credits first
@@ -97,13 +96,36 @@ class CreditController extends Controller
             }
 
             DB::commit();
+
+        } catch (\RuntimeException $e) {
+            DB::rollBack();
+
+            return Response::api(HttpEnum::PAYMENT_REQUIRED, "Insufficient credits", errors: [
+                "payment" => "Insufficient credits"
+            ]);
         } catch (\Throwable $e) {
             DB::rollBack();
             throw $e;
         }
 
         /** ================= AI CALL ================= */
-        $res = $genAiImageService->generate($data['prompt'], $data['negative_prompt'] ?? null);
+        try {
+            $res = $genAiImageService->generate($data['prompt'], $data['negative_prompt'] ?? null);
+        } catch (\Throwable $e) {
+            DB::transaction(function () use ($user, $reserved) {
+                $lockedUser = $user->newQuery()->lockForUpdate()->findOrFail($user->id);
+
+                if ($reserved['free'] > 0) {
+                    $lockedUser->decrement('free_credits_used', $reserved['free']);
+                }
+
+                if ($reserved['wallet'] > 0) {
+                    WalletService::release($lockedUser, $reserved['wallet'], 'image_generation_exception');
+                }
+            });
+
+            throw $e;
+        }
 
         /** ================= FAILURE → RELEASE ================= */
         if (!$res['ok']) {
@@ -130,20 +152,57 @@ class CreditController extends Controller
         if ($actualTokens > 0) {
             $actualCredits = (int) ceil($actualTokens / max(1, $tokensPerCredit));
 
-            DB::transaction(function () use ($user, $actualCredits, $reserved) {
+            DB::transaction(function () use ($user, $actualCredits, $reserved, $freeLimit) {
+
                 $lockedUser = $user->newQuery()->lockForUpdate()->findOrFail($user->id);
+                $wallet     = $lockedUser->wallet()->lockForUpdate()->firstOrFail();
 
-                $walletReserved = $reserved['wallet'];
+                $totalReserved = $reserved['free'] + $reserved['wallet'];
 
-                if ($walletReserved > 0) {
-                    if ($actualCredits <= $walletReserved) {
-                        WalletService::capture($lockedUser, $actualCredits, 'image_generation');
-                        WalletService::release($lockedUser, $walletReserved - $actualCredits, 'image_generation_adjust');
-                    } else {
-                        // Need extra credits beyond reserved
-                        $extra = $actualCredits - $walletReserved;
-                        WalletService::capture($lockedUser, $walletReserved, 'image_generation');
-                        WalletService::debit($lockedUser, $extra, 'image_generation_overuse');
+                // ===== USED <= RESERVED =====
+                if ($actualCredits <= $totalReserved) {
+
+                    $remainingToCharge = $actualCredits;
+
+                    $freeUsed   = min($reserved['free'], $remainingToCharge);
+                    $unusedFree = $reserved['free'] - $freeUsed;
+
+                    $remainingToCharge -= $freeUsed;
+
+                    if ($remainingToCharge > 0) {
+                        WalletService::capture($lockedUser, $remainingToCharge, 'image_generation');
+                    }
+
+                    $walletNeeded = max(0, $actualCredits - $reserved['free']);
+                    $walletExcess = $reserved['wallet'] - $walletNeeded;
+                    if ($walletExcess > 0) {
+                        WalletService::release($lockedUser, $walletExcess, 'image_generation_adjust');
+                    }
+
+                    if ($unusedFree > 0) {
+                        $lockedUser->decrement('free_credits_used', $unusedFree);
+                    }
+                }
+
+                // ===== USED > RESERVED =====
+                else {
+
+                    $extraNeeded = $actualCredits - $totalReserved;
+
+                    if ($reserved['wallet'] > 0) {
+                        WalletService::capture($lockedUser, $reserved['wallet'], 'image_generation');
+                    }
+
+                    $freeLeft = max(0, $freeLimit - (int)$lockedUser->free_credits_used);
+                    $useExtraFree = min($freeLeft, $extraNeeded);
+
+                    if ($useExtraFree > 0) {
+                        $lockedUser->increment('free_credits_used', $useExtraFree);
+                        $extraNeeded -= $useExtraFree;
+                    }
+
+                    if ($extraNeeded > 0) {
+                        WalletService::debit($lockedUser, $extraNeeded, 'image_generation_overuse');
                     }
                 }
             });
