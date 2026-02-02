@@ -150,7 +150,7 @@ class CreditController extends Controller
         }
 
         /** ================= SUCCESS ================= */
-        return Response::api([
+        return Response::api(data:[
             'images' => $res['images'],
             'model' => $res['model'],
             'usage' => $res['usage'],
