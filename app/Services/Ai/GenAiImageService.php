@@ -28,7 +28,7 @@ class GenAiImageService
     private int $breakerTtlSec = 180;
 
     public function __construct(
-        private readonly string $apiKey
+        private readonly ?string $apiKey
     )
     {
     }
