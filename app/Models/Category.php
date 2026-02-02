@@ -209,4 +209,9 @@ class Category extends Model implements HasMedia
     {
         return $this->morphMany(Review::class, 'reviewable');
     }
+    public function getAllCategoryImages()
+    {
+        return $this->getMedia('category_extra_images')
+            ->merge($this->getMedia('category_main_image'));
+    }
 }

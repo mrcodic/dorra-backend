@@ -38,7 +38,7 @@ class CategoryResource extends JsonResource
                 return $this->getFirstMediaUrl('website_banner');
             }),
             'all_product_images' => $this->whenLoaded('media', function () {
-                return MediaResource::collection($this->getMedia('category_extra_images'));
+                return MediaResource::collection($this->getAllCategoryImages());
             }),
             'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),
             'dimensions' => DimensionResource::collection($this->whenLoaded('dimensions')),
