@@ -75,7 +75,6 @@ class CreditController extends Controller
 
             $availableWallet = $wallet->balance - $wallet->reserved_balance;
             $freeLeft = max(0, $freeLimit - (int)$lockedUser->free_credits_used);
-dd($freeLeft, $availableWallet, $estimatedCredits);
             if ($freeLeft + $availableWallet < $estimatedCredits) {
                 DB::rollBack();
                 return Response::api(HttpEnum::PAYMENT_REQUIRED, "Insufficient credits", errors: [
