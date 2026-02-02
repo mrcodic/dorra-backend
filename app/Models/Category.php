@@ -212,6 +212,6 @@ class Category extends Model implements HasMedia
     public function getAllCategoryImages()
     {
         return $this->getMedia('category_extra_images')
-            ->merge($this->getMedia('category_main_image'));
+            ->merge($this->getMedia('categories'));
     }
 }
