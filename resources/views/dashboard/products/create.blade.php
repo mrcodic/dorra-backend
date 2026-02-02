@@ -872,9 +872,17 @@
             setTimeout(generateVariants, 300); // wait for DOM update
         });
         $(document).on('click', '[data-repeater-delete]', function () {
-            setTimeout(() => {
-                generateVariants();
-            }, 50);
+            let item = $(this).closest('[data-repeater-item]');
+
+            // Wait until repeater actually removes it
+            let observer = new MutationObserver(function (mutations, obs) {
+                if (!document.body.contains(item[0])) {
+                    generateVariants();
+                    obs.disconnect();
+                }
+            });
+
+            observer.observe(document.body, { childList: true, subtree: true });
         });
     </script>
 
