@@ -2,34 +2,62 @@
 
 namespace App\Services\Wallet;
 
-
 use App\Models\User;
-use App\Services\BaseService;
 use Illuminate\Support\Facades\DB;
 
-
-class WalletService extends BaseService
+class WalletService
 {
+    /**
+     * Get the user's wallet and lock it, creating it if missing
+     */
+    protected static function getOrCreateWallet(User $user)
+    {
+        $wallet = $user->wallet()->lockForUpdate()->first();
+
+        if (!$wallet) {
+            $wallet = $user->wallet()->create([
+                'balance' => 0,
+                'reserved_balance' => 0,
+            ]);
+        }
+
+        return $wallet;
+    }
+
     public static function credit(User $user, int $credits, string $source = "purchase"): void
     {
         DB::transaction(function () use ($user, $credits, $source) {
-            $wallet = $user->wallet()->lockForUpdate()->first();
+            $wallet = self::getOrCreateWallet($user);
+
             $wallet->increment('balance', $credits);
+
             $wallet->walletTransactions()->create([
                 'amount' => +$credits,
+                'reserved' => 0,
                 'source' => $source,
+                'type' => 'credit'
             ]);
         });
     }
 
-    public static function debit(User $user, int $credits, string $source = "logo_generation"): void
+    public static function debit(User $user, int $credits, string $source = "usage"): void
     {
         DB::transaction(function () use ($user, $credits, $source) {
-            $wallet = $user->wallet()->lockForUpdate()->first();
+            $wallet = self::getOrCreateWallet($user);
+
+            $available = $wallet->balance - $wallet->reserved_balance;
+
+            if ($available < $credits) {
+                throw new \Exception("Insufficient available credits");
+            }
+
             $wallet->decrement('balance', $credits);
+
             $wallet->walletTransactions()->create([
                 'amount' => -$credits,
+                'reserved' => 0,
                 'source' => $source,
+                'type' => 'debit'
             ]);
         });
     }
@@ -37,8 +65,11 @@ class WalletService extends BaseService
     public static function reserve(User $user, int $credits, string $source = 'ai_reserve'): void
     {
         DB::transaction(function () use ($user, $credits, $source) {
-            $wallet = $user->wallet()->lockForUpdate()->firstOrFail();
-            if (($wallet->balance - $wallet->reserved_balance) < $credits) {
+            $wallet = self::getOrCreateWallet($user);
+
+            $available = $wallet->balance - $wallet->reserved_balance;
+
+            if ($available < $credits) {
                 throw new \Exception("Insufficient available credits");
             }
 
@@ -46,16 +77,21 @@ class WalletService extends BaseService
 
             $wallet->walletTransactions()->create([
                 'amount' => 0,
-                'reserved' => $credits,
+                'reserved' => +$credits,
                 'source' => $source,
                 'type' => 'reserve'
             ]);
         });
     }
+
     public static function capture(User $user, int $credits, string $source = 'ai_capture'): void
     {
         DB::transaction(function () use ($user, $credits, $source) {
-            $wallet = $user->wallet()->lockForUpdate()->firstOrFail();
+            $wallet = self::getOrCreateWallet($user);
+
+            if ($wallet->reserved_balance < $credits) {
+                throw new \LogicException("Capture exceeds reserved balance");
+            }
 
             $wallet->decrement('reserved_balance', $credits);
             $wallet->decrement('balance', $credits);
@@ -68,10 +104,15 @@ class WalletService extends BaseService
             ]);
         });
     }
+
     public static function release(User $user, int $credits, string $source = 'ai_release'): void
     {
         DB::transaction(function () use ($user, $credits, $source) {
-            $wallet = $user->wallet()->lockForUpdate()->firstOrFail();
+            $wallet = self::getOrCreateWallet($user);
+
+            if ($wallet->reserved_balance < $credits) {
+                throw new \LogicException("Release exceeds reserved balance");
+            }
 
             $wallet->decrement('reserved_balance', $credits);
 
@@ -83,5 +124,4 @@ class WalletService extends BaseService
             ]);
         });
     }
-
 }
