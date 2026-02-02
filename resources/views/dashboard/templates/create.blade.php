@@ -320,7 +320,8 @@
                                                     multiple>
                                                 @foreach($associatedData['industries'] as $industry)
                                                     <option value="{{ $industry->id }}">
-                                                        {{ $industry->getTranslation('name', app()->getLocale()) }}
+                                                        {{ $industry->getTranslation('name', 'en').
+                        "({$industry->getTranslation('name', 'ar')})" }}
                                                     </option>
                                                 @endforeach
                                             </select>
