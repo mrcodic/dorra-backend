@@ -202,7 +202,8 @@
                                                 <!-- FRONT -->
                                                 <div class="form-group mb-2 col-md-6 d-none" id="dz-front">
                                                     <label class="label-text mb-1">Template Image (Front)</label>
-                                                    <div id="front-template-dropzone" class="dropzone border rounded p-3"
+                                                    <div id="front-template-dropzone"
+                                                         class="dropzone border rounded p-3"
                                                          style="cursor:pointer; min-height:150px;">
                                                         <div class="dz-message">
                                                             <span>Drop front image here or click</span>
@@ -247,7 +248,8 @@
                                                     <div class="dz-message" data-dz-message>
                                                         <span>Drop image here or click to upload</span>
                                                     </div>
-                                                    <input type="hidden" name="template_image_id" id="uploadedTemplateImage">
+                                                    <input type="hidden" name="template_image_id"
+                                                           id="uploadedTemplateImage">
                                                 </div>
                                             </div>
                                         </div>
@@ -364,11 +366,13 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-md-12 form-group mb-2 mockupWrapper {{ $model->approach == 'without_editor' ? '' : 'd-none' }}">
+                                    <div
+                                        class="col-md-12 form-group mb-2 mockupWrapper {{ $model->approach == 'without_editor' ? '' : 'd-none' }}">
                                         <div class="d-flex align-items-center justify-content-between mb-2">
                                             <div>
                                                 <h5 class="mb-0" style="color:#24B094;">Mockups</h5>
-                                                <small class="text-muted">Select a mockup to show this template on it.</small>
+                                                <small class="text-muted">Select a mockup to show this template on
+                                                    it.</small>
                                             </div>
                                             <span class="badge bg-light text-dark border">Optional</span>
                                         </div>
@@ -393,12 +397,14 @@
 
                                         <div class="col-md-6 form-group mb-2">
                                             <label for="industriesSelect" class="label-text mb-1">Industries</label>
-                                            <select id="industriesSelect" class="form-select select2" name="industry_ids[]"
+                                            <select id="industriesSelect" class="form-select select2"
+                                                    name="industry_ids[]"
                                                     multiple>
                                                 @foreach($associatedData['industries'] as $industry)
                                                     <option value="{{ $industry->id }}" @selected($model->
                                                 industries->contains($industry))>
-                                                        {{ $industry->getTranslation('name', app()->getLocale()) }}
+                                                        {{ $industry->getTranslation('name', 'en').
+                     "({$industry->getTranslation('name', 'ar')})" }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -411,7 +417,8 @@
                                                 @foreach($associatedData['sub_industries'] as $industry)
                                                     <option value="{{ $industry->id }}" @selected($model->
                                                 industries->contains($industry))>
-                                                        {{ $industry->getTranslation('name', app()->getLocale()) }}
+                                                        {{ $industry->getTranslation('name', 'en').
+                                  "({$industry->getTranslation('name', 'ar')})" }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -440,7 +447,8 @@
                                         </div>
                                         {{-- Persisted resources (used on submit / ajax) --}}
                                         <input type="hidden" name="dimension_resource_ids" id="dimensionResourceIds">
-                                        <input type="hidden" name="dimension_resource_types" id="dimensionResourceTypes">
+                                        <input type="hidden" name="dimension_resource_types"
+                                               id="dimensionResourceTypes">
                                         <div class="form-group mb-2">
                                             <label for="orientation" class="label-text mb-1">Orientation</label>
                                             <select id="orientation" class="form-select" name="orientation">
@@ -474,23 +482,30 @@
 
                                                     <div class="d-flex gap-3">
                                                         <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox" name="has_corner"
-                                                                   id="shape_circle" value="0" @checked($model->has_corner == 0)
+                                                            <input class="form-check-input" type="checkbox"
+                                                                   name="has_corner"
+                                                                   id="shape_circle"
+                                                                   value="0" @checked($model->has_corner == 0)
                                                             >
-                                                            <label class="form-check-label" for="shape_circle">Circle</label>
+                                                            <label class="form-check-label"
+                                                                   for="shape_circle">Circle</label>
                                                         </div>
                                                         <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox" name="has_corner"
-                                                                   id="shape_other" value="1" @checked($model->has_corner == 1)
+                                                            <input class="form-check-input" type="checkbox"
+                                                                   name="has_corner"
+                                                                   id="shape_other"
+                                                                   value="1" @checked($model->has_corner == 1)
 
                                                             >
-                                                            <label class="form-check-label" for="shape_other">Other</label>
+                                                            <label class="form-check-label"
+                                                                   for="shape_other">Other</label>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="form-group mb-2 d-none" id="cornersBox">
                                                     <label for="cornersSelect" class="label-text mb-1">Corners</label>
-                                                    <select id="cornersSelect" class="form-select select2" name="border">
+                                                    <select id="cornersSelect" class="form-select select2"
+                                                            name="border">
                                                         <option value="" selected>Choose Corner</option>
                                                         @foreach(\App\Enums\BorderEnum::cases() as $border)
                                                             <option value="{{ $border->value }}" @selected($border->value ==
@@ -508,7 +523,8 @@
                                                     <div class="form-check mb-2">
 
                                                         <input type="hidden" name="has_safety_area" value="0">
-                                                        <input class="form-check-input" type="checkbox" id="hasSafetyArea"
+                                                        <input class="form-check-input" type="checkbox"
+                                                               id="hasSafetyArea"
                                                                name="has_safety_area" value="1" {{ $model->has_safety_area ?
                                                 'checked' : '' }} >
                                                         <label class="form-check-label" for="hasSafetyArea">Enable
@@ -541,13 +557,15 @@
                                                     <div class="form-check mb-2">
                                                         {{-- send 0 when unchecked --}}
                                                         <input type="hidden" value="0">
-                                                        <input class="form-check-input" type="checkbox" id="hasCutMargin"
+                                                        <input class="form-check-input" type="checkbox"
+                                                               id="hasCutMargin"
                                                                value="1" @checked((int) $model->cut_margin > 0) >
                                                         <label class="form-check-label" for="hasCutMargin">Enable Cut
                                                             Margin</label>
                                                     </div>
 
-                                                    <div id="cutMarginBox" class="{{ $model->cut_margin > 0 ? '' : 'd-none' }}">
+                                                    <div id="cutMarginBox"
+                                                         class="{{ $model->cut_margin > 0 ? '' : 'd-none' }}">
                                                         <label for="cutMarginSelect" class="label-text mb-1">Cut
                                                             Margin</label>
                                                         <select id="cutMarginSelect" class="form-select select2"
@@ -622,14 +640,13 @@
 
 @section('page-script')
 
-
     <script>
         // خليها Strings عشان ما يحصلش mismatch بين رقم/سترنج
         const attachedMockupIds = new Set((@json(($model?->mockups?->pluck('id') ?? collect())->values())).map(String));
 
         $(function () {
-            const $cardsWrap  = $('#mockupsCards');
-            const $withCat    = $('#categoriesSelect');
+            const $cardsWrap = $('#mockupsCards');
+            const $withCat = $('#categoriesSelect');
             const $withoutCat = $('#productsWithoutCategoriesSelect');
 
             // ✅ selected يبدأ بالمرفقات القديمة في edit
@@ -644,7 +661,7 @@
                 }
 
                 items.forEach(mockup => {
-                    const id   = String(mockup.id);
+                    const id = String(mockup.id);
                     const name = mockup.name ?? ('Mockup #' + id);
                     // ✅ استخدم قالب route جاهز من Blade
                     const editUrlTemplate = `{{ $mockupEditUrlTemplate }}`; // مثال: /admin/mockups/__MOCKUP__/edit
@@ -701,7 +718,7 @@ data-id="${id}"> Show on Mockup </a>
             }
 
             function fetchMockups() {
-                const idsWithCat    = $withCat.val() || [];
+                const idsWithCat = $withCat.val() || [];
                 const idsWithoutCat = $withoutCat.val() || [];
                 const allProductIds = [...idsWithCat, ...idsWithoutCat];
 
@@ -723,7 +740,9 @@ data-id="${id}"> Show on Mockup </a>
 
                         // اختياري: شيل أي selected مش موجود في النتائج
                         const ids = new Set(items.map(x => String(x.id)));
-                        [...selected].forEach(id => { if (!ids.has(id)) selected.delete(id); });
+                        [...selected].forEach(id => {
+                            if (!ids.has(id)) selected.delete(id);
+                        });
 
                         renderMockupCards(items);
                     },
@@ -793,7 +812,7 @@ data-id="${id}"> Show on Mockup </a>
             });
 
             const visibleDZ = [];
-            console.log(selectedTypes.includes("front"),dzFront)
+            console.log(selectedTypes.includes("front"), dzFront)
 
             if (selectedTypes.includes("front") && dzFront) {
                 dzFront.classList.remove("d-none");
@@ -855,7 +874,7 @@ data-id="${id}"> Show on Mockup </a>
             paramName: "file",
             maxFiles: 1,
             acceptedFiles: "image/jpeg,image/png",
-            headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+            headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
             addRemoveLinks: true,
             init: function () {
                 let dz = this;
@@ -892,7 +911,7 @@ data-id="${id}"> Show on Mockup </a>
             paramName: "file",
             maxFiles: 1,
             acceptedFiles: "image/jpeg,image/png",
-            headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+            headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
             addRemoveLinks: true,
             init: function () {
                 let dz = this;
@@ -928,7 +947,7 @@ data-id="${id}"> Show on Mockup </a>
             paramName: "file",
             maxFiles: 1,
             acceptedFiles: "image/jpeg,image/png",
-            headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+            headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
             addRemoveLinks: true,
             init: function () {
                 let dz = this;
@@ -1727,7 +1746,8 @@ data-id="${id}"> Show on Mockup </a>
                     window.open(response.data.editor_url, '_blank');
                     return;
 
-                }  if (response.data.mockup_redirect_url) {
+                }
+                if (response.data.mockup_redirect_url) {
                     window.open(response.data.mockup_redirect_url);
 
                 }

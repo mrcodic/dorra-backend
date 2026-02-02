@@ -920,7 +920,7 @@
                         const saved = $right.val() || [];
                         (response.data || []).forEach(cat => {
                             if ($right.find(`option[value="${cat.id}"]`).length === 0) {
-                                const text = `${cat.name.en} (${cat.name.ar})`;
+                                const text = `${cat.name_en} (${cat.name_ar})`;
                                 $right.append(new Option(text, cat.id, false, false));
                             }
                         });
