@@ -813,12 +813,15 @@
 
                 <div class="dropzone variant-dropzone" data-code="${variantCode}">
                     <div class="dz-message">Upload Variant Image</div>
-                </div>
+                </div>s
 
                 <input type="hidden" class="variant-code-input" name="variants[${index}][code]" value="${variantCode}" />
                 <input type="hidden" class="variant-image-input" name="variants[${index}][image]" value="${savedImageId}" />
 
             </div>
+  <span class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 512x512 px
+                                            </span>
         </div>`;
             });
 
