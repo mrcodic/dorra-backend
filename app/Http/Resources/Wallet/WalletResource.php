@@ -17,6 +17,7 @@ class WalletResource extends JsonResource
         return [
             'id' => $this->id,
             'balance' => $this->balance,
+            'reserved_balance' => $this->reserved_balance,
             'transactions' => WalletTransactionResource::collection($this->whenLoaded('walletTransactions')),
 
         ];
