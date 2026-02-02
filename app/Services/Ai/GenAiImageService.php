@@ -35,6 +35,9 @@ class GenAiImageService
 
     public function generate(string $prompt, ?string $negativePrompt = null): array
     {
+        if (config('app.ai_fake_mode')) {
+            return $this->fakeGenerate($prompt, $negativePrompt);
+        }
         $prompt = trim($prompt);
         $neg = trim((string)$negativePrompt);
 
@@ -122,6 +125,7 @@ class GenAiImageService
     /** One provider call: limiter + backoff + timeout */
     private function generateOnce(string $model, string $instruction): array
     {
+
         $this->acquireLimiterTokenOrFail();
 
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent";
@@ -226,7 +230,7 @@ class GenAiImageService
     {
         Cache::put($this->breakerKey($model), 1, $this->breakerTtlSec);
     }
-// داخل GenAiImageService
+
     public function estimateTokens(string $prompt, ?string $negativePrompt = null, int $outputImages = 1, bool $hasInputImage = false): int
     {
         $text = trim($prompt) . "\n" . trim((string)$negativePrompt);
@@ -243,6 +247,41 @@ class GenAiImageService
         return $textTokens + $inputImageTokens + $outputImageTokens + $buffer;
     }
 
+    private function fakeGenerate(string $prompt, ?string $negativePrompt = null): array
+    {
+        // simulate real latency
+        usleep(random_int(300, 900) * 1000);
+
+        $promptLower = strtolower($prompt);
+
+        // 🔥 FORCE FAILURE TEST
+        if (str_contains($promptLower, 'fail')) {
+            return [
+                'ok' => false,
+                'status' => 500,
+                'error' => 'Simulated AI failure (fake mode)',
+            ];
+        }
+
+        // simulate token usage variation
+        $tokens = random_int(700, 2000);
+
+        // fake base64 image (tiny pixel)
+        $fakeImage = 'data:image/png;base64,' .
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=';
+
+        return [
+            'ok' => true,
+            'status' => 200,
+            'images' => [$fakeImage],
+            'model' => 'fake-gemini',
+            'usage' => [
+                'totalTokenCount' => $tokens
+            ],
+            'promptFeedback' => null,
+            'arabicNote' => 'FAKE MODE ACTIVE',
+        ];
+    }
 
 
 }

@@ -56,7 +56,6 @@ class CreditController extends Controller
         $tokensPerCredit = (int) Setting::where('key', 'tokens_per_credit')->value('value');
         $freeLimit       = (int) Setting::where('key', 'free_credits_limit')->value('value');
 
-        // 1) Estimate tokens BEFORE calling Gemini
         $estimatedTokens = $genAiImageService->estimateTokens(
             $data['prompt'],
             $data['negative_prompt'] ?? null,
@@ -66,28 +65,25 @@ class CreditController extends Controller
 
         $estimatedCredits = (int) ceil($estimatedTokens / max(1, $tokensPerCredit));
 
-        // 2) Reserve/Deduct credits atomically
         $reserved = ['free' => 0, 'wallet' => 0];
 
+        /** ================= RESERVE PHASE ================= */
         DB::beginTransaction();
         try {
-            // lock user row
             $lockedUser = $user->newQuery()->lockForUpdate()->findOrFail($user->id);
+            $wallet = $lockedUser->wallet()->lockForUpdate()->firstOrFail();
 
-            // lock wallet row (لو wallet ممكن تكون null اعمل create/ensure)
-            $wallet = $lockedUser->wallet()->lockForUpdate()->first();
-            $walletBalance = $wallet?->balance ?? 0;
-
+            $availableWallet = $wallet->balance - $wallet->reserved_balance;
             $freeLeft = max(0, $freeLimit - (int)$lockedUser->free_credits_used);
 
-            if ($freeLeft + $walletBalance < $estimatedCredits) {
+            if ($freeLeft + $availableWallet < $estimatedCredits) {
                 DB::rollBack();
                 return Response::api(HttpEnum::PAYMENT_REQUIRED, "Insufficient credits", errors: [
                     "payment" => "Insufficient credits"
                 ]);
             }
 
-            // consume free first
+            // Use free credits first
             if ($freeLeft > 0) {
                 $useFree = min($freeLeft, $estimatedCredits);
                 $lockedUser->increment('free_credits_used', $useFree);
@@ -95,9 +91,9 @@ class CreditController extends Controller
                 $estimatedCredits -= $useFree;
             }
 
-            // then wallet
+            // Reserve wallet credits
             if ($estimatedCredits > 0) {
-                WalletService::debit($lockedUser, $estimatedCredits, 'image_generation');
+                WalletService::reserve($lockedUser, $estimatedCredits, 'image_generation');
                 $reserved['wallet'] = $estimatedCredits;
             }
 
@@ -107,21 +103,20 @@ class CreditController extends Controller
             throw $e;
         }
 
-        // 3) Call Gemini بعد ما ضمنّا الخصم
+        /** ================= AI CALL ================= */
         $res = $genAiImageService->generate($data['prompt'], $data['negative_prompt'] ?? null);
 
-        // 4) لو فشل: Refund
+        /** ================= FAILURE → RELEASE ================= */
         if (!$res['ok']) {
             DB::transaction(function () use ($user, $reserved) {
                 $lockedUser = $user->newQuery()->lockForUpdate()->findOrFail($user->id);
 
                 if ($reserved['free'] > 0) {
-                    // رجّع free_credits_used
                     $lockedUser->decrement('free_credits_used', $reserved['free']);
                 }
+
                 if ($reserved['wallet'] > 0) {
-                    // لازم يكون عندك credit/reversal
-                    WalletService::credit($lockedUser, $reserved['wallet'], 'image_generation_refund');
+                    WalletService::release($lockedUser, $reserved['wallet'], 'image_generation_fail');
                 }
             });
 
@@ -130,28 +125,32 @@ class CreditController extends Controller
             ]);
         }
 
-        // 5) Reconcile with actual usage (لو متاح)
+        /** ================= RECONCILE ================= */
         $actualTokens = (int) data_get($res, 'usage.totalTokenCount', 0);
+
         if ($actualTokens > 0) {
             $actualCredits = (int) ceil($actualTokens / max(1, $tokensPerCredit));
-            $reservedTotal = $reserved['free'] + $reserved['wallet'];
 
-            if ($actualCredits < $reservedTotal) {
-                $refund = $reservedTotal - $actualCredits;
+            DB::transaction(function () use ($user, $actualCredits, $reserved) {
+                $lockedUser = $user->newQuery()->lockForUpdate()->findOrFail($user->id);
 
-                DB::transaction(function () use ($user, $refund, $freeLimit) {
-                    $lockedUser = $user->newQuery()->lockForUpdate()->findOrFail($user->id);
+                $walletReserved = $reserved['wallet'];
 
-                    // رجّع للـ wallet أولاً (أسهل في الإدارة)
-                    WalletService::credit($lockedUser, $refund, 'image_generation_refund_adjust');
-                });
-            }
-
-            // لو actualCredits > reservedTotal:
-            // - يا إما تخصم الفرق (لو متاح)
-            // - يا إما تعتبره buffer وتسيبه (أنا أنصح تخصم الفرق لو متاح)
+                if ($walletReserved > 0) {
+                    if ($actualCredits <= $walletReserved) {
+                        WalletService::capture($lockedUser, $actualCredits, 'image_generation');
+                        WalletService::release($lockedUser, $walletReserved - $actualCredits, 'image_generation_adjust');
+                    } else {
+                        // Need extra credits beyond reserved
+                        $extra = $actualCredits - $walletReserved;
+                        WalletService::capture($lockedUser, $walletReserved, 'image_generation');
+                        WalletService::debit($lockedUser, $extra, 'image_generation_overuse');
+                    }
+                }
+            });
         }
 
+        /** ================= SUCCESS ================= */
         return Response::api([
             'images' => $res['images'],
             'model' => $res['model'],
