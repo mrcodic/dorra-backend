@@ -920,7 +920,8 @@
                         const saved = $right.val() || [];
                         (response.data || []).forEach(cat => {
                             if ($right.find(`option[value="${cat.id}"]`).length === 0) {
-                                $right.append(new Option(cat.name, cat.id, false, false));
+                                const text = `${cat.name.en} (${cat.name.ar})`;
+                                $right.append(new Option(text, cat.id, false, false));
                             }
                         });
                         $right.val(saved).trigger('change');
