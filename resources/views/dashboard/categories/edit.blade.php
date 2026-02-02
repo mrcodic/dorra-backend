@@ -851,7 +851,7 @@
 
 
                 html += `
-        <div class="col-md-3 mb-2">
+        <div class="col-auto  mb-2">
             <div class="variant-box border rounded p-2 h-100">
 
                 <div class="fw-bold small text-muted">${displayTitle}</div>
