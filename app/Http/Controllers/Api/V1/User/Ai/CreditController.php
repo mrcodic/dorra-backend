@@ -64,6 +64,7 @@ class CreditController extends Controller
         );
 
         $estimatedCredits = (int) ceil($estimatedTokens / max(1, $tokensPerCredit));
+        $estimatedCredits = (int) ceil(1 / max(1, $tokensPerCredit));
 
         $reserved = ['free' => 0, 'wallet' => 0];
 
