@@ -102,7 +102,7 @@ class CreditController extends Controller
 
         } catch (\RuntimeException $e) {
             DB::rollBack();
-
+dd($e);
             return Response::api(HttpEnum::PAYMENT_REQUIRED, "Insufficient credits", errors: [
                 "payment" => "Insufficient credits"
             ]);
