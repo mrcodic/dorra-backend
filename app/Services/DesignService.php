@@ -92,9 +92,9 @@ class DesignService extends BaseService
         if (is_null($productPrice)) {
             $productId = Arr::get($validatedData, 'product_id');
            if ($validatedData['designable_type'] == 'App\\Models\\Product') {
-               $productPrice = $this->productRepository->find($productId);
+               $productPrice = $this->productRepository->find($productId)->base_price;
            }else{
-               $productPrice = $this->categoryRepository->find($productId);
+               $productPrice = $this->categoryRepository->find($productId)->base_price;
            }
         }
         $totalPrice += $productPrice->price ;
