@@ -91,7 +91,6 @@ class DesignService extends BaseService
         $productPrice = $this->productPriceRepository->query()->find(Arr::get($validatedData, 'product_price_id'));
         if (is_null($productPrice)) {
             $productId = Arr::get($validatedData, 'product_id');
-            dd($productId,$validatedData['designable_type']);
            if ($validatedData['designable_type'] == 'App\\Models\\Product') {
                $productPrice = $this->productRepository->find($productId)->base_price;
            }else{
