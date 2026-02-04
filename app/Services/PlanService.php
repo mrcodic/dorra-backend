@@ -34,7 +34,7 @@ class PlanService extends BaseService
             'user' => auth()->user(),
             'method' => $paymentMethod->code,
         ]);
-dd($dto,$plan,$paymentMethod,$gatewayCode,$paymentGatewayStrategy);
+
       return  $paymentGatewayStrategy->pay($dto->toArray(),['plan' => $plan,'type' => 'plan']);
 
     }
