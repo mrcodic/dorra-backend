@@ -27,13 +27,14 @@ class PlanService extends BaseService
         $plan = $this->repository->find($validateData['plan_id']);
         $paymentMethod = $this->paymentMethodRepository->find($validateData['payment_method_id']);
         $gatewayCode = $paymentMethod->paymentGateway->code;
-        $paymentGatewayStrategy = $this->paymentFactory->make($gatewayCode);
+         $paymentGatewayStrategy = $this->paymentFactory->make($gatewayCode);
+
         $dto = PaymentRequestData::fromArray([
             'plan' => $plan,
             'user' => auth()->user(),
             'method' => $paymentMethod->code,
         ]);
-
+dd($dto,$plan,$paymentMethod,$gatewayCode,$paymentGatewayStrategy);
       return  $paymentGatewayStrategy->pay($dto->toArray(),['plan' => $plan,'type' => 'plan']);
 
     }
