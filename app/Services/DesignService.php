@@ -27,16 +27,16 @@ class DesignService extends BaseService
     public BaseRepositoryInterface $repository;
 
     public function __construct(
-        DesignRepositoryInterface                   $repository,
-        public TemplateRepositoryInterface          $templateRepository,
-        public ProductSpecificationOptionRepository $optionRepository,
-        public UserRepositoryInterface              $userRepository,
-        public GuestRepositoryInterface             $guestRepository,
-        public TeamRepositoryInterface              $teamRepository,
-        public CategoryRepositoryInterface          $categoryRepository,
-        public ProductPriceRepositoryInterface      $productPriceRepository,
+        DesignRepositoryInterface                            $repository,
+        public TemplateRepositoryInterface                   $templateRepository,
+        public ProductSpecificationOptionRepository          $optionRepository,
+        public UserRepositoryInterface                       $userRepository,
+        public GuestRepositoryInterface                      $guestRepository,
+        public TeamRepositoryInterface                       $teamRepository,
+        public CategoryRepositoryInterface                   $categoryRepository,
+        public ProductPriceRepositoryInterface               $productPriceRepository,
         public ProductSpecificationOptionRepositoryInterface $productSpecificationOptionRepository,
-        public ProductRepositoryInterface $productRepository,
+        public ProductRepositoryInterface                    $productRepository,
 
     )
     {
@@ -91,16 +91,16 @@ class DesignService extends BaseService
         $productPrice = $this->productPriceRepository->query()->find(Arr::get($validatedData, 'product_price_id'));
         if (is_null($productPrice)) {
             $productId = Arr::get($validatedData, 'product_id');
-           if ($validatedData['designable_type'] == 'App\\Models\\Product') {
-               $productPrice = $this->productRepository->find($productId)->base_price;
-           }else{
-               $productPrice = $this->categoryRepository->find($productId)->base_price;
-           }
+            if ($validatedData['designable_type'] == 'App\\Models\\Product') {
+                $productPrice = $this->productRepository->find($productId);
+            } else {
+                $productPrice = $this->categoryRepository->find($productId);
+            }
         }
-        $totalPrice += $productPrice->price ;
+        $totalPrice += $productPrice->price ?? $productPrice->base_price;
         if (isset($validatedData['specs'])) {
             $productSpecificationOptionRepository = $this->productSpecificationOptionRepository;
-            collect($validatedData['specs'])->each(function ($spec) use ($design, &$totalPrice,$productSpecificationOptionRepository) {
+            collect($validatedData['specs'])->each(function ($spec) use ($design, &$totalPrice, $productSpecificationOptionRepository) {
                 $option = $productSpecificationOptionRepository->find($spec['option']);
                 $totalPrice += $option->price;
                 $design->specifications()->attach([$design->id => [
