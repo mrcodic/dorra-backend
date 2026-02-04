@@ -65,7 +65,6 @@ class CreditController extends Controller
         );
 
         $estimatedCredits = (int) ceil($estimatedTokens / max(1, $tokensPerCredit));
-        dd($estimatedCredits,$estimatedTokens);
         $reserved = ['free' => 0, 'wallet' => 0];
 
         /** ================= RESERVE PHASE ================= */
@@ -77,6 +76,7 @@ class CreditController extends Controller
 
             $availableWallet = max(0, $wallet->balance - $wallet->reserved_balance);
             $freeLeft        = max(0, $freeLimit - (int)$lockedUser->free_credits_used);
+            dd($estimatedCredits,$estimatedTokens,$freeLeft,$availableWallet);
 
             if (($freeLeft + $availableWallet) < $estimatedCredits) {
                 return Response::api(HttpEnum::PAYMENT_REQUIRED, "Insufficient credits", errors: [
