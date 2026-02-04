@@ -72,9 +72,9 @@ class CreditController extends Controller
             DB::beginTransaction();
 
             $lockedUser = $user->newQuery()->lockForUpdate()->findOrFail($user->id);
-            $wallet     = $lockedUser->wallet()->lockForUpdate()->firstOrFail();
+            $wallet     = $lockedUser->wallet()->lockForUpdate()->first();
 
-            $availableWallet = max(0, $wallet->balance - $wallet->reserved_balance);
+            $availableWallet = max(0, $wallet?->balance - $wallet?->reserved_balance);
             $freeLeft        = max(0, $freeLimit - (int)$lockedUser->free_credits_used);
             dd($estimatedCredits,$estimatedTokens,$freeLeft,$availableWallet);
 
@@ -102,7 +102,6 @@ class CreditController extends Controller
 
         } catch (\RuntimeException $e) {
             DB::rollBack();
-dd($e);
             return Response::api(HttpEnum::PAYMENT_REQUIRED, "Insufficient credits", errors: [
                 "payment" => "Insufficient credits"
             ]);
@@ -158,7 +157,7 @@ dd($e);
             DB::transaction(function () use ($user, $actualCredits, $reserved, $freeLimit, $data) {
 
                 $lockedUser = $user->newQuery()->lockForUpdate()->findOrFail($user->id);
-                $wallet     = $lockedUser->wallet()->lockForUpdate()->firstOrFail();
+                $wallet     = $lockedUser->wallet()->lockForUpdate()->first();
 
                 $totalReserved = $reserved['free'] + $reserved['wallet'];
 
