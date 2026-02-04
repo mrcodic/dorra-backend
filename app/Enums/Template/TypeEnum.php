@@ -26,13 +26,13 @@ enum TypeEnum : int
     {
         return array_map(fn(self $e) => $e->key(), self::cases());
     }
-    public function label()
+    public function label(): string
     {
         return match ($this) {
-            self::FRONT => "Front",
-            self::BACK => "Back",
-            self::NONE => "None",
-
+            self::FRONT => __('templates.type.front'),
+            self::BACK  => __('templates.type.back'),
+            self::NONE  => __('templates.type.none'),
         };
     }
+
 }
