@@ -46,6 +46,7 @@ class DesignController extends Controller
             'width',
             'unit',
             'product_id',
+            'designable_id',
             'designable_type',
             'specs',
             'product_price_id',
