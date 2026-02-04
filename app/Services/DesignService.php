@@ -94,6 +94,7 @@ class DesignService extends BaseService
            if ($validatedData['designable_type'] == 'App\\Models\\Product') {
                $productPrice = $this->productRepository->find($productId)->base_price;
            }else{
+               dd("jh");
                $productPrice = $this->categoryRepository->find($productId)->base_price;
            }
         }
