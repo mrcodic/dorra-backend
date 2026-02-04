@@ -12,10 +12,13 @@ use App\Repositories\Implementations\ProductSpecificationOptionRepository;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
 use App\Repositories\Interfaces\GuestRepositoryInterface;
+use App\Repositories\Interfaces\ProductPriceRepositoryInterface;
+use App\Repositories\Interfaces\ProductSpecificationOptionRepositoryInterface;
 use App\Repositories\Interfaces\TeamRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 
 
 class DesignService extends BaseService
@@ -30,6 +33,8 @@ class DesignService extends BaseService
         public GuestRepositoryInterface             $guestRepository,
         public TeamRepositoryInterface              $teamRepository,
         public CategoryRepositoryInterface          $categoryRepository,
+        public ProductPriceRepositoryInterface      $productPriceRepository,
+        public ProductSpecificationOptionRepositoryInterface $productSpecificationOptionRepository
 
     )
     {
@@ -38,7 +43,7 @@ class DesignService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-
+        $totalPrice = 0;
         if (!empty($validatedData['template_id'])) {
             $design = $this->handleTransaction(function () use ($validatedData) {
                 if (!empty($validatedData['user_id'])) {
@@ -81,8 +86,13 @@ class DesignService extends BaseService
                 $this->userRepository->find($validatedData['user_id'])
             );
         }
+        $productPrice = $this->productPriceRepository->find(Arr::get($validatedData, 'product_price_id'));
+        $totalPrice += $productPrice->price;
         if (isset($validatedData['specs'])) {
-            collect($validatedData['specs'])->each(function ($spec) use ($design) {
+            $productSpecificationOptionRepository = $this->productSpecificationOptionRepository;
+            collect($validatedData['specs'])->each(function ($spec) use ($design, &$totalPrice,$productSpecificationOptionRepository) {
+                $option = $productSpecificationOptionRepository->find($spec['option']);
+                $totalPrice += $option->price;
                 $design->specifications()->attach([$design->id => [
                     'product_spec_id' => $spec['id'],
                     'option_id' => $spec['option'],
