@@ -245,7 +245,11 @@ class Product extends Model implements HasMedia
         ];
     }
 
-
+    public function getAllCategoryImages()
+    {
+        return $this->getMedia('product_extra_images')
+            ->merge($this->getMedia('products'));
+    }
 
 
 }
