@@ -20,14 +20,14 @@ class LibraryAssetController extends Controller
 
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $notAuth = request()->is('api/v1/admin/*');
         $model = $notAuth ? Admin::first() : getAuthOrGuest();
         $media = Media::query()->whereMorphedTo('model', $model)
             ->whereCollectionName(($this->activeGuard ?? 'guest') . '_assets')
             ->latest()
-            ->get();
+            ->paginate($request->query('per_page',10));
         return Response::api(data: MediaResource::collection($media)->response()->getData(true));
     }
 
