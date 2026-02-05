@@ -7,7 +7,9 @@ use App\Http\Requests\Base\BaseRequest;
 use App\Models\Category;
 use App\Models\Design;
 use App\Models\Dimension;
+use App\Models\Guest;
 use App\Models\Product;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 
@@ -19,63 +21,6 @@ class UpdateDesignRequest extends BaseRequest
     public function authorize(): bool
     {
         return true;
-    }
-
-    protected function prepareForValidation()
-    {
-        $map = [
-            'product'  => \App\Models\Product::class,
-            'category' => \App\Models\Category::class,
-        ];
-
-        if (isset($map[$this->designable_type])) {
-            $this->merge([
-                'designable_type' => $map[$this->designable_type],
-            ]);
-        }
-
-        if ($this->has('name')) {
-            $name = $this->input('name');
-
-            if (is_string($name)) {
-                $this->merge([
-                    'name' => [
-                        'en' => $name,
-                        'ar' => $name,
-                    ],
-                ]);
-            } elseif (is_array($name)) {
-                $this->merge([
-                    'name' => [
-                        'en' => $name['en'] ?? null,
-                        'ar' => $name['ar'] ?? null,
-                    ],
-                ]);
-            }
-        }  if ($this->has('description')) {
-        $description = $this->input('description');
-
-        if (is_string($description)) {
-            $this->merge([
-                'description' => [
-                    'en' => $description,
-                    'ar' => $description,
-                ],
-            ]);
-        } elseif (is_array($description)) {
-            $this->merge([
-                'description' => [
-                    'en' => $description['en'] ?? null,
-                    'ar' => $description['ar'] ?? null,
-                ],
-            ]);
-        }
-    }
-        if ($this->has('product_id')) {
-            $this->merge([
-                'designable_id' => $this->input('product_id'),
-            ]);
-        }
     }
 
     /**
@@ -100,24 +45,26 @@ class UpdateDesignRequest extends BaseRequest
                 }),
                 'exists:product_prices,id',
             ],
-            'designable_id'   => ['nullable', 'integer',function ($attribute, $value, $fail) {
+            'designable_id' => ['nullable', 'integer', function ($attribute, $value, $fail) {
                 $design = Design::find($this->route('design'))?->template;
                 $template = $design?->template;
                 $category = Category::find($value) ?? Product::find($value);
                 if (!$design) {
                     return;
-                } if (!$template) {
-                    return;
-                } if (!$category) {
+                }
+                if (!$template) {
                     return;
                 }
-                if ($category->is_has_category && $this->designable_type == Category::class)
-                {
+                if (!$category) {
+                    return;
+                }
+                if ($category->is_has_category && $this->designable_type == Category::class) {
                     return $fail("You Cannot add product with categories.");
                 }
-                if (!($template?->products->pluck('id')->contains($value))&& $this->input('designable_type') == 'product') {
+                if (!($template?->products->pluck('id')->contains($value)) && $this->input('designable_type') == 'product') {
                     return $fail("The selected category is not associated with the selected template.");
-                } if (!($template?->categories->pluck('id')->contains($value)) && $this->input('designable_type') == 'category') {
+                }
+                if (!($template?->categories->pluck('id')->contains($value)) && $this->input('designable_type') == 'category') {
                     return $fail("The selected product is not associated with the selected template.");
                 }
             }],
@@ -145,20 +92,98 @@ class UpdateDesignRequest extends BaseRequest
             "specs.*.id" => ["sometimes", "exists:product_specifications,id"],
             "specs.*.option" => ["sometimes", "exists:product_specification_options,id"],
             'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
+            'user_id' => ['nullable', 'exists:users,id'],
+            'guest_id' => ['nullable', 'exists:guests,id'],
 
         ];
     }
-protected function passedValidation()
-{
-    $this->merge([
-        'designable_id' => $this->input('product_id'),
-    ]);
-}
+
     public function attributes(): array
     {
         return [
             'dimension_id' => 'dimension',
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $map = [
+            'product' => \App\Models\Product::class,
+            'category' => \App\Models\Category::class,
+        ];
+
+        if (isset($map[$this->designable_type])) {
+            $this->merge([
+                'designable_type' => $map[$this->designable_type],
+            ]);
+        }
+
+        if ($this->has('name')) {
+            $name = $this->input('name');
+
+            if (is_string($name)) {
+                $this->merge([
+                    'name' => [
+                        'en' => $name,
+                        'ar' => $name,
+                    ],
+                ]);
+            } elseif (is_array($name)) {
+                $this->merge([
+                    'name' => [
+                        'en' => $name['en'] ?? null,
+                        'ar' => $name['ar'] ?? null,
+                    ],
+                ]);
+            }
+        }
+        if ($this->has('description')) {
+            $description = $this->input('description');
+
+            if (is_string($description)) {
+                $this->merge([
+                    'description' => [
+                        'en' => $description,
+                        'ar' => $description,
+                    ],
+                ]);
+            } elseif (is_array($description)) {
+                $this->merge([
+                    'description' => [
+                        'en' => $description['en'] ?? null,
+                        'ar' => $description['ar'] ?? null,
+                    ],
+                ]);
+            }
+        }
+        if ($this->has('product_id')) {
+            $this->merge([
+                'designable_id' => $this->input('product_id'),
+            ]);
+        }
+    }
+
+    protected function passedValidation()
+    {
+        $cookieValue = getCookie('cookie_id')['value'];
+        $activeGuard = getActiveGuard();
+        $userId = match ($activeGuard) {
+            'web' => $this->input('user_id'),
+            'sanctum' => Auth::guard('sanctum')->id(),
+            default => null,
+        };
+
+
+        $guestId = null;
+        if (!$userId && $cookieValue) {
+            $guest = Guest::firstOrCreate(['cookie_value' => $cookieValue]);
+            $guestId = $guest->id;
+        }
+        $this->merge([
+            'user_id' => $userId,
+            'guest_id' => $guestId,
+            'designable_id' => $this->input('product_id'),
+        ]);
     }
 
 }
