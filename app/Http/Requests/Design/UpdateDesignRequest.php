@@ -179,7 +179,7 @@ class UpdateDesignRequest extends BaseRequest
             $guest = Guest::firstOrCreate(['cookie_value' => $cookieValue]);
             $guestId = $guest->id;
         }
-     dd($guest,$userId);
+     dd($userId);
         $this->merge([
             'user_id' => $userId,
             'guest_id' => $guestId,
