@@ -29,9 +29,9 @@ enum TypeEnum : int
     public function label(): string
     {
         return match ($this) {
-            self::FRONT => __('templates.type.front'),
-            self::BACK  => __('templates.type.back'),
-            self::NONE  => __('templates.type.none'),
+            self::FRONT => "Front",
+            self::BACK  => 'Back',
+            self::NONE  => 'None',
         };
     }
 
