@@ -47,7 +47,7 @@ class LoginController extends Controller
             path: '/',
             domain: '.dorraprint.com',
             secure: app()->environment('production'),
-            httpOnly: true,
+            httpOnly: false,
             sameSite: 'Lax'
         ));
     }
