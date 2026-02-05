@@ -131,7 +131,7 @@ class AuthService
                 ]
             );
 
-            $plainTextToken = $user->createToken($user->email, expiresAt: now()->addHours(10))->plainTextToken;
+            $plainTextToken = $user->createToken($user->email, expiresAt: now()->addDays(30))->plainTextToken;
             $user->token = $plainTextToken;
 
 
