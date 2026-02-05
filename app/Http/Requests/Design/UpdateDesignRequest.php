@@ -161,10 +161,6 @@ class UpdateDesignRequest extends BaseRequest
                 'designable_id' => $this->input('product_id'),
             ]);
         }
-    }
-
-    protected function passedValidation()
-    {
         $cookieValue = getCookie('cookie_id')['value'];
         $activeGuard = getActiveGuard();
         $userId = match ($activeGuard) {
@@ -179,12 +175,13 @@ class UpdateDesignRequest extends BaseRequest
             $guest = Guest::firstOrCreate(['cookie_value' => $cookieValue]);
             $guestId = $guest->id;
         }
-     dd($userId);
+
         $this->merge([
             'user_id' => $userId,
             'guest_id' => $guestId,
-            'designable_id' => $this->input('product_id'),
         ]);
     }
+
+ 
 
 }
