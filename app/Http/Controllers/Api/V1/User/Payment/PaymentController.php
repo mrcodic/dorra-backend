@@ -33,9 +33,9 @@ class PaymentController extends Controller
     {
     }
 
-    public function paymentMethods()
+    public function paymentMethods(Request $request)
     {
-        $methods = Cache::rememberForever('payment_methods', function () {
+        $methods = Cache::rememberForever('payment_methods', function ()  use ($request){
             return $this->paymentMethodRepository
                 ->query()
                 ->with('paymentGateway')
@@ -44,6 +44,10 @@ class PaymentController extends Controller
                     $q->whereHas('paymentGateway', fn($gw) => $gw->active())
                         ->orWhereNull('payment_gateway_id');
                 })
+                ->when(
+                    $request->type === 'credits',
+                    fn ($q) => $q->where('code', '!=', 'cash_on_delivery')
+                )
                 ->get();
         });
 
