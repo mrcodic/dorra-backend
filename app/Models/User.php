@@ -184,7 +184,10 @@ class User extends Authenticatable implements HasMedia
             get: fn(?string $value) => $this->getFirstMedia('users')
         );
     }
-
+    protected function freeCreditsLimit(): int
+    {
+        return (int) Setting::where('key', 'free_credits_limit')->value('value');
+    }
     protected function freeCreditsUsed(): Attribute
     {
         return Attribute::make(
