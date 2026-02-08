@@ -1,4 +1,4 @@
-F@extends('layouts/contentLayoutMaster')
+@extends('layouts/contentLayoutMaster')
 
 @section('title', 'User List')
 @section('main-page', 'Users')
