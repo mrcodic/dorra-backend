@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Jobs\SendSmsMessageJob;
 use App\Models\Setting;
 use App\Services\SMS\SmsInterface;
+use App\Services\Wallet\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -62,7 +63,7 @@ class UserService extends BaseService
     public function getData(): JsonResponse
     {
         $users = $this->repository
-            ->query(['id', 'first_name', 'last_name', 'email', 'status', 'created_at','free_credits_used'])
+            ->query(['id', 'first_name', 'last_name', 'email', 'status', 'created_at', 'free_credits_used'])
             ->withCount('orders')
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
@@ -146,7 +147,6 @@ class UserService extends BaseService
             ->latest();
 
 
-
         return DataTables::of($users)
             ->addColumn('name', function ($user) {
                 return $user->name;
@@ -168,6 +168,7 @@ class UserService extends BaseService
 
         SendSmsMessageJob::dispatch($users, $validatedData['message']);
     }
+
     public function changePassword($request, $id): bool
     {
         $request->validate([
@@ -213,5 +214,16 @@ class UserService extends BaseService
         return $this->repository->query()
             ->select(['first_name', 'last_name', 'phone_number'])
             ->get();
+    }
+
+    public function extraCredits($validatedData, $id)
+    {
+        $this->handleTransaction(function () use ($validatedData, $id) {
+            $model = $this->repository->find($id);
+            $credit = $model->extraCredits()->create(['admin_id' => auth()->id(), 'amount' => $validatedData["amount"]]);
+            WalletService::credit($model, $credit['amount'], "extra_credits_from_admin");
+        });
+
+
     }
 }

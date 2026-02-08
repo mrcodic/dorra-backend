@@ -111,6 +111,10 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(SocialAccount::class);
     }
 
+    public function extraCredits(): HasMany
+    {
+        return $this->hasMany(ExtraCredit::class);
+    }
     public function addresses(): HasMany
     {
         return $this->hasMany(ShippingAddress::class);

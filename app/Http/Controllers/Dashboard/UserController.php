@@ -81,5 +81,14 @@ class UserController extends DashboardController
         return Response::api();
 
     }
+    public function extraCredits(Request $request,$id): JsonResponse
+    {
+        $validatedData = $request->validate([
+            'amount' => ['required', 'integer'],
+        ]);
+        $this->userService->extraCredits($validatedData,$id);
+        return Response::api(message: "Extra credits added successfully.");
+
+    }
 }
 

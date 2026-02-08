@@ -68,6 +68,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::put('{id}/change-password', [UserController::class, 'changePassword'])->name('change-password');
             Route::get('/campaigns', [UserController::class, 'campaigns'])->name('campaigns');
             Route::get('/search', [UserController::class, 'search'])->name('search');
+            Route::post('/{id}/extra-credits', [UserController::class, 'extraCredits'])->name('extra-credits');
         });
         Route::resource('/users', UserController::class);
 
