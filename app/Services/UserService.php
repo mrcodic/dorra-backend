@@ -61,7 +61,7 @@ class UserService extends BaseService
     public function getData(): JsonResponse
     {
         $users = $this->repository
-            ->query(['id', 'first_name', 'last_name', 'email', 'status', 'created_at'])
+            ->query(['id', 'first_name', 'last_name', 'email', 'status', 'created_at','free_credits_used'])
             ->withCount('orders')
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
@@ -72,7 +72,7 @@ class UserService extends BaseService
                             $query->where(function ($q) use ($word) {
                                 $q->where('first_name', 'like', '%' . $word . '%')
                                     ->orWhere('last_name', 'like', '%' . $word . '%');
-                            });
+                            })->orWhere('email', 'like', '%' . $word . '%');
                         }
                     });
                 } else {
@@ -84,6 +84,8 @@ class UserService extends BaseService
         return DataTables::of($users)
             ->addColumn('name', function ($user) {
                 return $user->name;
+            })->editColumn('used_credits', function ($user) {
+                return $user->used_credits + $user->wallet_credits_used;
             })
             ->addColumn('image', function ($admin) {
                 return $admin->getFirstMediaUrl('users') ?: asset("images/default-user.png");

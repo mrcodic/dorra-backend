@@ -18,7 +18,8 @@ use Illuminate\Database\Eloquent\Relations\{BelongsTo,
     HasManyThrough,
     HasOne,
     MorphMany,
-    MorphToMany};
+    MorphToMany
+};
 
 class User extends Authenticatable implements HasMedia
 {
@@ -45,7 +46,14 @@ class User extends Authenticatable implements HasMedia
         'last_login_at',
         'free_credits_used',
     ];
-
+    protected $appends = [
+        'free_credits_available',
+        'wallet_credits_available',
+        'wallet_credits_used',
+        'used_credits',
+        'available_credits',
+        'total_credits',
+    ];
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -55,21 +63,6 @@ class User extends Authenticatable implements HasMedia
         'password',
         'remember_token',
     ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password_updated_at' => 'datetime',
-            'last_login_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
 
     protected static function booted(): void
     {
@@ -83,25 +76,26 @@ class User extends Authenticatable implements HasMedia
         parent::booted();
     }
 
+    public function notificationTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(NotificationType::class)
+            ->withPivot('enabled')
+            ->withTimestamps();
+    }
+
     public function status(): Attribute
     {
         return Attribute::get(fn(?bool $value) => $value == 0 ? 'Blocked' : 'Active');
     }
+
     public function getNameAttribute(): string
     {
-        return $this->first_name . ' '. $this->last_name;
-    }
-
-    protected function image(): Attribute
-    {
-        return Attribute::make(
-            get: fn(?string $value) => $this->getFirstMedia('users')
-        );
+        return $this->first_name . ' ' . $this->last_name;
     }
 
     public function name(): Attribute
     {
-       return Attribute::get(fn()=> $this->first_name.' '.$this->last_name);
+        return Attribute::get(fn() => $this->first_name . ' ' . $this->last_name);
     }
 
     public function countryCode(): BelongsTo
@@ -129,30 +123,24 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(ShippingAddress::class);
     }
 
-    public function notificationTypes(): BelongsToMany
-    {
-        return $this->belongsToMany(NotificationType::class)
-            ->withPivot('enabled')
-            ->withTimestamps();
-    }
-
     public function savedProducts(): MorphToMany
     {
-        return $this->morphedByMany(Product::class, 'savable','saves')->withTimestamps();
+        return $this->morphedByMany(Product::class, 'savable', 'saves')->withTimestamps();
     }
 
     public function savedDesigns(): MorphToMany
     {
-        return $this->morphedByMany(Design::class, 'savable','saves')->withTimestamps();
+        return $this->morphedByMany(Design::class, 'savable', 'saves')->withTimestamps();
     }
 
     public function teams(): MorphToMany
     {
-        return $this->morphToMany(Team::class,'teamable')->withTimestamps();
+        return $this->morphToMany(Team::class, 'teamable')->withTimestamps();
     }
+
     public function ownerTeams(): HasMany
     {
-        return $this->hasMany(Team::class,'owner_id');
+        return $this->hasMany(Team::class, 'owner_id');
     }
 
     public function reviews(): HasMany
@@ -173,5 +161,92 @@ class User extends Authenticatable implements HasMedia
     public function wallet(): HasOne
     {
         return $this->hasOne(Wallet::class);
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password_updated_at' => 'datetime',
+            'last_login_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
+
+    protected function image(): Attribute
+    {
+        return Attribute::make(
+            get: fn(?string $value) => $this->getFirstMedia('users')
+        );
+    }
+
+    protected function freeCreditsUsed(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => (int)($this->free_credits_used ?? 0),
+        );
+    }
+
+    protected function freeCreditsAvailable(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => max(
+                0,
+                $this->freeCreditsLimit() - $this->free_credits_used
+            ),
+        );
+    }
+
+    protected function walletCreditsAvailable(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => (int)($this->wallet?->balance ?? 0),
+        );
+    }
+
+    protected function walletCreditsUsed(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->walletUsedCreditsValue(),
+        );
+    }
+
+    protected function walletUsedCreditsValue(): int
+    {
+        if (!$this->wallet) {
+            return 0;
+        }
+
+        return (int)(
+            $this->wallet->walletTransactions()
+                ->where('type', 'debit')
+                ->sum('amount') * -1
+        );
+    }
+
+    protected function usedCredits(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->free_credits_used + $this->wallet_credits_used,
+        );
+    }
+
+    protected function availableCredits(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->free_credits_available + $this->wallet_credits_available,
+        );
+    }
+
+    protected function totalCredits(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->used_credits + $this->available_credits,
+        );
     }
 }

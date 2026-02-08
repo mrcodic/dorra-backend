@@ -1,4 +1,4 @@
-@extends('layouts/contentLayoutMaster')
+F@extends('layouts/contentLayoutMaster')
 
 @section('title', 'User List')
 @section('main-page', 'Users')
@@ -183,6 +183,7 @@
                         <th>Status</th>
                         <th>Joined Date</th>
                         <th>Orders Count</th>
+                        <th>Credits Used</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
