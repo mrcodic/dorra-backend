@@ -46,7 +46,7 @@ class User extends Authenticatable implements HasMedia
         'last_login_at',
         'free_credits_used',
     ];
-  
+
     /**
      * The attributes that should be hidden for serialization.
      *

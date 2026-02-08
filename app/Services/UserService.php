@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Jobs\SendSmsMessageJob;
+use App\Models\Setting;
 use App\Services\SMS\SmsInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -92,6 +93,13 @@ class UserService extends BaseService
                         ->sum('amount') * -1
                     : 0;
                 return $freeUsed + $walletUsed;
+            })->addColumn('available_credits', function ($user) {
+                $freeLimit = Setting::where('key', 'free_credits_limit')->value('value');
+                $freeUsed = $user->free_credits_used;
+                $freeLeft = max(0, $freeLimit - $freeUsed);
+                $walletBalance = $user->wallet?->balance ?? 0;
+
+                return $freeLeft + $walletBalance;
             })
             ->addColumn('image', function ($admin) {
                 return $admin->getFirstMediaUrl('users') ?: asset("images/default-user.png");

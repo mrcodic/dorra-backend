@@ -184,6 +184,7 @@
                         <th>Joined Date</th>
                         <th>Orders Count</th>
                         <th>Credits Used</th>
+                        <th>Credits Available</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
