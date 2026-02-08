@@ -111,7 +111,22 @@
             "name": "Orders",
             "icon": "orders.svg",
             "slug": "",
-            "url": "/orders"
+            "url": "",
+            "submenu": [
+                {
+                    "url": "/orders",
+                    "name": "Orders",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                },
+                {
+                    "url": "/sub-categories",
+                    "name": "Credits",
+                    "icon": "circle",
+                    "slug": "app-user-list"
+                }
+
+            ]
         },
 
         {

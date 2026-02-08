@@ -22,8 +22,7 @@ class FontController extends Controller
 
     public function index()
     {
-        $fonts = $this->fontService->getAll(['fontStyles.media', 'fontStyles.font'],true,
-            perPage: request('per_page'));
+        $fonts = $this->fontService->getAll(['fontStyles.media', 'fontStyles.font']);
         return Response::api(data: FontResource::collection($fonts)->response()->getData(true));
 
     }

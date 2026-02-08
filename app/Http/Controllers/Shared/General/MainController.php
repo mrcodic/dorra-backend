@@ -136,6 +136,12 @@ class MainController extends Controller
         return Response::api(data: CountryResource::collection($this->countryRepository->all()));
     }
 
+    public function creditOrders()
+    {
+        return view('dashboard.credit-orders');
+
+    }
+
     public function states()
     {
         return Response::api(data: StateResource::collection($this->stateRepository->getWithFilters()));

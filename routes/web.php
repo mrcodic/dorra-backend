@@ -298,6 +298,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
         Route::controller(MainController::class)->group(function () {
             Route::get('states', 'states')->name('states');
+            Route::get('credit-orders', 'creditOrders')->name('credit-orders');
             Route::get('sub-categories', 'subCategories')->name('sub-categories');
             Route::get('station-statuses', 'stationStatuses')->name('station-statuses');
             Route::get('template-types', 'templateTypes')->name('template-types');

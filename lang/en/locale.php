@@ -5,6 +5,7 @@ return [
     "User Interface" => "User Interface",
     "Dashboards" => "Dashboards",
     "Plans" => "Plans",
+    "Credits" => "Credits",
     "Campaigns" => "Campaigns",
     "Jobs" => "Jobs",
     "Print command" => "Print Command",
