@@ -85,7 +85,13 @@ class UserService extends BaseService
             ->addColumn('name', function ($user) {
                 return $user->name;
             })->editColumn('used_credits', function ($user) {
-                return $user->used_credits + $user->wallet_credits_used;
+                $freeUsed = $user->free_credits_used;
+                $walletUsed = $user->wallet
+                    ? (int)$user->wallet->walletTransactions()
+                        ->where('type', 'debit')
+                        ->sum('amount') * -1
+                    : 0;
+                return $freeUsed + $walletUsed;
             })
             ->addColumn('image', function ($admin) {
                 return $admin->getFirstMediaUrl('users') ?: asset("images/default-user.png");

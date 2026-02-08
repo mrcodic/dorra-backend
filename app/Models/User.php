@@ -46,14 +46,7 @@ class User extends Authenticatable implements HasMedia
         'last_login_at',
         'free_credits_used',
     ];
-    protected $appends = [
-        'free_credits_available',
-        'wallet_credits_available',
-        'wallet_credits_used',
-        'used_credits',
-        'available_credits',
-        'total_credits',
-    ];
+  
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -184,72 +177,5 @@ class User extends Authenticatable implements HasMedia
             get: fn(?string $value) => $this->getFirstMedia('users')
         );
     }
-    protected function freeCreditsLimit(): int
-    {
-        return (int) Setting::where('key', 'free_credits_limit')->value('value');
-    }
-    protected function freeCreditsUsed(): Attribute
-    {
-        return Attribute::make(
-            get: fn() => (int)($this->free_credits_used ?? 0),
-        );
-    }
 
-    protected function freeCreditsAvailable(): Attribute
-    {
-        return Attribute::make(
-            get: fn() => max(
-                0,
-                $this->freeCreditsLimit() - $this->free_credits_used
-            ),
-        );
-    }
-
-    protected function walletCreditsAvailable(): Attribute
-    {
-        return Attribute::make(
-            get: fn() => (int)($this->wallet?->balance ?? 0),
-        );
-    }
-
-    protected function walletCreditsUsed(): Attribute
-    {
-        return Attribute::make(
-            get: fn() => $this->walletUsedCreditsValue(),
-        );
-    }
-
-    protected function walletUsedCreditsValue(): int
-    {
-        if (!$this->wallet) {
-            return 0;
-        }
-
-        return (int)(
-            $this->wallet->walletTransactions()
-                ->where('type', 'debit')
-                ->sum('amount') * -1
-        );
-    }
-
-    protected function usedCredits(): Attribute
-    {
-        return Attribute::make(
-            get: fn() => $this->free_credits_used + $this->wallet_credits_used,
-        );
-    }
-
-    protected function availableCredits(): Attribute
-    {
-        return Attribute::make(
-            get: fn() => $this->free_credits_available + $this->wallet_credits_available,
-        );
-    }
-
-    protected function totalCredits(): Attribute
-    {
-        return Attribute::make(
-            get: fn() => $this->used_credits + $this->available_credits,
-        );
-    }
 }
