@@ -120,7 +120,7 @@
                     "slug": "app-user-list"
                 },
                 {
-                    "url": "/sub-categories",
+                    "url": "/credit-orders",
                     "name": "Credits",
                     "icon": "circle",
                     "slug": "app-user-list"

@@ -286,6 +286,10 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         }));
         Route::resource('/plans', PlanController::class);
+        Route::get('credit-orders', [MainController::class,'creditOrders'])->name('credit-orders');
+        Route::get('credit-orders/data', [MainController::class,'creditOrders'])->name('credit-orders.data');
+        Route::get('credit-orders/create', [MainController::class,'creditOrders'])->name('credit-orders.create');
+
     });
 
     Route::prefix('api/v1/')->group(function () {
@@ -298,7 +302,6 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
         Route::controller(MainController::class)->group(function () {
             Route::get('states', 'states')->name('states');
-            Route::get('credit-orders', 'creditOrders')->name('credit-orders');
             Route::get('sub-categories', 'subCategories')->name('sub-categories');
             Route::get('station-statuses', 'stationStatuses')->name('station-statuses');
             Route::get('template-types', 'templateTypes')->name('template-types');

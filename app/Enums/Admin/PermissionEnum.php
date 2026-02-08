@@ -166,6 +166,8 @@ enum PermissionEnum: string
     case CREATE_PLANS = 'plans_create';
     case DELETE_PLANS = 'plans_delete';
     case UPDATE_PLANS = 'plans_update';
+    case CREATE_CREDIT_ORDERS = 'credit-orders_create';
+    case SHOW_CREDIT_ORDERS = 'credit-orders_show';
 
     public function group(): array
     {
@@ -214,6 +216,7 @@ enum PermissionEnum: string
             'station-statuses'    => 'Custom Statuses',
             'users.campaigns'    => 'Campaigns',
             'plans'    => 'Plans',
+            'credit-orders'    => 'Credit Orders',
             default               => Str::headline(str_replace('-', ' ', $this->groupKey())),
         };
     }
