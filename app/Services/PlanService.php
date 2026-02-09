@@ -50,7 +50,10 @@ class PlanService extends BaseService
 
     public function activePlans()
     {
-        return $this->repository->query()->whereIsActive(true)->get();
+        return $this->repository->query()
+            ->whereIsActive(true)
+            ->with('features')
+            ->get();
     }
 
     public function getData()
