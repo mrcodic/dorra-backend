@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Plan extends Model
 {
@@ -16,5 +17,10 @@ class Plan extends Model
     public function scopeActive($query)
     {
        return $query->where('is_active',1);
+    }
+
+    public function features(): HasMany
+    {
+        return $this->hasMany(Feature::class);
     }
 }

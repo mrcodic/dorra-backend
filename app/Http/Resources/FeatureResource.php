@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PlanResource extends JsonResource
+class FeatureResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,11 +16,8 @@ class PlanResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
             'description' => $this->description,
-            'price' => $this->price,
-            'credits' => $this->credits,
-            'features' => FeatureResource::collection($this->whenLoaded('features')),
+            'plan' => PlanResource::make($this->whenLoaded('plan')),
         ];
     }
 }
