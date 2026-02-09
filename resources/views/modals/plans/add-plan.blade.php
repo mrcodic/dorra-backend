@@ -51,7 +51,7 @@
                                     <div class="col-12 col-md-11">
                                         <label class="form-label">Description</label>
                                         <input type="text" name="description" class="form-control"
-                                               placeholder="e.g. Access to all exams with unlimited attempts" required>
+                                               placeholder="e.g. Typical mix (70% Preview + 30% 4K): ≈ 5 Previews + 2 × 4K." required>
                                     </div>
 
                                     <div class="col-12 col-md-1 d-flex justify-content-end">
