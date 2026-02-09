@@ -23,6 +23,11 @@
                         <label for="desc" class="form-label">Description</label>
                         <textarea class="form-control" name="description" id="" cols="10" rows="10"></textarea>
                     </div>
+                    <!-- Recommended For -->
+                    <div class="mb-2">
+                        <label for="desc" class="form-label">Recommended For</label>
+                        <textarea class="form-control" name="recommended_for" id="" cols="10" rows="10"></textarea>
+                    </div>
                     <div class="row mb-2">
                         <div class="col-12 col-md-6">
                             <label for="credits" class="form-label">Credits</label>

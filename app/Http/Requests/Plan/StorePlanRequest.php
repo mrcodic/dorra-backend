@@ -25,6 +25,7 @@ class StorePlanRequest extends BaseRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'recommended_for' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
             'credits' => ['required', 'integer', 'min:1'],
             'is_active' => ['required', 'boolean'],

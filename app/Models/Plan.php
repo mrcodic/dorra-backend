@@ -12,6 +12,7 @@ class Plan extends Model
         'price',
         'credits',
         'description',
+        'recommended_for',
         'is_active',
     ];
     public function scopeActive($query)
