@@ -18,6 +18,7 @@ class PlanResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
+            'recommended_for' => $this->recommended_for,
             'price' => $this->price,
             'credits' => $this->credits,
             'features' => FeatureResource::collection($this->whenLoaded('features')),
