@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\User\Plan;
 
+use App\Enums\CreditOrder\StatusEnum;
 use App\Http\Controllers\Controller;
 
 use App\Http\Resources\PlanResource;
@@ -42,6 +43,7 @@ class PlanController extends Controller
             WalletService::credit($transaction->user
                 ,$transaction->payable->credits,
                 "purchase plan {$transaction->payable->name}");
+            $transaction->payable->update(['status' => StatusEnum::PAID]);
         }
         return "done";
     }
