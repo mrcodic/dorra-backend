@@ -95,43 +95,60 @@
         </div>
     </div>
 </div>
-<script !src="">
-    function initPlanRepeater() {
-        const $rep = $('#addPlanModal .invoice-repeater');
 
-        if (!$rep.length) return;
 
-        // prevent double init
-        if ($rep.data('repeater-initialized')) return;
-        $rep.data('repeater-initialized', true);
+<script>
+    (function () {
+        function initRepeater() {
+            const $rep = $('#addPlanModal .invoice-repeater');
 
-        $rep.repeater({
-            show: function () {
-                $(this).slideDown();
-                if (window.feather) feather.replace();
-                toggleFirstDeleteBtn($rep);
-            },
-            hide: function (deleteElement) {
-                $(this).slideUp(deleteElement);
-                toggleFirstDeleteBtn($rep);
+            if (!$rep.length) return;
+
+            // plugin not loaded? stop.
+            if (!$.fn.repeater) {
+                console.error('Repeater plugin not loaded. Check script path/order.');
+                return;
             }
+
+            // already initialized
+            if ($rep.data('repeater-initialized')) return;
+            $rep.data('repeater-initialized', true);
+
+            $rep.repeater({
+                initEmpty: false,
+                show: function () {
+                    $(this).slideDown();
+                    if (window.feather) feather.replace();
+                    toggleDeleteBtn($rep);
+                },
+                hide: function (deleteElement) {
+                    $(this).slideUp(deleteElement);
+                    toggleDeleteBtn($rep);
+                }
+            });
+
+            toggleDeleteBtn($rep);
+            if (window.feather) feather.replace();
+        }
+
+        function toggleDeleteBtn($rep) {
+            const items = $rep.find('[data-repeater-item]');
+            items.each(function (i) {
+                $(this).find('[data-repeater-delete]').toggle(i !== 0);
+            });
+        }
+
+        // init when modal opens
+        $(document).on('shown.bs.modal', '#addPlanModal', function () {
+            initRepeater();
         });
 
-        toggleFirstDeleteBtn($rep);
-    }
-
-    function toggleFirstDeleteBtn($repeater) {
-        const items = $repeater.find('[data-repeater-item]');
-        items.each(function (index) {
-            $(this).find('[data-repeater-delete]').toggle(index !== 0);
+        // also init on ready (in case modal is already in DOM)
+        $(document).ready(function () {
+            initRepeater();
         });
-    }
+    })();
 
-    // init when modal opens (best)
-    $('#addPlanModal').on('shown.bs.modal', function () {
-        initPlanRepeater();
-        if (window.feather) feather.replace();
-    });
 </script>
 
 <script>

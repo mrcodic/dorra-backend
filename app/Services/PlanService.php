@@ -13,9 +13,9 @@ use Yajra\DataTables\Facades\DataTables;
 class PlanService extends BaseService
 {
 
-    public function __construct(PlanRepositoryInterface        $repository,
-                                public PaymentMethodRepository $paymentMethodRepository,
-                                public PaymentGatewayFactory   $paymentFactory,
+    public function __construct(PlanRepositoryInterface               $repository,
+                                public PaymentMethodRepository        $paymentMethodRepository,
+                                public PaymentGatewayFactory          $paymentFactory,
                                 public CreditOrderRepositoryInterface $creditOrderRepository,
 
     )
@@ -54,6 +54,13 @@ class PlanService extends BaseService
             ->whereIsActive(true)
             ->with('features')
             ->get();
+    }
+
+    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
+    {
+        $resource = parent::storeResource($validatedData, $relationsToStore, $relationsToLoad);
+        $resource->features()->createMany($validatedData['features']);
+        return $resource;
     }
 
     public function getData()

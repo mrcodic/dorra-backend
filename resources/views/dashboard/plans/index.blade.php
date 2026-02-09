@@ -270,8 +270,7 @@
     const defaultImage ="{{ asset("images/default-user.png") }}";
     const locale = "{{ app()->getLocale() }}";
 </script>
-<script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
-
+<script src="{{ asset('vendors/js/forms/repeater/jquery.repeater.min.js?v='.time()) }}"></script>
 <script>
     $(document).ready(function () {
     setupClearInput('roleSelect', 'clearRoleFilter');
