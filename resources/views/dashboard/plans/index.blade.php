@@ -270,6 +270,7 @@
     const defaultImage ="{{ asset("images/default-user.png") }}";
     const locale = "{{ app()->getLocale() }}";
 </script>
+<script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
 
 <script>
     $(document).ready(function () {
@@ -420,7 +421,6 @@
     }, 500);
 });
 </script>
-
 {{-- Page js files --}}
 <script src="{{ asset('js/scripts/pages/app-plan-list.js') }}?v={{ time() }}"></script>
 

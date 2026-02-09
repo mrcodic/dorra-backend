@@ -34,6 +34,35 @@
                         </div>
 
                     </div>
+                    {{-- Features --}}
+                    <div class="mt-2">
+                        <h6 class="mb-1">Features</h6>
+                        <small class="text-muted">Add feature descriptions for this plan.</small>
+
+                        <div class="invoice-repeater mt-1">
+                            <div data-repeater-list="features">
+
+                                <div data-repeater-item class="row g-1 align-items-end mb-1">
+                                    <div class="col-12 col-md-11">
+                                        <label class="form-label">Description</label>
+                                        <input type="text" name="description" class="form-control"
+                                               placeholder="e.g. Access to all exams with unlimited attempts" required>
+                                    </div>
+
+                                    <div class="col-12 col-md-1 d-flex justify-content-end">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" data-repeater-delete>
+                                            <i data-feather="x"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <button type="button" class="btn btn-outline-primary btn-sm mt-1" data-repeater-create>
+                                <i data-feather="plus"></i> Add Feature
+                            </button>
+                        </div>
+                    </div>
 
                     <!-- Status -->
                     <div class="mb-2">
@@ -61,6 +90,44 @@
         </div>
     </div>
 </div>
+<script !src="">
+    function initPlanRepeater() {
+        const $rep = $('#addPlanModal .invoice-repeater');
+
+        if (!$rep.length) return;
+
+        // prevent double init
+        if ($rep.data('repeater-initialized')) return;
+        $rep.data('repeater-initialized', true);
+
+        $rep.repeater({
+            show: function () {
+                $(this).slideDown();
+                if (window.feather) feather.replace();
+                toggleFirstDeleteBtn($rep);
+            },
+            hide: function (deleteElement) {
+                $(this).slideUp(deleteElement);
+                toggleFirstDeleteBtn($rep);
+            }
+        });
+
+        toggleFirstDeleteBtn($rep);
+    }
+
+    function toggleFirstDeleteBtn($repeater) {
+        const items = $repeater.find('[data-repeater-item]');
+        items.each(function (index) {
+            $(this).find('[data-repeater-delete]').toggle(index !== 0);
+        });
+    }
+
+    // init when modal opens (best)
+    $('#addPlanModal').on('shown.bs.modal', function () {
+        initPlanRepeater();
+        if (window.feather) feather.replace();
+    });
+</script>
 
 <script>
     $('#statusToggle').on('change', function () {

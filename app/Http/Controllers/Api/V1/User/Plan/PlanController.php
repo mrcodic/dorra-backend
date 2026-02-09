@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\User\Plan;
 use App\Http\Controllers\Controller;
 
 use App\Http\Resources\PlanResource;
+use App\Models\CreditOrder;
 use App\Models\Plan;
 use App\Models\Transaction;
 use App\Services\PlanService;
@@ -37,7 +38,7 @@ class PlanController extends Controller
     public function transaction($transaction)
     {
         $transaction = Transaction::whereTransactionId($transaction)->first();
-        if ($transaction->payable_type == Plan::class) {
+        if ($transaction->payable_type == CreditOrder::class) {
             WalletService::credit($transaction->user
                 ,$transaction->payable->price,
                 "purchase plan {$transaction->payable->name}");
