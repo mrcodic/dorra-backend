@@ -22,6 +22,13 @@ enum StatusEnum : int
         };
     }
 
-
+    public function badgeClass(): string
+    {
+        return match ($this) {
+            self::PENDING => 'badge-light-warning',
+            self::PAID    => 'badge-light-success',
+            self::FAILED  => 'badge-light-danger',
+        };
+    }
 
 }

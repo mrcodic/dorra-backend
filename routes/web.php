@@ -290,6 +290,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
         Route::group(['prefix' => 'credit-orders', 'as' => 'credit-orders.', 'controller' => CreditOrderController::class,], (function () {
             Route::get('/data', [CreditOrderController::class, 'getData'])->name('data');
+            Route::post('/bulk-delete', [CreditOrderController::class, 'bulkDelete'])->name('bulk-delete');
         }));
         Route::resource('/credit-orders', CreditOrderController::class);
 

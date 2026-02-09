@@ -51,6 +51,18 @@ const dt_user_table = $(".category-list-table").DataTable({
         },
 
 
+        {
+            data: "status",
+            render: function (data, type, row) {
+
+                if (!data) return "-";
+
+                const badge = data.badgeClass || data.class || "";
+                const label = data.label || "-";
+
+                return `<span class="badge ${badge}">${label}</span>`;
+            }
+        },
         {data: "added_date"},
         {
             data: "id",
@@ -109,10 +121,9 @@ data-mobile_image_id="${row.mobile_banner_id}"
 
                     btns.push(`  <a href="#" class="text-danger  open-delete-category-modal"
    data-id="${data}"
-   data-name="${row.name}"
-   data-action="/categories/${data}"
+   data-action="/credit-orders/${data}"
    data-bs-toggle="modal"
-   data-bs-target="#deleteCategoryModal">
+   data-bs-target="#deleteCreditOrderModal">
    <i data-feather="trash-2"></i>
 </a>`)
                 }
@@ -196,7 +207,7 @@ function updateBulkDeleteVisibility() {
     const selected = $(".category-checkbox:checked").length;
     if (selected > 0) {
         $("#selected-count-text").text(
-            `${selected} Category${selected > 1 ? "ies" : "y"} are selected`
+            `${selected} Credit Order${selected > 1 ? "s" : ""} are selected`
         );
         $("#bulk-delete-container").show();
     } else {
@@ -569,19 +580,20 @@ $(document).ready(function () {
 
     $(document).on("click", ".open-delete-category-modal", function () {
         const categoryId = $(this).data("id");
-        $("#deleteCategoryForm").data("id", categoryId);
+        console.log(categoryId)
+        $("#deleteCreditOrderForm").data("id", categoryId);
     });
 
-    $(document).on("submit", "#deleteCategoryForm", function (e) {
+    $(document).on("submit", "#deleteCreditOrderForm", function (e) {
         e.preventDefault();
         const categoryId = $(this).data("id");
         $.ajax({
-            url: `/categories/${categoryId}`,
+            url: `/credit-orders/${categoryId}`,
             method: "DELETE",
             success: function (res) {
-                $("#deleteCategoryModal").modal("hide");
+                $("#deleteCreditOrderModal").modal("hide");
                 Toastify({
-                    text: "Product deleted successfully!",
+                    text: "Order deleted successfully!",
                     duration: 2000,
                     gravity: "top",
                     position: "right",
@@ -591,7 +603,7 @@ $(document).ready(function () {
                 $(".category-list-table").DataTable().ajax.reload(null, false);
             },
             error: function () {
-                $("#deleteCategoryModal").modal("hide");
+                $("#deleteCreditOrderModal").modal("hide");
                 Toastify({
                     text: "Something Went Wrong!",
                     duration: 2000,
@@ -616,16 +628,16 @@ $(document).ready(function () {
         if (selectedIds.length === 0) return;
 
         $.ajax({
-            url: "categories/bulk-delete",
+            url: "credit-orders/bulk-delete",
             method: "POST",
             data: {
                 ids: selectedIds,
                 _token: $('meta[name="csrf-token"]').attr("content"),
             },
             success: function (response) {
-                $("#deleteCategoriesModal").modal("hide");
+                $("#deleteCreditOrdersModal").modal("hide");
                 Toastify({
-                    text: "Selected products deleted successfully!",
+                    text: "Selected credit orders deleted successfully!",
                     duration: 1500,
                     gravity: "top",
                     position: "right",
@@ -641,7 +653,7 @@ $(document).ready(function () {
                 $(".category-list-table").DataTable().ajax.reload(null, false);
             },
             error: function () {
-                $("#deleteCategoriesModal").modal("hide");
+                $("#deleteCreditOrdersModal").modal("hide");
                 Toastify({
                     text: "Something Went Wrong!",
                     duration: 1500,

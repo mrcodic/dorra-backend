@@ -168,6 +168,7 @@ enum PermissionEnum: string
     case UPDATE_PLANS = 'plans_update';
     case CREATE_CREDIT_ORDERS = 'credit-orders_create';
     case SHOW_CREDIT_ORDERS = 'credit-orders_show';
+    case DELETE_CREDIT_ORDERS = 'credit-orders_delete';
 
     public function group(): array
     {

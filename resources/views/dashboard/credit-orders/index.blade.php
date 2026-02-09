@@ -150,7 +150,7 @@
                 <form action="" method="get" class="position-relative flex-grow-1 me-1 col-12 col-md-5 search-form">
                     <i data-feather="search" class="position-absolute top-50 translate-middle-y ms-2 text-muted"></i>
                     <input type="text" class="form-control ps-5 border rounded-3" name="search_value"
-                           id="search-category-form" placeholder="Search product..." style="height: 38px;">
+                           id="search-category-form" placeholder="Search order..." style="height: 38px;">
                     <!-- Clear button -->
                     <button type="button" id="clear-search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
                    background: transparent; border: none; font-weight: bold;
@@ -169,12 +169,12 @@
                 </div>
 
                 {{-- Add Button - 20% on md+, full width on xs --}}
-                @can("categories_create")
+                @can("credit-orders_create")
                 <div class="col-12 col-md-3">
                     <a class="btn btn-outline-primary w-100 w-md-auto" data-bs-toggle="modal"
-                       data-bs-target="#categoryModal">
+                       data-bs-target="#orderModal">
                         <i data-feather="plus"></i>
-                        Add New Product
+                        Add New Order
                     </a>
                 </div>
                 @endcan
@@ -192,16 +192,105 @@
                     <th>Plan Price</th>
                     <th>Plan Credit Number</th>
                     <th>User Name</th>
+                    <th>Status</th>
                     <th>Added Date</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
             </table>
+            <div id="bulk-delete-container" class="my-2 bulk-delete-container" style="display: none;">
+                <div class="delete-container d-flex flex-wrap align-items-center justify-content-center justify-content-md-between"
+                     style="z-index: 10;">
+                    <p id="selected-count-text">0 Credit Orders are selected</p>
+                    <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
+                            data-bs-target="#deleteCreditOrdersModal"
+                            class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
+                        <i data-feather="trash-2"></i> Delete Selected
+                    </button>
+                    <form style="display: none;" id="bulk-delete-form" method="POST"
+                          action="{{ route('credit-orders.bulk-delete') }}">
+                        @csrf
+                        <button type="submit" id="delete-selected-btn" data-bs-toggle="modal"
+                                data-bs-target="#deleteCreditOrdersModal"
+                                class="btn btn-outline-danger d-flex justify-content-center align-items-center gap-1 delete-selected-btns open-delete-categories-modal">
+                            <i data-feather="trash-2"></i> Delete Selected
+                        </button>
+                    </form>
+
+
+                </div>
+            </div>
 
         </div>
 
 
     </div>
+    {{-- Button already opens: #orderModal --}}
+
+    <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <form id="createOrderForm" method="POST" action="{{ route('credit-orders.store', $tenant ?? null) }}">
+                    @csrf
+
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="orderModalLabel">Add New Order</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="row g-2">
+
+                            {{-- User --}}
+                            <div class="col-12 col-md-6">
+                                <label class="form-label" for="user_id">User</label>
+                                <select id="user_id" name="user_id" class="select2 form-select" required>
+                                    <option value="" selected disabled>Select user...</option>
+                                    @foreach($associatedData['users'] as $user)
+                                        <option value="{{ $user->id }}">
+                                            {{ $user->name }}{{ $user->email ? ' - ' . $user->email : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            {{-- Plan --}}
+                            <div class="col-12 col-md-6">
+                                <label class="form-label" for="plan_id">Plan</label>
+                                <select id="plan_id" name="plan_id" class="select2 form-select" required>
+                                    <option value="" selected disabled>Select plan...</option>
+                                    @foreach($associatedData['plans'] as $plan)
+                                        <option value="{{ $plan->id }}">
+                                            {{ $plan->name }}{{ isset($plan->price) ? ' - ' . $plan->price : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i data-feather="check"></i> Create Order
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @include('modals.delete',[
+    'id' => 'deleteCreditOrderModal',
+    'formId' => 'deleteCreditOrderForm',
+    'title' => 'Delete CreditOrder',
+    ])
+    @include('modals.delete',[
+    'id' => 'deleteCreditOrdersModal',
+    'formId' => 'bulk-delete-form',
+    'title' => 'Delete Credit Orders',
+    'confirmText' => 'Are you sure you want to delete this items?',
+    ])
     <!-- list and filter end -->
 </section>
 <!-- users list ends -->
@@ -235,7 +324,24 @@
     const categoriesCreateUrl = "{{ route('credit-orders.create') }}";
     const locale = "{{ app()->getLocale() }}";
 </script>
-
+<script>
+    handleAjaxFormSubmit("#createOrderForm",{
+        successMessage:"Order created successfully",
+        resetForm:false,
+        closeModal:true,
+        onSuccess:function () {
+            location.reload()
+        }
+    })
+    document.addEventListener("DOMContentLoaded", function () {
+        // Re-init select2 when modal opens (dropdownParent fixes z-index)
+        $('#orderModal').on('shown.bs.modal', function () {
+            $('#user_id, #plan_id').select2({
+                dropdownParent: $('#orderModal')
+            });
+        });
+    });
+</script>
 
 {{-- Page js files --}}
 <script src="{{ asset('js/scripts/pages/app-credit-order-list.js') }}?v={{ time() }}"></script>
