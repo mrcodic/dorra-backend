@@ -4,8 +4,7 @@ $.ajaxSetup({
     },
 });
 
-const dt_user_table = $(".category-list-table").DataTable({
-
+const dt_user_table = $(".credit-order-list-table").DataTable({
     processing: true,
     serverSide: true,
     searching: false, // using custom search
@@ -27,43 +26,41 @@ const dt_user_table = $(".category-list-table").DataTable({
             render: function (data, type, row) {
                 return row?.action?.can_delete
                     ? `<input type="checkbox" name="ids[]" class="category-checkbox" value="${row.id}">`
-                    : '';
+                    : "";
             },
         },
         {
             data: "number",
-
         },
         {
             data: "plan.name",
-            name: "plan.name"
+            name: "plan.name",
         },
         {
             data: "amount",
-            name: "amount"
+            name: "amount",
         },
         {
             data: "credits",
-            name: "credits"
-        },  {
-            data: "user.name",
-            name: "user.name"
+            name: "credits",
         },
-
+        {
+            data: "user.name",
+            name: "user.name",
+        },
 
         {
             data: "status",
             render: function (data, type, row) {
-
                 if (!data) return "-";
 
                 const badge = data.badgeClass || data.class || "";
                 const label = data.label || "-";
 
                 return `<span class="badge ${badge}">${label}</span>`;
-            }
+            },
         },
-        {data: "added_date"},
+        { data: "added_date" },
         {
             data: "id",
 
@@ -76,19 +73,29 @@ const dt_user_table = $(".category-list-table").DataTable({
 
                 if (canShow) {
                     btns.push(`<a href="#" class="view-details"
-                                              data-action="${row.is_has_category ? 'modal' : 'redirect'}"
+                                              data-action="${
+                                                  row.is_has_category
+                                                      ? "modal"
+                                                      : "redirect"
+                                              }"
                                               data-url="/categories/${data}"
                                               data-id="${data}"
                                               data-name_ar="${row.name_ar}"
                                               data-name_en="${row.name_en}"
                                               data-image="${row.image}"
                                               data-image_id="${row.imageId}"
-                                              data-description_en="${row.description_en}"
-                                              data-description_ar="${row.description_ar}"
+                                              data-description_en="${
+                                                  row.description_en
+                                              }"
+                                              data-description_ar="${
+                                                  row.description_ar
+                                              }"
                                               data-subcategories="${row.children.map(
-                        (child) => child.name
-                    )}"
-                                              data-products="${row.no_of_products}"
+                                                  (child) => child.name
+                                              )}"
+                                              data-products="${
+                                                  row.no_of_products
+                                              }"
                                               data-showdate="${row.show_date}">
                     <i data-feather="eye"></i>
                 </a>`);
@@ -107,10 +114,10 @@ data-mobile_image_id="${row.mobile_banner_id}"
    data-image_id="${row.imageId}"
    data-description_en="${row.description_en}"
    data-description_ar="${row.description_ar}"
-   data-subcategories="${row.children.map(child => child.name)}"
+   data-subcategories="${row.children.map((child) => child.name)}"
    data-products="${row.no_of_products}"
    data-showdate="${row.show_date}"
-    data-action="${row.is_has_category ? 'modal' : 'redirect'}"
+    data-action="${row.is_has_category ? "modal" : "redirect"}"
        data-url="/categories/${data}/edit"
        >
 
@@ -118,19 +125,19 @@ data-mobile_image_id="${row.mobile_banner_id}"
 </a>`);
                 }
                 if (canDelete) {
-
                     btns.push(`  <a href="#" class="text-danger  open-delete-category-modal"
    data-id="${data}"
    data-action="/credit-orders/${data}"
    data-bs-toggle="modal"
    data-bs-target="#deleteCreditOrderModal">
    <i data-feather="trash-2"></i>
-</a>`)
+</a>`);
                 }
 
-
-                if (!btns.length) return '';
-                return `<div class="d-flex gap-1 align-items-center">${btns.join('')}</div>`;
+                if (!btns.length) return "";
+                return `<div class="d-flex gap-1 align-items-center">${btns.join(
+                    ""
+                )}</div>`;
             },
         },
     ],
@@ -158,9 +165,9 @@ data-mobile_image_id="${row.mobile_banner_id}"
         },
     },
 });
-$('#clear-search').on('click', function () {
-    $('#search-category-form').val('');  // clear input
-    dt_user_table.search('').draw();  // reset DataTable search
+$("#clear-search").on("click", function () {
+    $("#search-category-form").val(""); // clear input
+    dt_user_table.search("").draw(); // reset DataTable search
 });
 // Custom search with debounce
 let searchTimeout;
@@ -309,7 +316,7 @@ $(document).ready(function () {
         const mockFile = {
             name: "Existing Image",
             size: 123456,
-            accepted: true
+            accepted: true,
         };
 
         dropzone.emit("addedfile", mockFile);
@@ -322,13 +329,17 @@ $(document).ready(function () {
         document.getElementById(hiddenInputId).value = imageId;
     }
 
-// ================== VIEW DETAILS ==================
+    // ================== VIEW DETAILS ==================
     // One handler for BOTH view + edit
     $(document).on("click", ".view-details, .edit-details", function (e) {
         const $btn = $(this);
         const action = $btn.data("action") || "modal";
         const url = $btn.data("url");
-        const modalId = $btn.data("modal") || ($btn.hasClass("edit-details") ? "#editCategoryModal" : "#showCategoryModal");
+        const modalId =
+            $btn.data("modal") ||
+            ($btn.hasClass("edit-details")
+                ? "#editCategoryModal"
+                : "#showCategoryModal");
 
         if (action === "redirect" && url) {
             e.preventDefault();
@@ -340,15 +351,12 @@ $(document).ready(function () {
         e.preventDefault();
 
         if (modalId === "#editCategoryModal") {
-
-
-// Clear old previews
+            // Clear old previews
             editDropzone.removeAllFiles(true);
             editWebsiteDropzone.removeAllFiles(true);
             editMobileDropzone.removeAllFiles(true);
 
-
-// Main Image
+            // Main Image
             preloadDropzoneImage(
                 editDropzone,
                 $btn.data("image"),
@@ -356,8 +364,7 @@ $(document).ready(function () {
                 "editUploadedImage"
             );
 
-
-// Website Banner
+            // Website Banner
             preloadDropzoneImage(
                 editWebsiteDropzone,
                 $btn.data("website_image"),
@@ -365,8 +372,7 @@ $(document).ready(function () {
                 "editUploadedImageWebsiteBanner"
             );
 
-
-// Mobile Banner
+            // Mobile Banner
             preloadDropzoneImage(
                 editMobileDropzone,
                 $btn.data("mobile_image"),
@@ -382,8 +388,8 @@ $(document).ready(function () {
 
         const subCategories = Array.isArray(rowData.children)
             ? rowData.children
-                .map(c => (c.name?.[loc] ?? c.name ?? ""))
-                .filter(Boolean)
+                  .map((c) => c.name?.[loc] ?? c.name ?? "")
+                  .filter(Boolean)
             : [];
 
         hydrateCategoryModal(modalId, $btn.data(), subCategories);
@@ -391,7 +397,7 @@ $(document).ready(function () {
         new bootstrap.Modal(document.querySelector(modalId)).show();
     });
 
-// Fill modal fields based on which modal it is
+    // Fill modal fields based on which modal it is
     function hydrateCategoryModal(modalId, data, subCategories) {
         // Map selectors per modal
         const maps = {
@@ -407,8 +413,7 @@ $(document).ready(function () {
                 has_mockup: "#has_mockup",
                 imgId: "#image-id",
                 subs: "#subcategories-container",
-                extra: () => {
-                } // nothing special
+                extra: () => {}, // nothing special
             },
             "#editCategoryModal": {
                 nameAr: "#edit-category-name-ar",
@@ -423,9 +428,11 @@ $(document).ready(function () {
                 imgId: null, // not present in your edit modal
                 subs: "#subcategories-container",
                 extra: () => {
-                    $("#editCategoryModal #edit-uploaded-image").removeClass("d-none");
-                }
-            }
+                    $("#editCategoryModal #edit-uploaded-image").removeClass(
+                        "d-none"
+                    );
+                },
+            },
         };
 
         const m = maps[modalId] || maps["#showCategoryModal"];
@@ -437,14 +444,19 @@ $(document).ready(function () {
         $scope.find(m.date).val(data.showdate || "");
         $scope.find(m.descAr).val(data.description_ar || "");
         $scope.find(m.descEn).val(data.description_en || "");
-        $scope.find(m.has_mockup).prop('checked', !!data.has_mockup);
+        $scope.find(m.has_mockup).prop("checked", !!data.has_mockup);
         $scope.find(m.img).attr("src", data.image || "");
         if (m.imgId) $scope.find(m.imgId).val(data.image_id || "");
         $scope.find(m.id).val(data.id || "");
 
         // Subcategory badges (scope to the current modal!)
         const badgesHtml = subCategories.length
-            ? subCategories.map(s => `<span class="badge bg-light text-dark border me-1 mb-1">${s}</span>`).join("")
+            ? subCategories
+                  .map(
+                      (s) =>
+                          `<span class="badge bg-light text-dark border me-1 mb-1">${s}</span>`
+                  )
+                  .join("")
             : "-";
         $scope.find(m.subs).html(badgesHtml);
 
@@ -465,7 +477,7 @@ $(document).ready(function () {
         $("#edit-category-name-ar").val(nameAR);
         $("#edit-category-description-en").val(descEN);
         $("#edit-category-description-ar").val(descAR);
-        $("#has_mockup").prop('checked', !!hasMockup);
+        $("#has_mockup").prop("checked", !!hasMockup);
         $("#edit-category-id").val(id);
         $("#edit-uploaded-image").removeClass("d-none");
         $("#edit-preview-image").attr("src", image);
@@ -580,7 +592,7 @@ $(document).ready(function () {
 
     $(document).on("click", ".open-delete-category-modal", function () {
         const categoryId = $(this).data("id");
-        console.log(categoryId)
+        console.log(categoryId);
         $("#deleteCreditOrderForm").data("id", categoryId);
     });
 
