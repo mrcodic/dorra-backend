@@ -40,7 +40,7 @@ class PlanController extends Controller
         $transaction = Transaction::whereTransactionId($transaction)->first();
         if ($transaction->payable_type == CreditOrder::class) {
             WalletService::credit($transaction->user
-                ,$transaction->payable->price,
+                ,$transaction->payable->credits,
                 "purchase plan {$transaction->payable->name}");
         }
         return "done";
