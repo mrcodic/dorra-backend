@@ -25,7 +25,7 @@ class CreditOrder extends Model
     protected static function booted()
     {
         self::created(function ($model) {
-            $model->order_number = sprintf('%s-%s-%06d',"#CRORD", now()->format('Ymd'), $model->id);
+            $model->number = sprintf('%s-%s-%06d',"#CRORD", now()->format('Ymd'), $model->id);
             $model->saveQuietly();
         });
         parent::booted();
