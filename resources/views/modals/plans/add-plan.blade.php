@@ -119,11 +119,11 @@
                 show: function () {
                     $(this).slideDown();
                     if (window.feather) feather.replace();
-                    toggleDeleteBtn($rep);
+                    // toggleDeleteBtn($rep);
                 },
                 hide: function (deleteElement) {
                     $(this).slideUp(deleteElement);
-                    toggleDeleteBtn($rep);
+                    // toggleDeleteBtn($rep);
                 }
             });
 

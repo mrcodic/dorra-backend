@@ -48,6 +48,8 @@ const dt_user_table = $(".plan-list-table").DataTable({
             render: function (data, type, row) {
                 const canEdit = row?.action?.can_edit ?? false;
                 const canDelete = row?.action?.can_delete ?? false;
+                const featuresEncoded = encodeURIComponent(JSON.stringify(row.features || []));
+                const recommendedFor = row.recommended_for || "";
                 const editBtn = canEdit
                     ? `
       <a href="#" class="edit-details"
@@ -58,7 +60,10 @@ const dt_user_table = $(".plan-list-table").DataTable({
          data-description="${row.description || ""}"
          data-price="${row.price || ""}"
          data-credits="${row.credits || ""}"
-         data-status="${row.is_active}">
+         data-status="${row.is_active}"
+     data-recommended_for="${recommendedFor}"
+     data-features="${featuresEncoded}"
+         >
         <i data-feather="edit-3"></i>
       </a>`
                     : "";
