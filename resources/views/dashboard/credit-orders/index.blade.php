@@ -187,8 +187,9 @@
                     <th>
                         <input type="checkbox" id="select-all-checkbox" class="form-check-input" @disabled(!auth()->user()->hasPermissionTo('categories_delete'))>
                     </th>
+                    <th>Order Number</th>
                     <th>Plan Name</th>
-                    <th>Plan Amount</th>
+                    <th>Plan Price</th>
                     <th>Plan Credit Number</th>
                     <th>User Name</th>
                     <th>Added Date</th>
@@ -237,7 +238,7 @@
 
 
 {{-- Page js files --}}
-<script src="{{ asset('js/scripts/pages/app-category-list.js') }}?v={{ time() }}"></script>
+<script src="{{ asset('js/scripts/pages/app-credit-order-list.js') }}?v={{ time() }}"></script>
 
 <script>
     // Backup accordion handler in case the main one doesn't work

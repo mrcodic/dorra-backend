@@ -4,6 +4,7 @@ namespace App\Services\Payment;
 
 use AllowDynamicProperties;
 use App\Enums\Payment\StatusEnum;
+use App\Models\CreditOrder;
 use App\Models\Order;
 use App\Models\Plan;
 use App\Models\Transaction;
@@ -159,13 +160,13 @@ use Illuminate\Support\Facades\Log;
                 'user_id' => request()->user()?->id,
                 'payable_type' => match ($data['type']) {
                     'order' => Order::class,
-                    'plan' => Plan::class,
+                    'creditOrder' => CreditOrder::class,
                     default => null,
                 },
 
                 'payable_id' => match ($data['type']) {
                     'order' => Arr::get($data, 'order')?->id,
-                    'plan' => Arr::get($data, 'plan')?->id,
+                    'creditOrder' => Arr::get($data, 'creditOrder')?->id,
                     default => null,
                 },
             ]);

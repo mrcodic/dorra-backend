@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\DTOs\Payment\Fawry\PaymentRequestData;
 use App\Repositories\Implementations\PaymentMethodRepository;
+use App\Repositories\Interfaces\CreditOrderRepositoryInterface;
 use App\Repositories\Interfaces\PlanRepositoryInterface;
 use App\Services\Payment\PaymentGatewayFactory;
 use Yajra\DataTables\Facades\DataTables;
@@ -15,6 +16,7 @@ class PlanService extends BaseService
     public function __construct(PlanRepositoryInterface        $repository,
                                 public PaymentMethodRepository $paymentMethodRepository,
                                 public PaymentGatewayFactory   $paymentFactory,
+                                public CreditOrderRepositoryInterface $creditOrderRepository,
 
     )
     {
@@ -27,7 +29,7 @@ class PlanService extends BaseService
         $plan = $this->repository->find($validateData['plan_id']);
         $paymentMethod = $this->paymentMethodRepository->find($validateData['payment_method_id']);
         $gatewayCode = $paymentMethod->paymentGateway->code;
-         $paymentGatewayStrategy = $this->paymentFactory->make($gatewayCode);
+        $paymentGatewayStrategy = $this->paymentFactory->make($gatewayCode);
 
         $dto = PaymentRequestData::fromArray([
             'plan' => $plan,
@@ -35,7 +37,14 @@ class PlanService extends BaseService
             'method' => $paymentMethod->code,
         ]);
 
-      return  $paymentGatewayStrategy->pay($dto->toArray(),['plan' => $plan,'type' => 'plan']);
+        $creditOrder = $this->creditOrderRepository->create([
+            'plan_id' => $validateData['plan_id'],
+            'user_id' => auth()->id(),
+            'credits' => $plan->credits,
+            'amount' => $plan->price,
+        ]);
+
+        return $paymentGatewayStrategy->pay($dto->toArray(), ['creditOrder' => $creditOrder, 'type' => 'creditOrder']);
 
     }
 

@@ -26,7 +26,7 @@ return new class extends Migration
                 ->nullOnDelete();
             $table->integer('credits');
             $table->decimal('amount', 10, 2);
-            $table->string('status')->default('pending');
+            $table->tinyInteger('status')->default(1);
 
             $table->index(['plan_id', 'user_id']);
             $table->timestamps();

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\User\ShippingAddress\ShippingController;
 use App\Http\Controllers\Dashboard\{AdminController,
     BoardController,
     CategoryController,
+    CreditOrderController,
     DiscountCodeController,
     FaqController,
     FlagController,
@@ -286,9 +287,13 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
         }));
         Route::resource('/plans', PlanController::class);
-        Route::get('credit-orders', [MainController::class,'creditOrders'])->name('credit-orders');
-        Route::get('credit-orders/data', [MainController::class,'creditOrders'])->name('credit-orders.data');
-        Route::get('credit-orders/create', [MainController::class,'creditOrders'])->name('credit-orders.create');
+
+        Route::group(['prefix' => 'credit-orders', 'as' => 'credit-orders.', 'controller' => CreditOrderController::class,], (function () {
+            Route::get('/data', [CreditOrderController::class, 'getData'])->name('data');
+        }));
+        Route::resource('/credit-orders', CreditOrderController::class);
+
+
 
     });
 

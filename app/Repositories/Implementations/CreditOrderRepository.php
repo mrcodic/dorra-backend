@@ -3,13 +3,14 @@
 namespace App\Repositories\Implementations;
 
 use App\Models\Carousel;
-use App\Repositories\{Base\BaseRepository, Interfaces\CarouselRepositoryInterface,};
+use App\Models\CreditOrder;
+use App\Repositories\{Base\BaseRepository, Interfaces\CreditOrderRepositoryInterface,};
 
-class CarouselRepository extends BaseRepository implements CarouselRepositoryInterface
+class CreditOrderRepository extends BaseRepository implements CreditOrderRepositoryInterface
 {
-    public function __construct(Carousel $carousel)
+    public function __construct(CreditOrder $order)
     {
-        parent::__construct($carousel);
+        parent::__construct($order);
     }
 
 }

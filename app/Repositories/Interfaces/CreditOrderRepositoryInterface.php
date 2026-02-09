@@ -2,7 +2,7 @@
 namespace App\Repositories\Interfaces;
  use App\Repositories\Base\BaseRepositoryInterface;
 
- interface CarouselRepositoryInterface extends BaseRepositoryInterface
+ interface CreditOrderRepositoryInterface extends BaseRepositoryInterface
  {
 
  }

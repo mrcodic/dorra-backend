@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CreditOrder\StatusEnum;
 use Illuminate\Database\Eloquent\Model;
 
 class CreditOrder extends Model
@@ -14,4 +15,19 @@ class CreditOrder extends Model
         'status',
         'plan_id'
     ];
+
+    protected function casts()
+    {
+        return [
+            'status' => StatusEnum::class,
+        ];
+    }
+    protected static function booted()
+    {
+        self::created(function ($model) {
+            $model->order_number = sprintf('%s-%s-%06d',"#CRORD", now()->format('Ymd'), $model->id);
+            $model->saveQuietly();
+        });
+        parent::booted();
+    }
 }
