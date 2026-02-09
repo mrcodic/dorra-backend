@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('credit_orders', function (Blueprint $table) {
             $table->id();
-            $table->string('number')->unique();
+            $table->string('number')->unique()->nullable();
             $table->foreignIdFor(User::class)
                 ->nullable()
                 ->constrained()
