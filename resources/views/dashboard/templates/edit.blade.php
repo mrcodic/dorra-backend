@@ -832,9 +832,8 @@ data-id="${id}"> Show on Mockup </a>
                 dzModel.classList.remove("d-none");
                 visibleDZ.push(dzModel);
             }
-            @if(request()->query('q') == 'with')
+            @if($model->approach == 'with_editor')
             dzModel.classList.remove("d-none");
-
             @endif
 
 
