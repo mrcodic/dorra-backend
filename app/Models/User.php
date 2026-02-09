@@ -56,6 +56,9 @@ class User extends Authenticatable implements HasMedia
         'password',
         'remember_token',
     ];
+    protected $appends =[
+        'name'
+    ];
 
     protected static function booted(): void
     {
