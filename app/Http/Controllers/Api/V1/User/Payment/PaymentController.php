@@ -330,6 +330,8 @@ class PaymentController extends Controller
             WalletService::credit($transaction->user
                 ,$transaction->payable->credits,
                 "purchase plan {$transaction->payable->plan->name}");
+            $transaction->payable->update(['status' => \App\Enums\CreditOrder\StatusEnum::PAID]);
+
         }
 
         if ($paymentStatus === StatusEnum::PAID) {
