@@ -16,43 +16,15 @@ class CreditController extends Controller
     public function status(Request $request)
     {
         $user = $request->user();
-
-        $freeLimit = (int)Setting::where('key', 'free_credits_limit')->value('value');
         $freeUsed = (int)($user->free_credits_used ?? 0);
-        $freeLeft = max(0, $freeLimit - $freeUsed);
-
         $wallet = $user->wallet;
-
-        $walletBalance = (int)($wallet?->balance ?? 0);
-
         $walletUsed = $wallet
             ? (int)$wallet->walletTransactions()
                 ->where('type', 'debit')
                 ->sum('amount') * -1
             : 0;
-
-        $walletCredited = $wallet
-            ? (int)$wallet->walletTransactions()
-                ->where('type', 'credit')
-                ->sum('amount')
-            : 0;
-        $totalCredits = $freeLimit + $walletCredited;
-        $availableCredits = $totalCredits - $freeUsed - $walletUsed;
-
-        $totalCredits = ($totalCredits - $availableCredits) + $totalCredits;
-
-
+        
         return Response::api(data: [
-            'free_credits' => [
-                'used' => $freeUsed,
-                'available' => $freeLeft,
-                'total' => $freeLimit,
-            ],
-            'wallet_credits' => [
-                'used' => $walletUsed,
-                'available' => $walletBalance,
-                'total' => $walletCredited,
-            ],
             'used_credits' => $freeUsed + $walletUsed,
             'available_credits' => $user->available_credits,
             'total_credits' => $user->total_credits,
