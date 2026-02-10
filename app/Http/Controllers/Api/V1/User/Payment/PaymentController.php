@@ -318,7 +318,7 @@ class PaymentController extends Controller
             'EXPIRED', 'CANCELLED', 'FAILED' => StatusEnum::UNPAID,
             default => StatusEnum::PENDING,
         };
-dd($paymentStatus);
+
         $updates = [
             'payment_status' => $paymentStatus,
             'payment_method' => $transaction->payment_method ?: $paymentMethod,
@@ -327,7 +327,6 @@ dd($paymentStatus);
 
         $transaction->update($updates);
         if ($status == 'PAID' && $transaction->payable_type == CreditOrder::class) {
-            dd("Fsdfds");
             WalletService::credit($transaction->user
                 ,$transaction->payable->credits,
                 "purchase plan {$transaction->payable->plan->name}");
