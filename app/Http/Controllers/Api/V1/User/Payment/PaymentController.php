@@ -327,6 +327,7 @@ class PaymentController extends Controller
 
         $transaction->update($updates);
         if ($status == 'PAID' && $transaction->payable_type == CreditOrder::class) {
+            dd("Fsdfds");
             WalletService::credit($transaction->user
                 ,$transaction->payable->credits,
                 "purchase plan {$transaction->payable->plan->name}");
