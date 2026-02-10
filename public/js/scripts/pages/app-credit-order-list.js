@@ -33,8 +33,11 @@ const dt_user_table = $(".credit-order-list-table").DataTable({
             data: "number",
         },
         {
-            data: "plan?.name",
-            name: "plan?.name",
+            data: "plan.name",
+            name: "plan.name",
+            render: function (data, type, row) {
+                return data ?? "-";
+            }
         },
         {
             data: "amount",
