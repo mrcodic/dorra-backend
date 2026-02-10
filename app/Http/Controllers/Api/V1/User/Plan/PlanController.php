@@ -36,15 +36,5 @@ class PlanController extends Controller
         return Response::api(message: "Subscribed successfully", data: $data);
     }
 
-    public function transaction($transaction)
-    {
-        $transaction = Transaction::whereTransactionId($transaction)->first();
-        if ($transaction->payable_type == CreditOrder::class) {
-            WalletService::credit($transaction->user
-                ,$transaction->payable->credits,
-                "purchase plan {$transaction->payable->name}");
-            $transaction->payable->update(['status' => StatusEnum::PAID]);
-        }
-        return "done";
-    }
+
 }
