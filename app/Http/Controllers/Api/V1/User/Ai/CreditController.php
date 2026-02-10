@@ -36,10 +36,10 @@ class CreditController extends Controller
                 ->where('type', 'credit')
                 ->sum('amount')
             : 0;
-
-        $availableCredits = $freeLeft + $walletBalance;
-
         $totalCredits = $freeLimit + $walletCredited;
+
+        $availableCredits = $totalCredits - $freeUsed - $walletUsed;
+
 
         return Response::api(data: [
             'free_credits' => [
