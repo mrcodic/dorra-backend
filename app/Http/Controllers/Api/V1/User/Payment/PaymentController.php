@@ -7,6 +7,7 @@ use App\Enums\Payment\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaymentResource;
 use App\Models\CreditOrder;
+use App\Models\Order;
 use App\Models\Plan;
 use App\Models\Transaction;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
@@ -334,8 +335,8 @@ class PaymentController extends Controller
 
         }
 
-        if ($paymentStatus === StatusEnum::PAID) {
-            $this->resetCart($transaction, $payload['paymentMethod'], StatusEnum::PAID, $payload);
+        if ($paymentStatus === StatusEnum::PAID&& $transaction->payable_type == Order::class) {
+            $this->resetCart($transaction, $paymentMethod, StatusEnum::PAID, $payload);
         }
 
         return response()->json(['message' => 'Webhook processed']);
