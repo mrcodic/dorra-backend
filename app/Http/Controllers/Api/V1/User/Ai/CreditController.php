@@ -28,7 +28,7 @@ class CreditController extends Controller
         $walletUsed = $wallet
             ? (int) $wallet->walletTransactions()
                 ->where('type', 'debit')
-                ->sum('amount')
+                ->sum('amount') * -1
             : 0;
 
         $walletCredited = $wallet
@@ -39,7 +39,7 @@ class CreditController extends Controller
 
         $availableCredits = $freeLeft + $walletBalance;
 
-        $totalCredits = $freeLimit + $walletCredited;
+        $totalCredits = $freeLimit + $walletCredited + $freeUsed + $walletUsed;
 
         return Response::api(data: [
             'free_credits' => [
@@ -50,7 +50,7 @@ class CreditController extends Controller
             'wallet_credits' => [
                 'used'      => $walletUsed,
                 'available' => $walletBalance,
-                'total'     => $walletCredited, 
+                'total'     => $walletCredited,
             ],
             'used_credits'      => $freeUsed + $walletUsed,
             'available_credits' => $availableCredits,
