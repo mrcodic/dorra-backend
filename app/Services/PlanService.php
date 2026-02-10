@@ -63,10 +63,32 @@ class PlanService extends BaseService
         return $resource;
     }
 
+    public function updateResource($validatedData, $id, $relationsToLoad = [])
+    {
+        $resource = parent::updateResource($validatedData, $id, $relationsToLoad);
+
+        $features = collect($validatedData['features'] ?? []);
+
+        $features = $features->map(function ($feature) use ($resource) {
+            $featureId = $feature['id'] ?? null;
+
+           return $resource->features()->updateOrCreate(
+                ['id' => $featureId],
+                ['description' => $feature['description']]
+            );
+        });
+;
+        $keptIds = $features->pluck('id')->filter()->values()->all();
+        $resource->features()->whereNotIn('id', $keptIds)->delete();
+
+        return $resource->load($relationsToLoad);
+    }
+
     public function getData()
     {
         $plans = $this->repository
             ->query()
+            ->with('features')
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $search = request('search_value');
@@ -87,6 +109,15 @@ class PlanService extends BaseService
         return DataTables::of($plans)
             ->editColumn('created_at', function ($plan) {
                 return $plan->created_at->format('d/m/Y');
+            })
+            ->addColumn('features', function ($plan) {
+                return $plan->features
+                    ->map(fn ($f) => [
+                        'id' => $f->id,
+                        'description' => $f->description,
+                    ])
+                    ->values()
+                    ->toArray();
             })
             ->addColumn('action', function ($plan) {
                 return [

@@ -55,6 +55,8 @@
                                 <div data-repeater-item class="row g-1 align-items-end mb-1">
                                     <div class="col-12 col-md-11">
                                         <label class="form-label">Description</label>
+
+                                        <input type="hidden" name="id" class="feature-id">
                                         <input type="text" name="description" class="form-control" required>
                                     </div>
 
@@ -64,7 +66,6 @@
                                         </button>
                                     </div>
                                 </div>
-
                             </div>
 
                             <button type="button" class="btn btn-outline-primary btn-sm mt-1" data-repeater-create>
@@ -81,7 +82,7 @@
                         </div>
 
                         <!-- hidden input sent to backend -->
-                        <input type="hidden" name="is_active" id="status" value="1">
+                        <input type="hidden" name="is_active" id="edit-status" value="1">
                     </div>
 
                 </div>
@@ -94,9 +95,9 @@
         </div>
     </div>
 </div>
-<script >
-    function initEditRepeater() {
-        const $rep = $('#editPlanModal .invoice-repeater');
+<script>
+    window.initEditRepeater = function () {
+        const $rep = $('#editFeaturesRepeater');
         if (!$rep.length) return;
 
         if (!$.fn.repeater) {
@@ -104,42 +105,38 @@
             return;
         }
 
+        // ✅ init only once
         if ($rep.data('repeater-initialized')) return;
+
         $rep.data('repeater-initialized', true);
 
         $rep.repeater({
-            initEmpty: false,
+            initEmpty: true, // better: start empty, we will setList ourselves
             show: function () {
-                $(this).slideDown();
+                $(this).slideDown(150);
                 if (window.feather) feather.replace();
-                // toggleFirstDeleteBtn($rep);
             },
             hide: function (deleteElement) {
-                $(this).slideUp(deleteElement);
-                // toggleFirstDeleteBtn($rep);
+                $(this).slideUp(150, function () {
+                    deleteElement();
+                    if (window.feather) feather.replace();
+                });
             }
         });
 
-        toggleFirstDeleteBtn($rep);
         if (window.feather) feather.replace();
-    }
-
-    function toggleFirstDeleteBtn($rep) {
-        const items = $rep.find('[data-repeater-item]');
-        items.each(function (i) {
-            $(this).find('[data-repeater-delete]').toggle(i !== 0);
-        });
-    }
-
+    };
+    // Initialize when modal opens (optional)
     $(document).on('shown.bs.modal', '#editPlanModal', function () {
-        initEditRepeater();
+        window.initEditRepeater(false);
     });
 </script>
+
 <script>
+
     $('#editStatusToggle').on('change', function () {
         const isActive = $(this).is(':checked');
-        console.log(isActive)
-        $('#status').val(isActive ? 1 : 0);
+        $('#edit-status').val(isActive ? 1 : 0);
         $(this).next('label').text(isActive ? 'Active' : 'Inactive');
     });
 
@@ -150,6 +147,7 @@
             resetForm: false,
             onSuccess: function (response, $form) {
                 $(".plan-list-table").DataTable().ajax.reload(null, false); // false = stay on current page
+
             }
         });
 

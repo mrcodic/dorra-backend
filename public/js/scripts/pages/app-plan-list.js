@@ -48,33 +48,30 @@ const dt_user_table = $(".plan-list-table").DataTable({
             render: function (data, type, row) {
                 const canEdit = row?.action?.can_edit ?? false;
                 const canDelete = row?.action?.can_delete ?? false;
-                const featuresEncoded = encodeURIComponent(JSON.stringify(row.features || []));
-                const recommendedFor = row.recommended_for || "";
-                const editBtn = canEdit
-                    ? `
-      <a href="#" class="edit-details"
-         data-bs-toggle="modal"
-         data-bs-target="#editPlanModal"
-         data-id="${data}"
-         data-name="${row.name || ""}"
-         data-description="${row.description || ""}"
-         data-price="${row.price || ""}"
-         data-credits="${row.credits || ""}"
-         data-status="${row.is_active}"
-     data-recommended_for="${recommendedFor}"
-     data-features="${featuresEncoded}"
-         >
-        <i data-feather="edit-3"></i>
-      </a>`
-                    : "";
 
-                const delBtn = canDelete
-                    ? `
-      <a href="#" class="text-danger open-delete-admin-modal" data-id="${data}"
-         data-bs-toggle="modal" data-bs-target="#deletePlanModal">
-         <i data-feather="trash-2"></i>
-      </a>`
-                    : "";
+                const recommendedFor = row.recommended_for || "";
+                const featuresEncoded = encodeURIComponent(JSON.stringify(row.features || []));
+
+                const editBtn = canEdit ? `
+    <a href="#" class="edit-details"
+      data-bs-toggle="modal"
+      data-bs-target="#editPlanModal"
+      data-id="${data}"
+      data-name="${row.name || ""}"
+      data-description="${row.description || ""}"
+      data-price="${row.price || ""}"
+      data-credits="${row.credits || ""}"
+      data-status="${row.is_active}"
+      data-recommended_for="${recommendedFor}"
+      data-features="${featuresEncoded}">
+      <i data-feather="edit-3"></i>
+    </a>` : "";
+
+                const delBtn = canDelete ? `
+    <a href="#" class="text-danger open-delete-admin-modal" data-id="${data}"
+      data-bs-toggle="modal" data-bs-target="#deletePlanModal">
+      <i data-feather="trash-2"></i>
+    </a>` : "";
 
                 return `${editBtn} ${delBtn}`;
             },
@@ -186,40 +183,106 @@ dt_user_table.on("draw", function () {
 });
 
 $(document).ready(function () {
-    $(document).on('click', '.edit-details', function () {
+    function escapeHtml(str) {
+        return String(str ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    function renderFeaturesRows(features) {
+        const $rep  = $('#editFeaturesRepeater');
+        const $list = $rep.find('[data-repeater-list="features"]');
+
+        // normalize
+        let arr = features;
+        if (!Array.isArray(arr) && arr && typeof arr === 'object') arr = Object.values(arr);
+        if (!Array.isArray(arr)) arr = [];
+
+        // Always show at least 1 row
+        if (!arr.length) arr = [{ id: '', description: '' }];
+
+        const rows = arr.map(f, i => {
+            const fid  = (typeof f === 'object' && f) ? (f.id ?? '') : '';
+            const desc = (typeof f === 'object' && f) ? (f.description ?? '') : (f ?? '');
+
+            return `
+
+                                <div data-repeater-item class="row g-1 align-items-end mb-1">
+                                    <div class="col-12 col-md-11">
+                                        <label class="form-label">Description</label>
+
+                                        <input type="hidden" name="id" class="feature-id" value="${escapeHtml(fid)}">
+                                        <input type="text" name="description" class="form-control" value="${escapeHtml(desc)}" required>
+                                    </div>
+
+                                    <div class="col-12 col-md-1 d-flex justify-content-end">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" data-repeater-delete>
+                                            <i data-feather="x"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+    `;
+        }).join('');
+
+        $list.html(rows);
+        if (window.feather) feather.replace();
+    }
+    $(document).on('click', '.edit-details', function (e) {
+        e.preventDefault();
+
         const modal = $('#editPlanModal');
 
-        // Get data from button
         const id = $(this).data('id');
         const name = $(this).data('name');
         const description = $(this).data('description');
         const price = $(this).data('price');
         const credits = $(this).data('credits');
-        const status = $(this).data('status'); // 1 or 0
-        // Set form action
+        const status = $(this).data('status');
+        const recommendedFor = $(this).data('recommended_for');
+
+        // ✅ decode features
+        let features = [];
+        try {
+            const encoded = $(this).attr('data-features') || '';
+            const json = decodeURIComponent(encoded);
+            features = JSON.parse(json || '[]');
+        } catch (err) {
+            console.warn('Invalid features JSON', err);
+            features = [];
+        }
+
+        // form action
         modal.find('form').attr('action', `/plans/${id}`);
 
-        // Fill inputs
+        // fill fields
         modal.find('input[name="name"]').val(name);
         modal.find('textarea[name="description"]').val(description);
+        modal.find('textarea[name="recommended_for"]').val(recommendedFor || '');
         modal.find('input[name="price"]').val(price);
         modal.find('input[name="credits"]').val(credits);
 
-        // ✅ SET STATUS TOGGLE CORRECTLY
+        // status
         const toggle = modal.find('#editStatusToggle');
         const hiddenStatus = modal.find('#status');
         const label = toggle.next('label');
 
-        if (status == 1) {
-            toggle.prop('checked', true);
-            hiddenStatus.val(1);
-            label.text('Active');
-        } else {
-            toggle.prop('checked', false);
-            hiddenStatus.val(0);
-            label.text('Inactive');
-        }
+        const active = String(status) === '1';
+        toggle.prop('checked', active);
+        hiddenStatus.val(active ? 1 : 0);
+        label.text(active ? 'Active' : 'Inactive');
+
+        // ✅ init repeater ONCE (important: this must not re-init multiple times)
+        window.initEditRepeater();
+
+        // ✅ DO NOT empty before setList (breaks cloning in many repeater builds)
+        // Instead: render rows directly (always works)
+        renderFeaturesRows(features);
     });
+
 
     $(document).on("click", ".open-delete-admin-modal", function () {
         const adminId = $(this).data("id");
