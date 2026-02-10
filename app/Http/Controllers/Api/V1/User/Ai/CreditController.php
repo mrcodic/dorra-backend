@@ -37,8 +37,9 @@ class CreditController extends Controller
                 ->sum('amount')
             : 0;
         $totalCredits = $freeLimit + $walletCredited;
-
         $availableCredits = $totalCredits - $freeUsed - $walletUsed;
+        $totalCredits = ($totalCredits-$availableCredits) * $totalCredits;
+
 
 
         return Response::api(data: [
