@@ -2,6 +2,7 @@
 
 namespace App\Services\Wallet;
 
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -28,6 +29,21 @@ class WalletService
     {
         DB::transaction(function () use ($user, $credits, $source) {
             $wallet = self::getOrCreateWallet($user);
+            $freeLimit = Setting::where('key', 'free_credits_limit')->value('value');
+            $freeUsed = $user->free_credits_used;
+            $freeLeft = max(0, $freeLimit - $freeUsed);
+            $walletBalance = $wallet?->balance ?? 0;
+            $walletUsed = $wallet
+                ? (int)$wallet->walletTransactions()
+                    ->where('type', 'debit')
+                    ->sum('amount') * -1
+                : 0;
+            $availableCredits = $user->available_credits + $credits;
+            $totalCredits = $freeLeft + $walletBalance + $freeUsed + $walletUsed;
+            $user->update([
+                'available_credits' => $availableCredits,
+                'total_credits' => $totalCredits,
+            ]);
 
             $wallet->increment('balance', $credits);
 
