@@ -39,7 +39,7 @@ class CreditController extends Controller
 
         $availableCredits = $freeLeft + $walletBalance;
 
-        $totalCredits = $freeLimit + $walletCredited + $freeUsed + $walletUsed;
+        $totalCredits = $freeLimit + $walletCredited;
 
         return Response::api(data: [
             'free_credits' => [
