@@ -41,8 +41,8 @@ class CreditController extends Controller
                 'total' => $walletUsed + $walletBalance,
             ],
             'used_credits' => $freeUsed + $walletUsed,
-            'available_credits' => $totalCredits -$freeUsed,
-            'total_credits' => $totalCredits ,
+            'available_credits' => $availableCredits,
+            'total_credits' => $totalCredits + $lastCreditsCount,
         ]);
     }
 
