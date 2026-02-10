@@ -21,7 +21,7 @@ class CreditController extends Controller
         $freeLeft = max(0, $freeLimit - $freeUsed);
 
         $walletBalance = $user->wallet?->balance ?? 0;
-
+dd($walletBalance,  $freeUsed);
         $walletUsed = $user->wallet
             ? (int)$user->wallet->walletTransactions()
                 ->where('type', 'debit')
@@ -40,7 +40,7 @@ class CreditController extends Controller
                 'total' => $walletUsed + $walletBalance,
             ],
             'used_credits' => $freeUsed + $walletUsed,
-            'available_credits' => ($freeLeft + $walletBalance + $freeUsed + $walletUsed) - ($freeUsed + $walletUsed),
+            'available_credits' => $freeLeft + $walletBalance,
             'total_credits' => $freeLeft + $walletBalance + $freeUsed + $walletUsed,
         ]);
     }
