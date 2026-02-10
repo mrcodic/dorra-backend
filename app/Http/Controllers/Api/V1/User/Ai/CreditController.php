@@ -38,7 +38,8 @@ class CreditController extends Controller
             : 0;
         $totalCredits = $freeLimit + $walletCredited;
         $availableCredits = $totalCredits - $freeUsed - $walletUsed;
-        $totalCredits = ($totalCredits-$availableCredits) + $totalCredits;
+
+        $totalCredits = ($totalCredits - $availableCredits) + $totalCredits;
 
 
 
@@ -54,8 +55,8 @@ class CreditController extends Controller
                 'total'     => $walletCredited,
             ],
             'used_credits'      => $freeUsed + $walletUsed,
-            'available_credits' => $availableCredits,
-            'total_credits'     => $totalCredits,
+            'available_credits' => $user->available_credits,
+            'total_credits'     => $user->total_credits,
         ]);
     }
 

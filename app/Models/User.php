@@ -45,6 +45,8 @@ class User extends Authenticatable implements HasMedia
         'last_login_ip',
         'last_login_at',
         'free_credits_used',
+        'available_credits',
+        'total_credits',
     ];
 
     /**
