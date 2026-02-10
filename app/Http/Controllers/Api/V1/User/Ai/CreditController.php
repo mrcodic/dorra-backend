@@ -16,33 +16,45 @@ class CreditController extends Controller
     public function status(Request $request)
     {
         $user = $request->user();
-        $freeLimit = Setting::where('key', 'free_credits_limit')->value('value');
-        $freeUsed = $user->free_credits_used;
-        $freeLeft = max(0, $freeLimit - $freeUsed);
 
-        $walletBalance = $user->wallet?->balance ?? 0;
-        $walletUsed = $user->wallet
-            ? (int)$user->wallet->walletTransactions()
+        $freeLimit = (int) Setting::where('key', 'free_credits_limit')->value('value');
+        $freeUsed  = (int) ($user->free_credits_used ?? 0);
+        $freeLeft  = max(0, $freeLimit - $freeUsed);
+
+        $wallet = $user->wallet;
+
+        $walletBalance = (int) ($wallet?->balance ?? 0);
+
+        $walletUsed = $wallet
+            ? (int) $wallet->walletTransactions()
                 ->where('type', 'debit')
-                ->sum('amount') * -1
+                ->sum('amount')
             : 0;
+
+        $walletCredited = $wallet
+            ? (int) $wallet->walletTransactions()
+                ->where('type', 'credit')
+                ->sum('amount')
+            : 0;
+
         $availableCredits = $freeLeft + $walletBalance;
-        $totalCredits = $freeLeft + $walletBalance + $freeUsed + $walletUsed ;
-        $lastCreditsCount = $totalCredits == $availableCredits ? 0 : $user->wallet?->walletTransactions->last()->amount;
+
+        $totalCredits = $freeLimit + $walletCredited;
+
         return Response::api(data: [
             'free_credits' => [
-                'used' => $freeUsed,
+                'used'      => $freeUsed,
                 'available' => $freeLeft,
-                'total' => $freeLimit,
+                'total'     => $freeLimit,
             ],
             'wallet_credits' => [
-                'used' => $walletUsed,
+                'used'      => $walletUsed,
                 'available' => $walletBalance,
-                'total' => $walletUsed + $walletBalance,
+                'total'     => $walletCredited, 
             ],
-            'used_credits' => $freeUsed + $walletUsed,
+            'used_credits'      => $freeUsed + $walletUsed,
             'available_credits' => $availableCredits,
-            'total_credits' => $totalCredits + ($lastCreditsCount * $lastCreditsCount),
+            'total_credits'     => $totalCredits,
         ]);
     }
 
