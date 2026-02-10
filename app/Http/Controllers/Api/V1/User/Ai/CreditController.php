@@ -38,7 +38,7 @@ class CreditController extends Controller
             : 0;
         $totalCredits = $freeLimit + $walletCredited;
         $availableCredits = $totalCredits - $freeUsed - $walletUsed;
-        $totalCredits = ($totalCredits-$availableCredits) * $totalCredits;
+        $totalCredits = ($totalCredits-$availableCredits) + $totalCredits;
 
 
 
