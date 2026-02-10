@@ -26,7 +26,9 @@ class CreditController extends Controller
                 ->where('type', 'debit')
                 ->sum('amount') * -1
             : 0;
-        $lastCreditsCount = $user->free_credits_used == 0 ? 0 : $user->wallet?->walletTransactions->last()->amount;
+        $availableCredits = $freeLeft + $walletBalance;
+        $totalCredits = $freeLeft + $walletBalance + $freeUsed + $walletUsed ;
+        $lastCreditsCount = $totalCredits == $availableCredits ? 0 : $user->wallet?->walletTransactions->last()->amount;
         return Response::api(data: [
             'free_credits' => [
                 'used' => $freeUsed,
@@ -39,8 +41,8 @@ class CreditController extends Controller
                 'total' => $walletUsed + $walletBalance,
             ],
             'used_credits' => $freeUsed + $walletUsed,
-            'available_credits' => $freeLeft + $walletBalance,
-            'total_credits' => $freeLeft + $walletBalance + $freeUsed + $walletUsed + $lastCreditsCount,
+            'available_credits' => $availableCredits,
+            'total_credits' => $totalCredits + $lastCreditsCount,
         ]);
     }
 
