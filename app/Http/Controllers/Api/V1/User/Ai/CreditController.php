@@ -16,31 +16,38 @@ class CreditController extends Controller
     public function status(Request $request)
     {
         $user = $request->user();
-        $freeLimit = Setting::where('key', 'free_credits_limit')->value('value');
-        $freeUsed = $user->free_credits_used;
-        $freeLeft = max(0, $freeLimit - $freeUsed);
 
-        $walletBalance = $user->wallet?->balance ?? 0;
+        $freeLimit = (int) Setting::where('key', 'free_credits_limit')->value('value');
+        $freeUsed  = (int) ($user->free_credits_used ?? 0);
+        $freeLeft  = max(0, $freeLimit - $freeUsed);
 
-        $walletUsed = $user->wallet
-            ? (int)$user->wallet->walletTransactions()
+        $wallet = $user->wallet;
+
+        $walletBalance = (int) ($wallet?->balance ?? 0);
+        
+        $walletUsed = $wallet
+            ? (int) $wallet->walletTransactions()
                 ->where('type', 'debit')
-                ->sum('amount') * -1
+                ->sum('amount')
             : 0;
+
+
+        $walletTotal = $walletUsed + $walletBalance;
+
         return Response::api(data: [
             'free_credits' => [
-                'used' => $freeUsed,
-                'available' => $freeLeft,
-                'total' => $freeLimit,
+                'used'       => $freeUsed,
+                'available'  => $freeLeft,
+                'total'      => $freeLimit,
             ],
             'wallet_credits' => [
-                'used' => $walletUsed,
-                'available' => $walletBalance,
-                'total' => $walletUsed + $walletBalance,
+                'used'       => $walletUsed,
+                'available'  => $walletBalance,
+                'total'      => $walletTotal,
             ],
-            'used_credits' => $freeUsed + $walletUsed,
-            'available_credits' => $freeLeft + $walletBalance,
-            'total_credits' => $freeLeft + $walletBalance + $freeUsed + $walletUsed,
+            'used_credits'       => $freeUsed + $walletUsed,
+            'available_credits'  => $freeLeft + $walletBalance,
+            'total_credits'      => $freeLimit + $walletTotal,
         ]);
     }
 
