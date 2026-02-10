@@ -74,7 +74,7 @@ class WalletService
             }
 
             $wallet->decrement('balance', $credits);
-
+            $user->decrement('available_credits', $credits);
             $wallet->walletTransactions()->create([
                 'amount' => -$credits,
                 'reserved' => 0,

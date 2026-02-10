@@ -62,6 +62,11 @@ class User extends Authenticatable implements HasMedia
         'name'
     ];
 
+    protected $attributes =[
+        'available_credits' => (int) Setting::where('key', 'free_credits_limit')->value('value'),
+        'total_credits' => (int) Setting::where('key', 'free_credits_limit')->value('value'),
+    ];
+
     protected static function booted(): void
     {
         static::creating(function ($user) {
