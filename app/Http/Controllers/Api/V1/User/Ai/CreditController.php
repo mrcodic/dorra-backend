@@ -31,7 +31,7 @@ class CreditController extends Controller
 
         return Response::api(data: [
             'used_credits' => $freeUsed + $walletUsed,
-            'available_credits' => $user->available_credits == 0 ? null : $user->available_credits,
+            'available_credits' => $user->available_credits == 0 ? $freeLimit : $user->available_credits,
             'total_credits' => $user->total_credits == 0 ? $freeLimit : $user->total_credits,
         ]);
     }
