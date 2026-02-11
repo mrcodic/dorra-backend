@@ -29,6 +29,14 @@ class WalletService
     {
         DB::transaction(function () use ($user, $credits, $source) {
             $wallet = self::getOrCreateWallet($user);
+            $wallet->increment('balance', $credits);
+
+            $wallet->walletTransactions()->create([
+                'amount' => +$credits,
+                'reserved' => 0,
+                'source' => $source,
+                'type' => 'credit'
+            ]);
             $freeLimit = (int) Setting::where('key', 'free_credits_limit')->value('value');
             $freeUsed  = (int) ($user->free_credits_used ?? 0);
             $walletUsed = $wallet
@@ -48,19 +56,13 @@ class WalletService
             $totalCredits = $freeLimit + $walletCredited;
             $availableCredits = $totalCredits - $freeUsed - $walletUsed;
             $totalCredits = ($totalCredits - $availableCredits) + $totalCredits;
+ 
             $user->update([
                 'total_credits' => $totalCredits,
                 'available_credits' => $availableCredits,
             ]);
 
-            $wallet->increment('balance', $credits);
 
-            $wallet->walletTransactions()->create([
-                'amount' => +$credits,
-                'reserved' => 0,
-                'source' => $source,
-                'type' => 'credit'
-            ]);
         });
     }
 
