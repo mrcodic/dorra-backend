@@ -32,8 +32,11 @@ class WalletService
             $freeLimit = (int) Setting::where('key', 'free_credits_limit')->value('value');
             $freeUsed  = (int) ($user->free_credits_used ?? 0);
             $walletUsed = $wallet
-                ? (int) $wallet->walletTransactions()
-                    ->where('type', 'debit')
+                ? (int)$wallet->walletTransactions()
+                    ->where(function ($query) {
+                        $query->where('type', 'debit')
+                            ->orWhere('type', 'capture');
+                    })
                     ->sum('amount') * -1
                 : 0;
 
@@ -44,7 +47,6 @@ class WalletService
                 : 0;
             $totalCredits = $freeLimit + $walletCredited;
             $availableCredits = $totalCredits - $freeUsed - $walletUsed;
-dd($availableCredits, $totalCredits);
             $totalCredits = ($totalCredits - $availableCredits) + $totalCredits;
             $user->update([
                 'total_credits' => $totalCredits,
