@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\User\Ai;
 use App\Enums\HttpEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Models\Transaction;
 use App\Services\Ai\GenAiImageService;
 use App\Services\Wallet\WalletService;
 use Illuminate\Http\Request;
@@ -20,10 +21,13 @@ class CreditController extends Controller
         $wallet = $user->wallet;
         $walletUsed = $wallet
             ? (int)$wallet->walletTransactions()
-                ->where('type', 'debit')
+                ->where(function ($query) {
+                    $query->where('type', 'debit')
+                        ->orWhere('type', 'capture');
+                })
                 ->sum('amount') * -1
             : 0;
-        
+
         return Response::api(data: [
             'used_credits' => $freeUsed + $walletUsed,
             'available_credits' => $user->available_credits,
