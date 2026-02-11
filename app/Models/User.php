@@ -70,6 +70,10 @@ class User extends Authenticatable implements HasMedia
         });
         static::created(function ($user) {
             $user->notificationTypes()->sync(NotificationType::all(['id'])->pluck('id'));
+            $freeLimit = (int) Setting::where('key', 'free_credits_limit')->value('value') ?? 0;
+            $user->available_credits = $freeLimit;
+            $user->total_credits = $freeLimit;
+            $user->save();
         });
         parent::booted();
     }
