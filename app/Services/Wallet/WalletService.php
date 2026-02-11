@@ -56,7 +56,7 @@ class WalletService
             $totalCredits = $freeLimit + $walletCredited;
             $availableCredits = $totalCredits - $freeUsed - $walletUsed;
             $totalCredits = ($totalCredits - $availableCredits) + $totalCredits;
- 
+ dd($totalCredits, $availableCredits);
             $user->update([
                 'total_credits' => $totalCredits,
                 'available_credits' => $availableCredits,
