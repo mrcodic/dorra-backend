@@ -90,7 +90,10 @@ class UserService extends BaseService
                 $freeUsed = $user->free_credits_used;
                 $walletUsed = $user->wallet
                     ? (int)$user->wallet->walletTransactions()
-                        ->where('type', 'debit')
+                        ->where(function ($query) {
+                            $query->where('type', 'debit')
+                                ->orWhere('type', 'capture');
+                        })
                         ->sum('amount') * -1
                     : 0;
                 return $freeUsed + $walletUsed;
