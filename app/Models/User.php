@@ -62,31 +62,6 @@ class User extends Authenticatable implements HasMedia
         'name'
     ];
 
-
-    public function getAvailableCreditsAttribute(): int
-    {
-        $freeLimit = (int) Setting::where('key', 'free_credits_limit')->value('value');
-        $freeUsed  = (int) ($this->free_credits_used ?? 0);
-        $freeLeft  = max(0, $freeLimit - $freeUsed);
-
-        $walletBalance = (int) ($this->wallet?->balance ?? 0);
-
-        return $freeLeft + $walletBalance;
-    }
-
-    public function getTotalCreditsAttribute(): int
-    {
-        $freeLimit = (int) Setting::where('key', 'free_credits_limit')->value('value');
-
-        $walletCredited = $this->wallet
-            ? (int) $this->wallet->walletTransactions()
-                ->where('type', 'credit')
-                ->sum('amount')
-            : 0;
-
-        return $freeLimit + $walletCredited;
-    }
-
     protected static function booted(): void
     {
         static::creating(function ($user) {

@@ -16,6 +16,7 @@ class CreditController extends Controller
 {
     public function status(Request $request)
     {
+        $freeLimit = (int) Setting::where('key', 'free_credits_limit')->value('value');
         $user = $request->user();
         $freeUsed = (int)($user->free_credits_used ?? 0);
         $wallet = $user->wallet;
@@ -30,8 +31,8 @@ class CreditController extends Controller
 
         return Response::api(data: [
             'used_credits' => $freeUsed + $walletUsed,
-            'available_credits' => $user->available_credits,
-            'total_credits' => $user->total_credits,
+            'available_credits' => $user->available_credits == $freeLimit ? null : $user->available_credits,
+            'total_credits' => $user->total_credits == $freeLimit ? $freeLimit : $user->total_credits,
         ]);
     }
 
