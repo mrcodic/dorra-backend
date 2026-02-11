@@ -2,7 +2,6 @@
 
 namespace App\Services\Wallet;
 
-use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -29,6 +28,7 @@ class WalletService
     {
         DB::transaction(function () use ($user, $credits, $source) {
             $wallet = self::getOrCreateWallet($user);
+
             $wallet->increment('balance', $credits);
 
             $wallet->walletTransactions()->create([
@@ -37,31 +37,6 @@ class WalletService
                 'source' => $source,
                 'type' => 'credit'
             ]);
-            $freeLimit = (int) Setting::where('key', 'free_credits_limit')->value('value');
-            $freeUsed  = (int) ($user->free_credits_used ?? 0);
-            $walletUsed = $wallet
-                ? (int)$wallet->walletTransactions()
-                    ->where(function ($query) {
-                        $query->where('type', 'debit')
-                            ->orWhere('type', 'capture');
-                    })
-                    ->sum('amount') * -1
-                : 0;
-
-            $walletCredited = $wallet
-                ? (int) $wallet->walletTransactions()
-                    ->where('type', 'credit')
-                    ->sum('amount')
-                : 0;
-            $totalCredits = $freeLimit + $walletCredited;
-            $availableCredits = $totalCredits - $freeUsed - $walletUsed;
-            $totalCredits = ($totalCredits - $availableCredits) + $totalCredits;
-            $user->update([
-                'total_credits' => $totalCredits,
-                'available_credits' => $availableCredits,
-            ]);
-
-
         });
     }
 
@@ -77,7 +52,7 @@ class WalletService
             }
 
             $wallet->decrement('balance', $credits);
-            $user->decrement('available_credits', $credits);
+
             $wallet->walletTransactions()->create([
                 'amount' => -$credits,
                 'reserved' => 0,
@@ -120,7 +95,6 @@ class WalletService
 
             $wallet->decrement('reserved_balance', $credits);
             $wallet->decrement('balance', $credits);
-            $user->decrement('available_credits', $credits);
 
             $wallet->walletTransactions()->create([
                 'amount' => -$credits,
