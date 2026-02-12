@@ -283,7 +283,7 @@ class MockupService extends BaseService
                 );
             });
         });
-
+dd($model->media);
         return $model;
     }
     private function syncTemplatesSmart($model, array $syncData, bool $typesChanged)
