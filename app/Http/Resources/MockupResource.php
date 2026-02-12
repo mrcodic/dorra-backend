@@ -18,7 +18,7 @@ class MockupResource extends JsonResource
     {
 
         $types = $this->whenLoaded('types', fn () => $this->types, collect());
-dd($types);
+
         $images = $types->mapWithKeys(function ($type) {
             $sideName = strtolower($type->value->name);
 
