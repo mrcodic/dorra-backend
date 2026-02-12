@@ -33,7 +33,7 @@ class MockupResource extends JsonResource
             });
 
             return [
-                $sideName => [
+                $type->value->value => [
                     'base_url' => optional($baseMedia)->getFullUrl(),
                     'mask_url' => optional($maskMedia)->getFullUrl(),
                 ],
