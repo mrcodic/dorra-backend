@@ -40,7 +40,7 @@ class MockupResource extends JsonResource
                 ],
             ];
         });
-
+dd($images);
         return [
             'id'    => $this->id,
             'name'  => $this->name,
