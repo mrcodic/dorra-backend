@@ -228,6 +228,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::get('industries', [IndustryController::class, 'index'])->name('industries');
     Route::get('sub-industries', [IndustryController::class, 'getSubIndustries'])->name('sub-industries');
     Route::get('mockups', [MainController::class, 'mockups'])->name('mockups');
+    Route::get('mockup-types', [MockupController::class, 'types']);
     Route::resource('editor-mockups', MockupController::class)->only(['index', 'show']);
     Route::get('variants', [VariantController::class, 'index'])->name('variants');
 
