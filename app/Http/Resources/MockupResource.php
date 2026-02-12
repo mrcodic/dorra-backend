@@ -40,7 +40,10 @@ class MockupResource extends JsonResource
                 ],
             ];
         });
-dd($this->getMedia('mockups')->first());
+dd($this->getMedia('mockups')->first(function ($media)  {
+    return $media->getCustomProperty('side') == "back" &&
+        $media->getCustomProperty('role') == 'mask';
+}));
         return [
             'id'    => $this->id,
             'name'  => $this->name,
