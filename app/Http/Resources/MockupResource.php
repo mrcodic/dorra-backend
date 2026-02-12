@@ -18,7 +18,7 @@ class MockupResource extends JsonResource
     {
 
         $types = $this->whenLoaded('types', fn () => $this->types, collect());
-
+dd($types);
         $images = $types->mapWithKeys(function ($type) {
             $sideName = strtolower($type->value->name);
 
@@ -26,7 +26,6 @@ class MockupResource extends JsonResource
                 return $media->getCustomProperty('side') === $sideName &&
                     $media->getCustomProperty('role') === 'base';
             });
-            dd($baseMedia);
 
             $maskMedia = $this->getMedia('mockups')->first(function ($media) use ($sideName) {
                 return $media->getCustomProperty('side') === $sideName &&
@@ -40,10 +39,7 @@ class MockupResource extends JsonResource
                 ],
             ];
         });
-dd($this->getMedia('mockups')->first(function ($media)  {
-    return $media->getCustomProperty('side') == "back" &&
-        $media->getCustomProperty('role') == 'mask';
-}));
+
         return [
             'id'    => $this->id,
             'name'  => $this->name,
