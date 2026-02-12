@@ -186,12 +186,12 @@ class MockupService extends BaseService
             ->latest();
 
         if (request()->ajax()) {
-            dd("fghfg");
             return $pageSize === null
                 ? $query->get()
                 : $query->paginate($pageSize)->withQueryString();
         }
         if (request()->expectsJson()) {
+            dd($pageSize);
             return $query->paginate($pageSize);
         }
         return $this->repository->all(
