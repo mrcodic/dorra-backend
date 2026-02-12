@@ -191,7 +191,7 @@ class MockupService extends BaseService
                 : $query->paginate($pageSize)->withQueryString();
         }
         if (request()->expectsJson()) {
-            dd($pageSize);
+            dd($query->paginate($pageSize),$pageSize);
             return $query->paginate($pageSize);
         }
         return $this->repository->all(
