@@ -26,7 +26,7 @@ class MockupResource extends JsonResource
                 return $media->getCustomProperty('side') === $sideName &&
                     $media->getCustomProperty('role') === 'base';
             });
-            dump($baseMedia);
+            dd($baseMedia);
 
             $maskMedia = $this->getMedia('mockups')->first(function ($media) use ($sideName) {
                 return $media->getCustomProperty('side') === $sideName &&
