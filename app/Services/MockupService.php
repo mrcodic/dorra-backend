@@ -272,7 +272,7 @@ class MockupService extends BaseService
                         ->where('custom_properties->role', $role)
                         ->delete();
                 }
-                handleMediaUploads(
+                handleMediaUploads(~
                     request()->file($inputName),
                     $model,
                     customProperties: [
@@ -283,7 +283,7 @@ class MockupService extends BaseService
                 );
             });
         });
-dd($model->media);
+
         return $model;
     }
     private function syncTemplatesSmart($model, array $syncData, bool $typesChanged)
