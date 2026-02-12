@@ -139,7 +139,7 @@ class MockupService extends BaseService
 
         $query = $this->repository
             ->query()
-            ->with(['category:id,name'])
+            ->with(['category:id,name','types'])
             ->when(request()->filled('search_value'), function ($q) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $q->where('name', 'LIKE', '%' . request('search_value') . '%');
