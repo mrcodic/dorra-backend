@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\V1\User\{Ai\AiAssetController,
     Folder\FolderController,
     Industry\IndustryController,
     Invitation\InvitationController,
+    Mockup\MockupController,
     Order\OrderController,
     Payment\PaymentController,
     Plan\PlanController,
@@ -227,6 +228,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::get('industries', [IndustryController::class, 'index'])->name('industries');
     Route::get('sub-industries', [IndustryController::class, 'getSubIndustries'])->name('sub-industries');
     Route::get('mockups', [MainController::class, 'mockups'])->name('mockups');
+    Route::resource('editor-mockups', MockupController::class)->only(['index', 'show']);
     Route::get('variants', [VariantController::class, 'index'])->name('variants');
 
 });
