@@ -68,7 +68,7 @@ class Mockup extends Model implements HasMedia
                     ->unique()
                     ->values()
                     ->all();
-            })->values()->all();
+            });
         });
     }
     protected function getSideMediaUrl(string $side, string $role)
