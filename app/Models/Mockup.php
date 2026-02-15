@@ -43,7 +43,7 @@ class Mockup extends Model implements HasMedia
         'area_top' => 233,
         'area_height' => 370,
     ];
-    use Illuminate\Database\Eloquent\Casts\Attribute;
+
 
     protected function templateColors(): Attribute
     {
@@ -75,7 +75,7 @@ class Mockup extends Model implements HasMedia
                 ->all();
         });
     }
-    
+
     protected function getSideMediaUrl(string $side, string $role)
     {
         $media = $this->getMedia('mockups')->first(function ($media) use ($side, $role) {
