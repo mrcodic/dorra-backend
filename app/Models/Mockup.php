@@ -63,9 +63,10 @@ class Mockup extends Model implements HasMedia
 
                 return collect($colors)
                     ->filter(fn ($c) => is_string($c))
-                    ->flatMap(fn ($c) => strtoupper(trim($c)))
+                    ->map(fn ($c) => strtoupper(trim($c)))
                     ->filter(fn ($c) => preg_match('/^#([A-F0-9]{3}|[A-F0-9]{6})$/', $c))
                     ->unique()
+                    ->flatten()
                     ->values()
                     ->all();
             });
