@@ -294,35 +294,34 @@ class MockupService extends BaseService
             $oldCategoryId = $before->category_id;
             $model = $this->repository->update($validatedData, $id);
             $categoryChanged = (int)$oldCategoryId !== (int)($validatedData['category_id'] ?? $model->category_id);
-            // Sync types (OK)
+
 
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
             $modelTypesValues = $model->types->pluck('value.value')->toArray();
-
 
             $typesChanged = collect($selectedTypeValues)->sort()->values()->all()
                 != collect($modelTypesValues)->sort()->values()->all();
 
             $model->types()->sync($selectedTypeValues);
-            // Sync templates + pivot data
+
             $templatesInput = collect(Arr::get($validatedData, 'templates', []));
 
             if ($templatesInput->isNotEmpty()) {
                 $syncData = [];
                 $colorsArr = [];
-                $templatesInput->each(function ($template) use (&$syncData,&$colorsArr) {
+
+                $templatesInput->each(function ($template) use (&$syncData, &$colorsArr) {
                     $templateId = $template['template_id'] ?? null;
                     if (!$templateId) return;
 
-                    // Positions: everything except template_id & colors
                     $positions = collect($template)
                         ->except(['template_id', 'colors'])
                         ->filter(fn($v) => $v !== null && $v !== '')
                         ->toArray();
 
-                    // Colors: normalize + validate
                     $colors = Arr::get($template, 'colors', []);
                     $colorsArr[] = $colors;
+
                     if (is_string($colors)) {
                         $colors = json_decode($colors, true) ?: [];
                     }
@@ -341,12 +340,45 @@ class MockupService extends BaseService
                         'colors' => $colors,
                     ];
                 });
-                $model->update(['colors' => $colorsArr]);
+
+
+                $existingColors = $before->colors ?? [];
+                if (is_string($existingColors)) {
+                    $existingColors = json_decode($existingColors, true) ?: [];
+                }
+                if (!is_array($existingColors)) {
+                    $existingColors = [];
+                }
+
+                $existingFlat = collect($existingColors)->flatten(1)->filter()->all();
+
+                $newFlat = collect($colorsArr)
+                    ->map(function ($c) {
+                        if (is_string($c)) return json_decode($c, true) ?: [];
+                        return is_array($c) ? $c : [];
+                    })
+                    ->flatten(1)
+                    ->filter(fn($c) => is_string($c)
+                        && preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $c))
+                    ->map(fn($c) => strtoupper(trim($c)))
+                    ->values()
+                    ->all();
+
+                $mergedUnique = collect(array_merge($existingFlat, $newFlat))
+                    ->filter(fn($c) => is_string($c)
+                        && preg_match('/^#([A-F0-9]{3}|[A-F0-9]{6})$/', $c))
+                    ->map(fn($c) => strtoupper(trim($c)))
+                    ->unique()
+                    ->values()
+                    ->all();
+
+                $model->update(['colors' => $mergedUnique]);
+
+
                 if ($typesChanged || $categoryChanged) {
                     $this->syncTemplatesSmart($model, $syncData, true);
                 } else {
                     $model->templates()->syncWithoutDetaching($syncData);
-
                 }
             }
 
@@ -359,9 +391,9 @@ class MockupService extends BaseService
 
             return $model;
         });
+
         return $model;
     }
-
     private function syncTemplatesSmart($model, array $syncData, bool $typesChanged)
     {
         $requestIds = collect(array_keys($syncData))->map('strval');
