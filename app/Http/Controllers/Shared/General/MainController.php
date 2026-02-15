@@ -126,7 +126,7 @@ class MainController extends Controller
     public function fonts()
     {
         return Response::api(data: FontResource::collection($this->fontService->getAll(['fontStyles.media', 'fontStyles.font'],
-            true, perPage: request('per_page',10))
+            request('paginate',false), perPage: request('per_page',10))
         )->response()->getData());
 
     }
