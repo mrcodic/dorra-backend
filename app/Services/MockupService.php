@@ -139,7 +139,7 @@ class MockupService extends BaseService
 
         $query = $this->repository
             ->query()
-            ->with(['category:id,name','types'])
+            ->with(['category:id,name', 'types'])
             ->when(request()->filled('search_value'), function ($q) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $q->where('name', 'LIKE', '%' . request('search_value') . '%');
@@ -236,7 +236,7 @@ class MockupService extends BaseService
         });
         $this->handleFiles($model);
         $model->load(['templates', 'types', 'category', 'media']);
-        HandleMockupFilesJob::dispatch($model,'create')->delay(now()->addSeconds(5));
+        HandleMockupFilesJob::dispatch($model, 'create')->delay(now()->addSeconds(5));
         return $model;
     }
 
@@ -286,6 +286,82 @@ class MockupService extends BaseService
 
         return $model;
     }
+
+    public function updateResource($validatedData, $id, $relationsToLoad = [])
+    {
+        $model = $this->handleTransaction(function () use ($id, $validatedData) {
+            $before = $this->repository->find($id);
+            $oldCategoryId = $before->category_id;
+            $model = $this->repository->update($validatedData, $id);
+            $categoryChanged = (int)$oldCategoryId !== (int)($validatedData['category_id'] ?? $model->category_id);
+            // Sync types (OK)
+
+            $selectedTypeValues = Arr::get($validatedData, 'types', []);
+            $modelTypesValues = $model->types->pluck('value.value')->toArray();
+
+
+            $typesChanged = collect($selectedTypeValues)->sort()->values()->all()
+                != collect($modelTypesValues)->sort()->values()->all();
+
+            $model->types()->sync($selectedTypeValues);
+            // Sync templates + pivot data
+            $templatesInput = collect(Arr::get($validatedData, 'templates', []));
+
+            if ($templatesInput->isNotEmpty()) {
+                $syncData = [];
+                $colorsArr = [];
+                $templatesInput->each(function ($template) use (&$syncData,&$colorsArr) {
+                    $templateId = $template['template_id'] ?? null;
+                    if (!$templateId) return;
+
+                    // Positions: everything except template_id & colors
+                    $positions = collect($template)
+                        ->except(['template_id', 'colors'])
+                        ->filter(fn($v) => $v !== null && $v !== '')
+                        ->toArray();
+
+                    // Colors: normalize + validate
+                    $colors = Arr::get($template, 'colors', []);
+                    $colorsArr[] = $colors;
+                    if (is_string($colors)) {
+                        $colors = json_decode($colors, true) ?: [];
+                    }
+                    if (!is_array($colors)) {
+                        $colors = [];
+                    }
+
+                    $colors = collect($colors)
+                        ->filter(fn($c) => is_string($c)
+                            && preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $c))
+                        ->values()
+                        ->all();
+
+                    $syncData[$templateId] = [
+                        'positions' => $positions,
+                        'colors' => $colors,
+                    ];
+                });
+                $model->update(['colors' => $colorsArr]);
+                if ($typesChanged || $categoryChanged) {
+                    $this->syncTemplatesSmart($model, $syncData, true);
+                } else {
+                    $model->templates()->syncWithoutDetaching($syncData);
+
+                }
+            }
+
+            if (request()->allFiles()) {
+                $this->handleFiles($model, true);
+            }
+
+            $model->load(['templates', 'types', 'category', 'media']);
+            HandleMockupFilesJob::dispatch($model)->delay(now()->addSeconds(5));
+
+            return $model;
+        });
+        return $model;
+    }
+
     private function syncTemplatesSmart($model, array $syncData, bool $typesChanged)
     {
         $requestIds = collect(array_keys($syncData))->map('strval');
@@ -304,79 +380,6 @@ class MockupService extends BaseService
             $model->clearMediaCollection('generated_mockups');
         }
     }
-
-        public function updateResource($validatedData, $id, $relationsToLoad = [])
-        {
-            $model = $this->handleTransaction(function () use ($id, $validatedData) {
-                $before = $this->repository->find($id);
-                $oldCategoryId = $before->category_id;
-                $model = $this->repository->update($validatedData, $id);
-                $categoryChanged = (int)$oldCategoryId !== (int)($validatedData['category_id'] ?? $model->category_id);
-                // Sync types (OK)
-
-                $selectedTypeValues = Arr::get($validatedData, 'types', []);
-                $modelTypesValues = $model->types->pluck('value.value')->toArray();
-
-
-                $typesChanged = collect($selectedTypeValues)->sort()->values()->all()
-                    != collect($modelTypesValues)->sort()->values()->all();
-
-                $model->types()->sync($selectedTypeValues);
-                // Sync templates + pivot data
-                $templatesInput = collect(Arr::get($validatedData, 'templates', []));
-
-                if ($templatesInput->isNotEmpty()) {
-                    $syncData = [];
-
-                    $templatesInput->each(function ($template) use (&$syncData) {
-                        $templateId = $template['template_id'] ?? null;
-                        if (!$templateId) return;
-
-                        // Positions: everything except template_id & colors
-                        $positions = collect($template)
-                            ->except(['template_id', 'colors'])
-                            ->filter(fn($v) => $v !== null && $v !== '')
-                            ->toArray();
-
-                        // Colors: normalize + validate
-                        $colors = Arr::get($template, 'colors', []);
-                        if (is_string($colors)) {
-                            $colors = json_decode($colors, true) ?: [];
-                        }
-                        if (!is_array($colors)) {
-                            $colors = [];
-                        }
-
-                        $colors = collect($colors)
-                            ->filter(fn($c) => is_string($c)
-                                && preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $c))
-                            ->values()
-                            ->all();
-
-                        $syncData[$templateId] = [
-                            'positions' => $positions,
-                            'colors' => $colors,
-                        ];
-                    });
-                    if ($typesChanged || $categoryChanged) {
-                        $this->syncTemplatesSmart($model, $syncData, true);
-                    }else{
-                        $model->templates()->syncWithoutDetaching($syncData);
-
-                    }
-                }
-
-                if (request()->allFiles()) {
-                    $this->handleFiles($model, true);
-                }
-
-                $model->load(['templates', 'types', 'category', 'media']);
-                HandleMockupFilesJob::dispatch($model)->delay(now()->addSeconds(5));
-
-                return $model;
-            });
-            return $model;
-        }
 
     public function deleteResource($id)
     {
@@ -430,9 +433,9 @@ class MockupService extends BaseService
 
     public function removeColor($data): void
     {
-        $categoryId = (int) $data['category_id'];
-        $templateId =$data['template_id'];
-        $hex        = strtolower($data['color']);
+        $categoryId = (int)$data['category_id'];
+        $templateId = $data['template_id'];
+        $hex = strtolower($data['color']);
 
         $mockups = $this->repository->query()
             ->where('category_id', $categoryId)
@@ -456,8 +459,7 @@ class MockupService extends BaseService
             ]);
 
             $mockup->getMedia('generated_mockups')
-                ->filter(fn($media) =>
-                   $media->getCustomProperty('template_id') === $templateId
+                ->filter(fn($media) => $media->getCustomProperty('template_id') === $templateId
                     && strtolower((string)$media->getCustomProperty('hex')) === $hex
                 )
                 ->each(fn($media) => $media->delete());
