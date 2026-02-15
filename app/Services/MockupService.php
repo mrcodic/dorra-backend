@@ -489,7 +489,24 @@ class MockupService extends BaseService
             $mockup->templates()->updateExistingPivot($templateId, [
                 'colors' => $colors,
             ]);
+            $existing = $mockup->colors ?? [];
+            if (is_string($existing)) {
+                $existing = json_decode($existing, true) ?: [];
+            }
+            if (!is_array($existing)) {
+                $existing = [];
+            }
 
+            $newModelColors = collect($existing)
+                ->flatten(1)
+                ->map(fn ($c) => strtoupper(trim((string) $c)))
+                ->filter()
+                ->reject(fn ($c) => $c === $hex)
+                ->unique()
+                ->values()
+                ->all();
+
+            $mockup->update(['colors' => $newModelColors]);
             $mockup->getMedia('generated_mockups')
                 ->filter(fn($media) => $media->getCustomProperty('template_id') === $templateId
                     && strtolower((string)$media->getCustomProperty('hex')) === $hex
