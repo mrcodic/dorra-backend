@@ -26,7 +26,7 @@ class MockupController extends Controller
 
     public function show($id)
     {
-        $mockup = $this->mockupService->showResource($id,['types']);
+        $mockup = $this->mockupService->showResource($id,['types','templates']);
         return Response::api(data: MockupResource::make($mockup));
 
     }

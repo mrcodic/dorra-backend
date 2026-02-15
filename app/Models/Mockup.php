@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Mockup\TypeEnum;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\MediaLibrary\HasMedia;
@@ -42,6 +43,34 @@ class Mockup extends Model implements HasMedia
         'area_top' => 233,
         'area_height' => 370,
     ];
+    protected function templateColors(): Attribute
+    {
+        return Attribute::get(function () {
+            $templates = $this->relationLoaded('templates')
+                ? $this->templates
+                : $this->templates()->withPivot(['colors', 'positions'])->get();
+
+            return $templates->map(function ($tpl) {
+
+                $colors = $tpl->pivot->colors ?? [];
+
+                if (is_string($colors)) {
+                    $colors = json_decode($colors, true) ?: [];
+                }
+                if (!is_array($colors)) {
+                    $colors = [];
+                }
+
+                return collect($colors)
+                    ->filter(fn ($c) => is_string($c))
+                    ->map(fn ($c) => strtoupper(trim($c)))
+                    ->filter(fn ($c) => preg_match('/^#([A-F0-9]{3}|[A-F0-9]{6})$/', $c))
+                    ->unique()
+                    ->values()
+                    ->all();
+            })->values()->all();
+        });
+    }
     protected function getSideMediaUrl(string $side, string $role)
     {
         $media = $this->getMedia('mockups')->first(function ($media) use ($side, $role) {
