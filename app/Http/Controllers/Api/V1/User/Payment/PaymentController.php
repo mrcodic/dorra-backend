@@ -275,9 +275,7 @@ class PaymentController extends Controller
             . $paymentRef
             . $secureKey;
 
-        $calc = hash('sha256', $raw);
-
-        return $calc;
+        return Response::api(['signature' =>  hash('sha256', $raw)]);
     }
 
     private function verifySignature(array $payload): bool
