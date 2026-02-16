@@ -134,33 +134,53 @@
 </div>
 </div>
 
-<script !src="">
+<script>
     Dropzone.autoDiscover = false;
 
     const editDropzone = new Dropzone("#edit-category-dropzone", {
-        url: "{{ route('media.store') }}", // adjust to your media upload route
+        url: "{{ route('media.store') }}",
         paramName: "file",
         maxFiles: 1,
-        maxFilesize: 1, // MB
+        maxFilesize: 1,
         acceptedFiles: "image/*",
         headers: {
             "X-CSRF-TOKEN": "{{ csrf_token() }}"
         },
         addRemoveLinks: true,
-        dictDefaultMessage: "Drop image here or click to upload",
+
         init: function () {
 
+            const dz = this;
 
-            this.on("success", function (file, response) {
+            // ✅ Detect manual remove click
+            dz.on("addedfile", function (file) {
+
+                const removeBtn = file.previewElement.querySelector(".dz-remove");
+
+                if (removeBtn) {
+                    removeBtn.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        file.manuallyRemoved = true; // 🔥 mark manual
+                        dz.removeFile(file);
+                    });
+                }
+            });
+
+            dz.on("success", function (file, response) {
                 if (response.success && response.data) {
                     file._hiddenInputId = response.data.id;
-                    $("#editUploadedImage").val(response.data.id); // store image_id
-                    $("#edit-preview-image").attr("src", response.data.url);
+                    $("#editUploadedImage").val(response.data.id);
                 }
-
             });
-            this.on("removedfile", function (file) {
+
+            dz.on("removedfile", function (file) {
+
+                if (!file.manuallyRemoved) return; // 🚫 block auto remove
+
                 $("#editUploadedImage").val("");
+
                 if (file._hiddenInputId) {
                     fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                         method: "DELETE",
@@ -168,18 +188,10 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                         }
                     });
-                    $("#edit-preview-image").attr("src", "").addClass("d-none");
-
                 }
             });
-            // On remove -> clear hidden input
-
-        },
+        }
     });
-
-</script>
-<script>
-    Dropzone.autoDiscover = false;
 
     const editWebsiteDropzone = new Dropzone("#edit-website-image-banner-dropzone", {
         url: "{{ route('media.store') }}",
@@ -189,38 +201,50 @@
         acceptedFiles: "image/*",
         headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
         addRemoveLinks: true,
+
         init: function () {
-            this.on("success", function (file, response) {
+
+            const dz = this;
+
+            dz.on("addedfile", function (file) {
+
+                const removeBtn = file.previewElement.querySelector(".dz-remove");
+
+                if (removeBtn) {
+                    removeBtn.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        file.manuallyRemoved = true;
+                        dz.removeFile(file);
+                    });
+                }
+            });
+
+            dz.on("success", function (file, response) {
                 if (response.success && response.data) {
                     file._hiddenInputId = response.data.id;
                     document.getElementById("editUploadedImageWebsiteBanner").value = response.data.id;
-
                 }
             });
 
-            this.on("removedfile", function (file) {
+            dz.on("removedfile", function (file) {
+
+                if (!file.manuallyRemoved) return;
+
                 document.getElementById("editUploadedImageWebsiteBanner").value = "";
+
                 if (file._hiddenInputId) {
                     fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                         method: "DELETE",
-                        headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content}
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        }
                     });
                 }
-                document.getElementById("uploaded-image-main").classList.add("d-none");
             });
         }
     });
-
-    // Manual remove
-    document.getElementById("remove-image-main").addEventListener("click", function () {
-        editWebsiteDropzone.removeAllFiles(true);
-        document.getElementById("uploadedImageMain").value = "";
-        document.getElementById("uploaded-image-main").classList.add("d-none");
-    });
-
-</script>
-<script>
-    Dropzone.autoDiscover = false;
 
     const editMobileDropzone = new Dropzone("#edit-mobile-image-banner-dropzone", {
         url: "{{ route('media.store') }}",
@@ -230,35 +254,52 @@
         acceptedFiles: "image/*",
         headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
         addRemoveLinks: true,
-        init: function () {
-            this.on("success", function (file, response) {
-                if (response.success && response.data) {
-                    file._hiddenInputId = response.data.id;
-                    document.getElementById("editUploadedImageMobileBanner").value = response.data.id;
 
+        init: function () {
+
+            const dz = this;
+
+            dz.on("addedfile", function (file) {
+
+                const removeBtn = file.previewElement.querySelector(".dz-remove");
+
+                if (removeBtn) {
+                    removeBtn.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        file.manuallyRemoved = true;
+                        dz.removeFile(file);
+                    });
                 }
             });
 
-            this.on("removedfile", function (file) {
+            dz.on("success", function (file, response) {
+                if (response.success && response.data) {
+                    file._hiddenInputId = response.data.id;
+                    document.getElementById("editUploadedImageMobileBanner").value = response.data.id;
+                }
+            });
+
+            dz.on("removedfile", function (file) {
+
+                if (!file.manuallyRemoved) return;
+
                 document.getElementById("editUploadedImageMobileBanner").value = "";
+
                 if (file._hiddenInputId) {
                     fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                         method: "DELETE",
-                        headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content}
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        }
                     });
                 }
-                document.getElementById("uploaded-image-main").classList.add("d-none");
             });
         }
     });
 
-    // Manual remove
-    document.getElementById("remove-image-main").addEventListener("click", function () {
-        editMobileDropzone.removeAllFiles(true);
-        document.getElementById("uploadedImageMain").value = "";
-        document.getElementById("uploaded-image-main").classList.add("d-none");
-    });
-
+</script>
 </script>
 <script>
     $(document).ready(function () {

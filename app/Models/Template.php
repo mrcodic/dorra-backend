@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\App;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
@@ -39,9 +40,11 @@ class Template extends Model implements HasMedia
         'safety_area',
         'cut_margin',
         'border',
-        'approach'
+        'approach',
+        'supported_languages'
     ];
     protected $casts = [
+        'supported_languages' => 'array',
         'status' => StatusEnum::class,
         'type' => TypeEnum::class,
         'unit' => UnitEnum::class,
@@ -52,6 +55,20 @@ class Template extends Model implements HasMedia
     protected $attributes = [
         'status' => StatusEnum::DRAFTED,
     ];
+
+
+    protected static function booted()
+    {
+        static::addGlobalScope('supported_languages', function (Builder $builder) {
+            $locale = App::getLocale();
+
+            $builder->where(function ($q) use ($locale) {
+                $q->whereNull('supported_languages')
+                ->orWhereJsonLength('supported_languages', 0)
+                ->orWhereJsonContains('supported_languages', $locale);
+            });
+        });
+    }
 
     public function scopeIsLanding(Builder $builder): Builder
     {

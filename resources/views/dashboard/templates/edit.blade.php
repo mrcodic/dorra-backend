@@ -176,7 +176,23 @@
                                         Template Details
                                     </span>
                                     </div>
+                                    <div class="form-group mb-2">
+                                        <label class="label-text mb-1">Language</label>
+                                        <div class="row">
+                                            @foreach(config("app.locales") as $locale)
+                                                <div class="col-md-4 mb-1">
+                                                    <label class="radio-box">
+                                                        <input class="form-check-input " type="checkbox"
+                                                               name="supported_languages[]"
+                                                               value="{{ $locale }}"
+                                                               @checked($model->supported_languages)
+                                                        >
+                                                        <span>{{ $locale == 'en' ? 'English' : 'Arabic'}}</span>
+                                                    </label>
+                                                </div>
+                                            @endforeach
 
+                                        </div>
                                     <div class="form-group mb-2">
                                         <label class="label-text mb-1">Template Type</label>
                                         <div class="row">

@@ -47,6 +47,8 @@ class UpdateTemplateRequest extends BaseRequest
                 'nullable',
                 'string',
             ],
+            'supported_languages' => ['nullable','array'],
+            'supported_languages.*' => ['nullable','in:en,ar'],
             'price' => ['nullable', 'numeric','min:1'],
             'type' => ['sometimes','in:'.TypeEnum::getValuesAsString()],
 //            'status' => ["required","integer","in:".StatusEnum::getValuesAsString()],

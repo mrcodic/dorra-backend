@@ -359,12 +359,10 @@ $(document).ready(function () {
 
         if (modalId === "#editCategoryModal") {
 
-
 // Clear old previews
-            editDropzone.removeAllFiles(true);
-            editWebsiteDropzone.removeAllFiles(true);
-            editMobileDropzone.removeAllFiles(true);
-
+            editDropzone.removeAllFiles();
+            editWebsiteDropzone.removeAllFiles();
+            editMobileDropzone.removeAllFiles();
 
 // Main Image
             preloadDropzoneImage(
