@@ -61,12 +61,14 @@ class Template extends Model implements HasMedia
     {
         static::addGlobalScope('supported_languages', function (Builder $builder) {
             $locale = App::getLocale();
+            if (request()->is('api/v1/user/*')) {
+                $builder->where(function ($q) use ($locale) {
+                    $q->whereNull('supported_languages')
+                        ->orWhereJsonLength('supported_languages', 0)
+                        ->orWhereJsonContains('supported_languages', $locale);
+                });
+            }
 
-            $builder->where(function ($q) use ($locale) {
-                $q->whereNull('supported_languages')
-                ->orWhereJsonLength('supported_languages', 0)
-                ->orWhereJsonContains('supported_languages', $locale);
-            });
         });
     }
 
