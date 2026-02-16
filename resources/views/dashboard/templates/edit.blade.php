@@ -185,7 +185,7 @@
                                                         <input class="form-check-input " type="checkbox"
                                                                name="supported_languages[]"
                                                                value="{{ $locale }}"
-                                                            @checked(in_array($locale, $model->supported_languages, true))
+                                                            @checked(in_array($locale, $model->supported_languages ??[], true))
                                                         >
                                                         <span>{{ $locale == 'en' ? 'English' : 'Arabic'}}</span>
                                                     </label>
