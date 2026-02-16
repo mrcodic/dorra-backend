@@ -248,7 +248,7 @@ class PaymentController extends Controller
             return redirect()->to($transaction->failure_url);
         }
     }
-    public function verifySignatureTest(Request $request): bool
+    public function verifySignatureTest(Request $request)
     {
         $payload = $request->all();
         $mustRequestParams = ['fawryRefNumber', 'merchantRefNumber', 'paymentAmount', 'orderAmount', 'orderStatus', 'paymentMethod'];
