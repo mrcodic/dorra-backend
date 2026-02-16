@@ -252,11 +252,10 @@ class PaymentController extends Controller
     {
         $payload = $request->json()->all();
         $mustRequestParams = ['fawryRefNumber', 'merchantRefNumber', 'paymentAmount', 'orderAmount', 'orderStatus', 'paymentMethod'];
-        
-dd($payload,$mustRequestParams);
-        foreach ($mustRequestParams as $param) {
-            if (!array_key_exists($param, $payload)) return false;
-        }
+
+//        foreach ($mustRequestParams as $param) {
+//            if (!array_key_exists($param, $payload)) return false;
+//        }
 
         $secureKey = (string)config('services.fawry.secret_key');
 
