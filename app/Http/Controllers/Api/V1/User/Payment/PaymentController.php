@@ -251,8 +251,9 @@ class PaymentController extends Controller
     public function verifySignatureTest(Request $request): bool
     {
         $payload = $request->json()->all();
-
         $mustRequestParams = ['fawryRefNumber', 'merchantRefNumber', 'paymentAmount', 'orderAmount', 'orderStatus', 'paymentMethod'];
+        
+dd($payload,$mustRequestParams);
         foreach ($mustRequestParams as $param) {
             if (!array_key_exists($param, $payload)) return false;
         }
