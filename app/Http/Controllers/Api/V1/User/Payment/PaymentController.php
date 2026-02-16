@@ -248,8 +248,37 @@ class PaymentController extends Controller
             return redirect()->to($transaction->failure_url);
         }
     }
+    public function verifySignatureTest(Request $request): bool
+    {
+        $payload = $request->json()->all();
+        $mustRequestParams = ['fawryRefNumber', 'merchantRefNumber', 'paymentAmount', 'orderAmount', 'orderStatus', 'paymentMethod', 'messageSignature'];
+        foreach ($mustRequestParams as $param) {
+            if (!array_key_exists($param, $payload)) return false;
+        }
 
-    public function verifySignature(array $payload): bool
+        $secureKey = (string)config('services.fawry.secret_key');
+
+
+        $paymentAmount = number_format((float)$payload['paymentAmount'], 2, '.', '');
+        $orderAmount = number_format((float)$payload['orderAmount'], 2, '.', '');
+
+
+        $paymentRef = $payload['paymentRefrenceNumber'] ?? '';
+
+        $raw = ($payload['fawryRefNumber'] ?? '')
+            . ($payload['merchantRefNumber'] ?? '')
+            . $paymentAmount
+            . $orderAmount
+            . ($payload['orderStatus'] ?? '')
+            . ($payload['paymentMethod'] ?? '')
+            . $paymentRef
+            . $secureKey;
+
+        $calc = hash('sha256', $raw);
+        return hash_equals($calc, (string)$payload['messageSignature']);
+    }
+
+    private function verifySignature(array $payload): bool
     {
         $mustRequestParams = ['fawryRefNumber', 'merchantRefNumber', 'paymentAmount', 'orderAmount', 'orderStatus', 'paymentMethod', 'messageSignature'];
         foreach ($mustRequestParams as $param) {

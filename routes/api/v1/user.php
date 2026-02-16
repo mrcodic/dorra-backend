@@ -69,7 +69,7 @@ Route::controller(PaymentController::class)->group(function () {
     Route::post('paymob/payment/callback', 'handlePaymobCallback');
     Route::get('paymob/payment/redirect', 'handlePaymobRedirect');
     Route::post('fawry/payment/callback', 'handleFawryCallback');
-    Route::post('fawry/payment/verify-signature', 'verifySignature');
+    Route::post('fawry/payment/verify-signature', 'verifySignatureTest');
     Route::get('fawry/payment/redirect', 'handleFawryRedirect');
 });
 
