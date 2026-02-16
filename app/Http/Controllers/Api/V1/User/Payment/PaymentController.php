@@ -253,9 +253,9 @@ class PaymentController extends Controller
         $payload = $request->all();
         $mustRequestParams = ['fawryRefNumber', 'merchantRefNumber', 'paymentAmount', 'orderAmount', 'orderStatus', 'paymentMethod'];
 
-//        foreach ($mustRequestParams as $param) {
-//            if (!array_key_exists($param, $payload)) return false;
-//        }
+        foreach ($mustRequestParams as $param) {
+            if (!array_key_exists($param, $payload)) return false;
+        }
 
         $secureKey = (string)config('services.fawry.secret_key');
 
@@ -275,7 +275,7 @@ class PaymentController extends Controller
             . $paymentRef
             . $secureKey;
 
-        return Response::api(['signature' =>  hash('sha256', $raw)]);
+        return Response::api(data: ['signature' =>  hash('sha256', $raw)]);
     }
 
     private function verifySignature(array $payload): bool
