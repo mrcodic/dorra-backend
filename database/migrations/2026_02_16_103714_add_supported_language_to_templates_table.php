@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('templates', function (Blueprint $table) {
-            $table->json('supported_languages')->default(['ar', 'en']);
+            $table->json('supported_languages')->nullable()->after('name');
         });
     }
 
