@@ -274,7 +274,7 @@ class PaymentController extends Controller
             . ($payload['paymentMethod'] ?? '')
             . $paymentRef
             . $secureKey;
-dd(hash('sha256', $raw));
+
         return Response::api(['signature' =>  hash('sha256', $raw)]);
     }
 
