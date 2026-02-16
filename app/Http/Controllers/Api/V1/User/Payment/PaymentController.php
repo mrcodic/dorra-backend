@@ -252,7 +252,7 @@ class PaymentController extends Controller
     {
         $payload = $request->json()->all();
 
-        $mustRequestParams = ['fawryRefNumber', 'merchantRefNumber', 'paymentAmount', 'orderAmount', 'orderStatus', 'paymentMethod', 'messageSignature'];
+        $mustRequestParams = ['fawryRefNumber', 'merchantRefNumber', 'paymentAmount', 'orderAmount', 'orderStatus', 'paymentMethod'];
         foreach ($mustRequestParams as $param) {
             if (!array_key_exists($param, $payload)) return false;
         }
@@ -274,7 +274,7 @@ class PaymentController extends Controller
             . ($payload['paymentMethod'] ?? '')
             . $paymentRef
             . $secureKey;
-        dd(hash('sha256', $raw));
+
         return Response::api(['signature' =>  hash('sha256', $raw)]);
     }
 
