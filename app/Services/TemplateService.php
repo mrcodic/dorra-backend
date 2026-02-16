@@ -317,6 +317,9 @@ class TemplateService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
+        if (empty($validatedData['supported_languages'])) {
+            $validatedData['supported_languages'] = null;
+        }
         $colors = Arr::get($validatedData, 'colors');
         $finalColors = collect($colors)->flatMap(function ($color) {
             return [
