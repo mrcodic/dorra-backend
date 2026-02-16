@@ -275,6 +275,7 @@ class PaymentController extends Controller
             . $secureKey;
 
         $calc = hash('sha256', $raw);
+        dd(hash_equals($calc, (string)$payload['messageSignature']));
         return hash_equals($calc, (string)$payload['messageSignature']);
     }
 
