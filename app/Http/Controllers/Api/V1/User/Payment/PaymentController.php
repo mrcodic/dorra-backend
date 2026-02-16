@@ -249,7 +249,7 @@ class PaymentController extends Controller
         }
     }
 
-    private function verifySignature(array $payload): bool
+    public function verifySignature(array $payload): bool
     {
         $mustRequestParams = ['fawryRefNumber', 'merchantRefNumber', 'paymentAmount', 'orderAmount', 'orderStatus', 'paymentMethod', 'messageSignature'];
         foreach ($mustRequestParams as $param) {
