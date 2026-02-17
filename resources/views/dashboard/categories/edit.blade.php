@@ -948,28 +948,18 @@
             generateVariants();
         });
 
-        $(document).on('click', '[data-repeater-create], [data-repeater-delete]', function () {
-            setTimeout(generateVariants, 300); // wait for DOM update
+        // When creating → safe to regenerate immediately
+        $(document).on('click', '[data-repeater-create]', function () {
+            setTimeout(generateVariants, 0);
         });
+
 
         $(document).ready(function () {
             if (Object.keys(window.existingVariantsFromDB || {}).length) {
                 generateVariants(); // builds UI using DB variants
             }
         });
-        $(document).on('click', '[data-repeater-delete]', function () {
-            let item = $(this).closest('[data-repeater-item]');
 
-            // Wait until repeater actually removes it
-            let observer = new MutationObserver(function (mutations, obs) {
-                if (!document.body.contains(item[0])) {
-                    generateVariants();
-                    obs.disconnect();
-                }
-            });
-
-            observer.observe(document.body, { childList: true, subtree: true });
-        });
 
     </script>
 
@@ -1170,9 +1160,14 @@
                         }
 
                         $(this).find('.uploadedImage').val('');
+                        setTimeout(generateVariants, 0);
                     },
                     hide: function (deleteElement) {
-                        $(this).slideUp(deleteElement);
+                        const $row = $(this);
+                        $row.slideUp(200, function () {
+                            deleteElement();
+                            generateVariants();
+                        });
                     }
                 }],
                 show: function () {
@@ -1188,17 +1183,21 @@
                     }
 
                     $(this).find('.uploadedImage').val('');
+                    setTimeout(generateVariants, 0);
                 },
                 hide: function (deleteElement) {
-                    var $item = $(this);
-                    $item.slideUp(deleteElement, function() {
-                        var $specList = $item.closest('.outer-repeater').find('[data-repeater-list="specifications"]');
-                        var $items = $specList.find('[data-repeater-item]').not(':hidden');
+                    const $item = $(this);
 
-                        // keep visible if needed, comment out if not
-                        // if ($items.length === 0) {
-                        //     $specList.addClass('d-none');
-                        // }
+                    $item.slideUp(200, function () {
+                        deleteElement();      // ✅ IMPORTANT: actually remove spec item
+                        generateVariants();   // ✅ regenerate AFTER removal
+
+                        // (optional) hide list if empty
+                        var $specList = $item.closest('.outer-repeater').find('[data-repeater-list="specifications"]');
+                        var $items = $specList.find('[data-repeater-item]');
+                        if ($items.length === 0) {
+                            $specList.addClass('d-none');
+                        }
                     });
                 },
                 isFirstItemUndeletable: false

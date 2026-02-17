@@ -109,7 +109,7 @@ class UpdateProductRequest extends BaseRequest
             'specifications.*.specification_options.*.id' => 'nullable',
             'specifications.*.specification_options.*.value_en' => 'required_with:specifications|string',
             'specifications.*.specification_options.*.value_ar' => 'required_with:specifications|string',
-            'specifications.*.specification_options.*.price' => 'nullable|numeric|min:1',
+            'specifications.*.specification_options.*.price' => 'nullable|numeric|min:0',
             'specifications.*.specification_options.*.option_image' => ['nullable', 'exists:media,id'],
             'variants.*.code' => ['sometimes', 'string'],
             'variants.*.image' => ['sometimes', 'exists:media,id'],

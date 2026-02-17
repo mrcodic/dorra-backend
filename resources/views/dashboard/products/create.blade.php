@@ -1685,9 +1685,14 @@
                         updateDeleteButtons($(this).closest('.inner-repeater'));
                         initializeImageUploaders(this);
                         feather.replace();
+                        setTimeout(generateVariants, 0);
                     },
                     hide: function (deleteElement) {
-                        $(this).slideUp(deleteElement);
+                        const $row = $(this);
+                        $row.slideUp(200, function () {
+                            deleteElement();
+                            generateVariants();
+                        });
                         updateDeleteButtons($(this).closest('.inner-repeater'));
                     },
                     afterAdd: function () {
@@ -1705,9 +1710,14 @@
                     updateDeleteButtons($('.outer-repeater'));
                     initializeImageUploaders(this);
                     feather.replace();
+                    setTimeout(generateVariants, 0);
                 },
                 hide: function (deleteElement) {
-                    $(this).slideUp(deleteElement);
+                    const $row = $(this);
+                    $row.slideUp(200, function () {
+                        deleteElement();
+                        generateVariants();
+                    });
                     updateDeleteButtons($('.outer-repeater'));
                 },
                 afterAdd: function () {

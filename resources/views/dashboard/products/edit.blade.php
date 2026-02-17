@@ -1148,21 +1148,6 @@
             }
         });
 
-        // Trigger variants update when deleting spec or option
-        $(document).on('click', '[data-repeater-delete]', function () {
-            let item = $(this).closest('[data-repeater-item]');
-
-            // Wait until repeater actually removes it
-            let observer = new MutationObserver(function (mutations, obs) {
-                if (!document.body.contains(item[0])) {
-                    generateVariants();
-                    obs.disconnect();
-                }
-            });
-
-            observer.observe(document.body, { childList: true, subtree: true });
-        });
-
 
     </script>
     {{--    <script>--}}
@@ -1365,9 +1350,14 @@
                             initOptionDropzone(dzElement);
                         }
                         $(this).find('.uploadedImage').val('');
+                        setTimeout(generateVariants, 0);
                     },
                     hide: function (deleteElement) {
-                        $(this).slideUp(deleteElement);
+                        const $row = $(this);
+                        $row.slideUp(200, function () {
+                            deleteElement();
+                            generateVariants();
+                        });
                     }
                 }],
                 show: function () {
@@ -1388,10 +1378,13 @@
                         initOptionDropzone(dzElement);
                     }
                     $(this).find('.uploadedImage').val('');
+                    setTimeout(generateVariants, 0);
                 },
                 hide: function (deleteElement) {
                     const $item = $(this);
-                    $item.slideUp(deleteElement, function () {
+                    $item.slideUp(200, function () {
+                        deleteElement();
+                        generateVariants();
                         const $specList = $item.closest('.outer-repeater').find('[data-repeater-list="specifications"]');
                         const $items = $specList.find('[data-repeater-item]').not(':hidden');
                         // if ($items.length === 0) $specList.addClass('d-none');

@@ -102,7 +102,7 @@ class StoreProductRequest extends BaseRequest
             'specifications.*.specification_options' => ['required_with:specifications', 'array', 'min:1'],
             'specifications.*.specification_options.*.value_en' => 'required_with:specifications|string',
             'specifications.*.specification_options.*.value_ar' => 'required_with:specifications|string',
-            'specifications.*.specification_options.*.price' => ['nullable', 'numeric', 'min:1'],
+            'specifications.*.specification_options.*.price' => ['nullable', 'numeric', 'min:0'],
             'specifications.*.specification_options.*.option_image' => ['nullable', 'exists:media,id'],
             'variants' => ['sometimes', 'array'],
             'variants.*.code' => ['sometimes', 'string'],
