@@ -16,7 +16,7 @@ class UpdateTemplateEditorRequest extends BaseRequest
     /**
      * Determine if the v1 is authorized to make this request.
      */
-    public function authorize(): bool
+        public function authorize(): bool
     {
         return true;
     }

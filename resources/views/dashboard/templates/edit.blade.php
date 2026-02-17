@@ -506,16 +506,16 @@
                                                             <label class="form-check-label"
                                                                    for="shape_circle">Circle</label>
                                                         </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"
-                                                                   name="has_corner"
-                                                                   id="shape_other"
-                                                                   value="1" @checked($model->has_corner == 1)
+{{--                                                        <div class="form-check">--}}
+{{--                                                            <input class="form-check-input" type="checkbox"--}}
+{{--                                                                   name="has_corner"--}}
+{{--                                                                   id="shape_other"--}}
+{{--                                                                   value="1" @checked($model->has_corner == 1)--}}
 
-                                                            >
-                                                            <label class="form-check-label"
-                                                                   for="shape_other">Other</label>
-                                                        </div>
+{{--                                                            >--}}
+{{--                                                            <label class="form-check-label"--}}
+{{--                                                                   for="shape_other">Other</label>--}}
+{{--                                                        </div>--}}
                                                     </div>
                                                 </div>
                                                 <div class="form-group mb-2 d-none" id="cornersBox">

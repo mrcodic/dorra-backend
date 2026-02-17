@@ -73,7 +73,7 @@ class StoreTemplateRequest extends BaseRequest
 //            'colors' => ['sometimes','array'],
 //            'colors.*.value' => ['sometimes','string'],
 //            'colors.*.image_id' => ['sometimes', 'integer', 'exists:media,id'],
-            'has_corner' => ['sometimes', 'in:0,1'],
+//            'has_corner' => ['sometimes', 'in:0,1'],
             'has_safety_area' => ['sometimes', 'in:0,1'],
             'border' => ['sometimes', 'in:' . BorderEnum::getValuesAsString()],
             'safety_area' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
