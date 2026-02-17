@@ -204,6 +204,20 @@ class Category extends Model implements HasMedia
             }
         );
     }
+    protected function productsRating(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+
+                $sumOfAverages = $this->products()
+                    ->withAvg('reviews', 'rating')
+                    ->get()
+                    ->sum(fn ($p) => (float) ($p->reviews_avg_rating ?? 0));
+
+                return (float) $sumOfAverages;
+            }
+        );
+    }
 
     public function reviews(): MorphMany
     {

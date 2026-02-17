@@ -115,6 +115,7 @@ class CategoryResource extends JsonResource
             'show_customize_design_btn' => $this->show_customize_design_btn,
             'type' => 'category',
             'rating' => $this->rating,
+            'products_rating' => $this->products_rating,
             'reviews_count' => $this->when(isset($this->reviews_count), $this->reviews_count),
 
             'colors' => $this->colors,
