@@ -1,23 +1,23 @@
 @extends('layouts/contentLayoutMaster')
 @php
-        $dimensions = \App\Models\Dimension::query()
-        ->where('is_custom', false)
-        ->orWhereHas('categories', function ($q) use ($model) {
-        $q->where('dimensionable_id', $model->id)->where('dimensionable_type', get_class($model));
-        })
-        ->get(['id', 'name']);
+    $dimensions = \App\Models\Dimension::query()
+    ->where('is_custom', false)
+    ->orWhereHas('categories', function ($q) use ($model) {
+    $q->where('dimensionable_id', $model->id)->where('dimensionable_type', get_class($model));
+    })
+    ->get(['id', 'name']);
 
-        $variantsForJs = $model->variants->mapWithKeys(function ($variant) {
-            $media = $variant->media->first();
+    $variantsForJs = $model->variants->mapWithKeys(function ($variant) {
+        $media = $variant->media->first();
 
-            return [
-                $variant->key => [
-                    'id' => $variant->id,
-                    'image' => $media?->id,
-                    'image_url' => $media?->original_url,
-                ]
-            ];
-        });
+        return [
+            $variant->key => [
+                'id' => $variant->id,
+                'image' => $media?->id,
+                'image_url' => $media?->original_url,
+            ]
+        ];
+    });
 @endphp
 @section('title', 'Edit Products')
 @section('main-page', 'Products')
@@ -36,7 +36,9 @@
                 <div class="card">
 
                     <div class="card-body">
-                        <form id="product-form" class="form" action="{{ route('product-without-categories.update',$model->id) }}" method="POST" enctype="multipart/form-data">
+                        <form id="product-form" class="form"
+                              action="{{ route('product-without-categories.update',$model->id) }}" method="POST"
+                              enctype="multipart/form-data">
                             @csrf
                             @method("PUT")
                             <input type="hidden" name="is_has_category" value="0">
@@ -57,8 +59,10 @@
                                     <div class="d-flex flex-column gap-1">
                                         <h5 style="color: #121212">Show “Add to Cart” Button</h5>
                                         <p style="color: #424746">
-                                            When the checkbox is selected, the product can be added directly to the cart without customization.
-                                            If it’s not selected, the product must be customized before being added to cart.
+                                            When the checkbox is selected, the product can be added directly to the cart
+                                            without customization.
+                                            If it’s not selected, the product must be customized before being added to
+                                            cart.
                                         </p>
                                     </div>
                                 </div>
@@ -75,7 +79,8 @@
                                     <div class="d-flex flex-column gap-1">
                                         <h5 style="color: #121212">Show “Customize Design” Button</h5>
                                         <p style="color: #424746">
-                                            When the checkbox is selected, the product can be customized before being added to cart.
+                                            When the checkbox is selected, the product can be customized before being
+                                            added to cart.
                                         </p>
                                     </div>
                                 </div>
@@ -87,10 +92,12 @@
                                         Details</a>
                                 </li>
                                 <li class="nav-item" style="width: 30%;">
-                                    <a class="nav-link" data-step="1" href="#" style="font-size: 14px;">Quantity & Price</a>
+                                    <a class="nav-link" data-step="1" href="#" style="font-size: 14px;">Quantity &
+                                        Price</a>
                                 </li>
                                 <li class="nav-item" style="width: 30%;">
-                                    <a class="nav-link" data-step="2" href="#" style="font-size: 14px;">Product Specs</a>
+                                    <a class="nav-link" data-step="2" href="#" style="font-size: 14px;">Product
+                                        Specs</a>
                                 </li>
                             </ul>
 
@@ -102,45 +109,62 @@
                                         <!-- Product Name EN/AR -->
                                         <div class="col-md-6">
                                             <div class="mb-1">
-                                                <label class="form-label label-text" for="product-name-en">Product Name (EN)</label>
-                                                <input type="text" id="product-name-en" value="{{ $model->getTranslation('name','en') }}" class="form-control" name="name[en]" placeholder="Product Name (EN)"/>
+                                                <label class="form-label label-text" for="product-name-en">Product Name
+                                                    (EN)</label>
+                                                <input type="text" id="product-name-en"
+                                                       value="{{ $model->getTranslation('name','en') }}"
+                                                       class="form-control" name="name[en]"
+                                                       placeholder="Product Name (EN)"/>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-1">
-                                                <label class="form-label label-text" for="product-name-ar">Product Name (AR)</label>
-                                                <input type="text" id="product-name-ar" value="{{ $model->getTranslation('name','ar') }}" class="form-control" name="name[ar]" placeholder="Product Name (AR)"/>
+                                                <label class="form-label label-text" for="product-name-ar">Product Name
+                                                    (AR)</label>
+                                                <input type="text" id="product-name-ar"
+                                                       value="{{ $model->getTranslation('name','ar') }}"
+                                                       class="form-control" name="name[ar]"
+                                                       placeholder="Product Name (AR)"/>
                                             </div>
                                         </div>
 
                                         <!-- Description EN/AR -->
                                         <div class="col-md-6">
                                             <div class="mb-1">
-                                                <label class="form-label label-text" for="description-en">Product Description (EN)</label>
-                                                <textarea name="description[en]" id="description-en" class="form-control" placeholder="Product Description (EN)">{{ $model->getTranslation('description','en') }}</textarea>
+                                                <label class="form-label label-text" for="description-en">Product
+                                                    Description (EN)</label>
+                                                <textarea name="description[en]" id="description-en"
+                                                          class="form-control"
+                                                          placeholder="Product Description (EN)">{{ $model->getTranslation('description','en') }}</textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-1">
-                                                <label class="form-label label-text" for="description-ar">Product Description (AR)</label>
-                                                <textarea name="description[ar]" id="description-ar" class="form-control" placeholder="Product Description (AR)">{{ $model->getTranslation('description','ar') }}</textarea>
+                                                <label class="form-label label-text" for="description-ar">Product
+                                                    Description (AR)</label>
+                                                <textarea name="description[ar]" id="description-ar"
+                                                          class="form-control"
+                                                          placeholder="Product Description (AR)">{{ $model->getTranslation('description','ar') }}</textarea>
                                             </div>
                                         </div>
 
                                         <!-- Main Image Upload -->
                                         <div class="col-md-12">
                                             <div class="mb-2">
-                                                <label class="form-label label-text" for="product-image-main">Product Image (main)</label>
+                                                <label class="form-label label-text" for="product-image-main">Product
+                                                    Image (main)</label>
 
                                                 <!-- Dropzone Container -->
-                                                <div id="product-main-dropzone" class="dropzone border rounded p-3" style="cursor:pointer; min-height:150px;">
+                                                <div id="product-main-dropzone" class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
                                                     <div class="dz-message" data-dz-message>
                                                         <span>Drop image here or click to upload</span>
                                                     </div>
                                                 </div>
 
                                                 <!-- Hidden input: prefilled if editing -->
-                                                <input type="hidden" name="image_id" id="uploadedImage" value="{{ $model->getFirstMedia('categories')?->id ?? '' }}">
+                                                <input type="hidden" name="image_id" id="uploadedImage"
+                                                       value="{{ $model->getFirstMedia('categories')?->id ?? '' }}">
 
                                                 <span class="image-hint small text-end">
                             Max size: 1MB | Dimensions: 512x512 px
@@ -342,17 +366,20 @@
                                         <!-- Multiple Images Upload -->
                                         <div class="col-md-12">
                                             <div class="mb-2">
-                                                <label class="form-label label-text" for="product-images">Product Images</label>
+                                                <label class="form-label label-text" for="product-images">Product
+                                                    Images</label>
 
                                                 <!-- Dropzone container -->
-                                                <div id="multi-dropzone" class="dropzone border rounded p-3" style="cursor:pointer; min-height:150px;">
+                                                <div id="multi-dropzone" class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
                                                     <div class="dz-message" data-dz-message>
                                                         <i data-feather="upload" class="mb-2"></i>
                                                         <p>Drag images here or click to upload</p>
                                                     </div>
                                                 </div>
                                                 <input type="hidden" name="images_ids[]" id="images_ids">
-                                                <div id="multi-uploaded-images" class="mt-3 d-flex flex-wrap gap-2"></div>
+                                                <div id="multi-uploaded-images"
+                                                     class="mt-3 d-flex flex-wrap gap-2"></div>
 
                                                 <span class="image-hint small text-end">
                             Max size: 1MB | Dimensions: 512x512 px
@@ -361,14 +388,14 @@
                                         </div>
 
 
-
                                         <!-- Tags -->
                                         <div class="col-md-12">
                                             <div class="mb-1">
                                                 <label class="form-label label-text" for="tags">Tags</label>
                                                 <select name="tags[]" id="tags" class="select2 form-select" multiple>
                                                     @foreach($associatedData['tags'] as $tag)
-                                                        <option value="{{ $tag->id }}" @if(in_array($tag->id, $model->tags->pluck('id')->toArray())) selected @endif >{{ $tag->name }}</option>
+                                                        <option value="{{ $tag->id }}"
+                                                                @if(in_array($tag->id, $model->tags->pluck('id')->toArray())) selected @endif >{{ $tag->name }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -379,11 +406,19 @@
                                             <div class="mb-1">
                                                 <label class="form-label label-text">Product Size</label>
                                                 <!-- Standard Dimensions -->
-                                                <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2" id="standard-dimensions-container">
+                                                <div
+                                                    class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2"
+                                                    id="standard-dimensions-container">
                                                     @foreach($dimensions as $dimension)
-                                                        <div class="form-check option-box rounded border py-1 d-flex justify-content-center align-items-center" style="width: 100px">
-                                                            <input class="form-check-input me-1" type="checkbox" name="dimensions[]" id="dimension-checkbox-{{ $dimension['id'] }}" value="{{ $dimension['id'] }}" @checked($model->dimensions->contains($dimension->id)) />
-                                                            <label class="form-check-label mb-0" for="dimension-checkbox-{{ $dimension['id'] }}">
+                                                        <div
+                                                            class="form-check option-box rounded border py-1 d-flex justify-content-center align-items-center"
+                                                            style="width: 100px">
+                                                            <input class="form-check-input me-1" type="checkbox"
+                                                                   name="dimensions[]"
+                                                                   id="dimension-checkbox-{{ $dimension['id'] }}"
+                                                                   value="{{ $dimension['id'] }}" @checked($model->dimensions->contains($dimension->id)) />
+                                                            <label class="form-check-label mb-0"
+                                                                   for="dimension-checkbox-{{ $dimension['id'] }}">
                                                                 {{ $dimension['name'] }}
                                                             </label>
                                                         </div>
@@ -395,7 +430,9 @@
                                                     <!-- Custom dimensions from sessionStorage will be injected here -->
                                                 </div>
                                             </div>
-                                            <button type="button" class="upload-card w-100 mt-1" data-bs-toggle="modal" data-bs-target="#addSizeModal">Add Custom Size</button>
+                                            <button type="button" class="upload-card w-100 mt-1" data-bs-toggle="modal"
+                                                    data-bs-target="#addSizeModal">Add Custom Size
+                                            </button>
                                         </div>
                                     </div>
                                     <!-- Has Mockup -->
@@ -422,24 +459,33 @@
                                     <!-- Price Option Toggle -->
                                     <div class="col-md-12">
                                         <div class="mb-1">
-                                            <label class="form-label label-text d-block">Quantity & Price Options</label>
+                                            <label class="form-label label-text d-block">Quantity & Price
+                                                Options</label>
                                             <label class="form-label label-text mt-2">Quantity Type</label>
                                             <div class="row gap-1 d-flex flex-column flex-md-row" style="margin: 2px;">
                                                 <div class="col border rounded-3 p-1">
                                                     <div class="form-check form-check-inline">
-                                                        <input class="form-check-input" type="radio" name="has_custom_prices" id="customPrice" value="1" @checked($model->has_custom_prices == 1)>
+                                                        <input class="form-check-input" type="radio"
+                                                               name="has_custom_prices" id="customPrice"
+                                                               value="1" @checked($model->has_custom_prices == 1)>
                                                         <div>
-                                                            <label class="form-check-label label-text d-block" for="customPrice">Add Quantity Manually</label>
-                                                            <label class="form-check-label text-dark" for="customPrice">Custom Prices</label>
+                                                            <label class="form-check-label label-text d-block"
+                                                                   for="customPrice">Add Quantity Manually</label>
+                                                            <label class="form-check-label text-dark" for="customPrice">Custom
+                                                                Prices</label>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="col border rounded-3 p-1">
                                                     <div class="form-check form-check-inline">
-                                                        <input class="form-check-input " type="radio" name="has_custom_prices" id="defaultPrice" value="0" @checked($model->has_custom_prices == 0)>
+                                                        <input class="form-check-input " type="radio"
+                                                               name="has_custom_prices" id="defaultPrice"
+                                                               value="0" @checked($model->has_custom_prices == 0)>
                                                         <div>
-                                                            <label class="form-check-label label-text d-block" for="customPrice">Default Quantity</label>
-                                                            <label class="form-check-label text-dark" for="defaultPrice">Default Price</label>
+                                                            <label class="form-check-label label-text d-block"
+                                                                   for="customPrice">Default Quantity</label>
+                                                            <label class="form-check-label text-dark"
+                                                                   for="defaultPrice">Default Price</label>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -448,7 +494,8 @@
                                     </div>
 
                                     <!-- Custom Prices -->
-                                    <div class="col-md-12" id="custom-price-section" style="{{  $model->has_custom_prices == 1 ? '': 'display: none;' }}">
+                                    <div class="col-md-12" id="custom-price-section"
+                                         style="{{  $model->has_custom_prices == 1 ? '': 'display: none;' }}">
                                         <div class="card">
                                             <div class="card-body">
                                                 <div class="invoice-repeater">
@@ -459,18 +506,28 @@
                                                                     <div class="col-md-4">
                                                                         <div class="mb-1">
                                                                             <label class="form-label label-text">Quantity</label>
-                                                                            <input type="number" name="quantity" value="{{ $price->quantity }}" class="form-control" placeholder="Add Quantity"/>
+                                                                            <input type="number" name="quantity"
+                                                                                   value="{{ $price->quantity }}"
+                                                                                   class="form-control"
+                                                                                   placeholder="Add Quantity"/>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-4">
                                                                         <div class="mb-1">
-                                                                            <label class="form-label label-text">Price (EGP)</label>
-                                                                            <input type="text" name="price" value="{{ $price->price }}" class="form-control" placeholder="Add Price"/>
+                                                                            <label class="form-label label-text">Price
+                                                                                (EGP)</label>
+                                                                            <input type="text" name="price"
+                                                                                   value="{{ $price->price }}"
+                                                                                   class="form-control"
+                                                                                   placeholder="Add Price"/>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-4">
                                                                         <div class="mb-1">
-                                                                            <button type="button" class="btn btn-outline-danger text-nowrap px-1" style="display: none" data-repeater-delete>
+                                                                            <button type="button"
+                                                                                    class="btn btn-outline-danger text-nowrap px-1"
+                                                                                    style="display: none"
+                                                                                    data-repeater-delete>
                                                                                 <i data-feather="x" class="me-25"></i>
                                                                                 <span>Delete</span>
                                                                             </button>
@@ -484,18 +541,26 @@
                                                                     <div class="col-md-4">
                                                                         <div class="mb-1">
                                                                             <label class="form-label label-text">Quantity</label>
-                                                                            <input type="number" name="quantity" class="form-control" placeholder="Add Quantity"/>
+                                                                            <input type="number" name="quantity"
+                                                                                   class="form-control"
+                                                                                   placeholder="Add Quantity"/>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-4">
                                                                         <div class="mb-1">
-                                                                            <label class="form-label label-text">Price (EGP)</label>
-                                                                            <input type="text" name="price" class="form-control" placeholder="Add Price"/>
+                                                                            <label class="form-label label-text">Price
+                                                                                (EGP)</label>
+                                                                            <input type="text" name="price"
+                                                                                   class="form-control"
+                                                                                   placeholder="Add Price"/>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-4">
                                                                         <div class="mb-1">
-                                                                            <button type="button" class="btn btn-outline-danger text-nowrap px-1" style="display: none" data-repeater-delete>
+                                                                            <button type="button"
+                                                                                    class="btn btn-outline-danger text-nowrap px-1"
+                                                                                    style="display: none"
+                                                                                    data-repeater-delete>
                                                                                 <i data-feather="x" class="me-25"></i>
                                                                                 <span>Delete</span>
                                                                             </button>
@@ -507,7 +572,10 @@
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-12">
-                                                            <button type="button" class="w-100  rounded-3 p-1 bg-white text-dark" style="border:2px dashed #CED5D4;" data-repeater-create>
+                                                            <button type="button"
+                                                                    class="w-100  rounded-3 p-1 bg-white text-dark"
+                                                                    style="border:2px dashed #CED5D4;"
+                                                                    data-repeater-create>
                                                                 <i data-feather="plus" class="me-25"></i> <span>Add New Quantity</span>
                                                             </button>
                                                         </div>
@@ -518,10 +586,14 @@
                                     </div>
 
                                     <!-- Default Price -->
-                                    <div class="col-md-12" id="default-price-section" style="{{ $model->has_custom_prices == 0 ? '' : 'display:none;' }}">
+                                    <div class="col-md-12" id="default-price-section"
+                                         style="{{ $model->has_custom_prices == 0 ? '' : 'display:none;' }}">
                                         <div class="mb-1">
-                                            <label class="form-label label-text" for="base_price">Original Price (EGP) (Per Item)</label>
-                                            <input type="text" id="base_price" name="base_price" value="{{ $model->base_price }}" class="form-control" placeholder="Original Price"/>
+                                            <label class="form-label label-text" for="base_price">Original Price (EGP)
+                                                (Per Item)</label>
+                                            <input type="text" id="base_price" name="base_price"
+                                                   value="{{ $model->base_price }}" class="form-control"
+                                                   placeholder="Original Price"/>
                                         </div>
                                     </div>
                                     <div class="d-flex justify-content-end gap-2">
@@ -536,64 +608,376 @@
                                     <!-- Specifications -->
                                     <div class="col-12">
                                         <div class="mb-1">
-                                            <label class="form-label label-text">Product Specs</label>
                                             <div>
                                                 @php
                                                     $hasSpecs = $model->specifications->isNotEmpty();
                                                 @endphp
-                                                    <!-- Outer Repeater for Specifications -->
+                                                <div class="col-12">
+                                                    <div class="mb-2">
+                                                        <label class="form-label label-text">Product Specs</label>
+                                                        <div class="d-flex align-items-center gap-2 my-1">
+                                                            <button type="button" id="btnAddCuttingSpecs"
+                                                                    class="btn btn-outline-primary  px-3 py-2">
+                                                                Add Cutting Specs
+                                                            </button>
+                                                        </div>
+
+                                                        @php
+                                                            use App\Enums\Product\CuttingEnum;
+                                                     $selectedCutting = [];
+
+
+                                            $cuttingSpec = $model->specifications()
+                                                ->where('name->en', 'Cutting')
+                                                ->orWhere('name->ar', 'القص')
+                                                ->with('options')
+                                                ->first();
+
+                                            if ($cuttingSpec) {
+
+                                                foreach ($cuttingSpec->options as $opt) {
+                                                    $en = data_get($opt->value, 'en');
+                                                    $ar = data_get($opt->value, 'ar');
+
+                                                    foreach (CuttingEnum::cases() as $case) {
+                                                        $labels = $case->labelLocales();
+                                                        if ($en === $labels['en'] || $ar === $labels['ar']) {
+                                                            $selectedCutting[] = $case->value; 
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                    $selectedCutting = array_values(array_unique($selectedCutting));
+                                                        @endphp
+
+                                                        <div id="cuttingSpecsBox"
+                                                             class="mt-2 {{ count($selectedCutting) ? '' : 'd-none' }}">
+                                                            <label class="form-label label-text">Choose Cutting
+                                                                Specs</label>
+
+                                                            <select id="cuttingSpecsSelect"
+                                                                    class="form-control"
+                                                                    name="fixed_specs[]"
+                                                                    multiple="multiple"
+                                                                    style="width:100%">
+
+                                                                @foreach(CuttingEnum::cases() as $cutting)
+                                                                    <option value="{{ $cutting->value }}"
+                                                                            data-name-en="{{ $cutting->label('en') }}"
+                                                                            data-name-ar="{{ $cutting->label('ar') }}"
+                                                                            data-image="{{ $cutting->imageUrl() }}"
+                                                                        @selected(in_array($cutting->value, $selectedCutting, true))
+                                                                    >
+                                                                        {{ $cutting->label(app()->getLocale()) }}
+                                                                    </option>
+                                                                @endforeach
+
+                                                            </select>
+
+                                                            <div class="form-text">
+                                                                Select one or more specs. They will be added
+                                                                automatically below.
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="">
+                                                            <div>
+                                                                <!-- Outer Repeater for Specifications -->
+                                                                <div class="outer-repeater">
+                                                                    <div data-repeater-list="specifications">
+                                                                        <div data-repeater-item>
+                                                                            <!-- Specification Fields -->
+                                                                            <div class="row mt-1">
+                                                                                <div class="col-md-6">
+                                                                                    <div class="mb-1">
+                                                                                        <label
+                                                                                            class="form-label label-text">Name
+                                                                                            (EN) <span
+                                                                                                style="color: red; font-size: 20px;">*</span></label>
+                                                                                        <input type="text"
+                                                                                               name="name_en"
+                                                                                               class="form-control spec-name-en"
+                                                                                               placeholder="Specification Name (EN)"/>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <div class="mb-2">
+                                                                                        <label
+                                                                                            class="form-label label-text">Name
+                                                                                            (AR) <span
+                                                                                                style="color: red; font-size: 20px;">*</span></label>
+                                                                                        <input type="text"
+                                                                                               name="name_ar"
+                                                                                               class="form-control"
+                                                                                               placeholder="Specification Name (AR)"/>
+                                                                                    </div>
+                                                                                </div>
+
+                                                                                <!-- Inner Repeater for Specification Options -->
+                                                                                <div class="inner-repeater">
+                                                                                    <div
+                                                                                        data-repeater-list="specification_options">
+                                                                                        <div data-repeater-item>
+                                                                                            <div
+                                                                                                class="row d-flex flex-column flex-md-row gap-1 gap-md-0 mt-2">
+                                                                                                <!-- Option Name (EN) -->
+                                                                                                <div class="col">
+                                                                                                    <label
+                                                                                                        class="form-label label-text">Value
+                                                                                                        (EN) <span
+                                                                                                            style="color: red; font-size: 20px;">*</span></label>
+                                                                                                    <input type="text"
+                                                                                                           name="value_en"
+                                                                                                           class="form-control option-value-en"
+                                                                                                           placeholder="Option (EN)"/>
+                                                                                                </div>
+
+                                                                                                <!-- Option Name (AR) -->
+                                                                                                <div class="col">
+                                                                                                    <label
+                                                                                                        class="form-label label-text">Value
+                                                                                                        (AR) <span
+                                                                                                            style="color: red; font-size: 20px;">*</span></label>
+                                                                                                    <input type="text"
+                                                                                                           name="value_ar"
+                                                                                                           class="form-control"
+                                                                                                           placeholder="Option (AR)"/>
+                                                                                                </div>
+
+                                                                                                <!-- Option Price -->
+                                                                                                <div class="col">
+                                                                                                    <label
+                                                                                                        class="form-label label-text">Price
+                                                                                                        (EGP)
+                                                                                                        (Optional)</label>
+                                                                                                    <input type="text"
+                                                                                                           name="price"
+                                                                                                           class="form-control"
+                                                                                                           placeholder="Price"/>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div
+                                                                                                class="row d-flex align-items-end mt-2">
+                                                                                                <div class="col-md-12">
+                                                                                                    <label
+                                                                                                        class="form-label label-text">Option
+                                                                                                        Image</label>
+
+                                                                                                    <!-- Dropzone container -->
+                                                                                                    <div
+                                                                                                        class="dropzone option-dropzone border rounded p-3"
+                                                                                                        style="cursor:pointer; min-height:120px;">
+                                                                                                        <div
+                                                                                                            class="dz-message"
+                                                                                                            data-dz-message>
+                                                                                            <span>Drop image here or
+                                                                                                click to upload</span>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    <span
+                                                                                                        class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 200x200 px
+                                            </span>
+
+                                                                                                    <!-- Hidden input to store uploaded file id / path -->
+                                                                                                    <input type="hidden"
+                                                                                                           name="option_image"
+                                                                                                           class="option-image-hidden">
+                                                                                                </div>
+                                                                                                <!-- ❌ Delete Option Button -->
+                                                                                                <div class="row mt-2">
+                                                                                                    <div
+                                                                                                        class="col-12 text-end">
+                                                                                                        <button
+                                                                                                            type="button"
+                                                                                                            class="btn btn-outline-danger"
+                                                                                                            data-repeater-delete>
+                                                                                                            <i data-feather="x"
+                                                                                                               class="me-25"></i>
+                                                                                                            Delete Value
+                                                                                                        </button>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <!-- Add Option Button -->
+                                                                                    <div class="row">
+                                                                                        <div class="col-12">
+                                                                                            <button type="button"
+                                                                                                    class="btn primary-text-color bg-white mt-2"
+                                                                                                    data-repeater-create>
+                                                                                                <i data-feather="plus"></i>
+                                                                                                <span> Add
+                                                                                    New
+                                                                                    Value</span>
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <!-- End of Inner Repeater -->
+
+                                                                                <!-- Delete Specification Button -->
+                                                                                <div class="col-12 text-end mt-1 mb-2">
+                                                                                    <button type="button"
+                                                                                            class="btn btn-outline-danger"
+                                                                                            data-repeater-delete>
+                                                                                        <i data-feather="x"
+                                                                                           class="me-25"></i>
+                                                                                        Delete
+                                                                                        Spec
+                                                                                    </button>
+                                                                                </div>
+
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Add New Specification Button -->
+                                                                    <div class="row">
+                                                                        <div class="col-12">
+                                                                            <button type="button"
+                                                                                    class="w-100 rounded-3 p-1 text-dark"
+                                                                                    style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
+                                                                                    data-repeater-create>
+                                                                                <i data-feather="plus"
+                                                                                   class="me-25"></i> <span>Add Custom
+                                                                    Spec</span>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <label
+                                                                    class="form-label label-text mt-2">Variants</label>
+
+                                                                <div id="variants-container" class="mt-2"></div>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Free Shipping -->
+                                                    {{-- <div class="col-md-12 col-12 mb-2">--}}
+                                                    {{-- <div class="form-check form-switch">--}}
+                                                    {{-- <input type="hidden" name="is_free_shipping" value="0">--}}
+                                                    {{-- <input type="checkbox" class="form-check-input" id="free-shipping"
+                                                        name="is_free_shipping" value="1">--}}
+                                                    {{-- <label class="form-check-label" for="free-shipping">Product available
+                                                        for
+                                                        free shipping</label>--}}
+                                                    {{-- </div>--}}
+                                                    {{-- </div>--}}
+                                                    {{--
+                                                </div>--}}
+
+                                                    <!-- Submit -->
+                                                    <div class="col-12 d-flex justify-content-end gap-1">
+                                                        <button type="button" class="btn btn-secondary prev-tab">
+                                                            Previous
+                                                        </button>
+                                                        <button type="submit"
+                                                                class="btn btn-primary me-1 saveChangesButton"
+                                                                id="SaveChangesButton">
+                                                            <span class="btn-text">Add Product</span>
+                                                            <span id="saveLoader"
+                                                                  class="spinner-border spinner-border-sm d-none saveLoader"
+                                                                  role="status" aria-hidden="true"></span>
+                                                        </button>
+
+                                                    </div>
+                                                </div>
+
+                                                <!-- Outer Repeater for Specifications -->
                                                 <div class="outer-repeater">
-                                                    <div class="{{ $hasSpecs ? '' :'d-none' }}" data-repeater-list="specifications">
+                                                    <div class="{{ $hasSpecs ? '' :'d-none' }}"
+                                                         data-repeater-list="specifications">
                                                         @forelse($model->specifications as $specification)
                                                             <div data-repeater-item>
-                                                                <input type="hidden" name="id" value="{{ $specification->id }}">
+                                                                <input type="hidden" name="id"
+                                                                       value="{{ $specification->id }}">
 
                                                                 <!-- Specification Fields -->
                                                                 <div class="row mt-1">
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
-                                                                            <label class="form-label label-text">Name (EN)</label>
-                                                                            <input type="text" name="name_en" value="{{ $specification->getTranslation('name','en') }}" class="form-control spec-name-en" placeholder="Specification Name (EN)"/>
+                                                                            <label class="form-label label-text">Name
+                                                                                (EN)</label>
+                                                                            <input type="text" name="name_en"
+                                                                                   value="{{ $specification->getTranslation('name','en') }}"
+                                                                                   class="form-control spec-name-en"
+                                                                                   placeholder="Specification Name (EN)"/>
                                                                         </div>
                                                                     </div>
 
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
-                                                                            <label class="form-label label-text">Name (AR)</label>
-                                                                            <input type="text" name="name_ar" value="{{ $specification->getTranslation('name','ar') }}" class="form-control" placeholder="Specification Name (AR)"/>
+                                                                            <label class="form-label label-text">Name
+                                                                                (AR)</label>
+                                                                            <input type="text" name="name_ar"
+                                                                                   value="{{ $specification->getTranslation('name','ar') }}"
+                                                                                   class="form-control"
+                                                                                   placeholder="Specification Name (AR)"/>
                                                                         </div>
                                                                     </div>
                                                                     <!-- Inner Repeater for Specification Options -->
-                                                                    <div class="inner-repeater" data-init-empty="{{ $specification->options->isEmpty() ? 'true' : 'false' }}">
+                                                                    <div class="inner-repeater"
+                                                                         data-init-empty="{{ $specification->options->isEmpty() ? 'true' : 'false' }}">
                                                                         <div data-repeater-list="specification_options">
                                                                             @foreach($specification->options as $option)
                                                                                 <div data-repeater-item>
-                                                                                    <input type="hidden" name="id" value="{{ $option->id }}">
+                                                                                    <input type="hidden" name="id"
+                                                                                           value="{{ $option->id }}">
 
-                                                                                    <div class="row d-flex flex-column flex-md-row gap-1 gap-md-0 mt-2">
+                                                                                    <div
+                                                                                        class="row d-flex flex-column flex-md-row gap-1 gap-md-0 mt-2">
                                                                                         <!-- Option Name (EN) -->
                                                                                         <div class="col">
-                                                                                            <label class="form-label label-text">Value (EN)</label>
-                                                                                            <input type="text" name="value_en" value="{{ $option->getTranslation('value','en') }}" class="form-control option-value-en" placeholder="Option (EN)"/>
+                                                                                            <label
+                                                                                                class="form-label label-text">Value
+                                                                                                (EN)</label>
+                                                                                            <input type="text"
+                                                                                                   name="value_en"
+                                                                                                   value="{{ $option->getTranslation('value','en') }}"
+                                                                                                   class="form-control option-value-en"
+                                                                                                   placeholder="Option (EN)"/>
                                                                                         </div>
 
                                                                                         <!-- Option Name (AR) -->
                                                                                         <div class="col">
-                                                                                            <label class="form-label label-text">Value (AR)</label>
-                                                                                            <input type="text" name="value_ar" value="{{ $option->getTranslation('value','ar') }}" class="form-control" placeholder="Option (AR)"/>
+                                                                                            <label
+                                                                                                class="form-label label-text">Value
+                                                                                                (AR)</label>
+                                                                                            <input type="text"
+                                                                                                   name="value_ar"
+                                                                                                   value="{{ $option->getTranslation('value','ar') }}"
+                                                                                                   class="form-control"
+                                                                                                   placeholder="Option (AR)"/>
                                                                                         </div>
 
                                                                                         <!-- Option Price -->
                                                                                         <div class="col">
-                                                                                            <label class="form-label label-text">Price (EGP) (Optional)</label>
-                                                                                            <input type="text" value="{{ $option->price }}" name="price" class="form-control" placeholder="Price"/>
+                                                                                            <label
+                                                                                                class="form-label label-text">Price
+                                                                                                (EGP) (Optional)</label>
+                                                                                            <input type="text"
+                                                                                                   value="{{ $option->price }}"
+                                                                                                   name="price"
+                                                                                                   class="form-control"
+                                                                                                   placeholder="Price"/>
                                                                                         </div>
                                                                                     </div>
-                                                                                    <div class="row d-flex align-items-end mt-2">
+                                                                                    <div
+                                                                                        class="row d-flex align-items-end mt-2">
                                                                                         <!-- Option Image -->
                                                                                         <div class="col-md-12">
-                                                                                            <label class="form-label label-text">Option Image</label>
-                                                                                            <div class="dropzone option-dropzone" data-existing-media='{{ json_encode($option->image ? [
+                                                                                            <label
+                                                                                                class="form-label label-text">Option
+                                                                                                Image</label>
+                                                                                            <div
+                                                                                                class="dropzone option-dropzone"
+                                                                                                data-existing-media='{{ json_encode($option->image ? [
                                                                         "id" => $option->image->id,
                                                                         "file_name" => $option->image->file_name,
                                                                         "size" => $option->image->size,
@@ -601,16 +985,23 @@
                                                                     ] : null) }}'>
                                                                                             </div>
 
-                                                                                            <input type="hidden" name="option_image" class="uploadedImage" value="{{ $option->image?->id }}">
+                                                                                            <input type="hidden"
+                                                                                                   name="option_image"
+                                                                                                   class="uploadedImage"
+                                                                                                   value="{{ $option->image?->id }}">
                                                                                         </div>
                                                                                         <span
                                                                                             class="image-hint small text-end">
                                                 Max size: 1MB | Dimensions: 200x200 px
                                             </span>
 
-                                                                                        <div class="col-12 text-end mt-1 mb-2">
-                                                                                            <button type="button" class="btn btn-outline-danger" data-repeater-delete>
-                                                                                                <i data-feather="x" class="me-25"></i>
+                                                                                        <div
+                                                                                            class="col-12 text-end mt-1 mb-2">
+                                                                                            <button type="button"
+                                                                                                    class="btn btn-outline-danger"
+                                                                                                    data-repeater-delete>
+                                                                                                <i data-feather="x"
+                                                                                                   class="me-25"></i>
                                                                                                 Delete Value
                                                                                             </button>
                                                                                         </div>
@@ -622,7 +1013,9 @@
                                                                         <!-- Add Option Button -->
                                                                         <div class="row">
                                                                             <div class="col-12">
-                                                                                <button type="button" class="btn primary-text-color bg-white mt-2" data-repeater-create>
+                                                                                <button type="button"
+                                                                                        class="btn primary-text-color bg-white mt-2"
+                                                                                        data-repeater-create>
                                                                                     <i data-feather="plus"></i>
                                                                                     <span> Add New Value</span>
                                                                                 </button>
@@ -633,7 +1026,9 @@
 
                                                                     <!-- Delete Specification Button -->
                                                                     <div class="col-12 text-end mt-1 mb-2">
-                                                                        <button type="button" class="btn btn-outline-danger" data-repeater-delete>
+                                                                        <button type="button"
+                                                                                class="btn btn-outline-danger"
+                                                                                data-repeater-delete>
                                                                             <i data-feather="x" class="me-25"></i>
                                                                             Delete Spec
                                                                         </button>
@@ -645,15 +1040,21 @@
                                                                 <div class="row mt-1">
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
-                                                                            <label class="form-label label-text">Name (EN)</label>
-                                                                            <input type="text" name="name_en" class="form-control spec-name-en" placeholder="Specification Name (EN)"/>
+                                                                            <label class="form-label label-text">Name
+                                                                                (EN)</label>
+                                                                            <input type="text" name="name_en"
+                                                                                   class="form-control spec-name-en"
+                                                                                   placeholder="Specification Name (EN)"/>
                                                                         </div>
                                                                     </div>
 
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
-                                                                            <label class="form-label label-text">Name (AR)</label>
-                                                                            <input type="text" name="name_ar" class="form-control" placeholder="Specification Name (AR)"/>
+                                                                            <label class="form-label label-text">Name
+                                                                                (AR)</label>
+                                                                            <input type="text" name="name_ar"
+                                                                                   class="form-control"
+                                                                                   placeholder="Specification Name (AR)"/>
                                                                         </div>
                                                                     </div>
 
@@ -661,28 +1062,49 @@
                                                                     <div class="inner-repeater">
                                                                         <div data-repeater-list="specification_options">
                                                                             <div data-repeater-item>
-                                                                                <div class="row d-flex align-items-end mt-2">
+                                                                                <div
+                                                                                    class="row d-flex align-items-end mt-2">
                                                                                     <div class="col">
-                                                                                        <label class="form-label label-text">Value (EN)</label>
-                                                                                        <input type="text" name="value_en" class="form-control option-value-en" placeholder="Option (EN)"/>
+                                                                                        <label
+                                                                                            class="form-label label-text">Value
+                                                                                            (EN)</label>
+                                                                                        <input type="text"
+                                                                                               name="value_en"
+                                                                                               class="form-control option-value-en"
+                                                                                               placeholder="Option (EN)"/>
                                                                                     </div>
 
                                                                                     <div class="col">
-                                                                                        <label class="form-label label-text">Value (AR)</label>
-                                                                                        <input type="text" name="value_ar" class="form-control" placeholder="Option (AR)"/>
+                                                                                        <label
+                                                                                            class="form-label label-text">Value
+                                                                                            (AR)</label>
+                                                                                        <input type="text"
+                                                                                               name="value_ar"
+                                                                                               class="form-control"
+                                                                                               placeholder="Option (AR)"/>
                                                                                     </div>
 
                                                                                     <div class="col">
-                                                                                        <label class="form-label label-text">Price (EGP) (Optional)</label>
-                                                                                        <input type="text" name="price" class="form-control" placeholder="Price"/>
+                                                                                        <label
+                                                                                            class="form-label label-text">Price
+                                                                                            (EGP) (Optional)</label>
+                                                                                        <input type="text" name="price"
+                                                                                               class="form-control"
+                                                                                               placeholder="Price"/>
                                                                                     </div>
                                                                                 </div>
 
-                                                                                <div class="row d-flex align-items-end mt-2">
+                                                                                <div
+                                                                                    class="row d-flex align-items-end mt-2">
                                                                                     <div class="col-md-12">
-                                                                                        <label class="form-label label-text">Option Image</label>
-                                                                                        <div class="dropzone option-dropzone"></div>
-                                                                                        <input type="hidden" name="option_image" class="uploadedImage">
+                                                                                        <label
+                                                                                            class="form-label label-text">Option
+                                                                                            Image</label>
+                                                                                        <div
+                                                                                            class="dropzone option-dropzone"></div>
+                                                                                        <input type="hidden"
+                                                                                               name="option_image"
+                                                                                               class="uploadedImage">
                                                                                     </div>
                                                                                 </div>
                                                                                 <span
@@ -691,8 +1113,11 @@
                                             </span>
                                                                                 <!-- ✅ Delete Value Button -->
                                                                                 <div class="col-12 text-end mt-1 mb-2">
-                                                                                    <button type="button" class="btn btn-outline-danger" data-repeater-delete>
-                                                                                        <i data-feather="x" class="me-25"></i>
+                                                                                    <button type="button"
+                                                                                            class="btn btn-outline-danger"
+                                                                                            data-repeater-delete>
+                                                                                        <i data-feather="x"
+                                                                                           class="me-25"></i>
                                                                                         Delete Value
                                                                                     </button>
                                                                                 </div>
@@ -703,7 +1128,9 @@
                                                                         <!-- Add Option Button -->
                                                                         <div class="row">
                                                                             <div class="col-12">
-                                                                                <button type="button" class="btn primary-text-color bg-white mt-2" data-repeater-create>
+                                                                                <button type="button"
+                                                                                        class="btn primary-text-color bg-white mt-2"
+                                                                                        data-repeater-create>
                                                                                     <i data-feather="plus"></i>
                                                                                     <span>Add New Value</span>
                                                                                 </button>
@@ -712,7 +1139,9 @@
                                                                     </div>
 
                                                                     <div class="col-12 text-end mt-1 mb-2">
-                                                                        <button type="button" class="btn btn-outline-danger" data-repeater-delete>
+                                                                        <button type="button"
+                                                                                class="btn btn-outline-danger"
+                                                                                data-repeater-delete>
                                                                             <i data-feather="x" class="me-25"></i>
                                                                             Delete Spec
                                                                         </button>
@@ -725,7 +1154,9 @@
                                                     <!-- Add New Specification Button -->
                                                     <div class="row">
                                                         <div class="col-12">
-                                                            <button type="button" class="w-100 rounded-3 p-1 text-dark" style="border: 2px dashed #CED5D4; background-color: #EBEFEF" data-repeater-create>
+                                                            <button type="button" class="w-100 rounded-3 p-1 text-dark"
+                                                                    style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
+                                                                    data-repeater-create>
                                                                 <i data-feather="plus" class="me-25"></i> <span>Add New Spec</span>
                                                             </button>
                                                         </div>
@@ -741,9 +1172,12 @@
                                     <!-- Submit -->
                                     <div class="col-12 d-flex justify-content-end gap-1">
                                         <button type="button" class="btn btn-secondary prev-tab">Back</button>
-                                        <button type="submit" class="btn btn-primary me-1 saveChangesButton" id="SaveChangesButton">
+                                        <button type="submit" class="btn btn-primary me-1 saveChangesButton"
+                                                id="SaveChangesButton">
                                             <span class="btn-text">Edit Product</span>
-                                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status" aria-hidden="true"></span>
+                                            <span id="saveLoader"
+                                                  class="spinner-border spinner-border-sm d-none saveLoader"
+                                                  role="status" aria-hidden="true"></span>
                                         </button>
                                     </div>
                                 </div>
@@ -767,6 +1201,27 @@
 @endsection
 
 @section('page-script')
+    <script !src="">
+        // ----- Select2 UI -----
+        $(document).ready(function () {
+
+            // Toggle select box
+            $('#btnAddCuttingSpecs').on('click', function () {
+                $('#cuttingSpecsBox').toggleClass('d-none');
+
+                // init select2 once when shown first time
+                if (!$('#cuttingSpecsSelect').data('select2')) {
+                    $('#cuttingSpecsSelect').select2({
+                        placeholder: 'Select cutting specs...',
+                        closeOnSelect: false,
+                        width: '100'
+                    });
+                }
+            });
+
+
+        });
+    </script>
     <script>
         window.existingVariantsFromDB = @json($variantsForJs);
     </script>
@@ -932,7 +1387,7 @@
                     let imageId = existingImages[code].image;
                     let imageUrl = existingImages[code].image_url;
 
-                    let mockFile = { name: "Image", size: 12345 };
+                    let mockFile = {name: "Image", size: 12345};
 
                     dz.emit("addedfile", mockFile);
                     dz.emit("thumbnail", mockFile, imageUrl);

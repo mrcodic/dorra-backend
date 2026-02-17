@@ -3,6 +3,7 @@
 namespace App\Services;
 
 
+use App\Enums\Product\CuttingEnum;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\DimensionRepositoryInterface;
 use App\Repositories\Interfaces\VariantRepositoryInterface;
@@ -138,8 +139,34 @@ class CategoryService extends BaseService
                     $product->dimensions()->syncWithoutDetaching($dimension->id);
                 });
             }
-
             $product->prices()->createMany($validatedData['prices'] ?? []);
+            if (!empty($validatedData['fixed_specs'])) {
+
+                $spec = $product->specifications()->create([
+                    'name' => [
+                        'en' => 'Cutting',
+                        'ar' => 'القص',
+                    ],
+                ]);
+
+                collect($validatedData['fixed_specs'])
+                    ->map(fn($v) => CuttingEnum::tryFrom((int)$v))
+                    ->filter()
+                    ->each(function (CuttingEnum $cutting) use ($spec) {
+
+                        $labels = $cutting->labelLocales();
+
+                        $spec->options()->create([
+                            'value' => [
+                                'en' => $labels['en'],
+                                'ar' => $labels['ar'],
+                            ],
+                             'code' => $cutting->value,
+                             'type' => 'fixed',
+                             'price' => 0,
+                        ]);
+                    });
+            }
             if (isset($validatedData['specifications'])) {
                 collect($validatedData['specifications'])->map(function ($specification) use ($product) {
                     $productSpecification = $product->specifications()->create([

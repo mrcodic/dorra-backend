@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Category;
 
+use App\Enums\Product\CuttingEnum;
 use App\Http\Requests\Base\BaseRequest;
 
 class UpdateProductWithoutCategoryRequest extends BaseRequest
@@ -87,6 +88,8 @@ class UpdateProductWithoutCategoryRequest extends BaseRequest
                 'integer',
                 'min:1',
             ],
+            'fixed_specs' => ['sometimes', 'array'],
+            'fixed_specs.*' => ['sometimes', 'in:'.CuttingEnum::getValuesAsString()],
             'specifications' => ['sometimes', 'array'],
             'specifications.*.name_en' => 'sometimes|string',
             'specifications.*.name_ar' => 'sometimes|string',

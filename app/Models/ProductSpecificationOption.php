@@ -15,6 +15,8 @@ class ProductSpecificationOption extends Model implements HasMedia
     protected $fillable = [
         'product_specification_id',
         'value',
+        'type',
+        'code',
         'price',
     ];
 

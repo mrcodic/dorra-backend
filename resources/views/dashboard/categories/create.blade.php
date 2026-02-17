@@ -509,13 +509,14 @@
 
                                             <div id="cuttingSpecsBox" class="mt-2 d-none">
                                                 <label class="form-label label-text">Choose Cutting Specs</label>
-
-                                                <select id="cuttingSpecsSelect" class="form-control" multiple="multiple" style="width:100%">
-                                                    {{-- Example options (better: build from DB) --}}
-                                                    <option value="width"  data-name-en="Width"  data-name-ar="العرض">Width</option>
-                                                    <option value="height" data-name-en="Height" data-name-ar="الطول">Height</option>
-                                                    <option value="bleed"  data-name-en="Bleed"  data-name-ar="النزف">Bleed</option>
-                                                    <option value="paper"  data-name-en="Paper Type" data-name-ar="نوع الورق">Paper Type</option>
+                                                @php use App\Enums\Product\CuttingEnum; @endphp
+                                                <select id="cuttingSpecsSelect" class="form-control" name="fixed_specs[]" multiple="multiple" style="width:100%">
+                                                    @foreach(CuttingEnum::cases() as $cutting)
+                                                    <option value="{{$cutting->value }}"  data-name-en="{{$cutting->label('en') }}"
+                                                            data-name-ar="{{$cutting->label('en') }}">
+                                                        {{$cutting->label('en') }}
+                                                    </option>
+                                                    @endforeach
                                                 </select>
 
                                                 <div class="form-text">

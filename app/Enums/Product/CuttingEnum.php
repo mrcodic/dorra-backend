@@ -11,17 +11,13 @@ enum CuttingEnum: int
     case SHARP   = 1;
     case ROUNDED = 2;
 
-    public function translationKey(): string
-    {
-        return match ($this) {
-            self::SHARP   => 'products.cutting.sharp',
-            self::ROUNDED => 'products.cutting.rounded',
-        };
-    }
 
-    public function label(): string
+
+    public function label(?string $locale = null): string
     {
-        return __($this->translationKey());
+        $locale = $locale ?: app()->getLocale();
+        $labels = $this->labelLocales();
+        return $labels[$locale] ?? $labels['en'] ?? $this->name;
     }
 
 

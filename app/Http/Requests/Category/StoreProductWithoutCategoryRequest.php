@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Category;
 
+use App\Enums\Product\CuttingEnum;
 use App\Http\Requests\Base\BaseRequest;
 
 class StoreProductWithoutCategoryRequest extends BaseRequest
@@ -88,6 +89,8 @@ class StoreProductWithoutCategoryRequest extends BaseRequest
                 'min:1',
             ],
             'specifications' => ['sometimes', 'array'],
+            'fixed_specs' => ['sometimes', 'array'],
+            'fixed_specs.*' => ['sometimes', 'in:'.CuttingEnum::getValuesAsString()],
             'specifications.*.name_en' => 'sometimes|string',
             'specifications.*.name_ar' => 'sometimes|string',
             'specifications.*.specification_options' => ['required_with:specifications', 'array', 'min:1'],
