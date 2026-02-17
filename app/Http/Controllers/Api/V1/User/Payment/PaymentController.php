@@ -45,8 +45,9 @@ class PaymentController extends Controller
                 2
             );
             $isDownload = $cart->items->every(fn($item) => $item->type == \App\Enums\Item\TypeEnum::DOWNLOAD);
+            dd($isDownload);
             $total = round(getTotalPrice($cart->discountCode ?? 0, $subAfter, $cart->delivery_amount, $isDownload), 2);
-            return $total < 250 && $request->type !== 'credits'?
+            return $total < 250 && $request->type !== 'credits' && !$isDownload ?
                 $this->paymentMethodRepository
                     ->query()
                     ->with('paymentGateway')
