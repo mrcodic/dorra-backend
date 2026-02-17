@@ -38,16 +38,16 @@ class PaymentController extends Controller
 
     public function paymentMethods(Request $request)
     {
-        $methods = Cache::rememberForever('payment_methods', function ()  use ($request){
+
             $cart = $this->cartService->resolveUserCart();
             $subAfter = round(
                 $cart->items->sum(fn($item) => $item->sub_total_after_offer ?? $item->sub_total),
                 2
             );
             $isDownload = $cart->items->every(fn($item) => $item->type == \App\Enums\Item\TypeEnum::DOWNLOAD);
-            dd($isDownload);
+
             $total = round(getTotalPrice($cart->discountCode ?? 0, $subAfter, $cart->delivery_amount, $isDownload), 2);
-            return $total < 250 && $request->type !== 'credits' && !$isDownload ?
+              $methods = $total < 250 && $request->type !== 'credits' && !$isDownload ?
                 $this->paymentMethodRepository
                     ->query()
                     ->with('paymentGateway')
@@ -71,7 +71,7 @@ class PaymentController extends Controller
                     fn ($q) => $q->where('code', '!=', 'cash_on_delivery')
                 )
                 ->get();
-        });
+
 
         return Response::api(data: PaymentResource::collection($methods));
     }

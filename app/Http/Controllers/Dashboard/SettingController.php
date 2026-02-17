@@ -154,7 +154,7 @@ class SettingController extends Controller
     {
         $validatedData = $request->validate(['active' => 'required|boolean']);
         $paymentMethodRepository->update($validatedData, $id);
-        Cache::forget('payment_methods');
+//        Cache::forget('payment_methods');
         return Response::api();
     }
 
