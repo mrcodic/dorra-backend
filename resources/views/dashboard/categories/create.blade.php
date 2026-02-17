@@ -501,6 +501,28 @@
                                     <div class="col-12">
                                         <div class="mb-2">
                                             <label class="form-label label-text">Product Specs</label>
+                                            <div class="d-flex align-items-center gap-2 my-1">
+                                                <button type="button" id="btnAddCuttingSpecs" class="btn btn-outline-primary  px-3 py-2">
+                                                    Add Cutting Specs
+                                                </button>
+                                            </div>
+
+                                            <div id="cuttingSpecsBox" class="mt-2 d-none">
+                                                <label class="form-label label-text">Choose Cutting Specs</label>
+
+                                                <select id="cuttingSpecsSelect" class="form-control" multiple="multiple" style="width:100%">
+                                                    {{-- Example options (better: build from DB) --}}
+                                                    <option value="width"  data-name-en="Width"  data-name-ar="العرض">Width</option>
+                                                    <option value="height" data-name-en="Height" data-name-ar="الطول">Height</option>
+                                                    <option value="bleed"  data-name-en="Bleed"  data-name-ar="النزف">Bleed</option>
+                                                    <option value="paper"  data-name-en="Paper Type" data-name-ar="نوع الورق">Paper Type</option>
+                                                </select>
+
+                                                <div class="form-text">
+                                                    Select one or more specs. They will be added automatically below.
+                                                </div>
+                                            </div>
+
                                             <div class="">
                                                 <div>
                                                     <!-- Outer Repeater for Specifications -->
@@ -650,7 +672,7 @@
                                                                         class="w-100 rounded-3 p-1 text-dark"
                                                                         style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
                                                                         data-repeater-create>
-                                                                    <i data-feather="plus" class="me-25"></i> <span>Add New
+                                                                    <i data-feather="plus" class="me-25"></i> <span>Add Custom
                                                                     Spec</span>
                                                                 </button>
                                                             </div>
@@ -708,6 +730,76 @@
 @endsection
 
 @section('page-script')
+    <script !src="">
+        // ----- helpers -----
+        function getSpecListEl() {
+            return $('.outer-repeater').find('[data-repeater-list="specifications"]');
+        }
+
+        function findSpecItemByKey(key) {
+            return getSpecListEl().find('[data-repeater-item][data-spec-key="' + key + '"]');
+        }
+
+        function addSpecRepeaterItem({ key, nameEn, nameAr }) {
+            // avoid duplicates
+            if (findSpecItemByKey(key).length) return;
+
+            // trigger outer repeater create button (the one for specs)
+            // this creates a new [data-repeater-item] at end
+            $('.outer-repeater > .row button[data-repeater-create]').first().trigger('click');
+
+            // grab last created spec item
+            const $list = getSpecListEl();
+            const $newItem = $list.children('[data-repeater-item]').last();
+
+            // mark it so we can remove later
+            $newItem.attr('data-spec-key', key);
+
+            // fill names
+            $newItem.find('input[name="name_en"]').val(nameEn).trigger('change');
+            $newItem.find('input[name="name_ar"]').val(nameAr).trigger('change');
+
+            // ensure it has at least 1 option row (it already does in your markup)
+            // optional: set a default value text for cutting specs
+            // $newItem.find('input[name="value_en"]').first().val(''); // keep empty
+
+            setTimeout(() => {
+                feather.replace();
+                generateVariants();
+            }, 0);
+        }
+
+        function removeSpecRepeaterItem(key) {
+            const $item = findSpecItemByKey(key);
+            if (!$item.length) return;
+
+            // Click the spec delete button inside that item
+            // Ensure you select the DELETE SPEC button (not value delete)
+            $item.find('> .row .btn[data-repeater-delete]').last().trigger('click');
+
+            setTimeout(generateVariants, 0);
+        }
+
+        // ----- Select2 UI -----
+        $(document).ready(function () {
+
+            // Toggle select box
+            $('#btnAddCuttingSpecs').on('click', function () {
+                $('#cuttingSpecsBox').toggleClass('d-none');
+
+                // init select2 once when shown first time
+                if (!$('#cuttingSpecsSelect').data('select2')) {
+                    $('#cuttingSpecsSelect').select2({
+                        placeholder: 'Select cutting specs...',
+                        closeOnSelect: false,
+                        width: '100'
+                    });
+                }
+            });
+
+
+        });
+    </script>
     <script>
         window.variantImageMemory = {};
 
