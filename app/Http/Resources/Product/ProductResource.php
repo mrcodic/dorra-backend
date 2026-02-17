@@ -29,7 +29,7 @@ class ProductResource extends JsonResource
             'has_custom_prices' => $this->when(isset($this->has_custom_prices), $this->has_custom_prices),
             'base_price' => $this->when(isset($this->base_price), $this->base_price),
             'custom_prices' => ProductPriceResource::collection($this->whenLoaded('prices')),
-            'rating' => $this->when(isset($this->rating), $this->rating),
+            'rating' => $this->rating,
             'reviews_count' => $this->when(isset($this->reviews_count), $this->reviews_count),
             'type' => 'product',
             'main_image' => $this->whenLoaded('media', function () {

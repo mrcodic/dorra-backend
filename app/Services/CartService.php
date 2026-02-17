@@ -161,7 +161,7 @@ class CartService extends BaseService
         return $this->resolveUserCart() ?? null;
     }
 
-    private function resolveUserCart()
+    public function resolveUserCart()
     {
         $userId = auth('sanctum')->id();
         $cookieValue = request()->cookie('cookie_id');
