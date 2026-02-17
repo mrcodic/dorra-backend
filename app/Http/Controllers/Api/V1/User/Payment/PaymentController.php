@@ -67,7 +67,7 @@ class PaymentController extends Controller
                         ->orWhereNull('payment_gateway_id');
                 })
                 ->when(
-                    $request->type === 'credits',
+                    $request->type === 'credits' || $isDownload,
                     fn ($q) => $q->where('code', '!=', 'cash_on_delivery')
                 )
                 ->get();
