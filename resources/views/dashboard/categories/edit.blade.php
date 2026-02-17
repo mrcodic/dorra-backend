@@ -615,71 +615,71 @@
                                                 <div class="col-12">
                                                     <div class="mb-2">
                                                         <label class="form-label label-text">Product Specs</label>
-                                                        <div class="d-flex align-items-center gap-2 my-1">
-                                                            <button type="button" id="btnAddCuttingSpecs"
-                                                                    class="btn btn-outline-primary  px-3 py-2">
-                                                                Add Cutting Specs
-                                                            </button>
-                                                        </div>
+{{--                                                        <div class="d-flex align-items-center gap-2 my-1">--}}
+{{--                                                            <button type="button" id="btnAddCuttingSpecs"--}}
+{{--                                                                    class="btn btn-outline-primary  px-3 py-2">--}}
+{{--                                                                Add Cutting Specs--}}
+{{--                                                            </button>--}}
+{{--                                                        </div>--}}
 
-                                                        @php
-                                                            use App\Enums\Product\CuttingEnum;
-                                                     $selectedCutting = [];
+{{--                                                        @php--}}
+{{--                                                            use App\Enums\Product\CuttingEnum;--}}
+{{--                                                     $selectedCutting = [];--}}
 
 
-                                            $cuttingSpec = $model->specifications()
-                                                ->where('name->en', 'Cutting')
-                                                ->orWhere('name->ar', 'القص')
-                                                ->with('options')
-                                                ->first();
+{{--                                            $cuttingSpec = $model->specifications()--}}
+{{--                                                ->where('name->en', 'Cutting')--}}
+{{--                                                ->orWhere('name->ar', 'القص')--}}
+{{--                                                ->with('options')--}}
+{{--                                                ->first();--}}
 
-                                            if ($cuttingSpec) {
+{{--                                            if ($cuttingSpec) {--}}
 
-                                                foreach ($cuttingSpec->options as $opt) {
-                                                    $en = data_get($opt->value, 'en');
-                                                    $ar = data_get($opt->value, 'ar');
+{{--                                                foreach ($cuttingSpec->options as $opt) {--}}
+{{--                                                    $en = data_get($opt->value, 'en');--}}
+{{--                                                    $ar = data_get($opt->value, 'ar');--}}
 
-                                                    foreach (CuttingEnum::cases() as $case) {
-                                                        $labels = $case->labelLocales();
-                                                        if ($en === $labels['en'] || $ar === $labels['ar']) {
-                                                            $selectedCutting[] = $case->value; 
-                                                        }
-                                                    }
-                                                }
-                                            }
+{{--                                                    foreach (CuttingEnum::cases() as $case) {--}}
+{{--                                                        $labels = $case->labelLocales();--}}
+{{--                                                        if ($en === $labels['en'] || $ar === $labels['ar']) {--}}
+{{--                                                            $selectedCutting[] = $case->value; --}}
+{{--                                                        }--}}
+{{--                                                    }--}}
+{{--                                                }--}}
+{{--                                            }--}}
 
-                                    $selectedCutting = array_values(array_unique($selectedCutting));
-                                                        @endphp
+{{--                                    $selectedCutting = array_values(array_unique($selectedCutting));--}}
+{{--                                                        @endphp--}}
 
-                                                        <div id="cuttingSpecsBox"
-                                                             class="mt-2 {{ count($selectedCutting) ? '' : 'd-none' }}">
-                                                            <label class="form-label label-text">Choose Cutting
-                                                                Specs</label>
+{{--                                                        <div id="cuttingSpecsBox"--}}
+{{--                                                             class="mt-2 {{ count($selectedCutting) ? '' : 'd-none' }}">--}}
+{{--                                                            <label class="form-label label-text">Choose Cutting--}}
+{{--                                                                Specs</label>--}}
 
-                                                            <select id="cuttingSpecsSelect"
-                                                                    class="form-control"
-                                                                    name="fixed_specs[]"
-                                                                    multiple="multiple"
-                                                                    style="width:100%">
+{{--                                                            <select id="cuttingSpecsSelect"--}}
+{{--                                                                    class="form-control"--}}
+{{--                                                                    name="fixed_specs[]"--}}
+{{--                                                                    multiple="multiple"--}}
+{{--                                                                    style="width:100%">--}}
 
-                                                                @foreach(CuttingEnum::cases() as $cutting)
-                                                                    <option value="{{ $cutting->value }}"
-                                                                            data-name-en="{{ $cutting->label('en') }}"
-                                                                            data-name-ar="{{ $cutting->label('ar') }}"
-                                                                            data-image="{{ $cutting->imageUrl() }}"
-                                                                        @selected(in_array($cutting->value, $selectedCutting, true))
-                                                                    >
-                                                                        {{ $cutting->label(app()->getLocale()) }}
-                                                                    </option>
-                                                                @endforeach
+{{--                                                                @foreach(CuttingEnum::cases() as $cutting)--}}
+{{--                                                                    <option value="{{ $cutting->value }}"--}}
+{{--                                                                            data-name-en="{{ $cutting->label('en') }}"--}}
+{{--                                                                            data-name-ar="{{ $cutting->label('ar') }}"--}}
+{{--                                                                            data-image="{{ $cutting->imageUrl() }}"--}}
+{{--                                                                        @selected(in_array($cutting->value, $selectedCutting, true))--}}
+{{--                                                                    >--}}
+{{--                                                                        {{ $cutting->label(app()->getLocale()) }}--}}
+{{--                                                                    </option>--}}
+{{--                                                                @endforeach--}}
 
-                                                            </select>
+{{--                                                            </select>--}}
 
-                                                            <div class="form-text">
-                                                                Select one or more specs. They will be added
-                                                                automatically below.
-                                                            </div>
-                                                        </div>
+{{--                                                            <div class="form-text">--}}
+{{--                                                                Select one or more specs. They will be added--}}
+{{--                                                                automatically below.--}}
+{{--                                                            </div>--}}
+{{--                                                        </div>--}}
 
                                                         <div class="">
                                                             <div>

@@ -501,28 +501,28 @@
                                     <div class="col-12">
                                         <div class="mb-2">
                                             <label class="form-label label-text">Product Specs</label>
-                                            <div class="d-flex align-items-center gap-2 my-1">
-                                                <button type="button" id="btnAddCuttingSpecs" class="btn btn-outline-primary  px-3 py-2">
-                                                    Add Cutting Specs
-                                                </button>
-                                            </div>
+{{--                                            <div class="d-flex align-items-center gap-2 my-1">--}}
+{{--                                                <button type="button" id="btnAddCuttingSpecs" class="btn btn-outline-primary  px-3 py-2">--}}
+{{--                                                    Add Cutting Specs--}}
+{{--                                                </button>--}}
+{{--                                            </div>--}}
 
-                                            <div id="cuttingSpecsBox" class="mt-2 d-none">
-                                                <label class="form-label label-text">Choose Cutting Specs</label>
-                                                @php use App\Enums\Product\CuttingEnum; @endphp
-                                                <select id="cuttingSpecsSelect" class="form-control" name="fixed_specs[]" multiple="multiple" style="width:100%">
-                                                    @foreach(CuttingEnum::cases() as $cutting)
-                                                    <option value="{{$cutting->value }}"  data-name-en="{{$cutting->label('en') }}"
-                                                            data-name-ar="{{$cutting->label('en') }}">
-                                                        {{$cutting->label('en') }}
-                                                    </option>
-                                                    @endforeach
-                                                </select>
+{{--                                            <div id="cuttingSpecsBox" class="mt-2 d-none">--}}
+{{--                                                <label class="form-label label-text">Choose Cutting Specs</label>--}}
+{{--                                                @php use App\Enums\Product\CuttingEnum; @endphp--}}
+{{--                                                <select id="cuttingSpecsSelect" class="form-control" name="fixed_specs[]" multiple="multiple" style="width:100%">--}}
+{{--                                                    @foreach(CuttingEnum::cases() as $cutting)--}}
+{{--                                                    <option value="{{$cutting->value }}"  data-name-en="{{$cutting->label('en') }}"--}}
+{{--                                                            data-name-ar="{{$cutting->label('en') }}">--}}
+{{--                                                        {{$cutting->label('en') }}--}}
+{{--                                                    </option>--}}
+{{--                                                    @endforeach--}}
+{{--                                                </select>--}}
 
-                                                <div class="form-text">
-                                                    Select one or more specs. They will be added automatically below.
-                                                </div>
-                                            </div>
+{{--                                                <div class="form-text">--}}
+{{--                                                    Select one or more specs. They will be added automatically below.--}}
+{{--                                                </div>--}}
+{{--                                            </div>--}}
 
                                             <div class="">
                                                 <div>
