@@ -147,6 +147,14 @@ class TemplateService extends BaseService
             })->latest()
             ->when(request()->filled('limit'), function ($q) {
                 $q->limit((int) request('limit'));
+            })->when(request()->filled('languages'), function ($q) {
+                $languages = request('languages');
+                $languages = is_array($languages) ? $languages : [$languages];
+                $q->where(function ($qq) use ($languages) {
+                    foreach ($languages as $lang) {
+                        $qq->orWhereJsonContains('supported_languages', $lang);
+                    }
+                });
             });
 
         if (request()->ajax()) {

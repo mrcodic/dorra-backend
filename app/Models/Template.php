@@ -56,22 +56,6 @@ class Template extends Model implements HasMedia
         'status' => StatusEnum::DRAFTED,
     ];
 
-
-    protected static function booted()
-    {
-        static::addGlobalScope('supported_languages', function (Builder $builder) {
-            $locale = App::getLocale();
-            if (request()->is('api/v1/user/*')) {
-                $builder->where(function ($q) use ($locale) {
-                    $q->whereNull('supported_languages')
-                        ->orWhereJsonLength('supported_languages', 0)
-                        ->orWhereJsonContains('supported_languages', $locale);
-                });
-            }
-
-        });
-    }
-
     public function scopeIsLanding(Builder $builder): Builder
     {
         return $builder->where('is_landing', true);
