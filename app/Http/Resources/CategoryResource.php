@@ -116,6 +116,7 @@ class CategoryResource extends JsonResource
             'type' => 'category',
             'rating' => $this->rating,
             'reviews_count' => $this->when(isset($this->reviews_count), $this->reviews_count),
+
             'colors' => $this->colors,
             'has_mockup' => (boolean) $this->has_mockup,
         ];

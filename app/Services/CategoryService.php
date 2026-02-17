@@ -28,6 +28,7 @@ class CategoryService extends BaseService
         $perPage = request('per_page');
         $query = $this->repository->query()
             ->withLastOfferId()
+            ->withCount('reviews')
             ->with($relations)
             ->whereNull('parent_id')
             ->when(request()->filled('is_landing'), function ($query) {
