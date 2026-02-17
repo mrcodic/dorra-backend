@@ -219,6 +219,18 @@ class Category extends Model implements HasMedia
         );
     }
 
+    protected function productsReviewsCount(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                return (int) $this->products()
+                    ->withCount('reviews')
+                    ->get()
+                    ->sum('reviews_count');
+            }
+        );
+    }
+
     public function reviews(): MorphMany
     {
         return $this->morphMany(Review::class, 'reviewable');
