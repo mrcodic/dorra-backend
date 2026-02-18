@@ -209,16 +209,22 @@ class Category extends Model implements HasMedia
         return Attribute::make(
             get: function () {
 
-                $sumOfAverages = $this->products()
+                $products = $this->products()
                     ->withAvg('reviews', 'rating')
-                    ->get()
-                    ->sum(fn ($p) => (float) ($p->reviews_avg_rating ?? 0));
+                    ->get();
 
-                return (float) $sumOfAverages;
+                $sum = $products->sum(fn ($p) => (float) ($p->reviews_avg_rating ?? 0));
+
+                $count = $products->count();
+
+                if ($count === 0) {
+                    return 0.0;
+                }
+
+                return round($sum / $count, 2);
             }
         );
     }
-
     protected function productsReviewsCount(): Attribute
     {
         return Attribute::make(
