@@ -222,8 +222,8 @@ class Category extends Model implements HasMedia
                     ->get();
 
                 $sum = $products->sum(fn($p) => (float)($p->reviews_avg_rating ?? 0));
-
                 $count = $products->count();
+                dd($sum, $count);
 
                 if ($count === 0) {
                     return 0.0;
