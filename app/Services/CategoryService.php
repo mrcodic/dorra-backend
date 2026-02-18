@@ -53,7 +53,7 @@ class CategoryService extends BaseService
                 $query->where(function ($query) {
                     $query->where('is_has_category', 0)->orWhereHas('products');
                 });
-            });
+            })->latest();
         return $paginate ? $query->paginate($perPage) : $query->get();
     }
 
