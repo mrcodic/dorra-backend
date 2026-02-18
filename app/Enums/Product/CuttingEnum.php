@@ -39,8 +39,8 @@ enum CuttingEnum: int
     public function imagePath(): string
     {
         return match ($this) {
-            self::SHARP   => 'admin/images/cutting/sharp.png',
-            self::ROUNDED => 'admin/images/cutting/rounded.png',
+            self::SHARP   => 'images/cutting/sharp.jpg',
+            self::ROUNDED => 'images/cutting/rounded.jpg',
         };
     }
 

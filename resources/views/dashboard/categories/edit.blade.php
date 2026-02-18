@@ -1054,12 +1054,14 @@
                         $('#btnRemoveCuttingSpecs').addClass('d-none');
                         $('#btnAddCuttingSpecs').removeClass('d-none');
 
-                        // optional: also remove the "Cutting" spec from your repeater UI if you render it there
-                        // generateVariants();
+                        setTimeout(() => {
+                            window.generateVariants ? window.generateVariants() : generateVariants();
+                        }, 0);
                     })
                     .catch(err => {
                         alert(err.message || 'Something went wrong');
                     });
+
             });
         });
     </script>

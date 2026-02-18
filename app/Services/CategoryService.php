@@ -191,7 +191,7 @@ class CategoryService extends BaseService
 
                         $labels = $cutting->labelLocales();
 
-                        $spec->options()->create([
+                        $opt = $spec->options()->create([
                             'value' => [
                                 'en' => $labels['en'],
                                 'ar' => $labels['ar'],
@@ -199,6 +199,13 @@ class CategoryService extends BaseService
                             'fixed_key' => $cutting->value,
                             'price' => 0,
                         ]);
+                        $path = public_path($cutting->imagePath());
+                        if (file_exists($path)) {
+                            $opt->addMedia($path)
+                                ->preservingOriginal()
+                                ->usingFileName(basename($path))
+                                ->toMediaCollection('categorySpecificationOptions');
+                        }
                     });
 
             }
@@ -403,7 +410,7 @@ class CategoryService extends BaseService
 
                         $labels = $cutting->labelLocales();
 
-                        $spec->options()->create([
+                        $opt = $spec->options()->create([
                             'value' => [
                                 'en' => $labels['en'],
                                 'ar' => $labels['ar'],
@@ -411,6 +418,13 @@ class CategoryService extends BaseService
                             'fixed_key' => $cutting->value,
                             'price' => 0,
                         ]);
+                        $path = public_path($cutting->imagePath());
+                        if (file_exists($path)) {
+                            $opt->addMedia($path)
+                                ->preservingOriginal()
+                                ->usingFileName(basename($path))
+                                ->toMediaCollection('categorySpecificationOptions');
+                        }
                     });
             }
             if (isset($validatedData['image_id'])) {
