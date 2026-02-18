@@ -759,7 +759,57 @@
 @endsection
 
 @section('page-script')
-    <script>
+    <script !src="">
+        // ----- helpers -----
+        function getSpecListEl() {
+            return $('.outer-repeater').find('[data-repeater-list="specifications"]');
+        }
+
+        function findSpecItemByKey(key) {
+            return getSpecListEl().find('[data-repeater-item][data-spec-key="' + key + '"]');
+        }
+
+        function addSpecRepeaterItem({ key, nameEn, nameAr }) {
+            // avoid duplicates
+            if (findSpecItemByKey(key).length) return;
+
+            // trigger outer repeater create button (the one for specs)
+            // this creates a new [data-repeater-item] at end
+            $('.outer-repeater > .row button[data-repeater-create]').first().trigger('click');
+
+            // grab last created spec item
+            const $list = getSpecListEl();
+            const $newItem = $list.children('[data-repeater-item]').last();
+
+            // mark it so we can remove later
+            $newItem.attr('data-spec-key', key);
+
+            // fill names
+            $newItem.find('input[name="name_en"]').val(nameEn).trigger('change');
+            $newItem.find('input[name="name_ar"]').val(nameAr).trigger('change');
+
+            // ensure it has at least 1 option row (it already does in your markup)
+            // optional: set a default value text for cutting specs
+            // $newItem.find('input[name="value_en"]').first().val(''); // keep empty
+
+            setTimeout(() => {
+                feather.replace();
+                generateVariants();
+            }, 0);
+        }
+
+        function removeSpecRepeaterItem(key) {
+            const $item = findSpecItemByKey(key);
+            if (!$item.length) return;
+
+            // Click the spec delete button inside that item
+            // Ensure you select the DELETE SPEC button (not value delete)
+            $item.find('> .row .btn[data-repeater-delete]').last().trigger('click');
+
+            setTimeout(generateVariants, 0);
+        }
+
+        // ----- Select2 UI -----
         $(document).ready(function () {
 
             // Toggle select box
@@ -773,47 +823,77 @@
                         closeOnSelect: false,
                         width: '100'
                     });
+                    setTimeout(generateVariants, 0);
                 }
             });
+            $('#cuttingSpecsSelect').on('change', function () {
+                generateVariants();
+            });
+            if (($('#cuttingSpecsSelect').val() || []).length) {
+                $('#cuttingSpecsBox').removeClass('d-none'); // optional: show it
+                setTimeout(generateVariants, 0);
+            }
 
 
         });
-
     </script>
+
     <script>
         function generateVariants() {
             let specs = [];
 
-            // Collect all specifications
+            // -----------------------------
+            // A) FROM REPEATER (custom specs)
+            // -----------------------------
             $('[data-repeater-list="specifications"] > [data-repeater-item]').each(function () {
+                // ignore hidden (deleted but animating)
+                if (!$(this).is(':visible')) return;
+
                 let specName = $(this).find('.spec-name-en').val().trim();
                 let options = [];
 
                 $(this).find('.option-value-en').each(function () {
+                    if (!$(this).is(':visible')) return;
                     let val = $(this).val().trim();
                     if (val) options.push(val);
                 });
 
                 if (specName && options.length) {
-                    specs.push({name: specName, options: options});
+                    specs.push({ name: specName, options });
                 }
             });
 
+            // -----------------------------
+            // B) FIXED SPECS (Cutting select2)
+            // -----------------------------
+            const cuttingOpts = [];
+            $('#cuttingSpecsSelect option:selected').each(function () {
+                const en = ($(this).data('name-en') || $(this).text() || '').trim();
+                if (en) cuttingOpts.push(en);
+            });
+
+            // Add "Cutting" as a spec if any selected
+            if (cuttingOpts.length) {
+                specs.push({
+                    name: 'Cutting',        // used in variants; can be localized if you want
+                    options: cuttingOpts
+                });
+            }
+
+            // if nothing, clear variants
             if (specs.length === 0) {
                 $('#variants-container').html('');
                 return;
             }
 
-            // 🔥 CARTESIAN PRODUCT
             function cartesian(arr) {
-                return arr.reduce((a, b) =>
-                        a.flatMap(d => b.options.map(e => [...d, {spec: b.name, value: e}])),
+                return arr.reduce(
+                    (a, b) => a.flatMap(d => b.options.map(e => [...d, { spec: b.name, value: e }])),
                     [[]]
                 );
             }
 
-            let combinations = cartesian(specs);
-
+            const combinations = cartesian(specs);
             renderVariants(combinations);
         }
 

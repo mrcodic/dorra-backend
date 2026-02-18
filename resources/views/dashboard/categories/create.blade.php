@@ -795,8 +795,16 @@
                         closeOnSelect: false,
                         width: '100'
                     });
+                    setTimeout(generateVariants, 0);
                 }
             });
+            $('#cuttingSpecsSelect').on('change', function () {
+                generateVariants();
+            });
+            if (($('#cuttingSpecsSelect').val() || []).length) {
+                $('#cuttingSpecsBox').removeClass('d-none'); // optional: show it
+                setTimeout(generateVariants, 0);
+            }
 
 
         });
@@ -807,36 +815,58 @@
         function generateVariants() {
             let specs = [];
 
-            // Collect all specifications
+            // -----------------------------
+            // A) FROM REPEATER (custom specs)
+            // -----------------------------
             $('[data-repeater-list="specifications"] > [data-repeater-item]').each(function () {
+                // ignore hidden (deleted but animating)
+                if (!$(this).is(':visible')) return;
+
                 let specName = $(this).find('.spec-name-en').val().trim();
                 let options = [];
 
                 $(this).find('.option-value-en').each(function () {
+                    if (!$(this).is(':visible')) return;
                     let val = $(this).val().trim();
                     if (val) options.push(val);
                 });
 
                 if (specName && options.length) {
-                    specs.push({ name: specName, options: options });
+                    specs.push({ name: specName, options });
                 }
             });
 
+            // -----------------------------
+            // B) FIXED SPECS (Cutting select2)
+            // -----------------------------
+            const cuttingOpts = [];
+            $('#cuttingSpecsSelect option:selected').each(function () {
+                const en = ($(this).data('name-en') || $(this).text() || '').trim();
+                if (en) cuttingOpts.push(en);
+            });
+
+            // Add "Cutting" as a spec if any selected
+            if (cuttingOpts.length) {
+                specs.push({
+                    name: 'Cutting',        // used in variants; can be localized if you want
+                    options: cuttingOpts
+                });
+            }
+
+            // if nothing, clear variants
             if (specs.length === 0) {
                 $('#variants-container').html('');
                 return;
             }
 
-            // 🔥 CARTESIAN PRODUCT
             function cartesian(arr) {
-                return arr.reduce((a, b) =>
-                        a.flatMap(d => b.options.map(e => [...d, { spec: b.name, value: e }])),
+                return arr.reduce(
+                    (a, b) => a.flatMap(d => b.options.map(e => [...d, { spec: b.name, value: e }])),
                     [[]]
                 );
             }
 
-            let combinations = cartesian(specs);
-
+            const combinations = cartesian(specs);
             renderVariants(combinations);
         }
         function collectExistingVariantImages() {
