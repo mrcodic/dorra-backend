@@ -67,14 +67,10 @@ class Category extends Model implements HasMedia
         return $this->morphToMany(Design::class, 'designable', 'designables')
             ->withTimestamps();
     }
+
     public function variants(): MorphMany
     {
         return $this->morphMany(Variant::class, 'variantable');
-    }
-
-    public function products(): HasMany
-    {
-        return $this->hasMany(Product::class);
     }
 
     public function stationStatuses(): MorphMany
@@ -195,6 +191,12 @@ class Category extends Model implements HasMedia
         return $this->getFirstMediaUrl('categories');
     }
 
+    public function getAllCategoryImages()
+    {
+        return $this->getMedia('category_extra_images')
+            ->merge($this->getMedia('categories'));
+    }
+
     protected function rating(): Attribute
     {
         return Attribute::make(
@@ -205,45 +207,40 @@ class Category extends Model implements HasMedia
         );
     }
 
+    public function reviews(): MorphMany
+    {
+        return $this->morphMany(Review::class, 'reviewable');
+    }
+
     protected function productsRating(): Attribute
     {
         return Attribute::make(
             get: function () {
-
                 $products = $this->products()
                     ->withAvg('reviews', 'rating')
                     ->get();
-
-                $sum = $products->sum(fn ($p) => (float) ($p->reviews_avg_rating ?? 0));
-
-                $count = $products->filter(fn($p)=>$p->reviews_avg_rating !== null)->count();
-
+                $sum = $products->sum(fn($p) => (float)($p->reviews_avg_rating ?? 0));
+                $count = $products->filter(fn($p) => $p->reviews_avg_rating !== null)->count();
                 $avg = $count > 0 ? ($sum / $count) : 0;
-
-                return (float) number_format($avg, 2, '.', '');
+                return (float)number_format($avg, 2, '.', '');
             }
         );
+    }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
     }
 
     protected function productsReviewsCount(): Attribute
     {
         return Attribute::make(
             get: function () {
-                return (int) $this->products()
+                return (int)$this->products()
                     ->withCount('reviews')
                     ->get()
                     ->sum('reviews_count');
             }
         );
-    }
-
-    public function reviews(): MorphMany
-    {
-        return $this->morphMany(Review::class, 'reviewable');
-    }
-    public function getAllCategoryImages()
-    {
-        return $this->getMedia('category_extra_images')
-            ->merge($this->getMedia('categories'));
     }
 }

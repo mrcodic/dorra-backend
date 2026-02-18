@@ -34,7 +34,22 @@ class TemplateService extends BaseService
         parent::__construct($repository);
 
     }
+    public function showResource($id, $relations = [])
+    {
+        $model = $this->repository->query()
+            ->when(request()->filled('languages'), function ($q) {
+                $languages = request('languages');
+                $languages = is_array($languages) ? $languages : [$languages];
+                $q->where(function ($qq) use ($languages) {
+                    foreach ($languages as $lang) {
+                        $qq->orWhereJsonContains('supported_languages', $lang);
+                    }
+                });
+            })
+            ->find($id, $relations);
+        return $model;
 
+    }
     public function getAll(
         $relations = [], bool $paginate = false, $columns = ['*'], $perPage = 16, $counts = [])
     {
