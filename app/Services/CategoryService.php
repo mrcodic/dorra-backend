@@ -202,7 +202,7 @@ class CategoryService extends BaseService
                     });
 
             }
-            
+
             Media::where('id', $validatedData['image_id'])
                 ->update([
                     'model_type' => get_class($product),

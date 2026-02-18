@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Response;
 
 class FixedSpecController extends Controller
 {
-    public function destroy(ProductSpecification $spec)
+    public function destroy(ProductSpecification $productSpecification)
     {
-        $spec->delete();
+        $productSpecification->delete();
         return Response::api();
     }
 }

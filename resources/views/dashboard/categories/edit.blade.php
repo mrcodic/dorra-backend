@@ -18,6 +18,20 @@
             ]
         ];
     });
+    $specs =  $model->specifications
+
+      ->map(function ($spec) {
+        return [
+          'name' => $spec->getTranslation('name', 'en'),
+          'options' => $spec->options
+            ->map(fn($opt) => $opt->getTranslation('value', 'en'))
+            ->filter()
+            ->values()
+            ->toArray(),
+        ];
+      })
+      ->filter(fn($row) => !empty($row['name']) && count($row['options']))
+      ->values();
 @endphp
 @section('title', 'Edit Products')
 @section('main-page', 'Products')
@@ -1010,6 +1024,9 @@
                     });
                 }
             });
+            $(document).on('change', '#cuttingSpecsSelect', function () {
+                generateVariants();
+            });
 
             $('#btnRemoveCuttingSpecs').on('click', function () {
                 const btn = document.getElementById('btnRemoveCuttingSpecs');
@@ -1052,43 +1069,61 @@
 
 
     <script>
-
         function generateVariants() {
-            let specs = [];
+            let specs = @json($specs);
 
-            // Collect all specifications
+            // helper: upsert spec by name (replace if same name exists)
+            function upsertSpec(name, options) {
+                const i = specs.findIndex(s => (s.name || '').toLowerCase() === (name || '').toLowerCase());
+                if (i >= 0) specs[i] = { name, options };
+                else specs.push({ name, options });
+            }
+
+            // 2) OVERRIDE FROM REPEATER (ONLY VISIBLE)
             $('[data-repeater-list="specifications"] > [data-repeater-item]').each(function () {
-                let specName = $(this).find('.spec-name-en').val().trim();
-                let options = [];
+                if (!$(this).is(':visible')) return;
 
+                const specName = ($(this).find('.spec-name-en').val() || '').trim();
+                if (!specName) return;
+
+                const options = [];
                 $(this).find('.option-value-en').each(function () {
-                    let val = $(this).val().trim();
+                    // important: check the row visibility, not only input
+                    const row = $(this).closest('[data-repeater-item]');
+                    if (row.length && !row.is(':visible')) return;
+
+                    const val = ($(this).val() || '').trim();
                     if (val) options.push(val);
                 });
 
-                if (specName && options.length) {
-                    specs.push({name: specName, options: options});
-                }
+                if (options.length) upsertSpec(specName, options);
             });
 
-            if (specs.length === 0) {
+            // 3) FIXED CUTTING
+            const cuttingOpts = [];
+            $('#cuttingSpecsSelect option:selected').each(function () {
+                const en = ($(this).data('name-en') || $(this).text() || '').trim();
+                if (en) cuttingOpts.push(en);
+            });
+            if (cuttingOpts.length) upsertSpec('Cutting', cuttingOpts);
+
+            // 4) EMPTY?
+            specs = specs.filter(s => s.name && Array.isArray(s.options) && s.options.length);
+            if (!specs.length) {
                 $('#variants-container').html('');
                 return;
             }
 
-            // 🔥 CARTESIAN PRODUCT
+            // 5) CARTESIAN
             function cartesian(arr) {
-                return arr.reduce((a, b) =>
-                        a.flatMap(d => b.options.map(e => [...d, {spec: b.name, value: e}])),
+                return arr.reduce(
+                    (a, b) => a.flatMap(d => b.options.map(e => [...d, { spec: b.name, value: e }])),
                     [[]]
                 );
             }
 
-            let combinations = cartesian(specs);
-
-            renderVariants(combinations);
+            renderVariants(cartesian(specs));
         }
-
         function collectExistingVariantImages() {
             let map = {...window.existingVariantsFromDB};
 
@@ -1098,6 +1133,7 @@
                 let variantId = $(this).find('input[name*="[id]"]').val();
 
                 if (code) {
+
                     map[code] = {
                         ...(map[code] || {}),   // keep previous data
                         image: imageId || null,

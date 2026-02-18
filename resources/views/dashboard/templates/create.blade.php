@@ -413,13 +413,13 @@
                                                             <label class="form-check-label"
                                                                    for="shape_circle">Circle</label>
                                                         </div>
-{{--                                                        <div class="form-check">--}}
-{{--                                                            <input class="form-check-input" type="checkbox"--}}
-{{--                                                                   name="has_corner"--}}
-{{--                                                                   id="shape_other" value="1">--}}
-{{--                                                            <label class="form-check-label"--}}
-{{--                                                                   for="shape_other">Other</label>--}}
-{{--                                                        </div>--}}
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                   name="has_corner"
+                                                                   id="shape_other" value="1">
+                                                            <label class="form-check-label"
+                                                                   for="shape_other">Other</label>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div class="form-group mb-2 d-none" id="cornersBox">
@@ -429,7 +429,7 @@
                                                         <option value="" selected disabled>Choose
                                                             Corner
                                                         </option>
-                                                        @foreach(\App\Enums\BorderEnum::cases() as $border)
+                                                        @foreach(\App\Enums\CornerEnum::cases() as $border)
                                                             <option
                                                                 value="{{ $border->value }}">{{$border->label()}}</option>
                                                         @endforeach

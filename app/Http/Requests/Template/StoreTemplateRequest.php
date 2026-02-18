@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Template;
 
 use App\Enums\BorderEnum;
+use App\Enums\CornerEnum;
 use App\Enums\OrientationEnum;
 use App\Enums\Product\UnitEnum;
 use App\Enums\SafetyAreaEnum;
@@ -73,9 +74,9 @@ class StoreTemplateRequest extends BaseRequest
 //            'colors' => ['sometimes','array'],
 //            'colors.*.value' => ['sometimes','string'],
 //            'colors.*.image_id' => ['sometimes', 'integer', 'exists:media,id'],
-//            'has_corner' => ['sometimes', 'in:0,1'],
+            'has_corner' => ['sometimes', 'in:0,1'],
             'has_safety_area' => ['sometimes', 'in:0,1'],
-            'border' => ['sometimes', 'in:' . BorderEnum::getValuesAsString()],
+            'border' => ['sometimes', 'in:' . CornerEnum::getValuesAsString()],
             'safety_area' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
             'cut_margin' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
             'approach' => ['sometimes', 'in:with_editor,without_editor'],
