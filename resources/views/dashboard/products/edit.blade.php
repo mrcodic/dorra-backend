@@ -643,16 +643,64 @@
                                     <div class="col-12">
                                         <div class="mb-1">
                                             <label class="form-label label-text">Category Specs</label>
+                                            @php
+                                                $hasSpecs = $model->specifications->filter(fn($specification) => $specification->type !=  'fixed')->isNotEmpty();
+                                                $cuttingSpec = $model->specifications()
+                                                            ->where('fixed_key', 'cutting')
+                                                            ->first();
+
+                                                $cuttingSpecId = $cuttingSpec?->id;
+                                            @endphp
+                                            <div class="d-flex align-items-center gap-2 my-1">
+                                                <button type="button" id="btnAddCuttingSpecs"
+                                                        class="btn btn-outline-primary  px-3 py-2 {{ $cuttingSpecId ? 'd-none' : '' }}">
+                                                    Add Cutting Specs
+                                                </button>
+                                                <button type="button" id="btnRemoveCuttingSpecs"
+                                                        class="btn btn-outline-danger px-3 py-2 {{ $cuttingSpecId ? '' : 'd-none' }}"
+                                                        data-cutting-id="{{ $cuttingSpecId }}"
+                                                        @if($cuttingSpecId)
+                                                            data-url="{{ route('fixed-specs.destroy', $cuttingSpecId) }}"
+                                                    @endif>
+                                                    Remove Cutting Specs
+                                                </button>
+                                            </div>
+                                            <div id="cuttingSpecsBox"
+                                                 class="mt-2  d-none">
+                                                <label class="form-label label-text">Choose Cutting
+                                                    Specs</label>
+                                                <select id="cuttingSpecsSelect"
+                                                        class="form-control"
+                                                        name="fixed_specs[]"
+                                                        multiple="multiple"
+                                                        style="width:100%">
+
+                                                    @foreach(\App\Enums\Product\CuttingEnum::cases() as $cutting)
+                                                        <option value="{{ $cutting->value }}"
+                                                                data-name-en="{{ $cutting->label('en') }}"
+                                                                data-name-ar="{{ $cutting->label('ar') }}"
+                                                                data-image="{{ $cutting->imageUrl() }}"
+                                                        >
+                                                            {{ $cutting->label(app()->getLocale()) }}
+                                                        </option>
+                                                    @endforeach
+
+                                                </select>
+
+                                                <div class="form-text">
+                                                    Select one or more specs. They will be added
+                                                    automatically below.
+                                                </div>
+                                            </div>
                                             <div>
-                                                @php
-                                                    $hasSpecs = $model->specifications->isNotEmpty();
-                                                @endphp
+
                                                     <!-- Outer Repeater for Specifications -->
                                                 <div class="outer-repeater">
                                                     <div class="{{ $hasSpecs ? '' :'d-none' }}"
                                                          data-repeater-list="specifications">
-                                                        @forelse($model->specifications as $specification)
-                                                            <div data-repeater-item>
+                                                        @forelse($model->specifications->filter(fn($specification) => $specification->type !=  'fixed') as $specification)
+
+                                                        <div data-repeater-item>
                                                                 <input type="hidden" name="id"
                                                                        value="{{ $specification->id }}">
 
@@ -957,6 +1005,60 @@
 @endsection
 
 @section('page-script')
+    <script !src="">
+        // ----- Select2 UI -----
+        $(document).ready(function () {
+
+            // Toggle select box
+            $('#btnAddCuttingSpecs').on('click', function () {
+                $('#cuttingSpecsBox').toggleClass('d-none');
+
+                // init select2 once when shown first time
+                if (!$('#cuttingSpecsSelect').data('select2')) {
+                    $('#cuttingSpecsSelect').select2({
+                        placeholder: 'Select cutting specs...',
+                        closeOnSelect: false,
+                        width: '100'
+                    });
+                }
+            });
+
+            $('#btnRemoveCuttingSpecs').on('click', function () {
+                const btn = document.getElementById('btnRemoveCuttingSpecs');
+                const url = btn.dataset.url;
+
+                if (!url) {
+                    console.log('No fixed spec id to delete');
+                    return;
+                }
+                fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    }
+                })
+                    .then(r => r.json())
+                    .then(res => {
+                        if (!res.status) throw new Error(res.message || 'Delete failed');
+
+                        // ✅ reset UI
+                        $('#cuttingSpecsSelect').val(null).trigger('change');
+                        $('#cuttingSpecsBox').addClass('d-none');
+
+                        $('#btnRemoveCuttingSpecs').addClass('d-none');
+                        $('#btnAddCuttingSpecs').removeClass('d-none');
+
+                        // optional: also remove the "Cutting" spec from your repeater UI if you render it there
+                        // generateVariants();
+                    })
+                    .catch(err => {
+                        alert(err.message || 'Something went wrong');
+                    });
+            });
+        });
+    </script>
+
     <script>
         window.existingVariantsFromDB = @json($variantsForJs);
     </script>

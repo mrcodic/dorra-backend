@@ -531,6 +531,28 @@
                                     <div class="col-12">
                                         <div class="mb-2">
                                             <label class="form-label label-text">Category Specs</label>
+                                            <div class="d-flex align-items-center gap-2 my-1">
+                                                <button type="button" id="btnAddCuttingSpecs" class="btn btn-outline-primary  px-3 py-2">
+                                                    Add Cutting Specs
+                                                </button>
+                                            </div>
+
+                                            <div id="cuttingSpecsBox" class="mt-2 d-none">
+                                                <label class="form-label label-text">Choose Cutting Specs</label>
+                                                @php use App\Enums\Product\CuttingEnum; @endphp
+                                                <select id="cuttingSpecsSelect" class="form-control" name="fixed_specs[]" multiple="multiple" style="width:100%">
+                                                    @foreach(CuttingEnum::cases() as $cutting)
+                                                        <option value="{{$cutting->value }}"  data-name-en="{{$cutting->label('en') }}"
+                                                                data-name-ar="{{$cutting->label('en') }}">
+                                                            {{$cutting->label('en') }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+
+                                                <div class="form-text">
+                                                    Select one or more specs. They will be added automatically below.
+                                                </div>
+                                            </div>
                                             <div class="">
                                                 <div>
                                                     <!-- Outer Repeater for Specifications -->
@@ -737,6 +759,27 @@
 @endsection
 
 @section('page-script')
+    <script>
+        $(document).ready(function () {
+
+            // Toggle select box
+            $('#btnAddCuttingSpecs').on('click', function () {
+                $('#cuttingSpecsBox').toggleClass('d-none');
+
+                // init select2 once when shown first time
+                if (!$('#cuttingSpecsSelect').data('select2')) {
+                    $('#cuttingSpecsSelect').select2({
+                        placeholder: 'Select cutting specs...',
+                        closeOnSelect: false,
+                        width: '100'
+                    });
+                }
+            });
+
+
+        });
+
+    </script>
     <script>
         function generateVariants() {
             let specs = [];

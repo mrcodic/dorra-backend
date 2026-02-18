@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('product_specification_options', function (Blueprint $table) {
-            $table->integer('code')->after('value')->nullable();
-            $table->enum('type',['fixed','custom'])->after('value')->nullable()->default('custom');
+        Schema::table('product_specifications', function (Blueprint $table) {
+            $table->enum('type',['fixed','custom'])->after('name')->nullable()->default('custom');
+            $table->string('fixed_key')->nullable()->after('type');
         });
     }
 
@@ -22,9 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('product_specification_options', function (Blueprint $table) {
-            $table->dropColumn('code');
+        Schema::table('product_specifications', function (Blueprint $table) {
             $table->dropColumn('type');
+            $table->dropColumn('fixed_key');
         });
     }
 };

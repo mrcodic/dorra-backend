@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Product;
 
+use App\Enums\Product\CuttingEnum;
 use App\Enums\Product\StatusEnum;
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\Category;
@@ -100,7 +101,8 @@ class UpdateProductRequest extends BaseRequest
                 'integer',
                 'min:1',
             ],
-
+            'fixed_specs' => ['sometimes', 'array'],
+            'fixed_specs.*' => ['sometimes', 'in:'.CuttingEnum::getValuesAsString()],
             'specifications' => ['sometimes', 'array'],
             'specifications.*.name_en' => 'sometimes|string',
             'specifications.*.id' => 'sometimes',

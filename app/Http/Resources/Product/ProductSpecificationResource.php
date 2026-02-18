@@ -19,6 +19,8 @@ class ProductSpecificationResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->getTranslation('name', app()->getLocale()),
+            'fixed_key' => $this->fixed_key,
+            'type' => $this->type,
             'options' => ProductSpecificationOption::collection($this->whenLoaded('options')),
             'product' => ProductResource::make($this->whenLoaded('product')),
             'option' => ProductSpecificationOption::make($this->whenLoaded('pivot.option'))

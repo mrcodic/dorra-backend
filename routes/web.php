@@ -8,6 +8,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
     CreditOrderController,
     DiscountCodeController,
     FaqController,
+    FixedSpecController,
     FlagController,
     FontController,
     IndustryController,
@@ -34,7 +35,8 @@ use App\Http\Controllers\Dashboard\{AdminController,
     SubIndustryController,
     TagController,
     TemplateController,
-    UserController};
+    UserController
+};
 use App\Http\Controllers\Shared\{CommentController, LibraryAssetController};
 use App\Http\Controllers\Shared\General\MainController;
 use App\Http\Middleware\AutoCheckPermission;
@@ -295,11 +297,11 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::resource('/credit-orders', CreditOrderController::class);
 
 
-
     });
 
     Route::prefix('api/v1/')->group(function () {
-
+        Route::delete('fixed-specs/{id}', [FixedSpecController::class, 'destroy'])
+            ->name('fixed-specs.destroy');
         Route::controller(ReviewController::class)->group(function () {
             Route::delete('reviews/{review}', 'deleteReview')->name('reviews.destroy');
             Route::put('reviews/{review}/reply', 'deleteReply')->name('reviews.reply.destroy');

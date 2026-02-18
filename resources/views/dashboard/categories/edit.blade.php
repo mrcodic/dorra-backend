@@ -610,253 +610,59 @@
                                         <div class="mb-1">
                                             <div>
                                                 @php
-                                                    $hasSpecs = $model->specifications->isNotEmpty();
+                                                    $hasSpecs = $model->specifications->filter(fn($specification) => $specification->type !=  'fixed')->isNotEmpty();
+                                                    $cuttingSpec = $model->specifications()
+                                                                ->where('fixed_key', 'cutting')
+                                                                ->first();
+
+                                                    $cuttingSpecId = $cuttingSpec?->id;
                                                 @endphp
                                                 <div class="col-12">
                                                     <div class="mb-2">
                                                         <label class="form-label label-text">Product Specs</label>
-{{--                                                        <div class="d-flex align-items-center gap-2 my-1">--}}
-{{--                                                            <button type="button" id="btnAddCuttingSpecs"--}}
-{{--                                                                    class="btn btn-outline-primary  px-3 py-2">--}}
-{{--                                                                Add Cutting Specs--}}
-{{--                                                            </button>--}}
-{{--                                                        </div>--}}
+                                                        <div class="d-flex align-items-center gap-2 my-1">
+                                                            <button type="button" id="btnAddCuttingSpecs"
+                                                                    class="btn btn-outline-primary  px-3 py-2 {{ $cuttingSpecId ? 'd-none' : '' }}">
+                                                                Add Cutting Specs
+                                                            </button>
+                                                            <button type="button" id="btnRemoveCuttingSpecs"
+                                                                    class="btn btn-outline-danger px-3 py-2 {{ $cuttingSpecId ? '' : 'd-none' }}"
+                                                                    data-cutting-id="{{ $cuttingSpecId }}"
+                                                                    @if($cuttingSpecId)
+                                                                        data-url="{{ route('fixed-specs.destroy', $cuttingSpecId) }}"
+                                                                @endif>
+                                                                Remove Cutting Specs
+                                                            </button>
+                                                        </div>
+                                                        <div id="cuttingSpecsBox"
+                                                             class="mt-2  d-none">
+                                                            <label class="form-label label-text">Choose Cutting
+                                                                Specs</label>
+                                                            <select id="cuttingSpecsSelect"
+                                                                    class="form-control"
+                                                                    name="fixed_specs[]"
+                                                                    multiple="multiple"
+                                                                    style="width:100%">
 
-{{--                                                        @php--}}
-{{--                                                            use App\Enums\Product\CuttingEnum;--}}
-{{--                                                     $selectedCutting = [];--}}
+                                                                @foreach(\App\Enums\Product\CuttingEnum::cases() as $cutting)
+                                                                    <option value="{{ $cutting->value }}"
+                                                                            data-name-en="{{ $cutting->label('en') }}"
+                                                                            data-name-ar="{{ $cutting->label('ar') }}"
+                                                                            data-image="{{ $cutting->imageUrl() }}"
+                                                                    >
+                                                                        {{ $cutting->label(app()->getLocale()) }}
+                                                                    </option>
+                                                                @endforeach
 
+                                                            </select>
 
-{{--                                            $cuttingSpec = $model->specifications()--}}
-{{--                                                ->where('name->en', 'Cutting')--}}
-{{--                                                ->orWhere('name->ar', 'القص')--}}
-{{--                                                ->with('options')--}}
-{{--                                                ->first();--}}
-
-{{--                                            if ($cuttingSpec) {--}}
-
-{{--                                                foreach ($cuttingSpec->options as $opt) {--}}
-{{--                                                    $en = data_get($opt->value, 'en');--}}
-{{--                                                    $ar = data_get($opt->value, 'ar');--}}
-
-{{--                                                    foreach (CuttingEnum::cases() as $case) {--}}
-{{--                                                        $labels = $case->labelLocales();--}}
-{{--                                                        if ($en === $labels['en'] || $ar === $labels['ar']) {--}}
-{{--                                                            $selectedCutting[] = $case->value; --}}
-{{--                                                        }--}}
-{{--                                                    }--}}
-{{--                                                }--}}
-{{--                                            }--}}
-
-{{--                                    $selectedCutting = array_values(array_unique($selectedCutting));--}}
-{{--                                                        @endphp--}}
-
-{{--                                                        <div id="cuttingSpecsBox"--}}
-{{--                                                             class="mt-2 {{ count($selectedCutting) ? '' : 'd-none' }}">--}}
-{{--                                                            <label class="form-label label-text">Choose Cutting--}}
-{{--                                                                Specs</label>--}}
-
-{{--                                                            <select id="cuttingSpecsSelect"--}}
-{{--                                                                    class="form-control"--}}
-{{--                                                                    name="fixed_specs[]"--}}
-{{--                                                                    multiple="multiple"--}}
-{{--                                                                    style="width:100%">--}}
-
-{{--                                                                @foreach(CuttingEnum::cases() as $cutting)--}}
-{{--                                                                    <option value="{{ $cutting->value }}"--}}
-{{--                                                                            data-name-en="{{ $cutting->label('en') }}"--}}
-{{--                                                                            data-name-ar="{{ $cutting->label('ar') }}"--}}
-{{--                                                                            data-image="{{ $cutting->imageUrl() }}"--}}
-{{--                                                                        @selected(in_array($cutting->value, $selectedCutting, true))--}}
-{{--                                                                    >--}}
-{{--                                                                        {{ $cutting->label(app()->getLocale()) }}--}}
-{{--                                                                    </option>--}}
-{{--                                                                @endforeach--}}
-
-{{--                                                            </select>--}}
-
-{{--                                                            <div class="form-text">--}}
-{{--                                                                Select one or more specs. They will be added--}}
-{{--                                                                automatically below.--}}
-{{--                                                            </div>--}}
-{{--                                                        </div>--}}
-
-                                                        <div class="">
-                                                            <div>
-                                                                <!-- Outer Repeater for Specifications -->
-                                                                <div class="outer-repeater">
-                                                                    <div data-repeater-list="specifications">
-                                                                        <div data-repeater-item>
-                                                                            <!-- Specification Fields -->
-                                                                            <div class="row mt-1">
-                                                                                <div class="col-md-6">
-                                                                                    <div class="mb-1">
-                                                                                        <label
-                                                                                            class="form-label label-text">Name
-                                                                                            (EN) <span
-                                                                                                style="color: red; font-size: 20px;">*</span></label>
-                                                                                        <input type="text"
-                                                                                               name="name_en"
-                                                                                               class="form-control spec-name-en"
-                                                                                               placeholder="Specification Name (EN)"/>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-md-6">
-                                                                                    <div class="mb-2">
-                                                                                        <label
-                                                                                            class="form-label label-text">Name
-                                                                                            (AR) <span
-                                                                                                style="color: red; font-size: 20px;">*</span></label>
-                                                                                        <input type="text"
-                                                                                               name="name_ar"
-                                                                                               class="form-control"
-                                                                                               placeholder="Specification Name (AR)"/>
-                                                                                    </div>
-                                                                                </div>
-
-                                                                                <!-- Inner Repeater for Specification Options -->
-                                                                                <div class="inner-repeater">
-                                                                                    <div
-                                                                                        data-repeater-list="specification_options">
-                                                                                        <div data-repeater-item>
-                                                                                            <div
-                                                                                                class="row d-flex flex-column flex-md-row gap-1 gap-md-0 mt-2">
-                                                                                                <!-- Option Name (EN) -->
-                                                                                                <div class="col">
-                                                                                                    <label
-                                                                                                        class="form-label label-text">Value
-                                                                                                        (EN) <span
-                                                                                                            style="color: red; font-size: 20px;">*</span></label>
-                                                                                                    <input type="text"
-                                                                                                           name="value_en"
-                                                                                                           class="form-control option-value-en"
-                                                                                                           placeholder="Option (EN)"/>
-                                                                                                </div>
-
-                                                                                                <!-- Option Name (AR) -->
-                                                                                                <div class="col">
-                                                                                                    <label
-                                                                                                        class="form-label label-text">Value
-                                                                                                        (AR) <span
-                                                                                                            style="color: red; font-size: 20px;">*</span></label>
-                                                                                                    <input type="text"
-                                                                                                           name="value_ar"
-                                                                                                           class="form-control"
-                                                                                                           placeholder="Option (AR)"/>
-                                                                                                </div>
-
-                                                                                                <!-- Option Price -->
-                                                                                                <div class="col">
-                                                                                                    <label
-                                                                                                        class="form-label label-text">Price
-                                                                                                        (EGP)
-                                                                                                        (Optional)</label>
-                                                                                                    <input type="text"
-                                                                                                           name="price"
-                                                                                                           class="form-control"
-                                                                                                           placeholder="Price"/>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <div
-                                                                                                class="row d-flex align-items-end mt-2">
-                                                                                                <div class="col-md-12">
-                                                                                                    <label
-                                                                                                        class="form-label label-text">Option
-                                                                                                        Image</label>
-
-                                                                                                    <!-- Dropzone container -->
-                                                                                                    <div
-                                                                                                        class="dropzone option-dropzone border rounded p-3"
-                                                                                                        style="cursor:pointer; min-height:120px;">
-                                                                                                        <div
-                                                                                                            class="dz-message"
-                                                                                                            data-dz-message>
-                                                                                            <span>Drop image here or
-                                                                                                click to upload</span>
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                    <span
-                                                                                                        class="image-hint small text-end">
-                                                Max size: 1MB | Dimensions: 200x200 px
-                                            </span>
-
-                                                                                                    <!-- Hidden input to store uploaded file id / path -->
-                                                                                                    <input type="hidden"
-                                                                                                           name="option_image"
-                                                                                                           class="option-image-hidden">
-                                                                                                </div>
-                                                                                                <!-- ❌ Delete Option Button -->
-                                                                                                <div class="row mt-2">
-                                                                                                    <div
-                                                                                                        class="col-12 text-end">
-                                                                                                        <button
-                                                                                                            type="button"
-                                                                                                            class="btn btn-outline-danger"
-                                                                                                            data-repeater-delete>
-                                                                                                            <i data-feather="x"
-                                                                                                               class="me-25"></i>
-                                                                                                            Delete Value
-                                                                                                        </button>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-
-                                                                                    <!-- Add Option Button -->
-                                                                                    <div class="row">
-                                                                                        <div class="col-12">
-                                                                                            <button type="button"
-                                                                                                    class="btn primary-text-color bg-white mt-2"
-                                                                                                    data-repeater-create>
-                                                                                                <i data-feather="plus"></i>
-                                                                                                <span> Add
-                                                                                    New
-                                                                                    Value</span>
-                                                                                            </button>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <!-- End of Inner Repeater -->
-
-                                                                                <!-- Delete Specification Button -->
-                                                                                <div class="col-12 text-end mt-1 mb-2">
-                                                                                    <button type="button"
-                                                                                            class="btn btn-outline-danger"
-                                                                                            data-repeater-delete>
-                                                                                        <i data-feather="x"
-                                                                                           class="me-25"></i>
-                                                                                        Delete
-                                                                                        Spec
-                                                                                    </button>
-                                                                                </div>
-
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <!-- Add New Specification Button -->
-                                                                    <div class="row">
-                                                                        <div class="col-12">
-                                                                            <button type="button"
-                                                                                    class="w-100 rounded-3 p-1 text-dark"
-                                                                                    style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
-                                                                                    data-repeater-create>
-                                                                                <i data-feather="plus"
-                                                                                   class="me-25"></i> <span>Add Custom
-                                                                    Spec</span>
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <label
-                                                                    class="form-label label-text mt-2">Variants</label>
-
-                                                                <div id="variants-container" class="mt-2"></div>
-
+                                                            <div class="form-text">
+                                                                Select one or more specs. They will be added
+                                                                automatically below.
                                                             </div>
                                                         </div>
                                                     </div>
+
 
                                                     <!-- Free Shipping -->
                                                     {{-- <div class="col-md-12 col-12 mb-2">--}}
@@ -872,28 +678,14 @@
                                                     {{--
                                                 </div>--}}
 
-                                                    <!-- Submit -->
-                                                    <div class="col-12 d-flex justify-content-end gap-1">
-                                                        <button type="button" class="btn btn-secondary prev-tab">
-                                                            Previous
-                                                        </button>
-                                                        <button type="submit"
-                                                                class="btn btn-primary me-1 saveChangesButton"
-                                                                id="SaveChangesButton">
-                                                            <span class="btn-text">Add Product</span>
-                                                            <span id="saveLoader"
-                                                                  class="spinner-border spinner-border-sm d-none saveLoader"
-                                                                  role="status" aria-hidden="true"></span>
-                                                        </button>
 
-                                                    </div>
                                                 </div>
 
                                                 <!-- Outer Repeater for Specifications -->
                                                 <div class="outer-repeater">
                                                     <div class="{{ $hasSpecs ? '' :'d-none' }}"
                                                          data-repeater-list="specifications">
-                                                        @forelse($model->specifications as $specification)
+                                                        @forelse($model->specifications->filter(fn($specification) => $specification->type !=  'fixed') as $specification)
                                                             <div data-repeater-item>
                                                                 <input type="hidden" name="id"
                                                                        value="{{ $specification->id }}">
@@ -1157,7 +949,7 @@
                                                             <button type="button" class="w-100 rounded-3 p-1 text-dark"
                                                                     style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
                                                                     data-repeater-create>
-                                                                <i data-feather="plus" class="me-25"></i> <span>Add New Spec</span>
+                                                                <i data-feather="plus" class="me-25"></i> <span>Add Custom Spec</span>
                                                             </button>
                                                         </div>
                                                     </div>
@@ -1219,7 +1011,39 @@
                 }
             });
 
+            $('#btnRemoveCuttingSpecs').on('click', function () {
+                const btn = document.getElementById('btnRemoveCuttingSpecs');
+                const url = btn.dataset.url;
 
+                if (!url) {
+                    console.log('No fixed spec id to delete');
+                    return;
+                }
+                fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    }
+                })
+                    .then(r => r.json())
+                    .then(res => {
+                        if (!res.status) throw new Error(res.message || 'Delete failed');
+
+                        // ✅ reset UI
+                        $('#cuttingSpecsSelect').val(null).trigger('change');
+                        $('#cuttingSpecsBox').addClass('d-none');
+
+                        $('#btnRemoveCuttingSpecs').addClass('d-none');
+                        $('#btnAddCuttingSpecs').removeClass('d-none');
+
+                        // optional: also remove the "Cutting" spec from your repeater UI if you render it there
+                        // generateVariants();
+                    })
+                    .catch(err => {
+                        alert(err.message || 'Something went wrong');
+                    });
+            });
         });
     </script>
     <script>

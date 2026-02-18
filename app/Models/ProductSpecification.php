@@ -13,6 +13,8 @@ class ProductSpecification extends Model
     protected $fillable = [
         'name',
         'product_id',
+        'type',
+        'fixed_key',
     ];
 
     public $translatable = ['name'];

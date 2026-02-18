@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\Product\CuttingEnum;
 use App\Filters\SubCategoryFilter;
 use App\Models\CartItem;
 use App\Models\Product;
@@ -187,6 +188,35 @@ class ProductService extends BaseService
             }
 
             $product->prices()->createMany($validatedData['prices'] ?? []);
+            if (!empty($validatedData['fixed_specs'])) {
+                $spec = $product->specifications()->create([
+                    'name' => [
+                        'en' => 'Cutting',
+                        'ar' => 'القص',
+                    ],
+                    'type' => 'fixed',
+                    'fixed_key' => 'cutting',
+                ]);
+
+                collect($validatedData['fixed_specs'])
+                    ->map(fn($v) => CuttingEnum::tryFrom((int)$v))
+                    ->filter()
+                    ->each(function (CuttingEnum $cutting) use ($spec) {
+
+                        $labels = $cutting->labelLocales();
+
+                        $spec->options()->create([
+                            'value' => [
+                                'en' => $labels['en'],
+                                'ar' => $labels['ar'],
+                            ],
+                            'fixed_key' => $cutting->value,
+                            'price' => 0,
+                        ]);
+                    });
+
+            }
+
             if (isset($validatedData['specifications'])) {
                 collect($validatedData['specifications'])->map(function ($specification) use ($product) {
                     $productSpecification = $product->specifications()->create([
@@ -404,6 +434,33 @@ class ProductService extends BaseService
                     });
                     $spec->delete();
                 });
+            }
+            if (!empty($validatedData['fixed_specs'])) {
+
+                $spec = $product->specifications()->create([
+                    'name' => [
+                        'en' => 'Cutting',
+                        'ar' => 'القص',
+                    ],
+                    'type' => 'fixed',
+                    'fixed_key' => 'cutting',
+                ]);
+                collect($validatedData['fixed_specs'])
+                    ->map(fn($v) => CuttingEnum::tryFrom((int)$v))
+                    ->filter()
+                    ->each(function (CuttingEnum $cutting) use ($spec) {
+
+                        $labels = $cutting->labelLocales();
+
+                        $spec->options()->create([
+                            'value' => [
+                                'en' => $labels['en'],
+                                'ar' => $labels['ar'],
+                            ],
+                            'fixed_key' => $cutting->value,
+                            'price' => 0,
+                        ]);
+                    });
             }
 
             if (isset($validatedData['images_ids'])) {
