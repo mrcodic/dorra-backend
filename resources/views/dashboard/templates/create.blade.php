@@ -164,6 +164,9 @@
                                                         <input type="hidden" name="template_image_front_id"
                                                                id="uploadedFrontTemplateImage">
                                                     </div>
+                                                    <small class="form-text text-muted">
+                                                        If no size is selected, the default 618×700 will be applied.
+                                                    </small>
                                                 </div>
 
                                                 <!-- BACK -->
@@ -177,7 +180,11 @@
                                                         <input type="hidden" name="template_image_back_id"
                                                                id="uploadedBackTemplateImage">
                                                     </div>
+                                                    <small class="form-text text-muted">
+                                                        If no size is selected, the default 618×700 will be applied.
+                                                    </small>
                                                 </div>
+
 
                                                 <!-- NONE -->
                                                 <div class="form-group mb-2 col-md-6 d-none" id="dz-none">
@@ -190,6 +197,9 @@
                                                         <input type="hidden" name="template_image_none_id"
                                                                id="uploadedNoneTemplateImage">
                                                     </div>
+                                                    <small class="form-text text-muted">
+                                                        If no size is selected, the default 618×700 will be applied.
+                                                    </small>
 
                                                 </div>
                                             @endif
@@ -204,6 +214,9 @@
                                                     <input type="hidden" name="template_image_id"
                                                            id="uploadedTemplateImage">
                                                 </div>
+                                                <small class="form-text text-muted">
+                                                    If no size is selected, the default 618×700 will be applied.
+                                                </small>
                                             </div>
 
                                         </div>
