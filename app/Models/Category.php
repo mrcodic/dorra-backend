@@ -219,8 +219,8 @@ class Category extends Model implements HasMedia
                 $products = $this->products()
                     ->withAvg('reviews', 'rating')
                     ->get();
-                $sum = $products->sum(fn($p) => (float)($p->reviews_avg_rating ?? 0));
-                $count = $products->filter(fn($p) => $p->reviews_avg_rating !== null)->count();
+                $sum = $products->sum(fn($p) => (float)($p->reviews_avg ?? 0));
+                $count = $products->filter(fn($p) => $p->reviews_avg !== null)->count();
                 $avg = $count > 0 ? ($sum / $count) : 0;
                 return (float)number_format($avg, 2, '.', '');
             }
