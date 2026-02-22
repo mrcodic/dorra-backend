@@ -401,7 +401,7 @@
                                                 </option>
                                                 @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
 
-                                                    <option value="{{ $orientation->value }}"  @selected($orientation->value === \App\Enums\OrientationEnum::HORIZONTAL)>
+                                                    <option value="{{ $orientation->value }}" selected>
                                                         {{$orientation->label()}}
                                                     </option>
                                                 @endforeach
@@ -1266,6 +1266,7 @@
                                 $right.append(new Option(cat.name, cat.id, false, false));
                             }
                         });
+                        $right.trigger('change');
                         $right.val(saved).trigger('change');
 
                         // sync + maybe refresh

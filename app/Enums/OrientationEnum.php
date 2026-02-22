@@ -7,8 +7,8 @@ use App\Helpers\EnumHelpers;
 enum OrientationEnum : int
 {
     use EnumHelpers;
-    case VERTICAL = 1;
     case HORIZONTAL = 2;
+    case VERTICAL = 1;
 
 
     public function label()
