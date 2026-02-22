@@ -587,8 +587,6 @@
     <script>
         $(document).ready(function () {
             $('#categoriesSelect').trigger('change');
-            $('#sizesSelect').trigger('change');
-            refreshSizes();
         });
         $(function () {
             const q = "{{ request()->query('q') }}";
@@ -1294,14 +1292,14 @@
         $('#productsSelect').on('change', function () {
             syncSelectedResourcesToHiddenInputs();
             // optional immediate refresh:
-            // refreshSizes();
+            refreshSizes();
         });
 
         // Products without categories changed
         $('#productsWithoutCategoriesSelect').on('change', function () {
             syncSelectedResourcesToHiddenInputs();
             // optional immediate refresh:
-            // refreshSizes();
+            refreshSizes();
         });
 
         // When user opens/clicks Sizes, fetch fresh sizes
