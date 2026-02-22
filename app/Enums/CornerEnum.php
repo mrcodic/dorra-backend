@@ -4,11 +4,12 @@ namespace App\Enums;
 
 use App\Helpers\EnumHelpers;
 
-enum CornerEnum : int
+enum CornerEnum: int
 {
     use EnumHelpers;
-  case SHARP = 0;
-  case Rounded = 1;
+
+    case Rounded = 1;
+    case SHARP = 0;
 
     public function label()
     {

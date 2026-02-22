@@ -123,6 +123,7 @@
                                                         <input class="form-check-input " type="checkbox"
                                                                name="supported_languages[]"
                                                                value="{{ $locale }}"
+                                                               checked
                                                         >
                                                         <span>{{ $locale == 'en' ? 'English' : 'Arabic'}}</span>
                                                     </label>
@@ -139,7 +140,12 @@
                                                         <input class="form-check-input type-checkbox" type="checkbox"
                                                                name="types[]"
                                                                value="{{ $type->value }}"
-                                                               data-type-name="{{ strtolower($type->value->name) }}">
+                                                               data-type-name="{{ strtolower($type->value->name) }}"
+                                                            @checked(
+           $type->value === \App\Enums\Template\TypeEnum::FRONT
+           || $type->value === \App\Enums\Template\TypeEnum::BACK
+       )
+                                                        >
                                                         <span>{{ $type->value->label() }}</span>
                                                     </label>
                                                 </div>
@@ -227,13 +233,13 @@
                                         <div class="col-md-6">
                                             <label for="templateName" class="label-text mb-1">Name (EN)</label>
                                             <input type="text" id="templateName" class="form-control" name="name[en]"
-                                                   placeholder="Template Name in English">
+                                                   placeholder="Template Name in English" value="Personal Card">
                                         </div>
 
                                         <div class="col-md-6">
                                             <label for="templateName" class="label-text mb-1">Name (AR)</label>
                                             <input type="text" id="templateName" class="form-control" name="name[ar]"
-                                                   placeholder="Template Name in Arabic">
+                                                   placeholder="Template Name in Arabic" value="كارت شخصى">
                                         </div>
 
 
@@ -283,7 +289,9 @@
                                             <select id="categoriesSelect" class="form-select select2"
                                                     name="product_with_category" multiple>
                                                 @foreach($associatedData['product_with_categories'] as $category)
-                                                    <option value="{{ $category->id }}">
+                                                    <option value="{{ $category->id }}"
+                                                        @selected($category->getTranslation('name', 'en') === 'Business Card')
+                                                    >
                                                         {{ $category->getTranslation('name', app()->getLocale()) }}
                                                     </option>
                                                 @endforeach
@@ -392,7 +400,8 @@
                                                     chooese orientation
                                                 </option>
                                                 @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
-                                                    <option value="{{ $orientation->value }}">
+
+                                                    <option value="{{ $orientation->value }}"  @selected($orientation->value === \App\Enums\OrientationEnum::HORIZONTAL)>
                                                         {{$orientation->label()}}
                                                     </option>
                                                 @endforeach
@@ -429,7 +438,7 @@
                                                         <div class="form-check">
                                                             <input class="form-check-input" type="checkbox"
                                                                    name="has_corner"
-                                                                   id="shape_other" value="1">
+                                                                   id="shape_other" value="1" checked>
                                                             <label class="form-check-label"
                                                                    for="shape_other">Other</label>
                                                         </div>
@@ -444,7 +453,9 @@
                                                         </option>
                                                         @foreach(\App\Enums\CornerEnum::cases() as $border)
                                                             <option
-                                                                value="{{ $border->value }}">{{$border->label()}}</option>
+                                                                value="{{ $border->value }}"
+                                                            selected
+                                                            >{{$border->label()}}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -458,8 +469,7 @@
                                                         <input type="hidden" name="has_safety_area" value="0">
                                                         <input class="form-check-input" type="checkbox"
                                                                id="hasSafetyArea"
-                                                               name="has_safety_area" value="1" {{ old('has_safety_area') ? 'checked'
-                                                : '' }}>
+                                                               name="has_safety_area" value="1" checked>
                                                         <label class="form-check-label" for="hasSafetyArea">Enable
                                                             Safety
                                                             Area</label>
@@ -472,9 +482,7 @@
                                                         <select id="safetyAreaSelect" class="form-select select2"
                                                                 name="safety_area">
                                                             @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
-                                                                <option value="{{ $area->value }}" {{
-                                                    (string)old('safety_area')===(string)$area->value ? 'selected' :
-                                                    '' }}>
+                                                                <option value="{{ $area->value }}" @selected($area->value === \App\Enums\SafetyAreaEnum::R15)>
                                                                     {{ $area->label() }}
                                                                 </option>
                                                             @endforeach
@@ -493,7 +501,7 @@
                                                         <input type="hidden" value="0">
                                                         <input class="form-check-input" type="checkbox"
                                                                id="hasCutMargin" value="1"
-                                                            {{ old('cut_margin') ? 'checked' : '' }}>
+                                                               checked>
                                                         <label class="form-check-label" for="hasCutMargin">Enable Cut
                                                             Margin</label>
                                                     </div>
@@ -505,9 +513,9 @@
                                                         <select id="cutMarginSelect" class="form-select select2"
                                                                 name="cut_margin">
                                                             @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
-                                                                <option value="{{ $area->value }}" {{
-                                                    (string)old('cut_margin')===(string)$area->value ? 'selected' :
-                                                    '' }}>
+                                                                <option value="{{ $area->value }}"
+                                                                    @selected($area->value === \App\Enums\SafetyAreaEnum::R10)>
+
                                                                     {{ $area->label() }}
                                                                 </option>
                                                             @endforeach
@@ -577,7 +585,10 @@
 @section('vendor-script')
 
     <script>
-
+        $(document).ready(function () {
+            $('#categoriesSelect').trigger('change');
+            $('#sizesSelect').trigger('change');
+        });
         $(function () {
             const q = "{{ request()->query('q') }}";
             const isWithoutEditor = (q === 'without' || q === 'without_editor');
