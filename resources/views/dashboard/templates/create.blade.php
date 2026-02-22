@@ -1211,7 +1211,6 @@
             return {resource_ids: ids, resource_types: types};
         }
         function refreshSizes() {
-            // Ensure hidden inputs are synced
             syncSelectedResourcesToHiddenInputs();
             const payload = buildDimensionPayloadFromHidden();
 
@@ -1230,6 +1229,9 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 success(res) {
+                    // Remember current selection
+                    const current = $sizes.val() || [];
+
                     $sizes.empty();
 
                     const items = res.data || res || [];
@@ -1237,8 +1239,9 @@
                         const text = dimensionLabelHWTop(item, { showUnit: true });
                         const id = item.id;
 
-                        // Select only the first item
-                        $sizes.append(new Option(text, id, false, index === 0));
+                        // If user has no selection, auto-select the first option
+                        const selected = current.length ? current.includes(String(id)) : index === 0;
+                        $sizes.append(new Option(text, id, false, selected));
                     });
 
                     $sizes.trigger('change');
