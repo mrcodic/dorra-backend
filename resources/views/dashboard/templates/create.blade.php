@@ -1210,10 +1210,30 @@
             // return { resource_ids: ids, resource_types: types,has_corner: has_corner };
             return {resource_ids: ids, resource_types: types};
         }
+        let userSelectedSize = false;
+
+        // Track user interaction
+        $('#sizesSelect').on('change', function() {
+            if ($(this).val() && $(this).val().length) {
+                userSelectedSize = true;
+            } else {
+                userSelectedSize = false;
+                selectFirstSizeIfAvailable();
+            }
+        });
+
+        // Helper to select the first size if nothing is selected
+        function selectFirstSizeIfAvailable() {
+            const $sizes = $('#sizesSelect');
+            const firstOption = $sizes.find('option:first');
+            if (firstOption.length) {
+                $sizes.val(firstOption.val()).trigger('change');
+            }
+        }
+
         function refreshSizes() {
             syncSelectedResourcesToHiddenInputs();
             const payload = buildDimensionPayloadFromHidden();
-
             const $sizes = $('#sizesSelect');
 
             if (!payload.resource_ids.length) {
@@ -1229,9 +1249,7 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 success(res) {
-                    // Remember current selection
                     const current = $sizes.val() || [];
-
                     $sizes.empty();
 
                     const items = res.data || res || [];
@@ -1239,12 +1257,15 @@
                         const text = dimensionLabelHWTop(item, { showUnit: true });
                         const id = item.id;
 
-                        // If user has no selection, auto-select the first option
-                        const selected = current.length ? current.includes(String(id)) : index === 0;
+                        // Select if user hasn't selected anything yet and this is the first option
+                        const selected = !userSelectedSize && index === 0;
                         $sizes.append(new Option(text, id, false, selected));
                     });
 
                     $sizes.trigger('change');
+
+                    // Ensure first option is selected if user hasn't clicked
+                    if (!userSelectedSize) selectFirstSizeIfAvailable();
                 },
                 error(xhr) {
                     console.error('Failed to load dimensions:', xhr.responseText);
@@ -1252,6 +1273,12 @@
                 }
             });
         }
+
+        // On document ready, trigger change AFTER sizes are loaded
+        $(document).ready(function () {
+            $('#categoriesSelect').trigger('change');
+            refreshSizes(); // ensures first option is selected automatically
+        });
     </script>
     <script>
         // After “Products With Categories (left)” changes we fetch its categories (right), then sync + refresh
