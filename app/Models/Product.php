@@ -67,6 +67,7 @@ class Product extends Model implements HasMedia
             return $query;
         }
 
+        // Load average rating
         $query->withAvg('reviews as avg_rating', 'rating');
 
         return $query->where(function ($q) use ($ratings) {

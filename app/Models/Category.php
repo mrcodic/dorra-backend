@@ -39,16 +39,29 @@ class Category extends Model implements HasMedia
 
     public function scopeWithReviewRating(Builder $query, $ratings): Builder
     {
-        $ratings = is_array($ratings) ? $ratings : explode(',', (string)$ratings);
+        $ratings = is_array($ratings) ? $ratings : explode(',', (string) $ratings);
         $ratings = array_values(array_filter(array_map('intval', $ratings)));
 
         if (empty($ratings)) {
             return $query;
         }
 
-        return $query
-            ->withAvg('reviews as avg_rating', 'rating')
-            ->havingRaw('ROUND(avg_rating) IN (' . implode(',', $ratings) . ')');
+        $query->withAvg('reviews as avg_rating', 'rating');
+
+        return $query->having(function ($q) use ($ratings) {
+
+            foreach ($ratings as $rating) {
+
+                $min = $rating - 0.5;
+                $max = $rating == 5 ? 5 : $rating + 0.49;
+
+                if ($rating == 5) {
+                    $q->orHaving('avg_rating', '>=', 4.5);
+                } else {
+                    $q->orHavingBetween('avg_rating', [$min, $max]);
+                }
+            }
+        });
     }
 
     public function parent(): BelongsTo
