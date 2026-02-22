@@ -482,7 +482,7 @@
                                                         <select id="safetyAreaSelect" class="form-select select2"
                                                                 name="safety_area">
                                                             @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
-                                                                <option value="{{ $area->value }}" @selected($area === \App\Enums\SafetyAreaEnum::R15)>
+                                                                <option value="{{ $area }}" @selected($area === \App\Enums\SafetyAreaEnum::R15)>
                                                                     {{ $area->label() }}
                                                                 </option>
                                                             @endforeach
@@ -514,7 +514,7 @@
                                                                 name="cut_margin">
                                                             @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
                                                                 <option value="{{ $area->value }}"
-                                                                    @selected($area->value === \App\Enums\SafetyAreaEnum::R10)>
+                                                                    @selected($area === \App\Enums\SafetyAreaEnum::R10)>
 
                                                                     {{ $area->label() }}
                                                                 </option>
