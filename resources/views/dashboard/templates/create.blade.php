@@ -482,7 +482,7 @@
                                                         <select id="safetyAreaSelect" class="form-select select2"
                                                                 name="safety_area">
                                                             @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
-                                                                <option value="{{ $area->value }}" @selected($area->value === \App\Enums\SafetyAreaEnum::R15)>
+                                                                <option value="{{ $area->value }}" @selected($area === \App\Enums\SafetyAreaEnum::R15)>
                                                                     {{ $area->label() }}
                                                                 </option>
                                                             @endforeach
