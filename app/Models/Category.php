@@ -216,17 +216,19 @@ class Category extends Model implements HasMedia
     {
         return Attribute::make(
             get: function () {
-                $products = $this->products()
-                    ->withAvg('reviews', 'rating')
-                    ->get();
-                $sum = $products->sum(fn($p) => (float)($p->reviews_avg ?? 0));
-                $count = $products->filter(fn($p) => $p->reviews_avg !== null)->count();
-                $avg = $count > 0 ? ($sum / $count) : 0;
-                return (float)number_format($avg, 2, '.', '');
+
+                $avg = Review::query()
+                    ->join('products', function ($join) {
+                        $join->on('reviews.reviewable_id', '=', 'products.id')
+                            ->where('reviews.reviewable_type', Product::class);
+                    })
+                    ->where('products.category_id', $this->id)
+                    ->avg('reviews.rating');
+
+                return $avg ? round($avg, 2) : 0;
             }
         );
     }
-
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
