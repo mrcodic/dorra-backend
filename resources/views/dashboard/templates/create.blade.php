@@ -1212,39 +1212,46 @@
         }
 
         function refreshSizes() {
-            // Make sure hidden inputs reflect latest UI, then read from them
+            // Ensure hidden inputs are synced
             syncSelectedResourcesToHiddenInputs();
             const payload = buildDimensionPayloadFromHidden();
 
+            const $sizes = $('#sizesSelect');
+
             if (!payload.resource_ids.length) {
-                $('#sizesSelect').empty().trigger('change');
+                $sizes.empty().trigger('change');
                 return;
             }
 
             $.ajax({
                 url: "{{ route('dimensions.index') }}",
                 method: "POST",
-                data: payload,                   // parallel arrays
+                data: payload,
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 success(res) {
-                    const $sizes = $('#sizesSelect');
                     const current = $sizes.val() || [];
                     $sizes.empty();
 
                     const items = res.data || res || [];
                     items.forEach(item => {
-                        const text = dimensionLabelHWTop(item, {showUnit: true});  // "H * W Cm"
+                        const text = dimensionLabelHWTop(item, {showUnit: true}); // e.g., "H * W Cm"
                         const id = item.id;
-                        $sizes.append(new Option(text, id, false, false));
+
+                        // Auto-select the size if it matches payload or some condition
+                        // Here, we select all loaded sizes automatically
+                        $sizes.append(new Option(text, id, false, true)); // last 'true' selects it
                     });
 
-                    $sizes.val(current.filter(v => $sizes.find(`option[value="${v}"]`).length)).trigger('change');
+                    // Optional: If you want to preserve previously selected sizes
+                    // $sizes.val(current.filter(v => $sizes.find(`option[value="${v}"]`).length));
+
+                    $sizes.trigger('change');
                 },
                 error(xhr) {
                     console.error('Failed to load dimensions:', xhr.responseText);
-                    $('#sizesSelect').empty().trigger('change');
+                    $sizes.empty().trigger('change');
                 }
             });
         }
