@@ -1210,7 +1210,6 @@
             // return { resource_ids: ids, resource_types: types,has_corner: has_corner };
             return {resource_ids: ids, resource_types: types};
         }
-
         function refreshSizes() {
             // Ensure hidden inputs are synced
             syncSelectedResourcesToHiddenInputs();
@@ -1231,21 +1230,16 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 success(res) {
-                    const current = $sizes.val() || [];
                     $sizes.empty();
 
                     const items = res.data || res || [];
-                    items.forEach(item => {
-                        const text = dimensionLabelHWTop(item, {showUnit: true}); // e.g., "H * W Cm"
+                    items.forEach((item, index) => {
+                        const text = dimensionLabelHWTop(item, { showUnit: true });
                         const id = item.id;
 
-                        // Auto-select the size if it matches payload or some condition
-                        // Here, we select all loaded sizes automatically
-                        $sizes.append(new Option(text, id, false, true)); // last 'true' selects it
+                        // Select only the first item
+                        $sizes.append(new Option(text, id, false, index === 0));
                     });
-
-                    // Optional: If you want to preserve previously selected sizes
-                    // $sizes.val(current.filter(v => $sizes.find(`option[value="${v}"]`).length));
 
                     $sizes.trigger('change');
                 },
