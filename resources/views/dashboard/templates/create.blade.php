@@ -1253,25 +1253,27 @@
         // After “Products With Categories (left)” changes we fetch its categories (right), then sync + refresh
         $('#categoriesSelect').on('change', function () {
             const selectedIds = $(this).val();
+            const $right = $('#productsSelect');
             if (selectedIds && selectedIds.length > 0) {
                 $.ajax({
                     url: "{{ route('products.categories') }}",
                     type: "POST",
                     data: {_token: "{{ csrf_token() }}", category_ids: selectedIds},
                     success(response) {
-                        const $right = $('#productsSelect');
                         const saved = $right.val() || [];
-                        (response.data || []).forEach(cat => {
-                            if ($right.find(`option[value="${cat.id}"]`).length === 0) {
-                                $right.append(new Option(cat.name, cat.id, false, false));
-                            }
-                        });
-                        $right.trigger('change');
-                        $right.val(saved).trigger('change');
 
-                        // sync + maybe refresh
+                        // Clear previous options if needed
+                        $right.empty();
+
+                        (response.data || []).forEach(cat => {
+                            $right.append(new Option(cat.name, cat.id, false, true)); // last 'true' selects the option
+                        });
+
+                        // If you want to preserve previously selected values
+                        // $right.val(saved).trigger('change');
+
+                        $right.trigger('change'); // refresh select2
                         syncSelectedResourcesToHiddenInputs();
-                        // optional immediate refresh: refreshSizes();
                     },
                     error(xhr) {
                         console.error("Error fetching categories:", xhr.responseText);
@@ -1279,12 +1281,10 @@
                     }
                 });
             } else {
-                // Clear right select and sync
-                $('#productsSelect').empty().trigger('change');
+                $right.empty().trigger('change');
                 syncSelectedResourcesToHiddenInputs();
             }
         });
-
         // Right (categories) changed
         $('#productsSelect').on('change', function () {
             syncSelectedResourcesToHiddenInputs();
