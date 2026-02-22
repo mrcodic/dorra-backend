@@ -67,9 +67,36 @@ class Product extends Model implements HasMedia
             return $query;
         }
 
-        return $query
-            ->withAvg('reviews as avg_rating', 'rating')
-            ->havingRaw('ROUND(avg_rating) IN ('.implode(',', $ratings).')');
+        $query->withAvg('reviews as avg_rating', 'rating');
+
+        return $query->where(function ($q) use ($ratings) {
+
+            foreach ($ratings as $rating) {
+
+                switch ($rating) {
+
+                    case 5:
+                        $q->orHaving('avg_rating', '>=', 4.5);
+                        break;
+
+                    case 4:
+                        $q->orHavingBetween('avg_rating', [3.5, 4.49]);
+                        break;
+
+                    case 3:
+                        $q->orHavingBetween('avg_rating', [2.5, 3.49]);
+                        break;
+
+                    case 2:
+                        $q->orHavingBetween('avg_rating', [1.5, 2.49]);
+                        break;
+
+                    case 1:
+                        $q->orHavingBetween('avg_rating', [0.5, 1.49]);
+                        break;
+                }
+            }
+        });
     }
 
     public function category(): BelongsTo
