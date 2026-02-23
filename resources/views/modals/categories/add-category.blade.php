@@ -108,6 +108,15 @@
                                 placeholder="Enter Description Name(Ar)" name="description[ar]" rows="2"></textarea>
                         </div>
                     </div>
+                    <div class="col-md-12">
+                        <div class="mb-2">
+                            <label class="form-label label-text" for="sort">Product Ordering<span
+                                    style="color: red; font-size: 20px;">*</span></label>
+                            <input type="number" id="sort" class="form-control"
+                                   name="sort"
+                                   placeholder="Product ordering"/>
+                        </div>
+                    </div>
                     <!-- Has Mockup -->
                     <div class="col-md-12">
                         <div class="mb-2 d-flex align-items-center gap-2">

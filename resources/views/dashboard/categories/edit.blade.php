@@ -401,19 +401,30 @@
                                             </div>
                                         </div>
 
-
-                                        <!-- Tags -->
-                                        <div class="col-md-12">
-                                            <div class="mb-1">
-                                                <label class="form-label label-text" for="tags">Tags</label>
-                                                <select name="tags[]" id="tags" class="select2 form-select" multiple>
-                                                    @foreach($associatedData['tags'] as $tag)
-                                                        <option value="{{ $tag->id }}"
-                                                                @if(in_array($tag->id, $model->tags->pluck('id')->toArray())) selected @endif >{{ $tag->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
+                                       <div class="row">
+                                           <div class="col-md-6">
+                                               <div class="mb-2">
+                                                   <label class="form-label label-text" for="sort">Product Ordering<span
+                                                           style="color: red; font-size: 20px;">*</span></label>
+                                                   <input type="number" id="sort" class="form-control"
+                                                          name="sort"
+                                                          placeholder="Product ordering"
+                                                          value="{{ $model->sort }}"/>
+                                               </div>
+                                           </div>
+                                           <!-- Tags -->
+                                           <div class="col-md-6">
+                                               <div class="mb-1">
+                                                   <label class="form-label label-text" for="tags">Tags</label>
+                                                   <select name="tags[]" id="tags" class="select2 form-select" multiple>
+                                                       @foreach($associatedData['tags'] as $tag)
+                                                           <option value="{{ $tag->id }}"
+                                                                   @if(in_array($tag->id, $model->tags->pluck('id')->toArray())) selected @endif >{{ $tag->name }}</option>
+                                                       @endforeach
+                                                   </select>
+                                               </div>
+                                           </div>
+                                       </div>
 
                                         <!-- Dimensions -->
                                         <div class="col-md-12">

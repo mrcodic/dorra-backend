@@ -302,9 +302,18 @@
                                             </span>
                                             </div>
                                         </div>
-
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-2">
+                                                <label class="form-label label-text" for="sort">Product Ordering<span
+                                                        style="color: red; font-size: 20px;">*</span></label>
+                                                <input type="number" id="sort" class="form-control"
+                                                       name="sort"
+                                                       placeholder="Product ordering"/>
+                                            </div>
+                                        </div>
                                         <!-- Tags -->
-                                        <div class="col-md-12">
+                                        <div class="col-md-6">
                                             <div class="mb-2">
                                                 <label class="form-label label-text" for="tags">Tags <span
                                                         style="color: red; font-size: 20px;">*</span></label>
@@ -315,6 +324,7 @@
                                                 </select>
                                             </div>
                                         </div>
+                                    </div>
                                         <!-- Dimensions -->
 
                                         <div class="col-md-12 mb-2">

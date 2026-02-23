@@ -15,6 +15,7 @@ const dt_user_table = $(".category-list-table").DataTable({
         data: function (d) {
             d.search_value = $("#search-category-form").val(); // get from input
             d.created_at = $(".filter-date").val();
+            d.sort_order = $(".filter-sort-order").val();
             return d;
         },
     },
@@ -80,6 +81,7 @@ const dt_user_table = $(".category-list-table").DataTable({
             }
         },
         {data: "no_of_products"},
+        {data: "sort"},
         {data: "added_date"},
         {
             data: "id",
@@ -114,6 +116,7 @@ const dt_user_table = $(".category-list-table").DataTable({
                     btns.push(` <a href="#" class="edit-details"
    data-id="${data}"
    data-name_ar="${row.name_ar}"
+   data-sort="${row.sort}"
    data-name_en="${row.name_en}"
    data-has_mockup="${row.has_mockup}"
    data-image="${row.image}"
@@ -192,6 +195,8 @@ $("#search-category-form").on("keyup", function () {
 // Custom search with debounce
 
 $(".filter-date").on("change", function () {
+    dt_user_table.draw();
+});$(".filter-sort-order").on("change", function () {
     dt_user_table.draw();
 });
 
@@ -438,6 +443,7 @@ $(document).ready(function () {
                 id: "#edit-category-id",
                 imgId: null, // not present in your edit modal
                 subs: "#subcategories-container",
+                sort: "#edit-sort",
                 extra: () => {
                     $("#editCategoryModal #edit-uploaded-image").removeClass("d-none");
                 }
@@ -448,6 +454,7 @@ $(document).ready(function () {
         const $scope = $(modalId);
         // Fill fields safely (data-* with underscores come through as same keys in jQuery)
         $scope.find(m.nameAr).val(data.name_ar || "");
+        $scope.find(m.sort).val(data.sort || "");
         $scope.find(m.nameEn).val(data.name_en || "");
         $scope.find(m.products).val(data.products ?? "");
         $scope.find(m.date).val(data.showdate || "");

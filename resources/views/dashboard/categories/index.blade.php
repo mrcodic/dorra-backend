@@ -159,15 +159,21 @@
                     </button>
                 </form>
 
-                {{-- Filter Select - 10% on md+, half width on sm --}}
+{{--                --}}{{-- Filter Select - 10% on md+, half width on sm --}}
+{{--                <div class="col-12 col-md-3">--}}
+{{--                    <select name="created_at" class="form-select filter-date">--}}
+{{--                        <option value="" disabled>Date</option>--}}
+{{--                        <option value="desc">Newest</option>--}}
+{{--                        <option value="asc">Oldest</option>--}}
+{{--                    </select>--}}
+{{--                </div>--}}
                 <div class="col-12 col-md-3">
-                    <select name="created_at" class="form-select filter-date">
-                        <option value="" disabled>Date</option>
-                        <option value="desc">Newest</option>
-                        <option value="asc">Oldest</option>
+                    <select name="sort_order" class="form-select filter-sort-order">
+                        <option value="" disabled selected>Sort by Order</option>
+                        <option value="asc">Lowest Order First</option>
+                        <option value="desc">Highest Order First</option>
                     </select>
                 </div>
-
                 {{-- Add Button - 20% on md+, full width on xs --}}
                 @can("categories_create")
                 <div class="col-12 col-md-3">
@@ -192,6 +198,7 @@
                         <th>SubProducts</th>
                         <th>Categories</th>
                         <th>NO.of Categories</th>
+                        <th>Order</th>
                         <th>Added Date</th>
                         <th>Actions</th>
                     </tr>

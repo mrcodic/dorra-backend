@@ -38,6 +38,7 @@ class StoreProductWithoutCategoryRequest extends BaseRequest
             ],
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
+            'sort' => ['required', 'numeric','min:1'],
             'image_id' => ['required', 'exists:media,id'],
             'image_model_id' => ['required', 'exists:media,id'],
             'images_ids' => ['nullable', 'array'],

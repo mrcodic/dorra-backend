@@ -53,7 +53,7 @@ class CategoryService extends BaseService
                 $query->where(function ($query) {
                     $query->where('is_has_category', 0)->orWhereHas('products');
                 });
-            })->latest();
+            })->oldest('sort');
         return $paginate ? $query->paginate($perPage) : $query->get();
     }
 
@@ -541,7 +541,7 @@ class CategoryService extends BaseService
     {
         $locale = app()->getLocale();
         $categories = $this->repository
-            ->query(['id', 'name', 'description', 'created_at', 'is_has_category', 'has_mockup'])
+            ->query(['id', 'name', 'description', 'created_at', 'is_has_category', 'has_mockup','sort'])
             ->with(['products', 'children'])
             ->withCount(['children', 'products'])
             ->when(request()->filled('search_value'), function ($query) use ($locale) {
@@ -552,11 +552,15 @@ class CategoryService extends BaseService
                 } else {
                     $query->whereRaw('1 = 0');
                 }
-            })->when(request()->filled('created_at'), function ($query) {
-                $query->orderBy('created_at', request('created_at'));
+            })
+           ->when(request()->filled('sort_order'), function ($query) {
+
+                $direction = request('sort_order') === 'desc' ? 'desc' : 'asc';
+
+                $query->orderBy('sort', $direction);
             })
             ->whereNull('parent_id')
-            ->latest();
+            ->oldest('sort');
 
         return DataTables::of($categories)
             ->addColumn('name', function ($category) {

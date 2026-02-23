@@ -38,6 +38,8 @@ class StoreCategoryRequest extends BaseRequest
             ],
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
+            'sort' => ['required', 'numeric','min:1'],
+
             'image_id' => ['required','exists:media,id'],
             'website_banner_id' => ['required', 'exists:media,id'],
             'mobile_banner_id' => ['required', 'exists:media,id'],
