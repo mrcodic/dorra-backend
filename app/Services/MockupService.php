@@ -157,6 +157,7 @@ class MockupService extends BaseService
                 $productId = request('product_id');
 
                 if ($type === 'category') {
+                    dd($type,$productId);
                     $q->whereCategoryId($productId);
                 }
 
