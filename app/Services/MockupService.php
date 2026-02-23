@@ -153,7 +153,7 @@ class MockupService extends BaseService
             })
             ->when(request()->filled('product_id'), function ($q) {
 
-                $type = request()->get('type', 'category');
+                $type = request('type');
                 $productId = request('product_id');
 
                 if ($type === 'category') {
