@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Enums\Mockup\TypeEnum;
 use App\Jobs\HandleMockupFilesJob;
+use App\Models\Product;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\MockupRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
@@ -150,7 +151,10 @@ class MockupService extends BaseService
             ->when(request()->filled('color'), function ($query) {
 
             })
-            ->when(request()->filled('product_id'), fn($q) => $q->whereCategoryId(request('product_id')))
+            ->when(request()->filled('product_id') && request()->get('type','category') == 'category'
+                , fn($q) => $q->whereCategoryId(request('product_id')))
+            ->when(request()->filled('product_id') && request()->get('type') == 'product'
+                , fn($q) => $q->whereCategoryId(Product::find(request('product_id'))?->category_id))
             ->when(request()->filled('template_id'), fn($q) => $q->whereHas('templates', function ($query) {
                 $query->where('templates.id', request('template_id'));
             }))
