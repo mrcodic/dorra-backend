@@ -17,7 +17,7 @@ class MockupResource extends JsonResource
     public function toArray(Request $request): array
     {
 
-        $types = $this->whenLoaded('types', fn () => $this->types, collect());
+        $types = $this->whenLoaded('types', fn() => $this->types, collect());
 
         $images = $types->mapWithKeys(function ($type) {
             $sideName = strtolower($type->value->name);
@@ -31,26 +31,31 @@ class MockupResource extends JsonResource
                 return $media->getCustomProperty('side') === $sideName &&
                     $media->getCustomProperty('role') === 'mask';
             });
+            $shadowMedia = $this->getMedia('mockups')->first(function ($media) use ($sideName) {
+                return $media->getCustomProperty('side') === $sideName &&
+                    $media->getCustomProperty('role') === 'shadow';
+            });
 
             return [
                 $type->value->value => [
                     'base_url' => optional($baseMedia)->getFullUrl(),
                     'mask_url' => optional($maskMedia)->getFullUrl(),
+                    'shadow_url' => optional($shadowMedia)->getFullUrl(),
                 ],
             ];
         });
         return [
-            'id'    => $this->id,
-            'name'  => $this->name,
+            'id' => $this->id,
+            'name' => $this->name,
 
-            'types'  => TypeResource::collection($this->whenLoaded('types')),
-            'product'=> CategoryResource::make($this->whenLoaded('category')),
+            'types' => TypeResource::collection($this->whenLoaded('types')),
+            'product' => CategoryResource::make($this->whenLoaded('category')),
 
             'colors' => $this->templateColors,
 
-            'area_top'    => $this->area_top,
-            'area_left'   => $this->area_left,
-            'area_width'  => $this->area_width,
+            'area_top' => $this->area_top,
+            'area_left' => $this->area_left,
+            'area_width' => $this->area_width,
             'area_height' => $this->area_height,
 
             'mockup_template_urls' => $this->getMedia('generated_mockups')

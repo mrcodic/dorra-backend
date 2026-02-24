@@ -68,7 +68,17 @@ class UpdateMockupRequest extends BaseRequest
                 'array',
             ],
 
+            'front_base_image' => [
+                Rule::requiredIf(in_array(1, $types)),
+                'image',
+                'mimes:jpg',
+            ],
             'front_mask_image' => [
+                Rule::requiredIf(in_array(1, $types)),
+                'image',
+                'mimes:png',
+            ],
+            'front_shadow_image' => [
                 Rule::requiredIf(in_array(1, $types)),
                 'image',
                 'mimes:png',
@@ -84,6 +94,11 @@ class UpdateMockupRequest extends BaseRequest
                 'image',
                 'mimes:png',
             ],
+            'back_shadow_image' => [
+                Rule::requiredIf(in_array(2, $types)),
+                'image',
+                'mimes:png',
+            ],
 
             'none_base_image' => [
                 Rule::requiredIf(in_array(3, $types)),
@@ -91,6 +106,11 @@ class UpdateMockupRequest extends BaseRequest
                 'mimes:jpg',
             ],
             'none_mask_image' => [
+                Rule::requiredIf(in_array(3, $types)),
+                'image',
+                'mimes:png',
+            ],
+            'none_shadow_image' => [
                 Rule::requiredIf(in_array(3, $types)),
                 'image',
                 'mimes:png',

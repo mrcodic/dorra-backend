@@ -323,15 +323,17 @@
                 return str.charAt(0).toUpperCase() + str.slice(1);
             }
 
-            function preloadFile(type, baseUrl, maskUrl) {
+            function preloadFile(type, baseUrl, maskUrl, shadowUrl) {
                 const baseInput = document.getElementById(`${type}-base-input`);
                 const maskInput = document.getElementById(`${type}-mask-input`);
+                const shadowInput = document.getElementById(`${type}-shadow-input`);
 
                 const block = document.getElementById(`${type}-file-block`);
                 if (!block) return;
 
                 const basePreview = block.querySelector(`.upload-area[data-input-id="${type}-base-input"] .preview`);
                 const maskPreview = block.querySelector(`.upload-area[data-input-id="${type}-mask-input"] .preview`);
+                const shadowPreview = block.querySelector(`.upload-area[data-input-id="${type}-shadow-input"] .preview`);
 
                 const canvas = window[`canvas${capitalize(type)}`];
                 const wrapperId = `editor${capitalize(type)}Wrapper`;
@@ -375,6 +377,26 @@
                             });
                     }
                 }
+
+                // -----------------------------
+                // Shadow image
+                // -----------------------------
+                if (shadowUrl && shadowPreview) {
+                    shadowPreview.innerHTML = `<img src="${shadowUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
+                    if (canvas) loadMaskImage(canvas, shadowUrl);
+                    document.getElementById(wrapperId)?.classList.remove('d-none');
+
+                    // set file input value
+                    if (shadowInput) {
+                        fetch(shadowUrl)
+                            .then(res => res.blob())
+                            .then(blob => {
+                                const dt = new DataTransfer();
+                                dt.items.add(new File([blob], 'shadow.png', { type: blob.type }));
+                                shadowInput.files = dt.files;
+                            });
+                    }
+                }
             }
 
 
@@ -394,7 +416,8 @@
                     preloadFile(
                         "{{ strtolower($type->value->name) }}",
                         "{{ $model->{ strtolower($type->value->name) . '_base_image_url' } ?? '' }}",
-                        "{{ $model->{ strtolower($type->value->name) . '_mask_image_url' } ?? '' }}"
+                        "{{ $model->{ strtolower($type->value->name) . '_mask_image_url' } ?? '' }}",
+                        "{{ $model->{ strtolower($type->value->name) . '_shadow_image_url' } ?? '' }}"
                     );
                 }, 50); // 50ms delay usually enough
             })();

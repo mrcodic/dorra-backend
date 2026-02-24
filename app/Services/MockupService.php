@@ -268,7 +268,7 @@ class MockupService extends BaseService
         }
 
         $types = collect(request()->input('types', []));
-        $mediaTypes = collect(['base_image', 'mask_image']);
+        $mediaTypes = collect(['base_image', 'mask_image', 'shadow_image']);
 
         $types->each(function ($type) use ($mediaTypes, $model, $clearExisting) {
             $sideName = strtolower(TypeEnum::from($type)->name);
@@ -279,8 +279,13 @@ class MockupService extends BaseService
                 if (!request()->hasFile($inputName)) {
                     return;
                 }
-
-                $role = str_contains($mediaType, 'base') ? 'base' : 'mask';
+                if (str_contains($mediaType, 'base')) {
+                    $role = 'base';
+                } elseif (str_contains($mediaType, 'mask')) {
+                    $role = 'mask';
+                } elseif (str_contains($mediaType, 'shadow')) {
+                    $role = 'shadow';
+                }
 
                 if ($clearExisting) {
                     $model->media()

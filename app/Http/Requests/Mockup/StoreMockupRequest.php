@@ -65,34 +65,49 @@ class StoreMockupRequest extends BaseRequest
             'front_base_image' => [
                 Rule::requiredIf(in_array(1, $types)),
                 'image',
-//                'mimes:jpg',
+                'mimes:jpg',
             ],
             'front_mask_image' => [
                 Rule::requiredIf(in_array(1, $types)),
                 'image',
-//                'mimes:png',
+                'mimes:png',
+            ],
+            'front_shadow_image' => [
+                Rule::requiredIf(in_array(1, $types)),
+                'image',
+                'mimes:png',
             ],
 
             'back_base_image' => [
                 Rule::requiredIf(in_array(2, $types)),
                 'image',
-//                'mimes:jpg',
+                'mimes:jpg',
             ],
             'back_mask_image' => [
                 Rule::requiredIf(in_array(2, $types)),
                 'image',
-//                'mimes:png',
+                'mimes:png',
+            ],
+            'back_shadow_image' => [
+                Rule::requiredIf(in_array(2, $types)),
+                'image',
+                'mimes:png',
             ],
 
             'none_base_image' => [
                 Rule::requiredIf(in_array(3, $types)),
                 'image',
-//                'mimes:jpg',
+                'mimes:jpg',
             ],
             'none_mask_image' => [
                 Rule::requiredIf(in_array(3, $types)),
                 'image',
-//                'mimes:png',
+                'mimes:png',
+            ],
+            'none_shadow_image' => [
+                Rule::requiredIf(in_array(3, $types)),
+                'image',
+                'mimes:png',
             ],
         ];
     }
