@@ -1788,6 +1788,20 @@
                             </div>
                         </div>
                     </div>
+<div class="mb-2">
+                        <label class="form-label label-text">${typeLabel} Shodow Image</label>
+                        <input type="file" name="${type}_shadow_image" id="${type}-shadow-input"
+                            class="d-none" accept="image/*">
+
+                        <div class="upload-card upload-area" data-input-id="${type}-shadow-input">
+                            <div class="upload-content">
+                                <i data-feather="upload" class="mb-2"></i>
+                                <p>${typeLabel} Shodow Image: Drag file here or click to upload</p>
+                                <div class="preview mt-1"></div>
+                            </div>
+                        </div>
+                    </div>
+
         `;
 
                 document.getElementById('fileInputsContainer').appendChild(block);
