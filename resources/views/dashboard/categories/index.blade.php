@@ -31,7 +31,8 @@
         .category-list-table th:nth-child(5),
         .category-list-table th:nth-child(6),
         .category-list-table th:nth-child(7),
-        .category-list-table th:nth-child(8) {
+        .category-list-table th:nth-child(8),
+        .category-list-table th:nth-child(9) {
             display: none !important;
         }
 
@@ -39,7 +40,8 @@
         .category-list-table tbody tr:not(.details-row) td:nth-child(5),
         .category-list-table tbody tr:not(.details-row) td:nth-child(6),
         .category-list-table tbody tr:not(.details-row) td:nth-child(7),
-        .category-list-table tbody tr:not(.details-row) td:nth-child(8) {
+        .category-list-table tbody tr:not(.details-row) td:nth-child(8),
+        .category-list-table tbody tr:not(.details-row) td:nth-child(9) {
             display: none !important;
         }
 
@@ -159,14 +161,14 @@
                     </button>
                 </form>
 
-{{--                --}}{{-- Filter Select - 10% on md+, half width on sm --}}
-{{--                <div class="col-12 col-md-3">--}}
-{{--                    <select name="created_at" class="form-select filter-date">--}}
-{{--                        <option value="" disabled>Date</option>--}}
-{{--                        <option value="desc">Newest</option>--}}
-{{--                        <option value="asc">Oldest</option>--}}
-{{--                    </select>--}}
-{{--                </div>--}}
+                {{-- --}}{{-- Filter Select - 10% on md+, half width on sm --}}
+                {{-- <div class="col-12 col-md-3">--}}
+                    {{-- <select name="created_at" class="form-select filter-date">--}}
+                        {{-- <option value="" disabled>Date</option>--}}
+                        {{-- <option value="desc">Newest</option>--}}
+                        {{-- <option value="asc">Oldest</option>--}}
+                        {{-- </select>--}}
+                    {{-- </div>--}}
                 <div class="col-12 col-md-3">
                     <select name="sort_order" class="form-select filter-sort-order">
                         <option value="" disabled selected>Sort by Order</option>
@@ -191,7 +193,8 @@
                 <thead class="table-light">
                     <tr>
                         <th>
-                            <input type="checkbox" id="select-all-checkbox" class="form-check-input" @disabled(!auth()->user()->hasPermissionTo('categories_delete'))>
+                            <input type="checkbox" id="select-all-checkbox" class="form-check-input"
+                                @disabled(!auth()->user()->hasPermissionTo('categories_delete'))>
                         </th>
                         <th>IMAGE</th>
                         <th>Name</th>
@@ -347,8 +350,9 @@
                 const subProducts = $row.find('td:nth-child(4)').html() || '';
                 const categories = $row.find('td:nth-child(5)').html() || '';
                 const noOfCategories = $row.find('td:nth-child(6)').html() || '';
-                const addedDate = $row.find('td:nth-child(7)').html() || '';
-                const actions = $row.find('td:nth-child(8)').html() || '';
+                const order = $row.find('td:nth-child(7)').html() || '';
+                const addedDate = $row.find('td:nth-child(8)').html() || '';
+                const actions = $row.find('td:nth-child(9)').html() || '';
 
                 // Create details row
                 const detailsHtml = `
@@ -366,6 +370,10 @@
                                 <div class="detail-row">
                                     <span class="detail-label">No. Of Categories:</span>
                                     <span class="detail-value">${noOfCategories}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Order:</span>
+                                    <span class="detail-value">${order}</span>
                                 </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Added Date:</span>
