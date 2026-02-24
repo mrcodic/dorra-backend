@@ -363,7 +363,7 @@
                 // -----------------------------
                 if (maskUrl && maskPreview) {
                     maskPreview.innerHTML = `<img src="${maskUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
-                    if (canvas) loadMaskImage(canvas, maskUrl);
+                    // if (canvas) loadMaskImage(canvas, maskUrl);
                     document.getElementById(wrapperId)?.classList.remove('d-none');
 
                     // set file input value
