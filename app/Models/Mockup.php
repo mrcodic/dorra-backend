@@ -27,10 +27,13 @@ class Mockup extends Model implements HasMedia
     protected $appends = [
         'front_base_image_url',
         'front_mask_image_url',
+        'front_shadow_image_url',
         'back_base_image_url',
         'back_mask_image_url',
+        'back_shadow_image_url',
         'none_base_image_url',
         'none_mask_image_url',
+        'none_shadow_image_url',
     ];
 
     protected $casts = [
@@ -95,6 +98,10 @@ class Mockup extends Model implements HasMedia
     {
         return $this->getSideMediaUrl('front', 'mask');
     }
+    public function getFrontShadowImageUrlAttribute(): ?string
+    {
+        return $this->getSideMediaUrl('front', 'shadow');
+    }
 
     public function getBackBaseImageUrlAttribute(): ?string
     {
@@ -105,6 +112,10 @@ class Mockup extends Model implements HasMedia
     {
         return $this->getSideMediaUrl('back', 'mask');
     }
+    public function getBackShadowImageUrlAttribute(): ?string
+    {
+        return $this->getSideMediaUrl('back', 'shadow');
+    }
 
     public function getNoneBaseImageUrlAttribute(): ?string
     {
@@ -114,6 +125,10 @@ class Mockup extends Model implements HasMedia
     public function getNoneMaskImageUrlAttribute(): ?string
     {
         return $this->getSideMediaUrl('none', 'mask');
+    }
+    public function getNoneShadowImageUrlAttribute(): ?string
+    {
+        return $this->getSideMediaUrl('none', 'shadow');
     }
 
     public function category(): BelongsTo

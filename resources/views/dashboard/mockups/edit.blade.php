@@ -382,8 +382,8 @@
                 // Shadow image
                 // -----------------------------
                 if (shadowUrl && shadowPreview) {
+                    console.log("shadow",shadowUrl)
                     shadowPreview.innerHTML = `<img src="${shadowUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
-                    if (canvas) loadMaskImage(canvas, shadowUrl);
                     document.getElementById(wrapperId)?.classList.remove('d-none');
 
                     // set file input value
@@ -1789,7 +1789,7 @@
                         </div>
                     </div>
 <div class="mb-2">
-                        <label class="form-label label-text">${typeLabel} Shodow Image</label>
+                        <label class="form-label label-text">${typeLabel} Shadow Image</label>
                         <input type="file" name="${type}_shadow_image" id="${type}-shadow-input"
                             class="d-none" accept="image/*">
 
