@@ -49,24 +49,24 @@ class StoreDesignRequest extends BaseRequest
                 ]);
             }
         }  if ($this->has('description')) {
-            $description = $this->input('description');
+        $description = $this->input('description');
 
-            if (is_string($description)) {
-                $this->merge([
-                    'description' => [
-                        'en' => $description,
-                        'ar' => $description,
-                    ],
-                ]);
-            } elseif (is_array($description)) {
-                $this->merge([
-                    'description' => [
-                        'en' => $description['en'] ?? null,
-                        'ar' => $description['ar'] ?? null,
-                    ],
-                ]);
-            }
+        if (is_string($description)) {
+            $this->merge([
+                'description' => [
+                    'en' => $description,
+                    'ar' => $description,
+                ],
+            ]);
+        } elseif (is_array($description)) {
+            $this->merge([
+                'description' => [
+                    'en' => $description['en'] ?? null,
+                    'ar' => $description['ar'] ?? null,
+                ],
+            ]);
         }
+    }
 
     }
     public function rules(): array
@@ -173,10 +173,11 @@ class StoreDesignRequest extends BaseRequest
             'price' => $template?->price,
             'name' =>$template
                 ? [
-                'en' => $template->getTranslation('name', 'en'),
-                'ar' => $template->getTranslation('name', 'ar'),
-            ] : $this->input('name'),
+                    'en' => $template->getTranslation('name', 'en'),
+                    'ar' => $template->getTranslation('name', 'ar'),
+                ] : $this->input('name'),
             'description' => $template?->description ?? $this->input('description'),
+            'orientation' => $template?->orientation->value ?? $this->input('orientation'),
             'cookie' => $cookieValue,
         ]);
     }
@@ -184,7 +185,7 @@ class StoreDesignRequest extends BaseRequest
     public function attributes(): array
     {
         return [
-         'dimension_id' => 'dimension'
+            'dimension_id' => 'dimension'
         ];
     }
 }
