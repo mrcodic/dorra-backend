@@ -273,6 +273,14 @@ class TemplateController extends DashboardController
         ]);
     }
 
+    public function toggleBestSeller(Template $template)
+    {
+        $template->update([
+            'is_best_seller' => ! $template->is_best_seller
+        ]);
 
+        return Response::api(data: TemplateResource::make($template));
+
+    }
 
 }

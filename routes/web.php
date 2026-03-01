@@ -219,6 +219,9 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             ->name('product-templates.change-status.show');
         Route::post('/product-templates/import', [TemplateController::class, 'import'])
             ->name('product-templates.import');
+        Route::put('/product-templates/{template}/best-seller',
+            [TemplateController::class, 'toggleBestSeller'])
+            ->name('product-templates.best-seller.toggle');
         Route::resource('/product-templates', TemplateController::class);
 
         Route::controller(ProfileController::class)->prefix('profile')->group(function () {

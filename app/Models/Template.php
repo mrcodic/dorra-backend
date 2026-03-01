@@ -42,7 +42,7 @@ class Template extends Model implements HasMedia
         'border',
         'approach',
         'supported_languages',
-        'order',
+        'is_best_seller',
     ];
     protected $casts = [
         'supported_languages' => 'array',

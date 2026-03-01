@@ -331,7 +331,7 @@
                                         </div>
                                     </div>
                                     <div class="row mb-2">
-                                        <div class="col-md-6">
+                                        <div class="col-md-12">
                                             <label for="templatePrice" class="label-text mb-1">
                                                 Price</label>
                                             <input id="templatePrice" class="form-control" type="number"
@@ -340,20 +340,8 @@
                                                    min="0"
                                             />
                                         </div>
-                                        <div class="col-md-6">
-                                            <label for="templatePriority" class="label-text mb-1">
-                                                Display Order
-                                            </label>
-                                            <input id="templatePriority"
-                                                   class="form-control"
-                                                   type="number"
-                                                   name="order"
-                                                   placeholder="Template Order"
-                                                   value="{{  $model->order }}"
-                                                   min="0"/>
-                                        </div>
                                     </div>
-                                        
+
                                     </div>
                                     <div class="position-relative mt-3 text-center">
                                         <hr class="opacity-75" style="border: 1px solid #24B094;">

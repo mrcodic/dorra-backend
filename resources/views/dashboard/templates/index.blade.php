@@ -79,13 +79,6 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-12 col-md-3 col-lg-2">
-                        <select name="sort_order" class="form-select filter-sort-order">
-                            <option value="" disabled selected>Sort by Order</option>
-                            <option value="asc">Lowest Order First</option>
-                            <option value="desc">Highest Order First</option>
-                        </select>
-                    </div>
                     {{-- create template button --}}
                     @can('product-templates_create')
                     <a class="btn btn-primary col-12 col-md-3 col-lg-2" data-bs-target="#templateEditorModal" data-bs-toggle="modal" href="{{ route('product-templates.create') }}">

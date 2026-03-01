@@ -32,7 +32,6 @@ class StoreTranslatedTemplateRequest extends BaseRequest
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
             'type' => ['sometimes', 'in:' . TypeEnum::getValuesAsString()],
-            'order' => ['required', 'numeric','min:1'],
             'supported_languages' => ['nullable','array'],
             'supported_languages.*' => ['nullable','in:en,ar'],
             'product_ids' => ['nullable','required_with:product_with_category', 'array'],

@@ -13,10 +13,21 @@
 
       ">
     {{ $template->approach === 'with_editor' ? 'With Editor' : 'Without Editor' }}     </span>
-                @can('product-templates_delete')
-                    <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox"
-                           value="{{ $template->id }}" name="selected_templates[]">
-                @endcan
+            @if($template->is_best_seller)
+                <span class="badge position-absolute top-0 translate-middle-x mt-1"
+                      style="
+            background-color:#ffc107;
+            color:#000;
+            z-index:2;
+            left: 200px;
+          ">
+        ⭐ Best Seller
+    </span>
+            @endif
+            @can('product-templates_delete')
+                <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox"
+                       value="{{ $template->id }}" name="selected_templates[]">
+            @endcan
 
 
 
@@ -75,6 +86,20 @@
                                 <input type="hidden" name="status" value="{{ \App\Enums\Template\StatusEnum::LIVE }}">
                                 <button class="dropdown-item change-status-btn w-100    "><i data-feather="radio"
                                                                                              class="me-1"> </i>Live
+                                </button>
+                            </form>
+                        </li>
+                    @endcan
+                    @can('product-templates_update')
+                        <li>
+                            <form action="{{ route('product-templates.best-seller.toggle', $template->id) }}"
+                                  method="POST">
+                                @csrf
+                                @method('PUT')
+
+                                <button type="submit" class="dropdown-item w-100">
+                                    <i data-feather="star" class="me-1"></i>
+                                    {{ $template->is_best_seller ? 'Remove Best Seller' : 'Mark as Best Seller' }}
                                 </button>
                             </form>
                         </li>

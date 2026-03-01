@@ -156,7 +156,7 @@ class TemplateService extends BaseService
                         $qq->orWhereJsonContains('supported_languages', $lang);
                     }
                 });
-            })->oldest('order');
+            })->latest();
 
         if (request()->ajax()) {
             return $pageSize === null
@@ -538,7 +538,7 @@ class TemplateService extends BaseService
                 $query->whereHas('products', function ($q) use ($productId) {
                     $q->where('products.id', $productId);
                 });
-            })->oldest('order')
+            })
             ->paginate(10);
     }
 
