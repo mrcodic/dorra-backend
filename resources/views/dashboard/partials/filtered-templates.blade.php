@@ -13,8 +13,19 @@
 
       ">
     {{ $template->approach === 'with_editor' ? 'With Editor' : 'Without Editor' }}     </span>
-
-            @can('product-templates_delete')
+            {{-- Best Seller Badge --}}
+            @if($template->is_best_seller)
+                <span class="badge position-absolute top-0 translate-middle-x mt-1"
+                      style="
+              background-color: #ffc107;
+              color: #000;
+              z-index: 2;
+              left: 200px;
+          ">
+        <i data-feather="star" style="width:14px;height:14px;"></i>
+        Best Seller
+    </span>
+            @endif            @can('product-templates_delete')
                 <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox"
                        value="{{ $template->id }}" name="selected_templates[]">
             @endcan
