@@ -41,7 +41,8 @@ class Template extends Model implements HasMedia
         'cut_margin',
         'border',
         'approach',
-        'supported_languages'
+        'supported_languages',
+        'order',
     ];
     protected $casts = [
         'supported_languages' => 'array',
