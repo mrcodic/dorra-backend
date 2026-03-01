@@ -155,7 +155,7 @@ class TemplateService extends BaseService
                         $qq->orWhereJsonContains('supported_languages', $lang);
                     }
                 });
-            });
+            })->oldest('order');
 
         if (request()->ajax()) {
             return $pageSize === null
