@@ -79,7 +79,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-12 col-md-3">
+                    <div class="col-12 col-md-3 col-lg-2">
                         <select name="sort_order" class="form-select filter-sort-order">
                             <option value="" disabled selected>Sort by Order</option>
                             <option value="asc">Lowest Order First</option>
