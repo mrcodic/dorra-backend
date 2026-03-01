@@ -41,7 +41,7 @@ class UpdateTemplateEditorRequest extends BaseRequest
                 'max:255',
 
             ],
-            'design_data' => ['required', 'json', function ($attribute, $value, $fail) {
+            'design_data' => ['sometimes', 'json', function ($attribute, $value, $fail) {
                 if ($value === 'null') {
                     $fail($attribute . ' cannot be null.');
                 }
@@ -51,7 +51,7 @@ class UpdateTemplateEditorRequest extends BaseRequest
                     $fail($attribute . ' cannot be empty.');
                 }
             },],
-            'design_back_data' => ['required', 'json', function ($attribute, $value, $fail) {
+            'design_back_data' => ['sometimes', 'json', function ($attribute, $value, $fail) {
                 if ($value === 'null') {
                     $fail($attribute . ' cannot be null.');
                 }
