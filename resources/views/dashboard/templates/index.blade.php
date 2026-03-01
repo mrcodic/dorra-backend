@@ -58,13 +58,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-12 col-md-3 col-lg-1">
-                        <select name="sort_order" class="form-select filter-sort-order">
-                            <option value="" disabled selected>Sort by Order</option>
-                            <option value="asc">Lowest Order First</option>
-                            <option value="desc">Highest Order First</option>
-                        </select>
-                    </div>
+
                     {{-- Status Filter --}}
                     <div class="col-12 col-md-2 col-lg-1">
                         <select name="status" class="form-select filter-status select2" data-placeholder="Status">
@@ -85,7 +79,13 @@
                             @endforeach
                         </select>
                     </div>
-
+                    <div class="col-12 col-md-3">
+                        <select name="sort_order" class="form-select filter-sort-order">
+                            <option value="" disabled selected>Sort by Order</option>
+                            <option value="asc">Lowest Order First</option>
+                            <option value="desc">Highest Order First</option>
+                        </select>
+                    </div>
                     {{-- create template button --}}
                     @can('product-templates_create')
                     <a class="btn btn-primary col-12 col-md-3 col-lg-2" data-bs-target="#templateEditorModal" data-bs-toggle="modal" href="{{ route('product-templates.create') }}">
