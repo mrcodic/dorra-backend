@@ -80,7 +80,7 @@
                         </select>
                     </div>
 
-                    <div class="col-12 col-md-2 col-lg-1">
+                    <div class="col-12 col-md-3 col-lg-2">
                         <select name="best_seller" class="form-select filter-best-seller select2" data-placeholder="Best Seller">
                             <option value="">Best Seller</option>
                             <option value="1" @selected(request('best_seller') == '1')>Yes</option>
@@ -311,7 +311,7 @@
         },
         resetForm: false,
     });
-    handleAjaxFormSubmit('update-best-seller', {
+    handleAjaxFormSubmit('.update-best-seller', {
         successMessage: '✅ Marked as Best Seller successfully!',
         onSuccess: function (response, $form) {
             console.log('Success:', response);
