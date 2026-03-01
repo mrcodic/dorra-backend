@@ -271,8 +271,7 @@
                                                    step="0.01"
                                                    min="0"/>
                                         </div>
-                                    </div>
-                                        <div class="row mb-2">
+
                                             <div class="col-md-6">
                                                 <label for="templatePriority" class="label-text mb-1">
                                                     Display Order

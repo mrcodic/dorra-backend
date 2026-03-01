@@ -340,8 +340,6 @@
                                                    min="0"
                                             />
                                         </div>
-                                    </div>
-                                        <div class="col-md-6">
                                             <label for="templatePriority" class="label-text mb-1">
                                                 Display Order
                                             </label>
