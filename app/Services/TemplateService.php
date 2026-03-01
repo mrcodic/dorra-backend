@@ -537,7 +537,7 @@ class TemplateService extends BaseService
                 $query->whereHas('products', function ($q) use ($productId) {
                     $q->where('products.id', $productId);
                 });
-            })
+            })->oldest('order')
             ->paginate(10);
     }
 
