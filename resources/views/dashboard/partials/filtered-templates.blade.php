@@ -13,17 +13,7 @@
 
       ">
     {{ $template->approach === 'with_editor' ? 'With Editor' : 'Without Editor' }}     </span>
-            @if($template->is_best_seller)
-                <span class="badge position-absolute top-0 translate-middle-x mt-1"
-                      style="
-            background-color:#ffc107;
-            color:#000;
-            z-index:2;
-            left: 200px;
-          ">
-        ⭐ Best Seller
-    </span>
-            @endif
+
             @can('product-templates_delete')
                 <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox"
                        value="{{ $template->id }}" name="selected_templates[]">
@@ -92,7 +82,7 @@
                     @endcan
                     @can('product-templates_update')
                         <li>
-                            <form action="{{ route('product-templates.best-seller.toggle', $template->id) }}"
+                            <form class="update-best-seller" action="{{ route('product-templates.best-seller.toggle', $template->id) }}"
                                   method="POST">
                                 @csrf
                                 @method('PUT')

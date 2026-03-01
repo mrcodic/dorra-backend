@@ -130,6 +130,7 @@ class TemplateService extends BaseService
                 });
             })
             ->when(request()->filled('status'), fn($q) => $q->whereStatus(request('status')))
+            ->when(request()->filled('best_seller'), fn($q) => $q->where('is_best_seller', request('best_seller')))
             ->when(request()->filled('is_landing'), function ($query) {
                 $query->where('is_landing', true);
             })->when(request()->filled('tags'), function ($q) {
@@ -182,7 +183,7 @@ class TemplateService extends BaseService
                                 });
 
                         });
-                });
+                })->orderByDesc('is_best_seller');
 
 
             return $paginate
@@ -538,7 +539,8 @@ class TemplateService extends BaseService
                 $query->whereHas('products', function ($q) use ($productId) {
                     $q->where('products.id', $productId);
                 });
-            })
+            })->orderByDesc('is_best_seller')
+            ->latest()
             ->paginate(10);
     }
 

@@ -25,7 +25,7 @@ $(document).ready(function () {
         $('#search-category-form').val('');  // clear input
         fetchTemplates();
     });
-    $('.filter-status, .filter-product,.filter-tags, #search-category-form, .filter-paginate-number').on('change keyup', function () {
+    $('.filter-status, .filter-product,.filter-tags, #search-category-form, .filter-paginate-number, .filter-best-seller').on('change keyup', function () {
         fetchTemplates();
     });
 });
@@ -36,6 +36,7 @@ function fetchTemplates(page = 1) {
         page: page,
         search_value: $('#search-category-form').val(),
         product_id: $('.filter-product').val(),
+        best_seller: $('.filter-best-seller').val(),
         tags: $('.filter-tags').val(),
         status: $('.filter-status').val(),
         per_page: $('.filter-paginate-number').val()

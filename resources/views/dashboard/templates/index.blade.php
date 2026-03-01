@@ -79,6 +79,14 @@
                             @endforeach
                         </select>
                     </div>
+
+                    <div class="col-12 col-md-2 col-lg-1">
+                        <select name="best_seller" class="form-select filter-best-seller select2" data-placeholder="Best Seller">
+                            <option value="">Best Seller</option>
+                            <option value="1" @selected(request('best_seller') == '1')>Yes</option>
+                            <option value="0" @selected(request('best_seller') == '0')>No</option>
+                        </select>
+                    </div>
                     {{-- create template button --}}
                     @can('product-templates_create')
                     <a class="btn btn-primary col-12 col-md-3 col-lg-2" data-bs-target="#templateEditorModal" data-bs-toggle="modal" href="{{ route('product-templates.create') }}">
@@ -296,6 +304,18 @@
                 {{--    $liveBtn.addClass('disabled').prop('disabled', true);--}}
                 {{--}--}}
             }
+        },
+
+        onError: function (xhr, $form) {
+            console.error('Error:', xhr);
+        },
+        resetForm: false,
+    });
+    handleAjaxFormSubmit('update-best-seller', {
+        successMessage: '✅ Marked as Best Seller successfully!',
+        onSuccess: function (response, $form) {
+            console.log('Success:', response);
+            location.reload()
         },
 
         onError: function (xhr, $form) {
