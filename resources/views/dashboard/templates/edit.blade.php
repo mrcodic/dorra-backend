@@ -340,6 +340,7 @@
                                                    min="0"
                                             />
                                         </div>
+                                        <div class="col-md-6">
                                             <label for="templatePriority" class="label-text mb-1">
                                                 Display Order
                                             </label>
@@ -351,6 +352,8 @@
                                                    value="{{  $model->order }}"
                                                    min="0"/>
                                         </div>
+                                    </div>
+                                        
                                     </div>
                                     <div class="position-relative mt-3 text-center">
                                         <hr class="opacity-75" style="border: 1px solid #24B094;">
