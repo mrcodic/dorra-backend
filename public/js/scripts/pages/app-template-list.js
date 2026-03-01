@@ -32,18 +32,29 @@ $(document).ready(function () {
 
 
 function fetchTemplates(page = 1) {
+    let requestData = {
+        page: page,
+        search_value: $('#search-category-form').val(),
+        product_id: $('.filter-product').val(),
+        order: $('.filter-sort-order').val(),
+        tags: $('.filter-tags').val(),
+        status: $('.filter-status').val(),
+        per_page: $('.filter-paginate-number').val()
+    };
+    Object.keys(requestData).forEach(key => {
+        if (
+            requestData[key] === "" ||
+            requestData[key] === null ||
+            requestData[key] === undefined ||
+            (Array.isArray(requestData[key]) && requestData[key].length === 0)
+        ) {
+            delete requestData[key];
+        }
+    });
     $.ajax({
         url: '/product-templates',
         type: 'GET',
-        data: {
-            page,
-            search_value: $('#search-category-form').val(),
-            product_id  : $('.filter-product').val(),
-            order  : $('.filter-sort-order').val(),
-            tags  : $('.filter-tags').val(),
-            status      : $('.filter-status').val(),
-            per_page    : $('.filter-paginate-number').val()
-        },
+        data: requestData,
         success: res => {
             $('#templates-container').html(res.data.cards);
             $('#pagination-container').html(res.data.pagination);
