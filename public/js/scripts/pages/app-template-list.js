@@ -25,7 +25,7 @@ $(document).ready(function () {
         $('#search-category-form').val('');  // clear input
         fetchTemplates();
     });
-    $('.filter-status, .filter-product,.filter-tags, #search-category-form, .filter-paginate-number','.filter-sort-order').on('change keyup', function () {
+    $('.filter-status, .filter-product,.filter-tags, #search-category-form, .filter-paginate-number,.filter-sort-order').on('change keyup', function () {
         fetchTemplates();
     });
 });
