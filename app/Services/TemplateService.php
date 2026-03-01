@@ -145,7 +145,7 @@ class TemplateService extends BaseService
             })
             ->when(request()->filled('orientation'), function ($q) {
                 $q->whereOrientation(OrientationEnum::tryFrom(request('orientation')));
-            })->latest()
+            })
             ->when(request()->filled('limit'), function ($q) {
                 $q->limit((int) request('limit'));
             })->when(request()->filled('languages'), function ($q) {
