@@ -312,7 +312,7 @@
         resetForm: false,
     });
     handleAjaxFormSubmit('.update-best-seller', {
-        successMessage: '✅ Marked as Best Seller successfully!',
+        successMessage: '✅ Done!',
         onSuccess: function (response, $form) {
             console.log('Success:', response);
             location.reload()
