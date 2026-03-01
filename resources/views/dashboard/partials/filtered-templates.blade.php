@@ -22,7 +22,7 @@
               color: #000;
               z-index: 2;
               left: 42px;
-              top: 80%;
+              top: 89%;
           ">
             <i data-feather="star" style="width:14px;height:14px;"></i>
             Best Seller
