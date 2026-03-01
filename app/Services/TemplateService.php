@@ -115,7 +115,7 @@ class TemplateService extends BaseService
             ->when(request()->filled('approach'), function ($q) {
                 $q->where('approach', request('approach'));
             })->when(request()->filled('order'), function ($q) {
-                $q->where('order', request('order'));
+                $q->orderBy('order',request('order'));
             })
             ->when(request('category_id'), function ($q) {
                 $q->whereHas('products', function ($q) {
