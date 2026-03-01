@@ -16,7 +16,7 @@ class UpdateTemplateEditorRequest extends BaseRequest
     /**
      * Determine if the v1 is authorized to make this request.
      */
-        public function authorize(): bool
+    public function authorize(): bool
     {
         return true;
     }
@@ -41,8 +41,26 @@ class UpdateTemplateEditorRequest extends BaseRequest
                 'max:255',
 
             ],
-            'design_data' => ['sometimes', 'json'],
-            'design_back_data' => ['sometimes', 'json'],
+            'design_data' => ['required', 'json', function ($attribute, $value, $fail) {
+                if ($value === 'null') {
+                    $fail($attribute . ' cannot be null.');
+                }
+
+                $decoded = json_decode($value, true);
+                if (empty($decoded)) {
+                    $fail($attribute . ' cannot be empty.');
+                }
+            },],
+            'design_back_data' => ['required', 'json', function ($attribute, $value, $fail) {
+                if ($value === 'null') {
+                    $fail($attribute . ' cannot be null.');
+                }
+
+                $decoded = json_decode($value, true);
+                if (empty($decoded)) {
+                    $fail($attribute . ' cannot be empty.');
+                }
+            },],
             'base64_preview_image' => ['sometimes', 'string'],
             'back_base64_preview_image' => ['sometimes', 'string'],
             'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
