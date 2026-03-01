@@ -157,12 +157,12 @@ class TemplateService extends BaseService
                         $qq->orWhereJsonContains('supported_languages', $lang);
                     }
                 });
-            })->latest();
+            });
 
         if (request()->ajax()) {
             return $pageSize === null
-                ? $query->get()
-                : $query->paginate($pageSize)->withQueryString();
+                ? $query->latest()->get()
+                : $query->latest()->paginate($pageSize)->withQueryString();
         }
 
         if (request()->expectsJson()) {
@@ -183,7 +183,8 @@ class TemplateService extends BaseService
                                 });
 
                         });
-                })->orderByDesc('is_best_seller');
+                })->orderByDesc('is_best_seller')
+                ->latest();
 
 
             return $paginate
