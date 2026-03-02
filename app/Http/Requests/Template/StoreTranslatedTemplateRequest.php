@@ -48,8 +48,26 @@ class StoreTranslatedTemplateRequest extends BaseRequest
             'industry_ids.*' => ['integer', 'exists:industries,id'],
             'template_image_id' => ['required','exists:media,id'],
             'template_image_main_id' => ['required','exists:media,id'],
-            'design_data' => ['sometimes', 'json'],
-            'design_back_data' => ['sometimes', 'json'],
+            'design_data' => ['sometimes', 'json', function ($attribute, $value, $fail) {
+                if ($value === 'null') {
+                    $fail($attribute . ' cannot be null.');
+                }
+
+                $decoded = json_decode($value, true);
+                if (empty($decoded)) {
+                    $fail($attribute . ' cannot be empty.');
+                }
+            },],
+            'design_back_data' => ['sometimes', 'json', function ($attribute, $value, $fail) {
+                if ($value === 'null') {
+                    $fail($attribute . ' cannot be null.');
+                }
+
+                $decoded = json_decode($value, true);
+                if (empty($decoded)) {
+                    $fail($attribute . ' cannot be empty.');
+                }
+            },],
             'base64_preview_image' => ['sometimes', 'string'],
             'back_base64_preview_image' => ['sometimes', 'string'],
             'specifications' => ['sometimes', 'array'],
