@@ -119,7 +119,17 @@ class TemplateController extends DashboardController
     public function update(Request $request, string $id)
     {
         $rules = $this->updateRequestClass->rules($id);
-        $validated = Validator::make($request->all(), $rules)->validate();
+        $messages = [
+            'dimension_id.required' => 'You must choose size',
+            'dimension_id.integer'  => 'You must choose size',
+            'dimension_id.exists'   => 'Selected size is invalid',
+        ];
+
+        $validated = Validator::make(
+            $request->all(),
+            $rules,
+            $messages
+        )->validate();
         $model = $this->service->updateResource($validated, $id);
         if ($request->filled('mockup_id')){
             return Response::api(data: [
