@@ -84,5 +84,12 @@ class StoreTranslatedTemplateRequest extends BaseRequest
 
     }
 
-
+    public function messages(): array
+    {
+        return [
+            'dimension_id.required' => 'You must choose size',
+            'dimension_id.integer'  => 'You must choose size',
+            'dimension_id.exists'   => 'Selected size is invalid',
+        ];
+    }
 }
