@@ -74,7 +74,7 @@ class StoreTranslatedTemplateRequest extends BaseRequest
             'specifications.*' => ['sometimes', 'integer', 'exists:product_specifications,id'],
             'source_design_svg' => ['nullable', 'file'],
             'orientation' => ['required', 'in:' . OrientationEnum::getValuesAsString()],
-            'dimension_id' => ['nullable', 'integer', 'exists:dimensions,id'],
+            'dimension_id' => ['required', 'integer', 'exists:dimensions,id'],
             'has_safety_area' => ['sometimes', 'in:0,1'],
             'has_corner' => ['sometimes', 'in:0,1'],
             'border' => ['sometimes', 'in:' . BorderEnum::getValuesAsString()],

@@ -66,7 +66,6 @@ class UpdateTemplateEditorRequest extends BaseRequest
             'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
             'colors' => ['sometimes', 'array'],
             'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
-            'dimension_id' => ['nullable', 'integer', 'exists:dimensions,id'],
             'safety_area' => ['sometimes', 'numeric'],
             'border' => ['sometimes', 'numeric'],
             'go_to_editor' => ['sometimes', 'boolean'],
