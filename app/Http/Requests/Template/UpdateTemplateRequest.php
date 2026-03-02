@@ -109,4 +109,10 @@ class UpdateTemplateRequest extends BaseRequest
             'dimension_id.exists'   => 'Selected size is invalid',
         ];
     }
+    public function attributes()
+    {
+        return [
+            'dimension_id' => 'Size',
+        ]; 
+    }
 }
