@@ -8,6 +8,7 @@ use App\Http\Controllers\Base\DashboardController;
 use App\Jobs\ImportTemplatesFromExcel;
 use App\Models\Template;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Http\Requests\Template\{StoreTemplateRequest,
     UpdateTemplateEditorRequest,
     UpdateTemplateRequest
@@ -252,8 +253,6 @@ class TemplateController extends DashboardController
 
     }
 
-
-
     public function import(Request $request)
     {
         $request->validate([
@@ -293,4 +292,28 @@ class TemplateController extends DashboardController
 
     }
 
+
+    public function attachMultiple(Request $request, Template $template)
+    {
+        $validated = $request->validate([
+            'library_asset_ids' => 'required|array',
+            'library_asset_ids.*' => 'exists:media,id'
+        ]);
+
+        $mediaItems = Media::whereIn(
+            'id',
+            $validated['library_asset_ids']
+        )->get();
+
+        $copiedMedia = collect();
+
+        foreach ($mediaItems as $media) {
+            $newMedia = $media->copy($template, 'template-library-assets');
+            $copiedMedia->push($newMedia);
+        }
+
+        return Response::api(data: [
+            'urls' =>  $copiedMedia->map->getUrl()->values()
+        ]);
+    }
 }
