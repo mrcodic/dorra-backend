@@ -31,6 +31,8 @@ class UpdateDesignRequest extends BaseRequest
      */
     public function rules(): array
     {
+        $allowedKeys = TypeEnum::keys();
+        dd($allowedKeys);
         return [
             'design_data' => ['sometimes', 'json'],
             'design_back_data' => ['sometimes', 'json'],
@@ -105,7 +107,7 @@ class UpdateDesignRequest extends BaseRequest
             'design_mockup_area.*.rotation' => ['nullable', 'numeric', 'min:-360', 'max:360'],
             'design_mockup_area.*.z_index' => ['nullable', 'integer', 'min:0'],
             'files' => [
-                'sometimes',
+                'required_with:mockup_id',
                 'array',
                 function ($attribute, $value, $fail) {
 
