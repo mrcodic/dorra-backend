@@ -129,7 +129,7 @@
                                 <div class="d-flex">
                                     <img
                                         src="{{
-    get_class($orderItem->itemable) ==\App\Models\Design::class && $orderItem->itemable->linked_to_mockup ?
+      $orderItem->itemable && get_class($orderItem->itemable) ==\App\Models\Design::class && $orderItem->itemable->linked_to_mockup ?
     $orderItem->itemable->getFirstMediaUrl('front-mockup-designs') ?? $orderItem->itemable->getFirstMediaUrl('none-mockup-designs')
     : $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($orderItem->itemable))))
      }}"

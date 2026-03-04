@@ -136,7 +136,8 @@
                                 <p style="margin: 0; color: #121212">{{ $model->orderItem->quantity }}</p>
                             </div>
                             @if(
-            get_class($model->orderItem->itemable) === \App\Models\Design::class
+            $model->orderItem->itemable
+        && get_class($model->orderItem->itemable) === \App\Models\Design::class
                      && $model->orderItem->itemable->linked_to_mockup
      )
                                 <p style="color: #424746; margin: 0; font-size: 16px">Mockup Positions on Design:</p>
