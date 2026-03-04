@@ -149,7 +149,7 @@ class DesignService extends BaseService
                     'none' => 'none-mockup-designs',
                     default => 'mockup-designs'
                 };
-                handleMediaUploads($uploadedFiles, $design, $collectionName, clearExisting: true);
+                handleMediaUploads($uploadedFiles, $model, $collectionName, clearExisting: true);
             }
         }
         return $model->load($relationsToLoad);
