@@ -7,6 +7,8 @@ use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Base\DashboardController;
 use App\Jobs\ImportTemplatesFromExcel;
 use App\Models\Template;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Http\Requests\Template\{StoreTemplateRequest,
@@ -315,6 +317,28 @@ class TemplateController extends DashboardController
         return Response::api(data: [
             'urls' =>  $copiedMedia->map->getUrl()->values()
         ]);
+    }
+
+
+    public function getLibraryAssets(Request $request, Template $template): JsonResponse
+    {
+        $page = $request->get('page', 1);
+        $perPage = $request->get('per_page', 20);
+
+        $allMedia = $template->getMedia('template-library-assets');
+
+        $paginated = new LengthAwarePaginator(
+            $allMedia->forPage($page, $perPage)->values(),
+            $allMedia->count(),
+            $perPage,
+            $page,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
+
+        return Response::api(data: MediaResource::collection($paginated)->response()->getData(true));
     }
 
     public function attachMultipleFonts(Request $request, Template $template)
