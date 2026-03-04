@@ -109,7 +109,7 @@ class DesignService extends BaseService
                 ]]);
             });
         }
-        $files = request()->allFiles();
+        $files = request('files');
         if ($files) {
             foreach ($files as $type => $uploadedFiles) {
                 $collectionName = match($type) {
