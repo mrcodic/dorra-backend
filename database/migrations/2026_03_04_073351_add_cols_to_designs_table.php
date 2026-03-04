@@ -15,6 +15,7 @@ return new class extends Migration
         Schema::table('designs', function (Blueprint $table) {
             $table->after('total_price',function (Blueprint $table) {
                 $table->boolean('linked_to_mockup')->default(false);
+                $table->string('mockup_color')->nullable();
                 $table->foreignIdFor(Mockup::class)->nullable()
                     ->constrained()->nullOnDelete();
                 $table->json('design_mockup_area')->nullable();

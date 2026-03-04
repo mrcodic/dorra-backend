@@ -126,9 +126,7 @@ class StoreCartItemRequest extends BaseRequest
                 'integer',
                 'exists:product_specification_options,id',
             ],
-            'color' => [Rule::requiredIf(function (){
-                return $this->design->linked_to_mockup;
-            }), 'string'],
+            'color' => ['sometimes', 'string'],
         ];
     }
 

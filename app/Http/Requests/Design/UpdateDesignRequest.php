@@ -97,6 +97,7 @@ class UpdateDesignRequest extends BaseRequest
             'user_id' => ['nullable', 'exists:users,id'],
             'guest_id' => ['nullable', 'exists:guests,id'],
             'mockup_id' => ['nullable', 'exists:mockups,id'],
+            'mockup_color' => ['nullable', 'exists:mockups,colors'],
             'design_mockup_area' => ['required_with:mockup_id', 'array'],
             'design_mockup_area.*.name' => ['required_with:mockup_id', 'string', 'max:100','in:front,back,none'],
             'design_mockup_area.*.x' => ['required_with:mockup_id', 'numeric', 'min:0', 'max:100'],

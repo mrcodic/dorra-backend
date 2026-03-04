@@ -83,6 +83,7 @@ class DesignResource extends JsonResource
             'design_price' => $this->price,
             'visible_download_btn' => (bool) $this->price,
             'linked_to_mockup' =>  $this->linked_to_mockup,
+            'mockup_color' =>  $this->mockup_color,
             'design_mockup_area' =>  $this->design_mockup_area,
 
 

@@ -49,6 +49,7 @@ class Design extends Model implements HasMedia
         'total_price',
         'linked_to_mockup',
         'mockup_id',
+        'mockup_color',
         'design_mockup_area',
     ];
     protected $attributes = [
