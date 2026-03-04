@@ -109,7 +109,18 @@ class DesignService extends BaseService
                 ]]);
             });
         }
-
+        $files = request()->allFiles();
+        if ($files) {
+            foreach ($files as $type => $uploadedFiles) {
+                $collectionName = match($type) {
+                    'front' => 'front-mockup-designs',
+                    'back' => 'back-mockup-designs',
+                    'none' => 'none-mockup-designs',
+                    default => 'mockup-designs'
+                };
+                handleMediaUploads($uploadedFiles, $design, $collectionName, clearExisting: true);
+            }
+        }
         $design->update(['total_price' => $totalPrice]);
 
         return $design->load([
@@ -125,6 +136,7 @@ class DesignService extends BaseService
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
+        if (!empty($validatedData['mockup_id'])) $validatedData['linked_to_mockup'] = true;
         $model = $this->repository->update($validatedData, $id);
         if (isset($validatedData['specs'])) {
             collect($validatedData['specs'])->each(function ($spec) use ($model) {

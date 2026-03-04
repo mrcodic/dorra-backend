@@ -47,13 +47,18 @@ class Design extends Model implements HasMedia
         'orientation',
         'price',
         'total_price',
+        'linked_to_mockup',
+        'mockup_id',
+        'design_mockup_area',
     ];
     protected $attributes = [
         'quantity' => 1,
         'current_version' => 0
     ];
     protected $casts = [
-        'orientation' => OrientationEnum::class,];
+        'orientation' => OrientationEnum::class,
+        'design_mockup_area' => 'array',
+        ];
 
     public function guest(): BelongsTo
     {
@@ -96,6 +101,11 @@ class Design extends Model implements HasMedia
     public function template(): BelongsTo
     {
         return $this->belongsTo(Template::class);
+    }
+
+    public function mockup(): BelongsTo
+    {
+        return $this->belongsTo(Mockup::class);
     }
 
     public function categories()

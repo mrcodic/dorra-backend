@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Design;
 
 use App\Enums\OrientationEnum;
+use App\Enums\Template\TypeEnum;
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\Category;
 use App\Models\Design;
@@ -94,6 +95,40 @@ class UpdateDesignRequest extends BaseRequest
             'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
             'user_id' => ['nullable', 'exists:users,id'],
             'guest_id' => ['nullable', 'exists:guests,id'],
+            'mockup_id' => ['nullable', 'exists:mockups,id'],
+            'design_mockup_area' => ['required_with:mockup_id', 'array'],
+            'design_mockup_area.*.name' => ['required_with:mockup_id', 'string', 'max:100','in:front,back,none'],
+            'design_mockup_area.*.x' => ['required_with:mockup_id', 'numeric', 'min:0', 'max:100'],
+            'design_mockup_area.*.y' => ['required_with:mockup_id', 'numeric', 'min:0', 'max:100'],
+            'design_mockup_area.*.width' => ['required_with:mockup_id', 'numeric', 'min:0.1', 'max:100'],
+            'design_mockup_area.*.height' => ['required_with:mockup_id', 'numeric', 'min:0.1', 'max:100'],
+            'design_mockup_area.*.rotation' => ['nullable', 'numeric', 'min:-360', 'max:360'],
+            'design_mockup_area.*.z_index' => ['nullable', 'integer', 'min:0'],
+            'files' => [
+                'sometimes',
+                'array',
+                function ($attribute, $value, $fail) {
+
+                    if (!is_array($value)) {
+                        return;
+                    }
+
+                    $allowedKeys = TypeEnum::keys();
+
+                    foreach (array_keys($value) as $key) {
+
+                        if (!in_array($key, $allowedKeys)) {
+                            $fail("Invalid design type: {$key}");
+                        }
+                    }
+                }
+            ],
+
+            'files.*' => [
+                'file',
+                'mimes:png',
+                'max:2048'
+            ],
 
         ];
     }

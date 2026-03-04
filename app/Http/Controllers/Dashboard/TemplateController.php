@@ -293,7 +293,7 @@ class TemplateController extends DashboardController
     }
 
 
-    public function attachMultiple(Request $request, Template $template)
+    public function attachMultipleLibraryAssets(Request $request, Template $template)
     {
         $validated = $request->validate([
             'library_asset_ids' => 'required|array',
@@ -309,6 +309,30 @@ class TemplateController extends DashboardController
 
         foreach ($mediaItems as $media) {
             $newMedia = $media->copy($template, 'template-library-assets');
+            $copiedMedia->push($newMedia);
+        }
+
+        return Response::api(data: [
+            'urls' =>  $copiedMedia->map->getUrl()->values()
+        ]);
+    }
+
+    public function attachMultipleFonts(Request $request, Template $template)
+    {
+        $validated = $request->validate([
+            'font_media_ids' => 'required|array',
+            'font_media_ids.*' => 'exists:media,id'
+        ]);
+
+        $mediaItems = Media::whereIn(
+            'id',
+            $validated['font_media_ids']
+        )->get();
+
+        $copiedMedia = collect();
+
+        foreach ($mediaItems as $media) {
+            $newMedia = $media->copy($template, 'template-fonts');
             $copiedMedia->push($newMedia);
         }
 

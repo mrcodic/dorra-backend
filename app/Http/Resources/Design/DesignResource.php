@@ -4,6 +4,7 @@ namespace App\Http\Resources\Design;
 
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\DimensionResource;
+use App\Http\Resources\MockupResource;
 use App\Http\Resources\Product\ProductPriceResource;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\Product\ProductSpecificationOption;
@@ -36,6 +37,9 @@ class DesignResource extends JsonResource
             'design_image' => $this->getFirstMediaUrl('designs'),
             'source_design_svg' => $this->getFirstMediaUrl('designs'),
             'back_design_image' => $this->getFirstMediaUrl('back_designs'),
+            'front_mockup_design_image' => $this->getFirstMediaUrl('front-mockup-designs'),
+            'back_mockup_design_image' => $this->getFirstMediaUrl('back-mockup-designs'),
+            'none_mockup_design_image' => $this->getFirstMediaUrl('none-mockup-designs'),
             'current_version' => $this->current_version,
             'product' => $this->when($designable, function () use ($designable) {
                 return  new CategoryResource($designable instanceof Category ? $designable : $designable->category);
@@ -51,6 +55,7 @@ class DesignResource extends JsonResource
             'owner' => UserResource::make($this->whenLoaded('owner')),
             'category' => CategoryResource::make($this->whenLoaded('category')),
             'template' => TemplateResource::make($this->whenLoaded('template')),
+            'mockup' => MockupResource::make($this->whenLoaded('mockup')),
             'dimension' => DimensionResource::make($this->whenLoaded('dimension')),
             'productPrice' => ProductPriceResource::make($this->whenLoaded('productPrice')),
             'specs' => $this->whenLoaded('specifications', function () {
@@ -77,6 +82,9 @@ class DesignResource extends JsonResource
             ],
             'design_price' => $this->price,
             'visible_download_btn' => (bool) $this->price,
+            'linked_to_mockup' =>  $this->linked_to_mockup,
+            'design_mockup_area' =>  $this->design_mockup_area,
+
 
 //            'is_added_to_cart' => $this->isAddedToCart(),
         ];
