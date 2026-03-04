@@ -58,6 +58,7 @@ class Design extends Model implements HasMedia
     protected $casts = [
         'orientation' => OrientationEnum::class,
         'design_mockup_area' => 'array',
+        'linked_to_mockup' => 'boolean',
         ];
 
     public function guest(): BelongsTo
