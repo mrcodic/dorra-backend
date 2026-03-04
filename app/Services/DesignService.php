@@ -109,19 +109,6 @@ class DesignService extends BaseService
                 ]]);
             });
         }
-        $files = request('files');
-        dd($files);
-        if ($files) {
-            foreach ($files as $type => $uploadedFiles) {
-                $collectionName = match($type) {
-                    'front' => 'front-mockup-designs',
-                    'back' => 'back-mockup-designs',
-                    'none' => 'none-mockup-designs',
-                    default => 'mockup-designs'
-                };
-                handleMediaUploads($uploadedFiles, $design, $collectionName, clearExisting: true);
-            }
-        }
         $design->update(['total_price' => $totalPrice]);
 
         return $design->load([
@@ -152,6 +139,18 @@ class DesignService extends BaseService
         }
         if (isset($validatedData['back_base64_preview_image'])) {
             ProcessBase64Image::dispatch($validatedData['back_base64_preview_image'], $model, 'back_designs');
+        }
+        $files = request('files');
+        if ($files) {
+            foreach ($files as $type => $uploadedFiles) {
+                $collectionName = match($type) {
+                    'front' => 'front-mockup-designs',
+                    'back' => 'back-mockup-designs',
+                    'none' => 'none-mockup-designs',
+                    default => 'mockup-designs'
+                };
+                handleMediaUploads($uploadedFiles, $design, $collectionName, clearExisting: true);
+            }
         }
         return $model->load($relationsToLoad);
     }
