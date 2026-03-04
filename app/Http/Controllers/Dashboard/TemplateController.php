@@ -323,7 +323,7 @@ class TemplateController extends DashboardController
     public function getLibraryAssets(Request $request, Template $template): JsonResponse
     {
         $page = $request->get('page', 1);
-        $perPage = $request->get('per_page', 20);
+        $perPage = $request->get('per_page', 10);
 
         $allMedia = $template->getMedia('template-library-assets');
 

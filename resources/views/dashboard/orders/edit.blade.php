@@ -191,7 +191,11 @@
                             <div class="d-flex align-items-start justify-content-between">
                                 <div class="d-flex">
                                     <img
-                                        src="{{ $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($orderItem->itemable)))) }}"
+                                        src="{{
+    get_class($orderItem->itemable) ==\App\Models\Design::class && $orderItem->itemable->linked_to_mockup ?
+    $orderItem->itemable->getFirstMediaUrl('front-mockup-designs') ?? $orderItem->itemable->getFirstMediaUrl('none-mockup-designs')
+    : $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($orderItem->itemable))))
+     }}"
                                         class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
 
                                     <div>
