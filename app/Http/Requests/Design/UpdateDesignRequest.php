@@ -32,7 +32,6 @@ class UpdateDesignRequest extends BaseRequest
     public function rules(): array
     {
         $allowedKeys = TypeEnum::keys();
-        dd($allowedKeys);
         return [
             'design_data' => ['sometimes', 'json'],
             'design_back_data' => ['sometimes', 'json'],
@@ -128,7 +127,7 @@ class UpdateDesignRequest extends BaseRequest
 
             'files.*' => [
                 'file',
-                'mimes:png',
+//                'mimes:png',
                 'max:2048'
             ],
 
