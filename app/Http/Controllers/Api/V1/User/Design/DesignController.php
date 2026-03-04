@@ -66,7 +66,9 @@ class DesignController extends Controller
     public function show($design)
     {
         $design = $this->designService->showResource($design, ['media', 'designable','designable.prices',
-            'designable.specifications.options','dimension','template.types','specifications','productPrice']);
+            'designable.specifications.options','dimension','template.types','specifications','productPrice',
+            'mockup'
+            ]);
         return Response::api(data: DesignResource::make($design));
     }
 
