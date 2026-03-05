@@ -307,10 +307,8 @@ class TemplateController extends DashboardController
 
     public function getLibraryAssets(Request $request, Template $template): JsonResponse
     {
-dd($template->libraryMedia);
         $perPage = $request->get('per_page', 10);
 
-        // Paginate directly from the relationship
         $paginated = $template->libraryMedia()
             ->latest()
             ->paginate($perPage)
