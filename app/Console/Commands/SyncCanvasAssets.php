@@ -99,7 +99,7 @@ dd($found);
         return [$src, $path];
     }
 
-    private function walkFabric(&$node, callable $fn): void
+    private function walkFabric($node, callable $fn): void
     {
         if (is_array($node)) {
             $fn($node);
