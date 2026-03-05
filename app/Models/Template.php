@@ -12,9 +12,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Facades\App;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Translatable\HasTranslations;
 
 #[ObservedBy(TemplateObserver::class)]
@@ -138,6 +140,14 @@ class Template extends Model implements HasMedia
         return $this->morphToMany(Type::class, 'typeable')
             ->using(Typeable::class)
             ->withTimestamps();
+    }
+
+    public function libraryMedia(): MorphToMany
+    {
+        return $this->morphToMany(
+            Media::class,
+            'mediable'
+        );
     }
 
     public function getImageUrlForType(string $type): string
