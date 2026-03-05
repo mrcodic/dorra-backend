@@ -77,9 +77,9 @@ class SyncCanvasAssets extends Command
             if (!$media) {
                 continue;
             }
-            
+
             $alreadyAttached = $template->libraryMedia()
-                ->where('id', $media->id)
+                ->where('media_id', $media->id)
                 ->exists();
 
             if (!$alreadyAttached) {
