@@ -63,13 +63,7 @@ class SyncCanvasAssets extends Command
         });
 
         $changed = false;
-        dd($json['objects']);
-        foreach ($json['objects'] as &$object) {
-            if ($object['type'] === 'image' && isset($object['src'])) {
 
-                dd($object['src']);
-            }
-        }
         foreach ($found as &$imgObj) {
 
             [$fullSrc, $path] = $this->normalizeSrc($imgObj['src']);
@@ -106,7 +100,7 @@ class SyncCanvasAssets extends Command
         return [$src, $path];
     }
 
-    private function walkFabric($node, callable $fn): void
+    private function walkFabric(&$node, callable $fn): void
     {
         if (is_array($node)) {
             $fn($node);
