@@ -302,26 +302,34 @@ class TemplateController extends DashboardController
             'library_asset_ids.*' => 'exists:media,id'
         ]);
 
-        $mediaItems = Media::whereIn(
-            'id',
-            $validated['library_asset_ids']
-        )->get();
+        $mediaItems = Media::whereIn('id', $validated['library_asset_ids'])->get();
 
-        $copiedMedia = collect();
+        $attachedMedia = collect();
 
         foreach ($mediaItems as $media) {
-            $newMedia = $media->copy($template, 'template-library-assets');
-            $newMedia->parent_id = $media->id;
-            $newMedia->save();
-            $template->libraryMedia()->syncWithoutDetaching([$newMedia->id]);
-            $copiedMedia->push($newMedia);
+            $existing = $template->media()
+                ->where('parent_id', $media->id)
+                ->where('collection_name', 'template-library-assets')
+                ->where('model_type', get_class($template))
+                ->where('model_id', $template->id)
+                ->first();
+
+            if ($existing) {
+                $attachedMedia->push($existing);
+            } else {
+                $newMedia = $media->copy($template, 'template-library-assets');
+                $newMedia->parent_id = $media->id;
+                $newMedia->save();
+
+                $template->libraryMedia()->syncWithoutDetaching([$newMedia->id]);
+                $attachedMedia->push($newMedia);
+            }
         }
 
-        return Response::api(data: [
-            'urls' =>  $copiedMedia->map->getUrl()->values()
+        return response()->json([
+            'urls' => $attachedMedia->map->getUrl()->values()
         ]);
     }
-
 
     public function getLibraryAssets(Request $request, Template $template): JsonResponse
     {
