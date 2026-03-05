@@ -63,6 +63,7 @@ class SyncCanvasAssets extends Command
         });
 
         $changed = false;
+        dd($json['objects']);
         foreach ($json['objects'] as &$object) {
             if ($object['type'] === 'image' && isset($object['src'])) {
 
