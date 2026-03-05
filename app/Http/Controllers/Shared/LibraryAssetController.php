@@ -26,8 +26,13 @@ class LibraryAssetController extends Controller
         $model = $notAuth ? Admin::first() : getAuthOrGuest();
         $media = Media::query()
             ->withCount('templates')
-            ->whereMorphedTo('model', $model)
-            ->whereCollectionName(($this->activeGuard ?? 'guest') . '_assets')
+            ->where(function ($query) use ($model) {
+                $query->whereMorphedTo('model', $model)
+                    ->whereCollectionName(($this->activeGuard ?? 'guest') . '_assets');
+                if ($this->activeGuard === 'sanctum') {
+                    $query->orWhere('collection_name', 'web_assets');
+                }
+            })
             ->latest()
             ->paginate($request->query('per_page',10));
         return Response::api(data: MediaResource::collection($media)->response()->getData(true));
