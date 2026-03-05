@@ -147,7 +147,7 @@ class Template extends Model implements HasMedia
         return $this->morphToMany(
             Media::class,
             'mediable'
-        );
+        )->withTimestamps();
     }
 
     public function getImageUrlForType(string $type): string
