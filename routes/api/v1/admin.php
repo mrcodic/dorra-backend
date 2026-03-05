@@ -15,8 +15,8 @@ Route::get('templates', [TemplateController::class, 'getProductTemplates'])->nam
 Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'destroy']);
 Route::patch('templates/{template}', [TemplateController::class,'updateEditorData']);
 Route::post('templates/{template}/library-assets', [TemplateController::class, 'attachMultipleLibraryAssets']);
+Route::delete('templates/{template}/library-assets/{media}', [TemplateController::class, 'detachLibraryAsset']);
 Route::get('templates/{template}/library-assets', [TemplateController::class, 'getLibraryAssets']);
-Route::get('templates/{template}/library-assets/{media}', [TemplateController::class, 'showTemplateAsset']);
 
 Route::post('templates/{template}/fonts', [TemplateController::class, 'attachMultipleFonts']);
 Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);

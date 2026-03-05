@@ -64,7 +64,6 @@ class TemplateResource extends JsonResource
                return MediaResource::collection( $this->getMedia('color_templates'));
             }),
             'font_media' => MediaResource::collection($this->getMedia('template-fonts')),
-            'library_assets_media' => MediaResource::collection($this->getMedia('template-library-assets')),
             'price' => $this->price,
             'visible_download_btn' => $this->when($this->price,true),
         ];

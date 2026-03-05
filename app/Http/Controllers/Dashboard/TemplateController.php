@@ -317,18 +317,7 @@ class TemplateController extends DashboardController
         return Response::api(data: MediaResource::collection($paginated)->response()->getData(true));
     }
 
-    public function showTemplateAsset(Template $template,Media $media)
-    {
-       $media =  $template->media()
-            ->whereParentId($media->id)
-            ->where('model_type', get_class($template))
-            ->where('model_id', $template->id)
-            ->whereCollectionName('template-library-assets')
-            ->latest()
-            ->first();
-        return Response::api(data: MediaResource::make($media));
 
-    }
     public function attachMultipleFonts(Request $request, Template $template)
     {
         $validated = $request->validate([
@@ -351,5 +340,11 @@ class TemplateController extends DashboardController
         return Response::api(data: [
             'urls' =>  $copiedMedia->map->getUrl()->values()
         ]);
+    }
+
+    public function detachLibraryAsset(Template $template, Media $media)
+    {
+        $template->libraryMedia()->detach($media);
+        return Response::api();
     }
 }

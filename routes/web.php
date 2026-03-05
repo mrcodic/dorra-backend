@@ -343,7 +343,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'destroy']);
         Route::patch('templates/{template}', [TemplateController::class, 'updateEditorData']);
         Route::post('templates/{template}/library-assets', [TemplateController::class, 'attachMultipleLibraryAssets']);
-        Route::get('templates/{template}/library-assets/{media}', [TemplateController::class, 'showTemplateAsset']);
+        Route::get('templates/{template}/library-assets', [TemplateController::class, 'getLibraryAssets']);
         Route::post('templates/{template}/fonts', [TemplateController::class, 'attachMultipleFonts']);
 
         Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");

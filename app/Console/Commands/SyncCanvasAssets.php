@@ -27,21 +27,19 @@ class SyncCanvasAssets extends Command
      */
     public function handle()
     {
-        $template = Template::query()
-            ->find('a0dd40d8-84cc-462d-b253-da602863bc71');
-//            ->where(function ($q) {
-//                $q->whereNotNull('design_data')
-//                    ->orWhereNotNull('design_back_data');
-//            })
-//            ->chunkById(200, function ($templates) {
+        Template::query()->where(function ($q) {
+            $q->whereNotNull('design_data')
+                ->orWhereNotNull('design_back_data');
+        })
+            ->chunkById(200, function ($templates) {
 
-//                foreach ($templates as $template) {
+                foreach ($templates as $template) {
 
-        $this->processCanvasColumn($template, 'design_data');
-        $this->processCanvasColumn($template, 'design_back_data');
+                    $this->processCanvasColumn($template, 'design_data');
+                    $this->processCanvasColumn($template, 'design_back_data');
 
-//                }
-//            });
+                }
+            });
     }
 
     public function processCanvasColumn(Template $template, string $column): void
@@ -78,16 +76,10 @@ class SyncCanvasAssets extends Command
             if (!$media) {
                 continue;
             }
+            $template->libraryMedia()->syncWithoutDetaching([$media->id]);
 
-
-            $newMedia = $media->copy($template, 'template-library-assets');
-            $newMedia->parent_id = $media->id;
-            $newMedia->save();
-            $template->libraryMedia()->syncWithoutDetaching([$newMedia->id]);
-
-            $imgObj['src'] = $newMedia->getUrl();
             if (empty($imgObj['assetId'])) {
-                $imgObj['assetId'] = $newMedia->id;
+                $imgObj['assetId'] = $media->id;
                 $changed = true;
             }
         }
