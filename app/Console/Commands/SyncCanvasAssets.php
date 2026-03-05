@@ -61,7 +61,6 @@ class SyncCanvasAssets extends Command
                 $found[] =& $obj;
             }
         });
-        dd($found);
         $changed = false;
         foreach ($found as &$imgObj) {
             [$fullSrc, $path] = $this->normalizeSrc($imgObj['src']);
