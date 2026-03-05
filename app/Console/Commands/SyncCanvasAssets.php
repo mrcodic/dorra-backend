@@ -57,6 +57,7 @@ class SyncCanvasAssets extends Command
         $found = [];
 
         $this->walkFabric($json, function (&$obj) use (&$found) {
+            dd($obj);
             if (($obj['type'] ?? null) === 'image' && !empty($obj['src'] ?? null)) {
                 $found[] =& $obj;
             }
@@ -64,7 +65,7 @@ class SyncCanvasAssets extends Command
 
         $changed = false;
         foreach ($found as &$imgObj) {
-            [$fullSrc, $path] = $this->normalizeSrc($imgObj['src'] ?? null);
+            [$fullSrc, $path] = $this->normalizeSrc($imgObj['src']);
 
             $media = Media::query()
                 ->where('file_name', basename($path))
