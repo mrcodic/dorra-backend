@@ -69,10 +69,8 @@ class SyncCanvasAssets extends Command
             $id = $matches[1] ?? null;
             $media = Media::query()
                 ->whereKey($id)
-                ->where('file_name', basename($path))
                 ->latest()
                 ->first();
-dd($id);
             if (!$media) {
                 continue;
             }
