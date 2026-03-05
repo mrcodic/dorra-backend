@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Shared;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MediaResource;
 use App\Models\Admin;
+use App\Models\Media;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 
 class LibraryAssetController extends Controller
