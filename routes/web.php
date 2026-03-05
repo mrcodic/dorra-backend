@@ -382,3 +382,11 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
 });
 Route::view('test', 'dashboard.test');
+Route::get('handle-urls/{template}',function (\App\Models\Template $template){
+    $designData = json_decode($template->design_data, true);
+    foreach ($designData['objects'] as &$object) {
+        if ($object['type'] === 'image' && isset($object['src'])) {
+            dump($object['src']);
+        }
+    }
+});
