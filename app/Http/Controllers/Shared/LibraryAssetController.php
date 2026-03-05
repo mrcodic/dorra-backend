@@ -24,7 +24,9 @@ class LibraryAssetController extends Controller
     {
         $notAuth = request()->is('api/v1/admin/*');
         $model = $notAuth ? Admin::first() : getAuthOrGuest();
-        $media = Media::query()->whereMorphedTo('model', $model)
+        $media = Media::query()
+            ->withCount('templates')
+            ->whereMorphedTo('model', $model)
             ->whereCollectionName(($this->activeGuard ?? 'guest') . '_assets')
             ->latest()
             ->paginate($request->query('per_page',10));
