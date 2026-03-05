@@ -33,8 +33,15 @@ class LibraryAssetController extends Controller
                     $query->orWhere('collection_name', 'web_assets');
                 }
             })
+            ->orderByRaw("
+            CASE
+                WHEN collection_name = 'sanctum_assets' THEN 1
+                WHEN collection_name = 'web_assets' THEN 2
+                ELSE 3
+            END
+        ")
             ->latest()
-            ->paginate($request->query('per_page',10));
+            ->paginate($request->query('per_page', 10));
         return Response::api(data: MediaResource::collection($media)->response()->getData(true));
     }
 
