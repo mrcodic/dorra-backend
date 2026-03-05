@@ -72,7 +72,7 @@ class SyncCanvasAssets extends Command
                 ->where('file_name', basename($path))
                 ->latest()
                 ->first();
-dd($media);
+dd($id);
             if (!$media) {
                 continue;
             }
