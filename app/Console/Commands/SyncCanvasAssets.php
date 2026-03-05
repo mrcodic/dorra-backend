@@ -48,7 +48,6 @@ class SyncCanvasAssets extends Command
         if (!$template->$column) {
             return;
         }
-dd($template);
         $json = json_decode($template->$column, true);
 
         if (!$json) {
@@ -64,7 +63,7 @@ dd($template);
         });
 
         $changed = false;
-
+dd($found);
         foreach ($found as &$imgObj) {
 
             [$fullSrc, $path] = $this->normalizeSrc($imgObj['src']);
