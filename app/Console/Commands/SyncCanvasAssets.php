@@ -57,7 +57,7 @@ class SyncCanvasAssets extends Command
         $found = [];
 
         $this->walkFabric($json, function (&$obj) use (&$found) {
-            if (($obj['type'] ?? null) === 'image' && !empty($obj['src'])) {
+            if (($obj['type'] ?? null) === 'image' && !empty($obj['src'] ?? null)) {
                 $found[] =& $obj;
             }
         });
