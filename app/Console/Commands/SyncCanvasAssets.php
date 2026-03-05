@@ -65,26 +65,35 @@ class SyncCanvasAssets extends Command
         $changed = false;
         foreach ($found as &$imgObj) {
             [$fullSrc, $path] = $this->normalizeSrc($imgObj['src']);
+
             preg_match('#/storage/(\d+)/#', $path, $matches);
             $id = $matches[1] ?? null;
-            $media = Media::query()
-                ->whereKey($id)
-                ->latest()
-                ->first();
-            if (!$media) {
+
+            if (!$id) {
                 continue;
             }
 
-            $newMedia = $media->copy($template, 'template-library-assets');
+            $media = Media::query()->find($id);
+            if (!$media) {
+                continue;
+            }
+            
+            $alreadyAttached = $template->libraryMedia()
+                ->where('id', $media->id)
+                ->exists();
 
-            $template->libraryMedia()->syncWithoutDetaching([$newMedia->id]);
+            if (!$alreadyAttached) {
+                $newMedia = $media->copy($template, 'template-library-assets');
+                $template->libraryMedia()->syncWithoutDetaching([$newMedia->id]);
+            } else {
+                $newMedia = $media;
+            }
 
             if (empty($imgObj['assetId'])) {
                 $imgObj['assetId'] = $newMedia->id;
                 $changed = true;
             }
         }
-dd($imgObj,$json,$template->design_back_data);
         if ($changed) {
             $template->$column = json_encode($json, JSON_UNESCAPED_UNICODE);
             $template->save();
