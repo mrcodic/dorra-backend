@@ -37,12 +37,13 @@ class SyncCanvasAssets extends Command
 
 //                foreach ($templates as $template) {
 
-                    $this->processCanvasColumn($template, 'design_data');
-                    $this->processCanvasColumn($template, 'design_back_data');
+        $this->processCanvasColumn($template, 'design_data');
+        $this->processCanvasColumn($template, 'design_back_data');
 
 //                }
 //            });
     }
+
     public function processCanvasColumn(Template $template, string $column): void
     {
         if (!$template->$column) {
@@ -59,7 +60,7 @@ class SyncCanvasAssets extends Command
         $this->walkFabric($json, function (&$obj) use (&$found) {
             if (($obj['type'] ?? null) === 'image' && !empty($obj['src'] ?? null)) {
 
-                $found[] =&$obj;
+                $found[] =& $obj;
             }
         });
         $changed = false;
@@ -78,17 +79,13 @@ class SyncCanvasAssets extends Command
                 continue;
             }
 
-            $alreadyAttached = $template->libraryMedia()
-                ->where('media_id', $media->id)
-                ->exists();
 
-            if (!$alreadyAttached) {
-                $newMedia = $media->copy($template, 'template-library-assets');
-                $template->libraryMedia()->syncWithoutDetaching([$newMedia->id]);
-            } else {
-                $newMedia = $media;
-            }
+            $newMedia = $media->copy($template, 'template-library-assets');
+            $newMedia->parent_id = $media->id;
+            $newMedia->save();
+            $template->libraryMedia()->syncWithoutDetaching([$newMedia->id]);
 
+            $imgObj['src'] = $newMedia->getUrl();
             if (empty($imgObj['assetId'])) {
                 $imgObj['assetId'] = $newMedia->id;
                 $changed = true;
@@ -99,6 +96,7 @@ class SyncCanvasAssets extends Command
             $template->save();
         }
     }
+
     private function normalizeSrc(string $src): array
     {
         $src = trim($src);

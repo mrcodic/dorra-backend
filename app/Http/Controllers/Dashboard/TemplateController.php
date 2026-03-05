@@ -311,6 +311,9 @@ class TemplateController extends DashboardController
 
         foreach ($mediaItems as $media) {
             $newMedia = $media->copy($template, 'template-library-assets');
+            $newMedia->parent_id = $media->id;
+            $newMedia->save();
+            $template->libraryMedia()->syncWithoutDetaching([$newMedia->id]);
             $copiedMedia->push($newMedia);
         }
 
