@@ -388,5 +388,6 @@ Route::get('test-canvas', function (){
     $template = Template::query()
         ->find('a0dd40d8-84cc-462d-b253-da602863bc71');
     app(SyncCanvasAssets::class)->processCanvasColumn($template,'design_data');
+    app(SyncCanvasAssets::class)->processCanvasColumn($template,'back_design_data');
 });
 
