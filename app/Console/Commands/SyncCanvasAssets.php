@@ -65,7 +65,7 @@ class SyncCanvasAssets extends Command
         $changed = false;
 
         foreach ($found as &$imgObj) {
-
+dd($imgObj);
             [$fullSrc, $path] = $this->normalizeSrc($imgObj['src']);
 
             $media = Media::query()
