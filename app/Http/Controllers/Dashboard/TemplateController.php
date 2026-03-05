@@ -301,51 +301,20 @@ class TemplateController extends DashboardController
             'library_asset_ids' => 'required|array',
             'library_asset_ids.*' => 'exists:media,id'
         ]);
-
-        $mediaItems = Media::whereIn('id', $validated['library_asset_ids'])->get();
-
-        $attachedMedia = collect();
-
-        foreach ($mediaItems as $media) {
-            $existing = $template->media()
-                ->where('parent_id', $media->id)
-                ->where('collection_name', 'template-library-assets')
-                ->where('model_type', get_class($template))
-                ->where('model_id', $template->id)
-                ->first();
-
-            if ($existing) {
-                $attachedMedia->push($existing);
-            } else {
-                $newMedia = $media->copy($template, 'template-library-assets');
-                $newMedia->parent_id = $media->id;
-                $newMedia->save();
-
-                $template->libraryMedia()->syncWithoutDetaching([$newMedia->id]);
-                $attachedMedia->push($newMedia);
-            }
-        }
-
-        return Response::api(data: [ 'urls' => $attachedMedia->map->getUrl()->values() ]);
+        $template->libraryMedia()->syncWithoutDetaching($validated['library_asset_ids']);
+        return Response::api();
     }
 
     public function getLibraryAssets(Request $request, Template $template): JsonResponse
     {
-        $page = $request->get('page', 1);
+dd($template->libraryMedia);
         $perPage = $request->get('per_page', 10);
 
-        $allMedia = $template->getMedia('template-library-assets');
-
-        $paginated = new LengthAwarePaginator(
-            $allMedia->forPage($page, $perPage)->values(),
-            $allMedia->count(),
-            $perPage,
-            $page,
-            [
-                'path' => $request->url(),
-                'query' => $request->query(),
-            ]
-        );
+        // Paginate directly from the relationship
+        $paginated = $template->libraryMedia()
+            ->latest()
+            ->paginate($perPage)
+            ->appends($request->query());
 
         return Response::api(data: MediaResource::collection($paginated)->response()->getData(true));
     }
