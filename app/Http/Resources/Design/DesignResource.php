@@ -37,9 +37,11 @@ class DesignResource extends JsonResource
             'design_image' => $this->getFirstMediaUrl('designs'),
             'source_design_svg' => $this->getFirstMediaUrl('designs'),
             'back_design_image' => $this->getFirstMediaUrl('back_designs'),
-            'front_mockup_design_image' => $this->getFirstMediaUrl('front-mockup-designs'),
-            'back_mockup_design_image' => $this->getFirstMediaUrl('back-mockup-designs'),
-            'none_mockup_design_image' => $this->getFirstMediaUrl('none-mockup-designs'),
+            'mockup_design_image' =>
+                $this->getFirstMediaUrl('front-mockup-designs') ?:
+                $this->getFirstMediaUrl('none-mockup-designs') ?:
+                    $this->getFirstMediaUrl('back-mockup-designs')
+            ,
             'current_version' => $this->current_version,
             'product' => $this->when($designable, function () use ($designable) {
                 return  new CategoryResource($designable instanceof Category ? $designable : $designable->category);

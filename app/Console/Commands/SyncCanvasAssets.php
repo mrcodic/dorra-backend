@@ -99,13 +99,15 @@ dd($found);
         return [$src, $path];
     }
 
-    private function walkFabric($node, callable $fn): void
+    private function walkFabric(&$node, callable $fn): void
     {
         if (is_array($node)) {
             $fn($node);
 
             if (isset($node['objects']) && is_array($node['objects'])) {
-                foreach ($node['objects'] as $child) $this->walkFabric($child, $fn);
+                foreach ($node['objects'] as &$child) {
+                    $this->walkFabric($child, $fn);
+                }
             }
 
             if (isset($node['clipPath']) && is_array($node['clipPath'])) {

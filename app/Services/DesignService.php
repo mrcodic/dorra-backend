@@ -188,6 +188,7 @@ class DesignService extends BaseService
                 'owner:id,first_name,last_name',
                 'template:id,name,description,orientation',
                 'template.products.saves',
+                'mockup'
             ])
             ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
