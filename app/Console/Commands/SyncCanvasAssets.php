@@ -48,7 +48,7 @@ class SyncCanvasAssets extends Command
         if (!$template->$column) {
             return;
         }
-
+dd($template);
         $json = json_decode($template->$column, true);
 
         if (!$json) {
