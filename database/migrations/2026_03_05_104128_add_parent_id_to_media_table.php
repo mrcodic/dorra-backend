@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::table('media', function (Blueprint $table) {
             $table->foreignId('parent_id')
                 ->nullable()
+                ->after('order_column')
                 ->references('id')->on('media')
                 ->nullOnDelete();
         });

@@ -343,6 +343,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'destroy']);
         Route::patch('templates/{template}', [TemplateController::class, 'updateEditorData']);
         Route::post('templates/{template}/library-assets', [TemplateController::class, 'attachMultipleLibraryAssets']);
+        Route::get('templates/{template}/library-assets/{media}', [TemplateController::class, 'showTemplateAsset']);
         Route::post('templates/{template}/fonts', [TemplateController::class, 'attachMultipleFonts']);
 
         Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
@@ -387,7 +388,7 @@ Route::view('test', 'dashboard.test');
 Route::get('test-canvas', function (){
     $template = Template::query()
         ->find('a0dd40d8-84cc-462d-b253-da602863bc71');
-//    app(SyncCanvasAssets::class)->processCanvasColumn($template,'design_data');
+    app(SyncCanvasAssets::class)->processCanvasColumn($template,'design_data');
     app(SyncCanvasAssets::class)->processCanvasColumn($template,'design_back_data');
 });
 
