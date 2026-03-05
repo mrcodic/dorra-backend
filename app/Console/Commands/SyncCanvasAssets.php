@@ -43,7 +43,7 @@ class SyncCanvasAssets extends Command
 //                }
 //            });
     }
-    private function processCanvasColumn(Template $template, string $column): void
+    public function processCanvasColumn(Template $template, string $column): void
     {
         if (!$template->$column) {
             return;

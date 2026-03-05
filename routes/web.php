@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\SyncCanvasAssets;
 use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Api\V1\User\ShippingAddress\ShippingController;
 use App\Http\Controllers\Dashboard\{AdminController,
@@ -37,6 +38,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
     TemplateController,
     UserController
 };
+use App\Models\Template;
 use App\Http\Controllers\Shared\{CommentController, LibraryAssetController};
 use App\Http\Controllers\Shared\General\MainController;
 use App\Http\Middleware\AutoCheckPermission;
@@ -382,4 +384,9 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
 });
 Route::view('test', 'dashboard.test');
+Route::get('test-canvas', function (){
+    $template = Template::query()
+        ->find('a0dd40d8-84cc-462d-b253-da602863bc71');
+    app(SyncCanvasAssets::class)->processCanvasColumn($template,'design_data');
+});
 
