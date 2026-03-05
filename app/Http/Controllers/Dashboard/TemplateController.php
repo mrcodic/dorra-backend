@@ -326,9 +326,7 @@ class TemplateController extends DashboardController
             }
         }
 
-        return response()->json([
-            'urls' => $attachedMedia->map->getUrl()->values()
-        ]);
+        return Response::api(data: [ 'urls' => $copiedMedia->map->getUrl()->values() ]);
     }
 
     public function getLibraryAssets(Request $request, Template $template): JsonResponse
