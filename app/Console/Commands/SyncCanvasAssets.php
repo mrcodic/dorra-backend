@@ -84,7 +84,7 @@ class SyncCanvasAssets extends Command
                 $changed = true;
             }
         }
-dd($imgObj);
+dd($imgObj,$json);
         if ($changed) {
             $template->$column = json_encode($json, JSON_UNESCAPED_UNICODE);
             $template->save();
