@@ -385,9 +385,9 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
 });
 Route::view('test', 'dashboard.test');
-Route::get('test-canvas', function (){
+Route::get('test-canvas/{id}', function ($id){
     $template = Template::query()
-        ->find('a0dd40d8-84cc-462d-b253-da602863bc71');
+        ->find($id);
     app(SyncCanvasAssets::class)->processCanvasColumn($template,'design_data');
     app(SyncCanvasAssets::class)->processCanvasColumn($template,'design_back_data');
 });
