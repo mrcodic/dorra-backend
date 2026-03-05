@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('mediables', function (Blueprint $table) {
             $table->id();
             $table->foreignId('media_id')->constrained()->cascadeOnDelete();
-            $table->morphs('mediable');
+            $table->uuidMorphs('mediable');
             $table->timestamps();
         });
     }
