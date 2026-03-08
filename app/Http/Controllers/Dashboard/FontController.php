@@ -25,8 +25,8 @@ class FontController extends Controller
         $fonts = $this->fontService->getAll(['fontStyles.media', 'fontStyles.font'], request('paginate',false), perPage:request('per_page',10),
         counts: [
                 'fontStyles as templates_fonts_count' => function ($q) {
-                    $q->whereHas('media', function ($q2) {
-                        $q2->whereHas('fonts');
+                    $q->whereHas('media.templates', function ($q2) {
+                        $q2->where('mediables.type', 'font');
                     });
                 }
             ]
