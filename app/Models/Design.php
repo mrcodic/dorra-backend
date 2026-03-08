@@ -203,7 +203,7 @@ class Design extends Model implements HasMedia
 
     public function cartItems(): BelongsToMany
     {
-        return $this->belongsToMany(Cart::class, 'cart_items')->withPivot([
+        return $this->belongsToMany(Cart::class, 'cart_items','itemable_id')->withPivot([
             'sub_total', 'total_price'
         ]);
     }
