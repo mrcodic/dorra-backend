@@ -53,10 +53,13 @@ class LibraryAssetController extends Controller
     {
         $request->validate(['file' => ['required', 'file', 'mimetypes:image/jpeg,image/png,image/svg+xml',
             'mimes:jpg,jpeg,png,svg',
+            'image_id'=> ['sometimes','unique']
         ]]);
         $notAuth = request()->is('api/v1/admin/*');
         $model = $notAuth ? Admin::first() : getAuthOrGuest();
-        $media = handleMediaUploads($request->file('file'), $model, ($this->activeGuard ?? 'guest') . '_assets');
+        $media = handleMediaUploads($request->file('file'), $model, ($this->activeGuard ?? 'guest') . '_assets',[
+            'image_id' => $request->image_id
+        ]);
         return Response::api(data: MediaResource::make($media)->response()->getData(true));
 
     }

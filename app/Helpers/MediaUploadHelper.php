@@ -17,7 +17,8 @@ if (!function_exists('getMediaCollectionName')) {
 }
 
 if (!function_exists('handleMediaUploads')) {
-    function handleMediaUploads($files, $modelData = null, string $collectionName = null, array $customProperties = [], bool $clearExisting = false)
+    function handleMediaUploads($files, $modelData = null, string $collectionName = null,
+                                array $customProperties = [], bool $clearExisting = false,$columns = null)
     {
         if (empty($files)) {
             return null;
