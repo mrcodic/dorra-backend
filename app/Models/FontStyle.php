@@ -18,7 +18,7 @@ class FontStyle extends Model implements HasMedia
     {
         return $this->belongsTo(Font::class);
     }
-    
+
     public function media(): \Illuminate\Database\Eloquent\Relations\MorphMany
     {
         return $this->morphMany(Media::class, 'model');
