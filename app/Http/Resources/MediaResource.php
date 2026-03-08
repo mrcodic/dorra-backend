@@ -18,8 +18,8 @@ class MediaResource extends JsonResource
             'mime_type' => $this->mime_type,
             'url' => $this->getFullUrl(),
             'custom_properties' => $this->custom_properties,
-            'templates_count' => $this->templates_count,
-            'fonts_count' => $this->fonts_count,
+            'templates_count' => $this->templates_assets_count,
+            'fonts_count' => $this->templates_fonts_count,
             'designs_count' => $this->designs_count,
         ];
     }

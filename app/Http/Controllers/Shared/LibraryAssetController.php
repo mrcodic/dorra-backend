@@ -25,7 +25,13 @@ class LibraryAssetController extends Controller
         $notAuth = request()->is('api/v1/admin/*');
         $model = $notAuth ? Admin::first() : getAuthOrGuest();
         $media = Media::query()
-            ->withCount('templates')
+            ->withCount([
+                'templates as templates_assets_count' => function   ($q) {
+                    $q->whereNull('mediable.type');
+                }, 'templates as templates_fonts_count' => function   ($q) {
+                    $q->where('mediable.type','font');
+                },
+                'designs'])
             ->where(function ($query) use ($model) {
                 $query->whereMorphedTo('model', $model)
                     ->whereCollectionName(($this->activeGuard ?? 'guest') . '_assets');
