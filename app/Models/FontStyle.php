@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class FontStyle extends Model implements HasMedia
 {
@@ -17,5 +19,11 @@ class FontStyle extends Model implements HasMedia
     {
         return $this->belongsTo(Font::class);
     }
-
+    public function libraryMedia(): MorphToMany
+    {
+        return $this->morphToMany(
+            Media::class,
+            'mediable'
+        )->withPivot('type')->withTimestamps();
+    }
 }
