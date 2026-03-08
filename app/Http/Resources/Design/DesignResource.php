@@ -87,9 +87,7 @@ class DesignResource extends JsonResource
             'linked_to_mockup' =>  $this->linked_to_mockup,
             'mockup_color' =>  $this->mockup_color,
             'design_mockup_area' =>  $this->design_mockup_area,
-
-
-//            'is_added_to_cart' => $this->isAddedToCart(),
+            'is_added_to_cart' => $this->isAddedToCart(),
         ];
     }
 }
