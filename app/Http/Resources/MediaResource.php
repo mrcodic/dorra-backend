@@ -19,6 +19,8 @@ class MediaResource extends JsonResource
             'url' => $this->getFullUrl(),
             'custom_properties' => $this->custom_properties,
             'templates_count' => $this->templates_count,
+            'fonts_count' => $this->fonts_count,
+            'designs_count' => $this->designs_count,
         ];
     }
 

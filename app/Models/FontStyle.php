@@ -17,4 +17,5 @@ class FontStyle extends Model implements HasMedia
     {
         return $this->belongsTo(Font::class);
     }
+
 }

@@ -214,6 +214,14 @@ class Design extends Model implements HasMedia
             ->using(Typeable::class)
             ->withTimestamps();
     }
+
+    public function libraryMedia(): MorphToMany
+    {
+        return $this->morphToMany(
+            Media::class,
+            'mediable'
+        )->withTimestamps();
+    }
     public function getFrontImageUrl(): string
     {
         return $this->getFirstMediaUrl('designs') ?:  asset('images/default-product.png');

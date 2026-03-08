@@ -6,6 +6,7 @@ use App\Enums\HttpEnum;
 use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Base\DashboardController;
 use App\Jobs\ImportTemplatesFromExcel;
+use App\Models\FontStyle;
 use App\Models\Template;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -158,7 +159,9 @@ class TemplateController extends DashboardController
     }
     public function show($id)
     {
-        return Response::api(data: TemplateResource::make($this->templateService->showResource($id, ['products.dimensions', 'types','dimension'])));
+        return Response::api(data: TemplateResource::make($this->templateService->showResource($id,
+            ['products.dimensions', 'types',
+                'dimension','libraryMedia'])));
     }
 
     public function getProductTemplates()
@@ -310,6 +313,7 @@ class TemplateController extends DashboardController
         $perPage = $request->get('per_page', 10);
 
         $paginated = $template->libraryMedia()
+            ->wherePivotNull('type')
             ->latest()
             ->paginate($perPage)
             ->appends($request->query());
@@ -318,33 +322,22 @@ class TemplateController extends DashboardController
     }
 
 
+    public function detachLibraryAsset(Template $template, Media $media)
+    {
+        $template->libraryMedia()->detach($media);
+        return Response::api();
+    }
     public function attachMultipleFonts(Request $request, Template $template)
     {
         $validated = $request->validate([
             'font_media_ids' => 'required|array',
             'font_media_ids.*' => 'exists:media,id'
         ]);
+        $ids = collect($validated['font_media_ids'])
+            ->mapWithKeys(fn ($id) => [$id => ['type' => 'font']])
+            ->toArray();
 
-        $mediaItems = Media::whereIn(
-            'id',
-            $validated['font_media_ids']
-        )->get();
-
-        $copiedMedia = collect();
-
-        foreach ($mediaItems as $media) {
-            $newMedia = $media->copy($template, 'template-fonts');
-            $copiedMedia->push($newMedia);
-        }
-
-        return Response::api(data: [
-            'urls' =>  $copiedMedia->map->getUrl()->values()
-        ]);
-    }
-
-    public function detachLibraryAsset(Template $template, Media $media)
-    {
-        $template->libraryMedia()->detach($media);
+        $template->libraryMedia()->syncWithoutDetaching($ids);
         return Response::api();
     }
 }

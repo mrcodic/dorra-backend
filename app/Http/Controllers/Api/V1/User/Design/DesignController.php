@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api\V1\User\Design;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Design\StoreDesignFinalizationRequest;
+use App\Http\Resources\MediaResource;
+use App\Models\Media;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\Rule;
 use App\Http\Requests\Design\{StoreDesignRequest, UpdateDesignRequest};
 use App\Http\Resources\Design\{DesignResource, DesignFinalizationResource, DesignVersionResource};
@@ -105,7 +108,31 @@ class DesignController extends Controller
             ])->response()->getData(true)
         );
     }
+    public function attachMultipleLibraryAssets(Request $request, Design $design)
+    {
+        $validated = $request->validate([
+            'library_asset_ids' => 'required|array',
+            'library_asset_ids.*' => 'exists:media,id'
+        ]);
+        $design->libraryMedia()->syncWithoutDetaching($validated['library_asset_ids']);
+        return Response::api();
+    }
+    public function getLibraryAssets(Request $request, Design $design): JsonResponse
+    {
+        $perPage = $request->get('per_page', 10);
 
+        $paginated = $design->libraryMedia()
+            ->latest()
+            ->paginate($perPage)
+            ->appends($request->query());
+
+        return Response::api(data: MediaResource::collection($paginated)->response()->getData(true));
+    }
+    public function detachLibraryAsset(Design $design, Media $media)
+    {
+        $design->libraryMedia()->detach($media);
+        return Response::api();
+    }
     public function bulkDelete(Request $request)
     {
         $request->validate([

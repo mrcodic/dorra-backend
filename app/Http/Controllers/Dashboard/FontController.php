@@ -92,5 +92,4 @@ class FontController extends Controller
         return Response::api(message: "Font Style deleted successfully.");
     }
 
-
 }

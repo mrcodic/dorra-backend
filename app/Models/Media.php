@@ -21,4 +21,11 @@ class Media extends \Spatie\MediaLibrary\MediaCollections\Models\Media
             'mediable'
         );
     }
+    public function fonts(): MorphToMany
+    {
+        return $this->morphedByMany(
+            Font::class,
+            'mediable'
+        );
+    }
 }

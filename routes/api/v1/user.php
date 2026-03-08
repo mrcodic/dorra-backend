@@ -108,6 +108,9 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
 
     Route::controller(DesignController::class)->prefix('designs/')->group(function () {
         Route::post('{design}/teams', 'assignToTeam');
+        Route::post('{design}/library-assets', 'attachMultipleLibraryAssets');
+        Route::delete('{design}/library-assets/{library_asset}', 'detachLibraryAsset');
+        Route::get('{design}/library-assets', 'getLibraryAssets');
         Route::post('bulk-restore', 'bulkRestore');
         Route::post('bulk-delete', 'bulkDelete');
         Route::post('bulk-force-delete', 'bulkForceDelete');

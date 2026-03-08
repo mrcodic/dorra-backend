@@ -63,7 +63,11 @@ class TemplateResource extends JsonResource
             'color_templates_media' => $this->when($this->approach == 'without_editor',function(){
                return MediaResource::collection( $this->getMedia('color_templates'));
             }),
-            'font_media' => MediaResource::collection($this->getMedia('template-fonts')),
+            'font_media' => MediaResource::collection(
+                $this->whenLoaded('libraryMedia', function () {
+                    return $this->libraryMedia->where('pivot.type', 'font');
+                })
+            ),
             'price' => $this->price,
             'visible_download_btn' => $this->when($this->price,true),
         ];
