@@ -27,9 +27,9 @@ class LibraryAssetController extends Controller
         $media = Media::query()
             ->withCount([
                 'templates as templates_assets_count' => function   ($q) {
-                    $q->whereNull('mediable.type');
+                    $q->whereNull('mediables.type');
                 }, 'templates as templates_fonts_count' => function   ($q) {
-                    $q->where('mediable.type','font');
+                    $q->where('mediables.type','font');
                 },
                 'designs'])
             ->where(function ($query) use ($model) {
