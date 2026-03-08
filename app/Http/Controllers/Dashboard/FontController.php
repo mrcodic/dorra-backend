@@ -26,7 +26,7 @@ class FontController extends Controller
         counts: [
                 'fontStyles as templates_fonts_count' => function ($q) {
                     $q->whereHas('media', function ($q2) {
-                        $q2->whereHas('fonts'); 
+                        $q2->whereHas('fonts');
                     });
                 }
             ]
