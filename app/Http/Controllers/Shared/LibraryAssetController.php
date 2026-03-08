@@ -28,8 +28,6 @@ class LibraryAssetController extends Controller
             ->withCount([
                 'templates as templates_assets_count' => function   ($q) {
                     $q->whereNull('mediables.type');
-                }, 'templates as templates_fonts_count' => function   ($q) {
-                    $q->where('mediables.type','font');
                 },
                 'designs'])
             ->where(function ($query) use ($model) {
