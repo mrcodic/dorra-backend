@@ -51,7 +51,12 @@ return [
     */
 
     'channels' => [
-
+        'fawry' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/fawry/fawry.log'),
+            'level' => 'debug',
+            'days' => 14,
+        ],
         'stack' => [
             'driver' => 'stack',
             'channels' => explode(',', env('LOG_STACK', 'single')),
