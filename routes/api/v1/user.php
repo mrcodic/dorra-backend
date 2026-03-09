@@ -70,14 +70,11 @@ Route::controller(PaymentController::class)->group(function () {
     Route::post('buy-order-again', 'buyOrderAgain');
     Route::post('paymob/payment/callback', 'handlePaymobCallback');
     Route::get('paymob/payment/redirect', 'handlePaymobRedirect');
-//    Route::post('fawry/payment/callback', 'handleFawryCallback');
+    Route::post('fawry/payment/callback', 'handleFawryCallback');
     Route::post('fawry/payment/verify-signature', 'verifySignatureTest');
     Route::get('fawry/payment/redirect', 'handleFawryRedirect');
 });
-Route::post('fawry/payment/callback', function(Request $request) {
-    Log::channel('fawry')->info('RAW HIT', $request->all());
-    return response()->json(['ok' => true]);
-});
+
 
 Route::get('locations', [OrderController::class, 'searchLocations'])->name('locations.nearby');
 
