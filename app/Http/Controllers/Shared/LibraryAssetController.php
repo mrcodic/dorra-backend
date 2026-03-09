@@ -54,7 +54,7 @@ class LibraryAssetController extends Controller
     {
         $request->validate(['file' => ['required', 'file', 'mimetypes:image/jpeg,image/png,image/svg+xml',
             'mimes:jpg,jpeg,png,svg',
-            'image_id'=> ['sometimes', Rule::unique('media', "custom_properties->image_id")]
+            'image_id'=> ['nullable', Rule::unique('media', "custom_properties->image_id")]
         ]]);
         $notAuth = request()->is('api/v1/admin/*');
         $model = $notAuth ? Admin::first() : getAuthOrGuest();
