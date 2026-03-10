@@ -7,6 +7,7 @@ use App\Enums\Mockup\TypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MockupResource;
 use App\Services\MockupService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
 
@@ -16,8 +17,9 @@ class MockupController extends Controller
     {
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $request->get('approach','with_editor');
         $data = $this->mockupService->getAll(['types'], true, perPage: 10);
         return Response::api(data: MockupResource::collection($data)->response()->getData(true));
 

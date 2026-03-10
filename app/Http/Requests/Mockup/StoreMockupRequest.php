@@ -35,6 +35,11 @@ class StoreMockupRequest extends BaseRequest
                 'string',
                 'max:255',
             ],
+            'approach' => [
+                'required',
+                'string',
+                'in:with_editor,without_editor',
+            ],
             'types.*' => ['required', Rule::in(TypeEnum::values())],
             'category_id' => ['required','integer', Rule::exists(Category::class, 'id')],
             'colors' => ['sometimes','array'],

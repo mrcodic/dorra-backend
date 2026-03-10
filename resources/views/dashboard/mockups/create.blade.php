@@ -213,6 +213,7 @@
                         </div>
 
                         @if(request('q') === 'without')
+                            <input type="hidden" name="approach" value="without_editor">
 
 
                         <div class="form-group my-2 d-none" id="templatesCardsWrapper">
@@ -226,7 +227,7 @@
                     </div>
 
                     @if(request('q') === 'with')
-
+                        <input type="hidden" name="approach" value="with_editor">
                     <div class="mb-2">
                         <label class="label-text mb-1 d-block">Colors</label>
                         <div class="d-flex flex-wrap align-items-center gap-1">

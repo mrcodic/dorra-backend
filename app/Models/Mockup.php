@@ -23,6 +23,7 @@ class Mockup extends Model implements HasMedia
         'area_left',
         'area_height',
         'area_width',
+        'approach',
     ];
     protected $appends = [
         'front_base_image_url',

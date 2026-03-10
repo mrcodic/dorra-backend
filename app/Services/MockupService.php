@@ -56,6 +56,7 @@ class MockupService extends BaseService
                     'back_templates',
                 ]),
             ])
+            ->whereApproach('without_editor')
             ->get();
 
         $colors = $mockups
@@ -148,7 +149,8 @@ class MockupService extends BaseService
                     $q->whereRaw('1 = 0');
                 }
             })
-            ->when(request()->filled('color'), function ($query) {
+            ->when(request()->filled('approach'), function ($query) {
+                $query->whereApproach('with_editor');
 
             })
             ->when(request()->filled('product_id'), function ($q) {

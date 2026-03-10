@@ -214,6 +214,7 @@
                                 style="border:1px solid #ccc;"></canvas>
                         </div>
                     </div>
+                    @if($model->approach == 'without_editor')
                     <div class="form-group my-2 d-none" id="templatesCardsWrapper">
                         <label class="form-label mb-2">Choose Template</label>
 
@@ -223,10 +224,12 @@
                         <div id="templatesHiddenContainer"></div>
 
                     </div>
+                    @endif
 
 
 
                 </div>
+                @if($model->approach == 'with_editor')
 
                     <div class="mb-2">
                     <label class="label-text mb-1 d-block">Colors</label>
@@ -237,6 +240,7 @@
                     </div>
                     <div id="colorsInputContainer"></div>
                 </div>
+                @endif
 
                 <div class="modal-footer border-top-0">
                     <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
@@ -434,91 +438,141 @@
         let pickrInstance  = null;
         let currentCard    = null; // card for current pickr session
 
-        $(document).ready(function () {
+    $(document).ready(function () {
 
-            // Destroy previous instance if exists
-            if (pickrInstance) pickrInstance.destroyAndRemove();
+        if (pickrInstance) pickrInstance.destroyAndRemove();
 
-            // Dummy element for pickr
-            const dummyElement = document.createElement('div');
-            document.body.appendChild(dummyElement);
+        const dummyElement = document.createElement('div');
+        document.body.appendChild(dummyElement);
 
-            pickrInstance = Pickr.create({
-                el: dummyElement,
-                theme: 'classic',
-                components: {
-                    preview: false,
-                    opacity: false,
-                    hue: true,
-                    interaction: {
-                        input: true,
-                        save: true,
-                        clear: true
-                    }
+        pickrInstance = Pickr.create({
+            el: dummyElement,
+            theme: 'classic',
+            components: {
+                preview: false,
+                opacity: false,
+                hue: true,
+                interaction: {
+                    input: true,
+                    save: true,
+                    clear: true
                 }
-            });
-
-            // Handle save
-            pickrInstance.on('save', (color) => {
-                if (!currentCard) return;
-
-                const hex = color.toHEXA().toString();
-
-                if (!Array.isArray(currentCard.selectedColors)) {
-                    currentCard.selectedColors = [];
-                }
-
-                // ADD ONLY (no replace)
-                if (!currentCard.selectedColors.includes(hex)) {
-                    currentCard.selectedColors.push(hex);
-                }
-
-                renderSelectedColors(currentCard);
-                const templateIndex = currentCard.dataset.index;
-                const templateId = currentCard.dataset.id;
-
-                // buildTemplateColorInputs(currentCard, templateIndex,templateId);
-
-                pickrInstance.hide();
-            });
-
-            // Handle clear
-            pickrInstance.on('clear', () => {
-                if (!currentCard) return;
-                currentCard.selectedColors = [];
-                renderSelectedColors(currentCard);
-                pickrInstance.hide();
-            });
+            }
         });
 
-        // Open color picker
-        $(document).on('click', '.openColorPicker', function () {
-            const trigger = this;
-            const card = trigger.closest('.template-card');
-            //hydrateColorsForCard(card);
-            currentCard = card;
-            // Initialize selectedColors array if not exists
-            if (!card.selectedColors) card.selectedColors = [];
-            console.log(card.selectedColors)
-            const rect = trigger.getBoundingClientRect();
-            const modalScrollTop = document.querySelector('#templateModal .modal-body')?.scrollTop || 0;
-            if (!card.selectedColors || !card.selectedColors.length) {
+        // Handle save
+        pickrInstance.on('save', (color) => {
+            const hex = color.toHEXA().toString().toLowerCase();
+
+            // ===== Global color picker (static #openColorPicker, no template card) =====
+            if (!currentCard) {
+                const selectedColors = document.getElementById('selected-colors');
+                const inputContainer = document.getElementById('colorsInputContainer');
+                if (!selectedColors || !inputContainer) { pickrInstance.hide(); return; }
+
+                // avoid duplicates
+                if ([...inputContainer.querySelectorAll('input')].some(i => i.value === hex)) {
+                    pickrInstance.hide();
+                    return;
+                }
+
+                const li = document.createElement('li');
+                li.style.listStyle = 'none';
+                li.innerHTML = `
+                <div class="selected-color-wrapper position-relative">
+                    <div class="selected-color-dot" style="background-color:#fff;">
+                        <div class="selected-color-inner" style="background-color:${hex};"></div>
+                    </div>
+                    <button type="button" onclick="removeGlobalColor('${hex}', this)" class="remove-color-btn">×</button>
+                </div>`;
+                selectedColors.appendChild(li);
+
+                const input = document.createElement('input');
+                input.type  = 'hidden';
+                input.name  = 'colors[]';
+                input.value = hex;
+                inputContainer.appendChild(input);
+
+                pickrInstance.hide();
+                return;
             }
-            // hydrateColorsForCard(card); // يجيب المحفوظ ويرسمه مرةv واح-دة
+
+            // ===== Per-card color picker (template cards) =====
+            if (!Array.isArray(currentCard.selectedColors)) currentCard.selectedColors = [];
+
+            if (!currentCard.selectedColors.includes(hex)) {
+                currentCard.selectedColors.push(hex);
+            }
+
+            renderSelectedColors(currentCard);
+            buildHiddenTemplateInputs();
+            pickrInstance.hide();
+        });
+
+        // Handle clear
+        pickrInstance.on('clear', () => {
+            // ===== Global mode =====
+            if (!currentCard) {
+                const selectedColors = document.getElementById('selected-colors');
+                const inputContainer = document.getElementById('colorsInputContainer');
+                if (selectedColors) selectedColors.innerHTML = '';
+                if (inputContainer) inputContainer.innerHTML = '';
+                pickrInstance.hide();
+                return;
+            }
+
+            // ===== Per-card mode =====
+            currentCard.selectedColors = [];
+            renderSelectedColors(currentCard);
+            buildHiddenTemplateInputs();
+            pickrInstance.hide();
+        });
+    });
+        // Open color picker
+    $(document).on('click', '.openColorPicker, #openColorPicker', function () {
+        const trigger = this;
+        const isGlobal = trigger.id === 'openColorPicker';
+
+        if (isGlobal) {
+            currentCard = null;
 
             pickrInstance.show();
 
             setTimeout(() => {
                 const pickerPanel = document.querySelector('.pcr-app.visible');
                 if (pickerPanel) {
-                    pickerPanel.style.position = 'absolute';
-                    pickerPanel.style.left = `${rect.left + window.scrollX}px`;
-                    pickerPanel.style.top = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
+                    const rect = trigger.getBoundingClientRect();
+                    pickerPanel.style.position = 'fixed';
+                    pickerPanel.style.left = `${rect.left}px`;
+                    pickerPanel.style.top  = `${rect.bottom + 5}px`;
                     pickerPanel.style.zIndex = 9999;
                 }
             }, 0);
-        });
+            return;
+        }
 
+        // Per-card mode
+        const card = trigger.closest('.template-card');
+        if (!card) return;
+
+        currentCard = card;
+        if (!card.selectedColors) card.selectedColors = [];
+
+        const rect = trigger.getBoundingClientRect();
+        const modalScrollTop = document.querySelector('#templateModal .modal-body')?.scrollTop || 0;
+
+        pickrInstance.show();
+
+        setTimeout(() => {
+            const pickerPanel = document.querySelector('.pcr-app.visible');
+            if (pickerPanel) {
+                pickerPanel.style.position = 'absolute';
+                pickerPanel.style.left = `${rect.left + window.scrollX}px`;
+                pickerPanel.style.top  = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
+                pickerPanel.style.zIndex = 9999;
+            }
+        }, 0);
+    });
         // Remove color from current card
         window.removeColor = function (hex) {
             console.log("sdf",currentCard.selectedColors)
