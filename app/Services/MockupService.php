@@ -224,6 +224,7 @@ class MockupService extends BaseService
         $model = $this->handleTransaction(function () use ($validatedData) {
             $model = $this->repository->create($validatedData);
             $model->types()->attach(Arr::get($validatedData, 'types') ?? []);
+            if(!empty($validatedData['templates'])){
             collect($validatedData['templates'])->each(function ($template) use ($model) {
                 $templateId = $template['template_id'] ?? null;
                 if (!$templateId) return;
@@ -248,12 +249,12 @@ class MockupService extends BaseService
                     ],
                 ]);
             });
-
+            }
             return $model;
         });
         $this->handleFiles($model);
         $model->load(['templates', 'types', 'category', 'media']);
-        HandleMockupFilesJob::dispatch($model, 'create')->delay(now()->addSeconds(5));
+        if(!empty($validatedData['templates']))HandleMockupFilesJob::dispatch($model, 'create')->delay(now()->addSeconds(5));
         return $model;
     }
 
@@ -374,7 +375,7 @@ class MockupService extends BaseService
             }
 
             $model->load(['templates', 'types', 'category', 'media']);
-            HandleMockupFilesJob::dispatch($model)->delay(now()->addSeconds(5));
+            if(!empty($validatedData['templates'])) HandleMockupFilesJob::dispatch($model)->delay(now()->addSeconds(5));
 
             return $model;
         });
