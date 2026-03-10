@@ -31,20 +31,7 @@ class LibraryAssetController extends Controller
                     $q->whereNull('mediables.type');
                 },
                 'designs'])
-            ->where(function ($query) use ($model) {
-                $query->whereMorphedTo('model', $model)
-                    ->whereCollectionName(($this->activeGuard ?? 'guest') . '_assets');
-                if ($this->activeGuard === 'sanctum') {
-                    $query->orWhere('collection_name', 'web_assets');
-                }
-            })
-            ->orderByRaw("
-            CASE
-                WHEN collection_name = 'sanctum_assets' THEN 1
-                WHEN collection_name = 'web_assets' THEN 2
-                ELSE 3
-            END
-        ")
+            ->whereCollectionName(($notAuth? 'guest' : 'web') . '_assets')
             ->latest()
             ->paginate($request->query('per_page', 10));
         return Response::api(data: MediaResource::collection($media)->response()->getData(true));
