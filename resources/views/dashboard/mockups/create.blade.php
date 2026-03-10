@@ -181,7 +181,6 @@
                                 @endforeach
                             </div>
                         </div>
-                @if(request('q') === 'without')
                         {{-- mockup Canvas --}}
                         <!-- العمود الشمال: يحتوي fixed-block + fileInputsContainer (البلوكات تتحط هنا) -->
                         <div class="row">
@@ -213,6 +212,7 @@
                             </div>
                         </div>
 
+                        @if(request('q') === 'without')
 
 
                         <div class="form-group my-2 d-none" id="templatesCardsWrapper">
