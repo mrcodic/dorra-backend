@@ -312,7 +312,60 @@
 
 @section('page-script')
 
+    <script>
+        // =========================
+        // PRELOAD EXISTING COLORS (with_editor approach)
+        // =========================
+        document.addEventListener('DOMContentLoaded', function () {
+            @if($model->approach === 'with_editor')
+            const existingColors = @json($model->colors ?? []);
 
+            if (Array.isArray(existingColors) && existingColors.length) {
+                const selectedColors = document.getElementById('selected-colors');
+                const inputContainer = document.getElementById('colorsInputContainer');
+
+                if (!selectedColors || !inputContainer) return;
+
+                existingColors.forEach(hex => {
+                    const normalizedHex = String(hex).toLowerCase();
+
+                    // avoid duplicates
+                    if ([...inputContainer.querySelectorAll('input')].some(i => i.value === normalizedHex)) return;
+
+                    // color dot
+                    const li = document.createElement('li');
+                    li.style.listStyle = 'none';
+                    li.innerHTML = `
+                    <div class="selected-color-wrapper position-relative">
+                        <div class="selected-color-dot" style="background-color:#fff;">
+                            <div class="selected-color-inner" style="background-color:${normalizedHex};"></div>
+                        </div>
+                        <button type="button" onclick="removeGlobalColor('${normalizedHex}', this)" class="remove-color-btn">×</button>
+                    </div>`;
+                    selectedColors.appendChild(li);
+
+                    // hidden input
+                    const input = document.createElement('input');
+                    input.type  = 'hidden';
+                    input.name  = 'colors[]';
+                    input.value = normalizedHex;
+                    inputContainer.appendChild(input);
+                });
+            }
+            @endif
+        });
+        window.removeGlobalColor = function (hex, btn) {
+            const li = btn.closest('li');
+            if (li) li.remove();
+
+            const inputContainer = document.getElementById('colorsInputContainer');
+            if (!inputContainer) return;
+
+            [...inputContainer.querySelectorAll('input')]
+                .filter(i => i.value.toLowerCase() === hex.toLowerCase())
+                .forEach(i => i.remove());
+        };
+    </script>
 <script>
     const attachedTemplateIdsRaw = @json(($model?->templates?->pluck('id') ?? collect())->values());
         const attachedTemplateIds = new Set((attachedTemplateIdsRaw || []).map(id => String(id)));
