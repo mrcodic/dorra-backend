@@ -82,7 +82,7 @@ class DesignService extends BaseService
 
         } else {
             $design = $this->repository->query()->create($validatedData);
-            $design->types()->attach([3]);
+            $design->types()->attach([1]);
         }
         if ($validatedData['user_id']) {
             $design->users()->attach(
