@@ -65,9 +65,9 @@ class DesignService extends BaseService
                 $template->getMedia('back_templates')
                     ->last()
                     ?->copy($design, 'back_designs');
-                if ($template->types) {
-                    $design->types()->attach($template->types->pluck('id'));
-                }
+//                if ($template->types) {
+                    $design->types()->attach($template->types->pluck('id') ?? [3]);
+//                }
 
                 return $design->load([
                     'designable.prices',

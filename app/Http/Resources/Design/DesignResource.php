@@ -87,32 +87,51 @@ class DesignResource extends JsonResource
             'linked_to_mockup' =>  $this->linked_to_mockup,
             'mockup_color' =>  $this->mockup_color,
             'design_mockup_area' =>  $this->design_mockup_area ??
+                $this->types->map(function ($type) {
 
-                [
-                    [
-                        "name" => "front",
-                        "p1x" => "0.350000",
-                        "p1y" => "0.250000",
-                        "p2x" => "0.650000",
-                        "p2y" => "0.250000",
-                        "p3x" => "0.350000",
-                        "p3y" => "0.550000",
-                        "p4x" => "0.650000",
-                        "p4y" => "0.550000"
-                    ],
-                    [
-                        "name" => "back",
-                        "p1x" => "0.350000",
-                        "p1y" => "0.250000",
-                        "p2x" => "0.650000",
-                        "p2y" => "0.250000",
-                        "p3x" => "0.350000",
-                        "p3y" => "0.550000",
-                        "p4x" => "0.650000",
-                        "p4y" => "0.550000"
-                    ],
-                ],
+                    if ($type->value->key() === 'front') {
+                        return [
+                            "name" => "front",
+                            "p1x" => "0.350000",
+                            "p1y" => "0.250000",
+                            "p2x" => "0.650000",
+                            "p2y" => "0.250000",
+                            "p3x" => "0.350000",
+                            "p3y" => "0.550000",
+                            "p4x" => "0.650000",
+                            "p4y" => "0.550000"
+                        ];
+                    }
 
+                    if ($type->value->key() === 'back') {
+                        return [
+                            "name" => "back",
+                            "p1x" => "0.350000",
+                            "p1y" => "0.250000",
+                            "p2x" => "0.650000",
+                            "p2y" => "0.250000",
+                            "p3x" => "0.350000",
+                            "p3y" => "0.550000",
+                            "p4x" => "0.650000",
+                            "p4y" => "0.550000"
+                        ];
+                    }
+
+                    if ($type->value->key() === 'none') {
+                        return [
+                            "name" => "none",
+                            "p1x" => "0.350000",
+                            "p1y" => "0.250000",
+                            "p2x" => "0.650000",
+                            "p2y" => "0.250000",
+                            "p3x" => "0.350000",
+                            "p3y" => "0.550000",
+                            "p4x" => "0.650000",
+                            "p4y" => "0.550000"
+                        ];
+                    }
+
+                })->values(),
             'is_added_to_cart' => $this->isAddedToCart(),
         ];
     }
