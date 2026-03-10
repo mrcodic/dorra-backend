@@ -86,7 +86,28 @@ class DesignResource extends JsonResource
             'visible_download_btn' => (bool) $this->price,
             'linked_to_mockup' =>  $this->linked_to_mockup,
             'mockup_color' =>  $this->mockup_color,
-            'design_mockup_area' =>  $this->design_mockup_area,
+            'design_mockup_area' =>  $this->design_mockup_area ??  [
+                    "front" => [
+                        "p1x" => "0.350000",
+                        "p1y" => "0.250000",
+                        "p2x" => "0.650000",
+                        "p2y" => "0.250000",
+                        "p3x" => "0.350000",
+                        "p3y" => "0.550000",
+                        "p4x" => "0.650000",
+                        "p4y" => "0.550000"
+                    ],
+                    "back" => [
+                        "p1x" => "0.350000",
+                        "p1y" => "0.250000",
+                        "p2x" => "0.650000",
+                        "p2y" => "0.250000",
+                        "p3x" => "0.350000",
+                        "p3y" => "0.550000",
+                        "p4x" => "0.650000",
+                        "p4y" => "0.550000"
+                    ]
+                ],
             'is_added_to_cart' => $this->isAddedToCart(),
         ];
     }
