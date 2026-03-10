@@ -1462,7 +1462,17 @@
         // =========================
         // COLOR PICKER
         // =========================
+        window.removeGlobalColor = function (hex, btn) {
+            const li = btn.closest('li');
+            if (li) li.remove();
 
+            const inputContainer = document.getElementById('colorsInputContainer');
+            if (!inputContainer) return;
+
+            [...inputContainer.querySelectorAll('input')]
+                .filter(i => i.value.toLowerCase() === hex.toLowerCase())
+                .forEach(i => i.remove());
+        };
         let pickrInstance  = null;
         let currentCard    = null; // card for current pickr session
 
