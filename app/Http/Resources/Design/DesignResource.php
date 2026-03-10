@@ -87,7 +87,19 @@ class DesignResource extends JsonResource
             'linked_to_mockup' =>  $this->linked_to_mockup,
             'mockup_color' =>  $this->mockup_color,
             'design_mockup_area' =>  $this->design_mockup_area ??  [
-                    "front" => [
+                    [
+                        "name" => "front",
+                        "p1x" => "0.350000",
+                        "p1y" => "0.250000",
+                        "p2x" => "0.650000",
+                        "p2y" => "0.250000",
+                        "p3x" => "0.350000",
+                        "p3y" => "0.550000",
+                        "p4x" => "0.650000",
+                        "p4y" => "0.550000"
+                    ],
+                    [
+                        "name" => "back",
                         "p1x" => "0.350000",
                         "p1y" => "0.250000",
                         "p2x" => "0.650000",
