@@ -193,6 +193,7 @@
 
 
     </div>
+    @include("modals.mockups.mockup-modal")
 
     @include('modals.mockups.show-mockup')
     @include('modals.delete',[
@@ -207,7 +208,6 @@
     'confirmText' => 'Are you sure you want to delete this items?',
     ])
     @include('modals.mockups.add-mockup',['types' => $associatedData['types']])
-    @include("modals.mockups.mockup-modal")
 
     <!-- list and filter end -->
 </section>
