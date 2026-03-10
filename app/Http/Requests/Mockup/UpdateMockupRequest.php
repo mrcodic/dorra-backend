@@ -33,7 +33,8 @@ class UpdateMockupRequest extends BaseRequest
         $types = $this->input('types', []);
         $categoryChanged = $this->has('category_id')
             && ($this->input('category_id') !== optional($id)->category_id);
-        $approach = $this->input('approach') ?? $this->query('q');
+        $types = request('types', []);
+        $approach = request('approach') ?? request('q');
         $isWithout = $approach === 'without_editor' || $approach === 'without';
         return [
             'name' => [
