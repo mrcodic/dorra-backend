@@ -284,13 +284,17 @@
 
 @section('page-script')
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        (function waitForColorPicker() {
             const openBtn = document.getElementById('openColorPicker');
             const picker = document.getElementById('colorPicker');
             const selectedColors = document.getElementById('selected-colors');
             const inputContainer = document.getElementById('colorsInputContainer');
 
-            if (!openBtn || !picker || !selectedColors || !inputContainer) return;
+            if (!openBtn || !picker || !selectedColors || !inputContainer) {
+                // Retry in 50ms if elements not yet in DOM
+                setTimeout(waitForColorPicker, 50);
+                return;
+            }
 
             let colors = [];
 
@@ -302,7 +306,7 @@
 
                 colors.push(color);
 
-                // color preview
+                // Create color preview box
                 const colorBox = document.createElement('span');
                 colorBox.style.width = "24px";
                 colorBox.style.height = "24px";
@@ -312,15 +316,16 @@
                 colorBox.style.cursor = "pointer";
                 colorBox.title = "Click to remove";
 
-                colorBox.onclick = () => {
+                // Remove color on click
+                colorBox.addEventListener('click', () => {
                     colors = colors.filter(c => c !== color);
                     colorBox.remove();
                     input.remove();
-                };
+                });
 
                 selectedColors.appendChild(colorBox);
 
-                // hidden input
+                // Hidden input for form
                 const input = document.createElement('input');
                 input.type = "hidden";
                 input.name = "colors[]";
@@ -328,7 +333,8 @@
 
                 inputContainer.appendChild(input);
             });
-        });
+
+        })();
     </script>
     <script>
         window.templatePositions = window.templatePositions || {};
