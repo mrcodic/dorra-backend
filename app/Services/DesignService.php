@@ -65,9 +65,9 @@ class DesignService extends BaseService
                 $template->getMedia('back_templates')
                     ->last()
                     ?->copy($design, 'back_designs');
-//                if ($template->types) {
-                    $design->types()->attach($template->types->pluck('id') ?? [3]);
-//                }
+                if ($template->types) {
+                    $design->types()->attach($template->types->pluck('id') );
+                }
 
                 return $design->load([
                     'designable.prices',
@@ -82,6 +82,7 @@ class DesignService extends BaseService
 
         } else {
             $design = $this->repository->query()->create($validatedData);
+            $design->types()->attach([3]);
         }
         if ($validatedData['user_id']) {
             $design->users()->attach(
