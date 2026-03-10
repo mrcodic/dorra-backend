@@ -155,7 +155,9 @@
 
                     {{-- create mockup button --}}
                     @can('mockups_create')
-                    <a class="btn btn-outline-primary col-12 col-md-3 col-lg-2"  href="{{ route("mockups.create") }}">
+                    <a class="btn btn-outline-primary col-12 col-md-3 col-lg-2"
+                       data-bs-target="#mockupModal" data-bs-toggle="modal"
+                       href="{{ route("mockups.create") }}">
                         <i data-feather="plus"></i>
                         Create Mockup
                     </a>
@@ -205,6 +207,8 @@
     'confirmText' => 'Are you sure you want to delete this items?',
     ])
     @include('modals.mockups.add-mockup',['types' => $associatedData['types']])
+    @include("modals.mockups.mockup-modal")
+
     <!-- list and filter end -->
 </section>
 <!-- users list ends -->
