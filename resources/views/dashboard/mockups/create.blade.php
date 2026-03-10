@@ -230,9 +230,9 @@
                     <div class="mb-2">
                         <label class="label-text mb-1 d-block">Colors</label>
                         <div class="d-flex flex-wrap align-items-center gap-1">
-                            <button type="button" id="openColorPicker" class="gradient-picker-trigger border openColorPicker"></button>
+                            <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
 
-                            <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center selected-colors"></span>
+                            <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>
                         </div>
                         <div id="colorsInputContainer"></div>
                     </div>
@@ -283,7 +283,52 @@
 @endsection
 
 @section('page-script')
+    <script>
+        const openBtn = document.getElementById('openColorPicker');
+        const picker = document.getElementById('colorPicker');
+        const selectedColors = document.getElementById('selected-colors');
+        const inputContainer = document.getElementById('colorsInputContainer');
 
+        let colors = [];
+
+        openBtn.addEventListener('click', () => {
+            picker.click();
+        });
+
+        picker.addEventListener('input', function () {
+            const color = this.value;
+
+            if (colors.includes(color)) return;
+
+            colors.push(color);
+
+            // color preview
+            const colorBox = document.createElement('span');
+            colorBox.style.width = "24px";
+            colorBox.style.height = "24px";
+            colorBox.style.background = color;
+            colorBox.style.display = "inline-block";
+            colorBox.style.borderRadius = "4px";
+            colorBox.style.cursor = "pointer";
+            colorBox.title = "Click to remove";
+
+            colorBox.onclick = () => {
+                colors = colors.filter(c => c !== color);
+                colorBox.remove();
+                input.remove();
+            };
+
+            selectedColors.appendChild(colorBox);
+
+            // hidden input
+            const input = document.createElement('input');
+            input.type = "hidden";
+            input.name = "colors[]";
+            input.value = color;
+
+            inputContainer.appendChild(input);
+        });
+    </script>
     <script>
         window.templatePositions = window.templatePositions || {};
         var buildHiddenTemplateInputs;
