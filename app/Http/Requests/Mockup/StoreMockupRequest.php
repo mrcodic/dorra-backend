@@ -30,7 +30,7 @@ class StoreMockupRequest extends BaseRequest
     {
         $types = $this->input('types', []);
         $approach = $this->name ?? $this->query('q');
-        dd($types,$approach,$this->request->name);
+        dd($types,$approach,$this->request);
 
         $isWithout = $approach === 'without_editor' || $approach === 'without';
         return [
