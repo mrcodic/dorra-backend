@@ -230,9 +230,9 @@
                     <div class="mb-2">
                         <label class="label-text mb-1 d-block">Colors</label>
                         <div class="d-flex flex-wrap align-items-center gap-1">
-                            <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
+                            <button type="button" id="openColorPicker" class="gradient-picker-trigger border openColorPicker"></button>
 
-                            <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>
+                            <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center selected-colors"></span>
                         </div>
                         <div id="colorsInputContainer"></div>
                     </div>
@@ -1492,22 +1492,53 @@
 
             // Handle save
             pickrInstance.on('save', (color) => {
-                if (!currentCard) return;
-
                 const hex = color.toHEXA().toString().toLowerCase();
 
-                if (!currentCard.selectedColors) currentCard.selectedColors = [];
+                // ===== q=with mode: write directly to #selected-colors & #colorsInputContainer =====
+                if (!currentCard) {
+                    const selectedColors = document.getElementById('selected-colors');
+                    const inputContainer = document.getElementById('colorsInputContainer');
+                    if (!selectedColors || !inputContainer) { pickrInstance.hide(); return; }
 
+                    // avoid duplicates
+                    if ([...inputContainer.querySelectorAll('input')].some(i => i.value === hex)) {
+                        pickrInstance.hide();
+                        return;
+                    }
+
+                    // color dot
+                    const li = document.createElement('li');
+                    li.style.listStyle = 'none';
+                    li.innerHTML = `
+            <div class="selected-color-wrapper position-relative">
+                <div class="selected-color-dot" style="background-color:#fff;">
+                    <div class="selected-color-inner" style="background-color:${hex};"></div>
+                </div>
+                <button type="button" onclick="removeGlobalColor('${hex}', this)" class="remove-color-btn">×</button>
+            </div>`;
+                    selectedColors.appendChild(li);
+
+                    // hidden input
+                    const input = document.createElement('input');
+                    input.type  = 'hidden';
+                    input.name  = 'colors[]';
+                    input.value = hex;
+                    inputContainer.appendChild(input);
+
+                    pickrInstance.hide();
+                    return;
+                }
+
+                // ===== q=without mode: write to card =====
+                if (!currentCard.selectedColors) currentCard.selectedColors = [];
                 if (!currentCard.selectedColors.includes(hex)) {
                     currentCard.selectedColors.push(hex);
                 }
 
                 renderSelectedColors(currentCard);
-                buildHiddenTemplateInputs(); // sync الألوان مع الـ hidden inputs
+                buildHiddenTemplateInputs();
                 pickrInstance.hide();
-
             });
-
             // Handle clear
             pickrInstance.on('clear', () => {
                 if (!currentCard) return;
@@ -1518,12 +1549,34 @@
         });
 
         // Open color picker
+        // Open color picker
         $(document).on('click', '.openColorPicker', function () {
             const trigger = this;
+
+            // ===== q=with: single global color picker (no template card) =====
+            const isWithMode = trigger.id === 'openColorPicker'; // the static #openColorPicker button
+
+            if (isWithMode) {
+                currentCard = null; // no card context
+
+                pickrInstance.show();
+
+                setTimeout(() => {
+                    const pickerPanel = document.querySelector('.pcr-app.visible');
+                    if (pickerPanel) {
+                        const rect = trigger.getBoundingClientRect();
+                        pickerPanel.style.position = 'fixed';
+                        pickerPanel.style.left = `${rect.left}px`;
+                        pickerPanel.style.top  = `${rect.bottom + 5}px`;
+                        pickerPanel.style.zIndex = 9999;
+                    }
+                }, 0);
+                return; // stop here, don't look for .template-card
+            }
+
+            // ===== q=without: per-template-card color picker =====
             const card = trigger.closest('.template-card');
             currentCard = card;
-
-            // Initialize selectedColors array if not exists
             if (!card.selectedColors) card.selectedColors = [];
 
             const rect = trigger.getBoundingClientRect();
@@ -1536,12 +1589,11 @@
                 if (pickerPanel) {
                     pickerPanel.style.position = 'absolute';
                     pickerPanel.style.left = `${rect.left + window.scrollX}px`;
-                    pickerPanel.style.top = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
+                    pickerPanel.style.top  = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
                     pickerPanel.style.zIndex = 9999;
                 }
             }, 0);
         });
-
         // Remove color from current card
         window.removeColor = function (hex, btn) {
             const card = btn.closest('.template-card');
@@ -1607,59 +1659,6 @@
             });
         }
 
-    </script>
-    <script>
-        (function waitForColorPicker() {
-            const openBtn = document.getElementById('openColorPicker');
-            const picker = document.getElementById('colorPicker');
-            const selectedColors = document.getElementById('selected-colors');
-            const inputContainer = document.getElementById('colorsInputContainer');
-
-            if (!openBtn || !picker || !selectedColors || !inputContainer) {
-                // Retry in 50ms if elements not yet in DOM
-                setTimeout(waitForColorPicker, 50);
-                return;
-            }
-
-            let colors = [];
-
-            openBtn.addEventListener('click', () => picker.click());
-
-            picker.addEventListener('input', function () {
-                const color = this.value;
-                if (colors.includes(color)) return;
-
-                colors.push(color);
-
-                // Create color preview box
-                const colorBox = document.createElement('span');
-                colorBox.style.width = "24px";
-                colorBox.style.height = "24px";
-                colorBox.style.background = color;
-                colorBox.style.display = "inline-block";
-                colorBox.style.borderRadius = "4px";
-                colorBox.style.cursor = "pointer";
-                colorBox.title = "Click to remove";
-
-                // Remove color on click
-                colorBox.addEventListener('click', () => {
-                    colors = colors.filter(c => c !== color);
-                    colorBox.remove();
-                    input.remove();
-                });
-
-                selectedColors.appendChild(colorBox);
-
-                // Hidden input for form
-                const input = document.createElement('input');
-                input.type = "hidden";
-                input.name = "colors[]";
-                input.value = color;
-
-                inputContainer.appendChild(input);
-            });
-
-        })();
     </script>
 
 @endsection
