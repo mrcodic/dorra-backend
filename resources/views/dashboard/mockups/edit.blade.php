@@ -142,6 +142,7 @@
             <form id="editMockupForm" enctype="multipart/form-data" action="{{ route('mockups.update',$model->id) }}">
                 @csrf
                 @method('PUT')
+                <input type="hidden" name="approach" value="{{ $model->approach }}">
                 <div class="modal-body flex-grow-1">
                     <div class="position-relative text-center mb-2">
                         <hr class="opacity-75" style="border: 1px solid #24B094;">
@@ -215,7 +216,6 @@
                         </div>
                     </div>
                     @if($model->approach == 'without_editor')
-                        <input type="hidden" name="approach" value="without_editor">
 
                     <div class="form-group my-2 d-none" id="templatesCardsWrapper">
                         <label class="form-label mb-2">Choose Template</label>
@@ -232,7 +232,6 @@
 
                 </div>
                 @if($model->approach == 'with_editor')
-                    <input type="hidden" name="approach" value="with_editor">
 
                     <div class="mb-2">
                     <label class="label-text mb-1 d-block">Colors</label>
