@@ -33,6 +33,8 @@ class UpdateMockupRequest extends BaseRequest
         $types = $this->input('types', []);
         $categoryChanged = $this->has('category_id')
             && ($this->input('category_id') !== optional($id)->category_id);
+        $approach = $this->input('approach') ?? $this->query('q');
+        $isWithout = $approach === 'without_editor' || $approach === 'without';
         return [
             'name' => [
                 'required',
@@ -48,8 +50,8 @@ class UpdateMockupRequest extends BaseRequest
             'types.*' => ['required', Rule::in(TypeEnum::values())],
             'category_id' => ['required','integer', Rule::exists(Category::class, 'id')],
             'colors' => ['sometimes','array'],
-            'templates' => [Rule::requiredIf($this->approach == 'without_editor'),'array'],
-            'templates.*.template_id' => [Rule::requiredIf($this->approach == 'without_editor'),'exists:templates,id'],
+            'templates' => [Rule::requiredIf($isWithout),'array'],
+            'templates.*.template_id' => [Rule::requiredIf($isWithout),'exists:templates,id'],
             'templates.*.front_x'      => ['nullable', 'numeric', 'min:0'],
             'templates.*.front_y'      => ['nullable', 'numeric', 'min:0'],
             'templates.*.front_width'  => ['nullable', 'numeric', 'min:0'],
