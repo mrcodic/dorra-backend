@@ -5,7 +5,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
 
             <div class="modal-header mb-1 border-0 p-0">
-                <h5 class="modal-title fs-4">Select option to add template</h5>
+                <h5 class="modal-title fs-4">Select option to add mockup</h5>
             </div>
 
             {{-- أهم تعديل هنا: action --}}
