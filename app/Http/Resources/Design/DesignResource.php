@@ -27,7 +27,7 @@ class DesignResource extends JsonResource
     public function toArray(Request $request): array
     {
         $designable = $this->designable;
-
+dd($this->types);
         return [
             'id' => $this->id,
             'name'=> $this->name,
