@@ -284,59 +284,6 @@
 
 @section('page-script')
     <script>
-        (function waitForColorPicker() {
-            const openBtn = document.getElementById('openColorPicker');
-            const picker = document.getElementById('colorPicker');
-            const selectedColors = document.getElementById('selected-colors');
-            const inputContainer = document.getElementById('colorsInputContainer');
-
-            if (!openBtn || !picker || !selectedColors || !inputContainer) {
-                // Retry in 50ms if elements not yet in DOM
-                setTimeout(waitForColorPicker, 50);
-                return;
-            }
-
-            let colors = [];
-
-            openBtn.addEventListener('click', () => picker.click());
-
-            picker.addEventListener('input', function () {
-                const color = this.value;
-                if (colors.includes(color)) return;
-
-                colors.push(color);
-
-                // Create color preview box
-                const colorBox = document.createElement('span');
-                colorBox.style.width = "24px";
-                colorBox.style.height = "24px";
-                colorBox.style.background = color;
-                colorBox.style.display = "inline-block";
-                colorBox.style.borderRadius = "4px";
-                colorBox.style.cursor = "pointer";
-                colorBox.title = "Click to remove";
-
-                // Remove color on click
-                colorBox.addEventListener('click', () => {
-                    colors = colors.filter(c => c !== color);
-                    colorBox.remove();
-                    input.remove();
-                });
-
-                selectedColors.appendChild(colorBox);
-
-                // Hidden input for form
-                const input = document.createElement('input');
-                input.type = "hidden";
-                input.name = "colors[]";
-                input.value = color;
-
-                inputContainer.appendChild(input);
-            });
-
-        })();
-    </script>
-    <script>
         window.templatePositions = window.templatePositions || {};
         var buildHiddenTemplateInputs;
         var calculateObjectPercents;
@@ -1660,6 +1607,59 @@
             });
         }
 
+    </script>
+    <script>
+        (function waitForColorPicker() {
+            const openBtn = document.getElementById('openColorPicker');
+            const picker = document.getElementById('colorPicker');
+            const selectedColors = document.getElementById('selected-colors');
+            const inputContainer = document.getElementById('colorsInputContainer');
+
+            if (!openBtn || !picker || !selectedColors || !inputContainer) {
+                // Retry in 50ms if elements not yet in DOM
+                setTimeout(waitForColorPicker, 50);
+                return;
+            }
+
+            let colors = [];
+
+            openBtn.addEventListener('click', () => picker.click());
+
+            picker.addEventListener('input', function () {
+                const color = this.value;
+                if (colors.includes(color)) return;
+
+                colors.push(color);
+
+                // Create color preview box
+                const colorBox = document.createElement('span');
+                colorBox.style.width = "24px";
+                colorBox.style.height = "24px";
+                colorBox.style.background = color;
+                colorBox.style.display = "inline-block";
+                colorBox.style.borderRadius = "4px";
+                colorBox.style.cursor = "pointer";
+                colorBox.title = "Click to remove";
+
+                // Remove color on click
+                colorBox.addEventListener('click', () => {
+                    colors = colors.filter(c => c !== color);
+                    colorBox.remove();
+                    input.remove();
+                });
+
+                selectedColors.appendChild(colorBox);
+
+                // Hidden input for form
+                const input = document.createElement('input');
+                input.type = "hidden";
+                input.name = "colors[]";
+                input.value = color;
+
+                inputContainer.appendChild(input);
+            });
+
+        })();
     </script>
 
 @endsection
