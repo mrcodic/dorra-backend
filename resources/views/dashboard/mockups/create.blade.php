@@ -181,7 +181,7 @@
                                 @endforeach
                             </div>
                         </div>
-                @if(request('q') === 'with')
+                @if(request('q') === 'without')
                         {{-- mockup Canvas --}}
                         <!-- العمود الشمال: يحتوي fixed-block + fileInputsContainer (البلوكات تتحط هنا) -->
                         <div class="row">
@@ -225,7 +225,7 @@
                         @endif
                     </div>
 
-                    @if(request('q') === 'without')
+                    @if(request('q') === 'with')
 
                     <div class="mb-2">
                         <label class="label-text mb-1 d-block">Colors</label>
