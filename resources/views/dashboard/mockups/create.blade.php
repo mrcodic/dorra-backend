@@ -284,49 +284,50 @@
 
 @section('page-script')
     <script>
-        const openBtn = document.getElementById('openColorPicker');
-        const picker = document.getElementById('colorPicker');
-        const selectedColors = document.getElementById('selected-colors');
-        const inputContainer = document.getElementById('colorsInputContainer');
+        document.addEventListener('DOMContentLoaded', () => {
+            const openBtn = document.getElementById('openColorPicker');
+            const picker = document.getElementById('colorPicker');
+            const selectedColors = document.getElementById('selected-colors');
+            const inputContainer = document.getElementById('colorsInputContainer');
 
-        let colors = [];
+            if (!openBtn || !picker || !selectedColors || !inputContainer) return;
 
-        openBtn.addEventListener('click', () => {
-            picker.click();
-        });
+            let colors = [];
 
-        picker.addEventListener('input', function () {
-            const color = this.value;
+            openBtn.addEventListener('click', () => picker.click());
 
-            if (colors.includes(color)) return;
+            picker.addEventListener('input', function () {
+                const color = this.value;
+                if (colors.includes(color)) return;
 
-            colors.push(color);
+                colors.push(color);
 
-            // color preview
-            const colorBox = document.createElement('span');
-            colorBox.style.width = "24px";
-            colorBox.style.height = "24px";
-            colorBox.style.background = color;
-            colorBox.style.display = "inline-block";
-            colorBox.style.borderRadius = "4px";
-            colorBox.style.cursor = "pointer";
-            colorBox.title = "Click to remove";
+                // color preview
+                const colorBox = document.createElement('span');
+                colorBox.style.width = "24px";
+                colorBox.style.height = "24px";
+                colorBox.style.background = color;
+                colorBox.style.display = "inline-block";
+                colorBox.style.borderRadius = "4px";
+                colorBox.style.cursor = "pointer";
+                colorBox.title = "Click to remove";
 
-            colorBox.onclick = () => {
-                colors = colors.filter(c => c !== color);
-                colorBox.remove();
-                input.remove();
-            };
+                colorBox.onclick = () => {
+                    colors = colors.filter(c => c !== color);
+                    colorBox.remove();
+                    input.remove();
+                };
 
-            selectedColors.appendChild(colorBox);
+                selectedColors.appendChild(colorBox);
 
-            // hidden input
-            const input = document.createElement('input');
-            input.type = "hidden";
-            input.name = "colors[]";
-            input.value = color;
+                // hidden input
+                const input = document.createElement('input');
+                input.type = "hidden";
+                input.name = "colors[]";
+                input.value = color;
 
-            inputContainer.appendChild(input);
+                inputContainer.appendChild(input);
+            });
         });
     </script>
     <script>
