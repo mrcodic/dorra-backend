@@ -29,8 +29,6 @@ class UpdateMockupRequest extends BaseRequest
      */
     public function rules($id): array
     {
-
-        $types = $this->input('types', []);
         $categoryChanged = $this->has('category_id')
             && ($this->input('category_id') !== optional($id)->category_id);
         $types = request('types', []);
