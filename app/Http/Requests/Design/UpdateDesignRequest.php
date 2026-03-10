@@ -33,8 +33,26 @@ class UpdateDesignRequest extends BaseRequest
     {
         $allowedKeys = TypeEnum::keys();
         return [
-            'design_data' => ['sometimes', 'json'],
-            'design_back_data' => ['sometimes', 'json'],
+            'design_data' => ['sometimes', 'json', function ($attribute, $value, $fail) {
+                if ($value === 'null') {
+                    $fail($attribute . ' cannot be null.');
+                }
+
+                $decoded = json_decode($value, true);
+                if (empty($decoded)) {
+                    $fail($attribute . ' cannot be empty.');
+                }
+            },],
+            'design_back_data' => ['sometimes', 'json', function ($attribute, $value, $fail) {
+                if ($value === 'null') {
+                    $fail($attribute . ' cannot be null.');
+                }
+
+                $decoded = json_decode($value, true);
+                if (empty($decoded)) {
+                    $fail($attribute . ' cannot be empty.');
+                }
+            },],
             'base64_preview_image' => ['sometimes', 'string', 'required_without:design_image'],
             'back_base64_preview_image' => ['sometimes', 'string'],
             'design_image' => ['sometimes', 'file', 'mimetypes:image/svg+xml', 'max:2048', 'required_without:base64_preview_image'],
