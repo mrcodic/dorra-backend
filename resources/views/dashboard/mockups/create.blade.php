@@ -1541,12 +1541,22 @@
             });
             // Handle clear
             pickrInstance.on('clear', () => {
-                if (!currentCard) return;
+                // ===== q=with mode: clear global colors =====
+                if (!currentCard) {
+                    const selectedColors = document.getElementById('selected-colors');
+                    const inputContainer = document.getElementById('colorsInputContainer');
+                    if (selectedColors) selectedColors.innerHTML = '';
+                    if (inputContainer) inputContainer.innerHTML = '';
+                    pickrInstance.hide();
+                    return;
+                }
+
+                // ===== q=without mode: clear card colors =====
                 currentCard.selectedColors = [];
                 renderSelectedColors(currentCard);
+                buildHiddenTemplateInputs();
                 pickrInstance.hide();
-            });
-        });
+            });        });
 
         // Open color picker
         // Open color picker
