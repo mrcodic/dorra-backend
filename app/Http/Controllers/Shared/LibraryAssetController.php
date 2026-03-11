@@ -51,4 +51,18 @@ class LibraryAssetController extends Controller
         return Response::api(data: MediaResource::make($media)->response()->getData(true));
 
     }
+    public function gallery(Request $request)
+    {
+        $media = Media::query()
+            ->withCount([
+                'templates as templates_assets_count' => function   ($q) {
+                    $q->whereNull('mediables.type');
+                },
+                'designs'])
+            ->whereMorphedTo('model', getAuthOrGuest())
+            ->whereCollectionName($this->activeGuard. '_assets')
+            ->latest()
+            ->paginate($request->query('per_page', 10));
+        return Response::api(data: MediaResource::collection($media)->response()->getData(true));
+    }
 }

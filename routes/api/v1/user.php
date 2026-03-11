@@ -90,6 +90,7 @@ Route::get('/fonts', [MainController::Class, 'fonts']);
 Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
 Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");
 Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
+Route::get('gallery', [LibraryAssetController::class,'gallery']);
 Route::delete('/media/{media}', [MainController::class, 'removeMedia']);
 
 
