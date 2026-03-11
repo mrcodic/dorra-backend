@@ -1213,13 +1213,15 @@
         function refreshSizes() {
             syncSelectedResourcesToHiddenInputs();
             const payload = buildDimensionPayloadFromHidden();
-
             const $sizes = $('#sizesSelect');
 
             if (!payload.resource_ids.length) {
                 $sizes.empty().trigger('change');
                 return;
             }
+
+            // ✅ Save current selection BEFORE ajax
+            const current = $sizes.val();
 
             $.ajax({
                 url: "{{ route('dimensions.index') }}",
@@ -1229,19 +1231,15 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 success(res) {
-                    // Remember current selection
-                    const current = $sizes.val() || [];
-
                     $sizes.empty();
-
                     const items = res.data || res || [];
+
                     items.forEach((item, index) => {
                         const text = dimensionLabelHWTop(item, { showUnit: true });
-                        const id = item.id;
-
-                        // If user has no selection, auto-select the first option
-                        const selected = current.length ? current.includes(String(id)) : index === 0;
-                        $sizes.append(new Option(text, id, false, selected));
+                        const id = String(item.id);
+                        // ✅ Preserve selection if exists, else auto-select first
+                        const isSelected = current ? id === String(current) : index === 0;
+                        $sizes.append(new Option(text, id, false, isSelected));
                     });
 
                     $sizes.trigger('change');
@@ -1305,9 +1303,9 @@
 
         // When user opens/clicks Sizes, fetch fresh sizes
         // Works for click/focus; pick one or both
-        $('#sizesSelect').on('mousedown focus', function () {
-            refreshSizes();
-        });
+        // $('#sizesSelect').on('mousedown focus', function () {
+        //     refreshSizes();
+        // });
 
         // Initial sync on page load
         $(document).ready(function () {

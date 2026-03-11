@@ -1572,26 +1572,26 @@ data-id="${id}"> Show on Mockup </a>
                 });
             } else {
                 $('#productsSelect').empty().trigger('change');
-                // refreshSizes();
+                refreshSizes();
             }
         });
 
         // Right: categories changed → refresh sizes
         $('#productsSelect').on('change', function () {
             syncSelectedResourcesToHiddenInputs();
-            // refreshSizes();
+            refreshSizes();
         });
 
         // Bottom: products without categories changed → refresh sizes
         $('#productsWithoutCategoriesSelect').on('change', function () {
             syncSelectedResourcesToHiddenInputs();
-            // refreshSizes();
+            refreshSizes();
         });
 
         // Also fetch when opening the sizes select
-        $('#sizesSelect').on('mousedown focus', function () {
-            refreshSizes();
-        });
+        // $('#sizesSelect').on('mousedown focus', function () {
+        //     refreshSizes();
+        // });
 
         // On load: sync & preselect saved size
         $(document).ready(function () {
