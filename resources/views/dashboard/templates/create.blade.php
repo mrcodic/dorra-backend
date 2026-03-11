@@ -1213,15 +1213,13 @@
         function refreshSizes() {
             syncSelectedResourcesToHiddenInputs();
             const payload = buildDimensionPayloadFromHidden();
+
             const $sizes = $('#sizesSelect');
 
             if (!payload.resource_ids.length) {
                 $sizes.empty().trigger('change');
                 return;
             }
-
-            // ✅ Save current selection BEFORE ajax
-            const current = $sizes.val();
 
             $.ajax({
                 url: "{{ route('dimensions.index') }}",
@@ -1231,15 +1229,19 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 success(res) {
-                    $sizes.empty();
-                    const items = res.data || res || [];
+                    // Remember current selection
+                    const current = $sizes.val() || [];
 
+                    $sizes.empty();
+
+                    const items = res.data || res || [];
                     items.forEach((item, index) => {
                         const text = dimensionLabelHWTop(item, { showUnit: true });
-                        const id = String(item.id);
-                        // ✅ Preserve selection if exists, else auto-select first
-                        const isSelected = current ? id === String(current) : index === 0;
-                        $sizes.append(new Option(text, id, false, isSelected));
+                        const id = item.id;
+
+                        // If user has no selection, auto-select the first option
+                        const selected = current.length ? current.includes(String(id)) : index === 0;
+                        $sizes.append(new Option(text, id, false, selected));
                     });
 
                     $sizes.trigger('change');
