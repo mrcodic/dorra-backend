@@ -188,7 +188,11 @@ class MockupService extends BaseService
                     })
             )
             ->when(request()->filled('product_ids'), fn($q) => $q->whereIn('category_id', request()->array('product_ids')))
-            ->when(request()->filled('type'), fn($q) => $q->whereHas('types', fn($q) => $q->where('types.value', TypeEnum::tryFrom(request('type')))))
+            ->when(request()->filled('type'), fn($q) =>
+            $q->whereHas('types', fn($q) =>
+            $q->where('types.value', (int) request('type'))
+            )
+            )
             ->when(request()->filled('types'), function ($query) {
                 $types = array_map('intval', request()->input('types'));
                 $query->whereHas('types', function ($q) use ($types) {
