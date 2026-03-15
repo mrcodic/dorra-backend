@@ -142,8 +142,8 @@
             </div> <!-- Tags -->
             <div class="mb-1 d-flex flex-wrap gap-1">
                 <p style="display: inline">Created
-                    at: {{ $template->created_at->timezone('Africa/Cairo')->format('d/m/Y h:i A') }}</p>
-                <p style="display: inline">Last update: {{ $template->updated_at->timezone('Africa/Cairo')->format('d/m/Y h:i A') }}</p>
+                    at: {{  \Carbon\Carbon::parse($template->created_at)->timezone('Africa/Cairo')->format('d/m/Y h:i A') }}</p>
+                <p style="display: inline">Last update: {{ \Carbon\Carbon::parse($template->updated_at)->timezone('Africa/Cairo')->format('d/m/Y h:i A') }}</p>
             </div>
             <div class="d-flex flex-wrap justify-content-start gap-1 mb-1" style="min-height: 44px;">
                 @foreach($template->tags as $tag)
