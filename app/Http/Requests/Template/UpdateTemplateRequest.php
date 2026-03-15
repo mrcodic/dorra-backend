@@ -89,7 +89,7 @@ class UpdateTemplateRequest extends BaseRequest
             'types' => ['required', 'array'],
             'types.*' => ['integer', 'exists:types,id'],
             'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
-            'dimension_id' => ['required', 'integer', 'exists:dimensions,id'],
+            'dimension_id' => [Rule::requiredIf(request('approach') == 'with_editor'), 'integer', 'exists:dimensions,id'],
             'go_to_editor' => ['sometimes', 'boolean'],
             'has_corner' => ['sometimes', 'in:0,1'],
             'has_safety_area' => ['sometimes', 'in:0,1'],
