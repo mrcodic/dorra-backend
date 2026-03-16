@@ -26,7 +26,6 @@ class ProcessBase64Image implements ShouldQueue
      */
     public function handle(): void
     {
-        // ---- 1) Decode base64 ----
         if (preg_match('/^data:image\/(\w+);base64,/', $this->base64Image, $type)) {
             $imageData = substr($this->base64Image, strpos($this->base64Image, ',') + 1);
             $type = strtolower($type[1]);
@@ -35,7 +34,10 @@ class ProcessBase64Image implements ShouldQueue
                 throw new \Exception('Invalid image type');
             }
 
-            $imageData = base64_decode($imageData);
+            // ← strip whitespace/newlines before decoding
+            $imageData = str_replace([' ', '\n', '\r', '\t'], '', $imageData);
+            $imageData = base64_decode($imageData, strict: false);
+
             if ($imageData === false) {
                 throw new \Exception('base64_decode failed');
             }
@@ -54,20 +56,16 @@ class ProcessBase64Image implements ShouldQueue
             throw new \Exception('Failed to write temp file');
         }
 
-        // ---- 2) Verify the written file is valid before passing to Spatie ----
+        // ---- Validate before passing to Spatie ----
         if (!$this->isValidImage($tempFilePath)) {
             @unlink($tempFilePath);
-            throw new \Exception('Written temp file is not a valid image');
+            throw new \Exception('Decoded image is corrupt or truncated: ' . $tempFilePath);
         }
 
         $this->template->clearMediaCollection($this->collection);
         $this->template->addMedia($tempFilePath)
             ->toMediaCollection($this->collection);
 
-        // ---- DO NOT unlink here — Spatie moves the file itself ----
-        // @unlink($tempFilePath); ← REMOVE THIS, Spatie handles cleanup
-
-        // ---- 3) Render mockups after media is fully saved ----
         $this->renderMockups();
     }
 
@@ -75,10 +73,8 @@ class ProcessBase64Image implements ShouldQueue
     {
         if (!file_exists($path) || filesize($path) === 0) return false;
 
-        // getimagesize returns false for corrupt/truncated images
         return @getimagesize($path) !== false;
     }
-
     private function renderMockups(): void
     {
         $template = $this->template->fresh(['mockups.types', 'mockups.media']);
