@@ -13,6 +13,42 @@ trait RendersTemplateMockups
 
         $mockups = $template->mockups;
 
+        // ---- Cleanup: remove rendered mockups for sides no longer in this collection ----
+        $activeSides = collect();
+
+        if ($mockups && $mockups->isNotEmpty()) {
+            foreach ($mockups as $mockup) {
+                foreach ($mockup->types as $type) {
+                    $side = strtolower($type->value->name);
+                    $expectedCollection = $side === 'back' ? 'back_templates' : 'templates';
+                    if ($collection === $expectedCollection) {
+                        $activeSides->push($side);
+                    }
+                }
+            }
+        }
+
+        // Get active category_ids from current mockups
+        $activeCategoryIds = $mockups?->pluck('category_id')->map(fn($id) => (int)$id)->toArray() ?? [];
+
+        // Delete rendered mockups that no longer match active sides OR active categories
+        $template->getMedia('rendered_mockups')
+            ->filter(function ($m) use ($activeSides, $activeCategoryIds, $collection) {
+                $side       = $m->getCustomProperty('side');
+                $categoryId = (int)$m->getCustomProperty('category_id');
+
+                $expectedCollection = $side === 'back' ? 'back_templates' : 'templates';
+
+                // Only clean up media belonging to this collection's sides
+                if ($expectedCollection !== $collection) return false;
+
+                // Remove if side is no longer active OR category no longer attached
+                return !$activeSides->contains($side)
+                    || !in_array($categoryId, $activeCategoryIds);
+            })
+            ->each->delete();
+
+        // ---- If no mockups, nothing to render ----
         if (!$mockups || $mockups->isEmpty()) return;
 
         foreach ($mockups as $mockup) {
@@ -91,6 +127,7 @@ trait RendersTemplateMockups
                         continue;
                     }
 
+                    // Delete old render for this exact side + category
                     $template->getMedia('rendered_mockups')
                         ->filter(fn($m) =>
                             $m->getCustomProperty('side') === $side &&
@@ -115,7 +152,6 @@ trait RendersTemplateMockups
             }
         }
     }
-
     private function isValidImage(string $path): bool
     {
         if (!file_exists($path) || filesize($path) === 0) return false;
