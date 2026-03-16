@@ -56,7 +56,7 @@ use Illuminate\Support\Arr;
 
     public function showResource($id, $relations = [])
     {
-        return $this->query->with(['owner', 'members', 'designs.owner'])->findOrFail($id);
+        return $this->query->with(['owner', 'members', 'designs.owner','designs.mockup'])->findOrFail($id);
     }
 
     public function assignToDesign($teamId): void

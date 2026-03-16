@@ -276,7 +276,7 @@ class DesignService extends BaseService
     {
         return $this->repository->query()
             ->onlyTrashed()
-            ->with(['designable', 'owner'])
+            ->with(['designable', 'owner','mockup'])
             ->whereHas('users', function ($query) {
                 $query->where('user_id', auth('sanctum')->id());
             })
