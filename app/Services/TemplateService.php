@@ -351,16 +351,6 @@ class TemplateService extends BaseService
                     [(int) $validatedData['mockup_id']],
                     ['positions' => $positions]
                 );
-                    $model->types->each(function ($type) use ($model) {
-                        $side = strtolower($type->value->name);
-                        $collection = match ($side) {
-                            'back'  => 'back_templates',
-                            default => 'templates',
-                        };
-//                        $media = $model->getFirstMedia($collection);
-//                        if (!$media || !file_exists($media->getPath())) return;
-                        $this->renderMockups($model, $collection);
-                    });
 
             }
 
@@ -406,6 +396,17 @@ class TemplateService extends BaseService
                 })->toArray();
 
                 $model->mockups()->sync($pivotData);
+                $model->types->each(function ($type) use ($model) {
+                    $side = strtolower($type->value->name);
+                    $collection = match ($side) {
+                        'back'  => 'back_templates',
+                        default => 'templates',
+                    };
+                    $media = $model->getFirstMedia($collection);
+                    if (!$media || !file_exists($media->getPath())) return;
+                    $this->renderMockups($model, $collection);
+                });
+
             }
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->categories()->sync($validatedData['category_ids'] ?? []);
