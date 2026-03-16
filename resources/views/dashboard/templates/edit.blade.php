@@ -396,7 +396,7 @@
                                         </select>
                                     </div>
                                     <div
-                                        class="col-md-12 form-group mb-2 mockupWrapper {{ $model->approach == 'without_editor' ? '' : 'd-none' }}">
+                                        class="col-md-12 form-group mb-2 mockupWrapper">
                                         <div class="d-flex align-items-center justify-content-between mb-2">
                                             <div>
                                                 <h5 class="mb-0" style="color:#24B094;">Mockups</h5>
@@ -698,12 +698,17 @@
 
                     // ✅ أضف template_id كـ query parameter بشكل آمن
                     const href = `${editUrl}?template_id={{ $model->id }}`;
-                    const img =
-                        mockup?.images?.front?.base_url ||
-                        mockup?.images?.back?.base_url ||
-                        mockup?.images?.none?.base_url ||
-                        "{{ asset('images/placeholder.svg') }}";
-
+                    const images = mockup?.images || {};
+                    const firstKey = Object.keys(images)[0]; // gets "1", "2", "3", etc.
+                    const img = (firstKey && images[firstKey]?.base_url)
+                        || "{{ asset('images/placeholder.svg') }}";
+                    const approach = "{{ $model->approach }}";
+                    const isWithoutEditor = (approach === 'without_editor');
+                    const showMockupBtn = isWithoutEditor
+                        ? `<button type="button" class="btn btn-sm btn-primary w-100 js-submit-mockup" data-id="${id}">
+           Show on Mockup
+       </button>`
+                        : ''; // hide button in with-editor mode
                     $cardsWrap.append(`
           <div class="col-12 col-md-4 col-lg-2">
             <div class="mockup-card ${isChecked ? 'selected' : ''}" data-id="${id}">
@@ -729,8 +734,7 @@
 
                 <div class="card-body py-2">
                   <h6 class="card-title mb-2 text-truncate">${name}</h6>
-<a href="${href}" class="btn btn-sm btn-primary w-100 js-show-on-mockup"
-data-id="${id}"> Show on Mockup </a>
+  ${showMockupBtn}
                 </div>
 
               </div>

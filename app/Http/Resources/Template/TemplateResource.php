@@ -48,7 +48,7 @@ class TemplateResource extends JsonResource
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
             'template_model_image' => $this->getMedia('rendered_mockups')
                 ->first(fn($m) =>
-                    in_array($m->getCustomProperty('side'), ['front', 'none']) &&
+                    in_array($m->getCustomProperty('side'), ['front', 'none','back']) &&
                     (int)$m->getCustomProperty('category_id') === (int)request('product_without_category_id') &&
                     (string)$m->getCustomProperty('template_id') === (string)$this->id
                 )

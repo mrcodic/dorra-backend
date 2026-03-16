@@ -11,6 +11,7 @@ use App\Models\Admin;
 use App\Models\Template;
 use App\Models\Type;
 use App\Repositories\Base\BaseRepositoryInterface;
+use App\Traits\RendersTemplateMockups;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
@@ -24,6 +25,7 @@ use ZipArchive;
 
 class TemplateService extends BaseService
 {
+    use RendersTemplateMockups;
     public BaseRepositoryInterface $repository;
 
     public function __construct(TemplateRepositoryInterface $repository
@@ -349,6 +351,17 @@ class TemplateService extends BaseService
                     [(int) $validatedData['mockup_id']],
                     ['positions' => $positions]
                 );
+                    $model->types->each(function ($type) use ($model) {
+                        $side = strtolower($type->value->name);
+                        $collection = match ($side) {
+                            'back'  => 'back_templates',
+                            default => 'templates',
+                        };
+                        $media = $model->getFirstMedia($collection);
+                        if (!$media || !file_exists($media->getPath())) return;
+                        $this->renderMockups($model, $collection);
+                    });
+
             }
 
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
@@ -472,12 +485,6 @@ class TemplateService extends BaseService
 
             return $model;
         });
-        if (isset($validatedData['base64_preview_image'])) {
-            ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model, 'templates');
-        }
-        if (isset($validatedData['back_base64_preview_image'])) {
-            ProcessBase64Image::dispatch($validatedData['back_base64_preview_image'], $model, 'back_templates');
-        }
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model, clearExisting: true);
         }
