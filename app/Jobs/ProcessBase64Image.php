@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-
 use App\Models\Template;
 use App\Services\Mockup\MockupRenderer;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,19 +12,16 @@ class ProcessBase64Image implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * Create a new job instance.
-     */
-    public function __construct(public string $base64Image, public $template, public $collection = null)
-    {
+    public function __construct(
+        public string $base64Image,
+        public $template,
+        public $collection = null
+    ) {}
 
-    }
-
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
+        ini_set('memory_limit', '512M');
+
         // ---- 1) Decode base64 ----
         if (preg_match('/^data:image\/(\w+);base64,/', $this->base64Image, $type)) {
             $imageData = substr($this->base64Image, strpos($this->base64Image, ',') + 1);
@@ -54,22 +50,28 @@ class ProcessBase64Image implements ShouldQueue
             throw new \Exception('Failed to write temp file');
         }
 
-        // ---- 2) Verify the written file is valid before passing to Spatie ----
+        // Free raw string immediately
+        unset($imageData);
+
+        // ---- 2) Validate before passing to Spatie ----
         if (!$this->isValidImage($tempFilePath)) {
             @unlink($tempFilePath);
             throw new \Exception('Written temp file is not a valid image');
         }
 
+        // ---- 3) Save to media collection ----
         $this->template->clearMediaCollection($this->collection);
         $this->template->addMedia($tempFilePath)
             ->toMediaCollection($this->collection);
 
-        // ---- DO NOT unlink here — Spatie moves the file itself ----
-        // @unlink($tempFilePath); ← REMOVE THIS, Spatie handles cleanup
+        // Spatie moves the file — no manual unlink needed
+        unset($tempFilePath);
 
-        // ---- 3) Render mockups after media is fully saved ----
-        if(get_class($this->template) == Template::class)
-        {
+        // Force GC before heavy rendering
+        gc_collect_cycles();
+
+        // ---- 4) Render mockups ----
+        if (get_class($this->template) === Template::class) {
             $this->renderMockups();
         }
     }
@@ -78,7 +80,6 @@ class ProcessBase64Image implements ShouldQueue
     {
         if (!file_exists($path) || filesize($path) === 0) return false;
 
-        // getimagesize returns false for corrupt/truncated images
         return @getimagesize($path) !== false;
     }
 
@@ -92,6 +93,7 @@ class ProcessBase64Image implements ShouldQueue
 
         foreach ($mockups as $mockup) {
 
+            // ---- Read positions from pivot ----
             $positions = $mockup->pivot->positions ?? [];
             if (is_string($positions)) {
                 $positions = json_decode($positions, true) ?? [];
@@ -152,15 +154,17 @@ class ProcessBase64Image implements ShouldQueue
                         'angle'       => $angle,
                     ]);
 
-                    // ---- Validate rendered binary before saving ----
                     if (empty($binary)) {
                         Log::warning("MockupRenderer returned empty binary for mockup {$mockup->id} side {$side}");
                         continue;
                     }
 
-                    // Write to temp file to validate PNG integrity
+                    // Write rendered PNG to temp file
                     $renderTmpPath = storage_path("app/tmp_uploads/render_{$mockup->id}_{$side}_" . uniqid() . '.png');
                     file_put_contents($renderTmpPath, $binary);
+
+                    // Free binary immediately after writing
+                    unset($binary);
 
                     if (!$this->isValidImage($renderTmpPath)) {
                         @unlink($renderTmpPath);
@@ -168,8 +172,7 @@ class ProcessBase64Image implements ShouldQueue
                         continue;
                     }
 
-                    @unlink($renderTmpPath); // cleanup — we use binary directly below
-
+                    // Clear old rendered mockup for this side + category
                     $template->getMedia('rendered_mockups')
                         ->filter(fn($m) =>
                             $m->getCustomProperty('side') === $side &&
@@ -177,7 +180,9 @@ class ProcessBase64Image implements ShouldQueue
                         )
                         ->each->delete();
 
-                    $template->addMediaFromString($binary)
+                    // Use addMedia (file path) instead of addMediaFromString
+                    // to avoid holding two large PNG copies in memory
+                    $template->addMedia($renderTmpPath)
                         ->usingFileName("tpl_{$template->id}_{$side}_cat{$mockup->category_id}.png")
                         ->withCustomProperties([
                             'side'        => $side,
@@ -185,6 +190,9 @@ class ProcessBase64Image implements ShouldQueue
                             'category_id' => $mockup->category_id,
                         ])
                         ->toMediaCollection('rendered_mockups');
+
+                    // Spatie moves the file — no manual unlink needed
+                    gc_collect_cycles();
 
                 } catch (\Throwable $e) {
                     Log::error("Render failed mockup {$mockup->id} side {$side} template {$template->id}: " . $e->getMessage());
