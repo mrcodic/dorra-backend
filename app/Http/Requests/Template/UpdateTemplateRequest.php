@@ -76,7 +76,7 @@ class UpdateTemplateRequest extends BaseRequest
                 'nullable','exists:media,id',
                 Rule::requiredIf(fn()=> in_array(TypeEnum::NONE->value, (array)$this->input('types', []), true)),
             ],
-            'template_image_id' => ['required','exists:media,id'],
+            'template_image_id' => ['sometimes','exists:media,id'],
             'design_data' => ['sometimes', 'json'],
             'base64_preview_image' => ['sometimes', 'string'],
             'specifications' => ['sometimes', 'array'],

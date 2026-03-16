@@ -19,7 +19,7 @@ class MockupController extends Controller
 
     public function index(Request $request)
     {
-        $request->get('approach','with_editor');
+        $request->get('approachWithEditor','with_editor');
         $data = $this->mockupService->getAll(['types'], true, perPage: 10);
         return Response::api(data: MockupResource::collection($data)->response()->getData(true));
 

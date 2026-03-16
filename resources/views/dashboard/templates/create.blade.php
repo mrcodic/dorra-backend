@@ -314,7 +314,7 @@
                                             <select id="productsWithoutCategoriesSelect" class="form-select select2"
                                                     name="category_ids[]" multiple>
                                                 @foreach($associatedData['product_without_categories'] as $category)
-                                                    <option value="{{ $category->id }}">
+                                                    <option value="{{ $category->id }}" data-has-mockup="{{ $category->has_mockup ? '1' : '0' }}">
                                                         {{ $category->getTranslation('name', app()->getLocale()) }}
                                                     </option>
                                                 @endforeach
@@ -594,11 +594,28 @@
             const isWithoutEditor = (q === 'without' || q === 'without_editor');
             const $cardsWrap = $('#mockupsCards');
             const $mockupWrap = $('.mockupWrapper');
+            window.checkAllSelectedHaveMockup = function () {
+                const allSelected = [
+                    ...$('#productsSelect').find('option:selected'),
+                    ...$('#productsWithoutCategoriesSelect').find('option:selected')
+                ];
 
+                // Always show the wrapper now — cards should always be visible
+                // Only hide if truly no products selected at all
+                if (!allSelected.length) {
+                    $mockupWrap.addClass('d-none');
+                    return;
+                }
+
+                // Show regardless of has-mockup flag (removed that restriction)
+                $mockupWrap.removeClass('d-none');
+            }
             if (!isWithoutEditor) {
-                $cardsWrap.addClass('d-none');
-                $mockupWrap.addClass('d-none');
-                return;
+                // Cards still render, but "Show on Mockup" button will be hidden
+                $(document).on('click', '.js-submit-mockup', function (e) {
+                    e.stopImmediatePropagation();
+                    return false;
+                });
             }
 
             const $withCat = $('#categoriesSelect');
@@ -632,18 +649,22 @@
                     const name = mockup.name ?? ('Mockup #' + id);
 
                     // choose an image (adjust to your response shape)
-                    const img =
-                        mockup?.images?.front?.base_url ||
-                        mockup?.images?.back?.base_url ||
-                        mockup?.images?.none?.base_url ||
-                        "{{ asset('images/placeholder.svg') }}";
+                    const images = mockup?.images || {};
+                    const firstKey = Object.keys(images)[0]; // gets "1", "2", "3", etc.
+                    const img = (firstKey && images[firstKey]?.base_url)
+                        || "{{ asset('images/placeholder.svg') }}";
 
                     const isSelected = selected.has(String(id)) || selected.has(Number(id));
                     const updateUrl = `{{ $mockupUpdateUrlTemplate }}`.replace('__ID__', id);
+                    const showMockupBtn = isWithoutEditor
+                        ? `<button type="button" class="btn btn-sm btn-primary w-100 js-submit-mockup" data-id="${id}">
+           Show on Mockup
+       </button>`
+                        : ''; // hide button in with-editor mode
                     console.log(updateUrl)
                     $cardsWrap.append(`
   <div class="col-12 col-md-4 col-lg-2">
-    <div class="mockup-card ${isSelected ? 'selected' : ''}" data-id="${id}">
+    <div class="mockup-card $f{isSelected ? 'selected' : ''}" data-id="${id}">
       <div class="card rounded-3 shadow-sm" style="border:1px solid #24B094;">
    <!-- ✅ checkbox overlay top-left -->
                 <div class="position-absolute" style="top:10px;left:10px;z-index:20;">
@@ -664,11 +685,7 @@
         <div class="card-body py-2">
           <h6 class="card-title mb-2 text-truncate">${name}</h6>
 
-        <button type="button"
-                  class="btn btn-sm btn-primary w-100 js-submit-mockup"
-                  data-id="${id}">
-            Show on Mockup
-          </button>
+     ${showMockupBtn}
         </div>
       </div>
     </div>
@@ -709,6 +726,7 @@
                     data: {
                         'product_ids[]': allProductIds,
                         'types[]': getSelectedTypes(), // ✅ correct way
+                        'approach': "{{ request('q') == 'with' ? 'with_editor' : 'without_editor' }}",
                     },
                     success: function (response) {
                         const items = response?.data?.data || response?.data || response || [];
@@ -1270,7 +1288,9 @@
                         $right.empty();
 
                         (response.data || []).forEach(cat => {
-                            $right.append(new Option(cat.name, cat.id, false, true)); // last 'true' selects the option
+                            const opt = new Option(cat.name, cat.id, false, true);
+                            $(opt).attr('data-has-mockup', cat.has_mockup ? '1' : '0');
+                            $right.append(opt);
                         });
 
                         // If you want to preserve previously selected values
@@ -1294,6 +1314,7 @@
             syncSelectedResourcesToHiddenInputs();
             // optional immediate refresh:
             refreshSizes();
+            window.checkAllSelectedHaveMockup();
         });
 
         // Products without categories changed
@@ -1301,6 +1322,7 @@
             syncSelectedResourcesToHiddenInputs();
             // optional immediate refresh:
             refreshSizes();
+           window.checkAllSelectedHaveMockup();
         });
 
         // When user opens/clicks Sizes, fetch fresh sizes

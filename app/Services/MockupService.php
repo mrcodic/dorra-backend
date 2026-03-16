@@ -149,9 +149,10 @@ class MockupService extends BaseService
                     $q->whereRaw('1 = 0');
                 }
             })
-            ->when(request()->filled('approach'), function ($query) {
+            ->when(request()->filled('approachWithEditor'), function ($query) {
                 $query->whereApproach('with_editor');
-
+            })->when(request()->filled('approach'), function ($query) {
+                $query->whereApproach(request('approach'));
             })
             ->when(request()->filled('product_id'), function ($q) {
 
