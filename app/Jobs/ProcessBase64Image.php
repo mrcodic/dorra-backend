@@ -4,8 +4,10 @@ namespace App\Jobs;
 
 
 use App\Models\Template;
+use App\Services\Mockup\MockupRenderer;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
 
 class ProcessBase64Image implements ShouldQueue
 {
@@ -24,7 +26,8 @@ class ProcessBase64Image implements ShouldQueue
      */
     public function handle(): void
     {
-            if (preg_match('/^data:image\/(\w+);base64,/', $this->base64Image, $type)) {
+        // ---- 1) Decode base64 ----
+        if (preg_match('/^data:image\/(\w+);base64,/', $this->base64Image, $type)) {
             $imageData = substr($this->base64Image, strpos($this->base64Image, ',') + 1);
             $type = strtolower($type[1]);
 
@@ -50,12 +53,143 @@ class ProcessBase64Image implements ShouldQueue
         if (file_put_contents($tempFilePath, $imageData) === false) {
             throw new \Exception('Failed to write temp file');
         }
+
+        // ---- 2) Verify the written file is valid before passing to Spatie ----
+        if (!$this->isValidImage($tempFilePath)) {
+            @unlink($tempFilePath);
+            throw new \Exception('Written temp file is not a valid image');
+        }
+
         $this->template->clearMediaCollection($this->collection);
         $this->template->addMedia($tempFilePath)
             ->toMediaCollection($this->collection);
 
-        @unlink($tempFilePath);
+        // ---- DO NOT unlink here — Spatie moves the file itself ----
+        // @unlink($tempFilePath); ← REMOVE THIS, Spatie handles cleanup
 
+        // ---- 3) Render mockups after media is fully saved ----
+        if(get_class($this->template) == Template::class)
+        {
+            $this->renderMockups();
+        }
     }
 
+    private function isValidImage(string $path): bool
+    {
+        if (!file_exists($path) || filesize($path) === 0) return false;
+
+        // getimagesize returns false for corrupt/truncated images
+        return @getimagesize($path) !== false;
+    }
+
+    private function renderMockups(): void
+    {
+        $template = $this->template->fresh(['mockups.types', 'mockups.media']);
+
+        $mockups = $template->mockups;
+
+        if (!$mockups || $mockups->isEmpty()) return;
+
+        foreach ($mockups as $mockup) {
+
+            $positions = $mockup->pivot->positions ?? [];
+            if (is_string($positions)) {
+                $positions = json_decode($positions, true) ?? [];
+            }
+
+            foreach ($mockup->types as $type) {
+                $side = strtolower($type->value->name);
+
+                $expectedCollection = $side === 'back' ? 'back_templates' : 'templates';
+                if ($this->collection !== $expectedCollection) continue;
+
+                $base = $mockup->getMedia('mockups')
+                    ->first(fn($m) =>
+                        $m->getCustomProperty('side') === $side &&
+                        $m->getCustomProperty('role') === 'base'
+                    );
+
+                $mask = $mockup->getMedia('mockups')
+                    ->first(fn($m) =>
+                        $m->getCustomProperty('side') === $side &&
+                        $m->getCustomProperty('role') === 'mask'
+                    );
+
+                if (!$base || !$mask) continue;
+
+                $design = $template->getFirstMedia($this->collection);
+
+                if (!$design || !file_exists($design->getPath())) continue;
+
+                // ---- Validate design file before rendering ----
+                if (!$this->isValidImage($design->getPath())) {
+                    Log::warning("Design file invalid/truncated: {$design->getPath()}");
+                    continue;
+                }
+
+                [$baseW, $baseH] = getimagesize($base->getPath());
+
+                $xPct  = (float)($positions["{$side}_x"]      ?? 0.5);
+                $yPct  = (float)($positions["{$side}_y"]      ?? 0.5);
+                $wPct  = (float)($positions["{$side}_width"]  ?? 0.4);
+                $hPct  = (float)($positions["{$side}_height"] ?? 0.4);
+                $angle = (float)($positions["{$side}_angle"]  ?? 0);
+
+                $printW = max(1, (int)round($wPct * $baseW));
+                $printH = max(1, (int)round($hPct * $baseH));
+                $printX = (int)round($xPct * $baseW - $printW / 2);
+                $printY = (int)round($yPct * $baseH - $printH / 2);
+
+                try {
+                    $binary = (new MockupRenderer())->render([
+                        'base_path'   => $base->getPath(),
+                        'shirt_path'  => $mask->getPath(),
+                        'design_path' => $design->getPath(),
+                        'print_x'     => $printX,
+                        'print_y'     => $printY,
+                        'print_w'     => $printW,
+                        'print_h'     => $printH,
+                        'angle'       => $angle,
+                    ]);
+
+                    // ---- Validate rendered binary before saving ----
+                    if (empty($binary)) {
+                        Log::warning("MockupRenderer returned empty binary for mockup {$mockup->id} side {$side}");
+                        continue;
+                    }
+
+                    // Write to temp file to validate PNG integrity
+                    $renderTmpPath = storage_path("app/tmp_uploads/render_{$mockup->id}_{$side}_" . uniqid() . '.png');
+                    file_put_contents($renderTmpPath, $binary);
+
+                    if (!$this->isValidImage($renderTmpPath)) {
+                        @unlink($renderTmpPath);
+                        Log::warning("Rendered PNG is corrupt for mockup {$mockup->id} side {$side}");
+                        continue;
+                    }
+
+                    @unlink($renderTmpPath); // cleanup — we use binary directly below
+
+                    $template->getMedia('rendered_mockups')
+                        ->filter(fn($m) =>
+                            $m->getCustomProperty('side') === $side &&
+                            $m->getCustomProperty('category_id') === $mockup->category_id
+                        )
+                        ->each->delete();
+
+                    $template->addMediaFromString($binary)
+                        ->usingFileName("tpl_{$template->id}_{$side}_cat{$mockup->category_id}.png")
+                        ->withCustomProperties([
+                            'side'        => $side,
+                            'template_id' => $template->id,
+                            'category_id' => $mockup->category_id,
+                        ])
+                        ->toMediaCollection('rendered_mockups');
+
+                } catch (\Throwable $e) {
+                    Log::error("Render failed mockup {$mockup->id} side {$side} template {$template->id}: " . $e->getMessage());
+                }
+            }
+        }
+    }
 }
