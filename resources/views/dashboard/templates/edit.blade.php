@@ -692,55 +692,52 @@
                 items.forEach(mockup => {
                     const id = String(mockup.id);
                     const name = mockup.name ?? ('Mockup #' + id);
-                    // ✅ استخدم قالب route جاهز من Blade
-                    const editUrlTemplate = `{{ $mockupEditUrlTemplate }}`; // مثال: /admin/mockups/__MOCKUP__/edit
-                    const editUrl = editUrlTemplate.replace('__MOCKUP__', id);
 
-                    // ✅ أضف template_id كـ query parameter بشكل آمن
+                    // ✅ THIS WAS MISSING — isChecked was used but never defined
+                    const isChecked = selected.has(id);
+
+                    const editUrlTemplate = `{{ $mockupEditUrlTemplate }}`;
+                    const editUrl = editUrlTemplate.replace('__MOCKUP__', id);
                     const href = `${editUrl}?template_id={{ $model->id }}`;
+
                     const images = mockup?.images || {};
-                    const firstKey = Object.keys(images)[0]; // gets "1", "2", "3", etc.
+                    const firstKey = Object.keys(images)[0];
                     const img = (firstKey && images[firstKey]?.base_url)
                         || "{{ asset('images/placeholder.svg') }}";
+
                     const approach = "{{ $model->approach }}";
                     const isWithoutEditor = (approach === 'without_editor');
                     const showMockupBtn = isWithoutEditor
-                        ? `<button type="button" class="btn btn-sm btn-primary w-100 js-submit-mockup" data-id="${id}">
-           Show on Mockup
-       </button>`
-                        : ''; // hide button in with-editor mode
+                        ? `<button type="button" class="btn btn-sm btn-primary w-100 js-submit-mockup" data-id="${id}">Show on Mockup</button>`
+                        : '';
+
                     $cardsWrap.append(`
-          <div class="col-12 col-md-4 col-lg-2">
+        <div class="col-12 col-md-4 col-lg-2">
             <div class="mockup-card ${isChecked ? 'selected' : ''}" data-id="${id}">
-              <div class="card rounded-3 shadow-sm position-relative" style="border:1px solid #24B094;">
-
-                <!-- ✅ checkbox overlay top-left -->
-                <div class="position-absolute" style="top:10px;left:10px;z-index:20;">
-                  <input
-                    class="form-check-input js-mockup-checkbox"
-                    type="checkbox"
-                    name="mockup_ids[]"
-                    value="${id}"
-                    ${isChecked ? 'checked' : ''}
-                  />
+                <div class="card rounded-3 shadow-sm position-relative" style="border:1px solid #24B094;">
+                    <div class="position-absolute" style="top:10px;left:10px;z-index:20;">
+                        <input
+                            class="form-check-input js-mockup-checkbox"
+                            type="checkbox"
+                            name="mockup_ids[]"
+                            value="${id}"
+                            ${isChecked ? 'checked' : ''}
+                        />
+                    </div>
+                    <div class="d-flex justify-content-center align-items-center"
+                         style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">
+                        <img src="${img}" class="mx-auto d-block"
+                             style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:8px;"
+                             alt="${name}">
+                    </div>
+                    <div class="card-body py-2">
+                        <h6 class="card-title mb-2 text-truncate">${name}</h6>
+                        ${showMockupBtn}
+                    </div>
                 </div>
-
-                <div class="d-flex justify-content-center align-items-center"
-                     style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">
-                  <img src="${img}" class="mx-auto d-block"
-                       style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:8px;"
-                       alt="${name}">
-                </div>
-
-                <div class="card-body py-2">
-                  <h6 class="card-title mb-2 text-truncate">${name}</h6>
-  ${showMockupBtn}
-                </div>
-
-              </div>
             </div>
-          </div>
-        `);
+        </div>
+    `);
                 });
             }
 
