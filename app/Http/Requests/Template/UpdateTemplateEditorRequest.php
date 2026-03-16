@@ -5,6 +5,7 @@ namespace App\Http\Requests\Template;
 use App\Enums\OrientationEnum;
 use App\Enums\SafetyAreaEnum;
 use App\Enums\Template\StatusEnum;
+use App\Enums\Template\TypeEnum;
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\CountryCode;
 use Illuminate\Validation\Rule;
@@ -29,6 +30,36 @@ class UpdateTemplateEditorRequest extends BaseRequest
      */
     public function rules(): array
     {
+        $template = $this->route('template');
+        $types = $template?->types->pluck('value')->map(fn($t) => $t->value)->toArray() ?? [];
+
+        $hasFront = in_array(TypeEnum::FRONT->value, $types);
+        $hasBack  = in_array(TypeEnum::BACK->value, $types);
+        $hasNone  = in_array(TypeEnum::NONE->value, $types);
+
+        $designDataRules = ($hasFront || $hasNone)
+            ? ['sometimes', 'json', function ($attribute, $value, $fail) {
+                if ($value === 'null') {
+                    $fail($attribute . ' cannot be null.');
+                }
+                $decoded = json_decode($value, true);
+                if (empty($decoded)) {
+                    $fail($attribute . ' cannot be empty.');
+                }
+            }]
+            : ['nullable'];
+
+        $designBackDataRules = $hasBack
+            ? ['sometimes', 'json', function ($attribute, $value, $fail) {
+                if ($value === 'null') {
+                    $fail($attribute . ' cannot be null.');
+                }
+                $decoded = json_decode($value, true);
+                if (empty($decoded)) {
+                    $fail($attribute . ' cannot be empty.');
+                }
+            }]
+            : ['nullable'];
         return [
             'name.en' => [
                 'sometimes',
@@ -41,26 +72,8 @@ class UpdateTemplateEditorRequest extends BaseRequest
                 'max:255',
 
             ],
-            'design_data' => ['sometimes', 'json', function ($attribute, $value, $fail) {
-                if ($value === 'null') {
-                    $fail($attribute . ' cannot be null.');
-                }
-
-                $decoded = json_decode($value, true);
-                if (empty($decoded)) {
-                    $fail($attribute . ' cannot be empty.');
-                }
-            },],
-            'design_back_data' => ['sometimes', 'json', function ($attribute, $value, $fail) {
-                if ($value === 'null') {
-                    $fail($attribute . ' cannot be null.');
-                }
-
-                $decoded = json_decode($value, true);
-                if (empty($decoded)) {
-                    $fail($attribute . ' cannot be empty.');
-                }
-            },],
+            'design_data' => $designDataRules,
+            'design_back_data' => $designBackDataRules,
             'base64_preview_image' => ['sometimes', 'string'],
             'back_base64_preview_image' => ['sometimes', 'string'],
             'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],

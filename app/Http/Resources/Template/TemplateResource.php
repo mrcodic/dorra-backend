@@ -46,7 +46,12 @@ class TemplateResource extends JsonResource
             'back_base64_preview_image' => $this->getFirstMediaUrl('back_templates'),
             'has_mockup' => (boolean)$this->products->contains('has_mockup', true),
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
-            'template_model_image' => $this->getFirstMediaUrl('rendered_mockups')?: $this->getFirstMediaUrl('template_model_image'),
+            'template_model_image' =>$this->getMedia('rendered_mockups')
+                ->first(fn($m) =>
+                   ($m->getCustomProperty('side') === 'front' || $m->getCustomProperty('side') === 'none') &&
+                    $m->getCustomProperty('category_id') === request('product_without_category_id')
+                )
+                ?->getUrl() ?: $this->getFirstMediaUrl('template_model_image'),
             'orientation' => [
                 'value' => $this->orientation?->value,
                 'label' => $this->orientation?->label(),
