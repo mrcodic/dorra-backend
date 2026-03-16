@@ -764,6 +764,8 @@
                     data: {
                         'product_ids[]': allProductIds,
                         'types[]': getSelectedTypes(),
+                        'approach': "{{ $model->approach == 'with_editor' ? 'with_editor' : 'without_editor' }}",
+                        
                     },
                     success: function (response) {
                         const items = response?.data?.data || response?.data || response || [];
