@@ -190,10 +190,5 @@ class ProcessBase64Image implements ShouldQueue
         }
     }
 
-    private function isValidImage(string $path): bool
-    {
-        if (!file_exists($path) || filesize($path) === 0) return false;
 
-        return @getimagesize($path) !== false;
-    }
 }
