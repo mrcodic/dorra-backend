@@ -49,7 +49,8 @@ class TemplateResource extends JsonResource
             'template_model_image' =>$this->getMedia('rendered_mockups')
                 ->first(fn($m) =>
                    ($m->getCustomProperty('side') === 'front' || $m->getCustomProperty('side') === 'none') &&
-                    $m->getCustomProperty('category_id') === request('product_without_category_id')
+                    $m->getCustomProperty('category_id') === request('product_without_category_id',138)
+                   && $m->getCustomProperty('template_id') === $this->id
                 )
                 ?->getUrl() ?: $this->getFirstMediaUrl('template_model_image'),
             'orientation' => [
