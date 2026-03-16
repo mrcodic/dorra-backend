@@ -56,7 +56,7 @@ class ProcessBase64Image implements ShouldQueue
         $this->template->addMedia($tempFilePath)
             ->toMediaCollection($this->collection);
 
-        @unlink($tempFilePath);
+       // @unlink($tempFilePath);
         $this->renderMockups();
 
     }
