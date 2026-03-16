@@ -61,7 +61,7 @@ class StoreTemplateRequest extends BaseRequest
                 'nullable','exists:media,id',
                 Rule::requiredIf(fn()=> in_array(TypeEnum::NONE->value, (array)$this->input('types', []), true)),
             ],
-            'template_image_id' => ['sometimes','exists:media,id'],
+            'template_image_id' => ['nullable','exists:media,id'],
             'design_data' => ['sometimes', 'json', function ($attribute, $value, $fail) {
                 if ($value === 'null') {
                     $fail($attribute . ' cannot be null.');
