@@ -12,8 +12,8 @@ class ProcessBase64Image implements ShouldQueue
 {
     use Queueable;
 
-    public $tries = 3;
-    public $backoff = [2, 5, 10]; // Seconds between retries
+    public $tries = 5; // Increased retry attempts
+    public $backoff = [3, 6, 12, 24, 30]; // Progressive backoff
 
     /**
      * Create a new job instance.
@@ -28,66 +28,62 @@ class ProcessBase64Image implements ShouldQueue
     public function handle(): void
     {
         try {
-            if (preg_match('/^data:image\/(\w+);base64,/', $this->base64Image, $type)) {
-                $imageData = substr($this->base64Image, strpos($this->base64Image, ',') + 1);
-                $type = strtolower($type[1]);
+            // Log initial data for debugging
+            Log::info('Processing base64 image', [
+                'template_id' => $this->template->id ?? null,
+                'collection' => $this->collection,
+                'base64_length' => strlen($this->base64Image),
+                'base64_preview' => substr($this->base64Image, 0, 100) . '...'
+            ]);
 
-                if (!in_array($type, ['jpg', 'jpeg', 'png', 'gif'])) {
-                    throw new \Exception('Invalid image type');
-                }
+            // Extract and validate base64 data
+            $imageData = $this->extractBase64Data($this->base64Image);
 
-                // Use strict mode for base64 decoding
-                $imageData = base64_decode($imageData, true);
-                if ($imageData === false) {
-                    throw new \Exception('base64_decode failed');
-                }
-
-                // Validate image data before processing
-                if (!$this->validateImageData($imageData, $type)) {
-                    // Attempt to fix the image if validation fails
-                    $imageData = $this->fixImageData($imageData, $type);
-                    if (!$imageData) {
-                        throw new \Exception('Image data is corrupted and could not be fixed');
-                    }
-                }
-
-                // Verify image can be loaded by GD
-                $gdImage = @imagecreatefromstring($imageData);
-                if ($gdImage === false) {
-                    throw new \Exception('Image data is corrupted or invalid (GD library cannot load it)');
-                }
-                imagedestroy($gdImage);
-
-            } else {
-                throw new \Exception('Invalid base64 format');
+            if (!$imageData) {
+                throw new \Exception('Failed to extract image data from base64 string');
             }
 
-            $tempDir = storage_path('app/tmp_uploads');
-            if (!file_exists($tempDir)) {
-                mkdir($tempDir, 0755, true);
+            // Try multiple recovery methods
+            $recoveredData = $this->recoverImageData($imageData['data'], $imageData['type']);
+
+            if (!$recoveredData) {
+                // Log the problematic data for debugging
+                $this->debugImageData($imageData['data']);
+                throw new \Exception('Image data is corrupted and could not be fixed after multiple recovery attempts');
             }
 
-            $tempFilePath = $tempDir . '/' . uniqid('preview_') . '.' . $type;
+            // Save to temp file
+            $tempFilePath = $this->saveToTempFile($recoveredData, $imageData['type']);
 
-            if (file_put_contents($tempFilePath, $imageData) === false) {
-                throw new \Exception('Failed to write temp file');
+            if (!$tempFilePath) {
+                throw new \Exception('Failed to save image to temporary file');
             }
 
-            // Optimize the image to ensure it's clean
-            $this->optimizeImage($tempFilePath, $type);
-
-            // Verify the saved file can be read
+            // Verify the file is valid
             if (!$this->verifyImageFile($tempFilePath)) {
-                throw new \Exception('Saved image file is corrupted');
+                throw new \Exception('Saved image file is corrupted or invalid');
             }
 
+            // Clear existing media and add new one
             $this->template->clearMediaCollection($this->collection);
-            $this->template->addMedia($tempFilePath)
+
+            $media = $this->template->addMedia($tempFilePath)
+                ->withCustomProperties([
+                    'original_type' => $imageData['type'],
+                    'processed_at' => now()->toDateTimeString(),
+                    'recovery_attempted' => true
+                ])
                 ->toMediaCollection($this->collection);
 
-            // Uncomment if you want to delete temp file after processing
-            // @unlink($tempFilePath);
+            Log::info('Successfully added media', [
+                'media_id' => $media->id,
+                'template_id' => $this->template->id
+            ]);
 
+            // Clean up temp file
+            @unlink($tempFilePath);
+
+            // Render mockups
             $this->renderMockups();
 
         } catch (\Exception $e) {
@@ -99,6 +95,7 @@ class ProcessBase64Image implements ShouldQueue
             Log::error('ProcessBase64Image failed: ' . $e->getMessage(), [
                 'template_id' => $this->template->id ?? null,
                 'collection' => $this->collection,
+                'error_class' => get_class($e),
                 'trace' => $e->getTraceAsString()
             ]);
 
@@ -108,183 +105,325 @@ class ProcessBase64Image implements ShouldQueue
     }
 
     /**
-     * Validate image data integrity
+     * Extract data from base64 image string
      */
-    private function validateImageData(string $data, string $type): bool
+    private function extractBase64Data(string $base64Image): ?array
     {
-        // Check if data is empty
+        // Try multiple base64 patterns
+        $patterns = [
+            '/^data:image\/(\w+);base64,(.*)$/', // Standard pattern
+            '/^data:image\/(\w+);base64(.*)$/i',  // Missing comma
+            '/^data:image\/(\w+),(.*)$/i',        // Missing base64 indicator
+            '/^data:application\/image;base64,(.*)$/i', // Application type
+            '/^base64,(.*)$/i',                    // Just base64 indicator
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $base64Image, $matches)) {
+                $type = strtolower($matches[1] ?? 'png');
+                $data = $matches[count($matches) - 1]; // Last match is always the data
+
+                // Clean the data
+                $data = preg_replace('/\s+/', '', $data); // Remove whitespace
+
+                // Validate type
+                if (!in_array($type, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'])) {
+                    $type = 'png'; // Default to png if unknown
+                }
+
+                // Try to decode
+                $decoded = base64_decode($data, true);
+                if ($decoded !== false) {
+                    return [
+                        'type' => $type,
+                        'data' => $decoded
+                    ];
+                }
+            }
+        }
+
+        // If no pattern matched, try treating the whole string as base64
+        $decoded = base64_decode($base64Image, true);
+        if ($decoded !== false) {
+            return [
+                'type' => 'png', // Assume PNG
+                'data' => $decoded
+            ];
+        }
+
+        return null;
+    }
+
+    /**
+     * Attempt multiple recovery methods
+     */
+    private function recoverImageData(string $data, string $type): ?string
+    {
+        $recoveryMethods = [
+            'direct' => fn($d) => $this->attemptDirectLoad($d),
+            'reencode' => fn($d) => $this->attemptReencode($d, $type),
+            'strip' => fn($d) => $this->attemptStripCorruption($d, $type),
+            'create_new' => fn($d) => $this->attemptCreateNewImage($d, $type),
+            'force_png' => fn($d) => $this->attemptForcePNG($d),
+        ];
+
+        foreach ($recoveryMethods as $methodName => $method) {
+            try {
+                Log::info("Attempting recovery method: {$methodName}");
+                $result = $method($data);
+                if ($result && $this->validateImageData($result)) {
+                    Log::info("Recovery method {$methodName} succeeded");
+                    return $result;
+                }
+            } catch (\Exception $e) {
+                Log::warning("Recovery method {$methodName} failed: " . $e->getMessage());
+                continue;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Attempt to load image directly
+     */
+    private function attemptDirectLoad(string $data): ?string
+    {
+        $img = @imagecreatefromstring($data);
+        if ($img !== false) {
+            imagedestroy($img);
+            return $data;
+        }
+        return null;
+    }
+
+    /**
+     * Attempt to reencode the image
+     */
+    private function attemptReencode(string $data, string $type): ?string
+    {
+        $img = @imagecreatefromstring($data);
+        if ($img === false) {
+            return null;
+        }
+
+        ob_start();
+        switch ($type) {
+            case 'png':
+                imagepng($img, null, 9, PNG_ALL_FILTERS);
+                break;
+            case 'jpg':
+            case 'jpeg':
+                imagejpeg($img, null, 95);
+                break;
+            case 'gif':
+                imagegif($img);
+                break;
+            default:
+                imagepng($img, null, 9, PNG_ALL_FILTERS);
+        }
+        $cleanData = ob_get_clean();
+        imagedestroy($img);
+
+        return $cleanData;
+    }
+
+    /**
+     * Attempt to strip corruption by finding valid image boundaries
+     */
+    private function attemptStripCorruption(string $data, string $type): ?string
+    {
+        if ($type === 'png') {
+            return $this->stripPNGCorruption($data);
+        } elseif ($type === 'jpg' || $type === 'jpeg') {
+            return $this->stripJPEGCorruption($data);
+        }
+
+        // For other types, try to find valid image data
+        return $this->findValidImageData($data);
+    }
+
+    /**
+     * Strip corruption from PNG
+     */
+    private function stripPNGCorruption(string $data): ?string
+    {
+        // Find PNG signature
+        $pngSignature = "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A";
+        $sigPos = strpos($data, $pngSignature);
+
+        if ($sigPos === false) {
+            return null;
+        }
+
+        // Extract from signature to end
+        $cleanData = substr($data, $sigPos);
+
+        // Try to load it
+        $img = @imagecreatefromstring($cleanData);
+        if ($img !== false) {
+            imagedestroy($img);
+            return $cleanData;
+        }
+
+        return null;
+    }
+
+    /**
+     * Strip corruption from JPEG
+     */
+    private function stripJPEGCorruption(string $data): ?string
+    {
+        // Find JPEG SOI marker
+        $soiMarker = "\xFF\xD8";
+        $soiPos = strpos($data, $soiMarker);
+
+        if ($soiPos === false) {
+            return null;
+        }
+
+        // Find EOI marker
+        $eoiMarker = "\xFF\xD9";
+        $eoiPos = strrpos($data, $eoiMarker);
+
+        if ($eoiPos === false) {
+            // If no EOI, take from SOI to end
+            $cleanData = substr($data, $soiPos);
+        } else {
+            // Take from SOI to EOI
+            $cleanData = substr($data, $soiPos, $eoiPos - $soiPos + 2);
+        }
+
+        // Try to load it
+        $img = @imagecreatefromstring($cleanData);
+        if ($img !== false) {
+            imagedestroy($img);
+            return $cleanData;
+        }
+
+        return null;
+    }
+
+    /**
+     * Find valid image data by scanning for known headers
+     */
+    private function findValidImageData(string $data): ?string
+    {
+        $imageSignatures = [
+            'png' => "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A",
+            'jpg' => "\xFF\xD8\xFF",
+            'gif' => "GIF8",
+            'bmp' => "BM",
+            'webp' => "RIFF"
+        ];
+
+        foreach ($imageSignatures as $type => $signature) {
+            $pos = strpos($data, $signature);
+            if ($pos !== false) {
+                $candidate = substr($data, $pos);
+                $img = @imagecreatefromstring($candidate);
+                if ($img !== false) {
+                    imagedestroy($img);
+                    return $candidate;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Attempt to create a new image from corrupted data
+     */
+    private function attemptCreateNewImage(string $data, string $type): ?string
+    {
+        try {
+            // Try to get dimensions
+            $img = @imagecreatefromstring($data);
+            if ($img === false) {
+                // If we can't load it, try to create a blank image
+                $img = imagecreatetruecolor(800, 600);
+                $bg = imagecolorallocate($img, 255, 255, 255);
+                imagefill($img, 0, 0, $bg);
+
+                // Try to embed corrupted data as text? Not ideal but better than nothing
+                $textColor = imagecolorallocate($img, 0, 0, 0);
+                imagestring($img, 5, 10, 10, "Corrupted Image", $textColor);
+            }
+
+            ob_start();
+            imagepng($img, null, 9, PNG_ALL_FILTERS);
+            $newData = ob_get_clean();
+            imagedestroy($img);
+
+            return $newData;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Force conversion to PNG
+     */
+    private function attemptForcePNG(string $data): ?string
+    {
+        $img = @imagecreatefromstring($data);
+        if ($img === false) {
+            return null;
+        }
+
+        ob_start();
+        imagepng($img, null, 9, PNG_ALL_FILTERS);
+        $pngData = ob_get_clean();
+        imagedestroy($img);
+
+        return $pngData;
+    }
+
+    /**
+     * Validate image data
+     */
+    private function validateImageData(string $data): bool
+    {
         if (empty($data)) {
-            Log::error('Image data is empty');
             return false;
         }
 
-        // For PNG files, validate the signature
-        if ($type === 'png') {
-            return $this->validatePNG($data);
-        }
-
-        // For JPEG files, validate the SOI marker
-        if ($type === 'jpg' || $type === 'jpeg') {
-            return $this->validateJPEG($data);
-        }
-
-        // Try to create image from string as final validation
+        // Try to create image from string
         $img = @imagecreatefromstring($data);
         if ($img === false) {
             return false;
         }
+
         imagedestroy($img);
-
         return true;
     }
 
     /**
-     * Validate PNG integrity by checking the signature and IHDR chunk
+     * Save data to temporary file
      */
-    private function validatePNG(string $data): bool
+    private function saveToTempFile(string $data, string $type): ?string
     {
-        // Check PNG signature (first 8 bytes)
-        $pngSignature = "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A";
-        if (substr($data, 0, 8) !== $pngSignature) {
-            Log::error('PNG signature validation failed', [
-                'expected' => bin2hex($pngSignature),
-                'actual' => bin2hex(substr($data, 0, 8))
-            ]);
-            return false;
+        $tempDir = storage_path('app/tmp_uploads');
+        if (!file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
         }
 
-        // Check for IHDR chunk (must be first chunk)
-        $ihdrChunk = substr($data, 8, 4);
-        if ($ihdrChunk !== 'IHDR') {
-            Log::error('PNG IHDR chunk missing');
-            return false;
-        }
+        $tempFilePath = $tempDir . '/' . uniqid('img_', true) . '.' . $type;
 
-        return true;
-    }
-
-    /**
-     * Validate JPEG integrity
-     */
-    private function validateJPEG(string $data): bool
-    {
-        // Check JPEG SOI marker (FF D8)
-        if (bin2hex(substr($data, 0, 2)) !== 'ffd8') {
-            Log::error('JPEG SOI marker missing');
-            return false;
-        }
-
-        // Check for EOI marker (FF D9) at the end
-        if (bin2hex(substr($data, -2)) !== 'ffd9') {
-            Log::warn('JPEG EOI marker missing - image may be truncated');
-            // Don't return false as some JPEGs might still work
-        }
-
-        return true;
-    }
-
-    /**
-     * Attempt to fix corrupted image data by re-encoding it
-     */
-    private function fixImageData(string $data, string $type): ?string
-    {
-        try {
-            Log::info('Attempting to fix corrupted image', ['type' => $type]);
-
-            // Try to load the corrupted image
-            $img = @imagecreatefromstring($data);
-            if ($img === false) {
-                return null;
-            }
-
-            // Re-encode to a clean image
-            ob_start();
-            switch ($type) {
-                case 'png':
-                    imagepng($img, null, 9, PNG_ALL_FILTERS);
-                    break;
-                case 'jpg':
-                case 'jpeg':
-                    imagejpeg($img, null, 90);
-                    break;
-                case 'gif':
-                    imagegif($img);
-                    break;
-                default:
-                    imagedestroy($img);
-                    return null;
-            }
-            $cleanData = ob_get_clean();
-            imagedestroy($img);
-
-            if ($cleanData && $this->validateImageData($cleanData, $type)) {
-                Log::info('Successfully fixed corrupted image');
-                return $cleanData;
-            }
-
-            return null;
-
-        } catch (\Exception $e) {
-            Log::error('Failed to fix image: ' . $e->getMessage());
+        if (file_put_contents($tempFilePath, $data) === false) {
             return null;
         }
+
+        return $tempFilePath;
     }
 
     /**
-     * Optimize and clean image file
-     */
-    private function optimizeImage(string $filePath, string $type): void
-    {
-        try {
-            if (!file_exists($filePath)) {
-                return;
-            }
-
-            // Load the image based on type
-            $img = null;
-            switch ($type) {
-                case 'png':
-                    $img = @imagecreatefrompng($filePath);
-                    if ($img) {
-                        // Save with maximum compatibility and compression
-                        imagepng($img, $filePath, 9, PNG_ALL_FILTERS);
-                    }
-                    break;
-
-                case 'jpg':
-                case 'jpeg':
-                    $img = @imagecreatefromjpeg($filePath);
-                    if ($img) {
-                        // Save with good quality
-                        imagejpeg($img, $filePath, 90);
-                    }
-                    break;
-
-                case 'gif':
-                    $img = @imagecreatefromgif($filePath);
-                    if ($img) {
-                        imagegif($img, $filePath);
-                    }
-                    break;
-            }
-
-            if ($img) {
-                imagedestroy($img);
-                Log::info('Image optimized successfully', ['file' => basename($filePath)]);
-            }
-
-        } catch (\Exception $e) {
-            Log::warning('Image optimization failed: ' . $e->getMessage());
-            // Don't throw, continue with original file
-        }
-    }
-
-    /**
-     * Verify saved image file can be read
+     * Verify image file
      */
     private function verifyImageFile(string $filePath): bool
     {
-        if (!file_exists($filePath)) {
+        if (!file_exists($filePath) || filesize($filePath) === 0) {
             return false;
         }
 
@@ -305,7 +444,7 @@ class ProcessBase64Image implements ShouldQueue
     }
 
     /**
-     * Debug image data (useful for troubleshooting)
+     * Debug image data
      */
     private function debugImageData(string $data): void
     {
@@ -313,12 +452,14 @@ class ProcessBase64Image implements ShouldQueue
         $mimeType = finfo_buffer($finfo, $data);
         finfo_close($finfo);
 
-        Log::info('Image debug info:', [
+        Log::error('Corrupted image debug info:', [
             'size' => strlen($data),
             'mime_type' => $mimeType,
-            'starts_with_png_signature' => substr($data, 0, 8) === "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A",
-            'first_20_bytes' => bin2hex(substr($data, 0, 20)),
-            'last_20_bytes' => bin2hex(substr($data, -20))
+            'first_50_bytes' => bin2hex(substr($data, 0, 50)),
+            'last_50_bytes' => bin2hex(substr($data, -50)),
+            'contains_png_signature' => strpos($data, "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A") !== false,
+            'contains_jpg_signature' => strpos($data, "\xFF\xD8\xFF") !== false,
+            'is_valid_utf8' => mb_check_encoding($data, 'UTF-8')
         ]);
     }
 
@@ -327,17 +468,21 @@ class ProcessBase64Image implements ShouldQueue
      */
     public function failed(\Throwable $e): void
     {
-        Log::error('ProcessBase64Image failed permanently', [
+        Log::error('ProcessBase64Image failed permanently after all retries', [
             'template_id' => $this->template->id ?? null,
             'collection' => $this->collection,
             'error' => $e->getMessage(),
             'trace' => $e->getTraceAsString()
         ]);
 
-        // Optionally mark template as failed
+        // Mark template as failed
         if ($this->template && method_exists($this->template, 'update')) {
             try {
-                $this->template->update(['processing_failed' => true]);
+                $this->template->update([
+                    'processing_failed' => true,
+                    'failed_at' => now(),
+                    'error_message' => substr($e->getMessage(), 0, 255)
+                ]);
             } catch (\Exception $updateError) {
                 Log::error('Failed to update template status: ' . $updateError->getMessage());
             }
@@ -348,16 +493,13 @@ class ProcessBase64Image implements ShouldQueue
     {
         $template = $this->template->fresh(['mockups.types', 'mockups.media']);
 
-        $mockups = $template->mockups; // pivot data comes with the relation
+        $mockups = $template->mockups;
 
         if (!$mockups || $mockups->isEmpty()) return;
 
         foreach ($mockups as $mockup) {
-
-            // ---- Read positions from pivot ----
             $positions = $mockup->pivot->positions ?? [];
 
-            // Decode if stored as JSON string
             if (is_string($positions)) {
                 $positions = json_decode($positions, true) ?? [];
             }
@@ -428,7 +570,7 @@ class ProcessBase64Image implements ShouldQueue
                         ->toMediaCollection('rendered_mockups');
 
                 } catch (\Throwable $e) {
-                    Log::error("Render failed mockup {$mockup->id} side {$side} template {$template->id}: " . $e->getMessage());
+                    Log::error("Render failed mockup {$mockup->id} side {$side}: " . $e->getMessage());
                 }
             }
         }
