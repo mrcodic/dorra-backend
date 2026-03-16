@@ -357,8 +357,8 @@ class TemplateService extends BaseService
                             'back'  => 'back_templates',
                             default => 'templates',
                         };
-                        $media = $model->getFirstMedia($collection);
-                        if (!$media || !file_exists($media->getPath())) return;
+//                        $media = $model->getFirstMedia($collection);
+//                        if (!$media || !file_exists($media->getPath())) return;
                         $this->renderMockups($model, $collection);
                     });
 
