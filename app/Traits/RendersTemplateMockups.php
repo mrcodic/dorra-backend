@@ -93,7 +93,7 @@ trait RendersTemplateMockups
 
                     $template->getMedia('rendered_mockups')
                         ->filter(fn($m) =>
-//                            $m->getCustomProperty('side') === $side &&
+                            $m->getCustomProperty('side') === $side &&
                             (int)$m->getCustomProperty('category_id') === (int)$mockup->category_id
                         )
                         ->each->delete();
