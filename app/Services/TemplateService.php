@@ -259,6 +259,7 @@ class TemplateService extends BaseService
                         default => 'templates',
                     };
                     $media = $model->getFirstMedia($collection);
+                    dd($media);
                     if (!$media || !file_exists($media->getPath())) return;
                     $this->renderMockups($model, $collection);
                 });
