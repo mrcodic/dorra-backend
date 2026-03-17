@@ -20,8 +20,7 @@ class HandleMockupFilesJob implements ShouldQueue
         public Mockup $mockup,
         public        $type = 'update',
     )
-    {
-    }
+    {}
 
     /**
      * Execute the job.

@@ -240,6 +240,17 @@ class TemplateService extends BaseService
                 })->toArray();
 
                 $model->mockups()->syncWithoutDetaching($pivotData);
+                $model->types->each(function ($type) use ($model) {
+                    $side = strtolower($type->value->name);
+                    $collection = match ($side) {
+                        'back'  => 'back_templates',
+                        default => 'templates',
+                    };
+                    $media = $model->getFirstMedia($collection);
+                    if (!$media || !file_exists($media->getPath())) return;
+                    $this->renderMockups($model, $collection);
+                });
+
             }
             $model->types()->sync($validatedData['types']);
             $model->tags()->sync($validatedData['tags'] ?? []);
