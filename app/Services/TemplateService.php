@@ -233,9 +233,9 @@ class TemplateService extends BaseService
             }
             $mockupIds = $validatedData['mockup_ids'] ?? [];
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
+            $model->types()->sync($validatedData['types']);
 
             if (!empty($mockupIds)) {
-                dd($model->types);
                 $positions = $this->defaultPositionsForTypes($selectedTypeValues);
 
                 $pivotData = collect($mockupIds)->mapWithKeys(function ($mockupId) use ($positions) {
@@ -260,13 +260,11 @@ class TemplateService extends BaseService
                         default => 'templates',
                     };
                     $media = $model->getFirstMedia($collection);
-                    dd($media);
                     if (!$media || !file_exists($media->getPath())) return;
                     $this->renderMockups($model, $collection);
                 });
 
             }
-            $model->types()->sync($validatedData['types']);
             $model->tags()->sync($validatedData['tags'] ?? []);
             $model->flags()->sync($validatedData['flags'] ?? []);
             collect($colors)->each(function ($color) use ($model) {
