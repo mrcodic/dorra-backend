@@ -235,6 +235,7 @@ class TemplateService extends BaseService
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
 
             if (!empty($mockupIds)) {
+                dd("jkk");
                 $positions = $this->defaultPositionsForTypes($selectedTypeValues);
 
                 $pivotData = collect($mockupIds)->mapWithKeys(function ($mockupId) use ($positions) {
