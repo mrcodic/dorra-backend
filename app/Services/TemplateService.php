@@ -226,7 +226,9 @@ class TemplateService extends BaseService
                     ['positions' => $positions]
                 );
             }
-
+            if (request()->allFiles()) {
+                handleMediaUploads(request()->allFiles(), $model);
+            }
             $mockupIds = $validatedData['mockup_ids'] ?? [];
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
 
@@ -276,9 +278,7 @@ class TemplateService extends BaseService
             return $model->refresh();
         });
 
-        if (request()->allFiles()) {
-            handleMediaUploads(request()->allFiles(), $model);
-        }
+
         if (isset($validatedData['base64_preview_image'])) {
             ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model, 'templates');
         }
