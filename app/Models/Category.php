@@ -234,7 +234,7 @@ class Category extends Model implements HasMedia
                 if ($totalCount === 0) return 0;
 
                 // (avg1 × cnt1) + (avg2 × cnt2) + ... / totalCount
-                $weightedSum = $rows->sum(fn($row) => $row->avg_rating * $row->cnt);
+                $weightedSum = $rows->sum(fn($row) => round($row->avg_rating) * $row->cnt);
 
                 return round($weightedSum / $totalCount, 2);
             }
