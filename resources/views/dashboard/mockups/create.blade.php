@@ -284,6 +284,11 @@
 
 @section('page-script')
     <script>
+        $('#productsSelect').select2({
+            placeholder: 'Choose product',
+            allowClear: true,
+            width: '100%',
+        });
         window.templatePositions = window.templatePositions || {};
         var buildHiddenTemplateInputs;
         var calculateObjectPercents;
