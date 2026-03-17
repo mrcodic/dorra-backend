@@ -236,7 +236,6 @@ class TemplateService extends BaseService
             $model->types()->sync($validatedData['types']);
 
             if (!empty($mockupIds)) {
-                dd($model->types);
                 $positions = $this->defaultPositionsForTypes($selectedTypeValues);
 
                 $pivotData = collect($mockupIds)->mapWithKeys(function ($mockupId) use ($positions) {
