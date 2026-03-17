@@ -6,8 +6,10 @@ namespace App\Services;
 use App\Enums\OrientationEnum;
 use App\Enums\Template\StatusEnum;
 use App\Enums\Template\TypeEnum;
+use App\Jobs\HandleMockupFilesJob;
 use App\Jobs\ProcessBase64Image;
 use App\Models\Admin;
+use App\Models\Mockup;
 use App\Models\Template;
 use App\Models\Type;
 use App\Repositories\Base\BaseRepositoryInterface;
@@ -223,7 +225,7 @@ class TemplateService extends BaseService
 
                 $model->mockups()->syncWithPivotValues(
                     [(int) $validatedData['mockup_id']],
-                    ['positions' => $positions]
+                    ['positions' => $positions,'colors' => ['#000000', '#FFFFFF']]
                 );
             }
             if (request()->allFiles()) {
@@ -237,11 +239,19 @@ class TemplateService extends BaseService
 
                 $pivotData = collect($mockupIds)->mapWithKeys(function ($mockupId) use ($positions) {
                     return [
-                        (int) $mockupId => ['positions' => $positions],
+                        (int) $mockupId => [
+                            'positions' => $positions,
+                            'colors' => ['#000000', '#FFFFFF']
+                            ],
                     ];
                 })->toArray();
 
                 $model->mockups()->syncWithoutDetaching($pivotData);
+                foreach ($mockupIds as $mockupId) {
+                    $mockup = Mockup::find((int) $mockupId);
+                    if (!$mockup) continue;
+                   HandleMockupFilesJob::dispatch($mockup, 'create');
+                }
                 $model->types->each(function ($type) use ($model) {
                     $side = strtolower($type->value->name);
                     $collection = match ($side) {
