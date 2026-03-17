@@ -810,7 +810,7 @@
 
             $withCat.on('change', fetchMockups);
             $withoutCat.on('change', fetchMockups);
-
+            fetchMockups();
             // ✅ FIX 3: re-fetch when type filter changes
             $(document).on('change', '.type-checkbox', fetchMockups);
         });

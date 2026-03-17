@@ -218,7 +218,6 @@ class Category extends Model implements HasMedia
         return Attribute::make(
             get: function () {
 
-                // Get per-product: avg rating + review count
                 $rows = Review::query()
                     ->join('products', function ($join) {
                         $join->on('reviews.reviewable_id', '=', 'products.id')
@@ -233,7 +232,6 @@ class Category extends Model implements HasMedia
 
                 if ($totalCount === 0) return 0;
 
-                // (avg1 × cnt1) + (avg2 × cnt2) + ... / totalCount
                 $weightedSum = $rows->sum(fn($row) => round($row->avg_rating) * $row->cnt);
 
                 return round($weightedSum / $totalCount, 2);
