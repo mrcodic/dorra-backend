@@ -106,7 +106,8 @@ function fetchMockups(page = 1) {
         data: {
             page,
             search_value: $('#search-category-form').val(),
-            'product_ids[]': $('.filter-product').val(),
+            product_id: $('.filter-product').val(),
+            product_type: 'category',
             type: $('.filter-type').val(),
             per_page: $('.filter-paginate-number').val()
         },
