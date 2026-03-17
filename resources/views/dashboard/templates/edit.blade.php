@@ -678,7 +678,6 @@
             const $withCat = $('#categoriesSelect');
             const $withoutCat = $('#productsWithoutCategoriesSelect');
 
-            // ✅ selected يبدأ بالمرفقات القديمة في edit
             const selected = new Set([...attachedMockupIds]);
 
             function renderMockupCards(items) {
@@ -692,8 +691,6 @@
                 items.forEach(mockup => {
                     const id = String(mockup.id);
                     const name = mockup.name ?? ('Mockup #' + id);
-
-                    // ✅ THIS WAS MISSING — isChecked was used but never defined
                     const isChecked = selected.has(id);
 
                     const editUrlTemplate = `{{ $mockupEditUrlTemplate }}`;
@@ -707,37 +704,39 @@
 
                     const approach = "{{ $model->approach }}";
                     const isWithoutEditor = (approach === 'without_editor');
+
+                    // ✅ FIX 1: class changed from js-submit-mockup → js-show-on-mockup
                     const showMockupBtn = isWithoutEditor
-                        ? `<button type="button" class="btn btn-sm btn-primary w-100 js-submit-mockup" data-id="${id}">Show on Mockup</button>`
+                        ? `<button type="button" class="btn btn-sm btn-primary w-100 js-show-on-mockup" data-id="${id}">Show on Mockup</button>`
                         : '';
 
                     $cardsWrap.append(`
-        <div class="col-12 col-md-4 col-lg-2">
-            <div class="mockup-card ${isChecked ? 'selected' : ''}" data-id="${id}">
-                <div class="card rounded-3 shadow-sm position-relative" style="border:1px solid #24B094;">
-                    <div class="position-absolute" style="top:10px;left:10px;z-index:20;">
-                        <input
-                            class="form-check-input js-mockup-checkbox"
-                            type="checkbox"
-                            name="mockup_ids[]"
-                            value="${id}"
-                            ${isChecked ? 'checked' : ''}
-                        />
-                    </div>
-                    <div class="d-flex justify-content-center align-items-center"
-                         style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">
-                        <img src="${img}" class="mx-auto d-block"
-                             style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:8px;"
-                             alt="${name}">
-                    </div>
-                    <div class="card-body py-2">
-                        <h6 class="card-title mb-2 text-truncate">${name}</h6>
-                        ${showMockupBtn}
+                <div class="col-12 col-md-4 col-lg-2">
+                    <div class="mockup-card ${isChecked ? 'selected' : ''}" data-id="${id}">
+                        <div class="card rounded-3 shadow-sm position-relative" style="border:1px solid #24B094;">
+                            <div class="position-absolute" style="top:10px;left:10px;z-index:20;">
+                                <input
+                                    class="form-check-input js-mockup-checkbox"
+                                    type="checkbox"
+                                    name="mockup_ids[]"
+                                    value="${id}"
+                                    ${isChecked ? 'checked' : ''}
+                                />
+                            </div>
+                            <div class="d-flex justify-content-center align-items-center"
+                                 style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">
+                                <img src="${img}" class="mx-auto d-block"
+                                     style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:8px;"
+                                     alt="${name}">
+                            </div>
+                            <div class="card-body py-2">
+                                <h6 class="card-title mb-2 text-truncate">${name}</h6>
+                                ${showMockupBtn}
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    `);
+            `);
                 });
             }
 
@@ -754,7 +753,7 @@
 
                 if (!allProductIds.length) {
                     $cardsWrap.empty();
-                    selected.clear();
+                    // ✅ FIX 2: don't clear selected — preserve attachedMockupIds on empty
                     return;
                 }
 
@@ -765,12 +764,10 @@
                         'product_ids[]': allProductIds,
                         'types[]': getSelectedTypes(),
                         'approach': "{{ $model->approach == 'with_editor' ? 'with_editor' : 'without_editor' }}",
-                        
                     },
                     success: function (response) {
                         const items = response?.data?.data || response?.data || response || [];
 
-                        // اختياري: شيل أي selected مش موجود في النتائج
                         const ids = new Set(items.map(x => String(x.id)));
                         [...selected].forEach(id => {
                             if (!ids.has(id)) selected.delete(id);
@@ -785,7 +782,6 @@
                 });
             }
 
-            // ✅ أهم جزء: لو uncheck → يتشال من selected وبالتالي مش هيتبعت
             $(document).on('change', '.js-mockup-checkbox', function () {
                 const id = String(this.value);
                 if (this.checked) selected.add(id);
@@ -794,34 +790,31 @@
                 $(this).closest('.mockup-card').toggleClass('selected', this.checked);
             });
 
-            // (اختياري) click على الكارد يtoggle الـ checkbox (بدون اللينكات)
             $(document).on('click', '.mockup-card', function (e) {
                 if ($(e.target).is('input, a, button')) return;
                 const $cb = $(this).find('.js-mockup-checkbox');
                 $cb.prop('checked', !$cb.prop('checked')).trigger('change');
             });
+
             $(document).on('click', '.js-show-on-mockup', function (e) {
                 e.preventDefault();
 
                 const mockupId = String($(this).data('id'));
-
-                // ✅ ابعت mockup_id
                 $('#selectedMockupId').val(mockupId);
 
-                // (اختياري) خلّي checkbox بتاعه checked كمان
                 const $card = $(this).closest('.mockup-card');
                 $card.find('.js-mockup-checkbox').prop('checked', true).trigger('change');
 
-                // ✅ ابعت الفورم
-                $('#editTemplateForm').submit();   // غيّر id الفورم لو اسمك مختلف
+                $('#editTemplateForm').submit();
             });
 
             $withCat.on('change', fetchMockups);
             $withoutCat.on('change', fetchMockups);
-            $(document).on('change', '.type-checkbox', fetchMockups);
 
-            fetchMockups();
+            // ✅ FIX 3: re-fetch when type filter changes
+            $(document).on('change', '.type-checkbox', fetchMockups);
         });
+
     </script>
 
     <script>
