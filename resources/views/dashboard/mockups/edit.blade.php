@@ -312,6 +312,11 @@
 @section('page-script')
 
     <script>
+        $('#productsSelect').select2({
+            placeholder: 'Choose product',
+            allowClear: true,
+            width: '100%',
+        });
         // =========================
         // PRELOAD EXISTING COLORS (with_editor approach)
         // =========================
