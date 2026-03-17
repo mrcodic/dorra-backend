@@ -218,15 +218,25 @@ class Category extends Model implements HasMedia
         return Attribute::make(
             get: function () {
 
-                $avg = Review::query()
+                // Get per-product: avg rating + review count
+                $rows = Review::query()
                     ->join('products', function ($join) {
                         $join->on('reviews.reviewable_id', '=', 'products.id')
                             ->where('reviews.reviewable_type', Product::class);
                     })
                     ->where('products.category_id', $this->id)
-                    ->avg('reviews.rating');
+                    ->selectRaw('products.id, AVG(reviews.rating) as avg_rating, COUNT(*) as cnt')
+                    ->groupBy('products.id')
+                    ->get();
 
-                return $avg ? round($avg, 2) : 0;
+                $totalCount = $rows->sum('cnt');
+
+                if ($totalCount === 0) return 0;
+
+                // (avg1 × cnt1) + (avg2 × cnt2) + ... / totalCount
+                $weightedSum = $rows->sum(fn($row) => $row->avg_rating * $row->cnt);
+
+                return round($weightedSum / $totalCount, 2);
             }
         );
     }
