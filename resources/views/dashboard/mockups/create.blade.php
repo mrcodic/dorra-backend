@@ -227,15 +227,15 @@
                     </div>
 
 {{--                    @if(request('q') === 'with')--}}
-                    <div class="mb-2">
-                        <label class="label-text mb-1 d-block">Colors</label>
-                        <div class="d-flex flex-wrap align-items-center gap-1">
-                            <button type="button" id="openColorPicker" class="gradient-picker-trigger border openColorPicker"></button>
+{{--                    <div class="mb-2">--}}
+{{--                        <label class="label-text mb-1 d-block">Colors</label>--}}
+{{--                        <div class="d-flex flex-wrap align-items-center gap-1">--}}
+{{--                            <button type="button" id="openColorPicker" class="gradient-picker-trigger border openColorPicker"></button>--}}
 
-                            <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center selected-colors"></span>
-                        </div>
-                        <div id="colorsInputContainer"></div>
-                    </div>
+{{--                            <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center selected-colors"></span>--}}
+{{--                        </div>--}}
+{{--                        <div id="colorsInputContainer"></div>--}}
+{{--                    </div>--}}
 {{--                    @endif--}}
 
                     <div class="modal-footer border-top-0">

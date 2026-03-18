@@ -233,15 +233,15 @@
                 </div>
 {{--                @if($model->approach == 'with_editor')--}}
 
-                    <div class="mb-2">
-                    <label class="label-text mb-1 d-block">Colors</label>
-                    <div class="d-flex flex-wrap align-items-center gap-1">
-                        <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
+{{--                    <div class="mb-2">--}}
+{{--                    <label class="label-text mb-1 d-block">Colors</label>--}}
+{{--                    <div class="d-flex flex-wrap align-items-center gap-1">--}}
+{{--                        <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>--}}
 
-                        <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>
-                    </div>
-                    <div id="colorsInputContainer"></div>
-                </div>
+{{--                        <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>--}}
+{{--                    </div>--}}
+{{--                    <div id="colorsInputContainer"></div>--}}
+{{--                </div>--}}
 {{--                @endif--}}
 
                 <div class="modal-footer border-top-0">
