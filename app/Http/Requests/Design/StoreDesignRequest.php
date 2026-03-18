@@ -128,6 +128,10 @@ class StoreDesignRequest extends BaseRequest
             "specs.*.id" => ["sometimes", "exists:product_specifications,id"],
             "specs.*.option" => ["sometimes", "exists:product_specification_options,id"],
             'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
+            'mockup_id' => [Rule::requiredIf(function (){
+                $template = Template::find($this->template_id);
+                return $template->approach == 'without_editor';
+            }), 'exists:mockups,id'],
         ];
     }
 

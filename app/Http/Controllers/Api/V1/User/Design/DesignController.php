@@ -57,6 +57,7 @@ class DesignController extends Controller
             'dimension_id',
             'price',
             'approach',
+            'mockup_id',
         ]));
 
         return Response::api(
