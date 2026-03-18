@@ -254,7 +254,6 @@ class TemplateService extends BaseService
                    HandleMockupFilesJob::dispatch($mockup, 'create');
                 }
 
-                dd($model->types);
 
             }
             $model->types->each(function ($type) use ($model) {
