@@ -17,12 +17,10 @@ class HandleMockupFilesJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, SerializesModels, Queueable;
 
     public function __construct(
-        public Mockup    $mockup,
-        public         $type = 'update',
-        public ?Template $template = null,
+        public Mockup $mockup,
+        public        $type = 'update',
     )
-    {
-    }
+    {}
 
     /**
      * Execute the job.
@@ -30,8 +28,8 @@ class HandleMockupFilesJob implements ShouldQueue
     public function handle(): void
     {
         $model = $this->mockup;
-        $template = $this->template;
-        if ($template) {
+
+        foreach ($model->templates as $template) {
 
             $templateId = $template->id;
 
@@ -63,7 +61,7 @@ class HandleMockupFilesJob implements ShouldQueue
                 ->values()
                 ->all();
 
-            // تحديث التمبلت الجديد
+      // تحديث التمبلت الجديد
             $missingForNew = collect($allColors)->diff($newColors)->values()->all();
             $colorsToRenderForNew = $allColors;
             if ($this->type === 'create') {
@@ -129,109 +127,6 @@ class HandleMockupFilesJob implements ShouldQueue
                     colors: array_merge($oldTplColors, $missingForOld)
                 );
             }
-
-
-        } else {
-            foreach ($model->templates as $template) {
-
-                $templateId = $template->id;
-
-                // ألوان جديدة من التمبلت
-                $newColors = collect($template->pivot->colors ?? [])
-                    ->map(fn($c) => strtolower($c))
-                    ->filter()
-                    ->unique();
-
-                // تحميل mockups قديمة بنفس التصنيف والتمبلت
-                $oldMockups = Mockup::query()
-                    ->where('category_id', $model->category_id)
-                    ->whereKeyNot($model->id)
-                    ->whereHas('templates', fn($q) => $q->where('templates.id', $templateId))
-                    ->with(['templates', 'types', 'media'])
-                    ->get();
-
-                // ألوان موجودة في mockups قديمة
-                $oldColors = $oldMockups
-                    ->flatMap(fn($m) => $m->templates->firstWhere('id', $templateId)?->pivot->colors ?? [])
-                    ->map(fn($c) => strtolower($c))
-                    ->filter()
-                    ->unique();
-
-                // دمج كل الألوان
-                $allColors = $newColors
-                    ->merge($oldColors)
-                    ->unique()
-                    ->values()
-                    ->all();
-
-                // تحديث التمبلت الجديد
-                $missingForNew = collect($allColors)->diff($newColors)->values()->all();
-                $colorsToRenderForNew = $allColors;
-                if ($this->type === 'create') {
-                    $model->templates()->updateExistingPivot($templateId, [
-                        'colors' => array_values(array_unique(
-                            array_merge($newColors->all(), $missingForNew)
-                        )),
-                    ]);
-                }
-
-
-                // مسح الصور القديمة الخاصة بالتمبلت ده فقط قبل الرندر
-                $model->getMedia('generated_mockups')
-                    ->filter(fn($media) => $media->getCustomProperty('template_id') === $templateId)
-                    ->each(fn($media) => $media->delete());
-
-                $this->renderMockupColors(
-                    mockup: $model,
-                    template: $template,
-                    colors: $colorsToRenderForNew
-                );
-
-
-                // تحديث mockups قديمة
-                foreach ($oldMockups as $oldMockup) {
-
-                    $oldTemplate = $oldMockup->templates->firstWhere('id', $templateId);
-                    if (!$oldTemplate) continue;
-
-                    $oldTplColors = collect($oldTemplate->pivot->colors ?? [])
-                        ->filter()
-                        ->values()
-                        ->all();
-
-                    $missingForOld = collect($allColors)
-                        ->diff($oldTplColors)
-                        ->values()
-                        ->all();
-
-                    // تحديث بيانات pivot
-                    $pivotData = [];
-
-                    if (!empty($missingForOld)) {
-                        $pivotData['colors'] = array_values(array_unique(
-                            array_merge($oldTplColors, $missingForOld)
-                        ));
-                    }
-
-                    // تحديث الـpositions لو اتغيرت
-//                $pivotData['positions'] = $template->pivot->positions ?? [];
-
-                    // مسح الصور القديمة الخاصة بالتمبلت ده فقط
-                    $oldMockup->getMedia('generated_mockups')
-                        ->filter(fn($media) => $media->getCustomProperty('template_id') === $templateId)
-                        ->each(fn($media) => $media->delete());
-
-                    $oldMockup->templates()->updateExistingPivot($templateId, $pivotData);
-
-                    // إعادة الرندر لكل الألوان القديمة والجديدة
-                    $this->renderMockupColors(
-                        mockup: $oldMockup,
-                        template: $oldTemplate,
-                        colors: array_merge($oldTplColors, $missingForOld)
-                    );
-                }
-            }
-
         }
     }
 
@@ -293,6 +188,7 @@ class HandleMockupFilesJob implements ShouldQueue
                         'angle' => $angle,
                         'hex' => $hex,
                     ]);
+
                     $safeHex = ltrim(strtolower($hex), '#');
 
                     $mockup->addMediaFromString($binary)
@@ -304,8 +200,6 @@ class HandleMockupFilesJob implements ShouldQueue
                             'category_id' => $mockup->category_id,
                         ])
                         ->toMediaCollection('generated_mockups');
-                    unset($binary);
-
 
                 } catch (\Throwable $e) {
                     Log::error("Render failed mockup {$mockup->id} {$hex}: " . $e->getMessage());

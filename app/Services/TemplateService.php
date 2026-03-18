@@ -279,7 +279,7 @@ class TemplateService extends BaseService
                 foreach ($mockupIds as $mockupId) {
                     $mockup = Mockup::find((int) $mockupId);
                     if (!$mockup) continue;
-                   HandleMockupFilesJob::dispatch($mockup, 'create',$model);
+                   HandleMockupFilesJob::dispatch($mockup, 'create');
                 }
 
 
@@ -474,7 +474,7 @@ class TemplateService extends BaseService
                 foreach ($mockupIds as $mockupId) {
                     $mockup = Mockup::find((int) $mockupId);
                     if (!$mockup) continue;
-                    HandleMockupFilesJob::dispatch($mockup, 'create',$model);
+                    HandleMockupFilesJob::dispatch($mockup, 'create');
                 }
 
             }
