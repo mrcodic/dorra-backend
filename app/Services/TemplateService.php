@@ -214,11 +214,13 @@ class TemplateService extends BaseService
         })->toArray();
         $validatedData['colors'] = $finalColors;
         $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad, $colors) {
-
             $model = $this->repository->create($validatedData);
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->industries()->sync($validatedData['industry_ids'] ?? []);
             $model->categories()->sync($validatedData['category_ids'] ?? []);
+            if (request()->allFiles()) {
+                handleMediaUploads(request()->allFiles(), $model);
+            }
             if ($validatedData['mockup_id']){
                 $selectedTypeValues = Arr::get($validatedData, 'types', []);
                 $positions = $this->defaultPositionsForTypes($selectedTypeValues);
@@ -228,9 +230,7 @@ class TemplateService extends BaseService
                     ['positions' => $positions,'colors' => ['#000000', '#FFFFFF']]
                 );
             }
-            if (request()->allFiles()) {
-                handleMediaUploads(request()->allFiles(), $model);
-            }
+
             $mockupIds = $validatedData['mockup_ids'] ?? [];
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
             $model->types()->sync($validatedData['types']);
@@ -253,18 +253,20 @@ class TemplateService extends BaseService
                     if (!$mockup) continue;
                    HandleMockupFilesJob::dispatch($mockup, 'create');
                 }
-                $model->types->each(function ($type) use ($model) {
-                    $side = strtolower($type->value->name);
-                    $collection = match ($side) {
-                        'back'  => 'back_templates',
-                        default => 'templates',
-                    };
-                    $media = $model->getFirstMedia($collection);
-                    if (!$media || !file_exists($media->getPath())) return;
-                    $this->renderMockups($model, $collection);
-                });
+
 
             }
+            dd($model->types);
+            $model->types->each(function ($type) use ($model) {
+                $side = strtolower($type->value->name);
+                $collection = match ($side) {
+                    'back'  => 'back_templates',
+                    default => 'templates',
+                };
+                $media = $model->getFirstMedia($collection);
+                if (!$media || !file_exists($media->getPath())) return;
+                $this->renderMockups($model, $collection);
+            });
             $model->tags()->sync($validatedData['tags'] ?? []);
             $model->flags()->sync($validatedData['flags'] ?? []);
             collect($colors)->each(function ($color) use ($model) {
