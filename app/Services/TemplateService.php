@@ -230,7 +230,35 @@ class TemplateService extends BaseService
                     ['positions' => $positions,'colors' => ['#000000', '#FFFFFF']]
                 );
             }
+            if (isset($validatedData['template_image_id'])) {
+                Media::where('id', $validatedData['template_image_id'])
+                    ->update([
+                        'model_type' => get_class($model),
+                        'model_id' => $model->id,
+                        'collection_name' => 'template_model_image',
+                    ]);
+            }
+            if (isset($validatedData['template_image_front_id']) || isset($validatedData['template_image_none_id'])) {
 
+                Media::where(function ($query) use ($validatedData) {
+                    $query->whereKey($validatedData['template_image_front_id'])
+                        ->orWhere('id', $validatedData['template_image_none_id']);
+                })
+                    ->update([
+                        'model_type' => get_class($model),
+                        'model_id' => $model->id,
+                        'collection_name' => 'templates',
+                    ]);
+            }
+            if (isset($validatedData['template_image_back_id'])) {
+
+                Media::whereKey($validatedData['template_image_back_id'])
+                    ->update([
+                        'model_type' => get_class($model),
+                        'model_id' => $model->id,
+                        'collection_name' => 'back_templates',
+                    ]);
+            }
             $mockupIds = $validatedData['mockup_ids'] ?? [];
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
             $model->types()->sync($validatedData['types']);
@@ -251,7 +279,7 @@ class TemplateService extends BaseService
                 foreach ($mockupIds as $mockupId) {
                     $mockup = Mockup::find((int) $mockupId);
                     if (!$mockup) continue;
-                   HandleMockupFilesJob::dispatch($mockup, 'create');
+                   HandleMockupFilesJob::dispatch($mockup, 'create',$model);
                 }
 
 
@@ -296,35 +324,7 @@ class TemplateService extends BaseService
         if (isset($validatedData['back_base64_preview_image'])) {
             ProcessBase64Image::dispatch($validatedData['back_base64_preview_image'], $model, 'back_templates');
         }
-        if (isset($validatedData['template_image_id'])) {
-            Media::where('id', $validatedData['template_image_id'])
-                ->update([
-                    'model_type' => get_class($model),
-                    'model_id' => $model->id,
-                    'collection_name' => 'template_model_image',
-                ]);
-        }
-        if (isset($validatedData['template_image_front_id']) || isset($validatedData['template_image_none_id'])) {
 
-            Media::where(function ($query) use ($validatedData) {
-                $query->whereKey($validatedData['template_image_front_id'])
-                    ->orWhere('id', $validatedData['template_image_none_id']);
-            })
-                ->update([
-                    'model_type' => get_class($model),
-                    'model_id' => $model->id,
-                    'collection_name' => 'templates',
-                ]);
-        }
-        if (isset($validatedData['template_image_back_id'])) {
-
-            Media::whereKey($validatedData['template_image_back_id'])
-                ->update([
-                    'model_type' => get_class($model),
-                    'model_id' => $model->id,
-                    'collection_name' => 'back_templates',
-                ]);
-        }
         return $model->load($relationsToLoad);
     }
 
@@ -368,7 +368,6 @@ class TemplateService extends BaseService
 
                 $selectedTypeValues = Arr::get($validatedData, 'types', []);
                 $positions = $this->defaultPositionsForTypes($selectedTypeValues);
-
                 $model->mockups()->syncWithPivotValues(
                     [(int) $validatedData['mockup_id']],
                     ['positions' => $positions]
@@ -405,35 +404,6 @@ class TemplateService extends BaseService
             $model->types()->sync($validatedData['types']);
 
             $model->industries()->sync($validatedData['industry_ids'] ?? []);
-            $mockupIds = $validatedData['mockup_ids'] ?? [];
-            $selectedTypeValues = Arr::get($validatedData, 'types', []);
-
-            if (!empty($mockupIds)) {
-                $positions = $this->defaultPositionsForTypes($selectedTypeValues);
-
-                $pivotData = collect($mockupIds)->mapWithKeys(function ($mockupId) use ($positions) {
-                    return [
-                        (int) $mockupId => ['positions' => $positions],
-                    ];
-                })->toArray();
-
-                $model->mockups()->sync($pivotData);
-                $model->types->each(function ($type) use ($model) {
-                    $side = strtolower($type->value->name);
-                    $collection = match ($side) {
-                        'back'  => 'back_templates',
-                        default => 'templates',
-                    };
-                    $media = $model->getFirstMedia($collection);
-                    if (!$media || !file_exists($media->getPath())) return;
-                    $this->renderMockups($model, $collection);
-                });
-
-            }
-            $model->products()->sync($validatedData['product_ids'] ?? []);
-            $model->categories()->sync($validatedData['category_ids'] ?? []);
-            $model->tags()->sync($validatedData['tags'] ?? []);
-            $model->flags()->sync($validatedData['flags'] ?? []);
 
             if (isset($validatedData['template_image_id'])) {
                 $model->getMedia('template_model_image')
@@ -476,6 +446,42 @@ class TemplateService extends BaseService
                         'collection_name' => 'back_templates',
                     ]);
             }
+            $mockupIds = $validatedData['mockup_ids'] ?? [];
+            $selectedTypeValues = Arr::get($validatedData, 'types', []);
+
+            if (!empty($mockupIds)) {
+                $positions = $this->defaultPositionsForTypes($selectedTypeValues);
+
+                $pivotData = collect($mockupIds)->mapWithKeys(function ($mockupId) use ($positions) {
+                    return [
+                        (int) $mockupId => ['positions' => $positions],
+                    ];
+                })->toArray();
+
+                $model->mockups()->sync($pivotData);
+                $model->types->each(function ($type) use ($model) {
+                    $side = strtolower($type->value->name);
+                    $collection = match ($side) {
+                        'back'  => 'back_templates',
+                        default => 'templates',
+                    };
+                    $media = $model->getFirstMedia($collection);
+                    if (!$media || !file_exists($media->getPath())) return;
+                    $this->renderMockups($model, $collection);
+                });
+                foreach ($mockupIds as $mockupId) {
+                    $mockup = Mockup::find((int) $mockupId);
+                    if (!$mockup) continue;
+                    HandleMockupFilesJob::dispatch($mockup, 'create',$model);
+                }
+
+            }
+            $model->products()->sync($validatedData['product_ids'] ?? []);
+            $model->categories()->sync($validatedData['category_ids'] ?? []);
+            $model->tags()->sync($validatedData['tags'] ?? []);
+            $model->flags()->sync($validatedData['flags'] ?? []);
+
+
 
             $imageIds = collect($colors)
                 ->pluck('image_id')
