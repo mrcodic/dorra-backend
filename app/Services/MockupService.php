@@ -60,11 +60,28 @@ class MockupService extends BaseService
             ? (str_starts_with($color, '#') ? strtolower($color) : '#' . strtolower($color))
             : null;
 
-        $result = $mockups
-            ->filter(fn($mockup) => $mockup->templates->contains('id', $templateId))
+        $filtered = $mockups->filter(fn($mockup) => $mockup->templates->contains('id', $templateId));
+
+        // --- All colors across all mockups ---
+        $allColors = $filtered
+            ->flatMap(fn($mockup) => $mockup->templates
+                ->filter(fn($tpl) => $tpl->id == $templateId)
+                ->flatMap(function ($tpl) {
+                    $c = $tpl->pivot->colors ?? [];
+                    if (is_string($c)) {
+                        $c = json_decode($c, true) ?: [];
+                    }
+                    return is_array($c) ? $c : [];
+                })
+            )
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $result = $filtered
             ->map(function ($mockup) use ($templateId, $requestedColor) {
 
-                // --- Colors for this mockup from pivot ---
                 $colors = $mockup->templates
                     ->filter(fn($tpl) => $tpl->id == $templateId)
                     ->flatMap(function ($tpl) {
@@ -81,7 +98,6 @@ class MockupService extends BaseService
 
                 $activeColor = $requestedColor ?? (count($colors) ? strtolower($colors[0]) : null);
 
-                // --- Media filtered by template + color ---
                 $mockupMedia = $mockup->media
                     ->where('collection_name', 'generated_mockups')
                     ->filter(function ($m) use ($templateId, $activeColor) {
@@ -92,7 +108,6 @@ class MockupService extends BaseService
                         return !$activeColor || $hex === strtolower($activeColor);
                     });
 
-                // --- Pick URLs by side ---
                 $pickBySide = fn(string $side) => $mockupMedia
                     ->filter(fn($m) => $m->getCustomProperty('side') === $side)
                     ->map(fn($m) => $m->getFullUrl())
@@ -106,20 +121,19 @@ class MockupService extends BaseService
                 ));
 
                 return [
-                    'mockup_id'   => $mockup->id,
-                    'colors'      => $colors,
-                    'active_color'=> $activeColor,
-                    'urls'        => $urls,
+                    'mockup_id'    => $mockup->id,
+//                    'active_color' => $activeColor,
+                    'urls'         => $urls,
                 ];
             })
             ->values()
             ->all();
 
         return [
-            $result,
+            'colors'  => $allColors,
+            'mockups' => $result,
         ];
-    }
-    public function getAll(
+    }    public function getAll(
         $relations = [], bool $paginate = false, $columns = ['*'], $perPage = 16, $counts = [])
     {
 
