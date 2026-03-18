@@ -221,15 +221,15 @@ class TemplateService extends BaseService
             if (request()->allFiles()) {
                 handleMediaUploads(request()->allFiles(), $model);
             }
-            if ($validatedData['mockup_id']){
-                $selectedTypeValues = Arr::get($validatedData, 'types', []);
-                $positions = $this->defaultPositionsForTypes($selectedTypeValues);
-
-                $model->mockups()->syncWithPivotValues(
-                    [(int) $validatedData['mockup_id']],
-                    ['positions' => $positions,'colors' => ['#000000', '#ffffff']]
-                );
-            }
+//            if ($validatedData['mockup_id']){
+//                $selectedTypeValues = Arr::get($validatedData, 'types', []);
+//                $positions = $this->defaultPositionsForTypes($selectedTypeValues);
+//
+//                $model->mockups()->syncWithPivotValues(
+//                    [(int) $validatedData['mockup_id']],
+//                    ['positions' => $positions,'colors' => ['#000000', '#ffffff']]
+//                );
+//            }
             if (isset($validatedData['template_image_id'])) {
                 Media::where('id', $validatedData['template_image_id'])
                     ->update([
@@ -364,16 +364,16 @@ class TemplateService extends BaseService
         $validatedData['colors'] = $finalColors;
         $model = $this->handleTransaction(function () use ($validatedData, $id, $colors) {
             $model = $this->repository->update($validatedData, $id);
-            if (!empty($validatedData['mockup_id']) && !$model->mockups->contains($validatedData['mockup_id'])) {
-
-                $selectedTypeValues = Arr::get($validatedData, 'types', []);
-                $positions = $this->defaultPositionsForTypes($selectedTypeValues);
-                $model->mockups()->syncWithPivotValues(
-                    [(int) $validatedData['mockup_id']],
-                    ['positions' => $positions,'colors' => ['#000000', '#ffffff']]
-                );
-
-            }
+//            if (!empty($validatedData['mockup_id']) && !$model->mockups->contains($validatedData['mockup_id'])) {
+//
+//                $selectedTypeValues = Arr::get($validatedData, 'types', []);
+//                $positions = $this->defaultPositionsForTypes($selectedTypeValues);
+//                $model->mockups()->syncWithPivotValues(
+//                    [(int) $validatedData['mockup_id']],
+//                    ['positions' => $positions,'colors' => ['#000000', '#ffffff']]
+//                );
+//
+//            }
 
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
             $modelTypesValues   = $model->types->pluck('value.value')->toArray();
