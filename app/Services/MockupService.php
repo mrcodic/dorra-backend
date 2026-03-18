@@ -56,7 +56,6 @@ class MockupService extends BaseService
                     'back_templates',
                 ]),
             ])
-            ->whereApproach('without_editor')
             ->get();
 
         $colors = $mockups
