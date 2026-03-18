@@ -26,11 +26,10 @@ class MockupService extends BaseService
 
     public function getMockups(): array
     {
-        $categoryId = request('product_id');
+        $categoryId  = request('product_id');
         $productType = request('type');
-        $templateId = request('template_id');
-        $color = request('color');
-
+        $templateId  = request('template_id');
+        $color       = request('color');
 
         $categoryId = $productType === 'category'
             ? $categoryId
@@ -39,13 +38,12 @@ class MockupService extends BaseService
                 ->whereId($categoryId)
                 ->value('category_id');
 
-
         $mockups = $this->repository
             ->query()
             ->when($categoryId, fn($q) => $q->whereCategoryId($categoryId))
-            ->when($templateId, fn($q) => $q->whereHas('templates', fn($qq) => $qq->where('templates.id', $templateId)
-            )
-            )
+            ->when($templateId, fn($q) => $q->whereHas('templates', fn($qq) =>
+            $qq->where('templates.id', $templateId)
+            ))
             ->with([
                 'templates:id',
                 'types:id,value',
@@ -58,79 +56,69 @@ class MockupService extends BaseService
             ])
             ->get();
 
-        $colors = $mockups
-            ->flatMap(fn($mockup) => $mockup->templates
-                ->filter(fn($tpl) => $tpl->id == $templateId)
-                ->flatMap(function ($tpl) {
-                    $c = $tpl->pivot->colors ?? [];
-                    if (is_string($c)) {
-                        $c = json_decode($c, true) ?: [];
-                    }
-                    return is_array($c) ? $c : [];
-                })
-            )
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
-
-
         $requestedColor = $color
             ? (str_starts_with($color, '#') ? strtolower($color) : '#' . strtolower($color))
             : null;
 
-        $activeColor = $requestedColor ?? (count($colors) ? strtolower($colors[0]) : null);
-
-        $media = $mockups
+        $result = $mockups
             ->filter(fn($mockup) => $mockup->templates->contains('id', $templateId))
-            ->flatMap(function ($mockup) use ($templateId, $activeColor) {
+            ->map(function ($mockup) use ($templateId, $requestedColor) {
 
+                // --- Colors for this mockup from pivot ---
+                $colors = $mockup->templates
+                    ->filter(fn($tpl) => $tpl->id == $templateId)
+                    ->flatMap(function ($tpl) {
+                        $c = $tpl->pivot->colors ?? [];
+                        if (is_string($c)) {
+                            $c = json_decode($c, true) ?: [];
+                        }
+                        return is_array($c) ? $c : [];
+                    })
+                    ->filter()
+                    ->unique()
+                    ->values()
+                    ->all();
+
+                $activeColor = $requestedColor ?? (count($colors) ? strtolower($colors[0]) : null);
+
+                // --- Media filtered by template + color ---
                 $mockupMedia = $mockup->media
                     ->where('collection_name', 'generated_mockups')
                     ->filter(function ($m) use ($templateId, $activeColor) {
-
                         if ($m->getCustomProperty('template_id') != $templateId) {
                             return false;
                         }
-
                         $hex = strtolower($m->getCustomProperty('hex', ''));
-
                         return !$activeColor || $hex === strtolower($activeColor);
                     });
 
-                $sides = $mockupMedia->pluck('custom_properties.side')->unique();
-                if ($sides->contains('front') && $sides->contains('back')) {
-                    return $mockupMedia
-                        ->groupBy(fn($m) => $m->model_id . '_' . $m->getCustomProperty('side'))
-                        ->flatten();
-                }
+                // --- Pick URLs by side ---
+                $pickBySide = fn(string $side) => $mockupMedia
+                    ->filter(fn($m) => $m->getCustomProperty('side') === $side)
+                    ->map(fn($m) => $m->getFullUrl())
+                    ->values()
+                    ->all();
 
-                return $mockupMedia
-                    ->groupBy(fn($m) => $m->model_id . '_' . $m->getCustomProperty('side'))
-                    ->map(fn($group) => $group->first());
+                $urls = array_values(array_merge(
+                    $pickBySide('front'),
+                    $pickBySide('back'),
+                    $pickBySide('none'),
+                ));
+
+                return [
+                    'mockup_id'   => $mockup->id,
+                    'colors'      => $colors,
+                    'active_color'=> $activeColor,
+                    'urls'        => $urls,
+                ];
             })
-            ->values();
-
-        $pickBySide = function ($media, string $side): array {
-            return $media
-                ->filter(fn($m) => $m->getCustomProperty('side') === $side)
-                ->map(fn($m) => $m->getFullUrl())
-                ->values()
-                ->all();
-        };
-
-        $front = $pickBySide($media, 'front');
-        $back = $pickBySide($media, 'back');
-        $none = $pickBySide($media, 'none');
-
-        $urls = array_values(array_merge($front, $back, $none));
+            ->values()
+            ->all();
 
         return [
-            'colors' => $colors,
-            'urls' => $urls,
+            $result,
         ];
     }
-
     public function getAll(
         $relations = [], bool $paginate = false, $columns = ['*'], $perPage = 16, $counts = [])
     {
