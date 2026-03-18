@@ -2,119 +2,93 @@
 
 namespace App\Services\Mockup;
 
-use Illuminate\Support\Facades\Storage;
+use Imagick;
 use Intervention\Image\Laravel\Facades\Image;
-use Intervention\Image\Interfaces\EncodedImageInterface;
-use Intervention\Image\Interfaces\ImageInterface;
+//use Intervention\Image\Interfaces\ImageInterface;
 
 class MockupRenderer
 {
-    /**
-     * Render a mockup with:
-     * - base image (model wearing shirt)
-     * - shirt PNG (transparent)
-     * - optional design to place on shirt
-     * - tint color (HEX)
-     * - configurable print box & size
-     */
     public function render(array $options)
     {
-        // ----- 1) Read options with sane defaults -----
-        $basePath = $options['base_path'];         // required
-        $shirtPath = $options['shirt_path'];        // required
+        $basePath = $options['base_path'];
+        $shirtPath = $options['shirt_path'];
         $designPath = $options['design_path'] ?? null;
-        $hex = $options['hex'] ?? null;
+        $hex = $options['hex'] ?? 'ffffff';
 
-
+// Print area configuration
         $printX = $options['print_x'] ?? 360;
         $printY = $options['print_y'] ?? 660;
         $printW = $options['print_w'] ?? 480;
         $printH = $options['print_h'] ?? 540;
-
+        $angle = $options['angle'] ?? 0;
         $maxDim = $options['max_dim'] ?? 800;
-        $angle = $options['angle'] ?? 0; // degree rotation
 
-
-        // ----- 2) Read images -----
+// 1. Read Images
         $base = Image::read($basePath);
         $shirt = Image::read($shirtPath);
 
-        $design = null;
+// 2. Accurate Tinting
+        $tintedShirt = $this->tintShirt($shirt, $hex);
+
+// 3. Prepare Design
         if ($designPath) {
             $design = Image::read($designPath);
-        }
-        // ----- 3) Tint the shirt -----
-        // ----- 3) Tint the shirt (only if hex provided) -----
-        $tintedShirt = $shirt;
-
-        if (!empty($hex)) {
-            $tintedShirt = $this->tintShirt($shirt, $hex);
-        }
-
-        // ----- 4) Compose canvas -----
-        $canvas = clone $base;
-
-        // place shirt on base
-        $canvas->place($tintedShirt, 'top-left');
-
-        // ----- 5) Place design if exists -----
-        // ----- 5) Place design if exists -----
-        if ($design) {
-
-            // scale design to fit in print box
             $design->scaleDown(width: $printW, height: $printH);
 
-            // rotate if angle exists
             if (!empty($angle)) {
-                // rotate around center & keep alpha
-                $design = $design->rotate(-(float)$angle, 'transparent');
+                $design->rotate(-(float)$angle, 'rgba(0,0,0,0)');
             }
 
-            // center horizontally in print box
             $offsetX = $printX + (int)(($printW - $design->width()) / 2);
             $offsetY = $printY;
 
-            $canvas->place($design, 'top-left', $offsetX, $offsetY);
+// FIX: Place design on the TINTED SHIRT first.
+// This ensures the design is "part" of the shirt layer before placing on model.
+            $tintedShirt->place($design, 'top-left', $offsetX, $offsetY);
         }
 
+// 4. Final Composition
+        $canvas = clone $base;
+        $canvas->place($tintedShirt, 'top-left');
 
-        // ----- 6) Scale down for web -----
+// 5. Final Output
         if ($maxDim > 0) {
             $canvas->scaleDown(width: $maxDim, height: $maxDim);
         }
 
-        // ----- 7) Return encoded PNG -----
-        return $canvas->toPng()->toString();  // Get raw PNG string
-
-
+        return $canvas->toPng()->toString();
     }
 
     /**
-     * Tint shirt PNG with HEX color, preserving folds / texture.
+     * Advanced tinting using Multiply Blending for deep, accurate blacks.
      */
-    public function tintShirt(ImageInterface $shirt, string $hex): ImageInterface
+    public function tintShirt( $shirt, string $hex)
     {
-        $hex = ltrim($hex, '#');
-        $r = hexdec(substr($hex, 0, 2));
-        $g = hexdec(substr($hex, 2, 2));
-        $b = hexdec(substr($hex, 4, 2));
+        $width = $shirt->width();
+        $height = $shirt->height();
 
-        // Map 0..255 -> -40..40 for subtle colorize
-        $map = function (int $c): int {
-            return (int)round((($c - 128) / 127) * 40);
-        };
+// Create the flat color layer
+        $colorLayer = Image::create($width, $height)->fill($hex);
 
-        $rAdj = $map($r);
-        $gAdj = $map($g);
-        $bAdj = $map($b);
+// Create the texture/folds layer from the original shirt
+        $texture = clone $shirt;
+        $texture->greyscale();
 
-        $img = clone $shirt;
+// Adjust these to match the "feel" of your specific mockup files
+// Higher contrast = deeper shadows in the folds
+        $texture->contrast(10);
+        $texture->brightness(-5);
 
-        $img->greyscale()
-            ->colorize($rAdj, $gAdj, $bAdj)
-            ->contrast(12)
-            ->brightness(-18);
+// Blend: The texture 'multiplies' over the solid color
+        $colorLayer->place($texture, 'top-left', 0, 0, 'multiply');
 
-        return $img;
+// Clip the result to the shirt's original shape
+        $colorLayer->core()->native()->compositeImage(
+            $shirt->core()->native(),
+            Imagick::COMPOSITE_DSTIN,
+            0, 0
+        );
+
+        return $colorLayer;
     }
 }

@@ -7,11 +7,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "ext-http": "*",
         "ext-zip": "*",
         "awssat/laravel-visits": "^6.2",
         "barryvdh/laravel-dompdf": "^3.1",
         "doctrine/dbal": "^4.4",
         "enshrined/svg-sanitize": "0.22",
+        "intervention/image": "^3.11",
         "intervention/image-laravel": "^1.5",
         "laravel/framework": "^11.31",
         "laravel/jetstream": "^5.3",
@@ -29,7 +31,7 @@
         "spatie/laravel-query-builder": "^6.3",
         "spatie/laravel-translatable": "^6.11",
         "yajra/laravel-datatables-oracle": "11.0",
-        "ext-http": "*"
+        "ext-imagick": "*"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.15",
