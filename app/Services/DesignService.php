@@ -45,6 +45,7 @@ class DesignService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
+        if (!empty($validatedData['mockup_id'])) $validatedData['linked_to_mockup'] = true;
         $totalPrice = 0;
         if (!empty($validatedData['template_id'])) {
             $design = $this->handleTransaction(function () use ($validatedData) {
