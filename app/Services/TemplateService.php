@@ -254,9 +254,9 @@ class TemplateService extends BaseService
                    HandleMockupFilesJob::dispatch($mockup, 'create');
                 }
 
+                dd($model->types);
 
             }
-            dd($model->types);
             $model->types->each(function ($type) use ($model) {
                 $side = strtolower($type->value->name);
                 $collection = match ($side) {
