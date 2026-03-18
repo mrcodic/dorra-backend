@@ -454,7 +454,9 @@ class TemplateService extends BaseService
 
                 $pivotData = collect($mockupIds)->mapWithKeys(function ($mockupId) use ($positions) {
                     return [
-                        (int) $mockupId => ['positions' => $positions],
+                        (int) $mockupId => ['positions' => $positions,
+                            'colors' => ['#000000', '#FFFFFF']
+                            ],
                     ];
                 })->toArray();
 
