@@ -140,7 +140,7 @@
             <div class="card-body">
                 <form id="addMockupForm" enctype="multipart/form-data" action="{{ route('mockups.store') }}">
                     @csrf
-                    <input type="hidden" name="approach" value="{{ request('q') === 'with' ? 'with_editor' : 'without_editor' }}">
+{{--                    <input type="hidden" name="approach" value="{{ request('q') === 'with' ? 'with_editor' : 'without_editor' }}">--}}
                     <div class="modal-body flex-grow-1">
                         <div class="position-relative text-center mb-2">
                             <hr class="opacity-75" style="border: 1px solid #24B094;">
@@ -213,7 +213,7 @@
                             </div>
                         </div>
 
-                        @if(request('q') === 'without')
+{{--                        @if(request('q') === 'without')--}}
 
 
                         <div class="form-group my-2 d-none" id="templatesCardsWrapper">
@@ -223,10 +223,10 @@
                             <input type="hidden" name="template_id" id="selectedTemplateId" class="col-md-3">
                             <div id="templatesHiddenContainer"></div>
                         </div>
-                        @endif
+{{--                        @endif--}}
                     </div>
 
-                    @if(request('q') === 'with')
+{{--                    @if(request('q') === 'with')--}}
                     <div class="mb-2">
                         <label class="label-text mb-1 d-block">Colors</label>
                         <div class="d-flex flex-wrap align-items-center gap-1">
@@ -236,7 +236,7 @@
                         </div>
                         <div id="colorsInputContainer"></div>
                     </div>
-                    @endif
+{{--                    @endif--}}
 
                     <div class="modal-footer border-top-0">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -533,7 +533,7 @@
                     data: {
                         product_without_category_id: productId,
                         request_type: "api",
-                        approach: "without_editor",
+                        // approach: "without_editor",
                         paginate: true,
                         // has_not_mockups: true,
                         per_page: 12,

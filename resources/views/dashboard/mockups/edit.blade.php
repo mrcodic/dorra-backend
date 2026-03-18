@@ -142,7 +142,7 @@
             <form id="editMockupForm" enctype="multipart/form-data" action="{{ route('mockups.update',$model->id) }}">
                 @csrf
                 @method('PUT')
-                <input type="hidden" name="approach" value="{{ $model->approach }}">
+{{--                <input type="hidden" name="approach" value="{{ $model->approach }}">--}}
                 <div class="modal-body flex-grow-1">
                     <div class="position-relative text-center mb-2">
                         <hr class="opacity-75" style="border: 1px solid #24B094;">
@@ -215,7 +215,7 @@
                                 style="border:1px solid #ccc;"></canvas>
                         </div>
                     </div>
-                    @if($model->approach == 'without_editor')
+{{--                    @if($model->approach == 'without_editor')--}}
 
                     <div class="form-group my-2 d-none" id="templatesCardsWrapper">
                         <label class="form-label mb-2">Choose Template</label>
@@ -226,23 +226,23 @@
                         <div id="templatesHiddenContainer"></div>
 
                     </div>
-                    @endif
+{{--                    @endif--}}
 
 
 
                 </div>
-                @if($model->approach == 'with_editor')
+{{--                @if($model->approach == 'with_editor')--}}
 
-                    <div class="mb-2">
-                    <label class="label-text mb-1 d-block">Colors</label>
-                    <div class="d-flex flex-wrap align-items-center gap-1">
-                        <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
+{{--                    <div class="mb-2">--}}
+{{--                    <label class="label-text mb-1 d-block">Colors</label>--}}
+{{--                    <div class="d-flex flex-wrap align-items-center gap-1">--}}
+{{--                        <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>--}}
 
-                        <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>
-                    </div>
-                    <div id="colorsInputContainer"></div>
-                </div>
-                @endif
+{{--                        <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>--}}
+{{--                    </div>--}}
+{{--                    <div id="colorsInputContainer"></div>--}}
+{{--                </div>--}}
+{{--                @endif--}}
 
                 <div class="modal-footer border-top-0">
                     <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
@@ -321,7 +321,7 @@
         // PRELOAD EXISTING COLORS (with_editor approach)
         // =========================
         document.addEventListener('DOMContentLoaded', function () {
-            @if($model->approach === 'with_editor')
+{{--            @if($model->approach === 'with_editor')--}}
             const existingColors = @json($model->colors ?? []);
 
             if (Array.isArray(existingColors) && existingColors.length) {
@@ -356,7 +356,7 @@
                     inputContainer.appendChild(input);
                 });
             }
-            @endif
+{{--            @endif--}}
         });
         window.removeGlobalColor = function (hex, btn) {
             const li = btn.closest('li');
@@ -1263,7 +1263,7 @@
                     data: {
                         product_without_category_id: productId,
                         request_type: "api",
-                        approach: "without_editor",
+                        // approach: "without_editor",
                         paginate: true,
                         // has_not_mockups: false,
                         {{--                        mockup_id: "{{ $model->id }}",--}}
