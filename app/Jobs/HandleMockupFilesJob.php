@@ -188,7 +188,6 @@ class HandleMockupFilesJob implements ShouldQueue
                         'angle' => $angle,
                         'hex' => $hex,
                     ]);
-
                     $safeHex = ltrim(strtolower($hex), '#');
 
                     $mockup->addMediaFromString($binary)
@@ -200,6 +199,8 @@ class HandleMockupFilesJob implements ShouldQueue
                             'category_id' => $mockup->category_id,
                         ])
                         ->toMediaCollection('generated_mockups');
+                    unset($binary);
+
 
                 } catch (\Throwable $e) {
                     Log::error("Render failed mockup {$mockup->id} {$hex}: " . $e->getMessage());
