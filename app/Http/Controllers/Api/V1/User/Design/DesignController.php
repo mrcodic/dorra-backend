@@ -56,6 +56,7 @@ class DesignController extends Controller
             'orientation',
             'dimension_id',
             'price',
+            'approach',
         ]));
 
         return Response::api(
