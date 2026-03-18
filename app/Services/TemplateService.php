@@ -227,7 +227,7 @@ class TemplateService extends BaseService
 
                 $model->mockups()->syncWithPivotValues(
                     [(int) $validatedData['mockup_id']],
-                    ['positions' => $positions,'colors' => ['#000000', '#FFFFFF']]
+                    ['positions' => $positions,'colors' => ['#000000', '#ffffff']]
                 );
             }
             if (isset($validatedData['template_image_id'])) {
@@ -270,7 +270,7 @@ class TemplateService extends BaseService
                     return [
                         (int) $mockupId => [
                             'positions' => $positions,
-                            'colors' => ['#000000', '#FFFFFF']
+                            'colors' => ['#000000', '#ffffff']
                             ],
                     ];
                 })->toArray();
@@ -370,7 +370,7 @@ class TemplateService extends BaseService
                 $positions = $this->defaultPositionsForTypes($selectedTypeValues);
                 $model->mockups()->syncWithPivotValues(
                     [(int) $validatedData['mockup_id']],
-                    ['positions' => $positions]
+                    ['positions' => $positions,'colors' => ['#000000', '#ffffff']]
                 );
 
             }
@@ -455,7 +455,7 @@ class TemplateService extends BaseService
                 $pivotData = collect($mockupIds)->mapWithKeys(function ($mockupId) use ($positions) {
                     return [
                         (int) $mockupId => ['positions' => $positions,
-                            'colors' => ['#000000', '#FFFFFF']
+                            'colors' => ['#000000', '#ffffff']
                             ],
                     ];
                 })->toArray();
