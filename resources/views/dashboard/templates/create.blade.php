@@ -656,11 +656,11 @@
 
                     const isSelected = selected.has(String(id)) || selected.has(Number(id));
                     const updateUrl = `{{ $mockupUpdateUrlTemplate }}`.replace('__ID__', id);
-                    const showMockupBtn = isWithoutEditor
-                        ? `<button type="button" class="btn btn-sm btn-primary w-100 js-submit-mockup" data-id="${id}">
-           Show on Mockup
-       </button>`
-                        : ''; // hide button in with-editor mode
+       //              const showMockupBtn = isWithoutEditor
+       //                  ? `<button type="button" class="btn btn-sm btn-primary w-100 js-submit-mockup" data-id="${id}">
+       //     Show on Mockup
+       // </button>`
+       //                  : ''; // hide button in with-editor mode
                     console.log(updateUrl)
                     $cardsWrap.append(`
   <div class="col-12 col-md-4 col-lg-2">
@@ -685,7 +685,7 @@
         <div class="card-body py-2">
           <h6 class="card-title mb-2 text-truncate">${name}</h6>
 
-     ${showMockupBtn}
+     <button type="button" class="btn btn-sm btn-primary w-100 js-show-on-mockup" data-id="${id}">Show on Mockup</button>
         </div>
       </div>
     </div>
@@ -726,7 +726,7 @@
                     data: {
                         'product_ids[]': allProductIds,
                         'types[]': getSelectedTypes(), // ✅ correct way
-                        'approach': "{{ request('q') == 'with' ? 'with_editor' : 'without_editor' }}",
+                        {{--'approach': "{{ request('q') == 'with' ? 'with_editor' : 'without_editor' }}",--}}
                     },
                     success: function (response) {
                         const items = response?.data?.data || response?.data || response || [];

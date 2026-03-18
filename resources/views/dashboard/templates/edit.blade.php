@@ -706,9 +706,9 @@
                     const isWithoutEditor = (approach === 'without_editor');
 
                     // ✅ FIX 1: class changed from js-submit-mockup → js-show-on-mockup
-                    const showMockupBtn = isWithoutEditor
-                        ? `<button type="button" class="btn btn-sm btn-primary w-100 js-show-on-mockup" data-id="${id}">Show on Mockup</button>`
-                        : '';
+                    // const showMockupBtn = isWithoutEditor
+                    //     ? `<button type="button" class="btn btn-sm btn-primary w-100 js-show-on-mockup" data-id="${id}">Show on Mockup</button>`
+                    //     : '';
 
                     $cardsWrap.append(`
                 <div class="col-12 col-md-4 col-lg-2">
@@ -731,7 +731,7 @@
                             </div>
                             <div class="card-body py-2">
                                 <h6 class="card-title mb-2 text-truncate">${name}</h6>
-                                ${showMockupBtn}
+                      <button type="button" class="btn btn-sm btn-primary w-100 js-show-on-mockup" data-id="${id}">Show on Mockup</button>
                             </div>
                         </div>
                     </div>
@@ -763,7 +763,7 @@
                     data: {
                         'product_ids[]': allProductIds,
                         'types[]': getSelectedTypes(),
-                        'approach': "{{ $model->approach == 'with_editor' ? 'with_editor' : 'without_editor' }}",
+{{--                        'approach': "{{ $model->approach == 'with_editor' ? 'with_editor' : 'without_editor' }}",--}}
                     },
                     success: function (response) {
                         const items = response?.data?.data || response?.data || response || [];
