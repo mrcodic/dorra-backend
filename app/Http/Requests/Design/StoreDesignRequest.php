@@ -94,6 +94,7 @@ class StoreDesignRequest extends BaseRequest
             'designable_type' => ['required', 'string', 'in:App\\Models\\Product,App\\Models\\Category'],
             'user_id' => ['nullable', 'exists:users,id'],
             'guest_id' => ['nullable', 'exists:guests,id'],
+            'approach' => ['nullable', 'in:with_editor,without_editor'],
             'dimension_id' => [
                 'sometimes',
                 'exists:dimensions,id',
@@ -179,6 +180,7 @@ class StoreDesignRequest extends BaseRequest
             'description' => $template?->description ?? $this->input('description'),
             'orientation' => $template?->orientation->value ?? $this->input('orientation'),
             'cookie' => $cookieValue,
+            'approach' => $template?->approach ?? 'with_editor',
         ]);
     }
 

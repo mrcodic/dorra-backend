@@ -20,7 +20,7 @@ class DesignObserver
 
     public function created(Design $design): void
     {
-        if ($design->tempalte_id) {
+        if ($design->tempalte_id && $design->approach == 'with_editor') {
             $design->current_version = ($design->current_version ?? 0) + 1;
             $designVersion = $design->versions()->create([
                 'design_data' => $design->design_data,

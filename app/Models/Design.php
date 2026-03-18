@@ -51,6 +51,7 @@ class Design extends Model implements HasMedia
         'mockup_id',
         'mockup_color',
         'design_mockup_area',
+        'approach',
     ];
     protected $attributes = [
         'quantity' => 1,
