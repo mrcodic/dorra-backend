@@ -65,16 +65,16 @@ class UpdateTemplateRequest extends BaseRequest
 
             'template_image_front_id' => [
                 'nullable','exists:media,id',
-                Rule::requiredIf(fn()=> in_array(TypeEnum::FRONT->value, (array)$this->input('types', []), true)),
+                Rule::requiredIf(fn()=> in_array(TypeEnum::FRONT->value, (array)request('types', []), true)),
 
             ],
             'template_image_back_id' => [
                 'nullable','exists:media,id',
-                Rule::requiredIf(fn()=> in_array(TypeEnum::BACK->value, (array)$this->input('types', []), true)),
+                Rule::requiredIf(fn()=> in_array(TypeEnum::BACK->value, (array)request('types', []), true)),
             ],
             'template_image_none_id' => [
                 'nullable','exists:media,id',
-                Rule::requiredIf(fn()=> in_array(TypeEnum::NONE->value, (array)$this->input('types', []), true)),
+                Rule::requiredIf(fn()=> in_array(TypeEnum::NONE->value, (array)request('types', []), true)),
             ],
             'template_image_id' => ['nullable','exists:media,id'],
             'design_data' => ['sometimes', 'json'],
