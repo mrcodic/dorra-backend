@@ -47,19 +47,19 @@ class StoreTemplateRequest extends BaseRequest
             'types' => ['required', 'array'],
             'types.*' => ['integer', 'exists:types,id'],
             'template_image_front_id' => [
-                Rule::requiredIf(fn()=> in_array(TypeEnum::FRONT->value, (array)request('types', []), )),
+                Rule::requiredIf(fn()=> in_array(TypeEnum::FRONT->value, (array)request('types', []) ) && request('q') == 'without'),
                 'nullable',
                 'exists:media,id',
             ],
 
             'template_image_back_id' => [
-                Rule::requiredIf(fn()=> in_array(TypeEnum::BACK->value, (array)request('types', []), )),
+                Rule::requiredIf(fn()=> in_array(TypeEnum::BACK->value, (array)request('types', []) )&& request('q') == 'without'),
                 'nullable',
                 'exists:media,id',
             ],
 
             'template_image_none_id' => [
-                Rule::requiredIf(fn()=> in_array(TypeEnum::NONE->value, (array)request('types', []), )),
+                Rule::requiredIf(fn()=> in_array(TypeEnum::NONE->value, (array)request('types', []), )&& request('q') == 'without'),
                 'nullable',
                 'exists:media,id',
             ],
