@@ -589,41 +589,19 @@
         $(document).ready(function () {
             $('#categoriesSelect').trigger('change');
         });
+    </script>
+
+    {{-- Replace the entire mockup JS block in your blade file with this --}}
+
+    <script>
         $(function () {
             const q = "{{ request()->query('q') }}";
             const isWithoutEditor = (q === 'without' || q === 'without_editor');
-            const $cardsWrap = $('#mockupsCards');
-            const $mockupWrap = $('.mockupWrapper');
-            window.checkAllSelectedHaveMockup = function () {
-                const allSelected = [
-                    ...$('#productsSelect').find('option:selected'),
-                    ...$('#productsWithoutCategoriesSelect').find('option:selected')
-                ];
+            const $cardsWrap    = $('#mockupsCards');
+            const $mockupWrap   = $('.mockupWrapper');
+            const $hiddenWrap   = $('#mockupsHiddenInputs');
 
-                // Always show the wrapper now — cards should always be visible
-                // Only hide if truly no products selected at all
-                if (!allSelected.length) {
-                    $mockupWrap.addClass('d-none');
-                    return;
-                }
-
-                // Show regardless of has-mockup flag (removed that restriction)
-                $mockupWrap.removeClass('d-none');
-            }
-            if (!isWithoutEditor) {
-                // Cards still render, but "Show on Mockup" button will be hidden
-                $(document).on('click', '.js-submit-mockup', function (e) {
-                    e.stopImmediatePropagation();
-                    return false;
-                });
-            }
-
-            const $withCat = $('#categoriesSelect');
-            const $withoutCat = $('#productsWithoutCategoriesSelect');
-
-            const $hiddenWrap = $('#mockupsHiddenInputs');
-
-            // keep selected ids (like select multiple)
+            // ── Single source of truth ──────────────────────────────────────────
             const selected = new Set();
 
             function syncHiddenInputs() {
@@ -633,9 +611,9 @@
                 });
             }
 
+            // ── Card rendering ──────────────────────────────────────────────────
             function renderMockupCards(items) {
                 $mockupWrap.removeClass('d-none');
-
                 $cardsWrap.empty();
 
                 if (!items.length) {
@@ -645,139 +623,161 @@
                 }
 
                 items.forEach(mockup => {
-                    const id = mockup.id;
-                    const name = mockup.name ?? ('Mockup #' + id);
-
-                    // choose an image (adjust to your response shape)
-                    const images = mockup?.images || {};
-                    const firstKey = Object.keys(images)[0]; // gets "1", "2", "3", etc.
-                    const img = (firstKey && images[firstKey]?.base_url)
+                    const id      = String(mockup.id);
+                    const name    = mockup.name ?? ('Mockup #' + id);
+                    const images  = mockup?.images || {};
+                    const firstKey = Object.keys(images)[0];
+                    const img     = (firstKey && images[firstKey]?.base_url)
                         || "{{ asset('images/placeholder.svg') }}";
 
-                    const isSelected = selected.has(String(id)) || selected.has(Number(id));
-                    const updateUrl = `{{ $mockupUpdateUrlTemplate }}`.replace('__ID__', id);
-       //              const showMockupBtn = isWithoutEditor
-       //                  ? `<button type="button" class="btn btn-sm btn-primary w-100 js-submit-mockup" data-id="${id}">
-       //     Show on Mockup
-       // </button>`
-       //                  : ''; // hide button in with-editor mode
-                    console.log(updateUrl)
+                    const isSelected = selected.has(id);
+
                     $cardsWrap.append(`
-  <div class="col-12 col-md-4 col-lg-2">
-    <div class="mockup-card $f{isSelected ? 'selected' : ''}" data-id="${id}">
-      <div class="card rounded-3 shadow-sm" style="border:1px solid #24B094;">
-   <!-- ✅ checkbox overlay top-left -->
-                <div class="position-absolute" style="top:10px;left:10px;z-index:20;">
-                  <input
-                    class="form-check-input js-mockup-checkbox"
-                    type="checkbox"
-                    name="mockup_ids[]"
-                    value="${id}"
+              <div class="col-12 col-md-4 col-lg-2">
+                <div class="mockup-card${isSelected ? ' selected' : ''}" data-id="${id}">
+                  <div class="card rounded-3 shadow-sm" style="border:1px solid #24B094;">
 
-                  />
+                    <!-- checkbox — NO name attribute, purely visual -->
+                    <div class="position-absolute" style="top:10px;left:10px;z-index:20;">
+                      <input
+                        class="form-check-input js-mockup-checkbox"
+                        type="checkbox"
+                        value="${id}"
+                        ${isSelected ? 'checked' : ''}
+                      />
+                    </div>
+
+                    <div class="d-flex justify-content-center align-items-center"
+                         style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">
+                      <img src="${img}" class="mx-auto d-block"
+                           style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:8px;"
+                           alt="${name}">
+                    </div>
+
+                    <div class="card-body py-2">
+                      <h6 class="card-title mb-2 text-truncate">${name}</h6>
+                      <button type="button"
+                              class="btn btn-sm btn-primary w-100 js-show-on-mockup"
+                              data-id="${id}">
+                        Show on Mockup
+                      </button>
+                    </div>
+                  </div>
                 </div>
-        <div class="d-flex justify-content-center align-items-center"
-             style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">
-          <img src="${img}" class="mx-auto d-block"
-               style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:8px;"
-               alt="${name}">
-        </div>
-        <div class="card-body py-2">
-          <h6 class="card-title mb-2 text-truncate">${name}</h6>
-
-     <button type="button" class="btn btn-sm btn-primary w-100 js-show-on-mockup" data-id="${id}">Show on Mockup</button>
-        </div>
-      </div>
-    </div>
-  </div>
-`);
-
+              </div>
+            `);
                 });
 
                 syncHiddenInputs();
             }
 
+            // ── Toggle selection (card click OR checkbox click — same handler) ──
+            function toggleMockup(id) {
+                id = String(id);
+                if (selected.has(id)) {
+                    selected.delete(id);
+                } else {
+                    selected.add(id);
+                }
+
+                // Keep card border + checkbox in sync
+                const $card = $(`.mockup-card[data-id="${id}"]`);
+                $card.toggleClass('selected', selected.has(id));
+                $card.find('.js-mockup-checkbox').prop('checked', selected.has(id));
+
+                syncHiddenInputs();
+            }
+
+            // Card body click (excluding button clicks)
+            $(document).on('click', '.mockup-card', function (e) {
+                if ($(e.target).closest('button').length) return; // ignore button clicks
+                toggleMockup($(this).data('id'));
+            });
+
+            // Checkbox click (stop propagation so card handler doesn't also fire)
+            $(document).on('click', '.js-mockup-checkbox', function (e) {
+                e.stopPropagation();
+                toggleMockup($(this).val());
+            });
+
+            // ── Fetch mockups ───────────────────────────────────────────────────
             function fetchMockups() {
-                const idsWithCat = $withCat.val() || [];
-                const idsWithoutCat = $withoutCat.val() || [];
+                const idsWithCat    = $('#categoriesSelect').val() || [];
+                const idsWithoutCat = $('#productsWithoutCategoriesSelect').val() || [];
                 const allProductIds = [...idsWithCat, ...idsWithoutCat];
 
                 if (!allProductIds.length) {
                     $cardsWrap.empty();
                     $hiddenWrap.empty();
                     selected.clear();
+                    checkAllSelectedHaveMockup();
                     return;
                 }
 
-                function getSelectedTypes() {
-                    return $('.type-checkbox:checked')
-                        .map(function () {
-                            return $(this).val();
-                        })
-                        .get();
-                }
-
-                console.log(getSelectedTypes())
+                const selectedTypes = $('.type-checkbox:checked').map(function () {
+                    return $(this).val();
+                }).get();
 
                 $.ajax({
                     url: "{{ route('mockups.index') }}",
                     type: "GET",
-                    traditional: false, // ✅ ensure proper array serialization
+                    traditional: false,
                     data: {
                         'product_ids[]': allProductIds,
-                        'types[]': getSelectedTypes(), // ✅ correct way
-                        {{--'approach': "{{ request('q') == 'with' ? 'with_editor' : 'without_editor' }}",--}}
+                        'types[]': selectedTypes,
                     },
-                    success: function (response) {
+                    success(response) {
                         const items = response?.data?.data || response?.data || response || [];
-                        const ids = new Set(items.map(x => String(x.id)));
+
+                        // Drop any selected IDs that are no longer in the results
+                        const validIds = new Set(items.map(x => String(x.id)));
                         [...selected].forEach(id => {
-                            if (!ids.has(String(id))) selected.delete(id);
+                            if (!validIds.has(id)) selected.delete(id);
                         });
+
                         renderMockupCards(items);
+                        checkAllSelectedHaveMockup();
                     },
-                    error: function (xhr) {
+                    error(xhr) {
                         console.error("Error fetching mockups:", xhr.responseText);
-                        $cardsWrap.empty().append(`<div class="col-12 text-danger py-2">Failed to load mockups</div>`);
+                        $cardsWrap.empty().append(
+                            `<div class="col-12 text-danger py-2">Failed to load mockups</div>`
+                        );
                     }
                 });
-
             }
 
-        // Toggle selection on card click
-        $(document).on('click', '.mockup-card', function () {
-            const id = String($(this).data('id'));
-
-            if (selected.has(id)) {
-                selected.delete(id);
-                $(this).removeClass('selected');
+        // ── Mockup wrapper visibility ────────────────────────────────────────
+        window.checkAllSelectedHaveMockup = function () {
+            const allSelected = [
+                ...$('#productsSelect').find('option:selected'),
+                ...$('#productsWithoutCategoriesSelect').find('option:selected')
+            ];
+            if (!allSelected.length) {
+                $mockupWrap.addClass('d-none');
             } else {
-                selected.add(id);
-                $(this).addClass('selected');
+                $mockupWrap.removeClass('d-none');
             }
+        };
 
-            syncHiddenInputs();
-        });
-
-        $withCat.on('change', fetchMockups);
-        $withoutCat.on('change', fetchMockups);
-        $(document).on('change', '.type-checkbox', fetchMockups);
-
-
-        fetchMockups();
-        })
-        ;
-        $(document).on('click', '.js-submit-mockup', function (e) {
+        // ── "Show on Mockup" button ─────────────────────────────────────────
+        $(document).on('click', '.js-show-on-mockup', function (e) {
             e.preventDefault();
-            const id = $(this).data('id');
+            e.stopPropagation();
+            const id = String($(this).data('id'));
             $('#selectedMockupId').val(id);
             $('#addTemplateForm').submit();
         });
 
+        // ── Wire up external change triggers ────────────────────────────────
+        $('#categoriesSelect').on('change', fetchMockups);
+        $('#productsWithoutCategoriesSelect').on('change', fetchMockups);
+        $(document).on('change', '.type-checkbox', fetchMockups);
 
+        // Initial load
+        fetchMockups();
+        });
     </script>
-
-
 
     <script>
         function updateTemplateTypeDropzones() {
