@@ -4,8 +4,6 @@ namespace App\Services\Mockup;
 
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Laravel\Facades\Image;
-use Intervention\Image\Interfaces\EncodedImageInterface;
-use Intervention\Image\Interfaces\ImageInterface;
 
 class MockupRenderer
 {
@@ -92,7 +90,7 @@ class MockupRenderer
     /**
      * Tint shirt PNG with HEX color, preserving folds / texture.
      */
-    public function tintShirt(ImageInterface $shirt, string $hex): ImageInterface
+    public function tintShirt( $shirt, string $hex)
     {
         $hex = ltrim($hex, '#');
         $r = hexdec(substr($hex, 0, 2));
