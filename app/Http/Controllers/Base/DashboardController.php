@@ -81,6 +81,7 @@ class DashboardController extends Controller
      */
     public function store(Request $request)
     {
+
         $validatedData = $request->validate($this->storeRequestClass->rules(),
             $this->storeRequestClass->messages(),
             $this->storeRequestClass->attributes()

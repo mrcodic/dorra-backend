@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Template;
 
 use App\Http\Resources\DimensionResource;
+use App\Http\Resources\FontResource;
 use App\Http\Resources\MediaResource;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\TagResource;
@@ -69,11 +70,21 @@ class TemplateResource extends JsonResource
             'color_templates_media' => $this->when($this->approach == 'without_editor',function(){
                return MediaResource::collection( $this->getMedia('color_templates'));
             }),
-            'font_media' => MediaResource::collection(
+            'font_media' => FontResource::collection(
                 $this->whenLoaded('libraryMedia', function () {
-                    return $this->libraryMedia->where('pivot.type', 'font')
+                    return $this->libraryMedia
+                        ->where('pivot.type', 'font')
                         ->sortByDesc('pivot.created_at')
                         ->take(4)
+                        ->values()
+                        ->map(function ($media) {
+                            $fontStyle = $media->model;
+                            if (!$fontStyle) return null;
+
+                            $fontStyle->loadMissing('font');
+                            return $fontStyle->font;
+                        })
+                        ->filter()
                         ->values();
                 })
             ),

@@ -67,8 +67,6 @@ class CategoryService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        dd($validatedData);
-        
         $model = $this->repository->create($validatedData);
         if (Arr::has($validatedData, 'image_id')) {
             Media::where('id', $validatedData['image_id'])
