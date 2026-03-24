@@ -30,7 +30,8 @@ class Product extends Model implements HasMedia
         'has_mockup',
         'show_add_cart_btn',
         'show_customize_design_btn',
-        'colors'
+        'colors',
+        'has_orientation',
     ];
 
 

@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Log;
 
 trait RendersTemplateMockups
 {
-
     private function renderMockupsForTemplates(iterable $templates, string $collection): void
     {
         foreach ($templates as $template) {
@@ -96,16 +95,14 @@ trait RendersTemplateMockups
 
                 [$baseW, $baseH] = getimagesize($base->getPath());
 
-                $xPct  = (float)($templatePivotPositions["{$side}_x"]      ?? 0.5);
-                $yPct  = (float)($templatePivotPositions["{$side}_y"]      ?? 0.5);
-                $wPct  = (float)($templatePivotPositions["{$side}_width"]  ?? 0.4);
-                $hPct  = (float)($templatePivotPositions["{$side}_height"] ?? 0.4);
-                $angle = (float)($templatePivotPositions["{$side}_angle"]  ?? 0);
+                $xPct  = (float)($positions["{$side}_x"]      ?? 0.5);
+                $yPct  = (float)($positions["{$side}_y"]      ?? 0.5);
+                $wPct  = (float)($positions["{$side}_width"]  ?? 0.4);
+                $hPct  = (float)($positions["{$side}_height"] ?? 0.4);
+                $angle = (float)($positions["{$side}_angle"]  ?? 0);
 
                 $printW = max(1, (int)round($wPct * $baseW));
                 $printH = max(1, (int)round($hPct * $baseH));
-
-                // xPct/yPct are CENTER point from fabric.js → convert to top-left
                 $printX = (int)round($xPct * $baseW - $printW / 2);
                 $printY = (int)round($yPct * $baseH - $printH / 2);
 

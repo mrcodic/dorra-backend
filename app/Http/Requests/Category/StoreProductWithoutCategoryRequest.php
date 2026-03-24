@@ -112,6 +112,7 @@ class StoreProductWithoutCategoryRequest extends BaseRequest
             'is_has_category' => ['nullable', 'boolean'],
             'show_add_cart_btn' => ['required', 'boolean'],
             'has_mockup' => ['required', 'boolean'],
+            'has_orientation' => ['required', 'boolean'],
             'show_customize_design_btn' => ['required', 'boolean'],
 
         ];

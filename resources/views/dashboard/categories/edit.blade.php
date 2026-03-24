@@ -460,19 +460,34 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <!-- Has Mockup -->
-                                    <div class="col-md-12">
-                                        <div class="mb-2 d-flex align-items-center gap-2">
-                                            <label class="form-label label-text ">Is this product has
-                                                Mockup?</label>
-                                            <div class="form-check form-switch">
-                                                <input type="hidden" name="has_mockup" value="0"/>
-                                                <input class="form-check-input" type="checkbox" id="has_mockup"
-                                                       name="has_mockup"
-                                                       value="1" @checked($model->has_mockup == 1) />
+                                    <div class="row">
+                                        <!-- Has Mockup -->
+                                        <div class="col-md-6">
+                                            <div class="mb-2 d-flex align-items-center gap-2">
+                                                <label class="form-label label-text ">Is this product has
+                                                    Mockup?</label>
+                                                <div class="form-check form-switch">
+                                                    <input type="hidden" name="has_mockup" value="0"/>
+                                                    <input class="form-check-input" type="checkbox" id="has_mockup"
+                                                           name="has_mockup"
+                                                           value="1" @checked($model->has_mockup == 1) />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-2 d-flex align-items-center gap-2">
+                                                <label class="form-label label-text ">Is this product has
+                                                    Orientation?</label>
+                                                <div class="form-check form-switch">
+                                                    <input type="hidden" name="has_orientation" value="0"/>
+                                                    <input class="form-check-input" type="checkbox" id="has_orientation"
+                                                           name="has_orientation"
+                                                           value="1" @checked($model->has_orientation == 1) />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+
                                     <div class="d-flex justify-content-end ">
                                         <button type="button" class="btn btn-primary next-tab mt-2">Next</button>
                                     </div>

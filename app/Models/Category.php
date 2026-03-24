@@ -26,7 +26,8 @@ class Category extends Model implements HasMedia
         'is_has_category', 'show_add_cart_btn',
         'show_customize_design_btn',
         'colors',
-        'sort'
+        'sort',
+        'has_orientation',
     ];
     protected $attributes = ['is_has_category' => 1];
     protected $casts = [
