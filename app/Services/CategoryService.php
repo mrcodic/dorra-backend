@@ -99,6 +99,7 @@ class CategoryService extends BaseService
 
     public function storeProductWithoutCategories($validatedData)
     {
+        dd($validatedData);
         $colors = Arr::get($validatedData, 'colors');
         $finalColors = collect($colors)->flatMap(function ($color) {
             return [
