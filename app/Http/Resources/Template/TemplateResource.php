@@ -71,7 +71,7 @@ class TemplateResource extends JsonResource
             }),
             'font_media' => MediaResource::collection(
                 $this->whenLoaded('libraryMedia', function () {
-                    return $this->libraryMedia->where('pivot.type', 'font');
+                    return $this->libraryMedia->where('pivot.type', 'font')->latest();
                 })
             ),
             'price' => $this->price,
