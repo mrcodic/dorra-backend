@@ -329,14 +329,14 @@ class TemplateController extends DashboardController
     public function attachMultipleFonts(Request $request, Template $template)
     {
         $validated = $request->validate([
-            'font_media_ids' => 'required|array',
-            'font_media_ids.*' => 'exists:media,id'
+//            'font_media_ids' => 'required|array',
+//            'font_media_ids.*' => 'exists:media,id'
+            'font_media_id' => ['required','exists:media,id']
         ]);
-        $ids = collect($validated['font_media_ids'])
-            ->mapWithKeys(fn ($id) => [$id => ['type' => 'font']])
-            ->toArray();
-
-        $template->libraryMedia()->syncWithoutDetaching($ids);
+//        $ids = collect($validated['font_media_id'])
+//            ->mapWithKeys(fn ($id) => [$id => ['type' => 'font']])
+//            ->toArray();
+        $template->libraryMedia()->syncWithoutDetaching([$validated['font_media_id'] =>  ['type' => 'font']]);
         return Response::api();
     }
 }

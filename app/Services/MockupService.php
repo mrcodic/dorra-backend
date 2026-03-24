@@ -133,7 +133,8 @@ class MockupService extends BaseService
             'colors'  => $allColors,
             'mockups' => $result,
         ];
-    }    public function getAll(
+    }
+    public function getAll(
         $relations = [], bool $paginate = false, $columns = ['*'], $perPage = 16, $counts = [])
     {
 
