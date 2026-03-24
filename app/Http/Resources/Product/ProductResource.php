@@ -113,8 +113,6 @@ class ProductResource extends JsonResource
             'colors' => $this->colors,
             'show_add_cart_btn' => $this->show_add_cart_btn,
             'show_customize_design_btn' => $this->show_customize_design_btn,
-
-
         ];
     }
 }

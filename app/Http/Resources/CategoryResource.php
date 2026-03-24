@@ -119,6 +119,7 @@ class CategoryResource extends JsonResource
 
             'colors' => $this->colors,
             'has_mockup' => (boolean) $this->has_mockup,
+            'has_orientation' => (boolean) $this->has_orientation,
         ];
     }
 }

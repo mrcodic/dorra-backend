@@ -119,6 +119,7 @@ const dt_user_table = $(".category-list-table").DataTable({
    data-sort="${row.sort}"
    data-name_en="${row.name_en}"
    data-has_mockup="${row.has_mockup}"
+   data-has_orientation="${row.has_orientation}"
    data-image="${row.image}"
  data-website_image="${row.website_banner}"
 data-mobile_image="${row.mobile_banner}"
@@ -426,6 +427,7 @@ $(document).ready(function () {
                 img: "#imagePreview",
                 id: "#category-id",
                 has_mockup: "#has_mockup",
+                has_orientation: "#has_orientation",
                 imgId: "#image-id",
                 subs: "#subcategories-container",
                 extra: () => {
@@ -439,6 +441,7 @@ $(document).ready(function () {
                 descAr: "#edit-category-description-ar",
                 descEn: "#edit-category-description-en",
                 has_mockup: "#has_mockup",
+                has_orientation: "#has_orientation",
                 img: "#edit-preview-image",
                 id: "#edit-category-id",
                 imgId: null, // not present in your edit modal
