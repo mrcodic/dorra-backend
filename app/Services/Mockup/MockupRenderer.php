@@ -9,6 +9,7 @@ class MockupRenderer
 {
     public function render(array $options): string
     {
+        // 1. Setup Options
         $basePath   = $options['base_path'];
         $maskPath   = $options['shirt_path'];
         $designPath = $options['design_path'] ?? null;
@@ -21,16 +22,15 @@ class MockupRenderer
         $maxDim = (int)($options['max_dim'] ?? 800);
         $angle  = (float)($options['angle'] ?? 0);
 
-        // 1. Load the Base (The background/model)
-        $canvas = Image::read($basePath);
-
-        // 2. Load the Mask (The shirt shape)
+        // 2. Load Assets
+        $base = Image::read($basePath);
         $mask = Image::read($maskPath);
 
-        // 3. Create the Tinted Shirt
-        $tintedShirt = $this->createTintedLayer($mask, $hex);
+        // 3. Create Tinted Layer (CLONE the mask to preserve transparency)
+        $tintedShirt = $this->tintShirt($mask, $hex);
 
-        // 4. Place the tinted shirt ONLY where the shirt is
+        // 4. Compose: Place tinted shirt onto the model base
+        $canvas = clone $base;
         $canvas->place($tintedShirt, 'top-left', 0, 0);
 
         // 5. Place Design
@@ -39,7 +39,7 @@ class MockupRenderer
             $design->scaleDown(width: $printW, height: $printH);
 
             if ($angle != 0) {
-                $design->rotate(-(float)$angle, 'transparent');
+                $design = $design->rotate(-(float)$angle, 'transparent');
             }
 
             $offsetX = $printX + (int)(($printW - $design->width()) / 2);
@@ -48,6 +48,7 @@ class MockupRenderer
             $canvas->place($design, 'top-left', $offsetX, $offsetY);
         }
 
+        // 6. Scale for Web
         if ($maxDim > 0) {
             $canvas->scaleDown(width: $maxDim, height: $maxDim);
         }
@@ -56,36 +57,58 @@ class MockupRenderer
     }
 
     /**
-     * THE FIX: This ensures the color stays INSIDE the shirt shape.
+     * Tints only the shirt pixels by using the Mask as the base.
+     * Includes logic for Black, White, and Vivid Colors.
      */
-    private function createTintedLayer(ImageInterface $mask, string $hex): ImageInterface
+    public function tintShirt(ImageInterface $mask, string $hex): ImageInterface
     {
-        // 1. Create a clone of the mask to act as our "Base"
-        // This ensures we keep the transparency of the original mask file
-        $tintedShirt = clone $mask;
-
-        // 2. Use a "Colorize" or "Overlay" effect on the shirt pixels only
-        // Since we are using v3, we can't use mask(), so we use 'colorize'
-        // because it only affects non-transparent pixels.
-
         $hex = ltrim($hex, '#');
-        if (strlen($hex) === 3) $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+        if (strlen($hex) === 3) {
+            $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+        }
 
         $r = hexdec(substr($hex, 0, 2));
         $g = hexdec(substr($hex, 2, 2));
         $b = hexdec(substr($hex, 4, 2));
 
-        // Map RGB to the -100 to 100 range
-        $rAdj = (int)round((($r - 128) / 128) * 100);
-        $gAdj = (int)round((($g - 128) / 128) * 100);
-        $bAdj = (int)round((($b - 128) / 128) * 100);
+        // Calculate perceived brightness (0–255)
+        $brightnessValue = (int)(0.299 * $r + 0.587 * $g + 0.114 * $b);
 
-        // Apply greyscale to the shirt first to clear existing colors
-        // Then colorize only the shirt pixels, preserving the texture
-        $tintedShirt->greyscale()
-            ->colorize($rAdj, $gAdj, $bAdj)
-            ->contrast(15);
+        // Start with the mask itself to keep the transparent background
+        $img = clone $mask;
+        $img->greyscale();
 
-        return $tintedShirt;
+        // --- CASE 1: Pure / Near-Black (#000000) ---
+        if ($brightnessValue < 25) {
+            $img->brightness(-60)
+                ->contrast(20);
+            return $img;
+        }
+
+        // --- CASE 2: Pure / Near-White (#FFFFFF) ---
+        if ($brightnessValue > 235) {
+            $img->brightness(50)
+                ->contrast(-5);
+            return $img;
+        }
+
+        // --- CASE 3: All other colors ---
+        // Map RGB 0..255 -> -100..100 range for vivid results
+        $map = function (int $c): int {
+            return (int)round((($c - 128) / 128) * 100);
+        };
+
+        $rAdj = $map($r);
+        $gAdj = $map($g);
+        $bAdj = $map($b);
+
+        // Adjust overall brightness based on color luminance
+        $brightnessShift = (int)(($brightnessValue - 128) / 128 * 25);
+
+        $img->colorize($rAdj, $gAdj, $bAdj)
+            ->contrast(12)
+            ->brightness($brightnessShift);
+
+        return $img;
     }
 }
