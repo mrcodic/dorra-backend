@@ -9,7 +9,6 @@ class MockupRenderer
 {
     public function render(array $options): string
     {
-        // 1. Setup Paths & Options
         $basePath   = $options['base_path'];
         $maskPath   = $options['shirt_path'];
         $designPath = $options['design_path'] ?? null;
@@ -22,15 +21,16 @@ class MockupRenderer
         $maxDim = (int)($options['max_dim'] ?? 800);
         $angle  = (float)($options['angle'] ?? 0);
 
-        // 2. Load Assets using v3 "read" syntax
-        $base = Image::read($basePath);
+        // 1. Load the Base (The background/model)
+        $canvas = Image::read($basePath);
+
+        // 2. Load the Mask (The shirt shape)
         $mask = Image::read($maskPath);
 
-        // 3. Create the Tinted Layer (The Fix for missing mask())
+        // 3. Create the Tinted Shirt
         $tintedShirt = $this->createTintedLayer($mask, $hex);
 
-        // 4. Compose: Model + Tinted Shirt
-        $canvas = clone $base;
+        // 4. Place the tinted shirt ONLY where the shirt is
         $canvas->place($tintedShirt, 'top-left', 0, 0);
 
         // 5. Place Design
@@ -42,50 +42,50 @@ class MockupRenderer
                 $design->rotate(-(float)$angle, 'transparent');
             }
 
-            // Center design in the print box
             $offsetX = $printX + (int)(($printW - $design->width()) / 2);
             $offsetY = $printY;
 
             $canvas->place($design, 'top-left', $offsetX, $offsetY);
         }
 
-        // 6. Scale for Web
         if ($maxDim > 0) {
             $canvas->scaleDown(width: $maxDim, height: $maxDim);
         }
 
-        // Return raw PNG string
         return $canvas->toPng()->toString();
     }
 
     /**
-     * V3 Logic: Since $image->mask() is undefined, we use
-     * a composite approach to preserve color accuracy.
+     * THE FIX: This ensures the color stays INSIDE the shirt shape.
      */
     private function createTintedLayer(ImageInterface $mask, string $hex): ImageInterface
     {
-        $width = $mask->width();
-        $height = $mask->height();
+        // 1. Create a clone of the mask to act as our "Base"
+        // This ensures we keep the transparency of the original mask file
+        $tintedShirt = clone $mask;
 
-        // Step A: Create the pure Hex color layer (PIXI 'tint' equivalent)
-        $tint = Image::create($width, $height)->fill($hex);
+        // 2. Use a "Colorize" or "Overlay" effect on the shirt pixels only
+        // Since we are using v3, we can't use mask(), so we use 'colorize'
+        // because it only affects non-transparent pixels.
 
-        /**
-         * Step B: Handling the Mask
-         * In v3, we achieve masking by using the shirt texture as an overlay
-         * with specific opacity. This preserves the Hex color in the midtones.
-         */
-        $texture = clone $mask;
-        $texture->greyscale()->contrast(20);
+        $hex = ltrim($hex, '#');
+        if (strlen($hex) === 3) $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
 
-        /**
-         * Step C: The Accuracy Blend
-         * We place the texture (shadows/folds) OVER the pure color.
-         * Using 35% opacity ensures the shirt looks like fabric
-         * without changing the actual Hex value of the mid-tones.
-         */
-        $tint->place($texture, 'top-left', 0, 0, 35);
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
 
-        return $tint;
+        // Map RGB to the -100 to 100 range
+        $rAdj = (int)round((($r - 128) / 128) * 100);
+        $gAdj = (int)round((($g - 128) / 128) * 100);
+        $bAdj = (int)round((($b - 128) / 128) * 100);
+
+        // Apply greyscale to the shirt first to clear existing colors
+        // Then colorize only the shirt pixels, preserving the texture
+        $tintedShirt->greyscale()
+            ->colorize($rAdj, $gAdj, $bAdj)
+            ->contrast(15);
+
+        return $tintedShirt;
     }
 }
