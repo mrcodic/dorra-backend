@@ -130,7 +130,7 @@ class StoreDesignRequest extends BaseRequest
             'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
             'mockup_id' => [Rule::requiredIf(function (){
                 $template = Template::find($this->template_id);
-                return $template->approach == 'without_editor';
+                return $template?->approach == 'without_editor';
             }), 'exists:mockups,id'],
         ];
     }
