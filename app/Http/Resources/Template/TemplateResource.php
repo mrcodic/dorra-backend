@@ -87,7 +87,7 @@ class TemplateResource extends JsonResource
                         })
                         ->filter()
                         ->unique('id')
-                        ->take(4)   
+                        ->take(4)
                         ->values();
                 })
             ),

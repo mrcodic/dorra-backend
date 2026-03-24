@@ -266,20 +266,12 @@ class MockupService extends BaseService
         });
         $this->handleFiles($model);
         $model->load(['templates', 'types', 'category', 'media']);
-        if(!empty($validatedData['templates'])) {
-//            $templateIds = collect($validatedData['templates'])->pluck('template_id')->filter();
-//            $templates = Template::whereIn('id' , $templateIds)->get();
-//            $model->types->each(function ($type) use ($model) {
-//                $side = strtolower($type->value->name);
-//                $collection = match ($side) {
-//                    'back'  => 'back_templates',
-//                    default => 'templates',
-//                };
-//                $media = $model->getFirstMedia($collection);
-//                if (!$media || !file_exists($media->getPath())) return;
-//                $this->renderMockupsForTemplates();
+        if (!empty($validatedData['templates'])) {
+            $templateIds = collect($validatedData['templates'])->pluck('template_id')->filter();
+            $templates = Template::whereIn('id', $templateIds)->get();
 
-//            });
+            $this->renderMockupsForTemplates($templates, 'templates');
+            $this->renderMockupsForTemplates($templates, 'back_templates');
 
             HandleMockupFilesJob::dispatch($model, 'create')->delay(now()->addSeconds(5));
         }
@@ -403,7 +395,14 @@ class MockupService extends BaseService
             }
 
             $model->load(['templates', 'types', 'category', 'media']);
-            if(!empty($validatedData['templates'])) HandleMockupFilesJob::dispatch($model)->delay(now()->addSeconds(5));
+            if(!empty($validatedData['templates'])){
+                $templates = Template::whereIn('id', $validatedData['templates'])->get();
+
+                $this->renderMockupsForTemplates($templates, 'templates');
+                $this->renderMockupsForTemplates($templates, 'back_templates');
+                HandleMockupFilesJob::dispatch($model)->delay(now()->addSeconds(5));
+            }
+
 
             return $model;
         });
