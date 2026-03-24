@@ -51,28 +51,6 @@ class MockupRenderer
         $canvas->place($tintedShirt, 'top-left', 0, 0);
 
         // ----- 6) Place design if provided -----
-//        if ($designPath) {
-//            if (!file_exists($designPath)) {
-//                throw new \InvalidArgumentException("Design image not found: {$designPath}");
-//            }
-//
-//            $design = Image::read($designPath);
-//
-//            // Scale design to fit inside the print box
-//            $design->scaleDown(width: $printW, height: $printH);
-//
-//            // Rotate around center, keeping alpha channel
-//            if (!empty($angle)) {
-//                $design = $design->rotate(-(float)$angle, 'transparent');
-//            }
-//
-//            // Center the design horizontally within the print box
-//            $offsetX = $printX + (int)(($printW - $design->width()) / 2);
-//            $offsetY = $printY;
-//
-//            $canvas->place($design, 'top-left', $offsetX, $offsetY);
-//        }
-
         if ($designPath) {
             if (!file_exists($designPath)) {
                 throw new \InvalidArgumentException("Design image not found: {$designPath}");
@@ -80,22 +58,19 @@ class MockupRenderer
 
             $design = Image::read($designPath);
 
-            // Force exact size saved from editor
-            $design->resize($printW, $printH);
+            // Scale design to fit inside the print box
+            $design->scaleDown(width: $printW, height: $printH);
 
+            // Rotate around center, keeping alpha channel
             if (!empty($angle)) {
                 $design = $design->rotate(-(float)$angle, 'transparent');
-                // Re-center after rotation since dimensions may change
-                $centerX = $printX + (int)($printW / 2);
-                $centerY = $printY + (int)($printH / 2);
-                $printX  = $centerX - (int)($design->width()  / 2);
-                $printY  = $centerY - (int)($design->height() / 2);
             }
 
-            $canvas->place($design, 'top-left', $printX, $printY);
+            // Center the design horizontally within the print box
+            $offsetX = $printX + (int)(($printW - $design->width()) / 2);
+            $offsetY = $printY;
 
-            unset($design);
-            gc_collect_cycles();
+            $canvas->place($design, 'top-left', $offsetX, $offsetY);
         }
 
         // ----- 7) Scale down for web -----
