@@ -82,7 +82,7 @@ class TemplateResource extends JsonResource
                             if (!$fontStyle) return null;
 
                             $fontStyle->loadMissing('font');
-                            return $fontStyle->font;
+                            return $fontStyle->font->loadMissing('fontStyles.media');
                         })
                         ->filter()
                         ->values();
