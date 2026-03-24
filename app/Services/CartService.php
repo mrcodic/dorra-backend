@@ -185,10 +185,12 @@ class CartService extends BaseService
                         Category::class => fn($q) => $q->withLastOfferId()->with('lastOffer'),
                     ]);
                 },
-                'items.itemable' => function ($query) {
-                    $query->select(['id', 'name', 'price']);
+                'items.itemable' => function (MorphTo $itemable) {
+                    $itemable->constrain([
+                        Design::class => fn($q) => $q->select(['id', 'name', 'price','linked_to_mockup','mockup_id'])->with(['mockup', 'products']),
+                        Template::class => fn($q) => $q->select(['id', 'name', 'price'])->with('products'),
+                    ]);
                 },
-                'items.itemable.products',
                 'items.product.category'
             ])
             ->first();
