@@ -51,6 +51,29 @@ class MockupRenderer
         $canvas->place($tintedShirt, 'top-left', 0, 0);
 
         // ----- 6) Place design if provided -----
+//        if ($designPath) {
+//            if (!file_exists($designPath)) {
+//                throw new \InvalidArgumentException("Design image not found: {$designPath}");
+//            }
+//
+//            $design = Image::read($designPath);
+//
+//            // Scale design to fit inside the print box
+//            $design->scaleDown(width: $printW, height: $printH);
+//
+//            // Rotate around center, keeping alpha channel
+//            if (!empty($angle)) {
+//                $design = $design->rotate(-(float)$angle, 'transparent');
+//            }
+//
+//            // Center the design horizontally within the print box
+//            $offsetX = $printX + (int)(($printW - $design->width()) / 2);
+//            $offsetY = $printY;
+//
+//            $canvas->place($design, 'top-left', $offsetX, $offsetY);
+//        }
+
+        // ----- 6) Place design if provided -----
         if ($designPath) {
             if (!file_exists($designPath)) {
                 throw new \InvalidArgumentException("Design image not found: {$designPath}");
@@ -58,19 +81,13 @@ class MockupRenderer
 
             $design = Image::read($designPath);
 
-            // Scale design to fit inside the print box
-//            $design->scaleDown(width: $printW, height: $printH);
-
             // Rotate around center, keeping alpha channel
             if (!empty($angle)) {
                 $design = $design->rotate(-(float)$angle, 'transparent');
             }
 
-            // Center the design horizontally within the print box
-            $offsetX = $printX + (int)(($printW - $design->width()) / 2);
-            $offsetY = $printY;
-
-            $canvas->place($design, 'top-left', $offsetX, $offsetY);
+            // Place design at exact print box position without resizing
+            $canvas->place($design, 'top-left', $printX, $printY);
         }
 
         // ----- 7) Scale down for web -----
