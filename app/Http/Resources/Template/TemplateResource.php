@@ -72,8 +72,8 @@ class TemplateResource extends JsonResource
             'font_media' => MediaResource::collection(
                 $this->whenLoaded('libraryMedia', function () {
                     return $this->libraryMedia->where('pivot.type', 'font')
-                        ->sortByDesc('created_at')
-                        ->values(); 
+                        ->sortByDesc('pivot.id')
+                        ->values();
                 })
             ),
             'price' => $this->price,
