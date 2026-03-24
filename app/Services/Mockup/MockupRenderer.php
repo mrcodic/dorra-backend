@@ -59,7 +59,7 @@ class MockupRenderer
             $design = Image::read($designPath);
 
             // Scale design to fit inside the print box
-            $design->scaleDown(width: $printW, height: $printH);
+//            $design->scaleDown(width: $printW, height: $printH);
 
             // Rotate around center, keeping alpha channel
             if (!empty($angle)) {
