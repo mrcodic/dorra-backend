@@ -117,19 +117,19 @@ class UpdateDesignRequest extends BaseRequest
             'mockup_id' => ['nullable', 'exists:mockups,id'],
             'mockup_color' => [
                 'required_with:mockup_id',
-                function ($attribute, $value, $fail) {
-                    $mockupId = $this->input('mockup_id');
-                    $mockup = \App\Models\Mockup::find($mockupId);
-
-                    if (!$mockup) {
-                        $fail('The selected mockup does not exist.');
-                        return;
-                    }
-                    $colors = $mockup->colors;
-                    if (!in_array($value, $colors)) {
-                        $fail("The selected color ($value) is invalid for this mockup.");
-                    }
-                },
+//                function ($attribute, $value, $fail) {
+//                    $mockupId = $this->input('mockup_id');
+//                    $mockup = \App\Models\Mockup::find($mockupId);
+//
+//                    if (!$mockup) {
+//                        $fail('The selected mockup does not exist.');
+//                        return;
+//                    }
+//                    $colors = $mockup->colors;
+//                    if (!in_array($value, $colors)) {
+//                        $fail("The selected color ($value) is invalid for this mockup.");
+//                    }
+//                },
             ],
             'design_mockup_area' => ['required_with:mockup_id', 'array'],
             'design_mockup_area.*.name' => ['required_with:mockup_id', 'string', 'max:100', 'in:front,back,none'],
