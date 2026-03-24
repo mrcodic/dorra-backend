@@ -6,15 +6,18 @@ namespace App\Services;
 use App\Enums\Mockup\TypeEnum;
 use App\Jobs\HandleMockupFilesJob;
 use App\Models\Product;
+use App\Models\Template;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\MockupRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Services\BaseService;
 use App\Services\Mockup\MockupRenderer;
+use App\Traits\RendersTemplateMockups;
 use Illuminate\Support\Arr;
 
 class MockupService extends BaseService
 {
+    use RendersTemplateMockups;
     public BaseRepositoryInterface $repository;
 
     public function __construct(MockupRepositoryInterface $repository, public MockupRenderer $renderer
@@ -263,7 +266,23 @@ class MockupService extends BaseService
         });
         $this->handleFiles($model);
         $model->load(['templates', 'types', 'category', 'media']);
-        if(!empty($validatedData['templates']))HandleMockupFilesJob::dispatch($model, 'create')->delay(now()->addSeconds(5));
+        if(!empty($validatedData['templates'])) {
+//            $templateIds = collect($validatedData['templates'])->pluck('template_id')->filter();
+//            $templates = Template::whereIn('id' , $templateIds)->get();
+//            $model->types->each(function ($type) use ($model) {
+//                $side = strtolower($type->value->name);
+//                $collection = match ($side) {
+//                    'back'  => 'back_templates',
+//                    default => 'templates',
+//                };
+//                $media = $model->getFirstMedia($collection);
+//                if (!$media || !file_exists($media->getPath())) return;
+//                $this->renderMockupsForTemplates();
+
+//            });
+
+            HandleMockupFilesJob::dispatch($model, 'create')->delay(now()->addSeconds(5));
+        }
         return $model;
     }
 

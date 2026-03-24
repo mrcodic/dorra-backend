@@ -7,6 +7,13 @@ use Illuminate\Support\Facades\Log;
 
 trait RendersTemplateMockups
 {
+
+    private function renderMockupsForTemplates(iterable $templates, string $collection): void
+    {
+        foreach ($templates as $template) {
+            $this->renderMockups($template, $collection);
+        }
+    }
     private function renderMockups($template, string $collection): void
     {
         $template = $template->fresh(['mockups.types', 'mockups.media']);
