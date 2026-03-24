@@ -84,7 +84,7 @@ class TemplateResource extends JsonResource
                             $fontStyle->loadMissing('font');
                             return $fontStyle->font->loadMissing('fontStyles.media');
                         })
-//                        ->filter()
+                        ->filter()
                         ->values();
                 })
             ),
