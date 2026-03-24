@@ -75,16 +75,19 @@ class TemplateResource extends JsonResource
                     return $this->libraryMedia
                         ->where('pivot.type', 'font')
                         ->sortByDesc('pivot.created_at')
-                        ->take(4)
                         ->values()
                         ->map(function ($media) {
                             $fontStyle = $media->model;
                             if (!$fontStyle) return null;
 
                             $fontStyle->loadMissing('font');
+                            if (!$fontStyle->font) return null;
+
                             return $fontStyle->font->loadMissing('fontStyles.media');
                         })
                         ->filter()
+                        ->unique('id')
+                        ->take(4)   
                         ->values();
                 })
             ),
