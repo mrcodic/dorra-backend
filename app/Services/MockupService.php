@@ -267,12 +267,11 @@ class MockupService extends BaseService
         $this->handleFiles($model);
         $model->load(['templates', 'types', 'category', 'media']);
         if (!empty($validatedData['templates'])) {
-//            $templateIds = collect($validatedData['templates'])->pluck('template_id')->filter();
-//            $templates = Template::whereIn('id', $templateIds)->get();
-//
-//            $this->renderMockupsForTemplates($templates, 'templates');
-//            $this->renderMockupsForTemplates($templates, 'back_templates');
+            $templateIds = collect($validatedData['templates'])->pluck('template_id')->filter();
+            $templates = Template::whereIn('id', $templateIds)->get();
 
+            $this->renderMockupsForTemplates($templates, 'templates');
+            $this->renderMockupsForTemplates($templates, 'back_templates');
             HandleMockupFilesJob::dispatch($model, 'create')->delay(now()->addSeconds(5));
         }
         return $model;

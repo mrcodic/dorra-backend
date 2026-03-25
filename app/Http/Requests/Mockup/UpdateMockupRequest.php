@@ -78,48 +78,57 @@ class UpdateMockupRequest extends BaseRequest
                 Rule::requiredIf(in_array(1, $types)),
                 'image',
 //                'mimes:jpg',
+                'max:2048',
             ],
             'front_mask_image' => [
                 Rule::requiredIf(in_array(1, $types)),
                 'image',
                 'mimes:png',
+                'max:2048',
             ],
             'front_shadow_image' => [
                 Rule::requiredIf(in_array(1, $types)),
                 'image',
                 'mimes:png',
+                'max:2048',
             ],
 
             'back_base_image' => [
                 Rule::requiredIf(in_array(2, $types)),
                 'image',
 //                'mimes:jpg',
+                'max:2048',
             ],
             'back_mask_image' => [
                 Rule::requiredIf(in_array(2, $types)),
                 'image',
                 'mimes:png',
+                'max:2048',
             ],
             'back_shadow_image' => [
                 Rule::requiredIf(in_array(2, $types)),
                 'image',
                 'mimes:png',
+                'max:2048',
             ],
 
             'none_base_image' => [
                 Rule::requiredIf(in_array(3, $types)),
                 'image',
 //                'mimes:jpg',
+                'max:2048',
             ],
             'none_mask_image' => [
                 Rule::requiredIf(in_array(3, $types)),
                 'image',
                 'mimes:png',
+                'max:2048',
             ],
             'none_shadow_image' => [
                 Rule::requiredIf(in_array(3, $types)),
                 'image',
                 'mimes:png',
+                'max:2048',
             ],
         ];
     }
