@@ -1,16 +1,16 @@
-{{-- For submenu --}}
-{{-- For submenu --}}
 <ul class="menu-content">
     @if (isset($menu))
         @foreach ($menu as $submenu)
             @php
-                $submenuUrl = isset($submenu->url) ? ltrim(parse_url($submenu->url, PHP_URL_PATH), '/') : '';
-                $isSubmenuActive = Request::is($submenuUrl) || Request::is($submenuUrl . '/*');
-            @endphp
+                $submenuPath = ltrim(parse_url($submenu->url, PHP_URL_PATH), '/');
+                parse_str(parse_url($submenu->url, PHP_URL_QUERY) ?? '', $submenuQuery);
 
+                $isSubmenuActive =
+                    request()->path() === $submenuPath &&
+                    request()->get('product_without_category_id') == ($submenuQuery['product_without_category_id'] ?? null);
+            @endphp
             <li class="{{ $isSubmenuActive ? 'active' : '' }}">
 
-                {{-- ✅ التعديل هنا بس --}}
                 @if (!empty($submenu->modalTarget ?? ''))
                     <a href="javascript:void(0)"
                        data-bs-toggle="modal"
@@ -25,7 +25,14 @@
                                 @if (isset($submenu->icon))
                                     <i data-feather="{{ $submenu->icon }}" style="visibility: hidden;"></i>
                                 @endif
-                                <span class="menu-item text-truncate">{{ __('locale.' . $submenu->name) }}</span>
+
+                                {{-- ✅ لو dynamic (من DB) اعرضه مباشرة، لو static استخدم locale --}}
+                                <span class="menu-item text-truncate">
+            {{ isset($submenu->dynamic) && $submenu->dynamic
+                ? $submenu->name
+                : __('locale.' . $submenu->name) }}
+          </span>
+
                             </a>
 
                     @if (isset($submenu->submenu))

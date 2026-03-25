@@ -9,18 +9,20 @@ class MockupRenderer
 {
     public function render(array $options): string
     {
-        $basePath   = $options['base_path'] ?? null;
-        $maskPath   = $options['shirt_mask_path'] ?? ($options['shirt_path'] ?? null);
-        $shadowPath = $options['shirt_shadow_path'] ?? ($options['shadow_path'] ?? null);
-        $designPath = $options['design_path'] ?? null;
-        $hex        = $this->normalizeHex($options['hex'] ?? null);
+        $basePath      = $options['base_path'] ?? null;
+        $maskPath      = $options['shirt_mask_path'] ?? ($options['shirt_path'] ?? null);
+        $shadowPath    = $options['shirt_shadow_path'] ?? ($options['shadow_path'] ?? null);
+        $printMaskPath = $options['print_mask_path'] ?? null;
+        $designPath    = $options['design_path'] ?? null;
+        $hex           = $this->normalizeHex($options['hex'] ?? null);
 
         $printX = (int)($options['print_x'] ?? 360);
         $printY = (int)($options['print_y'] ?? 660);
         $printW = max(1, (int)($options['print_w'] ?? 480));
         $printH = max(1, (int)($options['print_h'] ?? 540));
-        $maxDim = (int)($options['max_dim'] ?? 800);
-        $angle  = (float)($options['angle'] ?? 0);
+        $maxDim = (int)($options['max_dim'] ?? 1600);
+
+        $warp = $options['warp_points'] ?? null;
 
         if (!$basePath || !file_exists($basePath)) {
             throw new \InvalidArgumentException("Base image not found: {$basePath}");
@@ -34,19 +36,23 @@ class MockupRenderer
             $shadowPath = null;
         }
 
+        if ($printMaskPath && !file_exists($printMaskPath)) {
+            $printMaskPath = null;
+        }
+
         if ($designPath && !file_exists($designPath)) {
             throw new \InvalidArgumentException("Design image not found: {$designPath}");
         }
 
-        // sourceBase = الأصل الذي نستخرج منه texture/folds
         $sourceBase = $this->load($basePath);
         $canvas     = $this->load($basePath);
 
         $w = $canvas->getImageWidth();
         $h = $canvas->getImageHeight();
 
-        $mask   = $this->load($maskPath, $w, $h);
-        $shadow = $shadowPath ? $this->load($shadowPath, $w, $h) : null;
+        $mask      = $this->load($maskPath, $w, $h);
+        $shadow    = $shadowPath ? $this->load($shadowPath, $w, $h) : null;
+        $printMask = $printMaskPath ? $this->load($printMaskPath, $w, $h) : null;
 
         // 1) recolor shirt
         if ($hex) {
@@ -56,55 +62,91 @@ class MockupRenderer
             $tintedShirt->destroy();
         }
 
-        // 2) design layer with professional fabric blending
+        // 2) design with perspective warp
         if ($designPath) {
             $design = $this->load($designPath);
 
-            if (abs($angle) > 0.001) {
-                $design->setImageBackgroundColor(new ImagickPixel('transparent'));
-                $design->rotateImage(new ImagickPixel('transparent'), -$angle);
+            [$srcX, $srcY, $srcW, $srcH] = $this->resolveSourceRect(
+                $printMask,
+                $warp,
+                $printX,
+                $printY,
+                $printW,
+                $printH
+            );
+
+            $design = $this->fitContain($design, $srcW, $srcH);
+
+            $layer = new Imagick();
+            $layer->newImage($w, $h, new ImagickPixel('transparent'), 'png');
+            $layer->setImageAlphaChannel(Imagick::ALPHACHANNEL_SET);
+
+            $placeX = $srcX + (int)(($srcW - $design->getImageWidth()) / 2);
+            $placeY = $srcY + (int)(($srcH - $design->getImageHeight()) / 2);
+
+            $layer->compositeImage($design, Imagick::COMPOSITE_DEFAULT, $placeX, $placeY);
+
+            if ($this->hasWarp($warp)) {
+                $layer->setImageVirtualPixelMethod(Imagick::VIRTUALPIXELMETHOD_TRANSPARENT);
+                $points = [
+                    $srcX,         $srcY,         $warp['tl'][0], $warp['tl'][1],
+                    $srcX + $srcW, $srcY,         $warp['tr'][0], $warp['tr'][1],
+                    $srcX + $srcW, $srcY + $srcH, $warp['br'][0], $warp['br'][1],
+                    $srcX,         $srcY + $srcH, $warp['bl'][0], $warp['bl'][1],
+                ];
+                $layer->distortImage(Imagick::DISTORTION_PERSPECTIVE, $points, false);
             }
 
-            $design = $this->fitContain($design, $printW, $printH);
+            // clip to print area first
+            if ($printMask) {
+                $clip = clone $printMask;
+                $clip->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
+                $layer->compositeImage($clip, Imagick::COMPOSITE_DSTIN, 0, 0);
+                $clip->clear();
+                $clip->destroy();
+            }
 
-            $offsetX = $printX + (int)(($printW - $design->getImageWidth()) / 2);
-            $offsetY = $printY + (int)(($printH - $design->getImageHeight()) / 2);
+            // do not let it escape the shirt
+            $shirtClip = clone $mask;
+            $shirtClip->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
+            $layer->compositeImage($shirtClip, Imagick::COMPOSITE_DSTIN, 0, 0);
+            $shirtClip->clear();
+            $shirtClip->destroy();
 
-            $designLayer = new Imagick();
-            $designLayer->newImage($w, $h, new ImagickPixel('transparent'), 'png');
-            $designLayer->setImageAlphaChannel(Imagick::ALPHACHANNEL_SET);
-            $designLayer->compositeImage($design, Imagick::COMPOSITE_DEFAULT, $offsetX, $offsetY);
+            // local folds on design (light touch)
+            $fabric = $this->buildMaskedGrayscaleMap($sourceBase, $mask);
+            $fabricSoft = clone $fabric;
+            $this->multiplyAlpha($fabricSoft, 0.14);
+            $layer->compositeImage($fabricSoft, Imagick::COMPOSITE_SOFTLIGHT, 0, 0);
 
-            // قص التصميم داخل التيشيرت
-            $shirtMaskForClip = clone $mask;
-            $shirtMaskForClip->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
-            $designLayer->compositeImage($shirtMaskForClip, Imagick::COMPOSITE_DSTIN, 0, 0);
+            $fabricDark = clone $fabric;
+            $fabricDark->gammaImage(1.22);
+            $this->multiplyAlpha($fabricDark, 0.09);
+            $layer->compositeImage($fabricDark, Imagick::COMPOSITE_MULTIPLY, 0, 0);
 
-            // احتفظ بألفا التصميم نفسه بعد القص
-            $designAlpha = clone $designLayer;
+            $fabricLight = clone $fabric;
+            $fabricLight->gammaImage(0.86);
+            $this->multiplyAlpha($fabricLight, 0.05);
+            $layer->compositeImage($fabricLight, Imagick::COMPOSITE_SCREEN, 0, 0);
 
-            // Apply fabric texture/folds to design itself
-            $this->applyFabricToDesignLayer($designLayer, $sourceBase, $mask, $shadow);
+            $canvas->compositeImage($layer, Imagick::COMPOSITE_DEFAULT, 0, 0);
 
-            // ارجع ألفا التصميم نفسه حتى لا يملأ layer بالكامل
-            $designLayer->compositeImage($designAlpha, Imagick::COMPOSITE_COPYOPACITY, 0, 0);
+            $fabricSoft->clear();
+            $fabricSoft->destroy();
+            $fabricDark->clear();
+            $fabricDark->destroy();
+            $fabricLight->clear();
+            $fabricLight->destroy();
+            $fabric->clear();
+            $fabric->destroy();
 
-            $canvas->compositeImage($designLayer, Imagick::COMPOSITE_DEFAULT, 0, 0);
-
-            $designAlpha->clear();
-            $designAlpha->destroy();
-
-            $shirtMaskForClip->clear();
-            $shirtMaskForClip->destroy();
-
-            $designLayer->clear();
-            $designLayer->destroy();
-
+            $layer->clear();
+            $layer->destroy();
             $design->clear();
             $design->destroy();
         }
 
-        // 3) global shadow on top, but gently
+        // 3) global shadow on top
         if ($shadow) {
             $shadowBlend = clone $shadow;
             $this->multiplyAlpha($shadowBlend, 0.18);
@@ -133,55 +175,61 @@ class MockupRenderer
         $mask->clear();
         $mask->destroy();
 
+        if ($printMask) {
+            $printMask->clear();
+            $printMask->destroy();
+        }
+
         return $blob;
     }
 
-    private function applyFabricToDesignLayer(
-        Imagick $designLayer,
-        Imagick $sourceBase,
-        Imagick $mask,
-        ?Imagick $shadow
-    ): void {
-        // grayscale fabric map from original shirt
-        $fabric = $this->buildMaskedGrayscaleMap($sourceBase, $mask);
-
-        // 1) soft light overall fabric grain/folds
-        $soft = clone $fabric;
-        $this->multiplyAlpha($soft, 0.22);
-        $designLayer->compositeImage($soft, Imagick::COMPOSITE_SOFTLIGHT, 0, 0);
-
-        // 2) dark folds only
-        $dark = clone $fabric;
-        $dark->gammaImage(1.28);
-        $this->multiplyAlpha($dark, 0.14);
-        $designLayer->compositeImage($dark, Imagick::COMPOSITE_MULTIPLY, 0, 0);
-
-        // 3) highlights only
-        $light = clone $fabric;
-        $light->gammaImage(0.82);
-        $this->multiplyAlpha($light, 0.07);
-        $designLayer->compositeImage($light, Imagick::COMPOSITE_SCREEN, 0, 0);
-
-        // 4) local shadow on design itself
-        if ($shadow) {
-            $localShadow = clone $shadow;
-            $this->multiplyAlpha($localShadow, 0.12);
-            $designLayer->compositeImage($localShadow, Imagick::COMPOSITE_MULTIPLY, 0, 0);
-            $localShadow->clear();
-            $localShadow->destroy();
+    private function resolveSourceRect(?Imagick $printMask, ?array $warp, int $printX, int $printY, int $printW, int $printH): array
+    {
+        if ($printMask) {
+            $b = $this->alphaBounds($printMask);
+            return [$b['x'], $b['y'], $b['w'], $b['h']];
         }
 
-        $soft->clear();
-        $soft->destroy();
+        if ($this->hasWarp($warp)) {
+            $xs = [$warp['tl'][0], $warp['tr'][0], $warp['br'][0], $warp['bl'][0]];
+            $ys = [$warp['tl'][1], $warp['tr'][1], $warp['br'][1], $warp['bl'][1]];
+            $minX = (int) floor(min($xs));
+            $minY = (int) floor(min($ys));
+            $maxX = (int) ceil(max($xs));
+            $maxY = (int) ceil(max($ys));
+            return [$minX, $minY, max(1, $maxX - $minX), max(1, $maxY - $minY)];
+        }
 
-        $dark->clear();
-        $dark->destroy();
+        return [$printX, $printY, $printW, $printH];
+    }
 
-        $light->clear();
-        $light->destroy();
+    private function hasWarp(?array $warp): bool
+    {
+        return is_array($warp)
+            && isset($warp['tl'], $warp['tr'], $warp['br'], $warp['bl'])
+            && count($warp['tl']) === 2
+            && count($warp['tr']) === 2
+            && count($warp['br']) === 2
+            && count($warp['bl']) === 2;
+    }
 
-        $fabric->clear();
-        $fabric->destroy();
+    private function alphaBounds(Imagick $mask): array
+    {
+        $tmp = clone $mask;
+        $tmp->trimImage(0);
+        $page = $tmp->getImagePage();
+
+        $result = [
+            'x' => max(0, (int)($page['x'] ?? 0)),
+            'y' => max(0, (int)($page['y'] ?? 0)),
+            'w' => max(1, $tmp->getImageWidth()),
+            'h' => max(1, $tmp->getImageHeight()),
+        ];
+
+        $tmp->clear();
+        $tmp->destroy();
+
+        return $result;
     }
 
     private function buildMaskedGrayscaleMap(Imagick $base, Imagick $mask): Imagick
@@ -189,13 +237,8 @@ class MockupRenderer
         $map = clone $base;
         $map->setImageAlphaChannel(Imagick::ALPHACHANNEL_SET);
         $map->compositeImage($mask, Imagick::COMPOSITE_COPYOPACITY, 0, 0);
-
-        // remove shirt color, keep luminance/folds
         $map->modulateImage(100, 0, 100);
-
-        // small blur so it behaves like fabric shading, not harsh edges
-        $map->gaussianBlurImage(1.2, 0.6);
-
+        $map->gaussianBlurImage(1.0, 0.6);
         return $map;
     }
 
@@ -207,8 +250,6 @@ class MockupRenderer
         $texture = clone $base;
         $texture->setImageAlphaChannel(Imagick::ALPHACHANNEL_SET);
         $texture->compositeImage($mask, Imagick::COMPOSITE_COPYOPACITY, 0, 0);
-
-        // keep folds/highlights only
         $texture->modulateImage(100, 0, 100);
         $texture->gammaImage(0.92);
 
@@ -216,8 +257,6 @@ class MockupRenderer
         $solid->newImage($w, $h, new ImagickPixel($hex), 'png');
         $solid->setImageAlphaChannel(Imagick::ALPHACHANNEL_SET);
         $solid->compositeImage($mask, Imagick::COMPOSITE_COPYOPACITY, 0, 0);
-
-        // fabric folds on shirt color
         $solid->compositeImage($texture, Imagick::COMPOSITE_MULTIPLY, 0, 0);
 
         $texture->clear();
@@ -236,11 +275,7 @@ class MockupRenderer
     private function multiplyAlpha(Imagick $image, float $factor): void
     {
         $image->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
-        $image->evaluateImage(
-            Imagick::EVALUATE_MULTIPLY,
-            $factor,
-            Imagick::CHANNEL_ALPHA
-        );
+        $image->evaluateImage(Imagick::EVALUATE_MULTIPLY, $factor, Imagick::CHANNEL_ALPHA);
     }
 
     private function load(string $path, ?int $targetW = null, ?int $targetH = null): Imagick

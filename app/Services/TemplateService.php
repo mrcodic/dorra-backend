@@ -102,7 +102,8 @@ class TemplateService extends BaseService
                 $query->whereHas('products', function ($q) use ($productId) {
                     $q->where('products.id', $productId);
                 });
-            })->when(request('product_without_category_id'), function ($q) use ($categoryId) {
+            })
+            ->when(request('product_without_category_id'), function ($q) use ($categoryId) {
                 $q->where(function ($q) use ($categoryId) {
                     $q->whereHas('categories', function ($q) use ($categoryId) {
                         $q->where('categories.id', $categoryId);
@@ -196,13 +197,9 @@ class TemplateService extends BaseService
                 : $query->get();
         }
 
-        return $this->repository->all(
-            $paginate,
-            $columns,
-            $relations,
-            filters: $this->filters,
-            perPage: $pageSize ?? $perPage
-        );
+        return $paginate
+            ? $query->paginate($requested)
+            : $query->get();
     }
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {

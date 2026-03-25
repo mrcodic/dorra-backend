@@ -79,11 +79,26 @@
             "modalTarget": ""
 
         },
+
         {
             "name": "Templates",
             "icon": "Templates.svg",
             "slug": "",
-            "url": "/product-templates",
+            "submenu": [
+                {
+                    "url": "/product-templates/create",
+                    "name": "Add New",
+                    "icon": "circle",
+                    "slug": "",
+                    "modalTarget":  "#templateEditorModal"
+                },
+                {
+                    "url": "/product-templates",
+                    "name": "All Templates",
+                    "icon": "circle",
+                    "slug": ""
+                }
+            ],
             "modalTarget": ""
         },
         {

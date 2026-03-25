@@ -32,6 +32,10 @@ $(document).ready(function () {
 
 
 function fetchTemplates(page = 1) {
+
+    // ✅ get current URL params
+    const urlParams = new URLSearchParams(window.location.search);
+
     let requestData = {
         page: page,
         search_value: $('#search-category-form').val(),
@@ -41,6 +45,15 @@ function fetchTemplates(page = 1) {
         status: $('.filter-status').val(),
         per_page: $('.filter-paginate-number').val()
     };
+
+    // ✅ merge URL params (VERY IMPORTANT)
+    urlParams.forEach((value, key) => {
+        if (!requestData[key]) {
+            requestData[key] = value;
+        }
+    });
+
+    // clean empty values
     Object.keys(requestData).forEach(key => {
         if (
             requestData[key] === "" ||
@@ -51,6 +64,7 @@ function fetchTemplates(page = 1) {
             delete requestData[key];
         }
     });
+
     $.ajax({
         url: '/product-templates',
         type: 'GET',
@@ -62,7 +76,6 @@ function fetchTemplates(page = 1) {
         error: xhr => console.error('Failed to fetch templates:', xhr)
     });
 }
-
 /* 3-A  — page-size selector */
 $('.filter-paginate-number').on('change', () => fetchTemplates(1));
 
