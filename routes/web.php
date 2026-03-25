@@ -44,6 +44,9 @@ use App\Http\Controllers\Shared\General\MainController;
 use App\Http\Middleware\AutoCheckPermission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Models\Mockup;
+use App\Services\Mockup\MockupRenderer;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 Route::middleware(AutoCheckPermission::class)->group(function () {
 
@@ -392,3 +395,129 @@ Route::get('test-canvas/{id}', function ($id){
     app(SyncCanvasAssets::class)->processCanvasColumn($template,'design_back_data');
 });
 
+Route::get('/debug/mockup-render-direct', function (Request $request, MockupRenderer $renderer) {
+    $token = (string) $request->query('token', '');
+    abort_unless($token === 'pixbyte-debug-123', 403);
+
+    $mockupId = (int) $request->query('mockup_id');
+    $designMediaId = (int) $request->query('design_media_id');
+    $side = strtolower((string) $request->query('side', 'front'));
+    $hex = $request->query('hex');
+    $noShadow = $request->boolean('no_shadow', false);
+    $save = $request->boolean('save', false);
+    $debug = $request->boolean('debug', false);
+    $maxDim = (int) $request->query('max_dim', 1600);
+    $angle = (float) $request->query('angle', 0);
+
+    $mockup = Mockup::with(['media'])->findOrFail($mockupId);
+    $designMedia = Media::findOrFail($designMediaId);
+
+    $base = $mockup->getMedia('mockups')->first(fn($m) =>
+        $m->getCustomProperty('side') === $side &&
+        $m->getCustomProperty('role') === 'base'
+    );
+
+    $mask = $mockup->getMedia('mockups')->first(fn($m) =>
+        $m->getCustomProperty('side') === $side &&
+        $m->getCustomProperty('role') === 'mask'
+    );
+
+    $shadow = $mockup->getMedia('mockups')->first(fn($m) =>
+        $m->getCustomProperty('side') === $side &&
+        $m->getCustomProperty('role') === 'shadow'
+    );
+
+    if (!$base || !$mask) {
+        return response()->json([
+            'ok' => false,
+            'error' => 'base or mask missing',
+            'mockup_id' => $mockupId,
+            'side' => $side,
+            'base' => $base?->getPath(),
+            'mask' => $mask?->getPath(),
+            'shadow' => $shadow?->getPath(),
+        ], 422);
+    }
+
+    if (!file_exists($designMedia->getPath())) {
+        return response()->json([
+            'ok' => false,
+            'error' => 'design file missing',
+            'design_media_id' => $designMediaId,
+            'design_path' => $designMedia->getPath(),
+        ], 422);
+    }
+
+    $printX = (int) $request->query('print_x', (int) $mockup->area_left);
+    $printY = (int) $request->query('print_y', (int) $mockup->area_top);
+    $printW = (int) $request->query('print_w', (int) $mockup->area_width);
+    $printH = (int) $request->query('print_h', (int) $mockup->area_height);
+
+    if ($debug) {
+        return response()->json([
+            'ok' => true,
+            'mockup_id' => $mockupId,
+            'design_media_id' => $designMediaId,
+            'side' => $side,
+            'hex' => $hex,
+            'no_shadow' => $noShadow,
+            'print_box' => [
+                'x' => $printX,
+                'y' => $printY,
+                'w' => $printW,
+                'h' => $printH,
+                'angle' => $angle,
+            ],
+            'base' => $base->getPath(),
+            'mask' => $mask->getPath(),
+            'shadow' => $noShadow ? null : $shadow?->getPath(),
+            'design' => $designMedia->getPath(),
+            'mockup_defaults' => [
+                'area_left' => (int) $mockup->area_left,
+                'area_top' => (int) $mockup->area_top,
+                'area_width' => (int) $mockup->area_width,
+                'area_height' => (int) $mockup->area_height,
+            ],
+        ]);
+    }
+
+    try {
+        $binary = $renderer->render([
+            'base_path'         => $base->getPath(),
+            'shirt_mask_path'   => $mask->getPath(),
+            'shirt_shadow_path' => $noShadow ? null : $shadow?->getPath(),
+            'design_path'       => $designMedia->getPath(),
+            'print_x'           => $printX,
+            'print_y'           => $printY,
+            'print_w'           => $printW,
+            'print_h'           => $printH,
+            'angle'             => $angle,
+            'hex'               => $hex,
+            'max_dim'           => $maxDim,
+        ]);
+
+        if ($save) {
+            $dir = storage_path('app/debug');
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+
+            $file = $dir . "/mockup_debug_{$mockupId}_{$designMediaId}_{$side}.png";
+            file_put_contents($file, $binary);
+        }
+
+        return response($binary, 200, [
+            'Content-Type' => 'image/png',
+            'X-Debug-Print-X' => (string) $printX,
+            'X-Debug-Print-Y' => (string) $printY,
+            'X-Debug-Print-W' => (string) $printW,
+            'X-Debug-Print-H' => (string) $printH,
+            'X-Debug-Shadow' => $noShadow ? 'off' : 'on',
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'ok' => false,
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+});

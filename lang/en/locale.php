@@ -4,6 +4,8 @@ return [
     "Apps & Pages" => "Apps & Pages",
     "User Interface" => "User Interface",
     "Dashboards" => "Dashboards",
+    "Add New" => "Add New",
+    "All Templates" => "All Templates",
     "Plans" => "Plans",
     "Credits" => "Credits",
     "Campaigns" => "Campaigns",

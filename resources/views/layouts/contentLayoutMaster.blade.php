@@ -61,6 +61,7 @@ $configData = Helper::applClasses();
 @extends((( $configData["mainLayoutType"] === 'horizontal') ? 'layouts.horizontalLayoutMaster' :
 'layouts.verticalLayoutMaster' ))
 @endisset
+@include("modals.templates.template-editor-modal")
 
 <script src="https://unpkg.com/feather-icons"></script>
 <script !src="">

@@ -85,7 +85,7 @@ class TemplateResource extends JsonResource
                             $model->loadMissing('font');
                             if (!$model->font) return null;
 
-                            return $model->font->loadMissing('fontStyles.media');
+                            return $model->font->loadMissing(['fontStyles.media','fontStyles.font']);
                         })
                         ->filter()
                         ->unique('id')
