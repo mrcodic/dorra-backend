@@ -395,7 +395,9 @@ class MockupService extends BaseService
 
             $model->load(['templates', 'types', 'category', 'media']);
             if(!empty($validatedData['templates'])){
-                $templates = Template::whereIn('id', $validatedData['templates'])->get();
+                $templateIds = collect($validatedData['templates'])->pluck('template_id')->filter();
+
+                $templates = Template::whereIn('id', $templateIds)->get();
 
                 $this->renderMockupsForTemplates($templates, 'templates');
                 $this->renderMockupsForTemplates($templates, 'back_templates');
