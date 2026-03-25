@@ -51,7 +51,7 @@
                     {{-- Product Filter --}}
                     <div class="col-12 col-md-2 col-lg-1">
                         <select name="product" class="form-select filter-product select2" data-placeholder="Category">
-                            <option value="" disabled selected>Category</option>
+                            <option value="" disabled selected>Product</option>
                             @foreach($associatedData['categories'] as $category)
                             <option value="{{ $category->id }}">{{ $category->getTranslation('name', app()->getLocale())
                                 }}</option>
