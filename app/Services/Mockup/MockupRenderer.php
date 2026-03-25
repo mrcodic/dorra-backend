@@ -3,6 +3,7 @@
 namespace App\Services\Mockup;
 
 use Intervention\Image\Laravel\Facades\Image;
+use Illuminate\Support\Facades\Log;
 
 class MockupRenderer
 {
@@ -37,15 +38,28 @@ class MockupRenderer
             throw new \InvalidArgumentException("Shirt/mask image not found: {$shirtPath}");
         }
 
+        // ----- LOG: file sizes & dimensions before anything is loaded -----
+        $this->logImageInfo('base',   $basePath);
+        $this->logImageInfo('shirt',  $shirtPath);
+        if ($designPath) {
+            $this->logImageInfo('design', $designPath);
+        }
+        $this->logMemory('start');
+
         // ----- 3) Tint the shirt (reads fresh from disk — no clone) -----
         $tintedShirt = (!empty($hex))
             ? $this->tintShirt($shirtPath, $hex)
             : Image::read($shirtPath);
 
+        $this->logMemory('after tintShirt');
+
         // ----- 4) Compose canvas: fresh base read + tinted shirt -----
         $canvas = Image::read($basePath);
+        $this->logMemory('after base read');
+
         $canvas->place($tintedShirt, 'top-left', 0, 0);
         unset($tintedShirt); // free GD resource immediately
+        $this->logMemory('after place shirt + unset');
 
         // ----- 5) Place design if provided -----
         if ($designPath) {
@@ -54,6 +68,7 @@ class MockupRenderer
             }
 
             $design = Image::read($designPath);
+            $this->logMemory('after design read');
 
             // Scale design to fit inside the print box
             $design->scaleDown(width: $printW, height: $printH);
@@ -61,6 +76,7 @@ class MockupRenderer
             // Rotate around center, keeping alpha channel
             if (!empty($angle)) {
                 $design = $design->rotate(-(float)$angle, 'transparent');
+                $this->logMemory('after design rotate');
             }
 
             // Center the design horizontally within the print box
@@ -69,27 +85,27 @@ class MockupRenderer
 
             $canvas->place($design, 'top-left', $offsetX, $offsetY);
             unset($design); // free GD resource immediately
+            $this->logMemory('after place design + unset');
         }
 
         // ----- 6) Scale down for web -----
         if ($maxDim > 0) {
             $canvas->scaleDown(width: $maxDim, height: $maxDim);
+            $this->logMemory('after scaleDown');
         }
 
         // ----- 7) Return encoded PNG -----
-        return $canvas->toPng()->toString();
+        $result = $canvas->toPng()->toString();
+        unset($canvas);
+        $this->logMemory('after encode + unset canvas');
+
+        return $result;
     }
 
     /**
      * Tint shirt PNG with HEX color, preserving fabric texture/folds.
      *
      * Reads fresh from disk instead of cloning to avoid GD memory duplication.
-     *
-     * Handles edge cases:
-     *  - Pure black (#000000): greyscale + heavy darken, no colorize (colorize on black = still black)
-     *  - Pure white (#ffffff): greyscale + strong brighten, slight contrast
-     *  - Near-black / near-white: blended approach
-     *  - All other colors: greyscale + colorize with wider range for vivid results
      */
     public function tintShirt(string $shirtPath, string $hex): mixed
     {
@@ -109,27 +125,26 @@ class MockupRenderer
 
         // Read fresh from disk — avoids cloning the GD bitmap into memory
         $img = Image::read($shirtPath);
+        $this->logMemory('tintShirt: after read');
+
         $img->greyscale();
+        $this->logMemory('tintShirt: after greyscale');
 
         // ── Pure / near-black (brightness < 20) ──────────────────────────
-        // colorize() has no effect on pure black pixels, so just darken hard.
         if ($brightness < 20) {
-            $img->brightness(-55)
-                ->contrast(15);
+            $img->brightness(-55)->contrast(15);
+            $this->logMemory('tintShirt: after black adjust');
             return $img;
         }
 
         // ── Pure / near-white (brightness > 235) ─────────────────────────
-        // Brighten strongly so it actually looks white, not grey.
         if ($brightness > 235) {
-            $img->brightness(55)
-                ->contrast(-10);
+            $img->brightness(55)->contrast(-10);
+            $this->logMemory('tintShirt: after white adjust');
             return $img;
         }
 
         // ── All other colors ──────────────────────────────────────────────
-        // Map 0..255 → -100..100 for a much more vivid colorize range.
-        // The original code used -40..40 which was too subtle and broke at extremes.
         $map = function (int $c): int {
             return (int)round((($c - 128) / 128) * 100);
         };
@@ -138,14 +153,44 @@ class MockupRenderer
         $gAdj = $map($g);
         $bAdj = $map($b);
 
-        // Shift overall brightness closer to the target color's luminance
-        // so dark colors look dark and light colors look light on the shirt.
         $brightnessShift = (int)(($brightness - 128) / 128 * 30);
 
         $img->colorize($rAdj, $gAdj, $bAdj)
             ->contrast(10)
             ->brightness($brightnessShift);
 
+        $this->logMemory('tintShirt: after colorize');
+
         return $img;
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private function logImageInfo(string $label, string $path): void
+    {
+        $info = @getimagesize($path);
+        $size = round(filesize($path) / 1024, 2);
+
+        // GD memory formula: width * height * 4 bytes (RGBA)
+        $estimatedMB = $info
+            ? round(($info[0] * $info[1] * 4) / 1024 / 1024, 2)
+            : null;
+
+        Log::debug("Image [{$label}]", [
+            'path'          => $path,
+            'file_size_kb'  => $size,
+            'dimensions'    => $info ? $info[0] . 'x' . $info[1] : 'unknown',
+            'gd_memory_est' => $estimatedMB ? "{$estimatedMB} MB" : 'unknown',
+        ]);
+    }
+
+    private function logMemory(string $checkpoint): void
+    {
+        Log::debug("Memory [{$checkpoint}]", [
+            'current_mb' => round(memory_get_usage(true) / 1024 / 1024, 2),
+            'peak_mb'    => round(memory_get_peak_usage(true) / 1024 / 1024, 2),
+        ]);
     }
 }
