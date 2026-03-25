@@ -487,6 +487,7 @@ $(document).ready(function () {
         var imageId = $("#image-id").val();
         var hasMockup = $("#has_mockup").val();
         var hasOrientation = $("#has_orientation").val();
+        console.log(hasOrientation)
         var image = $("#imagePreview").attr("src");
         var id = $("#category-id").val();
         $("#edit-category-name-en").val(nameEN);

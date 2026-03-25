@@ -21,7 +21,8 @@
                             <div class="dz-message" data-dz-message>
                                 <span>Drop image here or click to upload</span>
                             </div>
-                        </div <!-- hidden input to store uploaded image_id -->
+                        </div>
+                        <!-- hidden input to store uploaded image_id -->
                         <input type="hidden" name="image_id" id="uploadedImage">
                     </div>
                     <span class="image-hint small text-end">
@@ -139,7 +140,7 @@
                                    Orientation?</label>
                                <div class="form-check form-switch">
                                    <input type="hidden" name="has_orientation" value="0" />
-                                   <input class="form-check-input" type="checkbox" id="has_orientation" name="has_orientation"
+                                   <input class="form-check-input" type="checkbox"  name="has_orientation"
                                           value="1" />
 
                                </div>
