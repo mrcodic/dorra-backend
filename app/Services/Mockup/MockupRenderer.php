@@ -37,20 +37,17 @@ class MockupRenderer
             throw new \InvalidArgumentException("Shirt/mask image not found: {$shirtPath}");
         }
 
-        // ----- 3) Read images fresh (no clone — avoids memory leaks) -----
-        $shirt = Image::read($shirtPath);
-
-        // ----- 4) Tint the shirt -----
+        // ----- 3) Tint the shirt (reads fresh from disk — no clone) -----
         $tintedShirt = (!empty($hex))
-            ? $this->tintShirt($shirt, $hex)
-            : $shirt;
+            ? $this->tintShirt($shirtPath, $hex)
+            : Image::read($shirtPath);
 
-        // ----- 5) Compose canvas: fresh base read + tinted shirt -----
-        // We read base fresh here instead of cloning to avoid memory issues
+        // ----- 4) Compose canvas: fresh base read + tinted shirt -----
         $canvas = Image::read($basePath);
         $canvas->place($tintedShirt, 'top-left', 0, 0);
+        unset($tintedShirt); // free GD resource immediately
 
-        // ----- 6) Place design if provided -----
+        // ----- 5) Place design if provided -----
         if ($designPath) {
             if (!file_exists($designPath)) {
                 throw new \InvalidArgumentException("Design image not found: {$designPath}");
@@ -71,19 +68,22 @@ class MockupRenderer
             $offsetY = $printY;
 
             $canvas->place($design, 'top-left', $offsetX, $offsetY);
+            unset($design); // free GD resource immediately
         }
 
-        // ----- 7) Scale down for web -----
+        // ----- 6) Scale down for web -----
         if ($maxDim > 0) {
             $canvas->scaleDown(width: $maxDim, height: $maxDim);
         }
 
-        // ----- 8) Return encoded PNG -----
+        // ----- 7) Return encoded PNG -----
         return $canvas->toPng()->toString();
     }
 
     /**
      * Tint shirt PNG with HEX color, preserving fabric texture/folds.
+     *
+     * Reads fresh from disk instead of cloning to avoid GD memory duplication.
      *
      * Handles edge cases:
      *  - Pure black (#000000): greyscale + heavy darken, no colorize (colorize on black = still black)
@@ -91,7 +91,7 @@ class MockupRenderer
      *  - Near-black / near-white: blended approach
      *  - All other colors: greyscale + colorize with wider range for vivid results
      */
-    public function tintShirt($shirt, string $hex): mixed
+    public function tintShirt(string $shirtPath, string $hex): mixed
     {
         $hex = ltrim($hex, '#');
 
@@ -107,7 +107,8 @@ class MockupRenderer
         // Perceived brightness (0–255)
         $brightness = (int)(0.299 * $r + 0.587 * $g + 0.114 * $b);
 
-        $img = clone $shirt;
+        // Read fresh from disk — avoids cloning the GD bitmap into memory
+        $img = Image::read($shirtPath);
         $img->greyscale();
 
         // ── Pure / near-black (brightness < 20) ──────────────────────────
