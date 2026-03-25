@@ -464,6 +464,7 @@ $(document).ready(function () {
         $scope.find(m.descAr).val(data.description_ar || "");
         $scope.find(m.descEn).val(data.description_en || "");
         $scope.find(m.has_mockup).prop('checked', !!data.has_mockup);
+        $scope.find(m.has_orientation).prop('checked', !!data.has_orientation);
         $scope.find(m.img).attr("src", data.image || "");
         if (m.imgId) $scope.find(m.imgId).val(data.image_id || "");
         $scope.find(m.id).val(data.id || "");
@@ -485,6 +486,7 @@ $(document).ready(function () {
         var descAR = $("#category-description-ar").val();
         var imageId = $("#image-id").val();
         var hasMockup = $("#has_mockup").val();
+        var hasOrientation = $("#has_orientation").val();
         var image = $("#imagePreview").attr("src");
         var id = $("#category-id").val();
         $("#edit-category-name-en").val(nameEN);
@@ -492,6 +494,7 @@ $(document).ready(function () {
         $("#edit-category-description-en").val(descEN);
         $("#edit-category-description-ar").val(descAR);
         $("#has_mockup").prop('checked', !!hasMockup);
+        $("#has_orientation").prop('checked', !!hasOrientation);
         $("#edit-category-id").val(id);
         $("#edit-uploaded-image").removeClass("d-none");
         $("#edit-preview-image").attr("src", image);
