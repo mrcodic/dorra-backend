@@ -77,13 +77,15 @@ class TemplateResource extends JsonResource
                         ->sortByDesc('pivot.created_at')
                         ->values()
                         ->map(function ($media) {
-                            $fontStyle = $media->model;
-                            if (!$fontStyle) return null;
+                            $model = $media->model;
+                            if (!$model) return null;
 
-                            $fontStyle->loadMissing('font');
-                            if (!$fontStyle->font) return null;
+                            if (!$model instanceof \App\Models\FontStyle) return null;
 
-                            return $fontStyle->font->loadMissing('fontStyles.media');
+                            $model->loadMissing('font');
+                            if (!$model->font) return null;
+
+                            return $model->font->loadMissing('fontStyles.media');
                         })
                         ->filter()
                         ->unique('id')
