@@ -15,7 +15,7 @@
 
 
                 <div class="modal-body flex-grow-1 d-flex flex-column gap-2">
-
+                    <input type="hidden" name="category_id" value="{{ request('product_without_category_id') }}">
                     {{-- With Editor --}}
                     <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
                         <input

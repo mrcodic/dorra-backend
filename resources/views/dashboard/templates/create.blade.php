@@ -9,7 +9,9 @@
     <!-- Vendor CSS Files -->
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
 @endsection
-
+@php
+$category = \App\Models\Category::find(request('category_id'));
+@endphp
 @section('content')
     <section id="multiple-column-form ">
         <div class="row ">
@@ -233,13 +235,15 @@
                                         <div class="col-md-6">
                                             <label for="templateName" class="label-text mb-1">Name (EN)</label>
                                             <input type="text" id="templateName" class="form-control" name="name[en]"
-                                                   placeholder="Template Name in English" value="Personal Card">
+                                                   placeholder="Template Name in English"
+                                                   value="{{ $category?->getTranslation('name','en') ?? 'Personal Card'}}">
                                         </div>
 
                                         <div class="col-md-6">
                                             <label for="templateName" class="label-text mb-1">Name (AR)</label>
                                             <input type="text" id="templateName" class="form-control" name="name[ar]"
-                                                   placeholder="Template Name in Arabic" value="كارت شخصى">
+                                                   placeholder="Template Name in Arabic"
+                                                   value="{{ $category?->getTranslation('name','ar') ?? 'كارت شخصى'}}">
                                         </div>
 
 
@@ -289,11 +293,11 @@
                                                 Categories</label>
                                             <select id="categoriesSelect" class="form-select select2"
                                                     name="product_with_category" multiple>
-                                                @foreach($associatedData['product_with_categories'] as $category)
-                                                    <option value="{{ $category->id }}"
-                                                        @selected($category->getTranslation('name', 'en') === 'Business Card')
+                                                @foreach($associatedData['product_with_categories'] as $cate)
+                                                    <option value="{{ $cate->id }}"
+                                                        @selected($cate->id === ($category?->id ?? 1))
                                                     >
-                                                        {{ $category->getTranslation('name', app()->getLocale()) }}
+                                                        {{ $cate->getTranslation('name', app()->getLocale()) }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -313,9 +317,12 @@
                                                 Without Categories</label>
                                             <select id="productsWithoutCategoriesSelect" class="form-select select2"
                                                     name="category_ids[]" multiple>
-                                                @foreach($associatedData['product_without_categories'] as $category)
-                                                    <option value="{{ $category->id }}" data-has-mockup="{{ $category->has_mockup ? '1' : '0' }}">
-                                                        {{ $category->getTranslation('name', app()->getLocale()) }}
+                                                @foreach($associatedData['product_without_categories'] as $cate)
+                                                    <option value="{{ $cate->id }}"
+                                                            @selected($cate->id === ($category?->id ?? 1))
+
+                                                            data-has-mockup="{{ $cate->has_mockup ? '1' : '0' }}">
+                                                        {{ $cate->getTranslation('name', app()->getLocale()) }}
                                                     </option>
                                                 @endforeach
                                             </select>
