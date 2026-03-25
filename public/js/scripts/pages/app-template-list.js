@@ -39,7 +39,7 @@ function fetchTemplates(page = 1) {
     let requestData = {
         page: page,
         search_value: $('#search-category-form').val(),
-        product_id: $('.filter-product').val(),
+        product_without_category_id: $('.filter-product').val(),
         best_seller: $('.filter-best-seller').val(),
         tags: $('.filter-tags').val(),
         status: $('.filter-status').val(),

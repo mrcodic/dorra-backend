@@ -59,6 +59,7 @@ class TemplateController extends DashboardController
         $this->assoiciatedData = [
             'shared' => [
                 'products' => $this->productRepository->query()->get(['id', 'name']),
+                'categories' => $this->categoryRepository->query()->get(['id', 'name']),
                 'industries' => $this->industryRepository->query()->whereNull('parent_id')->get(['id', 'name']),
                 'sub_industries' => $this->industryRepository->query()->whereNotNull('parent_id')->get(['id', 'name']),
                 'product_with_categories' => $this->categoryRepository->query()->where('is_has_category',1)->has('products')->get(['id', 'name']),
