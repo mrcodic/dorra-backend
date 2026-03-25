@@ -2,26 +2,18 @@
 
 namespace App\Services\Mockup;
 
-use Intervention\Image\Laravel\Facades\Image;
-use Illuminate\Support\Facades\Log;
+use Imagick;
+use ImagickPixel;
 
 class MockupRenderer
 {
-    /**
-     * Render a mockup with:
-     * - base image (model wearing shirt)
-     * - shirt PNG (transparent mask / overlay)
-     * - optional design to place on shirt
-     * - tint color (HEX)
-     * - configurable print box & size
-     */
     public function render(array $options): string
     {
-        // ----- 1) Read options with sane defaults -----
-        $basePath   = $options['base_path'];           // required
-        $shirtPath  = $options['shirt_path'];          // required
+        $basePath   = $options['base_path'] ?? null;
+        $maskPath   = $options['shirt_mask_path'] ?? ($options['shirt_path'] ?? null);
+        $shadowPath = $options['shirt_shadow_path'] ?? ($options['shadow_path'] ?? null);
         $designPath = $options['design_path'] ?? null;
-        $hex        = $options['hex'] ?? null;
+        $hex        = $this->normalizeHex($options['hex'] ?? null);
 
         $printX = (int)($options['print_x'] ?? 360);
         $printY = (int)($options['print_y'] ?? 660);
@@ -30,167 +22,258 @@ class MockupRenderer
         $maxDim = (int)($options['max_dim'] ?? 800);
         $angle  = (float)($options['angle'] ?? 0);
 
-        // ----- 2) Validate paths -----
-        if (!file_exists($basePath)) {
+        if (!$basePath || !file_exists($basePath)) {
             throw new \InvalidArgumentException("Base image not found: {$basePath}");
         }
-        if (!file_exists($shirtPath)) {
-            throw new \InvalidArgumentException("Shirt/mask image not found: {$shirtPath}");
+
+        if (!$maskPath || !file_exists($maskPath)) {
+            throw new \InvalidArgumentException("Mask image not found: {$maskPath}");
         }
 
-        // ----- LOG: file sizes & dimensions before anything is loaded -----
-        $this->logImageInfo('base',   $basePath);
-        $this->logImageInfo('shirt',  $shirtPath);
-        if ($designPath) {
-            $this->logImageInfo('design', $designPath);
+        if ($shadowPath && !file_exists($shadowPath)) {
+            $shadowPath = null;
         }
-        $this->logMemory('start');
 
-        // ----- 3) Tint the shirt (reads fresh from disk — no clone) -----
-        $tintedShirt = (!empty($hex))
-            ? $this->tintShirt($shirtPath, $hex)
-            : Image::read($shirtPath);
+        if ($designPath && !file_exists($designPath)) {
+            throw new \InvalidArgumentException("Design image not found: {$designPath}");
+        }
 
-        $this->logMemory('after tintShirt');
+        // sourceBase = الأصل الذي نستخرج منه texture/folds
+        $sourceBase = $this->load($basePath);
+        $canvas     = $this->load($basePath);
 
-        // ----- 4) Compose canvas: fresh base read + tinted shirt -----
-        $canvas = Image::read($basePath);
-        $this->logMemory('after base read');
+        $w = $canvas->getImageWidth();
+        $h = $canvas->getImageHeight();
 
-        $canvas->place($tintedShirt, 'top-left', 0, 0);
-        unset($tintedShirt); // free GD resource immediately
-        $this->logMemory('after place shirt + unset');
+        $mask   = $this->load($maskPath, $w, $h);
+        $shadow = $shadowPath ? $this->load($shadowPath, $w, $h) : null;
 
-        // ----- 5) Place design if provided -----
+        // 1) recolor shirt
+        if ($hex) {
+            $tintedShirt = $this->buildTintedShirtFromBase($sourceBase, $mask, $hex);
+            $canvas->compositeImage($tintedShirt, Imagick::COMPOSITE_DEFAULT, 0, 0);
+            $tintedShirt->clear();
+            $tintedShirt->destroy();
+        }
+
+        // 2) design layer with professional fabric blending
         if ($designPath) {
-            if (!file_exists($designPath)) {
-                throw new \InvalidArgumentException("Design image not found: {$designPath}");
+            $design = $this->load($designPath);
+
+            if (abs($angle) > 0.001) {
+                $design->setImageBackgroundColor(new ImagickPixel('transparent'));
+                $design->rotateImage(new ImagickPixel('transparent'), -$angle);
             }
 
-            $design = Image::read($designPath);
-            $this->logMemory('after design read');
+            $design = $this->fitContain($design, $printW, $printH);
 
-            // Scale design to fit inside the print box
-            $design->scaleDown(width: $printW, height: $printH);
+            $offsetX = $printX + (int)(($printW - $design->getImageWidth()) / 2);
+            $offsetY = $printY + (int)(($printH - $design->getImageHeight()) / 2);
 
-            // Rotate around center, keeping alpha channel
-            if (!empty($angle)) {
-                $design = $design->rotate(-(float)$angle, 'transparent');
-                $this->logMemory('after design rotate');
-            }
+            $designLayer = new Imagick();
+            $designLayer->newImage($w, $h, new ImagickPixel('transparent'), 'png');
+            $designLayer->setImageAlphaChannel(Imagick::ALPHACHANNEL_SET);
+            $designLayer->compositeImage($design, Imagick::COMPOSITE_DEFAULT, $offsetX, $offsetY);
 
-            // Center the design horizontally within the print box
-            $offsetX = $printX + (int)(($printW - $design->width()) / 2);
-            $offsetY = $printY;
+            // قص التصميم داخل التيشيرت
+            $shirtMaskForClip = clone $mask;
+            $shirtMaskForClip->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
+            $designLayer->compositeImage($shirtMaskForClip, Imagick::COMPOSITE_DSTIN, 0, 0);
 
-            $canvas->place($design, 'top-left', $offsetX, $offsetY);
-            unset($design); // free GD resource immediately
-            $this->logMemory('after place design + unset');
+            // احتفظ بألفا التصميم نفسه بعد القص
+            $designAlpha = clone $designLayer;
+
+            // Apply fabric texture/folds to design itself
+            $this->applyFabricToDesignLayer($designLayer, $sourceBase, $mask, $shadow);
+
+            // ارجع ألفا التصميم نفسه حتى لا يملأ layer بالكامل
+            $designLayer->compositeImage($designAlpha, Imagick::COMPOSITE_COPYOPACITY, 0, 0);
+
+            $canvas->compositeImage($designLayer, Imagick::COMPOSITE_DEFAULT, 0, 0);
+
+            $designAlpha->clear();
+            $designAlpha->destroy();
+
+            $shirtMaskForClip->clear();
+            $shirtMaskForClip->destroy();
+
+            $designLayer->clear();
+            $designLayer->destroy();
+
+            $design->clear();
+            $design->destroy();
         }
 
-        // ----- 6) Scale down for web -----
+        // 3) global shadow on top, but gently
+        if ($shadow) {
+            $shadowBlend = clone $shadow;
+            $this->multiplyAlpha($shadowBlend, 0.18);
+            $canvas->compositeImage($shadowBlend, Imagick::COMPOSITE_MULTIPLY, 0, 0);
+
+            $shadowBlend->clear();
+            $shadowBlend->destroy();
+
+            $shadow->clear();
+            $shadow->destroy();
+        }
+
         if ($maxDim > 0) {
-            $canvas->scaleDown(width: $maxDim, height: $maxDim);
-            $this->logMemory('after scaleDown');
+            $canvas->thumbnailImage($maxDim, $maxDim, true, true);
         }
 
-        // ----- 7) Return encoded PNG -----
-        $result = $canvas->toPng()->toString();
-        unset($canvas);
-        $this->logMemory('after encode + unset canvas');
+        $canvas->setImageFormat('png');
+        $blob = $canvas->getImageBlob();
 
-        return $result;
+        $canvas->clear();
+        $canvas->destroy();
+
+        $sourceBase->clear();
+        $sourceBase->destroy();
+
+        $mask->clear();
+        $mask->destroy();
+
+        return $blob;
     }
 
-    /**
-     * Tint shirt PNG with HEX color, preserving fabric texture/folds.
-     *
-     * Reads fresh from disk instead of cloning to avoid GD memory duplication.
-     */
-    public function tintShirt(string $shirtPath, string $hex): mixed
+    private function applyFabricToDesignLayer(
+        Imagick $designLayer,
+        Imagick $sourceBase,
+        Imagick $mask,
+        ?Imagick $shadow
+    ): void {
+        // grayscale fabric map from original shirt
+        $fabric = $this->buildMaskedGrayscaleMap($sourceBase, $mask);
+
+        // 1) soft light overall fabric grain/folds
+        $soft = clone $fabric;
+        $this->multiplyAlpha($soft, 0.22);
+        $designLayer->compositeImage($soft, Imagick::COMPOSITE_SOFTLIGHT, 0, 0);
+
+        // 2) dark folds only
+        $dark = clone $fabric;
+        $dark->gammaImage(1.28);
+        $this->multiplyAlpha($dark, 0.14);
+        $designLayer->compositeImage($dark, Imagick::COMPOSITE_MULTIPLY, 0, 0);
+
+        // 3) highlights only
+        $light = clone $fabric;
+        $light->gammaImage(0.82);
+        $this->multiplyAlpha($light, 0.07);
+        $designLayer->compositeImage($light, Imagick::COMPOSITE_SCREEN, 0, 0);
+
+        // 4) local shadow on design itself
+        if ($shadow) {
+            $localShadow = clone $shadow;
+            $this->multiplyAlpha($localShadow, 0.12);
+            $designLayer->compositeImage($localShadow, Imagick::COMPOSITE_MULTIPLY, 0, 0);
+            $localShadow->clear();
+            $localShadow->destroy();
+        }
+
+        $soft->clear();
+        $soft->destroy();
+
+        $dark->clear();
+        $dark->destroy();
+
+        $light->clear();
+        $light->destroy();
+
+        $fabric->clear();
+        $fabric->destroy();
+    }
+
+    private function buildMaskedGrayscaleMap(Imagick $base, Imagick $mask): Imagick
     {
-        $hex = ltrim($hex, '#');
+        $map = clone $base;
+        $map->setImageAlphaChannel(Imagick::ALPHACHANNEL_SET);
+        $map->compositeImage($mask, Imagick::COMPOSITE_COPYOPACITY, 0, 0);
 
-        // Pad shorthand hex (e.g. "fff" -> "ffffff")
-        if (strlen($hex) === 3) {
-            $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+        // remove shirt color, keep luminance/folds
+        $map->modulateImage(100, 0, 100);
+
+        // small blur so it behaves like fabric shading, not harsh edges
+        $map->gaussianBlurImage(1.2, 0.6);
+
+        return $map;
+    }
+
+    private function buildTintedShirtFromBase(Imagick $base, Imagick $mask, string $hex): Imagick
+    {
+        $w = $base->getImageWidth();
+        $h = $base->getImageHeight();
+
+        $texture = clone $base;
+        $texture->setImageAlphaChannel(Imagick::ALPHACHANNEL_SET);
+        $texture->compositeImage($mask, Imagick::COMPOSITE_COPYOPACITY, 0, 0);
+
+        // keep folds/highlights only
+        $texture->modulateImage(100, 0, 100);
+        $texture->gammaImage(0.92);
+
+        $solid = new Imagick();
+        $solid->newImage($w, $h, new ImagickPixel($hex), 'png');
+        $solid->setImageAlphaChannel(Imagick::ALPHACHANNEL_SET);
+        $solid->compositeImage($mask, Imagick::COMPOSITE_COPYOPACITY, 0, 0);
+
+        // fabric folds on shirt color
+        $solid->compositeImage($texture, Imagick::COMPOSITE_MULTIPLY, 0, 0);
+
+        $texture->clear();
+        $texture->destroy();
+
+        return $solid;
+    }
+
+    private function fitContain(Imagick $img, int $maxW, int $maxH): Imagick
+    {
+        $copy = clone $img;
+        $copy->thumbnailImage($maxW, $maxH, true, true);
+        return $copy;
+    }
+
+    private function multiplyAlpha(Imagick $image, float $factor): void
+    {
+        $image->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
+        $image->evaluateImage(
+            Imagick::EVALUATE_MULTIPLY,
+            $factor,
+            Imagick::CHANNEL_ALPHA
+        );
+    }
+
+    private function load(string $path, ?int $targetW = null, ?int $targetH = null): Imagick
+    {
+        $img = new Imagick($path);
+        $img->setImageFormat('png');
+        $img->setImageAlphaChannel(Imagick::ALPHACHANNEL_SET);
+
+        if ($targetW && $targetH) {
+            if ($img->getImageWidth() !== $targetW || $img->getImageHeight() !== $targetH) {
+                $img->resizeImage($targetW, $targetH, Imagick::FILTER_LANCZOS, 1);
+            }
         }
-
-        $r = hexdec(substr($hex, 0, 2));
-        $g = hexdec(substr($hex, 2, 2));
-        $b = hexdec(substr($hex, 4, 2));
-
-        // Perceived brightness (0–255)
-        $brightness = (int)(0.299 * $r + 0.587 * $g + 0.114 * $b);
-
-        // Read fresh from disk — avoids cloning the GD bitmap into memory
-        $img = Image::read($shirtPath);
-        $this->logMemory('tintShirt: after read');
-
-        $img->greyscale();
-        $this->logMemory('tintShirt: after greyscale');
-
-        // ── Pure / near-black (brightness < 20) ──────────────────────────
-        if ($brightness < 20) {
-            $img->brightness(-55)->contrast(15);
-            $this->logMemory('tintShirt: after black adjust');
-            return $img;
-        }
-
-        // ── Pure / near-white (brightness > 235) ─────────────────────────
-        if ($brightness > 235) {
-            $img->brightness(55)->contrast(-10);
-            $this->logMemory('tintShirt: after white adjust');
-            return $img;
-        }
-
-        // ── All other colors ──────────────────────────────────────────────
-        $map = function (int $c): int {
-            return (int)round((($c - 128) / 128) * 100);
-        };
-
-        $rAdj = $map($r);
-        $gAdj = $map($g);
-        $bAdj = $map($b);
-
-        $brightnessShift = (int)(($brightness - 128) / 128 * 30);
-
-        $img->colorize($rAdj, $gAdj, $bAdj)
-            ->contrast(10)
-            ->brightness($brightnessShift);
-
-        $this->logMemory('tintShirt: after colorize');
 
         return $img;
     }
 
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private function logImageInfo(string $label, string $path): void
+    private function normalizeHex(?string $hex): ?string
     {
-        $info = @getimagesize($path);
-        $size = round(filesize($path) / 1024, 2);
+        if (!$hex) {
+            return null;
+        }
 
-        // GD memory formula: width * height * 4 bytes (RGBA)
-        $estimatedMB = $info
-            ? round(($info[0] * $info[1] * 4) / 1024 / 1024, 2)
-            : null;
+        $hex = ltrim(trim($hex), '#');
 
-        Log::debug("Image [{$label}]", [
-            'path'          => $path,
-            'file_size_kb'  => $size,
-            'dimensions'    => $info ? $info[0] . 'x' . $info[1] : 'unknown',
-            'gd_memory_est' => $estimatedMB ? "{$estimatedMB} MB" : 'unknown',
-        ]);
-    }
+        if (strlen($hex) === 3) {
+            $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+        }
 
-    private function logMemory(string $checkpoint): void
-    {
-        Log::debug("Memory [{$checkpoint}]", [
-            'current_mb' => round(memory_get_usage(true) / 1024 / 1024, 2),
-            'peak_mb'    => round(memory_get_peak_usage(true) / 1024 / 1024, 2),
-        ]);
+        if (!preg_match('/^[0-9a-fA-F]{6}$/', $hex)) {
+            return null;
+        }
+
+        return '#' . strtolower($hex);
     }
 }
