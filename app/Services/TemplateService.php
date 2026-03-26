@@ -198,8 +198,8 @@ class TemplateService extends BaseService
         }
 
         return $paginate
-            ? $query->paginate($requested)
-            : $query->get();
+            ? $query->latest()->paginate($requested)
+            : $query->latest()->get();
     }
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {

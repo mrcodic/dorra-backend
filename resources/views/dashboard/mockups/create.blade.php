@@ -1324,7 +1324,7 @@
                 url: "{{ route('media.store') }}",
                 paramName: "file",
                 maxFiles: 1,
-                maxFilesize: 10,
+                maxFilesize: 12,
                 acceptedFiles: "image/png",
                 dictInvalidFileType: "Only PNG files are allowed.",
                 headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
