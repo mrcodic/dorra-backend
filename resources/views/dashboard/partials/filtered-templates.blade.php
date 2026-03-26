@@ -42,8 +42,9 @@
                     data-feather="more-vertical"></i></button>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="actionDropdown{{ $template->id }}">
                 @can('product-templates_update')
-                <li><a class="dropdown-item" href="{{ route('product-templates.edit',$template->id) }}"><i
-                            data-feather="edit-3" class="me-1"></i>Edit</a></li>
+                <li><a class="dropdown-item" href="{{
+    route('product-templates.edit',$template->id) .'?'. http_build_query(request()->query()) }}">
+                        <i data-feather="edit-3" class="me-1"></i>Edit</a></li>
                 @endcan
                 @can('product-templates_show')
                 @if($template->approach == 'with_editor')

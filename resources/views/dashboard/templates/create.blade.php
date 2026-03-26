@@ -1424,7 +1424,8 @@ $category = \App\Models\Category::find(request('category_id'));
 
                 // ✅ 3) Default fallback
                 setTimeout(function () {
-                    window.location.href = '/product-templates';
+                    const params = new URLSearchParams(window.location.search);
+                    window.location.href = '/product-templates?' + params.toString();
                 }, 1000);
             },
             onError: function () {

@@ -395,34 +395,90 @@ Route::get('test-canvas/{id}', function ($id){
     app(SyncCanvasAssets::class)->processCanvasColumn($template,'design_back_data');
 });
 
-Route::get('/debug/mockup-render-direct', function (Request $request, MockupRenderer $renderer) {
+Route::get('/debug/mockup-render-perspective', function (Request $request, MockupRenderer $renderer) {
     $token = (string) $request->query('token', '');
     abort_unless($token === 'pixbyte-debug-123', 403);
 
-    $mockupId = (int) $request->query('mockup_id');
+    $mockupId      = (int) $request->query('mockup_id');
     $designMediaId = (int) $request->query('design_media_id');
-    $side = strtolower((string) $request->query('side', 'front'));
-    $hex = $request->query('hex');
-    $noShadow = $request->boolean('no_shadow', false);
-    $save = $request->boolean('save', false);
-    $debug = $request->boolean('debug', false);
-    $maxDim = (int) $request->query('max_dim', 1600);
-    $angle = (float) $request->query('angle', 0);
+    $side          = strtolower((string) $request->query('side', 'front'));
+    $hex           = $request->query('hex');
+    $save          = $request->boolean('save', false);
+    $debug         = $request->boolean('debug', false);
+    $skipMaskClip  = $request->boolean('skip_mask_clip', false);
+
+    $renderMode = strtolower((string) $request->query('render_mode', 'logo'));
+    if (!in_array($renderMode, ['logo', 'full_art'], true)) {
+        $renderMode = 'logo';
+    }
+
+    $presets = [
+        'logo' => [
+            'design_scale'       => 0.95,
+            'texture_strength'   => 0.28,
+            'highlight_strength' => 0.06,
+            'shadow_strength'    => 1.03,
+            'design_opacity'     => 0.96,
+            'design_softness'    => 0.16,
+            'displace_x'         => 1.0,
+            'displace_y'         => 1.8,
+            'displace_blur'      => 1.9,
+            'displace_emboss'    => 0.28,
+            'displace_contrast'  => 3.5,
+        ],
+        'full_art' => [
+            // أكبر من 1 عشان يقدر يملأ المساحة
+            'design_scale'       => 1.80,
+            // أخف من logo mode للحفاظ على اللون
+            'texture_strength'   => 0.18,
+            'highlight_strength' => 0.04,
+            'shadow_strength'    => 1.02,
+            'design_opacity'     => 0.99,
+            'design_softness'    => 0.08,
+            'displace_x'         => 0.60,
+            'displace_y'         => 1.10,
+            'displace_blur'      => 2.30,
+            'displace_emboss'    => 0.16,
+            'displace_contrast'  => 2.0,
+        ],
+    ];
+
+    $preset = $presets[$renderMode];
+
+    $resolveFloat = function (string $key, float $default, float $min, float $max) use ($request): float {
+        $value = $request->query($key, $default);
+        $value = is_numeric($value) ? (float) $value : $default;
+        return max($min, min($max, $value));
+    };
+
+    $designScale = $resolveFloat('design_scale', $preset['design_scale'], 0.05, 4.0);
+
+    $textureStrength   = $resolveFloat('texture_strength', $preset['texture_strength'], 0.0, 1.0);
+    $highlightStrength = $resolveFloat('highlight_strength', $preset['highlight_strength'], 0.0, 1.0);
+    $shadowStrength    = $resolveFloat('shadow_strength', $preset['shadow_strength'], 0.0, 2.0);
+    $designOpacity     = $resolveFloat('design_opacity', $preset['design_opacity'], 0.0, 1.0);
+    $designSoftness    = $resolveFloat('design_softness', $preset['design_softness'], 0.0, 2.0);
+
+    $displaceX        = $resolveFloat('displace_x', $preset['displace_x'], 0.0, 40.0);
+    $displaceY        = $resolveFloat('displace_y', $preset['displace_y'], 0.0, 40.0);
+    $displaceBlur     = $resolveFloat('displace_blur', $preset['displace_blur'], 0.0, 10.0);
+    $displaceEmboss   = $resolveFloat('displace_emboss', $preset['displace_emboss'], 0.1, 10.0);
+    $displaceContrast = $resolveFloat('displace_contrast', $preset['displace_contrast'], 0.0, 100.0);
 
     $mockup = Mockup::with(['media'])->findOrFail($mockupId);
     $designMedia = Media::findOrFail($designMediaId);
 
-    $base = $mockup->getMedia('mockups')->first(fn($m) =>
+    $base = $mockup->getMedia('mockups')->first(fn ($m) =>
         $m->getCustomProperty('side') === $side &&
         $m->getCustomProperty('role') === 'base'
     );
 
-    $mask = $mockup->getMedia('mockups')->first(fn($m) =>
+    $mask = $mockup->getMedia('mockups')->first(fn ($m) =>
         $m->getCustomProperty('side') === $side &&
         $m->getCustomProperty('role') === 'mask'
     );
 
-    $shadow = $mockup->getMedia('mockups')->first(fn($m) =>
+    $shadow = $mockup->getMedia('mockups')->first(fn ($m) =>
         $m->getCustomProperty('side') === $side &&
         $m->getCustomProperty('role') === 'shadow'
     );
@@ -431,93 +487,125 @@ Route::get('/debug/mockup-render-direct', function (Request $request, MockupRend
         return response()->json([
             'ok' => false,
             'error' => 'base or mask missing',
-            'mockup_id' => $mockupId,
-            'side' => $side,
-            'base' => $base?->getPath(),
-            'mask' => $mask?->getPath(),
-            'shadow' => $shadow?->getPath(),
         ], 422);
     }
 
     if (!file_exists($designMedia->getPath())) {
         return response()->json([
             'ok' => false,
-            'error' => 'design file missing',
-            'design_media_id' => $designMediaId,
+            'error' => 'design missing',
             'design_path' => $designMedia->getPath(),
         ], 422);
     }
 
-    $printX = (int) $request->query('print_x', (int) $mockup->area_left);
-    $printY = (int) $request->query('print_y', (int) $mockup->area_top);
-    $printW = (int) $request->query('print_w', (int) $mockup->area_width);
-    $printH = (int) $request->query('print_h', (int) $mockup->area_height);
+    $warpKeys = ['tlx', 'tly', 'trx', 'try', 'brx', 'bry', 'blx', 'bly'];
+
+    $hasWarp = collect($warpKeys)->every(function ($key) use ($request) {
+        $value = $request->query($key);
+        return $value !== null && $value !== '' && is_numeric($value);
+    });
+
+    $warp = $hasWarp ? [
+        'tl' => [(int) $request->query('tlx'), (int) $request->query('tly')],
+        'tr' => [(int) $request->query('trx'), (int) $request->query('try')],
+        'br' => [(int) $request->query('brx'), (int) $request->query('bry')],
+        'bl' => [(int) $request->query('blx'), (int) $request->query('bly')],
+    ] : null;
 
     if ($debug) {
+        $baseImg = new \Imagick($base->getPath());
+        $maskImg = new \Imagick($mask->getPath());
+
+        $tmp = clone $maskImg;
+        $tmp->trimImage(0);
+        $page = $tmp->getImagePage();
+
+        $maskBounds = [
+            'x' => max(0, (int) ($page['x'] ?? 0)),
+            'y' => max(0, (int) ($page['y'] ?? 0)),
+            'w' => max(1, $tmp->getImageWidth()),
+            'h' => max(1, $tmp->getImageHeight()),
+        ];
+
+        $tmp->clear();
+        $tmp->destroy();
+        $maskImg->clear();
+        $maskImg->destroy();
+
+        $baseSize = [
+            'w' => $baseImg->getImageWidth(),
+            'h' => $baseImg->getImageHeight(),
+        ];
+
+        $baseImg->clear();
+        $baseImg->destroy();
+
         return response()->json([
             'ok' => true,
+            'render_mode' => $renderMode,
             'mockup_id' => $mockupId,
             'design_media_id' => $designMediaId,
             'side' => $side,
             'hex' => $hex,
-            'no_shadow' => $noShadow,
-            'print_box' => [
-                'x' => $printX,
-                'y' => $printY,
-                'w' => $printW,
-                'h' => $printH,
-                'angle' => $angle,
-            ],
             'base' => $base->getPath(),
             'mask' => $mask->getPath(),
-            'shadow' => $noShadow ? null : $shadow?->getPath(),
+            'shadow' => $shadow?->getPath(),
             'design' => $designMedia->getPath(),
-            'mockup_defaults' => [
-                'area_left' => (int) $mockup->area_left,
-                'area_top' => (int) $mockup->area_top,
-                'area_width' => (int) $mockup->area_width,
-                'area_height' => (int) $mockup->area_height,
-            ],
+            'base_size' => $baseSize,
+            'mask_bounds' => $maskBounds,
+            'warp' => $warp,
+            'design_scale' => $designScale,
+            'texture_strength' => $textureStrength,
+            'highlight_strength' => $highlightStrength,
+            'shadow_strength' => $shadowStrength,
+            'design_opacity' => $designOpacity,
+            'design_softness' => $designSoftness,
+            'displace_x' => $displaceX,
+            'displace_y' => $displaceY,
+            'displace_blur' => $displaceBlur,
+            'displace_emboss' => $displaceEmboss,
+            'displace_contrast' => $displaceContrast,
+            'skip_mask_clip' => $skipMaskClip,
         ]);
     }
 
-    try {
-        $binary = $renderer->render([
-            'base_path'         => $base->getPath(),
-            'shirt_mask_path'   => $mask->getPath(),
-            'shirt_shadow_path' => $noShadow ? null : $shadow?->getPath(),
-            'design_path'       => $designMedia->getPath(),
-            'print_x'           => $printX,
-            'print_y'           => $printY,
-            'print_w'           => $printW,
-            'print_h'           => $printH,
-            'angle'             => $angle,
-            'hex'               => $hex,
-            'max_dim'           => $maxDim,
-        ]);
+    $binary = $renderer->render([
+        'base_path'         => $base->getPath(),
+        'shirt_mask_path'   => $mask->getPath(),
+        'shirt_shadow_path' => $shadow?->getPath(),
+        'design_path'       => $designMedia->getPath(),
+        'warp_points'       => $warp,
+        'hex'               => $hex,
+        'max_dim'           => 1600,
+        'skip_mask_clip'    => $skipMaskClip,
+        'render_mode'       => $renderMode,
 
-        if ($save) {
-            $dir = storage_path('app/debug');
-            if (!is_dir($dir)) {
-                mkdir($dir, 0755, true);
-            }
+        'design_scale'       => $designScale,
+        'texture_strength'   => $textureStrength,
+        'highlight_strength' => $highlightStrength,
+        'shadow_strength'    => $shadowStrength,
+        'design_opacity'     => $designOpacity,
+        'design_softness'    => $designSoftness,
+        'displace_x'         => $displaceX,
+        'displace_y'         => $displaceY,
+        'displace_blur'      => $displaceBlur,
+        'displace_emboss'    => $displaceEmboss,
+        'displace_contrast'  => $displaceContrast,
+    ]);
 
-            $file = $dir . "/mockup_debug_{$mockupId}_{$designMediaId}_{$side}.png";
-            file_put_contents($file, $binary);
+    if ($save) {
+        $dir = storage_path('app/debug');
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
         }
 
-        return response($binary, 200, [
-            'Content-Type' => 'image/png',
-            'X-Debug-Print-X' => (string) $printX,
-            'X-Debug-Print-Y' => (string) $printY,
-            'X-Debug-Print-W' => (string) $printW,
-            'X-Debug-Print-H' => (string) $printH,
-            'X-Debug-Shadow' => $noShadow ? 'off' : 'on',
-        ]);
-    } catch (\Throwable $e) {
-        return response()->json([
-            'ok' => false,
-            'error' => $e->getMessage(),
-        ], 500);
+        file_put_contents(
+            $dir . "/mockup_perspective_{$mockupId}_{$designMediaId}_{$side}_{$renderMode}.png",
+            $binary
+        );
     }
+
+    return response($binary, 200, [
+        'Content-Type' => 'image/png',
+    ]);
 });
