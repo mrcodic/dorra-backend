@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Enums\HttpEnum;
 use App\Models\Admin;
 use App\Services\Ai\GenAiImageService;
+use App\Services\Mockup\MockupRenderConfigResolver;
+use App\Services\Mockup\MockupRenderModeResolver;
 use App\Services\SMS\SmsInterface;
 use App\Services\SMS\SmsMisrService;
 use Illuminate\Http\Request;
@@ -23,6 +25,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(SmsInterface::class,SmsMisrService::class);
+        $this->app->singleton(MockupRenderModeResolver::class);
+        $this->app->singleton(MockupRenderConfigResolver::class);
     }
 
     /**

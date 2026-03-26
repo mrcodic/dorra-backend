@@ -39,6 +39,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
     UserController
 };
 use App\Models\Template;
+use App\Services\Mockup\MockupRenderConfigResolver;
 use App\Http\Controllers\Shared\{CommentController, LibraryAssetController};
 use App\Http\Controllers\Shared\General\MainController;
 use App\Http\Middleware\AutoCheckPermission;
@@ -609,3 +610,200 @@ Route::get('/debug/mockup-render-perspective', function (Request $request, Mocku
         'Content-Type' => 'image/png',
     ]);
 });
+
+
+Route::get('/debug2/mockup-render-perspective', function (
+    Request $request,
+    MockupRenderer $renderer,
+    MockupRenderConfigResolver $configResolver,
+) {
+    // ===== الحماية =====
+    $token = (string) $request->query('token', '');
+    abort_unless($token === 'pixbyte-debug-123', 403);
+
+    // ===== المدخلات الأساسية =====
+    $mockupId      = (int) $request->query('mockup_id');
+    $designMediaId = (int) $request->query('design_media_id');
+    $side          = strtolower((string) $request->query('side', 'front'));
+    $hex           = $request->query('hex');
+    $save          = $request->boolean('save', false);
+    $debug         = $request->boolean('debug', false);
+    $skipMaskClip  = $request->boolean('skip_mask_clip', false);
+    $renderModeOverride = $request->query('render_mode');
+
+    // ===== جيب البيانات =====
+    $mockup      = Mockup::with(['media', 'sideSettings'])->findOrFail($mockupId);
+    $designMedia = Media::findOrFail($designMediaId);
+
+    // ===== جيب الإعدادات من الداتابيز =====
+    $urlOverrides = collectUrlOverrides($request);
+
+    $config     = $configResolver->resolve(
+        mockup:     $mockup,
+        side:       $side,
+        renderMode: $renderModeOverride ?? 'logo',
+        overrides:  $urlOverrides,
+    );
+
+    $renderMode = $config['render_mode'];
+    $preset     = $config['preset'];
+    $warp       = resolveUrlWarp($request) ?? $config['warp_points'];
+
+    // ===== جيب الصور =====
+    $mockupMedia = $mockup->getMedia('mockups');
+
+    $base = $mockupMedia->first(fn($m) =>
+        $m->getCustomProperty('side') === $side &&
+        $m->getCustomProperty('role') === 'base'
+    );
+
+    $mask = $mockupMedia->first(fn($m) =>
+        $m->getCustomProperty('side') === $side &&
+        $m->getCustomProperty('role') === 'mask'
+    );
+
+    $shadow = $mockupMedia->first(fn($m) =>
+        $m->getCustomProperty('side') === $side &&
+        $m->getCustomProperty('role') === 'shadow'
+    );
+
+    if (!$base || !$mask) {
+        return response()->json([
+            'ok'    => false,
+            'error' => 'base or mask missing',
+            'side'  => $side,
+        ], 422);
+    }
+
+    if (!file_exists($designMedia->getPath())) {
+        return response()->json([
+            'ok'          => false,
+            'error'       => 'design file missing on disk',
+            'design_path' => $designMedia->getPath(),
+        ], 422);
+    }
+
+    // ===== وضع التشخيص =====
+    if ($debug) {
+        $baseImg = new \Imagick($base->getPath());
+        $maskImg = new \Imagick($mask->getPath());
+
+        $tmp  = clone $maskImg;
+        $tmp->trimImage(0);
+        $page = $tmp->getImagePage();
+
+        $maskBounds = [
+            'x' => max(0, (int) ($page['x'] ?? 0)),
+            'y' => max(0, (int) ($page['y'] ?? 0)),
+            'w' => max(1, $tmp->getImageWidth()),
+            'h' => max(1, $tmp->getImageHeight()),
+        ];
+
+        $baseSize = [
+            'w' => $baseImg->getImageWidth(),
+            'h' => $baseImg->getImageHeight(),
+        ];
+
+        $tmp->clear();     $tmp->destroy();
+        $maskImg->clear(); $maskImg->destroy();
+        $baseImg->clear(); $baseImg->destroy();
+
+        $sideSetting = $mockup->sideSettings->firstWhere('side', $side);
+
+        return response()->json([
+            'ok'             => true,
+            'source'         => $sideSetting ? 'database' : 'defaults',
+            'render_mode'    => $renderMode,
+            'mockup_id'      => $mockupId,
+            'side'           => $side,
+            'hex'            => $hex,
+            'warp'           => $warp,
+            'preset'         => $preset,
+            'url_overrides'  => $urlOverrides,
+            'base_size'      => $baseSize,
+            'mask_bounds'    => $maskBounds,
+            'paths' => [
+                'base'   => $base->getPath(),
+                'mask'   => $mask->getPath(),
+                'shadow' => $shadow?->getPath(),
+                'design' => $designMedia->getPath(),
+            ],
+            'side_setting'   => $sideSetting,
+            'skip_mask_clip' => $skipMaskClip,
+        ]);
+    }
+
+    // ===== الرندر الفعلي =====
+    $binary = $renderer->render([
+        'base_path'         => $base->getPath(),
+        'shirt_mask_path'   => $mask->getPath(),
+        'shirt_shadow_path' => $shadow?->getPath(),
+        'design_path'       => $designMedia->getPath(),
+        'hex'               => $hex,
+        'warp_points'       => $warp,
+        'max_dim'           => 1600,
+        'skip_mask_clip'    => $skipMaskClip,
+        'render_mode'       => $renderMode,
+        ...$preset,
+    ]);
+
+    // ===== حفظ اختياري =====
+    if ($save) {
+        $dir = storage_path('app/debug');
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $filename = "mockup_{$mockupId}_{$designMediaId}_{$side}_{$renderMode}_" . now()->format('His') . ".png";
+        file_put_contents("{$dir}/{$filename}", $binary);
+    }
+
+    return response($binary, 200, ['Content-Type' => 'image/png']);
+});
+
+
+// ===== Helper Functions =====
+
+function collectUrlOverrides(Request $request): array
+{
+    $overrides = [];
+
+    $limits = [
+        'design_scale'       => [0.05, 4.0],
+        'texture_strength'   => [0.0,  1.0],
+        'highlight_strength' => [0.0,  1.0],
+        'shadow_strength'    => [0.0,  2.0],
+        'design_opacity'     => [0.0,  1.0],
+        'design_softness'    => [0.0,  2.0],
+        'displace_x'         => [0.0,  40.0],
+        'displace_y'         => [0.0,  40.0],
+        'displace_blur'      => [0.0,  10.0],
+        'displace_emboss'    => [0.1,  10.0],
+        'displace_contrast'  => [0.0,  100.0],
+    ];
+
+    foreach ($limits as $key => [$min, $max]) {
+        if ($request->has($key) && is_numeric($request->query($key))) {
+            $overrides[$key] = max($min, min($max, (float) $request->query($key)));
+        }
+    }
+
+    return $overrides;
+}
+
+function resolveUrlWarp(Request $request): ?array
+{
+    $keys   = ['tlx', 'tly', 'trx', 'try', 'brx', 'bry', 'blx', 'bly'];
+    $hasAll = collect($keys)->every(fn($k) =>
+        $request->query($k) !== null && is_numeric($request->query($k))
+    );
+
+    if (!$hasAll) return null;
+
+    return [
+        'tl' => ['x' => (int) $request->query('tlx'), 'y' => (int) $request->query('tly')],
+        'tr' => ['x' => (int) $request->query('trx'), 'y' => (int) $request->query('try')],
+        'br' => ['x' => (int) $request->query('brx'), 'y' => (int) $request->query('bry')],
+        'bl' => ['x' => (int) $request->query('blx'), 'y' => (int) $request->query('bly')],
+    ];
+}

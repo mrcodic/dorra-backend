@@ -275,6 +275,22 @@ class MockupService extends BaseService
                     mediaId: request()->input($inputName),
                     model: $model,
                     collectionName: 'mockups');
+
+                $model->sideSettings()->updateOrCreate(
+                    [
+                        'side' => $typeName,
+                    ],
+                    [
+                        'is_active'      => true,
+                        'warp_points'    => ['warp_points' => [
+                    'tl' => ['x' => 786,  'y' => 1090],
+                    'tr' => ['x' => 1653, 'y' => 1092],
+                    'br' => ['x' => 1561, 'y' => 2145],
+                    'bl' => ['x' => 806,  'y' => 2142],
+                ],],
+                        'render_presets' => null,
+                    ]
+                );
             }
 
         });
