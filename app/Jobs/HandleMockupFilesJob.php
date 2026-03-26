@@ -62,7 +62,7 @@ class HandleMockupFilesJob implements ShouldQueue
             ->unique();
     }
 
-    private function getRelatedMockups(Mockup $model, int $templateId)
+    private function getRelatedMockups(Mockup $model, string $templateId)
     {
         return Mockup::query()
             ->where('category_id', $model->category_id)
