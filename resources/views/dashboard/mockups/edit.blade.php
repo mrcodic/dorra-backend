@@ -133,7 +133,45 @@
 {{-- Page Css files --}}
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 @endsection
+@php
+    $existingMedia = [
+        'front' => [
+            'base_image'   => $model->front_base_image_url   ?? null,
+            'mask_image'   => $model->front_mask_image_url   ?? null,
+            'shadow_image' => $model->front_shadow_image_url ?? null,
+        ],
+        'back' => [
+            'base_image'   => $model->back_base_image_url   ?? null,
+            'mask_image'   => $model->back_mask_image_url   ?? null,
+            'shadow_image' => $model->back_shadow_image_url ?? null,
+        ],
+        'none' => [
+            'base_image'   => $model->none_base_image_url   ?? null,
+            'mask_image'   => $model->none_mask_image_url   ?? null,
+            'shadow_image' => $model->none_shadow_image_url ?? null,
+        ],
+    ];
 
+    $mediaCollection = $model->getMedia('mockups');
+
+    $existingMediaIds = [
+        'front' => [
+            'base_image'   => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'base')->first()?->id,
+            'mask_image'   => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'mask')->first()?->id,
+            'shadow_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'shadow')->first()?->id,
+        ],
+        'back' => [
+            'base_image'   => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'base')->first()?->id,
+            'mask_image'   => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'mask')->first()?->id,
+            'shadow_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'shadow')->first()?->id,
+        ],
+        'none' => [
+            'base_image'   => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'base')->first()?->id,
+            'mask_image'   => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'mask')->first()?->id,
+            'shadow_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'shadow')->first()?->id,
+        ],
+    ];
+@endphp
 @section('content')
 <!-- users list start -->
 <section class="">
@@ -1838,149 +1876,233 @@
         }
 
 
-        function renderFileInputs() {
-            if (!fileInputsContainer) return;
+    // Disable Dropzone auto-discovery
+    Dropzone.autoDiscover = false;
+    const dropzoneInstances = {};
 
-            let selectedTypes = [...checkboxes]
-                .filter(cb => cb.checked)
-                .map(cb => cb.dataset.typeName);
+    function renderFileInputs() {
+        if (!fileInputsContainer) return;
 
-            // -------------------------------
-            // REMOVE blocks + hide canvas for unchecked types
-            // -------------------------------
-            ['front', 'back', 'none'].forEach(type => {
-                if (!selectedTypes.includes(type)) {
-                    const block = document.getElementById(`${type}-file-block`);
-                    if (block) block.remove();
+        let selectedTypes = [...checkboxes]
+            .filter(cb => cb.checked)
+            .map(cb => cb.dataset.typeName);
 
-                    // ⬅ هنا نخبّي الكانفاس ونفضّيه ونصفّر الـ inputs
-                    if (typeof hideCanvasForType === 'function') {
-                        hideCanvasForType(type);
+        // Remove blocks + destroy dropzones for unchecked types
+        ['front', 'back', 'none'].forEach(type => {
+            if (!selectedTypes.includes(type)) {
+                const block = document.getElementById(`${type}-file-block`);
+                if (block) block.remove();
+
+                ['base_image', 'mask_image', 'shadow_image'].forEach(part => {
+                    const key = `${type}-${part}`;
+                    if (dropzoneInstances[key]) {
+                        dropzoneInstances[key].destroy();
+                        delete dropzoneInstances[key];
                     }
+                });
+
+                if (typeof hideCanvasForType === 'function') {
+                    hideCanvasForType(type);
                 }
-            });
+            }
+        });
 
-            // -------------------------------
-            // ADD blocks for newly selected types
-            // -------------------------------
-            selectedTypes.forEach(type => {
-                if (document.getElementById(`${type}-file-block`)) return; // already exists
+        // Add blocks for newly selected types
+        selectedTypes.forEach(type => {
+            if (document.getElementById(`${type}-file-block`)) return;
 
-                const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+            const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+            const block     = document.createElement('div');
+            block.className = 'col-md-6';
+            block.id        = `${type}-file-block`;
 
-                const block = document.createElement('div');
-                block.className = 'col-md-6';
-                block.id = `${type}-file-block`;
+            block.innerHTML = `
+            <label class="label-text">${typeLabel}</label>
+            <hr style="height:2px;background-color:#CED5D4;"/>
 
-                block.innerHTML = `
-                    <label for="mockupTypLabel" class="label-text">${typeLabel}</label>
-                    <hr style="height: 2px; background-color: #CED5D4;"/>
-                    <div class="mb-2">
-                        <label class="form-label label-text">${typeLabel} Base Image</label>
-                        <input type="file" name="${type}_base_image" id="${type}-base-input"
-                            class="d-none" accept="image/*">
-
-                        <div class="upload-card upload-area" data-input-id="${type}-base-input">
-                            <div class="upload-content">
-                                <i data-feather="upload" class="mb-2"></i>
-                                <p>${typeLabel} Base Image: Drag file here or click to upload</p>
-                                <div class="preview mt-1"></div>
-                            </div>
-                        </div>
+            <div class="mb-2">
+                <label class="form-label label-text">${typeLabel} Base Image</label>
+                <div id="dz-${type}-base_image" class="dropzone dropzone-area">
+                    <div class="dz-message">
+                        <i data-feather="upload-cloud" style="width:28px;height:28px;stroke:#24B094;"></i>
+                        <p class="mt-1 mb-0">Drag &amp; drop or <u>click to upload</u></p>
+                        <small class="text-muted">PNG only</small>
                     </div>
+                </div>
+            </div>
 
-                    <div class="mb-2">
-                        <label class="form-label label-text">${typeLabel} Mask Image</label>
-                        <input type="file" name="${type}_mask_image" id="${type}-mask-input"
-                            class="d-none" accept="image/*">
-
-                        <div class="upload-card upload-area" data-input-id="${type}-mask-input">
-                            <div class="upload-content">
-                                <i data-feather="upload" class="mb-2"></i>
-                                <p>${typeLabel} Mask Image: Drag file here or click to upload</p>
-                                <div class="preview mt-1"></div>
-                            </div>
-                        </div>
+            <div class="mb-2">
+                <label class="form-label label-text">${typeLabel} Mask Image</label>
+                <div id="dz-${type}-mask_image" class="dropzone dropzone-area">
+                    <div class="dz-message">
+                        <i data-feather="upload-cloud" style="width:28px;height:28px;stroke:#24B094;"></i>
+                        <p class="mt-1 mb-0">Drag &amp; drop or <u>click to upload</u></p>
+                        <small class="text-muted">PNG only</small>
                     </div>
-<div class="mb-2">
-                        <label class="form-label label-text">${typeLabel} Shadow Image</label>
-                        <input type="file" name="${type}_shadow_image" id="${type}-shadow-input"
-                            class="d-none" accept="image/*">
+                </div>
+            </div>
 
-                        <div class="upload-card upload-area" data-input-id="${type}-shadow-input">
-                            <div class="upload-content">
-                                <i data-feather="upload" class="mb-2"></i>
-                                <p>${typeLabel} Shodow Image: Drag file here or click to upload</p>
-                                <div class="preview mt-1"></div>
-                            </div>
-                        </div>
+            <div class="mb-2">
+                <label class="form-label label-text">${typeLabel} Shadow Image</label>
+                <div id="dz-${type}-shadow_image" class="dropzone dropzone-area">
+                    <div class="dz-message">
+                        <i data-feather="upload-cloud" style="width:28px;height:28px;stroke:#24B094;"></i>
+                        <p class="mt-1 mb-0">Drag &amp; drop or <u>click to upload</u></p>
+                        <small class="text-muted">PNG only</small>
                     </div>
-
+                </div>
+            </div>
         `;
 
-                document.getElementById('fileInputsContainer').appendChild(block);
-            });
-
+            document.getElementById('fileInputsContainer').appendChild(block);
             feather.replace();
-            bindUploadAreas();
+
+            setTimeout(() => {
+                initDropzone(type, 'base_image');
+                initDropzone(type, 'mask_image');
+                initDropzone(type, 'shadow_image');
+            }, 50);
+        });
+    }
+
+    function initDropzone(type, part) {
+        const key       = `${type}-${part}`;
+        const elId      = `dz-${type}-${part}`;
+        const el        = document.getElementById(elId);
+        const inputName = `${type}_${part}`;           // e.g. front_base_image
+
+        if (!el || dropzoneInstances[key]) return;
+
+        // Hidden input to store uploaded media ID
+        let hiddenInput = document.querySelector(`input[name="${inputName}_id"]`);
+        if (!hiddenInput) {
+            hiddenInput        = document.createElement('input');
+            hiddenInput.type   = 'hidden';
+            hiddenInput.name   = `${inputName}_id`;
+            document.getElementById('editMockupForm').appendChild(hiddenInput);
         }
 
+        const dz = new Dropzone(`#${elId}`, {
+            url:           "{{ route('media.store') }}",
+            paramName:     "file",
+            maxFiles:      1,
+            maxFilesize:   10,
+            acceptedFiles: "image/png",
+            headers:       { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+            addRemoveLinks: true,
+            dictRemoveFile: '✕ Remove',
+            dictDefaultMessage: '',
+            dictInvalidFileType: "Only PNG files are allowed.",
 
-        function bindUploadAreas() {
-            document.querySelectorAll('.upload-area').forEach(area => {
-                area.replaceWith(area.cloneNode(true));
-            });
+            params: {
+                "customProperties[role]": part.replace('_image', ''),  // base | mask | shadow
+                "customProperties[side]": type,                         // front | back | none
+            },
 
-            document.querySelectorAll('.upload-area').forEach(area => {
-                const input = document.getElementById(area.dataset.inputId);
-                const preview = area.querySelector('.preview');
+            init: function () {
+                const dzInstance = this;
 
-                area.addEventListener('click', () => input?.click());
-                area.addEventListener('dragover', e => {
-                    e.preventDefault();
-                    area.classList.add('dragover');
-                });
-                area.addEventListener('dragleave', e => {
-                    e.preventDefault();
-                    area.classList.remove('dragover');
-                });
-                area.addEventListener('drop', e => {
-                    e.preventDefault();
-                    area.classList.remove('dragover');
-                    handleFiles(e.dataTransfer.files, input, preview);
-                });
-
-                input?.addEventListener('change', e => handleFiles(e.target.files, input, preview));
-            });
-        }
-
-        function handleFiles(files, input, preview) {
-            if (!files.length) return;
-
-            const reader = new FileReader();
-            reader.onload = e => {
-                const dataUrl = e.target.result;
-                preview.innerHTML = `<img src="${dataUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
-
-                if (input.name.includes('_base_image')) {
-                    if (input.id.startsWith('front')) {
-                        loadBaseImage(window.canvasFront, dataUrl);
-                        document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
-                    } else if (input.id.startsWith('back')) {
-                        loadBaseImage(window.canvasBack, dataUrl);
-                        document.getElementById('editorBackWrapper')?.classList.remove('d-none');
-                    } else if (input.id.startsWith('none')) {
-                        loadBaseImage(window.canvasNone, dataUrl);
-                        document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
+                // Only one file at a time
+                dzInstance.on('addedfile', function () {
+                    if (dzInstance.files.length > 1) {
+                        dzInstance.removeFile(dzInstance.files[0]);
                     }
-                }
-            };
-            reader.readAsDataURL(files[0]);
+                });
 
-            const dt = new DataTransfer();
-            dt.items.add(files[0]);
-            input.files = dt.files;
+                // Upload success → store media ID
+                dzInstance.on('success', function (file, response) {
+                    if (response.success && response.data) {
+                        file._mediaId     = response.data.id;
+                        hiddenInput.value = response.data.id;
+
+                        // Load base image onto canvas
+                        if (part === 'base_image' && response.data.url) {
+                            if (type === 'front') {
+                                loadBaseImage(window.canvasFront, response.data.url);
+                                document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
+                            } else if (type === 'back') {
+                                loadBaseImage(window.canvasBack, response.data.url);
+                                document.getElementById('editorBackWrapper')?.classList.remove('d-none');
+                            } else if (type === 'none') {
+                                loadBaseImage(window.canvasNone, response.data.url);
+                                document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
+                            }
+                        }
+                    }
+                });
+
+                dzInstance.on('error', function (file, message) {
+                    const msg = typeof message === 'object' ? (message.message ?? 'Upload failed') : message;
+                    console.error(`Dropzone [${key}] error:`, msg);
+                });
+
+                // Remove → delete from server + clear hidden input
+                dzInstance.on('removedfile', function (file) {
+                    hiddenInput.value = '';
+
+                    if (file._mediaId) {
+                        fetch("{{ url('api/v1/media') }}/" + file._mediaId, {
+                            method:  'DELETE',
+                            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                        }).catch(err => console.error('Media delete failed:', err));
+                    }
+
+                    if (part === 'base_image' && typeof hideCanvasForType === 'function') {
+                        hideCanvasForType(type);
+                    }
+                });
+
+                // ✅ Preload existing file if available
+                const existingUrl = getExistingMediaUrl(type, part);
+                if (existingUrl) {
+                    preloadDropzoneFile(dzInstance, existingUrl, type, part, hiddenInput);
+                }
+            }
+        });
+
+        dropzoneInstances[key] = dz;
+    }
+
+    // ─── Preload existing media from server ──────────────────────────────────────
+    // Pass existing URLs from blade to JS
+    const existingMedia   = @json($existingMedia);
+    const existingMediaIds = @json($existingMediaIds);
+
+    function getExistingMediaUrl(type, part) {
+        return (existingMedia[type] && existingMedia[type][part]) || null;
+    }
+
+    function preloadDropzoneFile(dz, url, type, part, hiddenInput) {
+        // Set the existing media ID immediately (no re-upload needed)
+        const mediaId = existingMediaIds[type]?.[part] ?? null;
+        if (mediaId) {
+            hiddenInput.value  = mediaId;
+            hiddenInput.dataset.existingId = mediaId; // keep track to skip DELETE on "remove"
         }
+
+        // Show the existing file as a mock file in Dropzone UI
+        const fileName = url.split('/').pop();
+        const mockFile = { name: fileName, size: 0, _mediaId: mediaId, _isExisting: true };
+
+        dz.emit('addedfile', mockFile);
+        dz.emit('thumbnail', mockFile, url);
+        dz.emit('complete', mockFile);
+        dz.files.push(mockFile);
+
+        // Load base onto canvas
+        if (part === 'base_image') {
+            if (type === 'front') {
+                loadBaseImage(window.canvasFront, url);
+                document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
+            } else if (type === 'back') {
+                loadBaseImage(window.canvasBack, url);
+                document.getElementById('editorBackWrapper')?.classList.remove('d-none');
+            } else if (type === 'none') {
+                loadBaseImage(window.canvasNone, url);
+                document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
+            }
+        }
+    }
 
         checkboxes.forEach(cb => cb.addEventListener('change', toggleCheckboxes));
 </script>

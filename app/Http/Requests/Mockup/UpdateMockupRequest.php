@@ -74,61 +74,44 @@ class UpdateMockupRequest extends BaseRequest
                 'array',
             ],
 
-            'front_base_image' => [
+            'front_base_image_id' => [
                 Rule::requiredIf(in_array(1, $types)),
-                'image',
-//                'mimes:jpg',
-                'max:2048',
+                'exists:media,id'
             ],
-            'front_mask_image' => [
+            'front_mask_image_id' => [
                 Rule::requiredIf(in_array(1, $types)),
-                'image',
-                'mimes:png',
-                'max:2048',
+                'exists:media,id'
             ],
-            'front_shadow_image' => [
+            'front_shadow_image_id' => [
                 Rule::requiredIf(in_array(1, $types)),
-                'image',
-                'mimes:png',
-                'max:2048',
+                'exists:media,id'
             ],
 
-            'back_base_image' => [
+            'back_base_image_id' => [
                 Rule::requiredIf(in_array(2, $types)),
-                'image',
-//                'mimes:jpg',
-                'max:2048',
+                'exists:media,id'
+
             ],
-            'back_mask_image' => [
+            'back_mask_image_id' => [
                 Rule::requiredIf(in_array(2, $types)),
-                'image',
-                'mimes:png',
-                'max:2048',
+                'exists:media,id'
             ],
-            'back_shadow_image' => [
+            'back_shadow_image_id' => [
                 Rule::requiredIf(in_array(2, $types)),
-                'image',
-                'mimes:png',
-                'max:2048',
+                'exists:media,id'
             ],
 
-            'none_base_image' => [
+            'none_base_image_id' => [
                 Rule::requiredIf(in_array(3, $types)),
-                'image',
-//                'mimes:jpg',
-                'max:2048',
+                'exists:media,id'
             ],
-            'none_mask_image' => [
+            'none_mask_image_id' => [
                 Rule::requiredIf(in_array(3, $types)),
-                'image',
-                'mimes:png',
-                'max:2048',
+                'exists:media,id'
             ],
-            'none_shadow_image' => [
+            'none_shadow_image_id' => [
                 Rule::requiredIf(in_array(3, $types)),
-                'image',
-                'mimes:png',
-                'max:2048',
+                'exists:media,id'
             ],
         ];
     }

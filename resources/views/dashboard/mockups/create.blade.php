@@ -1208,6 +1208,12 @@
         }
 
 
+        // Disable Dropzone auto-discovery
+        Dropzone.autoDiscover = false;
+
+        // Track Dropzone instances to avoid re-init
+        const dropzoneInstances = {};
+
         function renderFileInputs() {
             if (!fileInputsContainer) return;
 
@@ -1215,26 +1221,30 @@
                 .filter(cb => cb.checked)
                 .map(cb => cb.dataset.typeName);
 
-            // -------------------------------
-            // REMOVE blocks + hide canvas for unchecked types
-            // -------------------------------
+            // Remove blocks + hide canvas for unchecked types
             ['front', 'back', 'none'].forEach(type => {
                 if (!selectedTypes.includes(type)) {
                     const block = document.getElementById(`${type}-file-block`);
                     if (block) block.remove();
 
-                    // ⬅ هنا نخبّي الكانفاس ونفضّيه ونصفّر الـ inputs
+                    // Destroy dropzone instances for this type
+                    ['base', 'mask', 'shadow'].forEach(part => {
+                        const key = `${type}-${part}`;
+                        if (dropzoneInstances[key]) {
+                            dropzoneInstances[key].destroy();
+                            delete dropzoneInstances[key];
+                        }
+                    });
+
                     if (typeof hideCanvasForType === 'function') {
                         hideCanvasForType(type);
                     }
                 }
             });
 
-            // -------------------------------
-            // ADD blocks for newly selected types
-            // -------------------------------
+            // Add blocks for newly selected types
             selectedTypes.forEach(type => {
-                if (document.getElementById(`${type}-file-block`)) return; // already exists
+                if (document.getElementById(`${type}-file-block`)) return;
 
                 const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
 
@@ -1243,112 +1253,167 @@
                 block.id = `${type}-file-block`;
 
                 block.innerHTML = `
-                    <label for="mockupTypLabel" class="label-text">${typeLabel}</label>
-                    <hr style="height: 2px; background-color: #CED5D4;"/>
-                    <div class="mb-2">
-                        <label class="form-label label-text">${typeLabel} Base Image</label>
-                        <input type="file" name="${type}_base_image" id="${type}-base-input"
-                            class="d-none" accept="image/*">
+            <label class="label-text">${typeLabel}</label>
+            <hr style="height:2px;background-color:#CED5D4;"/>
 
-                        <div class="upload-card upload-area" data-input-id="${type}-base-input">
-                            <div class="upload-content">
-                                <i data-feather="upload" class="mb-2"></i>
-                                <p>${typeLabel} Base Image: Drag file here or click to upload</p>
-                                <div class="preview mt-1"></div>
-                            </div>
-                        </div>
+            <div class="mb-2">
+                <label class="form-label label-text">${typeLabel} Base Image</label>
+                <div id="dz-${type}-base" class="dropzone dropzone-area">
+                    <div class="dz-message">
+                        <i data-feather="upload-cloud" style="width:28px;height:28px;stroke:#24B094;"></i>
+                        <p class="mt-1 mb-0">Drag &amp; drop or <u>click to upload</u></p>
+                        <small class="text-muted">PNG accepted</small>
                     </div>
+                </div>
+            </div>
 
-                    <div class="mb-2">
-                        <label class="form-label label-text">${typeLabel} Mask Image</label>
-                        <input type="file" name="${type}_mask_image" id="${type}-mask-input"
-                            class="d-none" accept="image/*">
-
-                        <div class="upload-card upload-area" data-input-id="${type}-mask-input">
-                            <div class="upload-content">
-                                <i data-feather="upload" class="mb-2"></i>
-                                <p>${typeLabel} Mask Image: Drag file here or click to upload</p>
-                                <div class="preview mt-1"></div>
-                            </div>
-                        </div>
+            <div class="mb-2">
+                <label class="form-label label-text">${typeLabel} Mask Image</label>
+                <div id="dz-${type}-mask" class="dropzone dropzone-area">
+                    <div class="dz-message">
+                        <i data-feather="upload-cloud" style="width:28px;height:28px;stroke:#24B094;"></i>
+                        <p class="mt-1 mb-0">Drag &amp; drop or <u>click to upload</u></p>
+                        <small class="text-muted">PNG accepted</small>
                     </div>
-<div class="mb-2">
-                        <label class="form-label label-text">${typeLabel} Shodow Image</label>
-                        <input type="file" name="${type}_shadow_image" id="${type}-shadow-input"
-                            class="d-none" accept="image/*">
+                </div>
+            </div>
 
-                        <div class="upload-card upload-area" data-input-id="${type}-shadow-input">
-                            <div class="upload-content">
-                                <i data-feather="upload" class="mb-2"></i>
-                                <p>${typeLabel} Shodow Image: Drag file here or click to upload</p>
-                                <div class="preview mt-1"></div>
-                            </div>
-                        </div>
+            <div class="mb-2">
+                <label class="form-label label-text">${typeLabel} Shadow Image</label>
+                <div id="dz-${type}-shadow" class="dropzone dropzone-area">
+                    <div class="dz-message">
+                        <i data-feather="upload-cloud" style="width:28px;height:28px;stroke:#24B094;"></i>
+                        <p class="mt-1 mb-0">Drag &amp; drop or <u>click to upload</u></p>
+                        <small class="text-muted">PNG accepted</small>
                     </div>
+                </div>
+            </div>
         `;
 
                 document.getElementById('fileInputsContainer').appendChild(block);
-            });
 
-            feather.replace();
-            bindUploadAreas();
-        }
+                feather.replace();
 
-
-        function bindUploadAreas() {
-            document.querySelectorAll('.upload-area').forEach(area => {
-                area.replaceWith(area.cloneNode(true));
-            });
-
-            document.querySelectorAll('.upload-area').forEach(area => {
-                const input   = document.getElementById(area.dataset.inputId);
-                const preview = area.querySelector('.preview');
-
-                area.addEventListener('click', () => input?.click());
-                area.addEventListener('dragover', e => {
-                    e.preventDefault();
-                    area.classList.add('dragover');
-                });
-                area.addEventListener('dragleave', e => {
-                    e.preventDefault();
-                    area.classList.remove('dragover');
-                });
-                area.addEventListener('drop', e => {
-                    e.preventDefault();
-                    area.classList.remove('dragover');
-                    handleFiles(e.dataTransfer.files, input, preview);
-                });
-
-                input?.addEventListener('change', e => handleFiles(e.target.files, input, preview));
+                // Init Dropzone for each part after DOM is ready
+                setTimeout(() => {
+                    initDropzone(type, 'base');
+                    initDropzone(type, 'mask');
+                    initDropzone(type, 'shadow');
+                }, 50);
             });
         }
 
-        function handleFiles(files, input, preview) {
-            if (!files.length) return;
+        function initDropzone(type, part) {
+            const key       = `${type}-${part}`;
+            const elId      = `dz-${type}-${part}`;
+            const el        = document.getElementById(elId);
+            const inputName = `${type}_${part}_image`;
 
-            const reader = new FileReader();
-            reader.onload = e => {
-                const dataUrl = e.target.result;
-                preview.innerHTML = `<img src="${dataUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
+            if (!el || dropzoneInstances[key]) return;
 
-                if (input.name.includes('_base_image')) {
-                    if (input.id.startsWith('front')) {
-                        loadBaseImage(window.canvasFront, dataUrl);
-                        document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
-                    } else if (input.id.startsWith('back')) {
-                        loadBaseImage(window.canvasBack, dataUrl);
-                        document.getElementById('editorBackWrapper')?.classList.remove('d-none');
-                    } else if (input.id.startsWith('none')) {
-                        loadBaseImage(window.canvasNone, dataUrl);
-                        document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
-                    }
+            // Hidden input to store the uploaded media ID
+            let hiddenInput = document.querySelector(`input[name="${inputName}_id"]`);
+            if (!hiddenInput) {
+                hiddenInput = document.createElement('input');
+                hiddenInput.type  = 'hidden';
+                hiddenInput.name  = `${inputName}_id`;
+                document.getElementById('addMockupForm').appendChild(hiddenInput);
+            }
+
+            const dz = new Dropzone(`#${elId}`, {
+                url: "{{ route('media.store') }}",
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 10,
+                acceptedFiles: "image/png",
+                dictInvalidFileType: "Only PNG files are allowed.",
+                headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+                addRemoveLinks: true,
+                dictRemoveFile: '✕ Remove',
+                dictDefaultMessage: '',
+
+                // Send custom properties with every upload
+                params: {
+                    "customProperties[role]": part,   // base | mask | shadow
+                    "customProperties[side]": type,   // front | back | none
+                },
+
+                init: function () {
+                    const dzInstance = this;
+
+                    dzInstance.on('addedfile', function () {
+                        if (dzInstance.files.length > 1) {
+                            dzInstance.removeFile(dzInstance.files[0]);
+                        }
+                    });
+
+                    dzInstance.on('success', function (file, response) {
+                        if (response.success && response.data) {
+                            file._mediaId     = response.data.id;
+                            hiddenInput.value = response.data.id;
+
+                            if (part === 'base' && response.data.url) {
+                                if (type === 'front') {
+                                    loadBaseImage(window.canvasFront, response.data.url);
+                                    document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
+                                } else if (type === 'back') {
+                                    loadBaseImage(window.canvasBack, response.data.url);
+                                    document.getElementById('editorBackWrapper')?.classList.remove('d-none');
+                                } else if (type === 'none') {
+                                    loadBaseImage(window.canvasNone, response.data.url);
+                                    document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
+                                }
+                            }
+                        }
+                    });
+
+                    dzInstance.on('error', function (file, message) {
+                        const msg = (typeof message === 'object') ? (message.message ?? 'Upload failed') : message;
+                        console.error(`Dropzone [${key}] error:`, msg);
+                    });
+
+                    dzInstance.on('removedfile', function (file) {
+                        hiddenInput.value = '';
+
+                        if (file._mediaId) {
+                            fetch("{{ url('api/v1/media') }}/" + file._mediaId, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            }).catch(err => console.error('Media delete failed:', err));
+                        }
+
+                        if (part === 'base') {
+                            if (typeof hideCanvasForType === 'function') {
+                                hideCanvasForType(type);
+                            }
+                        }
+                    });
                 }
-            };
-            reader.readAsDataURL(files[0]);
+            });
+
+            dropzoneInstances[key] = dz;
+        }
+        // Attach a File object to a hidden <input type="file"> so the form submission picks it up
+        function attachFileToForm(inputName, file) {
+            let input = document.querySelector(`input[name="${inputName}"]`);
+            if (!input) {
+                input = document.createElement('input');
+                input.type   = 'file';
+                input.name   = inputName;
+                input.style.display = 'none';
+                document.getElementById('addMockupForm').appendChild(input);
+            }
 
             const dt = new DataTransfer();
-            dt.items.add(files[0]);
+            dt.items.add(file);
             input.files = dt.files;
+        }
+
+        function removeFormFile(inputName) {
+            const input = document.querySelector(`input[name="${inputName}"]`);
+            if (input) input.value = '';
         }
 
         checkboxes.forEach(cb => cb.addEventListener('change', toggleCheckboxes));

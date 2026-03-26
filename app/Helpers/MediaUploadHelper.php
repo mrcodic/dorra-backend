@@ -172,6 +172,28 @@ if (!function_exists('addMediaToResource')) {
 
         return count($uploaded) === 1 ? $uploaded->first() : $uploaded->all();
     }
+
+    if (!function_exists('attachMediaToModel')) {
+        function attachMediaToModel(int $mediaId, $model, string $collectionName = null): ?Media
+        {
+            $media = Media::find($mediaId);
+
+            if (!$media) {
+                return null;
+            }
+
+            $collectionName = $collectionName
+                ? getMediaCollectionName($collectionName)
+                : getMediaCollectionName($model);
+
+            $media->model_type      = get_class($model);
+            $media->model_id        = $model->getKey();
+            $media->collection_name = $collectionName;
+            $media->save();
+
+            return $media;
+        }
+    }
 }
 
 

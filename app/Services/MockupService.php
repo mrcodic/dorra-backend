@@ -18,6 +18,7 @@ use Illuminate\Support\Arr;
 class MockupService extends BaseService
 {
     use RendersTemplateMockups;
+
     public BaseRepositoryInterface $repository;
 
     public function __construct(MockupRepositoryInterface $repository, public MockupRenderer $renderer
@@ -29,10 +30,10 @@ class MockupService extends BaseService
 
     public function getMockups(): array
     {
-        $categoryId  = request('product_id');
+        $categoryId = request('product_id');
         $productType = request('type');
-        $templateId  = request('template_id');
-        $color       = request('color');
+        $templateId = request('template_id');
+        $color = request('color');
 
         $categoryId = $productType === 'category'
             ? $categoryId
@@ -44,8 +45,7 @@ class MockupService extends BaseService
         $mockups = $this->repository
             ->query()
             ->when($categoryId, fn($q) => $q->whereCategoryId($categoryId))
-            ->when($templateId, fn($q) => $q->whereHas('templates', fn($qq) =>
-            $qq->where('templates.id', $templateId)
+            ->when($templateId, fn($q) => $q->whereHas('templates', fn($qq) => $qq->where('templates.id', $templateId)
             ))
             ->with([
                 'templates:id',
@@ -124,19 +124,20 @@ class MockupService extends BaseService
                 ));
 
                 return [
-                    'mockup_id'    => $mockup->id,
+                    'mockup_id' => $mockup->id,
 //                    'active_color' => $activeColor,
-                    'urls'         => $urls,
+                    'urls' => $urls,
                 ];
             })
             ->values()
             ->all();
 
         return [
-            'colors'  => $allColors,
+            'colors' => $allColors,
             'mockups' => $result,
         ];
     }
+
     public function getAll(
         $relations = [], bool $paginate = false, $columns = ['*'], $perPage = 16, $counts = [])
     {
@@ -194,9 +195,7 @@ class MockupService extends BaseService
                     })
             )
             ->when(request()->filled('product_ids'), fn($q) => $q->whereIn('category_id', request()->array('product_ids')))
-            ->when(request()->filled('type'), fn($q) =>
-            $q->whereHas('types', fn($q) =>
-            $q->where('types.value', (int) request('type'))
+            ->when(request()->filled('type'), fn($q) => $q->whereHas('types', fn($q) => $q->where('types.value', (int)request('type'))
             )
             )
             ->when(request()->filled('types'), function ($query) {
@@ -236,35 +235,49 @@ class MockupService extends BaseService
         $model = $this->handleTransaction(function () use ($validatedData) {
             $model = $this->repository->create($validatedData);
             $model->types()->attach(Arr::get($validatedData, 'types') ?? []);
-            if(!empty($validatedData['templates'])){
-            collect($validatedData['templates'])->each(function ($template) use ($model) {
-                $templateId = $template['template_id'] ?? null;
-                if (!$templateId) return;
+            if (!empty($validatedData['templates'])) {
+                collect($validatedData['templates'])->each(function ($template) use ($model) {
+                    $templateId = $template['template_id'] ?? null;
+                    if (!$templateId) return;
 
-                $positions = collect($template)
-                    ->except(['template_id', 'colors'])
-                    ->filter(fn($value) => !is_null($value))
-                    ->toArray();
+                    $positions = collect($template)
+                        ->except(['template_id', 'colors'])
+                        ->filter(fn($value) => !is_null($value))
+                        ->toArray();
 
-                $colors = Arr::get($template, 'colors', []);
+                    $colors = Arr::get($template, 'colors', []);
 
-                $colors = collect($colors)
-                    ->filter(fn($c) => is_string($c) && preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $c))
-                    ->values()
-                    ->all();
+                    $colors = collect($colors)
+                        ->filter(fn($c) => is_string($c) && preg_match('/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/', $c))
+                        ->values()
+                        ->all();
 
 
-                $model->templates()->syncWithoutDetaching([
-                    $templateId => [
-                        'positions' => $positions,
-                        'colors' => $colors,
-                    ],
-                ]);
-            });
+                    $model->templates()->syncWithoutDetaching([
+                        $templateId => [
+                            'positions' => $positions,
+                            'colors' => $colors,
+                        ],
+                    ]);
+                });
             }
             return $model;
         });
-        $this->handleFiles($model);
+        $model->types->each(function ($type) use ($model) {
+            $typeName = strtolower($type->value->name);
+            $mediaTypes = ['base_image', 'mask_image', 'shadow_image'];
+            foreach ($mediaTypes as $mediaType) {
+                $inputName = $typeName. '_' . $mediaType . '_id';
+                if (!request()->filled($inputName)) {
+                    continue;
+                }
+                attachMediaToModel(
+                    mediaId: request()->input($inputName),
+                    model: $model,
+                    collectionName: 'mockups');
+            }
+
+        });
         $model->load(['templates', 'types', 'category', 'media']);
         if (!empty($validatedData['templates'])) {
             $templateIds = collect($validatedData['templates'])->pluck('template_id')->filter();
@@ -274,58 +287,6 @@ class MockupService extends BaseService
             $this->renderMockupsForTemplates($templates, 'back_templates');
             HandleMockupFilesJob::dispatch($model, 'create')->delay(now()->addSeconds(5));
         }
-        return $model;
-    }
-
-    /**
-     * @param mixed $model
-     * @return mixed
-     */
-    public function handleFiles(mixed $model, $clearExisting = false): mixed
-    {
-        if (!request()->allFiles()) {
-            return $model;
-        }
-
-        $types = collect(request()->input('types', []));
-        $mediaTypes = collect(['base_image', 'mask_image', 'shadow_image']);
-
-        $types->each(function ($type) use ($mediaTypes, $model, $clearExisting) {
-            $sideName = strtolower(TypeEnum::from($type)->name);
-
-            $mediaTypes->each(function ($mediaType) use ($sideName, $type, $model, $clearExisting) {
-                $inputName = "{$sideName}_{$mediaType}";
-
-                if (!request()->hasFile($inputName)) {
-                    return;
-                }
-                if (str_contains($mediaType, 'base')) {
-                    $role = 'base';
-                } elseif (str_contains($mediaType, 'mask')) {
-                    $role = 'mask';
-                } elseif (str_contains($mediaType, 'shadow')) {
-                    $role = 'shadow';
-                }
-
-                if ($clearExisting) {
-                    $model->media()
-                        ->where('collection_name', 'mockups')
-                        ->where('custom_properties->side', $sideName)
-                        ->where('custom_properties->role', $role)
-                        ->delete();
-                }
-                handleMediaUploads(
-                    request()->file($inputName),
-                    $model,
-                    customProperties: [
-                        'side' => $sideName,
-                        'role' => $role,
-                    ],
-
-                );
-            });
-        });
-
         return $model;
     }
 
@@ -389,12 +350,25 @@ class MockupService extends BaseService
                 }
             }
 
-            if (request()->allFiles()) {
-                $this->handleFiles($model, true);
-            }
+            $model->types->each(function ($type) use ($model) {
+                $typeName = strtolower($type->value->name);
+                $mediaTypes = ['base_image', 'mask_image', 'shadow_image'];
+                foreach ($mediaTypes as $mediaType) {
+                    $inputName = $typeName. '_' . $mediaType . '_id';
+                    if (!request()->filled($inputName)) {
+                        continue;
+                    }
+                    attachMediaToModel(
+                        mediaId: request()->input($inputName),
+                        model: $model,
+                        collectionName: 'mockups');
+                }
+
+            });
+
 
             $model->load(['templates', 'types', 'category', 'media']);
-            if(!empty($validatedData['templates'])){
+            if (!empty($validatedData['templates'])) {
                 $templateIds = collect($validatedData['templates'])->pluck('template_id')->filter();
 
                 $templates = Template::whereIn('id', $templateIds)->get();

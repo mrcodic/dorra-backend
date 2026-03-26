@@ -196,7 +196,9 @@ class MainController extends Controller
         $modelId = (int)$model;
         $class = 'App\\Models\\' . Str::studly($modelName);
         $model = $modelName && $modelId ? $class::find($modelId) : null;
-        $media = handleMediaUploads($request->allFiles(), $model, clearExisting: true);
+        $media = handleMediaUploads($request->allFiles(), $model,
+            customProperties: $request->customProperties ?? []
+            , clearExisting: true);
         return Response::api(data: MediaResource::make($media));
     }
 
