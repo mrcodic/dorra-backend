@@ -5,6 +5,8 @@ namespace App\Jobs;
 use App\Models\Mockup;
 use App\Models\Template;
 use App\Services\Mockup\MockupRenderer;
+use App\Services\Mockup\MockupRenderConfigResolver;
+use App\Services\Mockup\MockupRenderModeResolver;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
@@ -19,12 +21,8 @@ class HandleMockupFilesJob implements ShouldQueue
     public function __construct(
         public Mockup $mockup,
         public $type = 'update',
-    ) {
-    }
+    ) {}
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
         $model = $this->mockup;
@@ -32,210 +30,259 @@ class HandleMockupFilesJob implements ShouldQueue
         foreach ($model->templates as $template) {
             $templateId = $template->id;
 
-            // ألوان جديدة من التمبلت
-            $newColors = collect($template->pivot->colors ?? [])
-                ->map(fn($c) => strtolower($c))
-                ->filter()
-                ->unique();
+            $newColors = $this->normalizeColors($template->pivot->colors ?? []);
 
-            // تحميل mockups قديمة بنفس التصنيف والتمبلت
-            $oldMockups = Mockup::query()
-                ->where('category_id', $model->category_id)
-                ->whereKeyNot($model->id)
-                ->whereHas('templates', fn($q) => $q->where('templates.id', $templateId))
-                ->with(['templates', 'types', 'media'])
-                ->get();
+            $oldMockups = $this->getRelatedMockups($model, $templateId);
 
-            // ألوان موجودة في mockups قديمة
-            $oldColors = $oldMockups
-                ->flatMap(fn($m) => $m->templates->firstWhere('id', $templateId)?->pivot->colors ?? [])
-                ->map(fn($c) => strtolower($c))
-                ->filter()
-                ->unique();
+            $oldColors = $this->extractOldColors($oldMockups, $templateId);
 
-            // دمج كل الألوان
-            $allColors = $newColors
-                ->merge($oldColors)
-                ->unique()
-                ->values()
-                ->all();
-
-            // تحديث التمبلت الجديد
-            $missingForNew = collect($allColors)->diff($newColors)->values()->all();
-            $colorsToRenderForNew = $allColors;
+            $allColors = $this->mergeColors($newColors, $oldColors);
 
             if ($this->type === 'create') {
-                $model->templates()->updateExistingPivot($templateId, [
-                    'colors' => array_values(array_unique(
-                        array_merge($newColors->all(), $missingForNew)
-                    )),
-                ]);
+                $this->syncNewMockupColors($model, $templateId, $newColors, $allColors);
             }
 
-            // مسح الصور القديمة الخاصة بالتمبلت ده فقط قبل الرندر
-            $model->getMedia('generated_mockups')
-                ->filter(fn($media) =>
-                    (string) $media->getCustomProperty('template_id') === (string) $templateId
-                )
-                ->each(fn($media) => $media->delete());
+            $this->clearTemplateMedia($model, $templateId);
 
-            $this->renderMockupColors(
-                mockup: $model,
-                template: $template,
-                colors: $colorsToRenderForNew
-            );
+            $this->renderMockupColors($model, $template, $allColors);
 
-            // تحديث mockups قديمة
             foreach ($oldMockups as $oldMockup) {
-                $oldTemplate = $oldMockup->templates->firstWhere('id', $templateId);
-                if (!$oldTemplate) {
-                    continue;
-                }
-
-                $oldTplColors = collect($oldTemplate->pivot->colors ?? [])
-                    ->filter()
-                    ->values()
-                    ->all();
-
-                $missingForOld = collect($allColors)
-                    ->diff($oldTplColors)
-                    ->values()
-                    ->all();
-
-                // تحديث بيانات pivot
-                $pivotData = [];
-
-                if (!empty($missingForOld)) {
-                    $pivotData['colors'] = array_values(array_unique(
-                        array_merge($oldTplColors, $missingForOld)
-                    ));
-                }
-
-                // تحديث الـpositions لو اتغيرت
-                // $pivotData['positions'] = $template->pivot->positions ?? [];
-
-                // مسح الصور القديمة الخاصة بالتمبلت ده فقط
-                $oldMockup->getMedia('generated_mockups')
-                    ->filter(fn($media) =>
-                        (string) $media->getCustomProperty('template_id') === (string) $templateId
-                    )
-                    ->each(fn($media) => $media->delete());
-
-                $oldMockup->templates()->updateExistingPivot($templateId, $pivotData);
-
-                // إعادة الرندر لكل الألوان القديمة والجديدة
-                $this->renderMockupColors(
-                    mockup: $oldMockup,
-                    template: $oldTemplate,
-                    colors: array_merge($oldTplColors, $missingForOld)
-                );
+                $this->processOldMockup($oldMockup, $template, $templateId, $allColors);
             }
         }
     }
 
-    /**
-     * Render colors for specific mockup + template
-     */
+    // ================= HELPERS =================
+
+    private function normalizeColors(array $colors)
+    {
+        return collect($colors)
+            ->map(fn($c) => strtolower($c))
+            ->filter()
+            ->unique();
+    }
+
+    private function getRelatedMockups(Mockup $model, int $templateId)
+    {
+        return Mockup::query()
+            ->where('category_id', $model->category_id)
+            ->whereKeyNot($model->id)
+            ->whereHas('templates', fn($q) => $q->where('templates.id', $templateId))
+            ->with(['templates', 'types', 'media'])
+            ->get();
+    }
+
+    private function extractOldColors($mockups, int $templateId)
+    {
+        return $mockups
+            ->flatMap(fn($m) => $m->templates->firstWhere('id', $templateId)?->pivot->colors ?? [])
+            ->map(fn($c) => strtolower($c))
+            ->filter()
+            ->unique();
+    }
+
+    private function mergeColors($new, $old): array
+    {
+        return $new->merge($old)->unique()->values()->all();
+    }
+
+    private function syncNewMockupColors(Mockup $model, int $templateId, $newColors, array $allColors)
+    {
+        $missing = collect($allColors)->diff($newColors)->values()->all();
+
+        $model->templates()->updateExistingPivot($templateId, [
+            'colors' => array_values(array_unique(
+                array_merge($newColors->all(), $missing)
+            )),
+        ]);
+    }
+
+    private function processOldMockup(Mockup $mockup, Template $template, int $templateId, array $allColors)
+    {
+        $oldTemplate = $mockup->templates->firstWhere('id', $templateId);
+        if (!$oldTemplate) return;
+
+        $oldColors = collect($oldTemplate->pivot->colors ?? [])->filter()->values()->all();
+
+        $missing = collect($allColors)->diff($oldColors)->values()->all();
+
+        if (!empty($missing)) {
+            $mockup->templates()->updateExistingPivot($templateId, [
+                'colors' => array_values(array_unique(array_merge($oldColors, $missing))),
+            ]);
+        }
+
+        $this->clearTemplateMedia($mockup, $templateId);
+
+        $this->renderMockupColors(
+            $mockup,
+            $oldTemplate,
+            array_merge($oldColors, $missing)
+        );
+    }
+
+    private function clearTemplateMedia(Mockup $mockup, int $templateId): void
+    {
+        $mockup->getMedia('generated_mockups')
+            ->filter(fn($m) =>
+                (string)$m->getCustomProperty('template_id') === (string)$templateId
+            )
+            ->each->delete();
+    }
+
+    // ================= CORE RENDER =================
+
     private function renderMockupColors(Mockup $mockup, Template $template, array $colors): void
     {
-        if (empty($colors)) {
-            return;
-        }
+        if (empty($colors)) return;
 
         $mockup->loadMissing(['types', 'media']);
 
-        $positions = $template->pivot->positions ?? [];
-        if (is_string($positions)) {
-            $positions = json_decode($positions, true) ?? [];
-        }
+        $positions = $this->parsePositions($template);
 
         foreach ($colors as $hex) {
-            $hex = strtolower($hex);
-
             foreach ($mockup->types as $type) {
-                $side = strtolower($type->value->name);
-
-                $base = $mockup->getMedia('mockups')
-                    ->first(fn($media) =>
-                        $media->getCustomProperty('side') === $side
-                        && $media->getCustomProperty('role') === 'base'
-                    );
-
-                $mask = $mockup->getMedia('mockups')
-                    ->first(fn($media) =>
-                        $media->getCustomProperty('side') === $side
-                        && $media->getCustomProperty('role') === 'mask'
-                    );
-
-                $shadow = $mockup->getMedia('mockups')
-                    ->first(fn($media) =>
-                        $media->getCustomProperty('side') === $side
-                        && $media->getCustomProperty('role') === 'shadow'
-                    );
-
-                if (!$base || !$mask) {
-                    continue;
-                }
-
-                $design = $side === 'back'
-                    ? $template->getFirstMedia('back_templates')
-                    : $template->getFirstMedia('templates');
-
-                if (!$design || !$design->getPath() || !file_exists($design->getPath())) {
-                    continue;
-                }
-
-                [$baseW, $baseH] = getimagesize($base->getPath());
-
-                $xPct  = (float) ($positions["{$side}_x"] ?? 0.5);
-                $yPct  = (float) ($positions["{$side}_y"] ?? 0.5);
-                $wPct  = (float) ($positions["{$side}_width"] ?? 0.4);
-                $hPct  = (float) ($positions["{$side}_height"] ?? 0.4);
-                $angle = (float) ($positions["{$side}_angle"] ?? 0);
-
-                $printW = max(1, (int) round($wPct * $baseW));
-                $printH = max(1, (int) round($hPct * $baseH));
-                $printX = (int) round($xPct * $baseW - $printW / 2);
-                $printY = (int) round($yPct * $baseH - $printH / 2);
-
-                try {
-                    $binary = (new MockupRenderer())->render([
-                        'base_path'         => $base->getPath(),
-                        'shirt_mask_path'   => $mask->getPath(),
-                        'shirt_shadow_path' => $shadow?->getPath(),
-                        'design_path'       => $design->getPath(),
-                        'print_x'           => $printX,
-                        'print_y'           => $printY,
-                        'print_w'           => $printW,
-                        'print_h'           => $printH,
-                        'angle'             => $angle,
-                        'hex'               => $hex,
-                    ]);
-
-                    $safeHex = ltrim($hex, '#');
-
-                    // Delete only same template + side + color before re-add
-                    $mockup->getMedia('generated_mockups')
-                        ->filter(fn($media) =>
-                            (string) $media->getCustomProperty('template_id') === (string) $template->id
-                            && (string) $media->getCustomProperty('side') === (string) $side
-                            && strtolower((string) $media->getCustomProperty('hex')) === $hex
-                        )
-                        ->each(fn($media) => $media->delete());
-
-                    $mockup->addMediaFromString($binary)
-                        ->usingFileName("mockup_{$side}_tpl{$template->id}_{$safeHex}.png")
-                        ->withCustomProperties([
-                            'side'        => $side,
-                            'template_id' => (string) $template->id,
-                            'hex'         => $hex,
-                            'category_id' => (int) $mockup->category_id,
-                        ])
-                        ->toMediaCollection('generated_mockups');
-                } catch (\Throwable $e) {
-                    Log::error("Render failed mockup {$mockup->id} {$hex}: " . $e->getMessage());
-                }
+                $this->renderSingle($mockup, $template, $type->value->name, $hex, $positions);
             }
         }
+    }
+
+    private function renderSingle(Mockup $mockup, Template $template, string $side, string $hex, array $positions)
+    {
+        $side = strtolower($side);
+        $hex = strtolower($hex);
+
+        [$base, $mask, $shadow] = $this->getBaseAssets($mockup, $side);
+        if (!$base || !$mask) return;
+
+        $design = $this->getDesign($template, $side);
+        if (!$design) return;
+
+        try {
+            $maskBounds = $this->getMaskBounds($mask);
+            $context = $this->getDesignContext($design, $maskBounds);
+
+            $modeResolver = app(MockupRenderModeResolver::class);
+            $configResolver = app(MockupRenderConfigResolver::class);
+
+            $mode = $modeResolver->resolve($context);
+
+            $config = $configResolver->resolve($mockup, $side, $mode);
+
+            $binary = (new MockupRenderer())->render([
+                'base_path' => $base->getPath(),
+                'shirt_mask_path' => $mask->getPath(),
+                'shirt_shadow_path' => $shadow?->getPath(),
+                'design_path' => $design->getPath(),
+                'warp_points' => $config['warp_points'],
+                'render_mode' => $config['render_mode'],
+                'max_dim' => 1600,
+                ...$config['preset'],
+                'hex' => $hex,
+            ]);
+
+            if (empty($binary)) return;
+
+            $this->storeGenerated($mockup, $template, $side, $hex, $binary);
+
+        } catch (\Throwable $e) {
+            Log::error("Render failed mockup {$mockup->id} {$hex}: " . $e->getMessage());
+        }
+    }
+
+    // ================= LOW LEVEL =================
+
+    private function getBaseAssets(Mockup $mockup, string $side)
+    {
+        return [
+            $mockup->getMedia('mockups')->first(fn($m) => $this->match($m, $side, 'base')),
+            $mockup->getMedia('mockups')->first(fn($m) => $this->match($m, $side, 'mask')),
+            $mockup->getMedia('mockups')->first(fn($m) => $this->match($m, $side, 'shadow')),
+        ];
+    }
+
+    private function match($media, $side, $role): bool
+    {
+        return $media->getCustomProperty('side') === $side
+            && $media->getCustomProperty('role') === $role;
+    }
+
+    private function getDesign(Template $template, string $side)
+    {
+        $media = $side === 'back'
+            ? $template->getFirstMedia('back_templates')
+            : $template->getFirstMedia('templates');
+
+        return ($media && file_exists($media->getPath())) ? $media : null;
+    }
+
+    private function parsePositions(Template $template): array
+    {
+        $positions = $template->pivot->positions ?? [];
+        return is_string($positions) ? json_decode($positions, true) ?? [] : $positions;
+    }
+
+    private function getMaskBounds($mask): array
+    {
+        $img = new \Imagick($mask->getPath());
+        $tmp = clone $img;
+
+        $tmp->trimImage(0);
+        $page = $tmp->getImagePage();
+
+        $bounds = [
+            'x' => (int)($page['x'] ?? 0),
+            'y' => (int)($page['y'] ?? 0),
+            'w' => $tmp->getImageWidth(),
+            'h' => $tmp->getImageHeight(),
+        ];
+
+        $tmp->clear();
+        $img->clear();
+
+        return $bounds;
+    }
+
+    private function getDesignContext($design, array $maskBounds): array
+    {
+        $img = new \Imagick($design->getPath());
+
+        $w = $img->getImageWidth();
+        $h = $img->getImageHeight();
+
+        $context = [
+            'coverage_ratio' => (($w / $maskBounds['w']) + ($h / $maskBounds['h'])) / 2,
+            'placed_width_ratio' => $w / $maskBounds['w'],
+            'placed_height_ratio' => $h / $maskBounds['h'],
+            'has_alpha' => $img->getImageAlphaChannel() !== 0,
+            'mime' => $design->mime_type ?? 'image/png',
+        ];
+
+        $img->clear();
+
+        return $context;
+    }
+
+    private function storeGenerated(Mockup $mockup, Template $template, string $side, string $hex, string $binary)
+    {
+        $safeHex = ltrim($hex, '#');
+
+        $mockup->getMedia('generated_mockups')
+            ->filter(fn($m) =>
+                $m->getCustomProperty('template_id') == $template->id &&
+                $m->getCustomProperty('side') == $side &&
+                strtolower($m->getCustomProperty('hex')) == $hex
+            )
+            ->each->delete();
+
+        $mockup->addMediaFromString($binary)
+            ->usingFileName("mockup_{$side}_tpl{$template->id}_{$safeHex}.png")
+            ->withCustomProperties([
+                'side' => $side,
+                'template_id' => (string)$template->id,
+                'hex' => $hex,
+                'category_id' => (int)$mockup->category_id,
+            ])
+            ->toMediaCollection('generated_mockups');
     }
 }
