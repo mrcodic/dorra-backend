@@ -708,7 +708,6 @@ Route::get('/debug2/mockup-render-perspective', function (
         'has_alpha'           => $hasAlpha,
         'mime'                => $designMime,
     ]);
-dd($autoRenderMode);
     $finalRenderMode = $renderModeOverride ?? $autoRenderMode;
 
     // ===== جيب الإعدادات من الداتابيز =====
