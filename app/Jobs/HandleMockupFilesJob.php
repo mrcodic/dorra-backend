@@ -72,7 +72,7 @@ class HandleMockupFilesJob implements ShouldQueue
             ->get();
     }
 
-    private function extractOldColors($mockups, int $templateId)
+    private function extractOldColors($mockups, string $templateId)
     {
         return $mockups
             ->flatMap(fn($m) => $m->templates->firstWhere('id', $templateId)?->pivot->colors ?? [])
@@ -86,7 +86,7 @@ class HandleMockupFilesJob implements ShouldQueue
         return $new->merge($old)->unique()->values()->all();
     }
 
-    private function syncNewMockupColors(Mockup $model, int $templateId, $newColors, array $allColors)
+    private function syncNewMockupColors(Mockup $model, string $templateId, $newColors, array $allColors)
     {
         $missing = collect($allColors)->diff($newColors)->values()->all();
 
@@ -97,7 +97,7 @@ class HandleMockupFilesJob implements ShouldQueue
         ]);
     }
 
-    private function processOldMockup(Mockup $mockup, Template $template, int $templateId, array $allColors)
+    private function processOldMockup(Mockup $mockup, Template $template, string $templateId, array $allColors)
     {
         $oldTemplate = $mockup->templates->firstWhere('id', $templateId);
         if (!$oldTemplate) return;
@@ -121,7 +121,7 @@ class HandleMockupFilesJob implements ShouldQueue
         );
     }
 
-    private function clearTemplateMedia(Mockup $mockup, int $templateId): void
+    private function clearTemplateMedia(Mockup $mockup, string $templateId): void
     {
         $mockup->getMedia('generated_mockups')
             ->filter(fn($m) =>
