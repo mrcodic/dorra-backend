@@ -40,6 +40,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
 };
 use App\Models\Template;
 use App\Services\Mockup\MockupRenderConfigResolver;
+use App\Services\Mockup\MockupRenderModeResolver;
 use App\Http\Controllers\Shared\{CommentController, LibraryAssetController};
 use App\Http\Controllers\Shared\General\MainController;
 use App\Http\Middleware\AutoCheckPermission;
@@ -622,32 +623,18 @@ Route::get('/debug2/mockup-render-perspective', function (
     abort_unless($token === 'pixbyte-debug-123', 403);
 
     // ===== المدخلات الأساسية =====
-    $mockupId      = (int) $request->query('mockup_id');
-    $designMediaId = (int) $request->query('design_media_id');
-    $side          = strtolower((string) $request->query('side', 'front'));
-    $hex           = $request->query('hex');
-    $save          = $request->boolean('save', false);
-    $debug         = $request->boolean('debug', false);
-    $skipMaskClip  = $request->boolean('skip_mask_clip', false);
+    $mockupId           = (int) $request->query('mockup_id');
+    $designMediaId      = (int) $request->query('design_media_id');
+    $side               = strtolower((string) $request->query('side', 'front'));
+    $hex                = $request->query('hex');
+    $save               = $request->boolean('save', false);
+    $debug              = $request->boolean('debug', false);
+    $skipMaskClip       = $request->boolean('skip_mask_clip', false);
     $renderModeOverride = $request->query('render_mode');
 
     // ===== جيب البيانات =====
     $mockup      = Mockup::with(['media', 'sideSettings'])->findOrFail($mockupId);
     $designMedia = Media::findOrFail($designMediaId);
-
-    // ===== جيب الإعدادات من الداتابيز =====
-    $urlOverrides = collectUrlOverrides($request);
-
-    $config     = $configResolver->resolve(
-        mockup:     $mockup,
-        side:       $side,
-        renderMode: $renderModeOverride ?? 'logo',
-        overrides:  $urlOverrides,
-    );
-
-    $renderMode = $config['render_mode'];
-    $preset     = $config['preset'];
-    $warp       = resolveUrlWarp($request) ?? $config['warp_points'];
 
     // ===== جيب الصور =====
     $mockupMedia = $mockup->getMedia('mockups');
@@ -683,45 +670,94 @@ Route::get('/debug2/mockup-render-perspective', function (
         ], 422);
     }
 
+    // ===== احسب mask bounds =====
+    $maskImg = new \Imagick($mask->getPath());
+    $tmp     = clone $maskImg;
+    $tmp->trimImage(0);
+    $page    = $tmp->getImagePage();
+
+    $maskBounds = [
+        'x' => max(0, (int) ($page['x'] ?? 0)),
+        'y' => max(0, (int) ($page['y'] ?? 0)),
+        'w' => max(1, $tmp->getImageWidth()),
+        'h' => max(1, $tmp->getImageHeight()),
+    ];
+
+    $tmp->clear();     $tmp->destroy();
+    $maskImg->clear(); $maskImg->destroy();
+
+    // ===== احسب design context لـ mode resolver =====
+    $designImg  = new \Imagick($designMedia->getPath());
+    $designW    = $designImg->getImageWidth();
+    $designH    = $designImg->getImageHeight();
+    $hasAlpha   = $designImg->getImageAlphaChannel() !== 0;
+    $designImg->clear();
+    $designImg->destroy();
+
+    $designMime        = $designMedia->mime_type ?? 'image/png';
+    $placedWidthRatio  = $designW / max(1, $maskBounds['w']);
+    $placedHeightRatio = $designH / max(1, $maskBounds['h']);
+    $coverageRatio     = ($placedWidthRatio + $placedHeightRatio) / 2;
+
+    // ===== حدد الوضع تلقائياً =====
+    $modeResolver   = app(MockupRenderModeResolver::class);
+    $autoRenderMode = $modeResolver->resolve([
+        'coverage_ratio'      => $coverageRatio,
+        'placed_width_ratio'  => $placedWidthRatio,
+        'placed_height_ratio' => $placedHeightRatio,
+        'has_alpha'           => $hasAlpha,
+        'mime'                => $designMime,
+    ]);
+dd($autoRenderMode);
+    $finalRenderMode = $renderModeOverride ?? $autoRenderMode;
+
+    // ===== جيب الإعدادات من الداتابيز =====
+    $urlOverrides = collectUrlOverrides($request);
+
+    $config     = $configResolver->resolve(
+        mockup:     $mockup,
+        side:       $side,
+        renderMode: $finalRenderMode,
+        overrides:  $urlOverrides,
+    );
+
+    $renderMode = $config['render_mode'];
+    $preset     = $config['preset'];
+    $warp       = resolveUrlWarp($request) ?? $config['warp_points'];
+
     // ===== وضع التشخيص =====
     if ($debug) {
-        $baseImg = new \Imagick($base->getPath());
-        $maskImg = new \Imagick($mask->getPath());
-
-        $tmp  = clone $maskImg;
-        $tmp->trimImage(0);
-        $page = $tmp->getImagePage();
-
-        $maskBounds = [
-            'x' => max(0, (int) ($page['x'] ?? 0)),
-            'y' => max(0, (int) ($page['y'] ?? 0)),
-            'w' => max(1, $tmp->getImageWidth()),
-            'h' => max(1, $tmp->getImageHeight()),
-        ];
-
+        $baseImg  = new \Imagick($base->getPath());
         $baseSize = [
             'w' => $baseImg->getImageWidth(),
             'h' => $baseImg->getImageHeight(),
         ];
-
-        $tmp->clear();     $tmp->destroy();
-        $maskImg->clear(); $maskImg->destroy();
-        $baseImg->clear(); $baseImg->destroy();
+        $baseImg->clear();
+        $baseImg->destroy();
 
         $sideSetting = $mockup->sideSettings->firstWhere('side', $side);
 
         return response()->json([
-            'ok'             => true,
-            'source'         => $sideSetting ? 'database' : 'defaults',
-            'render_mode'    => $renderMode,
-            'mockup_id'      => $mockupId,
-            'side'           => $side,
-            'hex'            => $hex,
-            'warp'           => $warp,
-            'preset'         => $preset,
-            'url_overrides'  => $urlOverrides,
-            'base_size'      => $baseSize,
-            'mask_bounds'    => $maskBounds,
+            'ok'               => true,
+            'source'           => $sideSetting ? 'database' : 'defaults',
+            'auto_render_mode' => $autoRenderMode,
+            'final_render_mode'=> $finalRenderMode,
+            'render_mode'      => $renderMode,
+            'mockup_id'        => $mockupId,
+            'side'             => $side,
+            'hex'              => $hex,
+            'warp'             => $warp,
+            'preset'           => $preset,
+            'url_overrides'    => $urlOverrides,
+            'base_size'        => $baseSize,
+            'mask_bounds'      => $maskBounds,
+            'coverage_context' => [
+                'coverage_ratio'      => $coverageRatio,
+                'placed_width_ratio'  => $placedWidthRatio,
+                'placed_height_ratio' => $placedHeightRatio,
+                'has_alpha'           => $hasAlpha,
+                'mime'                => $designMime,
+            ],
             'paths' => [
                 'base'   => $base->getPath(),
                 'mask'   => $mask->getPath(),

@@ -17,11 +17,9 @@ class MockupRenderConfigResolver
         $sideSetting = $mockup->sideSettings
             ->firstWhere('side', strtolower($side));
 
-        // قراءة الـ preset من ملف الإعدادات
         $preset = config("mockup.presets.{$renderMode}",
             config('mockup.presets.logo'));
 
-        // override من الداتابيز لو موجود
         $dbPresets      = is_array($sideSetting?->render_presets) ? $sideSetting->render_presets : [];
         $dbPresetForMode = is_array($dbPresets[$renderMode] ?? null) ? $dbPresets[$renderMode] : [];
 
