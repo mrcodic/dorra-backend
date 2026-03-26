@@ -218,15 +218,7 @@ class TemplateService extends BaseService
             if (request()->allFiles()) {
                 handleMediaUploads(request()->allFiles(), $model);
             }
-//            if ($validatedData['mockup_id']){
-//                $selectedTypeValues = Arr::get($validatedData, 'types', []);
-//                $positions = $this->defaultPositionsForTypes($selectedTypeValues);
-//
-//                $model->mockups()->syncWithPivotValues(
-//                    [(int) $validatedData['mockup_id']],
-//                    ['positions' => $positions,'colors' => ['#000000', '#ffffff']]
-//                );
-//            }
+
             if (isset($validatedData['template_image_id'])) {
                 Media::where('id', $validatedData['template_image_id'])
                     ->update([
@@ -439,14 +431,25 @@ class TemplateService extends BaseService
                     $existingPivot  = $model->mockups->firstWhere('id', $mockupId);
                     $existingColors = $existingPivot?->pivot->colors ?? null;
 
+                    if ($existingPivot && !empty($existingColors)) {
+                        return [
+                            $mockupId => [
+                                'positions' => $positions,
+                                'colors'    => $existingColors,
+                            ],
+                        ];
+                    }
+
+                    $mockup       = Mockup::find($mockupId);
+                    $mockupColors = $mockup?->colors;
+
                     return [
                         $mockupId => [
                             'positions' => $positions,
-                            'colors'    => $existingColors ?? ['#000000', '#ffffff'],
+                            'colors'    => !empty($mockupColors) ? $mockupColors : ['#000000', '#ffffff'],
                         ],
                     ];
                 })->toArray();
-
                 $model->mockups()->sync($pivotData);
 
                 $model->types->each(function ($type) use ($model) {
