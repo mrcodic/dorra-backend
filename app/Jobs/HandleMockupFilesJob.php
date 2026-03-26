@@ -130,7 +130,7 @@ class HandleMockupFilesJob implements ShouldQueue
                     $template->id,
                     $type->value->name,
                     $hex
-                )->onQueue('render');
+                );
 
             }
         }
