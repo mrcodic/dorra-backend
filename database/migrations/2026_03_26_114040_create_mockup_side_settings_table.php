@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('mockup_side_settings', function (Blueprint $table) {
-            Schema::create('mockup_side_settings', function (Blueprint $table) {
                 $table->id();
 
                 $table->foreignIdFor(\App\Models\Mockup::class)
@@ -29,7 +28,6 @@ return new class extends Migration
 
                 $table->unique(['mockup_id', 'side']);
             });
-        });
     }
 
     /**
