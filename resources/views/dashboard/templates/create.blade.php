@@ -628,7 +628,8 @@ $category = \App\Models\Category::find(request('category_id'));
                     syncHiddenInputs();
                     return;
                 }
-
+                const urlParams = new URLSearchParams(window.location.search);
+                const isWithEditor = urlParams.get('q') === 'with';
                 items.forEach(mockup => {
                     const id      = String(mockup.id);
                     const name    = mockup.name ?? ('Mockup #' + id);
@@ -663,11 +664,12 @@ $category = \App\Models\Category::find(request('category_id'));
 
                     <div class="card-body py-2">
                       <h6 class="card-title mb-2 text-truncate">${name}</h6>
-                      <button type="button"
+
+                ${ !isWithEditor ?`<button type="button"
                               class="btn btn-sm btn-primary w-100 js-show-on-mockup"
                               data-id="${id}">
                         Show on Mockup
-                      </button>
+                      </button>` :''}
                     </div>
                   </div>
                 </div>

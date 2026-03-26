@@ -64,19 +64,22 @@ class UpdateTemplateRequest extends BaseRequest
             'mockup_id' => ['nullable'  ,'integer', 'exists:mockups,id'],
 
             'template_image_front_id' => [
-//                Rule::requiredIf(fn()=> in_array(TypeEnum::FRONT->value, (array)request('types', []), )),
+                Rule::requiredIf(fn()=> in_array(TypeEnum::FRONT->value, (array)request('types', []) )
+                    && request('approach') == 'without_editor'),
                 'nullable',
                 'exists:media,id',
             ],
 
             'template_image_back_id' => [
-//                Rule::requiredIf(fn()=> in_array(TypeEnum::BACK->value, (array)request('types', []), )),
+                Rule::requiredIf(fn()=> in_array(TypeEnum::BACK->value, (array)request('types', []) )
+                    && request('approach') == 'without_editor'),
                 'nullable',
                 'exists:media,id',
             ],
 
             'template_image_none_id' => [
-//                Rule::requiredIf(fn()=> in_array(TypeEnum::NONE->value, (array)request('types', []), )),
+                Rule::requiredIf(fn()=> in_array(TypeEnum::NONE->value, (array)request('types', []) )
+                    && request('approach') == 'without_editor'),
                 'nullable',
                 'exists:media,id',
             ],

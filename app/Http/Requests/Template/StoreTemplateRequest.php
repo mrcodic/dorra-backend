@@ -46,20 +46,24 @@ class StoreTemplateRequest extends BaseRequest
             'flags.*' => ['integer', 'exists:flags,id'],
             'types' => ['required', 'array'],
             'types.*' => ['integer', 'exists:types,id'],
+            'approach' => ['sometimes', 'in:with_editor,without_editor'],
             'template_image_front_id' => [
-                Rule::requiredIf(fn()=> in_array(TypeEnum::FRONT->value, (array)request('types', []) ) && request('q') == 'without'),
+                Rule::requiredIf(fn()=> in_array(TypeEnum::FRONT->value, (array)request('types', []) )
+                    && request('approach') == 'without_editor'),
                 'nullable',
                 'exists:media,id',
             ],
 
             'template_image_back_id' => [
-                Rule::requiredIf(fn()=> in_array(TypeEnum::BACK->value, (array)request('types', []) )&& request('q') == 'without'),
+                Rule::requiredIf(fn()=> in_array(TypeEnum::BACK->value, (array)request('types', []) )
+                    && request('approach') == 'without_editor'),
                 'nullable',
                 'exists:media,id',
             ],
 
             'template_image_none_id' => [
-                Rule::requiredIf(fn()=> in_array(TypeEnum::NONE->value, (array)request('types', []), )&& request('q') == 'without'),
+                Rule::requiredIf(fn()=> in_array(TypeEnum::NONE->value, (array)request('types', []), )
+                    && request('approach') == 'without_editor'),
                 'nullable',
                 'exists:media,id',
             ],
@@ -99,7 +103,6 @@ class StoreTemplateRequest extends BaseRequest
             'border' => ['sometimes', 'in:' . CornerEnum::getValuesAsString()],
             'safety_area' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
             'cut_margin' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
-            'approach' => ['sometimes', 'in:with_editor,without_editor'],
 
         ];
     }

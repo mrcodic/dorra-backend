@@ -214,6 +214,7 @@
                                     <div class="row">
 
                                         <div class="row" id="templateTypeDropzones">
+                                            <input type="hidden" name="approach" value="{{ $model->approach }}">
                                             @if($model->approach == 'without_editor')
                                                 <!-- FRONT -->
                                                 <div class="form-group mb-2 col-md-6 d-none" id="dz-front">
