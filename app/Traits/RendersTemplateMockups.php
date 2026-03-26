@@ -169,7 +169,16 @@ trait RendersTemplateMockups
                 $renderMode = $config['render_mode'];
                 $preset = $config['preset'];
                 $warp = $config['warp_points'];
-
+dd([
+    'base_path' => $base->getPath(),
+    'shirt_mask_path' => $mask->getPath(),
+    'shirt_shadow_path' => $shadow?->getPath(),
+    'design_path' => $design->getPath(),
+    'warp_points' => $warp,
+    'render_mode' => $renderMode,
+    'max_dim' => 1600,
+    ...$preset,
+]);
                 try {
                     $binary = (new MockupRenderer())->render([
                         'base_path' => $base->getPath(),
