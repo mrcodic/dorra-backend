@@ -36,6 +36,15 @@ $configData = Helper::applClasses();
             background: #f5f5f5;   /* Light gray background */
             border-left: 3px solid #7367f0; /* Optional highlight */
         }
+        /* Main menu (level 1) */
+        .main-menu > li > a .menu-item {
+            font-size: 16px;
+        }
+
+        /* Submenu (level 2 and deeper) */
+        .main-menu li ul li > a .menu-item {
+            font-size: 14px;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
 

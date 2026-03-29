@@ -1,4 +1,4 @@
-<ul class="menu-content">
+<ul class="menu-content  main-menu">
     @if (isset($menu))
         @foreach ($menu as $submenu)
             @php
