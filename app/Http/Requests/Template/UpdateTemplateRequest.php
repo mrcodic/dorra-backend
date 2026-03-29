@@ -53,6 +53,8 @@ class UpdateTemplateRequest extends BaseRequest
             'price' => ['nullable', 'numeric','min:1'],
             'type' => ['sometimes','in:'.TypeEnum::getValuesAsString()],
 //            'status' => ["required","integer","in:".StatusEnum::getValuesAsString()],
+            'font_styles_ids' => ['nullable', 'array'],
+            'font_styles_ids.*' => ['integer', 'exists:font_styles,id'],
             'product_ids' => ['nullable','required_with:product_with_category', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
             'category_ids' => ['nullable', 'array'],

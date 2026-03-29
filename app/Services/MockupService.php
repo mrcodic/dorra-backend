@@ -375,7 +375,7 @@ class MockupService extends BaseService
                         model: $model,
                         collectionName: 'mockups');
                 }
-              
+
 
             });
 

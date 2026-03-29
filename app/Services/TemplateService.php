@@ -9,6 +9,7 @@ use App\Enums\Template\TypeEnum;
 use App\Jobs\HandleMockupFilesJob;
 use App\Jobs\ProcessBase64Image;
 use App\Models\Admin;
+use App\Models\FontStyle;
 use App\Models\Mockup;
 use App\Models\Template;
 use App\Models\Type;
@@ -513,6 +514,50 @@ class TemplateService extends BaseService
                 }
             });
 
+            $fontStyleIds = collect($validatedData['font_styles_ids'] ?? [])
+                ->filter()
+                ->unique()
+                ->values();
+
+            if ($fontStyleIds->isNotEmpty()) {
+                $fontMediaIds = FontStyle::query()
+                    ->whereIn('id', $fontStyleIds)
+                    ->with('media')
+                    ->get()
+                    ->map(function ($fontStyle) {
+                        return optional($fontStyle->media->first())->id;
+                    })
+                    ->filter()
+                    ->unique()
+                    ->values();
+
+                $existingFontMediaIds = $model->libraryMedia()
+                    ->wherePivot('type', 'font')
+                    ->pluck('media.id')
+                    ->toArray();
+
+                $toDetach = array_diff($existingFontMediaIds, $fontMediaIds->toArray());
+                if (!empty($toDetach)) {
+                    $model->libraryMedia()->detach($toDetach);
+                }
+
+                $syncFontData = $fontMediaIds->mapWithKeys(function ($mediaId) {
+                    return [
+                        $mediaId => ['type' => 'font'],
+                    ];
+                })->toArray();
+
+                $model->libraryMedia()->syncWithoutDetaching($syncFontData);
+            } else {
+                $existingFontMediaIds = $model->libraryMedia()
+                    ->wherePivot('type', 'font')
+                    ->pluck('media.id')
+                    ->toArray();
+
+                if (!empty($existingFontMediaIds)) {
+                    $model->libraryMedia()->detach($existingFontMediaIds);
+                }
+            }
             return $model;
         });
 
