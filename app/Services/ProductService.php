@@ -524,6 +524,17 @@ class ProductService extends BaseService
                 $media->setCustomProperty('color_hex', $color['value']);
                 $media->save();
             });
+            if ($validatedData['image_id']){
+                $product->getMedia('image_id')
+                    ->where('id', '!=', $validatedData['image_id'])
+                    ->each->delete();
+                Media::where('id', $validatedData['image_id'])
+                    ->update([
+                        'model_type' => get_class($product),
+                        'model_id' => $product->id,
+                        'collection_name' => 'product_main_image',
+                    ]);
+            }
 
             return $product;
         });
