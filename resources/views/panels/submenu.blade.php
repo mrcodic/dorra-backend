@@ -1,4 +1,4 @@
-<ul class="menu-content  main-menu">
+<ul class="menu-content" style="font-size: 16px;">
     @if (isset($menu))
         @foreach ($menu as $submenu)
             @php
@@ -9,7 +9,7 @@
                     request()->path() === $submenuPath &&
                     request()->get('product_without_category_id') == ($submenuQuery['product_without_category_id'] ?? null);
             @endphp
-            <li class="{{ $isSubmenuActive ? 'active' : '' }}">
+            <li class="{{ $isSubmenuActive ? 'active' : '' }}" style="font-size: 14px; padding-top: 0">
 
                 @if (!empty($submenu->modalTarget ?? ''))
                     <a href="javascript:void(0)"
