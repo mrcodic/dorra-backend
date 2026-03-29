@@ -373,6 +373,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
             Route::get('mockups', 'index')->name('mockups.index');
             Route::get('mockups/{mockup}', 'showAndUpdateRecent');
+            Route::get('mockups/{mockup}/side-settings/{side}', 'showAndUpdateRecent');
             Route::get('recent-mockups', 'recentMockups');
             Route::get('mockup-types', 'mockupTypes');
             Route::patch('mockups/{mockup}', 'updateEditorData');

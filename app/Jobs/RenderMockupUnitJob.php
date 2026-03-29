@@ -28,7 +28,7 @@ class RenderMockupUnitJob implements ShouldQueue
     {
         $lockKey = "render_{$this->mockupId}_{$this->templateId}_{$this->side}_{$this->hex}";
 
-        if (!Cache::lock($lockKey, 10)->get()) {
+        if (!Cache::lock($lockKey, 5)->get()) {
             return;
         }
 

@@ -140,7 +140,7 @@
             <div class="card-body">
                 <form id="addMockupForm" enctype="multipart/form-data" action="{{ route('mockups.store') }}">
                     @csrf
-{{--                    <input type="hidden" name="approach" value="{{ request('q') === 'with' ? 'with_editor' : 'without_editor' }}">--}}
+                    {{--                    <input type="hidden" name="approach" value="{{ request('q') === 'with' ? 'with_editor' : 'without_editor' }}">--}}
                     <div class="modal-body flex-grow-1">
                         <div class="position-relative text-center mb-2">
                             <hr class="opacity-75" style="border: 1px solid #24B094;">
@@ -213,7 +213,7 @@
                             </div>
                         </div>
 
-{{--                        @if(request('q') === 'without')--}}
+                        {{--                        @if(request('q') === 'without')--}}
 
 
                         <div class="form-group my-2 d-none" id="templatesCardsWrapper">
@@ -223,20 +223,20 @@
                             <input type="hidden" name="template_id" id="selectedTemplateId" class="col-md-3">
                             <div id="templatesHiddenContainer"></div>
                         </div>
-{{--                        @endif--}}
+                        {{--                        @endif--}}
                     </div>
 
-{{--                    @if(request('q') === 'with')--}}
-{{--                    <div class="mb-2">--}}
-{{--                        <label class="label-text mb-1 d-block">Colors</label>--}}
-{{--                        <div class="d-flex flex-wrap align-items-center gap-1">--}}
-{{--                            <button type="button" id="openColorPicker" class="gradient-picker-trigger border openColorPicker"></button>--}}
+                    {{--                    @if(request('q') === 'with')--}}
+                    {{--                    <div class="mb-2">--}}
+                    {{--                        <label class="label-text mb-1 d-block">Colors</label>--}}
+                    {{--                        <div class="d-flex flex-wrap align-items-center gap-1">--}}
+                    {{--                            <button type="button" id="openColorPicker" class="gradient-picker-trigger border openColorPicker"></button>--}}
 
-{{--                            <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center selected-colors"></span>--}}
-{{--                        </div>--}}
-{{--                        <div id="colorsInputContainer"></div>--}}
-{{--                    </div>--}}
-{{--                    @endif--}}
+                    {{--                            <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center selected-colors"></span>--}}
+                    {{--                        </div>--}}
+                    {{--                        <div id="colorsInputContainer"></div>--}}
+                    {{--                    </div>--}}
+                    {{--                    @endif--}}
 
                     <div class="modal-footer border-top-0">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -1207,7 +1207,226 @@
             }
         }
 
+        // =========================
+        // WARP POINTS EDITOR
+        // =========================
+        const warpState = {};
 
+        function initWarpEditor(side, imageUrl) {
+            const wrapper = document.getElementById(`warp-editor-${side}`);
+            const img     = document.getElementById(`warp-preview-${side}`);
+            const canvas  = document.getElementById(`warp-canvas-${side}`);
+            if (!wrapper || !img || !canvas) return;
+
+            warpState[side] = {
+                points: [
+                    { x: 0.1, y: 0.1 },
+                    { x: 0.9, y: 0.1 },
+                    { x: 0.9, y: 0.9 },
+                    { x: 0.1, y: 0.9 },
+                ],
+                dragging: null,
+            };
+
+            img.src = imageUrl;
+            wrapper.classList.remove('d-none');
+
+            const LABELS = ['TL', 'TR', 'BR', 'BL'];
+            const RADIUS  = 10;
+
+            function pxOf(p) {
+                return { x: p.x * canvas.width, y: p.y * canvas.height };
+            }
+
+            function draw() {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const pts = warpState[side].points;
+
+                // Fill
+                ctx.beginPath();
+                const f = pxOf(pts[0]);
+                ctx.moveTo(f.x, f.y);
+                pts.slice(1).forEach(p => { const px = pxOf(p); ctx.lineTo(px.x, px.y); });
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(36,176,148,0.08)';
+                ctx.fill();
+
+                // Outline
+                ctx.strokeStyle = 'rgba(36,176,148,0.85)';
+                ctx.lineWidth   = 1.5;
+                ctx.setLineDash([6, 4]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Diagonal guides
+                ctx.beginPath();
+                const tl = pxOf(pts[0]), br = pxOf(pts[2]);
+                const tr = pxOf(pts[1]), bl = pxOf(pts[3]);
+                ctx.moveTo(tl.x, tl.y); ctx.lineTo(br.x, br.y);
+                ctx.moveTo(tr.x, tr.y); ctx.lineTo(bl.x, bl.y);
+                ctx.strokeStyle = 'rgba(36,176,148,0.25)';
+                ctx.lineWidth   = 0.8;
+                ctx.stroke();
+
+                // Handles
+                pts.forEach((p, i) => {
+                    const px = pxOf(p);
+                    ctx.beginPath();
+                    ctx.arc(px.x, px.y, RADIUS, 0, Math.PI * 2);
+                    ctx.fillStyle   = '#24B094';
+                    ctx.fill();
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth   = 2;
+                    ctx.stroke();
+                    ctx.fillStyle    = '#fff';
+                    ctx.font         = 'bold 10px sans-serif';
+                    ctx.textAlign    = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(LABELS[i], px.x, px.y);
+                });
+            }
+
+            function resize() {
+                canvas.width  = img.clientWidth  || img.naturalWidth;
+                canvas.height = img.clientHeight || img.naturalHeight;
+                draw();
+            }
+
+            function nearestHandle(mx, my) {
+                const pts = warpState[side].points;
+                for (let i = 0; i < pts.length; i++) {
+                    const p  = pxOf(pts[i]);
+                    if (Math.hypot(p.x - mx, p.y - my) < RADIUS + 5) return i;
+                }
+                return null;
+            }
+
+            canvas.addEventListener('pointerdown', e => {
+                const rect = canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+                warpState[side].dragging = nearestHandle(mx, my);
+                if (warpState[side].dragging !== null) canvas.setPointerCapture(e.pointerId);
+            });
+
+            canvas.addEventListener('pointermove', e => {
+                if (warpState[side].dragging === null) return;
+                const rect = canvas.getBoundingClientRect();
+                warpState[side].points[warpState[side].dragging] = {
+                    x: Math.min(1, Math.max(0, (e.clientX - rect.left)  / canvas.width)),
+                    y: Math.min(1, Math.max(0, (e.clientY - rect.top)   / canvas.height)),
+                };
+                draw();
+                syncWarpInput(side);
+            });
+
+            canvas.addEventListener('pointerup', () => {
+                warpState[side].dragging = null;
+            });
+
+            img.addEventListener('load', resize);
+            new ResizeObserver(resize).observe(img);
+            if (img.complete) resize();
+
+            syncWarpInput(side);
+        }
+
+        function syncWarpInput(side) {
+            let input = document.getElementById(`warp-input-${side}`);
+            if (!input) {
+                input = document.createElement('input');
+                input.type = 'hidden';
+                input.id   = `warp-input-${side}`;
+                input.name = `warp_points[${side}]`;
+                document.getElementById('addMockupForm').appendChild(input);
+            }
+
+            const state = warpState[side];
+            if (!state || !state.points || state.points.length < 4) {
+                input.value = '';
+                return;
+            }
+
+            const pts = state.points;
+
+            const warpPoints = {
+                tl: {
+                    x: Number(pts[0].x.toFixed(6)),
+                    y: Number(pts[0].y.toFixed(6)),
+                },
+                tr: {
+                    x: Number(pts[1].x.toFixed(6)),
+                    y: Number(pts[1].y.toFixed(6)),
+                },
+                br: {
+                    x: Number(pts[2].x.toFixed(6)),
+                    y: Number(pts[2].y.toFixed(6)),
+                },
+                bl: {
+                    x: Number(pts[3].x.toFixed(6)),
+                    y: Number(pts[3].y.toFixed(6)),
+                }
+            };
+
+            input.value = JSON.stringify(warpPoints);
+        }
+
+        function resetWarp(side) {
+            if (!warpState[side]) return;
+            warpState[side].points = [
+                { x: 0.1, y: 0.1 },
+                { x: 0.9, y: 0.1 },
+                { x: 0.9, y: 0.9 },
+                { x: 0.1, y: 0.9 },
+            ];
+            // Re-init draw by triggering resize
+            const img = document.getElementById(`warp-preview-${side}`);
+            const canvas = document.getElementById(`warp-canvas-${side}`);
+            if (canvas && img) {
+                canvas.width  = img.clientWidth  || img.naturalWidth;
+                canvas.height = img.clientHeight || img.naturalHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            syncWarpInput(side);
+            // Re-init to redraw handles
+            const imgEl = document.getElementById(`warp-preview-${side}`);
+            if (imgEl && imgEl.src) initWarpEditor(side, imgEl.src);
+        }
+
+        $(document).on('click', '.js-reset-warp', function () {
+            resetWarp($(this).data('side'));
+            Toastify({ text: 'Reset to default corners', backgroundColor: '#6c757d', duration: 1200 }).showToast();
+        });
+
+        $(document).on('click', '.js-save-warp', function () {
+            const side     = $(this).data('side');
+            const mockupId = "{{ $mockup->id ?? 'null' }}";
+
+            syncWarpInput(side);
+
+            if (!mockupId || mockupId === 'null') {
+                Toastify({ text: 'Warp points ready — will save with mockup', backgroundColor: '#17a2b8', duration: 2000 }).showToast();
+                return;
+            }
+
+            fetch(`/admin/mockups/${mockupId}/side-settings/${side}`, {
+                method:  'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ warp_points: warpState[side]?.points }),
+            })
+                .then(r => r.json())
+                .then(() => {
+                    Toastify({ text: `Warp points saved for ${side}`, backgroundColor: '#28a745', duration: 1500 }).showToast();
+                })
+                .catch(() => {
+                    Toastify({ text: 'Save failed', backgroundColor: '#dc3545', duration: 1500 }).showToast();
+                });
+        });
         // Disable Dropzone auto-discovery
         Dropzone.autoDiscover = false;
 
@@ -1288,6 +1507,27 @@
                     </div>
                 </div>
             </div>
+ <div id="warp-editor-${type}" class="mt-3 d-none">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <label class="label-text">
+                Warp Points
+                <span class="badge bg-secondary ms-1" style="font-size:10px;">drag corners</span>
+            </label>
+            <div class="d-flex gap-1">
+                <button type="button" class="btn btn-sm btn-outline-secondary js-reset-warp" data-side="${type}">Reset</button>
+                <button type="button" class="btn btn-sm btn-primary js-save-warp" data-side="${type}">Save Warp</button>
+            </div>
+        </div>
+        <div class="position-relative" style="line-height:0;border:1px solid #CED5D4;border-radius:8px;overflow:hidden;">
+            <img id="warp-preview-${type}" src="" alt="mockup preview"
+                 style="width:100%;display:block;pointer-events:none;">
+            <canvas id="warp-canvas-${type}"
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair;touch-action:none;">
+            </canvas>
+        </div>
+        <small class="text-muted d-block mt-1">Points saved as % — resolution independent</small>
+        <input type="hidden" name="warp_points[${type}]" id="warp-input-${type}" value="">
+    </div>
         `;
 
                 document.getElementById('fileInputsContainer').appendChild(block);
@@ -1353,16 +1593,14 @@
                             hiddenInput.value = response.data.id;
 
                             if (part === 'base' && response.data.url) {
-                                if (type === 'front') {
-                                    loadBaseImage(window.canvasFront, response.data.url);
-                                    document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
-                                } else if (type === 'back') {
-                                    loadBaseImage(window.canvasBack, response.data.url);
-                                    document.getElementById('editorBackWrapper')?.classList.remove('d-none');
-                                } else if (type === 'none') {
-                                    loadBaseImage(window.canvasNone, response.data.url);
-                                    document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
-                                }
+                                const canvasMap  = { front: window.canvasFront, back: window.canvasBack, none: window.canvasNone };
+                                const wrapperMap = { front: 'editorFrontWrapper', back: 'editorBackWrapper', none: 'editorNoneWrapper' };
+
+                                loadBaseImage(canvasMap[type], response.data.url);
+                                document.getElementById(wrapperMap[type])?.classList.remove('d-none');
+
+                                // ✅ show warp editor for this side
+                                initWarpEditor(type, response.data.url);
                             }
                         }
                     });
@@ -1420,6 +1658,7 @@
     </script>
 
     <script>
+
         // =========================
         // MAIN IMAGE UPLOAD + FORM SUBMIT
         // =========================
@@ -1441,6 +1680,7 @@
                         if (!obj.templateId || obj.templateType !== type) return;
                         updateTemplatePositionsFromObject(obj, type);
                     });
+                    syncWarpInput(type);
                 });
 
                 buildHiddenTemplateInputs();

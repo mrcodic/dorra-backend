@@ -234,6 +234,18 @@ class MockupService extends BaseService
     {
         $model = $this->handleTransaction(function () use ($validatedData) {
             $model = $this->repository->create($validatedData);
+            if (!empty($warpPoints = $validatedData['warp_points'])) {
+                foreach ($warpPoints as $side => $points) {
+                    $model->sideSettings()->updateOrCreate(
+                        ['side' => $side],
+                        [
+                            'is_active' => true,
+                            'warp_points' => $points,
+                        ]
+                    );
+                }
+
+            }
             $model->types()->attach(Arr::get($validatedData, 'types') ?? []);
             if (!empty($validatedData['templates'])) {
                 collect($validatedData['templates'])->each(function ($template) use ($model) {
