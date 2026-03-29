@@ -57,7 +57,7 @@ class MockupResource extends JsonResource
             'area_left' => $this->area_left,
             'area_width' => $this->area_width,
             'area_height' => $this->area_height,
-
+            'side_settings' => MockupSideSettingResource::collection($this->whenLoaded('sideSettings')),
             'mockup_template_urls' => $this->getMedia('generated_mockups')
                 ->map(fn($m) => $m->getFullUrl()),
 
