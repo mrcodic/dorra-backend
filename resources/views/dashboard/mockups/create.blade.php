@@ -1333,43 +1333,35 @@
         }
 
         function syncWarpInput(side) {
-            let input = document.getElementById(`warp-input-${side}`);
-            if (!input) {
-                input = document.createElement('input');
-                input.type = 'hidden';
-                input.id   = `warp-input-${side}`;
-                input.name = `warp_points[${side}]`;
-                document.getElementById('addMockupForm').appendChild(input);
-            }
+            // احذف أي inputs قديمة لنفس side
+            document.querySelectorAll(`.warp-${side}`).forEach(el => el.remove());
 
             const state = warpState[side];
             if (!state || !state.points || state.points.length < 4) {
-                input.value = '';
                 return;
             }
 
             const pts = state.points;
 
             const warpPoints = {
-                tl: {
-                    x: Number(pts[0].x.toFixed(6)),
-                    y: Number(pts[0].y.toFixed(6)),
-                },
-                tr: {
-                    x: Number(pts[1].x.toFixed(6)),
-                    y: Number(pts[1].y.toFixed(6)),
-                },
-                br: {
-                    x: Number(pts[2].x.toFixed(6)),
-                    y: Number(pts[2].y.toFixed(6)),
-                },
-                bl: {
-                    x: Number(pts[3].x.toFixed(6)),
-                    y: Number(pts[3].y.toFixed(6)),
-                }
+                tl: pts[0],
+                tr: pts[1],
+                br: pts[2],
+                bl: pts[3],
             };
 
-            input.value = JSON.stringify(warpPoints);
+            const form = document.getElementById('addMockupForm');
+
+            Object.entries(warpPoints).forEach(([corner, point]) => {
+                ['x', 'y'].forEach(axis => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.className = `warp-${side}`;
+                    input.name = `warp_points[${side}][${corner}][${axis}]`;
+                    input.value = Number(point[axis].toFixed(6));
+                    form.appendChild(input);
+                });
+            });
         }
 
         function resetWarp(side) {
