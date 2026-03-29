@@ -83,6 +83,8 @@ class UpdateTemplateEditorRequest extends BaseRequest
             'border' => ['sometimes', 'numeric'],
             'go_to_editor' => ['sometimes', 'boolean'],
             'cut_margin' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
+            'font_styles_ids' => ['nullable', 'array'],
+            'font_styles_ids.*' => ['integer', 'exists:font_styles,id'],
 
         ];
     }
