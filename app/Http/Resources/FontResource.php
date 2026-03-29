@@ -17,10 +17,10 @@ class FontResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'font_styles' => $this->when(
-                $this->relationLoaded('fontStyles'),
-                FontStyleResource::collection(
-                    $this->fontStyles()->paginate(request('styles_per_page', 5))
+            'font_styles' => $this->whenLoaded(
+                'fontStyles',
+                fn() => FontStyleResource::collection(
+                    $this->fontStyles()->with(['media', 'font'])->paginate(request('styles_per_page', 5))
                 )
             ),
         ];
