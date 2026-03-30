@@ -1882,11 +1882,45 @@
     // =========================
     // WARP POINTS EDITOR
     // =========================
+    function normalizeWarpPoints(saved) {
+        if (!saved) return null;
+
+        if (typeof saved === 'string') {
+            try {
+                saved = JSON.parse(saved);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // لو جاي array بالفعل
+        if (Array.isArray(saved) && saved.length === 4) {
+            return saved.map((p) => ({
+                x: Number(p.x),
+                y: Number(p.y),
+            }));
+        }
+
+        // لو جاي object بالشكل tl,tr,br,bl
+        if (
+            saved.tl && saved.tr &&
+            saved.br && saved.bl
+        ) {
+            return [
+                { x: Number(saved.tl.x), y: Number(saved.tl.y) },
+                { x: Number(saved.tr.x), y: Number(saved.tr.y) },
+                { x: Number(saved.br.x), y: Number(saved.br.y) },
+                { x: Number(saved.bl.x), y: Number(saved.bl.y) },
+            ];
+        }
+
+        return null;
+    }
     const warpState = {};
 
     // ✅ Pre-load existing warp points from DB (per side)
     const existingWarpPoints = @json($existingWarpPoints);
-    console.log("hh",existingWarpPoints)
+    console.log(existingWarpPoints)
     function initWarpEditor(side, imageUrl) {
         const wrapper = document.getElementById(`warp-editor-${side}`);
         const img     = document.getElementById(`warp-preview-${side}`);
@@ -1894,9 +1928,10 @@
         if (!wrapper || !img || !canvas) return;
 
         // ✅ Use saved warp points if available, else default corners
-        const saved = existingWarpPoints[side];
+        const saved = normalizeWarpPoints(existingWarpPoints[side]);
+
         warpState[side] = {
-            points: (Array.isArray(saved) && saved.length === 4) ? saved : [
+            points: saved ?? [
                 { x: 0.1, y: 0.1 },
                 { x: 0.9, y: 0.1 },
                 { x: 0.9, y: 0.9 },
