@@ -29,7 +29,18 @@ class DesignResource extends JsonResource
     public function toArray(Request $request): array
     {
         $designable = $this->designable;
-
+        dd(
+            $this->relationLoaded('libraryMedia'),
+            $this->libraryMedia->map(function ($media) {
+                return [
+                    'media_id' => $media->id,
+                    'pivot_type' => $media->pivot->type ?? null,
+                    'owner_model_class' => $media->model ? get_class($media->model) : null,
+                    'owner_model_id' => $media->model?->id,
+                    'font_id' => $media->model?->font?->id ?? null,
+                ];
+            })
+        );
         return [
             'id' => $this->id,
             'name'=> $this->name,
