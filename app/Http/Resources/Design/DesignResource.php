@@ -4,6 +4,7 @@ namespace App\Http\Resources\Design;
 
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\DimensionResource;
+use App\Http\Resources\FontResource;
 use App\Http\Resources\MockupResource;
 use App\Http\Resources\Product\ProductPriceResource;
 use App\Http\Resources\Product\ProductResource;
@@ -90,87 +91,28 @@ class DesignResource extends JsonResource
             'mockup_color' =>  $this->mockup_color,
             'approach' =>  $this->approach,
             'design_mockup_area' =>  $this->design_mockup_area ,
-//            'design_mockup_area' =>  $this->design_mockup_area ??  [
-//                    [
-//                        "name" => "front",
-//                        "p1x" => "0.350000",
-//                        "p1y" => "0.250000",
-//                        "p2x" => "0.650000",
-//                        "p2y" => "0.250000",
-//                        "p3x" => "0.350000",
-//                        "p3y" => "0.550000",
-//                        "p4x" => "0.650000",
-//                        "p4y" => "0.550000"
-//                    ],
-//                    [
-//                        "name" => "back",
-//                        "p1x" => "0.350000",
-//                        "p1y" => "0.250000",
-//                        "p2x" => "0.650000",
-//                        "p2y" => "0.250000",
-//                        "p3x" => "0.350000",
-//                        "p3y" => "0.550000",
-//                        "p4x" => "0.650000",
-//                        "p4y" => "0.550000"
-//                    ],
-//                    [
-//                        "name" => "none",
-//                        "p1x" => "0.350000",
-//                        "p1y" => "0.250000",
-//                        "p2x" => "0.650000",
-//                        "p2y" => "0.250000",
-//                        "p3x" => "0.350000",
-//                        "p3y" => "0.550000",
-//                        "p4x" => "0.650000",
-//                        "p4y" => "0.550000"
-//                    ],
-//                ],
-//            'design_mockup_area' => $this->design_mockup_area ??
-//                $this->types->map(function ($type) {
-//
-//                    if ($type->value->key() === 'front') {
-//                        return [
-//                            "name" => "front",
-//                            "p1x" => "0.350000",
-//                            "p1y" => "0.250000",
-//                            "p2x" => "0.650000",
-//                            "p2y" => "0.250000",
-//                            "p3x" => "0.350000",
-//                            "p3y" => "0.550000",
-//                            "p4x" => "0.650000",
-//                            "p4y" => "0.550000"
-//                        ];
-//                    }
-//
-//                    if ($type->value->key() === 'back') {
-//                        return [
-//                            "name" => "back",
-//                            "p1x" => "0.350000",
-//                            "p1y" => "0.250000",
-//                            "p2x" => "0.650000",
-//                            "p2y" => "0.250000",
-//                            "p3x" => "0.350000",
-//                            "p3y" => "0.550000",
-//                            "p4x" => "0.650000",
-//                            "p4y" => "0.550000"
-//                        ];
-//                    }
-//
-//                    if ($type->value->key() === 'none') {
-//                        return [
-//                            "name" => "none",
-//                            "p1x" => "0.350000",
-//                            "p1y" => "0.250000",
-//                            "p2x" => "0.650000",
-//                            "p2y" => "0.250000",
-//                            "p3x" => "0.350000",
-//                            "p3y" => "0.550000",
-//                            "p4x" => "0.650000",
-//                            "p4y" => "0.550000"
-//                        ];
-//                    }
-//
-//                })->values(),
+            'font_media' => FontResource::collection(
+                $this->whenLoaded('libraryMedia', function () {
+                    return $this->libraryMedia
+                        ->where('pivot.type', 'font')
+                        ->sortByDesc('pivot.created_at')
+                        ->values()
+                        ->map(function ($media) {
+                            $model = $media->model;
+                            if (!$model) return null;
+
+                            if (!$model instanceof \App\Models\FontStyle) return null;
+
+                            $model->loadMissing('font');
+                            if (!$model->font) return null;
+
+                            return $model->font->loadMissing(['fontStyles.media','fontStyles.font']);
+                        })
+                        ->filter()
+                        ->unique('id')
+                        ->values();
+                })
+            ),
             'is_added_to_cart' => $this->isAddedToCart(),
         ];
     }
