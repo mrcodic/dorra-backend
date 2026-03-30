@@ -85,7 +85,7 @@ class CartService extends BaseService
                     $priceDetails['sub_total'],
                     $request->cartable_id,
                     $request->cartable_type,
-                    $request->color ?? $design &&  $design->linked_to_mockup ? $design->mockup_color : null,
+                    $request->color ?? $design &&  $design?->linked_to_mockup ? $design?->mockup_color : null,
                 );
 
                 $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
