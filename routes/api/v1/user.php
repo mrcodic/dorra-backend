@@ -91,6 +91,7 @@ Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'
 Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
 Route::get('gallery', [LibraryAssetController::class,'gallery']);
 Route::delete('/media/{media}', [MainController::class, 'removeMedia']);
+Route::post('designs/{design}/fonts', [DesignController::class,'attachMultipleFonts']);
 
 
 Route::middleware(LocalizationMiddleware::class)->group(function () {
@@ -113,7 +114,6 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
         Route::post('{design}/library-assets', 'attachMultipleLibraryAssets');
         Route::delete('{design}/library-assets/{library_asset}', 'detachLibraryAsset');
         Route::get('{design}/library-assets', 'getLibraryAssets');
-        Route::post('{design}/fonts', 'attachMultipleFonts');
 
         Route::post('bulk-restore', 'bulkRestore');
         Route::post('bulk-delete', 'bulkDelete');
