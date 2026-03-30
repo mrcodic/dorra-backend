@@ -71,6 +71,7 @@ class DesignService extends BaseService
                     $design->types()->attach($template->types->pluck('id') );
                 }
                 $mediaIds = $template->libraryMedia()
+                    ->wherePivot('type', 'font')
                     ->pluck('media_id')
                     ->toArray();
 
