@@ -167,7 +167,8 @@ class UpdateDesignRequest extends BaseRequest
 //                'mimes:png',
                 'max:2048'
             ],
-
+            'font_styles_ids' => ['nullable', 'array'],
+            'font_styles_ids.*' => ['integer', 'exists:font_styles,id'],
         ];
     }
 

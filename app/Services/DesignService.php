@@ -6,6 +6,7 @@ namespace App\Services;
 use App\Jobs\ProcessBase64Image;
 
 use App\Models\Category;
+use App\Models\FontStyle;
 use App\Models\Product;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Implementations\ProductSpecificationOptionRepository;
@@ -69,8 +70,17 @@ class DesignService extends BaseService
                 if ($template->types) {
                     $design->types()->attach($template->types->pluck('id') );
                 }
-                $mediaIds = $template->libraryMedia()->pluck('media_id')->toArray();
-                $design->libraryMedia()->sync($mediaIds);
+                $mediaIds = $template->libraryMedia()
+                    ->pluck('media_id')
+                    ->toArray();
+
+                $syncData = collect($mediaIds)
+                    ->mapWithKeys(fn ($mediaId) => [
+                        $mediaId => ['type' => 'font']
+                    ])
+                    ->toArray();
+
+                $design->libraryMedia()->sync($syncData);
                 return $design->load([
                     'designable.prices',
                     'media',
@@ -112,6 +122,7 @@ class DesignService extends BaseService
                 ]]);
             });
         }
+
         $design->update(['total_price' => $totalPrice]);
 
         return $design->load([
@@ -129,6 +140,50 @@ class DesignService extends BaseService
     {
         if (!empty($validatedData['mockup_id'])) $validatedData['linked_to_mockup'] = true;
         $model = $this->repository->update($validatedData, $id);
+        $fontStyleIds = collect($validatedData['font_styles_ids'] ?? [])
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($fontStyleIds->isNotEmpty()) {
+            $fontMediaIds = FontStyle::query()
+                ->whereIn('id', $fontStyleIds)
+                ->with('media')
+                ->get()
+                ->map(function ($fontStyle) {
+                    return optional($fontStyle->media->first())->id;
+                })
+                ->filter()
+                ->unique()
+                ->values();
+
+            $existingFontMediaIds = $model->libraryMedia()
+                ->wherePivot('type', 'font')
+                ->pluck('media.id')
+                ->toArray();
+
+            $toDetach = array_diff($existingFontMediaIds, $fontMediaIds->toArray());
+            if (!empty($toDetach)) {
+                $model->libraryMedia()->detach($toDetach);
+            }
+
+            $syncFontData = $fontMediaIds->mapWithKeys(function ($mediaId) {
+                return [
+                    $mediaId => ['type' => 'font'],
+                ];
+            })->toArray();
+
+            $model->libraryMedia()->syncWithoutDetaching($syncFontData);
+        } else {
+            $existingFontMediaIds = $model->libraryMedia()
+                ->wherePivot('type', 'font')
+                ->pluck('media.id')
+                ->toArray();
+
+            if (!empty($existingFontMediaIds)) {
+                $model->libraryMedia()->detach($existingFontMediaIds);
+            }
+        }
         if (isset($validatedData['specs'])) {
             collect($validatedData['specs'])->each(function ($spec) use ($model) {
                 $model->specifications()->syncWithoutDetaching([$model->id => [
