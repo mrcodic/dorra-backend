@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\{BelongsTo,
     MorphTo,
     MorphToMany
 };
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Translatable\HasTranslations;
 
 #[ObservedBy(DesignObserver::class)]
@@ -221,7 +222,7 @@ class Design extends Model implements HasMedia
         return $this->morphToMany(
             Media::class,
             'mediable'
-        )->withTimestamps();
+        )->withPivot('type')->withTimestamps();
     }
     public function getFrontImageUrl(): string
     {
