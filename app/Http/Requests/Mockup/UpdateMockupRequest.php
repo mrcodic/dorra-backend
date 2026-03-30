@@ -49,6 +49,7 @@ class UpdateMockupRequest extends BaseRequest
             'types.*' => ['required', Rule::in(TypeEnum::values())],
             'category_id' => ['required','integer', Rule::exists(Category::class, 'id')],
             'colors' => ['sometimes','array'],
+            'warp_points' => ['nullable', 'array'],
             'templates' => ['nullable','array'],
             'templates.*.template_id' => ['nullable','exists:templates,id'],
             'templates.*.front_x'      => ['nullable', 'numeric', 'min:0'],

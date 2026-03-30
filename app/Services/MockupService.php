@@ -308,6 +308,18 @@ class MockupService extends BaseService
             $before = $this->repository->find($id);
             $oldCategoryId = $before->category_id;
             $model = $this->repository->update($validatedData, $id);
+            if (!empty($warpPoints = $validatedData['warp_points'])) {
+                foreach ($warpPoints as $side => $points) {
+                    $model->sideSettings()->updateOrCreate(
+                        ['side' => $side],
+                        [
+                            'is_active' => true,
+                            'warp_points' => $points,
+                        ]
+                    );
+                }
+
+            }
             $categoryChanged = (int)$oldCategoryId !== (int)($validatedData['category_id'] ?? $model->category_id);
             // Sync types (OK)
 
