@@ -35,8 +35,6 @@ use App\Http\Controllers\Api\V1\User\{Ai\AiAssetController,
     Wallet\WalletController};
 use App\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\Shared\General\MainController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -89,6 +87,7 @@ Route::prefix('ship-blu/')->controller(ShippingController::class)->group(functio
 Route::get('/fonts', [MainController::Class, 'fonts']);
 Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
 Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");
+
 Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
 Route::get('gallery', [LibraryAssetController::class,'gallery']);
 Route::delete('/media/{media}', [MainController::class, 'removeMedia']);
@@ -114,6 +113,8 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
         Route::post('{design}/library-assets', 'attachMultipleLibraryAssets');
         Route::delete('{design}/library-assets/{library_asset}', 'detachLibraryAsset');
         Route::get('{design}/library-assets', 'getLibraryAssets');
+        Route::post('{design}/fonts', 'attachMultipleFonts');
+
         Route::post('bulk-restore', 'bulkRestore');
         Route::post('bulk-delete', 'bulkDelete');
         Route::post('bulk-force-delete', 'bulkForceDelete');

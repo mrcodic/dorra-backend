@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\V1\User\Design;
 
 
+use App\Enums\HttpEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Design\StoreDesignFinalizationRequest;
 use App\Http\Resources\MediaResource;
+use App\Models\FontStyle;
 use App\Models\Media;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\Rule;
@@ -184,8 +186,25 @@ class DesignController extends Controller
     {
         $owners = $this->designService->owners();
         return Response::api(data: UserResource::collection($owners));
-
-
     }
+
+    public function attachMultipleFonts(Request $request, Design $design)
+    {
+        $validated = $request->validate([
+            'font_media_id' => ['required','exists:font_styles,id']
+        ]);
+
+        $fontStyle = FontStyle::find($validated['font_media_id']);
+        $firstMedia = $fontStyle->media()->first();
+
+        if (!$firstMedia) {
+            return Response::api(HttpEnum::NOT_FOUND, 'No media found for this font style');
+        }
+        $design->libraryMedia()->syncWithoutDetaching([
+            $firstMedia->id => ['type' => 'font']
+        ]);
+        return Response::api();
+    }
+
 
 }

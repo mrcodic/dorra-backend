@@ -69,7 +69,8 @@ class DesignService extends BaseService
                 if ($template->types) {
                     $design->types()->attach($template->types->pluck('id') );
                 }
-
+                $mediaIds = $template->libraryMedia->pluck('media_id');
+                $design->libraryMedia->sync($mediaIds);
                 return $design->load([
                     'designable.prices',
                     'media',
