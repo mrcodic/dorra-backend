@@ -218,9 +218,9 @@ $category = \App\Models\Category::find(request('category_id'));
                                                 </div>
                                             @endif
                                                 @php
-                                                    $category = \App\Models\Category::find(request('product_without_category_id'));
+                                                    $HasMockupCategory = \App\Models\Category::find(request('product_without_category_id'));
                                                 @endphp
-                                                @if($category && !$category->has_mockup)
+                                                @if($HasMockupCategory && !$HasMockupCategory->has_mockup)
                                             <!-- MODEL  -->
                                             <div class="form-group mb-2 col-md-6 d-none" id="dz-model">
                                                 <label class="label-text mb-1">Template Model Image</label>
