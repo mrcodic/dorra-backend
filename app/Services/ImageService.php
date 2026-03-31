@@ -59,30 +59,26 @@ class ImageService
             $preview->setBackgroundColor(new ImagickPixel('transparent'));
         }
 
-        // Convert to WebP at 80% quality
-        $preview->setImageFormat('webp');
-        $preview->setImageCompressionQuality(80);
+        // Keep same format as original
+        $ext         = pathinfo($original->file_name, PATHINFO_EXTENSION);
+        $tmpPath     = tempnam(sys_get_temp_dir(), 'preview_') . '.' . $ext;
+        $previewFileName = pathinfo($original->file_name, PATHINFO_FILENAME) . '_preview.' . $ext;
 
-        // Write to temp file
-        $tmpPath = tempnam(sys_get_temp_dir(), 'preview_') . '.webp';
         $preview->writeImage($tmpPath);
 
-        $previewFileName = pathinfo($original->file_name, PATHINFO_FILENAME) . '_preview.webp';
-
-        // Store as new media row — same pattern as your $modelData = null branch
         $previewMedia = handleMediaUploads(
             files           : new UploadedFile(
                 path        : $tmpPath,
                 originalName: $previewFileName,
-                mimeType    : 'image/webp',
+                mimeType    : $original->mime_type, // same mime as original
                 test        : true,
             ),
             collectionName  : 'templates-preview',
             customProperties: [
-                'width'        => $preview->getImageWidth(),
-                'height'       => $preview->getImageHeight(),
-                'has_alpha'    => (bool) $preview->getImageAlphaChannel(),
-                'original_id'  => $original->id, // trace back to original
+                'width'       => $preview->getImageWidth(),
+                'height'      => $preview->getImageHeight(),
+                'has_alpha'   => (bool) $preview->getImageAlphaChannel(),
+                'original_id' => $original->id,
             ],
         );
 
