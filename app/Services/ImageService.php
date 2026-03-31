@@ -76,40 +76,54 @@ class ImageService
 
         $preview = new Imagick($filePath . '[0]');
 
-        // Strip metadata first
+        // Remove metadata
         $preview->stripImage();
 
-        // Compress down to 1MB max — reduce quality in steps until under limit
-        $this->compressToLimit(
-            imagick  : $preview,
-            maxBytes : config('media.preview.max_size', 1 * 1024 * 1024), // 1MB
-        );
+        // Force preview format to JPEG for better compression
+        $preview->setImageFormat('jpeg');
+        $preview->setImageCompression(Imagick::COMPRESSION_JPEG);
+        $preview->setImageCompressionQuality(85);
+        $preview->setInterlaceScheme(Imagick::INTERLACE_JPEG);
 
-        // Preserve alpha if original had it
+        // Flatten transparency if exists, because JPEG does not support alpha
         if ($preview->getImageAlphaChannel()) {
-            $preview->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
-            $preview->setBackgroundColor(new ImagickPixel('transparent'));
+            $background = new Imagick();
+            $background->newImage(
+                $preview->getImageWidth(),
+                $preview->getImageHeight(),
+                new ImagickPixel('white')
+            );
+            $background->setImageFormat('jpeg');
+            $background->compositeImage($preview, Imagick::COMPOSITE_OVER, 0, 0);
+            $preview->destroy();
+            $preview = $background;
         }
 
-        $ext             = pathinfo($original->file_name, PATHINFO_EXTENSION);
-        $tmpPath         = tempnam(sys_get_temp_dir(), 'preview_') . '.' . $ext;
-        $previewFileName = pathinfo($original->file_name, PATHINFO_FILENAME) . '_preview.' . $ext;
+        $this->compressToLimit(
+            imagick: $preview,
+            maxBytes: config('media.preview.max_size', 1 * 1024 * 1024),
+        );
+
+        $tmpPath = tempnam(sys_get_temp_dir(), 'preview_') . '.jpg';
+        $previewFileName = pathinfo($original->file_name, PATHINFO_FILENAME) . '_preview.jpg';
 
         $preview->writeImage($tmpPath);
 
+        clearstatcache(true, $tmpPath);
+
         $previewMedia = handleMediaUploads(
-            files           : new UploadedFile(
-                path        : $tmpPath,
+            files: new UploadedFile(
+                path: $tmpPath,
                 originalName: $previewFileName,
-                mimeType    : $original->mime_type,
-                test        : true,
+                mimeType: 'image/jpeg',
+                test: true,
             ),
-            modelData       : $original->model,
-            collectionName  : $previewCollection,
+            modelData: $original->model,
+            collectionName: $previewCollection,
             customProperties: [
-                'width'       => $preview->getImageWidth(),
-                'height'      => $preview->getImageHeight(),
-                'has_alpha'   => (bool) $preview->getImageAlphaChannel(),
+                'width' => $preview->getImageWidth(),
+                'height' => $preview->getImageHeight(),
+                'has_alpha' => false,
                 'original_id' => $original->id,
             ],
         );
@@ -119,28 +133,41 @@ class ImageService
 
         return $previewMedia;
     }
-
     private function compressToLimit(Imagick $imagick, int $maxBytes): void
     {
-        $quality = 85; // start quality
-        $step    = 5;  // reduce by 5 each iteration
-        $minQuality = 10; // never go below this
+        $quality = 85;
+        $minQuality = 20;
+        $step = 5;
 
+        $imagick->setImageCompression(Imagick::COMPRESSION_JPEG);
         $imagick->setImageCompressionQuality($quality);
 
-        // If already under limit — nothing to do
-        if (strlen($imagick->getImageBlob()) <= $maxBytes) {
-            return;
-        }
-
-        // Reduce quality in steps until under 1MB or hit minimum quality
-        while ($quality > $minQuality) {
-            $quality -= $step;
+        // First try quality reduction
+        while ($quality >= $minQuality) {
             $imagick->setImageCompressionQuality($quality);
 
             if (strlen($imagick->getImageBlob()) <= $maxBytes) {
+                return;
+            }
+
+            $quality -= $step;
+        }
+
+        // If still too large, resize gradually
+        while (strlen($imagick->getImageBlob()) > $maxBytes) {
+            $currentWidth = $imagick->getImageWidth();
+            $currentHeight = $imagick->getImageHeight();
+
+            // prevent endless loop on very small images
+            if ($currentWidth <= 300 || $currentHeight <= 300) {
                 break;
             }
+
+            $newWidth = (int) round($currentWidth * 0.9);
+            $newHeight = (int) round($currentHeight * 0.9);
+
+            $imagick->resizeImage($newWidth, $newHeight, Imagick::FILTER_LANCZOS, 1, true);
+            $imagick->setImageCompressionQuality($minQuality);
         }
     }
 }
