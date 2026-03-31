@@ -1451,7 +1451,7 @@ $category = \App\Models\Category::find(request('category_id'));
             url: "{{ route('media.store') }}",
             paramName: "file",
             maxFiles: 1,
-            maxFilesize: 1, // MB
+            maxFilesize: 30, // MB
             acceptedFiles: "image/*",
             headers: {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}"

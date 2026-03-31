@@ -241,7 +241,7 @@ class TemplateService extends BaseService
                         'collection_name' => 'templates',
                     ]);
                 $this->imageService->processUploaded($validatedData['template_image_front_id'] ?? $validatedData['template_image_none_id'],'templates-preview');
-                
+
             }
             if (isset($validatedData['template_image_back_id'])) {
 

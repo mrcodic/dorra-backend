@@ -61,8 +61,8 @@ class ImageService
 
         $originalWidth  = $preview->getImageWidth();
         $originalHeight = $preview->getImageHeight();
-        $maxWidth       = 1200;
-        $maxHeight      = 1200;
+        $maxWidth       = 1000;
+        $maxHeight      = 1000;
 
         // Only downscale — never upscale, always keep aspect ratio
         if ($originalWidth > $maxWidth || $originalHeight > $maxHeight) {
