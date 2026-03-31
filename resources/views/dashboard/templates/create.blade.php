@@ -173,7 +173,9 @@ $category = \App\Models\Category::find(request('category_id'));
                                                                id="uploadedFrontTemplateImage">
                                                     </div>
                                                     <small class="form-text text-muted">
-                                                        If no size is selected, the default 618×700 will be applied.
+                                                        Allowed formats: PNG, JPG, JPEG, WEBP.
+                                                        Maximum file size: 30 MB.
+                                                        Minimum dimensions: 1000 × 1000 px.
                                                     </small>
                                                 </div>
 
@@ -227,9 +229,7 @@ $category = \App\Models\Category::find(request('category_id'));
                                                            id="uploadedTemplateImage">
                                                 </div>
                                                 <small class="form-text text-muted">
-                                                    Allowed formats: PNG, JPG, JPEG, WEBP.
-                                                    Maximum file size: 30 MB.
-                                                    Minimum dimensions: 1000 × 1000 px.
+                                                    If no size is selected, the default 618×700 will be applied.
                                                 </small>
                                             </div>
 

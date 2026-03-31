@@ -193,155 +193,173 @@
                                             @endforeach
 
                                         </div>
-                                    <div class="form-group mb-2">
-                                        <label class="label-text mb-1">Template Type</label>
-                                        <div class="row">
-                                            @foreach(\App\Models\Type::all(['id','value']) as $type)
-                                                <div class="col-md-4 mb-1">
-                                                    <label class="radio-box">
-                                                        <input class="form-check-input type-checkbox" type="checkbox"
-                                                               name="types[]" value="{{ $type->value }}"
-                                                               data-type-name="{{ strtolower($type->value->name) }}"
-                                                            @checked($model->types->contains($type->id))
+                                        <div class="form-group mb-2">
+                                            <label class="label-text mb-1">Template Type</label>
+                                            <div class="row">
+                                                @foreach(\App\Models\Type::all(['id','value']) as $type)
+                                                    <div class="col-md-4 mb-1">
+                                                        <label class="radio-box">
+                                                            <input class="form-check-input type-checkbox"
+                                                                   type="checkbox"
+                                                                   name="types[]" value="{{ $type->value }}"
+                                                                   data-type-name="{{ strtolower($type->value->name) }}"
+                                                                @checked($model->types->contains($type->id))
 
-                                                        >
-                                                        <span>{{ $type->value->label() }}</span>
-                                                    </label>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                    <div class="row">
-
-                                        <div class="row" id="templateTypeDropzones">
-                                            <input type="hidden" name="approach" value="{{ $model->approach }}">
-                                            @if($model->approach == 'without_editor')
-                                                <!-- FRONT -->
-                                                <div class="form-group mb-2 col-md-6 d-none" id="dz-front">
-                                                    <label class="label-text mb-1">Template Image (Front)</label>
-                                                    <div id="front-template-dropzone"
-                                                         class="dropzone border rounded p-3"
-                                                         style="cursor:pointer; min-height:150px;">
-                                                        <div class="dz-message">
-                                                            <span>Drop front image here or click</span>
-                                                        </div>
-                                                        <input type="hidden" name="template_image_front_id"
-                                                               id="uploadedFrontTemplateImage">
+                                                            >
+                                                            <span>{{ $type->value->label() }}</span>
+                                                        </label>
                                                     </div>
-                                                    <small class="form-text text-muted">
-                                                        If no size is selected, the default 618×700 will be applied.
-                                                    </small>
-                                                </div>
-
-                                                <!-- BACK -->
-                                                <div class="form-group mb-2 col-md-6 d-none" id="dz-back">
-                                                    <label class="label-text mb-1">Template Image (Back)</label>
-                                                    <div id="back-template-dropzone" class="dropzone border rounded p-3"
-                                                         style="cursor:pointer; min-height:150px;">
-                                                        <div class="dz-message">
-                                                            <span>Drop back image here or click</span>
-                                                        </div>
-                                                        <input type="hidden" name="template_image_back_id"
-                                                               id="uploadedBackTemplateImage">
-                                                    </div>
-                                                    <small class="form-text text-muted">
-                                                        If no size is selected, the default 618×700 will be applied.
-                                                    </small>
-                                                </div>
-
-                                                <!-- NONE -->
-                                                <div class="form-group mb-2 col-md-6 d-none" id="dz-none">
-                                                    <label class="label-text mb-1">Template Image (General)</label>
-                                                    <div id="none-template-dropzone" class="dropzone border rounded p-3"
-                                                         style="cursor:pointer; min-height:150px;">
-                                                        <div class="dz-message">
-                                                            <span>Drop general image here or click</span>
-                                                        </div>
-                                                        <input type="hidden" name="template_image_none_id"
-                                                               id="uploadedNoneTemplateImage">
-                                                    </div>
-                                                    <small class="form-text text-muted">
-                                                        If no size is selected, the default 618×700 will be applied.
-                                                    </small>
-                                                </div>
-                                            @endif
-                                            <!-- MODEL  -->
-                                            <div class="form-group mb-2 col-md-6 d-none" id="dz-model">
-                                                <label class="label-text mb-1">Template Model Image</label>
-                                                <div id="template-dropzone" class="dropzone border rounded p-3"
-                                                     style="cursor:pointer; min-height:150px;">
-                                                    <div class="dz-message" data-dz-message>
-                                                        <span>Drop image here or click to upload</span>
-                                                    </div>
-                                                    <input type="hidden" name="template_image_id"
-                                                           id="uploadedTemplateImage">
-                                                </div>
-                                                <small class="form-text text-muted">
-                                                    If no size is selected, the default 618×700 will be applied.
-                                                </small>
+                                                @endforeach
                                             </div>
                                         </div>
+                                        <div class="row">
+
+                                            <div class="row" id="templateTypeDropzones">
+                                                <input type="hidden" name="approach" value="{{ $model->approach }}">
+                                                @if($model->approach == 'without_editor')
+                                                    <!-- FRONT -->
+                                                    <div class="form-group mb-2 col-md-6 d-none" id="dz-front">
+                                                        <label class="label-text mb-1">Upload Print File (Front)</label>
+                                                        <div id="front-template-dropzone"
+                                                             class="dropzone border rounded p-3"
+                                                             style="cursor:pointer; min-height:150px;">
+                                                            <div class="dz-message">
+                                                                <span>Drop front image here or click</span>
+                                                            </div>
+                                                            <input type="hidden" name="template_image_front_id"
+                                                                   id="uploadedFrontTemplateImage">
+                                                        </div>
+                                                        <small class="form-text text-muted">
+                                                            Allowed formats: PNG, JPG, JPEG, WEBP.
+                                                            Maximum file size: 30 MB.
+                                                            Minimum dimensions: 1000 × 1000 px.
+                                                        </small>
+                                                    </div>
+
+                                                    <!-- BACK -->
+                                                    <div class="form-group mb-2 col-md-6 d-none" id="dz-back">
+                                                        <label class="label-text mb-1">Upload Print File (Back)</label>
+                                                        <div id="back-template-dropzone"
+                                                             class="dropzone border rounded p-3"
+                                                             style="cursor:pointer; min-height:150px;">
+                                                            <div class="dz-message">
+                                                                <span>Drop back image here or click</span>
+                                                            </div>
+                                                            <input type="hidden" name="template_image_back_id"
+                                                                   id="uploadedBackTemplateImage">
+                                                        </div>
+                                                        <small class="form-text text-muted">
+                                                            Allowed formats: PNG, JPG, JPEG, WEBP.
+                                                            Maximum file size: 30 MB.
+                                                            Minimum dimensions: 1000 × 1000 px.
+                                                        </small>
+                                                    </div>
+
+                                                    <!-- NONE -->
+                                                    <div class="form-group mb-2 col-md-6 d-none" id="dz-none">
+                                                        <label class="label-text mb-1">Upload Print File
+                                                            (General)</label>
+                                                        <div id="none-template-dropzone"
+                                                             class="dropzone border rounded p-3"
+                                                             style="cursor:pointer; min-height:150px;">
+                                                            <div class="dz-message">
+                                                                <span>Drop general image here or click</span>
+                                                            </div>
+                                                            <input type="hidden" name="template_image_none_id"
+                                                                   id="uploadedNoneTemplateImage">
+                                                        </div>
+                                                        <small class="form-text text-muted">
+                                                            Allowed formats: PNG, JPG, JPEG, WEBP.
+                                                            Maximum file size: 30 MB.
+                                                            Minimum dimensions: 1000 × 1000 px.
+                                                        </small>
+                                                    </div>
+                                                @endif
+                                                @php
+                                                    $category = \App\Models\Category::find(request('product_without_category_id'));
+                                                @endphp
+                                                @if($category&& !$category->has_mockup)
+                                                    <!-- MODEL  -->
+                                                <div class="form-group mb-2 col-md-6 d-none" id="dz-model">
+                                                    <label class="label-text mb-1">Template Model Image</label>
+                                                    <div id="template-dropzone" class="dropzone border rounded p-3"
+                                                         style="cursor:pointer; min-height:150px;">
+                                                        <div class="dz-message" data-dz-message>
+                                                            <span>Drop image here or click to upload</span>
+                                                        </div>
+                                                        <input type="hidden" name="template_image_id"
+                                                               id="uploadedTemplateImage">
+                                                    </div>
+                                                    <small class="form-text text-muted">
+                                                        If no size is selected, the default 618×700 will be applied.
+                                                    </small>
+                                                </div>
+                                                @endif
+                                            </div>
 
 
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-md-6">
-                                            <label for="templateNameEn" class="label-text mb-1">Name (EN)</label>
-                                            <input type="text" id="templateNameEn" class="form-control" name="name[en]"
-                                                   value="{{ $model->getTranslation('name','en') }}"
-                                                   placeholder="Template Name in English">
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-md-6">
+                                                <label for="templateNameEn" class="label-text mb-1">Name (EN)</label>
+                                                <input type="text" id="templateNameEn" class="form-control"
+                                                       name="name[en]"
+                                                       value="{{ $model->getTranslation('name','en') }}"
+                                                       placeholder="Template Name in English">
+                                            </div>
+
+
+                                            <div class="col-md-6">
+                                                <label for="templateNameAr" class="label-text mb-1">Name (AR)</label>
+                                                <input type="text" id="templateNameAr" class="form-control"
+                                                       name="name[ar]"
+                                                       value="{{ $model->getTranslation('name','ar') }}"
+                                                       placeholder="Template Name in Arabic">
+                                            </div>
+
+
                                         </div>
 
 
-                                        <div class="col-md-6">
-                                            <label for="templateNameAr" class="label-text mb-1">Name (AR)</label>
-                                            <input type="text" id="templateNameAr" class="form-control" name="name[ar]"
-                                                   value="{{ $model->getTranslation('name','ar') }}"
-                                                   placeholder="Template Name in Arabic">
+                                        {{-- <div class="form-group mb-2">--}}
+                                        {{-- <label for="statusSelect" class="label-text mb-1">Status</label>--}}
+                                        {{-- <select id="statusSelect" name="status" class="form-select select2">--}}
+                                        {{-- <option value="" disabled selected>Choose status</option>--}}
+                                        {{-- @foreach(\App\Enums\Template\StatusEnum::cases() as $status)--}}
+                                        {{-- <option value="{{ $status->value }}" @selected($status==$model->
+                                            status)>{{--}}
+                                        {{-- $status->label() }}</option>--}}
+                                        {{-- @endforeach--}}
+                                        {{-- </select>--}}
+                                        {{-- </div>--}}
+                                        <div class="row mb-2">
+                                            <div class="col-md-6">
+                                                <label for="templateDescription" class="label-text mb-1">Description
+                                                    (AR)</label>
+                                                <textarea id="templateDescription" class="form-control" rows="3"
+                                                          name="description[ar]"
+                                                          placeholder="Template Description in Arabic">{{ $model->getTranslation('description','ar') }}</textarea>
+                                            </div>
+                                            <div class="col-md-6 ">
+                                                <label for="templateDescription" class="label-text mb-1">Description
+                                                    (EN)</label>
+                                                <textarea id="templateDescription" class="form-control" rows="3"
+                                                          name="description[en]"
+                                                          placeholder="Template Description in English">{{ $model->getTranslation('description','en') }}</textarea>
+                                            </div>
                                         </div>
-
-
-                                    </div>
-
-
-                                    {{-- <div class="form-group mb-2">--}}
-                                    {{-- <label for="statusSelect" class="label-text mb-1">Status</label>--}}
-                                    {{-- <select id="statusSelect" name="status" class="form-select select2">--}}
-                                    {{-- <option value="" disabled selected>Choose status</option>--}}
-                                    {{-- @foreach(\App\Enums\Template\StatusEnum::cases() as $status)--}}
-                                    {{-- <option value="{{ $status->value }}" @selected($status==$model->
-                                        status)>{{--}}
-                                    {{-- $status->label() }}</option>--}}
-                                    {{-- @endforeach--}}
-                                    {{-- </select>--}}
-                                    {{-- </div>--}}
-                                    <div class="row mb-2">
-                                        <div class="col-md-6">
-                                            <label for="templateDescription" class="label-text mb-1">Description
-                                                (AR)</label>
-                                            <textarea id="templateDescription" class="form-control" rows="3"
-                                                      name="description[ar]"
-                                                      placeholder="Template Description in Arabic">{{ $model->getTranslation('description','ar') }}</textarea>
+                                        <div class="row mb-2">
+                                            <div class="col-md-12">
+                                                <label for="templatePrice" class="label-text mb-1">
+                                                    Price</label>
+                                                <input id="templatePrice" class="form-control" type="number"
+                                                       name="price" placeholder="Template Price"
+                                                       value="{{ $model->price }}"
+                                                       step="0.01"
+                                                       min="0"
+                                                />
+                                            </div>
                                         </div>
-                                        <div class="col-md-6 ">
-                                            <label for="templateDescription" class="label-text mb-1">Description
-                                                (EN)</label>
-                                            <textarea id="templateDescription" class="form-control" rows="3"
-                                                      name="description[en]"
-                                                      placeholder="Template Description in English">{{ $model->getTranslation('description','en') }}</textarea>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-md-12">
-                                            <label for="templatePrice" class="label-text mb-1">
-                                                Price</label>
-                                            <input id="templatePrice" class="form-control" type="number"
-                                                   name="price" placeholder="Template Price" value="{{ $model->price }}"
-                                                   step="0.01"
-                                                   min="0"
-                                            />
-                                        </div>
-                                    </div>
 
                                     </div>
                                     <div class="position-relative mt-3 text-center">
@@ -679,9 +697,9 @@
         );
 
         $(function () {
-            const $cardsWrap  = $('#mockupsCards');
+            const $cardsWrap = $('#mockupsCards');
             const $hiddenWrap = $('#mockupsHiddenInputs');
-            const $withCat    = $('#categoriesSelect');
+            const $withCat = $('#categoriesSelect');
             const $withoutCat = $('#productsWithoutCategoriesSelect');
 
             // ── Single source of truth — seeded with server-side attached IDs ──
@@ -708,19 +726,19 @@
                 const editUrlTemplate = `{{ $mockupEditUrlTemplate }}`;
 
                 items.forEach(mockup => {
-                    const id   = String(mockup.id);
+                    const id = String(mockup.id);
                     const name = mockup.name ?? ('Mockup #' + id);
 
-                    const images   = mockup?.images || {};
+                    const images = mockup?.images || {};
                     const firstKey = Object.keys(images)[0];
-                    const img      = (firstKey && images[firstKey]?.base_url)
+                    const img = (firstKey && images[firstKey]?.base_url)
                         || "{{ asset('images/placeholder.svg') }}";
 
                     const isSelected = selected.has(id);
 
                     // Build the "Show on Mockup" edit URL with template context
                     const editUrl = editUrlTemplate.replace('__MOCKUP__', id);
-                    const href    = `${editUrl}?template_id={{ $model->id }}`;
+                    const href = `${editUrl}?template_id={{ $model->id }}`;
 
                     $cardsWrap.append(`
                   <div class="col-12 col-md-4 col-lg-2">
@@ -809,7 +827,7 @@
 
             // ── Fetch available mockups from server ──────────────────────────────
             function fetchMockups() {
-                const idsWithCat    = $withCat.val()    || [];
+                const idsWithCat = $withCat.val() || [];
                 const idsWithoutCat = $withoutCat.val() || [];
                 const allProductIds = [...idsWithCat, ...idsWithoutCat];
 
