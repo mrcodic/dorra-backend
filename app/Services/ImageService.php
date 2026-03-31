@@ -74,7 +74,6 @@ class ImageService
                 mimeType    : $original->mime_type, // same mime as original
                 test        : true,
             ),
-            modelData: $original,
             collectionName  : 'templates-preview',
             customProperties: [
                 'width'       => $preview->getImageWidth(),
