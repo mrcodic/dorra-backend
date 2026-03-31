@@ -22,13 +22,6 @@ class ImageService
         $filePath = Storage::disk($original->disk)
             ->path("{$original->id}/{$original->file_name}");
 
-
-        if (!file_exists($filePath)) {
-            throw new \Exception("Media file not found: {$filePath}");
-        }
-
-        $imagick = new Imagick($filePath);
-
         $imagick = new Imagick($filePath);
 
         $original->update([
@@ -102,10 +95,7 @@ class ImageService
                 'original_id' => $original->id,
             ],
         );
-        $previewMedia->update([
-            'model_type' => $original->model_type,
-            'model_id'   => $original->model_id,
-        ]);
+
         $preview->destroy();
         @unlink($tmpPath);
 
