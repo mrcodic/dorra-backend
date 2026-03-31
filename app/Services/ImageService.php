@@ -10,28 +10,20 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ImageService
 {
-    public function processUploaded(int $mediaId, string $collectionName = 'templates'): array
+    /**
+     * Called on save — receives the media ID from the Dropzone upload.
+     * Calculates metadata for the original, generates + stores the preview,
+     * returns both IDs to attach to the design record.
+     */
+    public function processUploaded(int $mediaId): array
     {
         $original = Media::findOrFail($mediaId);
 
         $filePath = Storage::disk($original->disk)
             ->path("{$original->id}/{$original->file_name}");
 
-        if (!file_exists($filePath)) {
-            throw new \Exception("Media file not found: {$filePath}");
-        }
 
-        $imagick = new Imagick($filePath . '[0]');
-
-        \Log::debug('Imagick info', [
-            'width'      => $imagick->getImageWidth(),
-            'height'     => $imagick->getImageHeight(),
-            'format'     => $imagick->getImageFormat(),
-            'depth'      => $imagick->getImageDepth(),
-            'colorspace' => $imagick->getImageColorspace(),
-            'file_path'  => $filePath,
-            'file_size'  => filesize($filePath),
-        ]);
+        $imagick = new Imagick($filePath);
 
         $original->update([
             'custom_properties' => array_merge(
@@ -44,15 +36,7 @@ class ImageService
             ),
         ]);
 
-        $previewMedia = $this->storePreview($original, $collectionName . '-preview');
-
-        // Link preview ID onto original
-        $original->update([
-            'custom_properties' => array_merge(
-                $original->custom_properties ?? [],
-                ['preview_id' => $previewMedia->id]
-            ),
-        ]);
+        $previewMedia = $this->storePreview($imagick, $original);
 
         $imagick->destroy();
 
@@ -62,42 +46,23 @@ class ImageService
         ];
     }
 
-    private function storePreview(Media $original, string $previewCollection): Media
+    private function storePreview(Imagick $imagick, Media $original): Media
     {
-        $filePath = Storage::disk($original->disk)
-            ->path("{$original->id}/{$original->file_name}");
+        $preview = clone $imagick;
 
-        // Re-open from file — more reliable than clone across Imagick versions
-        $preview = new Imagick($filePath . '[0]');
-
-        $originalWidth  = $preview->getImageWidth();
-        $originalHeight = $preview->getImageHeight();
-        $maxWidth       = config('media.preview.max_width');
-        $maxHeight      = config('media.preview.max_height');
-
-        \Log::debug('Before thumbnail', [
-            'width'  => $originalWidth,
-            'height' => $originalHeight,
-            'format' => $preview->getImageFormat(),
-        ]);
-
-        // Only downscale — never upscale
-        if ($originalWidth > $maxWidth || $originalHeight > $maxHeight) {
-            $preview->thumbnailImage($maxWidth, $maxHeight, bestfit: true);
-        }
-
-        // Strip AFTER resize — stripping before can cause geometry loss
+        // Resize — cap longest side at 1200px, keep aspect ratio
+        $preview->thumbnailImage(1200, 1200, bestfit: true);
+        $preview->setImageCompressionQuality(80);
         $preview->stripImage();
-        $preview->setImageCompressionQuality(config('media.preview.quality'));
-
         // Preserve alpha if original had it
         if ($preview->getImageAlphaChannel()) {
             $preview->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
             $preview->setBackgroundColor(new ImagickPixel('transparent'));
         }
 
-        $ext             = pathinfo($original->file_name, PATHINFO_EXTENSION);
-        $tmpPath         = tempnam(sys_get_temp_dir(), 'preview_') . '.' . $ext;
+        // Keep same format as original
+        $ext         = pathinfo($original->file_name, PATHINFO_EXTENSION);
+        $tmpPath     = tempnam(sys_get_temp_dir(), 'preview_') . '.' . $ext;
         $previewFileName = pathinfo($original->file_name, PATHINFO_FILENAME) . '_preview.' . $ext;
 
         $preview->writeImage($tmpPath);
@@ -106,10 +71,10 @@ class ImageService
             files           : new UploadedFile(
                 path        : $tmpPath,
                 originalName: $previewFileName,
-                mimeType    : $original->mime_type,
+                mimeType    : $original->mime_type, // same mime as original
                 test        : true,
             ),
-            collectionName  : $previewCollection,
+            collectionName  : 'templates-preview',
             customProperties: [
                 'width'       => $preview->getImageWidth(),
                 'height'      => $preview->getImageHeight(),
@@ -117,12 +82,6 @@ class ImageService
                 'original_id' => $original->id,
             ],
         );
-
-        // Inherit model attachment from original
-        $previewMedia->update([
-            'model_type' => $original->model_type,
-            'model_id'   => $original->model_id,
-        ]);
 
         $preview->destroy();
         @unlink($tmpPath);
