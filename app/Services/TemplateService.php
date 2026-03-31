@@ -231,7 +231,7 @@ class TemplateService extends BaseService
                     ]);
             }
             if (isset($validatedData['template_image_front_id']) || isset($validatedData['template_image_none_id'])) {
-                $this->imageService->processUploaded($validatedData['template_image_front_id']);
+                $this->imageService->processUploaded($validatedData['template_image_front_id'] ?? $validatedData['template_image_none_id'],'templates-preview');
                 Media::where(function ($query) use ($validatedData) {
                     $query->whereKey($validatedData['template_image_front_id'])
                         ->orWhere('id', $validatedData['template_image_none_id']);
@@ -243,6 +243,7 @@ class TemplateService extends BaseService
                     ]);
             }
             if (isset($validatedData['template_image_back_id'])) {
+                $this->imageService->processUploaded($validatedData['template_image_back_id'],'back-templates-preview');
 
                 Media::whereKey($validatedData['template_image_back_id'])
                     ->update([

@@ -15,13 +15,12 @@ class ImageService
      * Calculates metadata for the original, generates + stores the preview,
      * returns both IDs to attach to the design record.
      */
-    public function processUploaded(int $mediaId): array
+    public function processUploaded(int $mediaId, string $collectionName = 'templates'): array
     {
         $original = Media::findOrFail($mediaId);
 
         $filePath = Storage::disk($original->disk)
             ->path("{$original->id}/{$original->file_name}");
-
 
         $imagick = new Imagick($filePath);
 
@@ -36,7 +35,15 @@ class ImageService
             ),
         ]);
 
-        $previewMedia = $this->storePreview($imagick, $original);
+        $previewMedia = $this->storePreview($imagick, $original, $collectionName . '-preview');
+
+        // Link preview ID onto original
+        $original->update([
+            'custom_properties' => array_merge(
+                $original->custom_properties ?? [],
+                ['preview_id' => $previewMedia->id]
+            ),
+        ]);
 
         $imagick->destroy();
 
@@ -46,23 +53,29 @@ class ImageService
         ];
     }
 
-    private function storePreview(Imagick $imagick, Media $original): Media
+    private function storePreview(Imagick $imagick, Media $original, string $previewCollection): Media
     {
         $preview = clone $imagick;
 
-        // Resize — cap longest side at 1200px, keep aspect ratio
-        $preview->thumbnailImage(1200, 1200, bestfit: true);
-        $preview->setImageCompressionQuality(80);
+        $originalWidth  = $imagick->getImageWidth();
+        $originalHeight = $imagick->getImageHeight();
+        $maxWidth       = config('media.preview.max_width');
+        $maxHeight      = config('media.preview.max_height');
+
+        if ($originalWidth > $maxWidth || $originalHeight > $maxHeight) {
+            $preview->thumbnailImage($maxWidth, $maxHeight, bestfit: true);
+        }
+
+        $preview->setImageCompressionQuality(config('media.preview.quality'));
         $preview->stripImage();
-        // Preserve alpha if original had it
+
         if ($preview->getImageAlphaChannel()) {
             $preview->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
             $preview->setBackgroundColor(new ImagickPixel('transparent'));
         }
 
-        // Keep same format as original
-        $ext         = pathinfo($original->file_name, PATHINFO_EXTENSION);
-        $tmpPath     = tempnam(sys_get_temp_dir(), 'preview_') . '.' . $ext;
+        $ext             = pathinfo($original->file_name, PATHINFO_EXTENSION);
+        $tmpPath         = tempnam(sys_get_temp_dir(), 'preview_') . '.' . $ext;
         $previewFileName = pathinfo($original->file_name, PATHINFO_FILENAME) . '_preview.' . $ext;
 
         $preview->writeImage($tmpPath);
@@ -71,10 +84,10 @@ class ImageService
             files           : new UploadedFile(
                 path        : $tmpPath,
                 originalName: $previewFileName,
-                mimeType    : $original->mime_type, // same mime as original
+                mimeType    : $original->mime_type,
                 test        : true,
             ),
-            collectionName  : 'templates-preview',
+            collectionName  : $previewCollection,
             customProperties: [
                 'width'       => $preview->getImageWidth(),
                 'height'      => $preview->getImageHeight(),
@@ -82,7 +95,10 @@ class ImageService
                 'original_id' => $original->id,
             ],
         );
-
+        $previewMedia->update([
+            'model_type' => $original->model_type,
+            'model_id'   => $original->model_id,
+        ]);
         $preview->destroy();
         @unlink($tmpPath);
 
