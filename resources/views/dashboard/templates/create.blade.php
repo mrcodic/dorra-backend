@@ -219,6 +219,7 @@ $category = \App\Models\Category::find(request('category_id'));
                                             @endif
                                                 @php
                                                     $HasMockupCategory = \App\Models\Category::find(request('product_without_category_id'));
+                                                    dd($HasMockupCategory && !$HasMockupCategory->has_mockup);
                                                 @endphp
                                                 @if($HasMockupCategory && !$HasMockupCategory->has_mockup)
                                             <!-- MODEL  -->
