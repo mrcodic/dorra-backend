@@ -111,10 +111,7 @@ class ImageService
             'model_type' => $original->model_type,
             'model_id'   => $original->model_id,
         ]);
-dd($previewMedia,   $previewMedia->update([
-    'model_type' => $original->model_type,
-    'model_id'   => $original->model_id,
-]));
+
         $preview->destroy();
         @unlink($tmpPath);
 
