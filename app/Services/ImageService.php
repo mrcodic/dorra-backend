@@ -34,7 +34,7 @@ class ImageService
             ),
         ]);
 
-        $previewMedia = $this->storePreview($original, $collectionName . '-preview');
+        $previewMedia = $this->storePreview($original, $collectionName);
 
         // Link preview ID onto original
         $original->update([
@@ -111,7 +111,10 @@ class ImageService
             'model_type' => $original->model_type,
             'model_id'   => $original->model_id,
         ]);
-
+dd($previewMedia,   $previewMedia->update([
+    'model_type' => $original->model_type,
+    'model_id'   => $original->model_id,
+]));
         $preview->destroy();
         @unlink($tmpPath);
 
