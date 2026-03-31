@@ -23,20 +23,27 @@ class ImageService
 
         $imagick = new Imagick($filePath . '[0]');
 
+        $width  = $imagick->getImageWidth();
+        $height = $imagick->getImageHeight();
+
+        // Validate minimum dimensions
+        $this->validateDimensions($width, $height);
+
         $original->update([
             'custom_properties' => array_merge(
                 $original->custom_properties ?? [],
                 [
-                    'width'     => $imagick->getImageWidth(),
-                    'height'    => $imagick->getImageHeight(),
+                    'width'     => $width,
+                    'height'    => $height,
                     'has_alpha' => (bool) $imagick->getImageAlphaChannel(),
                 ]
             ),
         ]);
 
-        $previewMedia = $this->storePreview($original, $collectionName);
+        $imagick->destroy();
 
-        // Link preview ID onto original
+        $previewMedia = $this->storePreview($original, $collectionName . '-preview');
+
         $original->update([
             'custom_properties' => array_merge(
                 $original->custom_properties ?? [],
@@ -44,12 +51,22 @@ class ImageService
             ),
         ]);
 
-        $imagick->destroy();
-
         return [
             'original_media_id' => $original->id,
             'preview_media_id'  => $previewMedia->id,
         ];
+    }
+
+    private function validateDimensions(int $width, int $height): void
+    {
+        $minWidth  = config('media.original.min_width',  520);
+        $minHeight = config('media.original.min_height', 618);
+
+        if ($width < $minWidth || $height < $minHeight) {
+            throw new \InvalidArgumentException(
+                "Image too small. Minimum dimensions are {$minWidth}×{$minHeight}px. Uploaded: {$width}×{$height}px."
+            );
+        }
     }
 
     private function storePreview(Media $original, string $previewCollection): Media
@@ -59,24 +76,14 @@ class ImageService
 
         $preview = new Imagick($filePath . '[0]');
 
-        $originalWidth  = $preview->getImageWidth();
-        $originalHeight = $preview->getImageHeight();
-        $maxWidth       = 1000;
-        $maxHeight      = 1000;
-
-        // Only downscale — never upscale, always keep aspect ratio
-        if ($originalWidth > $maxWidth || $originalHeight > $maxHeight) {
-            // Calculate ratio to fit within max bounds
-            $ratio  = min($maxWidth / $originalWidth, $maxHeight / $originalHeight);
-            $newWidth  = (int) round($originalWidth  * $ratio);
-            $newHeight = (int) round($originalHeight * $ratio);
-
-            $preview->resizeImage($newWidth, $newHeight, Imagick::FILTER_LANCZOS, 1);
-        }
-
-        // Strip AFTER resize — stripping before can cause geometry loss
+        // Strip metadata first
         $preview->stripImage();
-        $preview->setImageCompressionQuality(config('media.preview.quality'));
+
+        // Compress down to 1MB max — reduce quality in steps until under limit
+        $this->compressToLimit(
+            imagick  : $preview,
+            maxBytes : config('media.preview.max_size', 1 * 1024 * 1024), // 1MB
+        );
 
         // Preserve alpha if original had it
         if ($preview->getImageAlphaChannel()) {
@@ -97,7 +104,7 @@ class ImageService
                 mimeType    : $original->mime_type,
                 test        : true,
             ),
-            modelData: $original->model,
+            modelData       : $original->model,
             collectionName  : $previewCollection,
             customProperties: [
                 'width'       => $preview->getImageWidth(),
@@ -107,11 +114,33 @@ class ImageService
             ],
         );
 
-
-
         $preview->destroy();
         @unlink($tmpPath);
 
         return $previewMedia;
+    }
+
+    private function compressToLimit(Imagick $imagick, int $maxBytes): void
+    {
+        $quality = 85; // start quality
+        $step    = 5;  // reduce by 5 each iteration
+        $minQuality = 10; // never go below this
+
+        $imagick->setImageCompressionQuality($quality);
+
+        // If already under limit — nothing to do
+        if (strlen($imagick->getImageBlob()) <= $maxBytes) {
+            return;
+        }
+
+        // Reduce quality in steps until under 1MB or hit minimum quality
+        while ($quality > $minQuality) {
+            $quality -= $step;
+            $imagick->setImageCompressionQuality($quality);
+
+            if (strlen($imagick->getImageBlob()) <= $maxBytes) {
+                break;
+            }
+        }
     }
 }
