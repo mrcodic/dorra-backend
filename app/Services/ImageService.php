@@ -34,7 +34,7 @@ class ImageService
                 ]
             ),
         ]);
-
+dd($imagick);
         $previewMedia = $this->storePreview($imagick, $original, $collectionName . '-preview');
 
         // Link preview ID onto original
@@ -55,6 +55,7 @@ class ImageService
 
     private function storePreview(Imagick $imagick, Media $original, string $previewCollection): Media
     {
+        dd("sasdss");
         $preview = clone $imagick;
 
         $originalWidth  = $imagick->getImageWidth();
@@ -95,7 +96,7 @@ class ImageService
                 'original_id' => $original->id,
             ],
         );
-        
+
 
         $preview->destroy();
         @unlink($tmpPath);
