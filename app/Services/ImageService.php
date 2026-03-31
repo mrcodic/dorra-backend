@@ -97,6 +97,7 @@ class ImageService
                 mimeType    : $original->mime_type,
                 test        : true,
             ),
+            modelData: $original->model,
             collectionName  : $previewCollection,
             customProperties: [
                 'width'       => $preview->getImageWidth(),
@@ -106,11 +107,7 @@ class ImageService
             ],
         );
 
-        // ✅ Inherit model attachment from original — not the media model itself
-        $previewMedia->update([
-            'model_type' => $original->model_type,
-            'model_id'   => $original->model_id,
-        ]);
+
 
         $preview->destroy();
         @unlink($tmpPath);
