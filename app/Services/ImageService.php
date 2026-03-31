@@ -23,7 +23,15 @@ class ImageService
 
         // [0] = first frame only — avoids Invalid image geometry on multi-frame files
         $imagick = new Imagick($filePath . '[0]');
-
+dd([
+    'width'      => $imagick->getImageWidth(),
+    'height'     => $imagick->getImageHeight(),
+    'format'     => $imagick->getImageFormat(),
+    'depth'      => $imagick->getImageDepth(),
+    'colorspace' => $imagick->getImageColorspace(),
+    'file_path'  => $filePath,
+    'file_size'  => filesize($filePath),
+]);
         $original->update([
             'custom_properties' => array_merge(
                 $original->custom_properties ?? [],
