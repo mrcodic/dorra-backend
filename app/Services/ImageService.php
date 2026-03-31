@@ -10,6 +10,11 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ImageService
 {
+    /**
+     * Called on save — receives the media ID from the Dropzone upload.
+     * Calculates metadata for the original, generates + stores the preview,
+     * returns both IDs to attach to the design record.
+     */
     public function processUploaded(int $mediaId, string $collectionName = 'templates'): array
     {
         $original = Media::findOrFail($mediaId);
@@ -17,12 +22,7 @@ class ImageService
         $filePath = Storage::disk($original->disk)
             ->path("{$original->id}/{$original->file_name}");
 
-        if (!file_exists($filePath)) {
-            throw new \Exception("Media file not found: {$filePath}");
-        }
-
-        // [0] = first frame only — avoids Invalid image geometry on multi-frame files
-        $imagick = new Imagick($filePath . '[0]');
+        $imagick = new Imagick($filePath);
 
         $original->update([
             'custom_properties' => array_merge(
@@ -55,14 +55,10 @@ class ImageService
 
     private function storePreview(Imagick $imagick, Media $original, string $previewCollection): Media
     {
-        // ✅ Re-open from file instead of clone — more reliable across Imagick versions
-        $filePath = Storage::disk($original->disk)
-            ->path("{$original->id}/{$original->file_name}");
+        $preview = clone $imagick;
 
-        $preview = new Imagick($filePath . '[0]');
-
-        $originalWidth  = $preview->getImageWidth();
-        $originalHeight = $preview->getImageHeight();
+        $originalWidth  = $imagick->getImageWidth();
+        $originalHeight = $imagick->getImageHeight();
         $maxWidth       = config('media.preview.max_width');
         $maxHeight      = config('media.preview.max_height');
 
@@ -99,11 +95,7 @@ class ImageService
                 'original_id' => $original->id,
             ],
         );
-
-        $previewMedia->update([
-            'model_type' => $original->model_type,
-            'model_id'   => $original->model_id,
-        ]);
+        
 
         $preview->destroy();
         @unlink($tmpPath);
