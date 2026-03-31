@@ -10,11 +10,6 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ImageService
 {
-    /**
-     * Called on save — receives the media ID from the Dropzone upload.
-     * Calculates metadata for the original, generates + stores the preview,
-     * returns both IDs to attach to the design record.
-     */
     public function processUploaded(int $mediaId, string $collectionName = 'templates'): array
     {
         $original = Media::findOrFail($mediaId);
@@ -22,12 +17,12 @@ class ImageService
         $filePath = Storage::disk($original->disk)
             ->path("{$original->id}/{$original->file_name}");
 
-// ✅ Check file exists before opening
         if (!file_exists($filePath)) {
             throw new \Exception("Media file not found: {$filePath}");
         }
 
-        $imagick = new Imagick($filePath);
+        // [0] = first frame only — avoids Invalid image geometry on multi-frame files
+        $imagick = new Imagick($filePath . '[0]');
 
         $original->update([
             'custom_properties' => array_merge(
@@ -67,6 +62,7 @@ class ImageService
         $maxWidth       = config('media.preview.max_width');
         $maxHeight      = config('media.preview.max_height');
 
+        // Only downscale — never upscale
         if ($originalWidth > $maxWidth || $originalHeight > $maxHeight) {
             $preview->thumbnailImage($maxWidth, $maxHeight, bestfit: true);
         }
@@ -74,6 +70,7 @@ class ImageService
         $preview->setImageCompressionQuality(config('media.preview.quality'));
         $preview->stripImage();
 
+        // Preserve alpha if original had it
         if ($preview->getImageAlphaChannel()) {
             $preview->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
             $preview->setBackgroundColor(new ImagickPixel('transparent'));
@@ -100,6 +97,8 @@ class ImageService
                 'original_id' => $original->id,
             ],
         );
+
+        // Inherit model attachment from original
         $previewMedia->update([
             'model_type' => $original->model_type,
             'model_id'   => $original->model_id,
