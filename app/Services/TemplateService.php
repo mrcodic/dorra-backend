@@ -29,11 +29,13 @@ use ZipArchive;
 class TemplateService extends BaseService
 {
     use RendersTemplateMockups;
+
     public BaseRepositoryInterface $repository;
 
     public function __construct(TemplateRepositoryInterface $repository
         , public ProductRepositoryInterface                 $productRepository
         , public CategoryRepositoryInterface                $categoryRepository
+        , public ImageService                               $imageService
     )
     {
         parent::__construct($repository);
@@ -76,14 +78,13 @@ class TemplateService extends BaseService
                     $q->whereRaw('1 = 0');
                 }
             })->when(filter_var(request('has_not_mockups'), FILTER_VALIDATE_BOOLEAN), function ($q) {
-                if (request('mockup_id')){
-                    $q->whereDoesntHave('mockups',function ($q){
-                        $q->where('id',request('mockup_id'));
+                if (request('mockup_id')) {
+                    $q->whereDoesntHave('mockups', function ($q) {
+                        $q->where('id', request('mockup_id'));
                     });
-                }
-                else{
-                    $q->whereDoesntHave('mockups',function ($q){
-                        $q->where('category_id',request('product_without_category_id'));
+                } else {
+                    $q->whereDoesntHave('mockups', function ($q) {
+                        $q->where('category_id', request('product_without_category_id'));
                     });
 
                 }
@@ -112,7 +113,7 @@ class TemplateService extends BaseService
                         ->orwhereHas('products.category', function ($q) use ($categoryId) {
                             $q->where('categories.id', $categoryId);
                         })->orwhereHas('products', function ($q) use ($categoryId) {
-                            $category =  $this->categoryRepository->find($categoryId);
+                            $category = $this->categoryRepository->find($categoryId);
                             $q->whereIn('products.id', $category->products->pluck('id'));
                         });
                 });
@@ -121,7 +122,7 @@ class TemplateService extends BaseService
             ->when(request()->filled('approach'), function ($q) {
                 $q->where('approach', request('approach'));
             })->when(request()->filled('order'), function ($q) {
-                $q->orderBy('order',request('order'));
+                $q->orderBy('order', request('order'));
             })
             ->when(request('category_id'), function ($q) {
                 $q->whereHas('products', function ($q) {
@@ -154,7 +155,7 @@ class TemplateService extends BaseService
                 $q->whereOrientation(OrientationEnum::tryFrom(request('orientation')));
             })
             ->when(request()->filled('limit'), function ($q) {
-                $q->limit((int) request('limit'));
+                $q->limit((int)request('limit'));
             })->when(request()->filled('languages'), function ($q) {
                 $languages = request('languages');
                 $languages = is_array($languages) ? $languages : [$languages];
@@ -185,7 +186,7 @@ class TemplateService extends BaseService
                                         ?? $this->productRepository->query()->find(request('product_id'))?->category_id;
 
                                     $q->where('mockups.category_id', $categoryId)
-                                        ->where('mockup_template.colors','!=','[]');
+                                        ->where('mockup_template.colors', '!=', '[]');
                                 });
 
                         });
@@ -202,6 +203,7 @@ class TemplateService extends BaseService
             ? $query->latest()->paginate($requested)
             : $query->latest()->get();
     }
+
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $colors = Arr::get($validatedData, 'colors');
@@ -229,7 +231,7 @@ class TemplateService extends BaseService
                     ]);
             }
             if (isset($validatedData['template_image_front_id']) || isset($validatedData['template_image_none_id'])) {
-
+                $this->imageService->processUploaded($validatedData['template_image_front_id']);
                 Media::where(function ($query) use ($validatedData) {
                     $query->whereKey($validatedData['template_image_front_id'])
                         ->orWhere('id', $validatedData['template_image_none_id']);
@@ -258,18 +260,18 @@ class TemplateService extends BaseService
 
                 $pivotData = collect($mockupIds)->mapWithKeys(function ($mockupId) use ($positions) {
                     return [
-                        (int) $mockupId => [
+                        (int)$mockupId => [
                             'positions' => $positions,
                             'colors' => ['#000000', '#ffffff']
-                            ],
+                        ],
                     ];
                 })->toArray();
 
                 $model->mockups()->syncWithoutDetaching($pivotData);
                 foreach ($mockupIds as $mockupId) {
-                    $mockup = Mockup::find((int) $mockupId);
+                    $mockup = Mockup::find((int)$mockupId);
                     if (!$mockup) continue;
-                   HandleMockupFilesJob::dispatch($mockup);
+                    HandleMockupFilesJob::dispatch($mockup);
                 }
 
 
@@ -277,7 +279,7 @@ class TemplateService extends BaseService
             $model->types->each(function ($type) use ($model) {
                 $side = strtolower($type->value->name);
                 $collection = match ($side) {
-                    'back'  => 'back_templates',
+                    'back' => 'back_templates',
                     default => 'templates',
                 };
                 $media = $model->getFirstMedia($collection);
@@ -326,15 +328,15 @@ class TemplateService extends BaseService
         if (in_array(2, $typeIds, true)) $sides[] = 'back';
         if (in_array(3, $typeIds, true)) $sides[] = 'none';
 
-        if (!$sides) $sides = ['front','back','none'];
+        if (!$sides) $sides = ['front', 'back', 'none'];
 
         $pos = [];
         foreach ($sides as $side) {
-            $pos["{$side}_x"]      = 0.5;
-            $pos["{$side}_y"]      = 0.507031;
-            $pos["{$side}_width"]  = 0.264844;
+            $pos["{$side}_x"] = 0.5;
+            $pos["{$side}_y"] = 0.507031;
+            $pos["{$side}_width"] = 0.264844;
             $pos["{$side}_height"] = 0.176563;
-            $pos["{$side}_angle"]  = 0;
+            $pos["{$side}_angle"] = 0;
         }
 
         return $pos;
@@ -354,19 +356,19 @@ class TemplateService extends BaseService
             $model = $this->repository->update($validatedData, $id);
 
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
-            $modelTypesValues   = $model->types->pluck('value.value')->toArray();
+            $modelTypesValues = $model->types->pluck('value.value')->toArray();
 
             $typesChanged = collect($selectedTypeValues)->sort()->values()->all()
                 != collect($modelTypesValues)->sort()->values()->all();
 
             if ($typesChanged) {
                 $hasFront = in_array(1, $selectedTypeValues);
-                $hasBack  = in_array(2, $selectedTypeValues);
-                $hasNone  = in_array(3, $selectedTypeValues);
+                $hasBack = in_array(2, $selectedTypeValues);
+                $hasNone = in_array(3, $selectedTypeValues);
 
                 if (!($hasFront && $hasBack)) {
                     if ($hasFront) $model->clearMediaCollection('back_templates');
-                    if ($hasBack)  $model->clearMediaCollection('templates');
+                    if ($hasBack) $model->clearMediaCollection('templates');
                     if ($hasNone) {
                         $model->clearMediaCollection('templates');
                         $model->clearMediaCollection('back_templates');
@@ -383,8 +385,8 @@ class TemplateService extends BaseService
                     ->each->delete();
 
                 Media::where('id', $validatedData['template_image_id'])->update([
-                    'model_type'      => get_class($model),
-                    'model_id'        => $model->id,
+                    'model_type' => get_class($model),
+                    'model_id' => $model->id,
                     'collection_name' => 'template_model_image',
                 ]);
             }
@@ -401,8 +403,8 @@ class TemplateService extends BaseService
                     $query->whereKey($validatedData['template_image_front_id'])
                         ->orWhere('id', $validatedData['template_image_none_id']);
                 })->update([
-                    'model_type'      => get_class($model),
-                    'model_id'        => $model->id,
+                    'model_type' => get_class($model),
+                    'model_id' => $model->id,
                     'collection_name' => 'templates',
                 ]);
             }
@@ -413,50 +415,50 @@ class TemplateService extends BaseService
                     ->each->delete();
 
                 Media::whereKey($validatedData['template_image_back_id'])->update([
-                    'model_type'      => get_class($model),
-                    'model_id'        => $model->id,
+                    'model_type' => get_class($model),
+                    'model_id' => $model->id,
                     'collection_name' => 'back_templates',
                 ]);
             }
 
-            $mockupIds         = collect($validatedData['mockup_ids'] ?? [])->map(fn($id) => (int)$id);
+            $mockupIds = collect($validatedData['mockup_ids'] ?? [])->map(fn($id) => (int)$id);
             $existingMockupIds = $model->mockups->pluck('id');
 
-            $newMockupIds     = $mockupIds->diff($existingMockupIds);
+            $newMockupIds = $mockupIds->diff($existingMockupIds);
             $removedMockupIds = $existingMockupIds->diff($mockupIds);
 
             if ($mockupIds->isNotEmpty()) {
                 $positions = $this->defaultPositionsForTypes($selectedTypeValues);
 
                 $pivotData = $mockupIds->mapWithKeys(function ($mockupId) use ($positions, $model) {
-                    $existingPivot  = $model->mockups->firstWhere('id', $mockupId);
+                    $existingPivot = $model->mockups->firstWhere('id', $mockupId);
                     $existingColors = $existingPivot?->pivot->colors ?? null;
 
                     if ($existingPivot && !empty($existingColors)) {
                         return [
                             $mockupId => [
                                 'positions' => $positions,
-                                'colors'    => $existingColors,
+                                'colors' => $existingColors,
                             ],
                         ];
                     }
 
-                    $mockup       = Mockup::find($mockupId);
+                    $mockup = Mockup::find($mockupId);
                     $mockupColors = $mockup?->colors;
 
                     return [
                         $mockupId => [
                             'positions' => $positions,
-                            'colors'    => !empty($mockupColors) ? $mockupColors : ['#000000', '#ffffff'],
+                            'colors' => !empty($mockupColors) ? $mockupColors : ['#000000', '#ffffff'],
                         ],
                     ];
                 })->toArray();
                 $model->mockups()->sync($pivotData);
 
                 $model->types->each(function ($type) use ($model) {
-                    $side       = strtolower($type->value->name);
+                    $side = strtolower($type->value->name);
                     $collection = $side === 'back' ? 'back_templates' : 'templates';
-                    $media      = $model->getFirstMedia($collection);
+                    $media = $model->getFirstMedia($collection);
                     if (!$media || !file_exists($media->getPath())) return;
                     $this->renderMockups($model, $collection);
                 });
@@ -505,8 +507,8 @@ class TemplateService extends BaseService
                 $media = Media::where('id', $color['image_id'])->first();
                 if ($media) {
                     $media->update([
-                        'model_type'      => get_class($model),
-                        'model_id'        => $model->id,
+                        'model_type' => get_class($model),
+                        'model_id' => $model->id,
                         'collection_name' => 'color_templates',
                     ]);
                     $media->setCustomProperty('color_hex', $color['value']);
@@ -606,7 +608,6 @@ class TemplateService extends BaseService
             ->when(request()->filled('approach'), function ($q) {
                 $q->where('approach', request('approach'));
             })
-
             ->when(!empty($types), function ($query) use ($types) {
                 $query->whereHas('types', function ($q) use ($types) {
                     $q->whereIn('types.id', $types);
@@ -634,7 +635,7 @@ class TemplateService extends BaseService
         $notAuth = request()->is('api/v1/admin/*');
         $model = $notAuth ? Admin::first() : getAuthOrGuest();
         return Media::query()
-            ->whereMorphedTo('model',$model)
+            ->whereMorphedTo('model', $model)
             ->whereCollectionName("template_assets")
             ->latest()
             ->paginate();
@@ -645,7 +646,7 @@ class TemplateService extends BaseService
         $validated = $request->validate(["file" => "required|file|mimes:svg"]);
         $notAuth = request()->is('api/v1/admin/*');
         $model = $notAuth ? Admin::first() : getAuthOrGuest();
-        return handleMediaUploads($validated['file'],$model,"template_assets");
+        return handleMediaUploads($validated['file'], $model, "template_assets");
 
     }
 
@@ -689,7 +690,7 @@ class TemplateService extends BaseService
 
         // ✅ اقرأ من path
         $sheets = Excel::toArray([], $excelAbs);
-        $rows   = $sheets[0] ?? [];
+        $rows = $sheets[0] ?? [];
 
         if (count($rows) < 2) {
             return [
@@ -701,9 +702,8 @@ class TemplateService extends BaseService
         }
 
 
-
-        $headers  = array_map(fn($h) => strtolower(trim((string)$h)), $rows[0]);
-        $required = ['name_en','name_ar','image','type','model_image'];
+        $headers = array_map(fn($h) => strtolower(trim((string)$h)), $rows[0]);
+        $required = ['name_en', 'name_ar', 'image', 'type', 'model_image'];
 
         $missing = array_values(array_diff($required, $headers));
         if ($missing) {
@@ -711,7 +711,7 @@ class TemplateService extends BaseService
                 'batch' => $batch,
                 'created' => 0,
                 'skipped_count' => 1,
-                'skipped' => ['Missing headers: '.implode(', ', $missing)],
+                'skipped' => ['Missing headers: ' . implode(', ', $missing)],
                 'found_headers' => $headers,
             ];
         }
@@ -735,7 +735,7 @@ class TemplateService extends BaseService
         $zip->close();
 
         // 3) Index images in zip (recursive)
-        $allowedExt = ['png','jpg','jpeg','webp'];
+        $allowedExt = ['png', 'jpg', 'jpeg', 'webp'];
         $filesIndex = []; // filename => fullpath
 
         $rii = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($tmpDir));
@@ -750,8 +750,8 @@ class TemplateService extends BaseService
         // 4) Maps
         $collectionMap = [
             'front' => 'templates',
-            'back'  => 'back_templates',
-            'none'  => 'templates',
+            'back' => 'back_templates',
+            'none' => 'templates',
         ];
 
         // ids in your types table
@@ -816,7 +816,7 @@ class TemplateService extends BaseService
             $template = Template::create(['name' => [
                 'ar' => $nameAR,
                 'en' => $nameEn,
-            ],'approach' => 'without_editor',]);
+            ], 'approach' => 'without_editor',]);
             $modelCollection = 'template_model_image';
             $modelImage = strtolower(trim((string)($row[$idx['model_image']] ?? '')));
 
@@ -853,10 +853,10 @@ class TemplateService extends BaseService
 
             // Add media per (image,type) pair
             for ($i = 0; $i < $pairCount; $i++) {
-                $img     = $imageCells[$i];
+                $img = $imageCells[$i];
                 $typeKey = $typeCells[$i];
 
-                $imgBase = strtolower(basename(str_replace('\\','/',$img)));
+                $imgBase = strtolower(basename(str_replace('\\', '/', $img)));
 
                 $src = $filesIndex[$imgBase] ?? null;
                 if (!$src || !file_exists($src)) {
@@ -887,7 +887,7 @@ class TemplateService extends BaseService
             // mismatch report (optional)
             if (count($imageCells) !== count($typeCells)) {
                 $skipped[] = "Row $rowNum: count mismatch images("
-                    .count($imageCells).") types(".count($typeCells).")";
+                    . count($imageCells) . ") types(" . count($typeCells) . ")";
             }
 
             $created++;
