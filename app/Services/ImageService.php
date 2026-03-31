@@ -23,15 +23,7 @@ class ImageService
 
         // [0] = first frame only — avoids Invalid image geometry on multi-frame files
         $imagick = new Imagick($filePath . '[0]');
-dd([
-    'width'      => $imagick->getImageWidth(),
-    'height'     => $imagick->getImageHeight(),
-    'format'     => $imagick->getImageFormat(),
-    'depth'      => $imagick->getImageDepth(),
-    'colorspace' => $imagick->getImageColorspace(),
-    'file_path'  => $filePath,
-    'file_size'  => filesize($filePath),
-]);
+
         $original->update([
             'custom_properties' => array_merge(
                 $original->custom_properties ?? [],
@@ -63,14 +55,17 @@ dd([
 
     private function storePreview(Imagick $imagick, Media $original, string $previewCollection): Media
     {
-        $preview = clone $imagick;
+        // ✅ Re-open from file instead of clone — more reliable across Imagick versions
+        $filePath = Storage::disk($original->disk)
+            ->path("{$original->id}/{$original->file_name}");
 
-        $originalWidth  = $imagick->getImageWidth();
-        $originalHeight = $imagick->getImageHeight();
+        $preview = new Imagick($filePath . '[0]');
+
+        $originalWidth  = $preview->getImageWidth();
+        $originalHeight = $preview->getImageHeight();
         $maxWidth       = config('media.preview.max_width');
         $maxHeight      = config('media.preview.max_height');
 
-        // Only downscale — never upscale
         if ($originalWidth > $maxWidth || $originalHeight > $maxHeight) {
             $preview->thumbnailImage($maxWidth, $maxHeight, bestfit: true);
         }
@@ -78,7 +73,6 @@ dd([
         $preview->setImageCompressionQuality(config('media.preview.quality'));
         $preview->stripImage();
 
-        // Preserve alpha if original had it
         if ($preview->getImageAlphaChannel()) {
             $preview->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
             $preview->setBackgroundColor(new ImagickPixel('transparent'));
@@ -106,7 +100,6 @@ dd([
             ],
         );
 
-        // Inherit model attachment from original
         $previewMedia->update([
             'model_type' => $original->model_type,
             'model_id'   => $original->model_id,
