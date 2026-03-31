@@ -62,11 +62,11 @@ class ImageService
         $minWidth  = config('media.original.min_width',  520);
         $minHeight = config('media.original.min_height', 618);
 
-        if ($width < $minWidth || $height < $minHeight) {
-            throw new \InvalidArgumentException(
-                "Image too small. Minimum dimensions are {$minWidth}×{$minHeight}px. Uploaded: {$width}×{$height}px."
-            );
-        }
+//        if ($width < $minWidth || $height < $minHeight) {
+//            throw new \InvalidArgumentException(
+//                "Image too small. Minimum dimensions are {$minWidth}×{$minHeight}px. Uploaded: {$width}×{$height}px."
+//            );
+//        }
     }
 
     private function storePreview(Media $original, string $previewCollection): Media
