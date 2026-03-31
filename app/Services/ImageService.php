@@ -74,7 +74,7 @@ class ImageService
                 mimeType    : $original->mime_type, // same mime as original
                 test        : true,
             ),
-            collectionName  : 'templates-preview',
+            collectionName  : $original->collection_name.'-preview',
             customProperties: [
                 'width'       => $preview->getImageWidth(),
                 'height'      => $preview->getImageHeight(),
@@ -82,6 +82,11 @@ class ImageService
                 'original_id' => $original->id,
             ],
         );
+        
+        $previewMedia->update([
+            'model_type' => get_class($original),
+            'model_id' => $original->id
+        ]);
 
         $preview->destroy();
         @unlink($tmpPath);
