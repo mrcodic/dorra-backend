@@ -162,7 +162,7 @@ $category = \App\Models\Category::find(request('category_id'));
                                             @if(request()->query('q') == 'without')
                                                 <!-- FRONT -->
                                                 <div class="form-group mb-2 col-md-6 d-none" id="dz-front">
-                                                    <label class="label-text mb-1">Template Image (Front)</label>
+                                                    <label class="label-text mb-1">Upload Print File (Front)</label>
                                                     <div id="front-template-dropzone"
                                                          class="dropzone border rounded p-3"
                                                          style="cursor:pointer; min-height:150px;">
@@ -179,7 +179,7 @@ $category = \App\Models\Category::find(request('category_id'));
 
                                                 <!-- BACK -->
                                                 <div class="form-group mb-2 col-md-6 d-none" id="dz-back">
-                                                    <label class="label-text mb-1">Template Image (Back)</label>
+                                                    <label class="label-text mb-1">Upload Print File (Back)</label>
                                                     <div id="back-template-dropzone" class="dropzone border rounded p-3"
                                                          style="cursor:pointer; min-height:150px;">
                                                         <div class="dz-message">
@@ -189,14 +189,16 @@ $category = \App\Models\Category::find(request('category_id'));
                                                                id="uploadedBackTemplateImage">
                                                     </div>
                                                     <small class="form-text text-muted">
-                                                        If no size is selected, the default 618×700 will be applied.
+                                                        Allowed formats: PNG, JPG, JPEG, WEBP.
+                                                        Maximum file size: 30 MB.
+                                                        Minimum dimensions: 1000 × 1000 px.
                                                     </small>
                                                 </div>
 
 
                                                 <!-- NONE -->
                                                 <div class="form-group mb-2 col-md-6 d-none" id="dz-none">
-                                                    <label class="label-text mb-1">Template Image (General)</label>
+                                                    <label class="label-text mb-1">Upload Print File (General)</label>
                                                     <div id="none-template-dropzone" class="dropzone border rounded p-3"
                                                          style="cursor:pointer; min-height:150px;">
                                                         <div class="dz-message">
@@ -206,7 +208,9 @@ $category = \App\Models\Category::find(request('category_id'));
                                                                id="uploadedNoneTemplateImage">
                                                     </div>
                                                     <small class="form-text text-muted">
-                                                        If no size is selected, the default 618×700 will be applied.
+                                                        Allowed formats: PNG, JPG, JPEG, WEBP.
+                                                        Maximum file size: 30 MB.
+                                                        Minimum dimensions: 1000 × 1000 px.
                                                     </small>
 
                                                 </div>
@@ -223,7 +227,9 @@ $category = \App\Models\Category::find(request('category_id'));
                                                            id="uploadedTemplateImage">
                                                 </div>
                                                 <small class="form-text text-muted">
-                                                    If no size is selected, the default 618×700 will be applied.
+                                                    Allowed formats: PNG, JPG, JPEG, WEBP.
+                                                    Maximum file size: 30 MB.
+                                                    Minimum dimensions: 1000 × 1000 px.
                                                 </small>
                                             </div>
 
@@ -1491,7 +1497,7 @@ $category = \App\Models\Category::find(request('category_id'));
             paramName: "file",
             maxFiles: 1,
             maxFilesize: 30, // MB
-            acceptedFiles: "image/jpeg,image/png",
+            acceptedFiles: "image/png,image/jpeg,image/webp",
             headers: {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}"
             },
@@ -1523,7 +1529,7 @@ $category = \App\Models\Category::find(request('category_id'));
             paramName: "file",
             maxFiles: 1,
             maxFilesize: 30, // MB
-            acceptedFiles: "image/jpeg,image/png",
+            acceptedFiles: "image/png,image/jpeg,image/webp",
             headers: {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}"
             },
@@ -1555,7 +1561,7 @@ $category = \App\Models\Category::find(request('category_id'));
             paramName: "file",
             maxFiles: 1,
             maxFilesize: 30, // MB
-            acceptedFiles: "image/jpeg,image/png",
+            acceptedFiles: "image/png,image/jpeg,image/webp",
             headers: {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}"
             },
