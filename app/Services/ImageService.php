@@ -22,6 +22,13 @@ class ImageService
         $filePath = Storage::disk($original->disk)
             ->path("{$original->id}/{$original->file_name}");
 
+
+        if (!file_exists($filePath)) {
+            throw new \Exception("Media file not found: {$filePath}");
+        }
+
+        $imagick = new Imagick($filePath);
+
         $imagick = new Imagick($filePath);
 
         $original->update([
