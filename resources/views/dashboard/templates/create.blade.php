@@ -217,6 +217,10 @@ $category = \App\Models\Category::find(request('category_id'));
 
                                                 </div>
                                             @endif
+                                                @php
+                                                    $category = \App\Models\Category::find(request('product_without_category_id'));
+                                                @endphp
+                                                @if($category && !$category->has_mockup)
                                             <!-- MODEL  -->
                                             <div class="form-group mb-2 col-md-6 d-none" id="dz-model">
                                                 <label class="label-text mb-1">Template Model Image</label>
@@ -232,6 +236,7 @@ $category = \App\Models\Category::find(request('category_id'));
                                                     If no size is selected, the default 618×700 will be applied.
                                                 </small>
                                             </div>
+                                                @endif
 
                                         </div>
 
