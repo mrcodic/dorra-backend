@@ -1055,7 +1055,7 @@
             url: "{{ route('media.store') }}",
             paramName: "file",
             maxFiles: 1,
-            acceptedFiles: "image/jpeg,image/png",
+            acceptedFiles: "image/png,image/jpeg,image/webp",
             headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
             addRemoveLinks: true,
             init: function () {
@@ -1129,7 +1129,7 @@
             url: "{{ route('media.store') }}",
             paramName: "file",
             maxFiles: 1,
-            acceptedFiles: "image/jpeg,image/png",
+            acceptedFiles: "image/png,image/jpeg,image/webp",
             headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
             addRemoveLinks: true,
             init: function () {
@@ -1203,7 +1203,7 @@
             url: "{{ route('media.store') }}",
             paramName: "file",
             maxFiles: 1,
-            acceptedFiles: "image/jpeg,image/png",
+            acceptedFiles: "image/png,image/jpeg,image/webp",
             headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
             addRemoveLinks: true,
             init: function () {
