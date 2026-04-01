@@ -735,10 +735,12 @@
                 const isBack = $(this).data('type-name') === 'back';
                 const isChecked = $(this).is(':checked');
 
-                if (isBack && isChecked && !backModalShown) {
-                    backModalShown = true;
-                    const modal = new bootstrap.Modal(document.getElementById('backDesignModal'));
-                    modal.show();
+                // If back is unchecked, reset flag so modal shows again if re-checked
+                if (isBack && !isChecked) {
+                    backModalShown = false;
+                    document.getElementById('uploadedBackTemplateImage').value = '';
+                    document.getElementById('useFrontAsBack').value = '0';
+                    $('#dz-front .label-text').text('Upload Print File (Front)');
                 }
 
                 if (isBack && !isChecked) {
@@ -1107,7 +1109,7 @@
                 });
                 this.on("removedfile", function (file) {
                     hiddenInput.value = "";
-                    
+
                     document.getElementById("uploadedBackTemplateImage").value = "";
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
