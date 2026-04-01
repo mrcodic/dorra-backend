@@ -12,6 +12,7 @@ class FontStyle extends Model implements HasMedia
     use  InteractsWithMedia;
     protected $fillable = [
         'name',
+        'style_value',
         'font_id',
     ];
     public function font(): \Illuminate\Database\Eloquent\Relations\BelongsTo

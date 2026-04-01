@@ -45,6 +45,7 @@ class Template extends Model implements HasMedia
         'approach',
         'supported_languages',
         'is_best_seller',
+        'use_front_as_back',
     ];
     protected $casts = [
         'supported_languages' => 'array',

@@ -17,6 +17,7 @@ class FontStyleResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'style_value' => $this->style_value,
             'file' => $this->whenLoaded('media', function () {
                 return MediaResource::make($this->media->first());
             }),

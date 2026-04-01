@@ -25,7 +25,7 @@ $category = \App\Models\Category::find(request('category_id'));
                                    value="{{ request()->query('q') == 'without' ? 'without_editor' : 'with_editor' }}">
                             <div class="flex-grow-1">
                                 <div class="">
-
+                                    <input type="hidden" name="use_front_as_back" id="useFrontAsBack" value="0">
 
                                     {{-- @if(request()->query('q') == 'without')--}}
                                     {{--
@@ -144,8 +144,8 @@ $category = \App\Models\Category::find(request('category_id'));
                                                                value="{{ $type->value }}"
                                                                data-type-name="{{ strtolower($type->value->name) }}"
                                                             @checked(
-           $type->value === \App\Enums\Template\TypeEnum::FRONT
-           || $type->value === \App\Enums\Template\TypeEnum::BACK
+   request('category_id') ==134 ? $type->value === \App\Enums\Template\TypeEnum::FRONT
+           || $type->value === \App\Enums\Template\TypeEnum::BACK :$type->value === \App\Enums\Template\TypeEnum::FRONT
        )
                                                         >
                                                         <span>{{ $type->value->label() }}</span>
@@ -594,6 +594,29 @@ $category = \App\Models\Category::find(request('category_id'));
             </div>
         </div>
 
+        <!-- Back Design Modal -->
+        <div class="modal fade" id="backDesignModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Back Side Design</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center py-4">
+                        <p class="mb-4">Do you want to use the same front design for the back side, or upload a different one?</p>
+                        <div class="d-flex gap-3 justify-content-center">
+                            <button type="button" class="btn btn-outline-primary" id="useSameDesignBtn">
+                                <i data-feather="copy" class="me-1"></i> Use Same Design
+                            </button>
+                            <button type="button" class="btn btn-primary" id="useDifferentDesignBtn">
+                                <i data-feather="upload" class="me-1"></i> Upload Different
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </section>
     @php
         // لو route محتاج parameter اسمه mockup
@@ -604,6 +627,42 @@ $category = \App\Models\Category::find(request('category_id'));
 @section('vendor-script')
 
     <script>
+        $(function () {
+            let backModalShown = false;
+
+            // Watch for "back" checkbox being checked
+            $(document).on('change', '.type-checkbox', function () {
+                const isBack = $(this).data('type-name') === 'back';
+                const isChecked = $(this).is(':checked');
+
+                if (isBack && isChecked && !backModalShown) {
+                    backModalShown = true;
+                    const modal = new bootstrap.Modal(document.getElementById('backDesignModal'));
+                    modal.show();
+                }
+
+                // If back is unchecked, reset flag so modal shows again if re-checked
+                if (isBack && !isChecked) {
+                    backModalShown = false;
+                    // Clear back hidden input
+                    document.getElementById('uploadedBackTemplateImage').value = '';
+                }
+            });
+
+            // "Use Same Design" — copy front media ID into back hidden input
+            $('#useSameDesignBtn').on('click', function () {
+                document.getElementById('useFrontAsBack').value = '1';
+                $('#dz-back').addClass('d-none');
+                document.getElementById('uploadedBackTemplateImage').value = '';
+
+                bootstrap.Modal.getInstance(document.getElementById('backDesignModal')).hide();
+            });
+            // "Upload Different" — just close modal, let user upload normally
+                $('#useDifferentDesignBtn').on('click', function () {
+                    document.getElementById('useFrontAsBack').value = '0';
+                    bootstrap.Modal.getInstance(document.getElementById('backDesignModal')).hide();
+                });
+        });
         $(document).ready(function () {
             $('#categoriesSelect').trigger('change');
         });
