@@ -1054,7 +1054,7 @@
         templateDropzones.front = new Dropzone("#front-template-dropzone", {
             url: "{{ route('media.store') }}",
             paramName: "file",
-            maxFiles: 1,
+            maxFiles: 30,
             acceptedFiles: "image/png,image/jpeg,image/webp",
             headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
             addRemoveLinks: true,
@@ -1128,7 +1128,7 @@
         templateDropzones.back = new Dropzone("#back-template-dropzone", {
             url: "{{ route('media.store') }}",
             paramName: "file",
-            maxFiles: 1,
+            maxFiles: 30,
             acceptedFiles: "image/png,image/jpeg,image/webp",
             headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
             addRemoveLinks: true,
@@ -1202,7 +1202,7 @@
         templateDropzones.none = new Dropzone("#none-template-dropzone", {
             url: "{{ route('media.store') }}",
             paramName: "file",
-            maxFiles: 1,
+            maxFiles: 30,
             acceptedFiles: "image/png,image/jpeg,image/webp",
             headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
             addRemoveLinks: true,
