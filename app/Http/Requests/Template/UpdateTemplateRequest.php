@@ -73,7 +73,7 @@ class UpdateTemplateRequest extends BaseRequest
 
             'template_image_back_id' => [
                 Rule::requiredIf(fn()=> in_array(TypeEnum::BACK->value, (array)request('types', []) )
-                    && request('approach') == 'without_editor'),
+                    && request('approach') == 'without_editor'&& request('use_front_as_back') == 0),
                 'nullable',
                 'exists:media,id',
             ],
