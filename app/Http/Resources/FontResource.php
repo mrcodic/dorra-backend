@@ -17,10 +17,10 @@ class FontResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'has_regular_and_bold' => (bool) $this->whenLoaded('fontStyles', fn() =>
-                $this->fontStyles->contains(fn($style) => strtolower($style->name) === 'regular') &&
-                $this->fontStyles->contains(fn($style) => strtolower($style->name) === 'bold')
-            ),
+            'has_regular_and_bold' => $this->fontStyles()
+                    ->whereIn('name', ['regular', 'bold'])
+                    ->distinct('name')
+                    ->count() >= 2,
             'font_styles' => FontStyleResource::collection($this->whenLoaded('fontStyles')),
         ];
     }
