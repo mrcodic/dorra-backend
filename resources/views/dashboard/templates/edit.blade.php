@@ -221,7 +221,7 @@
                                                 @if($model->approach == 'without_editor')
                                                     <!-- FRONT -->
                                                     <div class="form-group mb-2 col-md-6 d-none" id="dz-front">
-                                                        <label class="label-text mb-1">Upload Print File (Front)</label>
+                                                        <label class="label-text mb-1">{{ $model->use_front_as_back ? 'Upload Print File (Front,Back)' : 'Upload Print File (Front)' }}</label>
                                                         <div id="front-template-dropzone"
                                                              class="dropzone border rounded p-3"
                                                              style="cursor:pointer; min-height:150px;">
