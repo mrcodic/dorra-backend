@@ -26,7 +26,8 @@
                             @method("PUT")
                             <div class="flex-grow-1">
                                 <div class="">
-                                    <input type="hidden" name="use_front_as_back" id="useFrontAsBack" value="{{ $model->use_front_as_back }}">
+                                    <input type="hidden" name="use_front_as_back" id="useFrontAsBack"
+                                           value="{{ $model->use_front_as_back }}">
 
                                     @php
                                         $colors = collect($model->colors) ?? collect();
@@ -236,26 +237,27 @@
                                                             Minimum dimensions: 1000 × 1000 px.
                                                         </small>
                                                     </div>
-
-                                                    <!-- BACK -->
-                                                    <div class="form-group mb-2 col-md-6 d-none" id="dz-back">
-                                                        <label class="label-text mb-1">Upload Print File (Back)</label>
-                                                        <div id="back-template-dropzone"
-                                                             class="dropzone border rounded p-3"
-                                                             style="cursor:pointer; min-height:150px;">
-                                                            <div class="dz-message">
-                                                                <span>Drop back image here or click</span>
+                                                    @if($model->use_front_as_back = 0)
+                                                        <!-- BACK -->
+                                                        <div class="form-group mb-2 col-md-6 d-none" id="dz-back">
+                                                            <label class="label-text mb-1">Upload Print File
+                                                                (Back)</label>
+                                                            <div id="back-template-dropzone"
+                                                                 class="dropzone border rounded p-3"
+                                                                 style="cursor:pointer; min-height:150px;">
+                                                                <div class="dz-message">
+                                                                    <span>Drop back image here or click</span>
+                                                                </div>
+                                                                <input type="hidden" name="template_image_back_id"
+                                                                       id="uploadedBackTemplateImage">
                                                             </div>
-                                                            <input type="hidden" name="template_image_back_id"
-                                                                   id="uploadedBackTemplateImage">
+                                                            <small class="form-text text-muted">
+                                                                Allowed formats: PNG, JPG, JPEG, WEBP.
+                                                                Maximum file size: 30 MB.
+                                                                Minimum dimensions: 1000 × 1000 px.
+                                                            </small>
                                                         </div>
-                                                        <small class="form-text text-muted">
-                                                            Allowed formats: PNG, JPG, JPEG, WEBP.
-                                                            Maximum file size: 30 MB.
-                                                            Minimum dimensions: 1000 × 1000 px.
-                                                        </small>
-                                                    </div>
-
+                                                    @endif
                                                     <!-- NONE -->
                                                     <div class="form-group mb-2 col-md-6 d-none" id="dz-none">
                                                         <label class="label-text mb-1">Upload Print File
@@ -281,20 +283,20 @@
                                                 @endphp
                                                 @if($category && !$category->has_mockup)
                                                     <!-- MODEL  -->
-                                                <div class="form-group mb-2 col-md-6 d-none" id="dz-model">
-                                                    <label class="label-text mb-1">Template Model Image</label>
-                                                    <div id="template-dropzone" class="dropzone border rounded p-3"
-                                                         style="cursor:pointer; min-height:150px;">
-                                                        <div class="dz-message" data-dz-message>
-                                                            <span>Drop image here or click to upload</span>
+                                                    <div class="form-group mb-2 col-md-6 d-none" id="dz-model">
+                                                        <label class="label-text mb-1">Template Model Image</label>
+                                                        <div id="template-dropzone" class="dropzone border rounded p-3"
+                                                             style="cursor:pointer; min-height:150px;">
+                                                            <div class="dz-message" data-dz-message>
+                                                                <span>Drop image here or click to upload</span>
+                                                            </div>
+                                                            <input type="hidden" name="template_image_id"
+                                                                   id="uploadedTemplateImage">
                                                         </div>
-                                                        <input type="hidden" name="template_image_id"
-                                                               id="uploadedTemplateImage">
+                                                        <small class="form-text text-muted">
+                                                            If no size is selected, the default 618×700 will be applied.
+                                                        </small>
                                                     </div>
-                                                    <small class="form-text text-muted">
-                                                        If no size is selected, the default 618×700 will be applied.
-                                                    </small>
-                                                </div>
                                                 @endif
                                             </div>
 
@@ -688,7 +690,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body text-center py-4">
-                    <p class="mb-4">Do you want to use the same front design for the back side, or upload a different one?</p>
+                    <p class="mb-4">Do you want to use the same front design for the back side, or upload a different
+                        one?</p>
                     <div class="d-flex gap-3 justify-content-center">
                         <button type="button" class="btn btn-outline-primary" id="useSameDesignBtn">
                             <i data-feather="copy" class="me-1"></i> Use Same Design
@@ -702,7 +705,8 @@
         </div>
     </div>
 
-    <input type="hidden" name="use_front_as_back" id="useFrontAsBack" value="{{ $model->use_front_as_back ? '1' : '0' }}">
+    <input type="hidden" name="use_front_as_back" id="useFrontAsBack"
+           value="{{ $model->use_front_as_back ? '1' : '0' }}">
 @endsection
 
 
