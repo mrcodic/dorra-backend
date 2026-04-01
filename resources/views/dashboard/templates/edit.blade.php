@@ -1064,6 +1064,21 @@
                 this.on("addedfile", function (file) {
                     if (file._isMock) return;
 
+                    // ── Max file size check (30MB) ──
+                    if (file.size > 30 * 1024 * 1024) {
+                        this.removeFile(file);
+                        Toastify({
+                            text: `File size must not exceed 30MB. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB.`,
+                            duration: 3000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455",
+                            close: true,
+                        }).showToast();
+                        return;
+                    }
+
+                    // ── Min dimensions check (1000×1000) ──
                     const reader = new FileReader();
                     const dzRef = this;
 
@@ -1138,6 +1153,21 @@
                 this.on("addedfile", function (file) {
                     if (file._isMock) return;
 
+                    // ── Max file size check (30MB) ──
+                    if (file.size > 30 * 1024 * 1024) {
+                        this.removeFile(file);
+                        Toastify({
+                            text: `File size must not exceed 30MB. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB.`,
+                            duration: 3000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455",
+                            close: true,
+                        }).showToast();
+                        return;
+                    }
+
+                    // ── Min dimensions check (1000×1000) ──
                     const reader = new FileReader();
                     const dzRef = this;
 
@@ -1212,6 +1242,21 @@
                 this.on("addedfile", function (file) {
                     if (file._isMock) return;
 
+                    // ── Max file size check (30MB) ──
+                    if (file.size > 30 * 1024 * 1024) {
+                        this.removeFile(file);
+                        Toastify({
+                            text: `File size must not exceed 30MB. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB.`,
+                            duration: 3000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455",
+                            close: true,
+                        }).showToast();
+                        return;
+                    }
+
+                    // ── Min dimensions check (1000×1000) ──
                     const reader = new FileReader();
                     const dzRef = this;
 

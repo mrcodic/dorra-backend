@@ -1584,14 +1584,31 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
             init: function () {
 
                 this.on("addedfile", function (file) {
+                    if (file._isMock) return;
+
+                    // ── Max file size check (30MB) ──
+                    if (file.size > 30 * 1024 * 1024) {
+                        this.removeFile(file);
+                        Toastify({
+                            text: `File size must not exceed 30MB. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB.`,
+                            duration: 3000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455",
+                            close: true,
+                        }).showToast();
+                        return;
+                    }
+
+                    // ── Min dimensions check (1000×1000) ──
                     const reader = new FileReader();
-                    const dz = this;
+                    const dzRef = this;
 
                     reader.onload = function (e) {
                         const img = new Image();
                         img.onload = function () {
                             if (img.width < 1000 || img.height < 1000) {
-                                dz.removeFile(file);
+                                dzRef.removeFile(file);
                                 Toastify({
                                     text: `Image must be at least 1000×1000px. Your image is ${img.width}×${img.height}px.`,
                                     duration: 3000,
@@ -1641,14 +1658,31 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
             dictDefaultMessage: "Drop image here or click to upload",
             init: function () {
                 this.on("addedfile", function (file) {
+                    if (file._isMock) return;
+
+                    // ── Max file size check (30MB) ──
+                    if (file.size > 30 * 1024 * 1024) {
+                        this.removeFile(file);
+                        Toastify({
+                            text: `File size must not exceed 30MB. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB.`,
+                            duration: 3000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455",
+                            close: true,
+                        }).showToast();
+                        return;
+                    }
+
+                    // ── Min dimensions check (1000×1000) ──
                     const reader = new FileReader();
-                    const dz = this;
+                    const dzRef = this;
 
                     reader.onload = function (e) {
                         const img = new Image();
                         img.onload = function () {
                             if (img.width < 1000 || img.height < 1000) {
-                                dz.removeFile(file);
+                                dzRef.removeFile(file);
                                 Toastify({
                                     text: `Image must be at least 1000×1000px. Your image is ${img.width}×${img.height}px.`,
                                     duration: 3000,
@@ -1698,14 +1732,31 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
             dictDefaultMessage: "Drop image here or click to upload",
             init: function () {
                 this.on("addedfile", function (file) {
+                    if (file._isMock) return;
+
+                    // ── Max file size check (30MB) ──
+                    if (file.size > 30 * 1024 * 1024) {
+                        this.removeFile(file);
+                        Toastify({
+                            text: `File size must not exceed 30MB. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB.`,
+                            duration: 3000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455",
+                            close: true,
+                        }).showToast();
+                        return;
+                    }
+
+                    // ── Min dimensions check (1000×1000) ──
                     const reader = new FileReader();
-                    const dz = this;
+                    const dzRef = this;
 
                     reader.onload = function (e) {
                         const img = new Image();
                         img.onload = function () {
                             if (img.width < 1000 || img.height < 1000) {
-                                dz.removeFile(file);
+                                dzRef.removeFile(file);
                                 Toastify({
                                     text: `Image must be at least 1000×1000px. Your image is ${img.width}×${img.height}px.`,
                                     duration: 3000,
