@@ -1106,7 +1106,17 @@
                     }
                 });
                 this.on("removedfile", function (file) {
+                    hiddenInput.value = "";
+                    
                     document.getElementById("uploadedBackTemplateImage").value = "";
+                    if (file._hiddenInputId) {
+                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                            method: "DELETE",
+                            headers: {
+                                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+                    }
                 });
             },
         });
