@@ -41,7 +41,7 @@ class MenuServiceProvider extends ServiceProvider
                 foreach ($categories as $category) {
                     $item->submenu[] = (object) [
                         'url'  => '/product-templates?product_without_category_id=' . $category->id,
-                        'name' => $category->name.' Templates',
+                        'name' => $category->name,
                         'icon' => 'circle',
                         'slug' => '',
                         'dynamic' => true,

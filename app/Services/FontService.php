@@ -13,6 +13,20 @@ class FontService extends BaseService
         parent::__construct($repository);
 
     }
+    public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10, $counts = [])
+    {
+        $styleName = request('style_name');
+        $query = $this->repository->query()
+            ->select($columns)
+            ->with($relations)
+            ->when(request()->filled('style_name'),function ($query) use ($styleName){
+                $query ->whereHas('fontStyles', function ($query) use ($styleName) {
+                    $query->where('name', 'like', '%' . $styleName . '%');
+                });
+            })
+            ->withCount($counts);
+        return $paginate ? $query->paginate($perPage, $columns) : $query->get($columns);
+    }
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
