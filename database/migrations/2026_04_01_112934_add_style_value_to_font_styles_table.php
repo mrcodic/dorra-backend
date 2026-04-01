@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('font_styles', function (Blueprint $table) {
-            //
+            $table->string('style_value')->after('name')->nullable();
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('font_styles', function (Blueprint $table) {
-            //
+            $table->dropColumn('style_value');
         });
     }
 };
