@@ -163,14 +163,12 @@
     'id' => 'deleteTemplateModal',
     'formId' => 'deleteTemplateForm',
     'title' => 'Delete Template',
-    'model'      => $model,
     ])
     @include('modals.delete',[
     'id' => 'deleteTemplatesModal',
     'formId' => 'bulk-delete-form',
     'title' => 'Delete Templates',
     'confirmText' => 'Are you sure you want to delete this items?',
-    'model'      => $model,
     ])
     <!-- list and filter end -->
 </section>

@@ -189,20 +189,4 @@
     </div>
 @endforelse
 
-{{-- ✅ Modals OUTSIDE the loop — rendered only ONCE --}}
-@include('modals.delete', [
-    'id'     => 'deleteTemplateModal',
-    'formId' => 'deleteTemplateForm',
-    'title'  => 'Delete Template',
-])
 
-@include('modals.delete', [
-    'id'          => 'deleteTemplatesModal',
-    'formId'      => 'bulk-delete-form',
-    'title'       => 'Delete Templates',
-    'confirmText' => 'Are you sure you want to delete these items?',
-])
-
-{{-- ✅ JS to populate modal dynamically --}}
-@push('scripts')
-@endpush
