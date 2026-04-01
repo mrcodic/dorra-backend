@@ -147,13 +147,6 @@ $(document).on('change', '.category-checkbox', function () {
 //     $("#bulk-delete-container").hide();
 // });
 
-$(document).on("click", ".open-delete-template-modal", function () {
-    console.log("Gfgdf")
-    const templateId = $(this).data("id");
-    console.log(templateId)
-    $('#deleteTemplateForm input[name="id"]').val(templateId);
-    $("#deleteTemplateForm").attr('action', `product-templates/${templateId}`);
-});
 
 
 function removeTemplateCards(ids) {
@@ -228,38 +221,37 @@ $(document).on("submit", "#bulk-delete-form", function (e) {
 
 
 
-    document.querySelectorAll('.open-delete-template-modal').forEach(button => {
-    button.addEventListener('click', function () {
-        const action = this.dataset.action;
-        const products = this.dataset.products;
-        const categories = this.dataset.categories;
+$(document).on("click", ".open-delete-template-modal", function () {
+    const action     = $(this).data("action");
+    const products   = $(this).data("products");
+    const categories = $(this).data("categories");
 
-        // Set form action dynamically
-        document.getElementById('deleteTemplateForm').setAttribute('action', action);
+    // Set form action
+    $("#deleteTemplateForm").attr("action", action);
 
-        // Populate Products
-        const productsWrap = document.getElementById('deleteModalProducts');
-        const productsList = document.getElementById('deleteModalProductsList');
-        if (products && products.trim() !== '') {
-            productsList.innerHTML = products.split(', ')
-                .map(p => `<span class="badge bg-primary">${p}</span>`)
-                .join('');
-            productsWrap.classList.remove('d-none');
-        } else {
-            productsWrap.classList.add('d-none');
-        }
+    // Populate Products
+    const $productsWrap = $("#deleteModalProducts");
+    const $productsList = $("#deleteModalProductsList");
+    if (products && $.trim(products) !== '') {
+        $productsList.html(
+            products.split(', ').map(p => `<span class="badge bg-primary">${p}</span>`).join('')
+        );
+        $productsWrap.removeClass('d-none');
+    } else {
+        $productsWrap.addClass('d-none');
+    }
 
-        // Populate Categories
-        const categoriesWrap = document.getElementById('deleteModalCategories');
-        const categoriesList = document.getElementById('deleteModalCategoriesList');
-        if (categories && categories.trim() !== '') {
-            categoriesList.innerHTML = categories.split(', ')
-                .map(c => `<span class="badge bg-secondary">${c}</span>`)
-                .join('');
-            categoriesWrap.classList.remove('d-none');
-        } else {
-            categoriesWrap.classList.add('d-none');
-        }
-    });
+    // Populate Categories
+    const $categoriesWrap = $("#deleteModalCategories");
+    const $categoriesList = $("#deleteModalCategoriesList");
+    if (categories && $.trim(categories) !== '') {
+        $categoriesList.html(
+            categories.split(', ').map(c => `<span class="badge bg-secondary">${c}</span>`).join('')
+        );
+        $categoriesWrap.removeClass('d-none');
+    } else {
+        $categoriesWrap.addClass('d-none');
+    }
 });
+
 
