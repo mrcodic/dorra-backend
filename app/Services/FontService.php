@@ -34,7 +34,7 @@ class FontService extends BaseService
         collect($validatedData['font_styles'])->each(function ($style) use ($model, $validatedData) {
             $fontStyle = $model->fontStyles()->create([
                 'name' => $style['name'],
-                'style_value' => $style['style_value'],
+                'style_value' => $style['style_value'] ?? null,
             ]);
             handleMediaUploads($style['file'], $fontStyle);
         });
@@ -53,7 +53,8 @@ class FontService extends BaseService
                 'id' => Arr::get($style, 'id'),
             ], [
                 'name' => $style['name'],
-                'style_value' => $style['style_value'],
+                'style_value' => $style['style_value'] ?? null,
+
             ]);
 
             if (!empty($style['file'])) {
