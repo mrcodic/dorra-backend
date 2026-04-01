@@ -104,6 +104,7 @@ class UpdateTemplateRequest extends BaseRequest
             'border' => ['nullable', 'in:' . CornerEnum::getValuesAsString()],
             'safety_area' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
             'cut_margin' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
+            'use_front_as_back' => ['sometimes', 'in:0,1'],
 //            'colors' => ['sometimes','array'],
 //            'colors.*.value' => ['sometimes','string'],
 //            'colors.*.image_id' => ['sometimes', 'integer', 'exists:media,id'],
