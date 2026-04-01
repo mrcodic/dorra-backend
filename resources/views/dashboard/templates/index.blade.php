@@ -159,19 +159,7 @@
     </div>
 @include("modals.templates.template-editor-modal")
 @include("modals.templates.import")
-    @include('modals.delete',[
-    'id' => 'deleteTemplateModal',
-    'formId' => 'deleteTemplateForm',
-    'title' => 'Delete Template',
-    'model'      => $model,
-    ])
-    @include('modals.delete',[
-    'id' => 'deleteTemplatesModal',
-    'formId' => 'bulk-delete-form',
-    'title' => 'Delete Templates',
-    'confirmText' => 'Are you sure you want to delete this items?',
-    'model'      => $model,
-    ])
+
     <!-- list and filter end -->
 </section>
 <!-- users list ends -->

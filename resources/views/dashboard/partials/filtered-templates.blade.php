@@ -168,6 +168,19 @@
         </div>
     </div>
 </div>
+@include('modals.delete',[
+'id' => 'deleteTemplateModal',
+'formId' => 'deleteTemplateForm',
+'title' => 'Delete Template',
+'model'      => $template,
+])
+@include('modals.delete',[
+'id' => 'deleteTemplatesModal',
+'formId' => 'bulk-delete-form',
+'title' => 'Delete Templates',
+'confirmText' => 'Are you sure you want to delete this items?',
+'model'      => $template,
+])
 @empty
 <div class="d-flex flex-column justify-content-center align-items-center text-center py-5 w-100"
     style="min-height:65vh;">
