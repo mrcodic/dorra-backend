@@ -49,6 +49,7 @@ use Illuminate\Support\Facades\Route;
 use App\Models\Mockup;
 use App\Services\Mockup\MockupRenderer;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Services\Mockup\KittlSeatBucketRenderer;
 
 Route::middleware(AutoCheckPermission::class)->group(function () {
 
@@ -397,6 +398,102 @@ Route::get('test-canvas/{id}', function ($id){
     app(SyncCanvasAssets::class)->processCanvasColumn($template,'design_data');
     app(SyncCanvasAssets::class)->processCanvasColumn($template,'design_back_data');
 });
+
+
+Route::get('/debug/kittl-seat-bucket', function (Request $request, KittlSeatBucketRenderer $renderer) {
+    abort_unless($request->query('token') === 'pixbyte-debug-123', 403);
+
+    $assetsDir  = public_path('mockup-asset-test');
+    $designsDir = $assetsDir . DIRECTORY_SEPARATOR . 'designs';
+    $outputRoot = base_path();
+
+    $mode = strtolower((string) $request->query('mode', 'logo'));
+    $mode = in_array($mode, ['logo', 'full_art'], true) ? $mode : 'logo';
+
+    $designFile = trim((string) $request->query('design', ''));
+    $designPath = null;
+    if ($designFile !== '') {
+        $designPath = $designsDir . DIRECTORY_SEPARATOR . basename($designFile);
+        abort_unless(is_file($designPath), 404, 'Design file not found.');
+    }
+
+    $hasCustomPolygon =
+        $request->has('tlx') && $request->has('tly') &&
+        $request->has('trx') && $request->has('try') &&
+        $request->has('brx') && $request->has('bry') &&
+        $request->has('blx') && $request->has('bly');
+
+    $logoPolygon = null;
+    if ($hasCustomPolygon) {
+        $logoPolygon = [
+            [(float) $request->query('tlx'), (float) $request->query('tly')],
+            [(float) $request->query('trx'), (float) $request->query('try')],
+            [(float) $request->query('brx'), (float) $request->query('bry')],
+            [(float) $request->query('blx'), (float) $request->query('bly')],
+        ];
+    }
+
+    $cfg = [
+        'scene_path'     => $assetsDir . DIRECTORY_SEPARATOR . '1773934849445.scene.png',
+        'dark_path'      => $assetsDir . DIRECTORY_SEPARATOR . '1773934849445.darkBlend.png',
+        'light_path'     => $assetsDir . DIRECTORY_SEPARATOR . '1773934849445.lightBlend.png',
+
+        'displacement_path'      => $assetsDir . DIRECTORY_SEPARATOR . '1773934849445.displacementMap.png',
+        'front_panel_path'       => $assetsDir . DIRECTORY_SEPARATOR . '1773934849445.frontPanel.png',
+        'highlight_path'         => $assetsDir . DIRECTORY_SEPARATOR . '1773934849445.highlightMap.png',
+
+        'mode'           => $mode,
+        'design_path'    => $designPath,
+        'base_hex'       => (string) $request->query('base_hex', '#d9ff00'),
+        'fit'            => (string) $request->query('fit', $mode === 'full_art' ? 'cover' : 'contain'),
+        'design_scale'   => (float) $request->query('design_scale', 0.72),
+        'offset_x_ratio' => (float) $request->query('offset_x_ratio', 0.0),
+        'offset_y_ratio' => (float) $request->query('offset_y_ratio', -0.03),
+
+        'dark_strength'  => (float) $request->query('dark_strength', $request->query('shadow_strength', 1.0)),
+        'light_strength' => (float) $request->query('light_strength', $request->query('highlight_strength', 1.0)),
+
+        'displacement_strength'  => (float) $request->query('displacement_strength', 14.0),
+        'highlight_strength_map' => (float) $request->query('highlight_strength_map', 0.06),
+        'use_front_panel'        => $request->boolean('use_front_panel', false),
+        'front_panel_expand_px'  => (float) $request->query('front_panel_expand_px', 140),
+        'design_opacity'         => (float) $request->query('design_opacity', 1.0),
+        'alpha_blur'             => (float) $request->query('alpha_blur', 0.35),
+        'logo_top_bias'          => (float) $request->query('logo_top_bias', 0.30),
+        'clip_softness'          => (float) $request->query('clip_softness', 0.8),
+
+        'trim_design'    => $request->boolean('trim_design', false),
+        'trim_fuzz'      => (float) $request->query('trim_fuzz', 0.02),
+        'src_x'          => (int) $request->query('src_x', 0),
+        'src_y'          => (int) $request->query('src_y', 0),
+        'src_w'          => (int) $request->query('src_w', 0),
+        'src_h'          => (int) $request->query('src_h', 0),
+    ];
+
+    if ($logoPolygon) {
+        $cfg['logo_polygon'] = $logoPolygon;
+    }
+
+    $debugStage = (string) $request->query('debug_stage', '');
+    if ($debugStage !== '') {
+        $cfg['debug_stage'] = $debugStage;
+    }
+
+    $png = $renderer->render($cfg);
+
+    if ($request->boolean('save', false)) {
+        $filename = ($debugStage ? $debugStage . '-' : 'render-') . date('Ymd-His') . '.png';
+        $savePath = $outputRoot . DIRECTORY_SEPARATOR . $filename;
+        file_put_contents($savePath, $png);
+    }
+
+    return response($png, 200, [
+        'Content-Type'  => 'image/png',
+        'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+    ]);
+});
+
+
 
 Route::get('/debug/mockup-render-perspective', function (Request $request, MockupRenderer $renderer) {
     $token = (string) $request->query('token', '');
@@ -797,7 +894,234 @@ Route::get('/debug2/mockup-render-perspective', function (
     return response($binary, 200, ['Content-Type' => 'image/png']);
 });
 
+Route::get('/debug3/mockup-render-assets', function (Request $request, MockupRenderer $renderer) {
+    $token = (string) $request->query('token', '');
+    abort_unless($token === 'pixbyte-debug-123', 403);
 
+    $assetDir  = public_path('mockup-asset-test');
+    $designDir = $assetDir . DIRECTORY_SEPARATOR . 'designs';
+
+    $basePath         = $assetDir . DIRECTORY_SEPARATOR . 'base.png';
+    $maskPath         = $assetDir . DIRECTORY_SEPARATOR . 'mask.png';
+    $shadowPath       = $assetDir . DIRECTORY_SEPARATOR . 'shadow.png';
+    $highlightPath    = $assetDir . DIRECTORY_SEPARATOR . 'highlight.png';
+    $displacementPath = $assetDir . DIRECTORY_SEPARATOR . 'displacement_gray.png';
+
+    $designFile = basename((string) $request->query('design', 'logo-text.png'));
+    $designPath = $designDir . DIRECTORY_SEPARATOR . $designFile;
+
+    if (!file_exists($basePath) || !file_exists($maskPath)) {
+        return response()->json([
+            'ok' => false,
+            'error' => 'base or mask missing from public/mockup-asset-test',
+            'paths' => [
+                'base' => $basePath,
+                'mask' => $maskPath,
+            ],
+        ], 422);
+    }
+
+    if (!file_exists($designPath)) {
+        return response()->json([
+            'ok' => false,
+            'error' => 'design missing',
+            'design' => $designPath,
+        ], 422);
+    }
+
+    $side         = strtolower((string) $request->query('side', 'front'));
+    $hex          = $request->query('hex');
+    $save         = $request->boolean('save', false);
+    $debug        = $request->boolean('debug', false);
+    $skipMaskClip = $request->boolean('skip_mask_clip', false);
+
+    $renderMode = strtolower((string) $request->query('render_mode', 'logo'));
+    if (!in_array($renderMode, ['logo', 'full_art'], true)) {
+        $renderMode = 'logo';
+    }
+
+    $presets = [
+        'logo' => [
+            'design_scale'          => 0.95,
+            'texture_strength'      => 0.0,
+            'highlight_strength'    => 0.0,
+            'highlight_pass_opacity'=> 0.0,
+            'shadow_strength'       => 0.45,
+            'design_opacity'        => 1.0,
+            'design_softness'       => 0.03,
+            'displace_x'            => 5.0,
+            'displace_y'            => 8.0,
+            'displace_blur'         => 1.9,
+            'displace_emboss'       => 0.28,
+            'displace_contrast'     => 3.5,
+        ],
+        'full_art' => [
+            'design_scale'          => 1.45,
+            'texture_strength'      => 0.0,
+            'highlight_strength'    => 0.0,
+            'highlight_pass_opacity'=> 0.0,
+            'shadow_strength'       => 0.30,
+            'design_opacity'        => 1.0,
+            'design_softness'       => 0.02,
+            'displace_x'            => 4.0,
+            'displace_y'            => 7.0,
+            'displace_blur'         => 1.9,
+            'displace_emboss'       => 0.28,
+            'displace_contrast'     => 3.5,
+        ],
+    ];
+
+    $preset = $presets[$renderMode];
+
+    $resolveFloat = function (string $key, float $default, float $min, float $max) use ($request): float {
+        $value = $request->query($key, $default);
+        $value = is_numeric($value) ? (float) $value : $default;
+        return max($min, min($max, $value));
+    };
+
+    $designScale          = $resolveFloat('design_scale', $preset['design_scale'], 0.05, 4.0);
+    $textureStrength      = $resolveFloat('texture_strength', $preset['texture_strength'], 0.0, 1.0);
+    $highlightStrength    = $resolveFloat('highlight_strength', $preset['highlight_strength'], 0.0, 1.0);
+    $highlightPassOpacity = $resolveFloat('highlight_pass_opacity', $preset['highlight_pass_opacity'], 0.0, 1.0);
+    $shadowStrength       = $resolveFloat('shadow_strength', $preset['shadow_strength'], 0.0, 2.0);
+    $designOpacity        = $resolveFloat('design_opacity', $preset['design_opacity'], 0.0, 1.0);
+    $designSoftness       = $resolveFloat('design_softness', $preset['design_softness'], 0.0, 2.0);
+    $displaceX            = $resolveFloat('displace_x', $preset['displace_x'], 0.0, 40.0);
+    $displaceY            = $resolveFloat('displace_y', $preset['displace_y'], 0.0, 40.0);
+    $displaceBlur         = $resolveFloat('displace_blur', $preset['displace_blur'], 0.0, 10.0);
+    $displaceEmboss       = $resolveFloat('displace_emboss', $preset['displace_emboss'], 0.1, 10.0);
+    $displaceContrast     = $resolveFloat('displace_contrast', $preset['displace_contrast'], 0.0, 100.0);
+    $maxDim               = (int) $request->query('max_dim', 1600);
+
+    $warpKeys = ['tlx', 'tly', 'trx', 'try', 'brx', 'bry', 'blx', 'bly'];
+    $placeXRatio = (float) $request->query('place_x_ratio', $renderMode === 'logo' ? 0.18 : 0.10);
+    $placeYRatio = (float) $request->query('place_y_ratio', $renderMode === 'logo' ? 0.18 : 0.06);
+    $placeWRatio = (float) $request->query('place_w_ratio', $renderMode === 'logo' ? 0.64 : 0.80);
+    $placeHRatio = (float) $request->query('place_h_ratio', $renderMode === 'logo' ? 0.22 : 0.86);
+    $placeFit    = (string) $request->query('place_fit', $renderMode === 'logo' ? 'contain' : 'cover');
+
+    $hasWarp = collect($warpKeys)->every(function ($key) use ($request) {
+        $value = $request->query($key);
+        return $value !== null && $value !== '' && is_numeric($value);
+    });
+
+    $warp = $hasWarp ? [
+        'tl' => ['x' => (int) $request->query('tlx'), 'y' => (int) $request->query('tly')],
+        'tr' => ['x' => (int) $request->query('trx'), 'y' => (int) $request->query('try')],
+        'br' => ['x' => (int) $request->query('brx'), 'y' => (int) $request->query('bry')],
+        'bl' => ['x' => (int) $request->query('blx'), 'y' => (int) $request->query('bly')],
+    ] : null;
+
+    if ($debug) {
+        $baseImg = new \Imagick($basePath);
+        $maskImg = new \Imagick($maskPath);
+
+        $tmp = clone $maskImg;
+        $tmp->trimImage(0);
+        $page = $tmp->getImagePage();
+
+        $maskBounds = [
+            'x' => max(0, (int) ($page['x'] ?? 0)),
+            'y' => max(0, (int) ($page['y'] ?? 0)),
+            'w' => max(1, $tmp->getImageWidth()),
+            'h' => max(1, $tmp->getImageHeight()),
+        ];
+
+        $tmp->clear();
+        $tmp->destroy();
+        $maskImg->clear();
+        $maskImg->destroy();
+
+        $baseSize = [
+            'w' => $baseImg->getImageWidth(),
+            'h' => $baseImg->getImageHeight(),
+        ];
+
+        $baseImg->clear();
+        $baseImg->destroy();
+
+        return response()->json([
+            'ok' => true,
+            'side' => $side,
+            'render_mode' => $renderMode,
+            'design' => $designFile,
+            'paths' => [
+                'base' => $basePath,
+                'mask' => $maskPath,
+                'shadow' => file_exists($shadowPath) ? $shadowPath : null,
+                'highlight' => file_exists($highlightPath) ? $highlightPath : null,
+                'displacement' => file_exists($displacementPath) ? $displacementPath : null,
+                'design' => $designPath,
+            ],
+            'base_size' => $baseSize,
+            'mask_bounds' => $maskBounds,
+            'warp' => $warp,
+            'hex' => $hex,
+            'design_scale' => $designScale,
+            'texture_strength' => $textureStrength,
+            'highlight_strength' => $highlightStrength,
+            'highlight_pass_opacity' => $highlightPassOpacity,
+            'shadow_strength' => $shadowStrength,
+            'design_opacity' => $designOpacity,
+            'design_softness' => $designSoftness,
+            'displace_x' => $displaceX,
+            'displace_y' => $displaceY,
+            'displace_blur' => $displaceBlur,
+            'displace_emboss' => $displaceEmboss,
+            'displace_contrast' => $displaceContrast,
+            'max_dim' => $maxDim,
+            'skip_mask_clip' => $skipMaskClip,
+        ]);
+    }
+
+    $binary = $renderer->render([
+        'base_path'              => $basePath,
+        'shirt_mask_path'        => $maskPath,
+        'shirt_shadow_path'      => file_exists($shadowPath) ? $shadowPath : null,
+        'shirt_highlight_path'   => file_exists($highlightPath) ? $highlightPath : null,
+        'displacement_map_path'  => file_exists($displacementPath) ? $displacementPath : null,
+        'design_path'            => $designPath,
+        'warp_points'            => $warp,
+        'hex'                    => $hex,
+        'max_dim'                => $maxDim,
+        'skip_mask_clip'         => $skipMaskClip,
+        'render_mode'            => $renderMode,
+        'design_scale'           => $designScale,
+        'texture_strength'       => $textureStrength,
+        'highlight_strength'     => $highlightStrength,
+        'highlight_pass_opacity' => $highlightPassOpacity,
+        'shadow_strength'        => $shadowStrength,
+        'design_opacity'         => $designOpacity,
+        'design_softness'        => $designSoftness,
+        'displace_x'             => $displaceX,
+        'displace_y'             => $displaceY,
+        'displace_blur'          => $displaceBlur,
+        'displace_emboss'        => $displaceEmboss,
+        'displace_contrast'      => $displaceContrast,
+        'place_x_ratio' => $placeXRatio,
+        'place_y_ratio' => $placeYRatio,
+        'place_w_ratio' => $placeWRatio,
+        'place_h_ratio' => $placeHRatio,
+        'place_fit'     => $placeFit,
+    ]);
+
+    if ($save) {
+        $dir = storage_path('app/debug');
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $safeDesign = preg_replace('/[^a-zA-Z0-9._-]/', '_', $designFile);
+        file_put_contents(
+            $dir . "/mockup_assets_{$side}_{$renderMode}_{$safeDesign}.png",
+            $binary
+        );
+    }
+
+    return response($binary, 200, [
+        'Content-Type' => 'image/png',
+    ]);
+});
 // ===== Helper Functions =====
 
 function collectUrlOverrides(Request $request): array
