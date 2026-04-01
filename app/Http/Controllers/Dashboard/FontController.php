@@ -42,7 +42,7 @@ class FontController extends Controller
             'name' => ['required', 'string', 'max:255',],
             'font_styles' => ['required', 'array'],
             'font_styles.*.name' => ['required', 'string', 'max:255'],
-            'font_styles.*.style_value' => ['required', 'boolean'],
+//            'font_styles.*.style_value' => ['required', 'boolean'],
             'font_styles.*.file' => [
                 'required',
                 'file',
@@ -70,7 +70,7 @@ class FontController extends Controller
             'font_styles' => ['required', 'array'],
             'font_styles.*.id' => ['sometimes', 'integer', 'exists:font_styles,id'],
             'font_styles.*.name' => ['required', 'string', 'max:255'],
-            'font_styles.*.style_value' => ['required',  'boolean'],
+//            'font_styles.*.style_value' => ['required',  'boolean'],
             'font_styles.*.file' => ['required_without:font_styles.*.id', 'file',
                 new ValidFontFile(),
                 'max:10240',
