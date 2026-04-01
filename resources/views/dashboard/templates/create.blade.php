@@ -11,7 +11,9 @@
 @endsection
 @php
 $category = \App\Models\Category::find(request('category_id'));
+$HasMockupCategory = \App\Models\Category::find(request('category_id'));
 @endphp
+
 @section('content')
     <section id="multiple-column-form ">
         <div class="row ">
@@ -144,7 +146,7 @@ $category = \App\Models\Category::find(request('category_id'));
                                                                value="{{ $type->value }}"
                                                                data-type-name="{{ strtolower($type->value->name) }}"
                                                             @checked(
-   request('category_id') ==134 ? $type->value === \App\Enums\Template\TypeEnum::FRONT
+   $HasMockupCategory->has_mockup == false ? $type->value === \App\Enums\Template\TypeEnum::FRONT
            || $type->value === \App\Enums\Template\TypeEnum::BACK :$type->value === \App\Enums\Template\TypeEnum::FRONT
        )
                                                         >
@@ -217,9 +219,7 @@ $category = \App\Models\Category::find(request('category_id'));
 
                                                 </div>
                                             @endif
-                                                @php
-                                                    $HasMockupCategory = \App\Models\Category::find(request('category_id'));
-                                                @endphp
+
                                                 @if($HasMockupCategory && !$HasMockupCategory->has_mockup)
                                             <!-- MODEL  -->
                                             <div class="form-group mb-2 col-md-6 d-none" id="dz-model">
