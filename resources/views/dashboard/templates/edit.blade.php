@@ -1060,6 +1060,31 @@
             headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
             addRemoveLinks: true,
             init: function () {
+                this.on("addedfile", function (file) {
+                    const reader = new FileReader();
+                    const dz = this;
+
+                    reader.onload = function (e) {
+                        const img = new Image();
+                        img.onload = function () {
+                            if (img.width < 1000 || img.height < 1000) {
+                                dz.removeFile(file);
+                                Toastify({
+                                    text: `Image must be at least 1000×1000px. Your image is ${img.width}×${img.height}px.`,
+                                    duration: 3000,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "#EA5455",
+                                    close: true,
+                                }).showToast();
+                            }
+                        };
+                        img.src = e.target.result;
+                    };
+
+                    reader.readAsDataURL(file);
+                });
+
                 let dz = this;
                 @if(!empty($media = $model->getFirstMedia('templates')) && $model->types->contains(\App\Enums\Template\TypeEnum::FRONT->value))
                 let modelMockFile = {
@@ -1106,6 +1131,31 @@
             headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
             addRemoveLinks: true,
             init: function () {
+                this.on("addedfile", function (file) {
+                    const reader = new FileReader();
+                    const dz = this;
+
+                    reader.onload = function (e) {
+                        const img = new Image();
+                        img.onload = function () {
+                            if (img.width < 1000 || img.height < 1000) {
+                                dz.removeFile(file);
+                                Toastify({
+                                    text: `Image must be at least 1000×1000px. Your image is ${img.width}×${img.height}px.`,
+                                    duration: 3000,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "#EA5455",
+                                    close: true,
+                                }).showToast();
+                            }
+                        };
+                        img.src = e.target.result;
+                    };
+
+                    reader.readAsDataURL(file);
+                });
+
                 let dz = this;
                 @if(!empty($media = $model->getFirstMedia('back_templates')))
                 let modelMockFile = {
@@ -1151,6 +1201,31 @@
             headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
             addRemoveLinks: true,
             init: function () {
+                this.on("addedfile", function (file) {
+                    const reader = new FileReader();
+                    const dz = this;
+
+                    reader.onload = function (e) {
+                        const img = new Image();
+                        img.onload = function () {
+                            if (img.width < 1000 || img.height < 1000) {
+                                dz.removeFile(file);
+                                Toastify({
+                                    text: `Image must be at least 1000×1000px. Your image is ${img.width}×${img.height}px.`,
+                                    duration: 3000,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "#EA5455",
+                                    close: true,
+                                }).showToast();
+                            }
+                        };
+                        img.src = e.target.result;
+                    };
+
+                    reader.readAsDataURL(file);
+                });
+                
                 let dz = this;
                 @if(!empty($media = $model->getFirstMedia('templates')) && $model->types->contains(\App\Enums\Template\TypeEnum::NONE->value))
                 let modelMockFile = {

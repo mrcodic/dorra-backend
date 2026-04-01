@@ -1574,7 +1574,7 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
             url: "{{ route('media.store') }}",
             paramName: "file",
             maxFiles: 1,
-            maxFilesize: 30, // MB
+            maxFilesize: 30,
             acceptedFiles: "image/png,image/jpeg,image/webp",
             headers: {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}"
@@ -1582,6 +1582,32 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
             addRemoveLinks: true,
             dictDefaultMessage: "Drop image here or click to upload",
             init: function () {
+
+                this.on("addedfile", function (file) {
+                    const reader = new FileReader();
+                    const dz = this;
+
+                    reader.onload = function (e) {
+                        const img = new Image();
+                        img.onload = function () {
+                            if (img.width < 1000 || img.height < 1000) {
+                                dz.removeFile(file);
+                                Toastify({
+                                    text: `Image must be at least 1000×1000px. Your image is ${img.width}×${img.height}px.`,
+                                    duration: 3000,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "#EA5455",
+                                    close: true,
+                                }).showToast();
+                            }
+                        };
+                        img.src = e.target.result;
+                    };
+
+                    reader.readAsDataURL(file);
+                });
+
                 this.on("success", function (file, response) {
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
@@ -1614,6 +1640,31 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
             addRemoveLinks: true,
             dictDefaultMessage: "Drop image here or click to upload",
             init: function () {
+                this.on("addedfile", function (file) {
+                    const reader = new FileReader();
+                    const dz = this;
+
+                    reader.onload = function (e) {
+                        const img = new Image();
+                        img.onload = function () {
+                            if (img.width < 1000 || img.height < 1000) {
+                                dz.removeFile(file);
+                                Toastify({
+                                    text: `Image must be at least 1000×1000px. Your image is ${img.width}×${img.height}px.`,
+                                    duration: 3000,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "#EA5455",
+                                    close: true,
+                                }).showToast();
+                            }
+                        };
+                        img.src = e.target.result;
+                    };
+
+                    reader.readAsDataURL(file);
+                });
+
                 this.on("success", function (file, response) {
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
@@ -1646,6 +1697,31 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
             addRemoveLinks: true,
             dictDefaultMessage: "Drop image here or click to upload",
             init: function () {
+                this.on("addedfile", function (file) {
+                    const reader = new FileReader();
+                    const dz = this;
+
+                    reader.onload = function (e) {
+                        const img = new Image();
+                        img.onload = function () {
+                            if (img.width < 1000 || img.height < 1000) {
+                                dz.removeFile(file);
+                                Toastify({
+                                    text: `Image must be at least 1000×1000px. Your image is ${img.width}×${img.height}px.`,
+                                    duration: 3000,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "#EA5455",
+                                    close: true,
+                                }).showToast();
+                            }
+                        };
+                        img.src = e.target.result;
+                    };
+
+                    reader.readAsDataURL(file);
+                });
+
                 this.on("success", function (file, response) {
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
