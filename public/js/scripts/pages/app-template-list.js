@@ -1,4 +1,3 @@
-
 $.ajaxSetup({
     headers: {
         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
@@ -76,13 +75,14 @@ function fetchTemplates(page = 1) {
         error: xhr => console.error('Failed to fetch templates:', xhr)
     });
 }
+
 /* 3-A  — page-size selector */
 $('.filter-paginate-number').on('change', () => fetchTemplates(1));
 
 /* 3-B  — delegate clicks on the (new) paginator links */
 $(document).on('click', '#pagination-container a.page-link', function (e) {
     e.preventDefault();
-    const url  = new URL($(this).attr('href'), location.origin);
+    const url = new URL($(this).attr('href'), location.origin);
     const page = url.searchParams.get('page') || 1;
     fetchTemplates(page);
 });
@@ -152,9 +152,8 @@ $(document).on("click", ".open-delete-template-modal", function () {
     const templateId = $(this).data("id");
     console.log(templateId)
     $('#deleteTemplateForm input[name="id"]').val(templateId);
-    $("#deleteTemplateForm").attr('action',`product-templates/${templateId}`);
+    $("#deleteTemplateForm").attr('action', `product-templates/${templateId}`);
 });
-
 
 
 function removeTemplateCards(ids) {
@@ -228,4 +227,39 @@ $(document).on("submit", "#bulk-delete-form", function (e) {
 });
 
 
+
+    document.querySelectorAll('.open-delete-template-modal').forEach(button => {
+    button.addEventListener('click', function () {
+        const action = this.dataset.action;
+        const products = this.dataset.products;
+        const categories = this.dataset.categories;
+
+        // Set form action dynamically
+        document.getElementById('deleteTemplateForm').setAttribute('action', action);
+
+        // Populate Products
+        const productsWrap = document.getElementById('deleteModalProducts');
+        const productsList = document.getElementById('deleteModalProductsList');
+        if (products && products.trim() !== '') {
+            productsList.innerHTML = products.split(', ')
+                .map(p => `<span class="badge bg-primary">${p}</span>`)
+                .join('');
+            productsWrap.classList.remove('d-none');
+        } else {
+            productsWrap.classList.add('d-none');
+        }
+
+        // Populate Categories
+        const categoriesWrap = document.getElementById('deleteModalCategories');
+        const categoriesList = document.getElementById('deleteModalCategoriesList');
+        if (categories && categories.trim() !== '') {
+            categoriesList.innerHTML = categories.split(', ')
+                .map(c => `<span class="badge bg-secondary">${c}</span>`)
+                .join('');
+            categoriesWrap.classList.remove('d-none');
+        } else {
+            categoriesWrap.classList.add('d-none');
+        }
+    });
+});
 

@@ -12,31 +12,15 @@
                 <div class="modal-body pt-0">
                     <h6 class="mb-2 fw-bold fs-4 text-black">{{ $confirmText ?? 'Are you sure you want to delete this item?' }}</h6>
                     <p class="mb-2 text-dark fs-4">{{ $subText ?? 'Deleting this will remove all associated data.' }}</p>
+                    <div id="deleteModalProducts" class="mb-2 d-none">
+                        <span class="fw-bold text-dark fs-5">Products:</span>
+                        <div id="deleteModalProductsList" class="d-flex flex-wrap gap-1 mt-1"></div>
+                    </div>
 
-                    {{-- Products List --}}
-                    @if(!empty($model) && $model->relationLoaded('products') && $model->products->isNotEmpty())
-                        <div class="mb-2">
-                            <span class="fw-bold text-dark fs-5">Categories:</span>
-                            <div class="d-flex flex-wrap gap-1 mt-1">
-                                @foreach($model->products->pluck('name') as $productName)
-                                    <span class="badge bg-primary">{{ $productName }}</span>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-
-                    {{-- Categories List --}}
-                    @if(!empty($model) && $model->relationLoaded('categories') && $model->categories->isNotEmpty())
-                        <div class="mb-2">
-                            <span class="fw-bold text-dark fs-5">Products:</span>
-                            <div class="d-flex flex-wrap gap-1 mt-1">
-                                @foreach($model->categories->pluck('name') as $categoryName)
-                                    <span class="badge bg-secondary">{{ $categoryName }}</span>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-
+                    <div id="deleteModalCategories" class="mb-2 d-none">
+                        <span class="fw-bold text-dark fs-5">Categories:</span>
+                        <div id="deleteModalCategoriesList" class="d-flex flex-wrap gap-1 mt-1"></div>
+                    </div>
                     <div class="d-flex align-items-center p-1 shadow rounded-3">
                         <img src="{{ asset('images/deleteIcon.svg') }}" alt="Warning" width="32" height="32" class="mx-2" />
                         <div class="fs-16 text-black">This act can't be undone.</div>
