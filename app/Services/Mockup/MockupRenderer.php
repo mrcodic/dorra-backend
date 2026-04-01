@@ -9,10 +9,12 @@ class MockupRenderer
 {
     public function render(array $options): string
     {
-        $basePath     = $options['base_path'] ?? null;
-        $maskPath     = $options['shirt_mask_path'] ?? ($options['shirt_path'] ?? null);
-        $shadowPath   = $options['shirt_shadow_path'] ?? ($options['shadow_path'] ?? null);
-        $designPath   = $options['design_path'] ?? null;
+        $basePath         = $options['base_path'] ?? null;
+        $maskPath         = $options['shirt_mask_path'] ?? ($options['shirt_path'] ?? null);
+        $shadowPath       = $options['shirt_shadow_path'] ?? ($options['shadow_path'] ?? null);
+        $highlightPath    = $options['shirt_highlight_path'] ?? ($options['highlight_path'] ?? null);
+        $displacementPath = $options['displacement_map_path'] ?? null;
+        $designPath       = $options['design_path'] ?? null;
 
         $hex          = $this->normalizeHex($options['hex'] ?? null);
         $maxDim       = (int) ($options['max_dim'] ?? 1600);
@@ -27,29 +29,31 @@ class MockupRenderer
         $designScale  = (float) ($options['design_scale'] ?? 0.95);
         $designScale  = max(0.05, min(4.0, $designScale));
 
-        $textureStrength   = (float) ($options['texture_strength'] ?? 0.28);
-        $highlightStrength = (float) ($options['highlight_strength'] ?? 0.06);
-        $shadowStrength    = (float) ($options['shadow_strength'] ?? 1.03);
-        $designOpacity     = (float) ($options['design_opacity'] ?? 0.96);
-        $designSoftness    = (float) ($options['design_softness'] ?? 0.16);
+        $textureStrength      = (float) ($options['texture_strength'] ?? 0.0);
+        $highlightStrength    = (float) ($options['highlight_strength'] ?? 0.0);
+        $shadowStrength       = (float) ($options['shadow_strength'] ?? 0.45);
+        $designOpacity        = (float) ($options['design_opacity'] ?? 1.0);
+        $designSoftness       = (float) ($options['design_softness'] ?? 0.03);
+        $highlightPassOpacity = (float) ($options['highlight_pass_opacity'] ?? 0.0);
 
-        $textureStrength   = max(0.0, min(1.0, $textureStrength));
-        $highlightStrength = max(0.0, min(1.0, $highlightStrength));
-        $shadowStrength    = max(0.0, min(2.0, $shadowStrength));
-        $designOpacity     = max(0.0, min(1.0, $designOpacity));
-        $designSoftness    = max(0.0, min(2.0, $designSoftness));
+        $textureStrength      = max(0.0, min(1.0, $textureStrength));
+        $highlightStrength    = max(0.0, min(1.0, $highlightStrength));
+        $shadowStrength       = max(0.0, min(2.0, $shadowStrength));
+        $designOpacity        = max(0.0, min(1.0, $designOpacity));
+        $designSoftness       = max(0.0, min(2.0, $designSoftness));
+        $highlightPassOpacity = max(0.0, min(1.0, $highlightPassOpacity));
 
-        $displaceX         = (float) ($options['displace_x'] ?? 1.0);
-        $displaceY         = (float) ($options['displace_y'] ?? 1.8);
-        $displaceBlur      = (float) ($options['displace_blur'] ?? 1.9);
-        $displaceEmboss    = (float) ($options['displace_emboss'] ?? 0.28);
-        $displaceContrast  = (float) ($options['displace_contrast'] ?? 3.5);
+        $displaceX        = (float) ($options['displace_x'] ?? 0.0);
+        $displaceY        = (float) ($options['displace_y'] ?? 0.0);
+        $displaceBlur     = (float) ($options['displace_blur'] ?? 1.9);
+        $displaceEmboss   = (float) ($options['displace_emboss'] ?? 0.28);
+        $displaceContrast = (float) ($options['displace_contrast'] ?? 3.5);
 
-        $displaceX         = max(0.0, min(40.0, $displaceX));
-        $displaceY         = max(0.0, min(40.0, $displaceY));
-        $displaceBlur      = max(0.0, min(10.0, $displaceBlur));
-        $displaceEmboss    = max(0.1, min(10.0, $displaceEmboss));
-        $displaceContrast  = max(0.0, min(100.0, $displaceContrast));
+        $displaceX        = max(0.0, min(40.0, $displaceX));
+        $displaceY        = max(0.0, min(40.0, $displaceY));
+        $displaceBlur     = max(0.0, min(10.0, $displaceBlur));
+        $displaceEmboss   = max(0.1, min(10.0, $displaceEmboss));
+        $displaceContrast = max(0.0, min(100.0, $displaceContrast));
 
         if (!$basePath || !file_exists($basePath)) {
             throw new \InvalidArgumentException("Base image not found: {$basePath}");
@@ -63,6 +67,14 @@ class MockupRenderer
             $shadowPath = null;
         }
 
+        if ($highlightPath && !file_exists($highlightPath)) {
+            $highlightPath = null;
+        }
+
+        if ($displacementPath && !file_exists($displacementPath)) {
+            $displacementPath = null;
+        }
+
         if ($designPath && !file_exists($designPath)) {
             throw new \InvalidArgumentException("Design image not found: {$designPath}");
         }
@@ -73,10 +85,11 @@ class MockupRenderer
         $w = $canvas->getImageWidth();
         $h = $canvas->getImageHeight();
 
-        $mask   = $this->load($maskPath, $w, $h);
-        $shadow = $shadowPath ? $this->load($shadowPath, $w, $h) : null;
+        $mask         = $this->load($maskPath, $w, $h);
+        $shadow       = $shadowPath ? $this->load($shadowPath, $w, $h) : null;
+        $highlight    = $highlightPath ? $this->load($highlightPath, $w, $h) : null;
+        $externalDisp = $displacementPath ? $this->load($displacementPath, $w, $h) : null;
 
-        // recolor product while preserving selected hue
         if ($hex) {
             $tintedBase = $this->buildTintedProductPreserveHue($sourceBase, $mask, $hex);
             $canvas->compositeImage($tintedBase, Imagick::COMPOSITE_DEFAULT, 0, 0);
@@ -94,7 +107,12 @@ class MockupRenderer
 
             $design = $this->load($designPath);
 
-            $fitted = $this->fitContain($design, $srcW, $srcH);
+            $place = $this->resolvePlacementRect($srcW, $srcH, $renderMode, $options);
+
+            $fitted = $place['fit'] === 'cover'
+                ? $this->fitCover($design, $place['w'], $place['h'])
+                : $this->fitContain($design, $place['w'], $place['h']);
+
             $design->clear();
             $design->destroy();
             $design = $fitted;
@@ -110,8 +128,8 @@ class MockupRenderer
             $plate->newImage($srcW, $srcH, new ImagickPixel('transparent'), 'png');
             $plate->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
 
-            $localX = (int) round(($srcW - $design->getImageWidth()) / 2);
-            $localY = (int) round(($srcH - $design->getImageHeight()) / 2);
+            $localX = $place['x'] + (int) round(($place['w'] - $design->getImageWidth()) / 2);
+            $localY = $place['y'] + (int) round(($place['h'] - $design->getImageHeight()) / 2);
 
             $plate->compositeImage($design, Imagick::COMPOSITE_DEFAULT, $localX, $localY);
 
@@ -124,10 +142,10 @@ class MockupRenderer
                 $warped->compositeImage($plate, Imagick::COMPOSITE_DEFAULT, 0, 0);
 
                 $points = [
-                    0,     0,      $warp['tl']['x'] ?? $warp['tl'][0], $warp['tl']['y'] ?? $warp['tl'][1],
-                    $srcW,  0,      $warp['tr']['x'] ?? $warp['tr'][0], $warp['tr']['y'] ?? $warp['tr'][1],
-                    $srcW,  $srcH,  $warp['br']['x'] ?? $warp['br'][0], $warp['br']['y'] ?? $warp['br'][1],
-                    0,      $srcH,  $warp['bl']['x'] ?? $warp['bl'][0], $warp['bl']['y'] ?? $warp['bl'][1],
+                    0,     0,     $warp['tl']['x'] ?? $warp['tl'][0], $warp['tl']['y'] ?? $warp['tl'][1],
+                    $srcW,  0,     $warp['tr']['x'] ?? $warp['tr'][0], $warp['tr']['y'] ?? $warp['tr'][1],
+                    $srcW,  $srcH, $warp['br']['x'] ?? $warp['br'][0], $warp['br']['y'] ?? $warp['br'][1],
+                    0,      $srcH, $warp['bl']['x'] ?? $warp['bl'][0], $warp['bl']['y'] ?? $warp['bl'][1],
                 ];
 
                 $warped->distortImage(Imagick::DISTORTION_PERSPECTIVE, $points, false);
@@ -151,13 +169,15 @@ class MockupRenderer
             }
 
             if ($displaceX > 0 || $displaceY > 0) {
-                $displaceMap = $this->buildDisplacementMap(
-                    $canvas,
-                    $mask,
-                    $displaceBlur,
-                    $displaceEmboss,
-                    $displaceContrast
-                );
+                $displaceMap = $externalDisp
+                    ? clone $externalDisp
+                    : $this->buildDisplacementMap(
+                        $canvas,
+                        $mask,
+                        $displaceBlur,
+                        $displaceEmboss,
+                        $displaceContrast
+                    );
 
                 $displaced = $this->applyDisplacementMap(
                     $warped,
@@ -222,6 +242,26 @@ class MockupRenderer
 
             $shadow->clear();
             $shadow->destroy();
+        }
+
+        if ($highlight && $highlightPassOpacity > 0) {
+            $highlightBlend = clone $highlight;
+            $this->multiplyAlpha($highlightBlend, $highlightPassOpacity);
+            $canvas->compositeImage($highlightBlend, Imagick::COMPOSITE_SCREEN, 0, 0);
+
+            $highlightBlend->clear();
+            $highlightBlend->destroy();
+
+            $highlight->clear();
+            $highlight->destroy();
+        } elseif ($highlight) {
+            $highlight->clear();
+            $highlight->destroy();
+        }
+
+        if ($externalDisp) {
+            $externalDisp->clear();
+            $externalDisp->destroy();
         }
 
         if ($maxDim > 0) {
@@ -437,20 +477,24 @@ class MockupRenderer
     ): Imagick {
         $result = clone $warped;
 
-        $darkTransfer = $this->buildDarkTransferMap($shirt, $warped, $textureStrength);
-        $result->compositeImage($darkTransfer, Imagick::COMPOSITE_MULTIPLY, 0, 0);
-        $darkTransfer->clear();
-        $darkTransfer->destroy();
+        if ($textureStrength > 0) {
+            $darkTransfer = $this->buildDarkTransferMap($shirt, $warped, $textureStrength);
+            $result->compositeImage($darkTransfer, Imagick::COMPOSITE_MULTIPLY, 0, 0);
+            $darkTransfer->clear();
+            $darkTransfer->destroy();
 
-        $textureMap = $this->buildTextureSoftlightMap($shirt, $warped, $textureStrength);
-        $result->compositeImage($textureMap, Imagick::COMPOSITE_SOFTLIGHT, 0, 0);
-        $textureMap->clear();
-        $textureMap->destroy();
+            $textureMap = $this->buildTextureSoftlightMap($shirt, $warped, $textureStrength);
+            $result->compositeImage($textureMap, Imagick::COMPOSITE_SOFTLIGHT, 0, 0);
+            $textureMap->clear();
+            $textureMap->destroy();
+        }
 
-        $highlightMap = $this->buildHighlightTransferMap($shirt, $warped, $highlightStrength);
-        $result->compositeImage($highlightMap, Imagick::COMPOSITE_SCREEN, 0, 0);
-        $highlightMap->clear();
-        $highlightMap->destroy();
+        if ($highlightStrength > 0) {
+            $highlightMap = $this->buildHighlightTransferMap($shirt, $warped, $highlightStrength);
+            $result->compositeImage($highlightMap, Imagick::COMPOSITE_SCREEN, 0, 0);
+            $highlightMap->clear();
+            $highlightMap->destroy();
+        }
 
         return $result;
     }
@@ -466,42 +510,46 @@ class MockupRenderer
         $alpha = clone $warped;
         $alpha->separateImageChannel(Imagick::CHANNEL_ALPHA);
 
-        $darkMap = clone $shirt;
-        $darkMap->modulateImage(100, 0, 100);
-        $darkMap->gaussianBlurImage(0, 1.2);
-        $darkMap->brightnessContrastImage(-10, 18);
-        $darkMap->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
-        $darkMap->compositeImage($alpha, Imagick::COMPOSITE_COPYOPACITY, 0, 0);
-        $this->multiplyAlpha($darkMap, 0.08 + (0.10 * $textureStrength));
-        $result->compositeImage($darkMap, Imagick::COMPOSITE_MULTIPLY, 0, 0);
+        if ($textureStrength > 0) {
+            $darkMap = clone $shirt;
+            $darkMap->modulateImage(100, 0, 100);
+            $darkMap->gaussianBlurImage(0, 1.2);
+            $darkMap->brightnessContrastImage(-10, 18);
+            $darkMap->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
+            $darkMap->compositeImage($alpha, Imagick::COMPOSITE_COPYOPACITY, 0, 0);
+            $this->multiplyAlpha($darkMap, 0.08 + (0.10 * $textureStrength));
+            $result->compositeImage($darkMap, Imagick::COMPOSITE_MULTIPLY, 0, 0);
 
-        $textureMap = clone $shirt;
-        $textureMap->modulateImage(100, 0, 100);
-        $textureMap->gaussianBlurImage(0, 0.9);
-        $textureMap->brightnessContrastImage(0, 8);
-        $textureMap->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
-        $textureMap->compositeImage($alpha, Imagick::COMPOSITE_COPYOPACITY, 0, 0);
-        $this->multiplyAlpha($textureMap, 0.04 + (0.06 * $textureStrength));
-        $result->compositeImage($textureMap, Imagick::COMPOSITE_SOFTLIGHT, 0, 0);
+            $textureMap = clone $shirt;
+            $textureMap->modulateImage(100, 0, 100);
+            $textureMap->gaussianBlurImage(0, 0.9);
+            $textureMap->brightnessContrastImage(0, 8);
+            $textureMap->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
+            $textureMap->compositeImage($alpha, Imagick::COMPOSITE_COPYOPACITY, 0, 0);
+            $this->multiplyAlpha($textureMap, 0.04 + (0.06 * $textureStrength));
+            $result->compositeImage($textureMap, Imagick::COMPOSITE_SOFTLIGHT, 0, 0);
 
-        $lightMap = clone $shirt;
-        $lightMap->modulateImage(100, 0, 100);
-        $lightMap->gaussianBlurImage(0, 1.4);
-        $lightMap->brightnessContrastImage(8, 14);
-        $lightMap->gammaImage(0.95);
-        $lightMap->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
-        $lightMap->compositeImage($alpha, Imagick::COMPOSITE_COPYOPACITY, 0, 0);
-        $this->multiplyAlpha($lightMap, 0.03 + (0.06 * $highlightStrength));
-        $result->compositeImage($lightMap, Imagick::COMPOSITE_SCREEN, 0, 0);
+            $darkMap->clear();
+            $darkMap->destroy();
 
-        $darkMap->clear();
-        $darkMap->destroy();
+            $textureMap->clear();
+            $textureMap->destroy();
+        }
 
-        $textureMap->clear();
-        $textureMap->destroy();
+        if ($highlightStrength > 0) {
+            $lightMap = clone $shirt;
+            $lightMap->modulateImage(100, 0, 100);
+            $lightMap->gaussianBlurImage(0, 1.4);
+            $lightMap->brightnessContrastImage(8, 14);
+            $lightMap->gammaImage(0.95);
+            $lightMap->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
+            $lightMap->compositeImage($alpha, Imagick::COMPOSITE_COPYOPACITY, 0, 0);
+            $this->multiplyAlpha($lightMap, 0.03 + (0.06 * $highlightStrength));
+            $result->compositeImage($lightMap, Imagick::COMPOSITE_SCREEN, 0, 0);
 
-        $lightMap->clear();
-        $lightMap->destroy();
+            $lightMap->clear();
+            $lightMap->destroy();
+        }
 
         $alpha->clear();
         $alpha->destroy();
@@ -588,5 +636,76 @@ class MockupRenderer
         }
 
         return '#' . strtolower($hex);
+    }
+
+    private function resolvePlacementRect(int $srcW, int $srcH, string $renderMode, array $options): array
+    {
+        $defaults = [
+            'logo' => [
+                'x_ratio' => 0.18,
+                'y_ratio' => 0.18,
+                'w_ratio' => 0.64,
+                'h_ratio' => 0.22,
+                'fit'     => 'contain',
+            ],
+            'full_art' => [
+                'x_ratio' => 0.10,
+                'y_ratio' => 0.06,
+                'w_ratio' => 0.80,
+                'h_ratio' => 0.86,
+                'fit'     => 'cover',
+            ],
+        ];
+
+        $cfg = $defaults[$renderMode] ?? $defaults['logo'];
+
+        $xRatio = isset($options['place_x_ratio']) ? (float) $options['place_x_ratio'] : $cfg['x_ratio'];
+        $yRatio = isset($options['place_y_ratio']) ? (float) $options['place_y_ratio'] : $cfg['y_ratio'];
+        $wRatio = isset($options['place_w_ratio']) ? (float) $options['place_w_ratio'] : $cfg['w_ratio'];
+        $hRatio = isset($options['place_h_ratio']) ? (float) $options['place_h_ratio'] : $cfg['h_ratio'];
+        $fit    = isset($options['place_fit']) ? (string) $options['place_fit'] : $cfg['fit'];
+
+        $xRatio = max(0.0, min(1.0, $xRatio));
+        $yRatio = max(0.0, min(1.0, $yRatio));
+        $wRatio = max(0.05, min(1.0, $wRatio));
+        $hRatio = max(0.05, min(1.0, $hRatio));
+
+        $x = (int) round($srcW * $xRatio);
+        $y = (int) round($srcH * $yRatio);
+        $w = max(1, (int) round($srcW * $wRatio));
+        $h = max(1, (int) round($srcH * $hRatio));
+
+        if ($x + $w > $srcW) {
+            $w = max(1, $srcW - $x);
+        }
+
+        if ($y + $h > $srcH) {
+            $h = max(1, $srcH - $y);
+        }
+
+        return compact('x', 'y', 'w', 'h', 'fit');
+    }
+
+    private function fitCover(Imagick $img, int $targetW, int $targetH): Imagick
+    {
+        $copy = clone $img;
+
+        $srcW = $copy->getImageWidth();
+        $srcH = $copy->getImageHeight();
+
+        $scale = max($targetW / max(1, $srcW), $targetH / max(1, $srcH));
+
+        $newW = max(1, (int) round($srcW * $scale));
+        $newH = max(1, (int) round($srcH * $scale));
+
+        $copy->resizeImage($newW, $newH, Imagick::FILTER_LANCZOS, 1);
+
+        $x = max(0, (int) floor(($newW - $targetW) / 2));
+        $y = max(0, (int) floor(($newH - $targetH) / 2));
+
+        $copy->cropImage($targetW, $targetH, $x, $y);
+        $copy->setImagePage(0, 0, 0, 0);
+
+        return $copy;
     }
 }

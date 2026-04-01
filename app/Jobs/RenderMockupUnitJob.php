@@ -26,56 +26,69 @@ class RenderMockupUnitJob implements ShouldQueue
 
     public function handle(): void
     {
-        $lockKey = "render_{$this->mockupId}_{$this->templateId}_{$this->side}_{$this->hex}";
-
-//        if (!Cache::lock($lockKey, 5)->get()) {
-//            return;
-//        }
-
-        $mockup = Mockup::with(['media'])->find($this->mockupId);
+        $mockup   = Mockup::with(['media'])->find($this->mockupId);
         $template = Template::find($this->templateId);
 
         if (!$mockup || !$template) return;
 
         $side = strtolower($this->side);
-        $hex = strtolower($this->hex);
+        $hex  = strtolower($this->hex);
 
         try {
             [$base, $mask, $shadow] = $this->getAssets($mockup, $side);
-            if (!$base || !$mask) return;
+
+            if (!$base || !$mask) {
+                Log::warning("Missing base or mask", ['mockup' => $this->mockupId, 'side' => $side]);
+                return;
+            }
 
             $design = $this->getDesign($template, $side);
-            if (!$design) return;
 
-            $maskBounds = $this->getMaskBounds($mask);
-            $context = $this->getContext($design, $maskBounds);
+            if (!$design) {
+                Log::warning("Missing design", [
+                    'template'  => $this->templateId,
+                    'approach'  => $template->approach,
+                    'side'      => $side,
+                ]);
+                return;
+            }
 
-            $modeResolver = app(MockupRenderModeResolver::class);
+            $modeResolver   = app(MockupRenderModeResolver::class);
             $configResolver = app(MockupRenderConfigResolver::class);
 
-            $mode = $modeResolver->resolve($context);
+            // build context the same way the debug route does
+            $maskBounds = $this->getMaskBounds($mask);
+            $context    = $this->getContext($design, $maskBounds);
+
+            $mode   = $modeResolver->resolve($context);
             $config = $configResolver->resolve($mockup, $side, $mode);
 
             $binary = (new MockupRenderer())->render([
-                'base_path' => $base->getPath(),
-                'shirt_mask_path' => $mask->getPath(),
+                'base_path'         => $base->getPath(),
+                'shirt_mask_path'   => $mask->getPath(),
                 'shirt_shadow_path' => $shadow?->getPath(),
-                'design_path' => $design->getPath(),
-                'warp_points' => $config['warp_points'],
-                'render_mode' => $config['render_mode'],
-                'max_dim' => 1600,
+                'design_path'       => $design->getPath(),   // ← was missing / null before
+                'warp_points'       => $config['warp_points'],
+                'render_mode'       => $config['render_mode'],
+                'hex'               => $hex,
+                'max_dim'           => 1600,
                 ...$config['preset'],
-                'hex' => $hex,
             ]);
 
-            if (empty($binary)) return;
+            if (empty($binary)) {
+                Log::warning("Empty binary returned", ['mockup' => $this->mockupId]);
+                return;
+            }
 
             $this->store($mockup, $template, $side, $hex, $binary);
 
         } catch (\Throwable $e) {
-            Log::error("Render failed {$this->mockupId} {$this->hex}: " . $e->getMessage());
+            Log::error("Render failed {$this->mockupId} {$this->hex}: " . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
         }
     }
+
 
     private function getAssets($mockup, $side)
     {
@@ -92,25 +105,39 @@ class RenderMockupUnitJob implements ShouldQueue
             && $m->getCustomProperty('role') === $role;
     }
 
-    private function getDesign($template, $side)
+    private function getDesign($template, string $side): ?object
     {
         $media = $side === 'back'
-            ?($template->approach == 'without_editor' ? $template->getFirstMedia('back-templates-preview') : $template->getFirstMedia('back_templates'))
-            :($template->approach == 'without_editor' ? $template->getFirstMedia('templates-preview') :$template->getFirstMedia('templates'));
+            ? ($template->approach === 'without_editor'
+                ? $template->getFirstMedia('back-templates-preview')
+                : $template->getFirstMedia('back_templates'))
+            : ($template->approach === 'without_editor'
+                ? $template->getFirstMedia('templates-preview')
+                : $template->getFirstMedia('templates'));
+
+        Log::info('getDesign', [
+            'template_id'  => $template->id,
+            'approach'     => $template->approach,
+            'side'         => $side,
+            'media_id'     => $media?->id,
+            'path'         => $media?->getPath(),
+            'path_exists'  => $media ? file_exists($media->getPath()) : false,
+        ]);
 
         return ($media && file_exists($media->getPath())) ? $media : null;
     }
-
-    private function getMaskBounds($mask)
+    private function getMaskBounds($mask): array
     {
         $img = new \Imagick($mask->getPath());
         $tmp = clone $img;
-
         $tmp->trimImage(0);
+        $page = $tmp->getImagePage();   // ← debug route uses getImagePage(), not just size
 
         $bounds = [
-            'w' => $tmp->getImageWidth(),
-            'h' => $tmp->getImageHeight(),
+            'x' => max(0, (int) ($page['x'] ?? 0)),
+            'y' => max(0, (int) ($page['y'] ?? 0)),
+            'w' => max(1, $tmp->getImageWidth()),
+            'h' => max(1, $tmp->getImageHeight()),
         ];
 
         $tmp->clear();
@@ -119,7 +146,7 @@ class RenderMockupUnitJob implements ShouldQueue
         return $bounds;
     }
 
-    private function getContext($design, $maskBounds)
+    private function getContext($design, array $maskBounds): array
     {
         $img = new \Imagick($design->getPath());
 
@@ -127,18 +154,17 @@ class RenderMockupUnitJob implements ShouldQueue
         $h = $img->getImageHeight();
 
         $ctx = [
-            'coverage_ratio' => (($w / $maskBounds['w']) + ($h / $maskBounds['h'])) / 2,
-            'placed_width_ratio' => $w / $maskBounds['w'],
-            'placed_height_ratio' => $h / $maskBounds['h'],
-            'has_alpha' => $img->getImageAlphaChannel() !== 0,
-            'mime' => $design->mime_type ?? 'image/png',
+            'coverage_ratio'       => (($w / $maskBounds['w']) + ($h / $maskBounds['h'])) / 2,
+            'placed_width_ratio'   => $w / $maskBounds['w'],
+            'placed_height_ratio'  => $h / $maskBounds['h'],
+            'has_alpha'            => $img->getImageAlphaChannel() !== 0,
+            'mime'                 => $design->mime_type ?? 'image/png',
         ];
 
         $img->clear();
 
         return $ctx;
     }
-
     private function store($mockup, $template, $side, $hex, $binary)
     {
         $safeHex = ltrim($hex, '#');
