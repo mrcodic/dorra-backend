@@ -600,7 +600,7 @@ $category = \App\Models\Category::find(request('category_id'));
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Back Side Design</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">x</button>
                     </div>
                     <div class="modal-body text-center py-4">
                         <p class="mb-4">Do you want to use the same front design for the back side, or upload a different one?</p>
@@ -644,8 +644,9 @@ $category = \App\Models\Category::find(request('category_id'));
                 // If back is unchecked, reset flag so modal shows again if re-checked
                 if (isBack && !isChecked) {
                     backModalShown = false;
-                    // Clear back hidden input
                     document.getElementById('uploadedBackTemplateImage').value = '';
+                    document.getElementById('useFrontAsBack').value = '0';
+                    $('#dz-front .label-text').text('Upload Print File (Front)');
                 }
             });
 
@@ -653,6 +654,7 @@ $category = \App\Models\Category::find(request('category_id'));
             $('#useSameDesignBtn').on('click', function () {
                 document.getElementById('useFrontAsBack').value = '1';
                 $('#dz-back').addClass('d-none');
+                $('#dz-front .label-text').text('Upload Print File (Front, Back)');
                 document.getElementById('uploadedBackTemplateImage').value = '';
 
                 bootstrap.Modal.getInstance(document.getElementById('backDesignModal')).hide();

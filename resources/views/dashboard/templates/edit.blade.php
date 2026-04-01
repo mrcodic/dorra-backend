@@ -26,6 +26,7 @@
                             @method("PUT")
                             <div class="flex-grow-1">
                                 <div class="">
+                                    <input type="hidden" name="use_front_as_back" id="useFrontAsBack" value="{{ $model->use_front_as_back }}">
 
                                     @php
                                         $colors = collect($model->colors) ?? collect();
@@ -677,6 +678,31 @@
         // لو route محتاج parameter اسمه mockup
         $mockupEditUrlTemplate = route('mockups.edit', ['mockup' => '__MOCKUP__']);
     @endphp
+
+        <!-- Back Design Modal -->
+    <div class="modal fade" id="backDesignModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Back Side Design</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <p class="mb-4">Do you want to use the same front design for the back side, or upload a different one?</p>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <button type="button" class="btn btn-outline-primary" id="useSameDesignBtn">
+                            <i data-feather="copy" class="me-1"></i> Use Same Design
+                        </button>
+                        <button type="button" class="btn btn-primary" id="useDifferentDesignBtn">
+                            <i data-feather="upload" class="me-1"></i> Upload Different
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" name="use_front_as_back" id="useFrontAsBack" value="{{ $model->use_front_as_back ? '1' : '0' }}">
 @endsection
 
 
@@ -687,7 +713,53 @@
 
 
 @section('page-script')
+    <script !src="">
+        @if($model->approach == 'without_editor')
+        $(function () {
+            let backModalShown = false;
 
+            // If model already uses front as back, reflect that on load
+            const alreadyUsingSame = "{{ $model->use_front_as_back ? '1' : '0' }}" === '1';
+            if (alreadyUsingSame) {
+                $('#dz-back').addClass('d-none');
+                $('#dz-front .label-text').text('Upload Print File (Front, Back)');
+                backModalShown = true;
+            }
+
+            $(document).on('change', '.type-checkbox', function () {
+                const isBack = $(this).data('type-name') === 'back';
+                const isChecked = $(this).is(':checked');
+
+                if (isBack && isChecked && !backModalShown) {
+                    backModalShown = true;
+                    const modal = new bootstrap.Modal(document.getElementById('backDesignModal'));
+                    modal.show();
+                }
+
+                if (isBack && !isChecked) {
+                    backModalShown = false;
+                    document.getElementById('uploadedBackTemplateImage').value = '';
+                    document.getElementById('useFrontAsBack').value = '0';
+                    $('#dz-front .label-text').text('Upload Print File (Front)');
+                }
+            });
+
+            $('#useSameDesignBtn').on('click', function () {
+                document.getElementById('useFrontAsBack').value = '1';
+                $('#dz-back').addClass('d-none');
+                $('#dz-front .label-text').text('Upload Print File (Front, Back)');
+                document.getElementById('uploadedBackTemplateImage').value = '';
+                bootstrap.Modal.getInstance(document.getElementById('backDesignModal')).hide();
+            });
+
+            $('#useDifferentDesignBtn').on('click', function () {
+                document.getElementById('useFrontAsBack').value = '0';
+                $('#dz-front .label-text').text('Upload Print File (Front)');
+                bootstrap.Modal.getInstance(document.getElementById('backDesignModal')).hide();
+            });
+        });
+        @endif
+    </script>
     {{-- Replace the first <script> block inside @section('page-script') in your edit blade --}}
 
     <script>
