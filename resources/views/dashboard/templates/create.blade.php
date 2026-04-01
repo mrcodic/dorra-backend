@@ -146,7 +146,7 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                                                                value="{{ $type->value }}"
                                                                data-type-name="{{ strtolower($type->value->name) }}"
                                                             @checked(
-   $HasMockupCategory->has_mockup == false ? $type->value === \App\Enums\Template\TypeEnum::FRONT
+   $HasMockupCategory?->has_mockup == false ? $type->value === \App\Enums\Template\TypeEnum::FRONT
            || $type->value === \App\Enums\Template\TypeEnum::BACK :$type->value === \App\Enums\Template\TypeEnum::FRONT
        )
                                                         >
