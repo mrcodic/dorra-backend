@@ -13,12 +13,12 @@
                     <h6 class="mb-2 fw-bold fs-4 text-black">{{ $confirmText ?? 'Are you sure you want to delete this item?' }}</h6>
                     <p class="mb-2 text-dark fs-4">{{ $subText ?? 'Deleting this will remove all associated data.' }}</p>
                     <div id="deleteModalProducts" class="mb-2 d-none">
-                        <span class="fw-bold text-dark fs-5">Categories:</span>
+                        <span class="fw-bold text-dark fs-5">Attached Categories:</span>
                         <div id="deleteModalProductsList" class="d-flex flex-wrap gap-1 mt-1"></div>
                     </div>
 
                     <div id="deleteModalCategories" class="mb-2 d-none">
-                        <span class="fw-bold text-dark fs-5">Products:</span>
+                        <span class="fw-bold text-dark fs-5">Attached Products:</span>
                         <div id="deleteModalCategoriesList" class="d-flex flex-wrap gap-1 mt-1"></div>
                     </div>
                     <div class="d-flex align-items-center p-1 shadow rounded-3">
