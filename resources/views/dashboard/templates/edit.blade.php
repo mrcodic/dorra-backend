@@ -720,31 +720,30 @@
         $(function () {
             let backModalShown = false;
 
-            // If model already uses front as back, reflect that on load
             const alreadyUsingSame = "{{ $model->use_front_as_back ? '1' : '0' }}" === '1';
-            // If model already uses front as back, reflect that AFTER dropzones are initialized
             if (alreadyUsingSame) {
-                // Wait for updateTemplateTypeDropzones to finish showing the dropzones
+                backModalShown = true;
                 setTimeout(function () {
                     $('#dz-back').addClass('d-none');
                     $('#dz-front .label-text').text('Upload Print File (Front, Back)');
-                    backModalShown = true;
-                }, 100);
+                }, 150);
             }
+
+            // Use $(document).on to catch the event AFTER handleTypeChangeAndResetDZ runs
             $(document).on('change', '.type-checkbox', function () {
                 const isBack = $(this).data('type-name') === 'back';
                 const isChecked = $(this).is(':checked');
 
-                // If back is unchecked, reset flag so modal shows again if re-checked
-                if (isBack && !isChecked) {
-                    backModalShown = false;
-                    document.getElementById('uploadedBackTemplateImage').value = '';
-                    document.getElementById('useFrontAsBack').value = '0';
-                    $('#dz-front .label-text').text('Upload Print File (Front)');
+                if (isBack && isChecked && !backModalShown) {
+                    backModalShown = true;
+                    setTimeout(function () {
+                        const modal = new bootstrap.Modal(document.getElementById('backDesignModal'));
+                        modal.show();
+                    }, 50); // slight delay so dropzone renders first
                 }
 
                 if (isBack && !isChecked) {
-                    backModalShown = false;
+                    backModalShown = false; // ← reset so modal shows again on re-check
                     document.getElementById('uploadedBackTemplateImage').value = '';
                     document.getElementById('useFrontAsBack').value = '0';
                     $('#dz-front .label-text').text('Upload Print File (Front)');
@@ -757,12 +756,14 @@
                 $('#dz-front .label-text').text('Upload Print File (Front, Back)');
                 document.getElementById('uploadedBackTemplateImage').value = '';
                 bootstrap.Modal.getInstance(document.getElementById('backDesignModal')).hide();
+                // don't reset backModalShown here — stays true until back is unchecked
             });
 
             $('#useDifferentDesignBtn').on('click', function () {
                 document.getElementById('useFrontAsBack').value = '0';
                 $('#dz-front .label-text').text('Upload Print File (Front)');
                 bootstrap.Modal.getInstance(document.getElementById('backDesignModal')).hide();
+                // don't reset backModalShown here either — user made their choice
             });
         });
         @endif

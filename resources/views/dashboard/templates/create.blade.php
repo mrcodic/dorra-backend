@@ -646,6 +646,7 @@ $category = \App\Models\Category::find(request('category_id'));
                     backModalShown = false;
                     document.getElementById('uploadedBackTemplateImage').value = '';
                     document.getElementById('useFrontAsBack').value = '0';
+
                     $('#dz-front .label-text').text('Upload Print File (Front)');
                 }
             });
