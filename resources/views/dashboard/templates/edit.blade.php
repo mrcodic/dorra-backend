@@ -214,7 +214,7 @@
                                                 @endforeach
                                             </div>
                                         </div>
-                                        <div class="row">
+
 
                                             <div class="row" id="templateTypeDropzones">
                                                 <input type="hidden" name="approach" value="{{ $model->approach }}">
@@ -298,8 +298,6 @@
                                                 @endif
                                             </div>
 
-
-                                        </div>
                                         <div class="row mb-2">
                                             <div class="col-md-6">
                                                 <label for="templateNameEn" class="label-text mb-1">Name (EN)</label>
