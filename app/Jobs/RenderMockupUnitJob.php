@@ -28,9 +28,9 @@ class RenderMockupUnitJob implements ShouldQueue
     {
         $lockKey = "render_{$this->mockupId}_{$this->templateId}_{$this->side}_{$this->hex}";
 
-        if (!Cache::lock($lockKey, 5)->get()) {
-            return;
-        }
+//        if (!Cache::lock($lockKey, 5)->get()) {
+//            return;
+//        }
 
         $mockup = Mockup::with(['media'])->find($this->mockupId);
         $template = Template::find($this->templateId);
@@ -95,8 +95,8 @@ class RenderMockupUnitJob implements ShouldQueue
     private function getDesign($template, $side)
     {
         $media = $side === 'back'
-            ? $template->getFirstMedia('back_templates')
-            : $template->getFirstMedia('templates');
+            ?($template->approach == 'without_editor' ? $template->getFirstMedia('back-templates-preview') : $template->getFirstMedia('back_templates'))
+            :($template->approach == 'without_editor' ? $template->getFirstMedia('templates-preview') :$template->getFirstMedia('templates'));
 
         return ($media && file_exists($media->getPath())) ? $media : null;
     }
