@@ -237,7 +237,6 @@
                                                             Minimum dimensions: 1000 × 1000 px.
                                                         </small>
                                                     </div>
-                                                    @if($model->use_front_as_back = 0)
                                                         <!-- BACK -->
                                                         <div class="form-group mb-2 col-md-6 d-none" id="dz-back">
                                                             <label class="label-text mb-1">Upload Print File
@@ -257,7 +256,6 @@
                                                                 Minimum dimensions: 1000 × 1000 px.
                                                             </small>
                                                         </div>
-                                                    @endif
                                                     <!-- NONE -->
                                                     <div class="form-group mb-2 col-md-6 d-none" id="dz-none">
                                                         <label class="label-text mb-1">Upload Print File
@@ -724,12 +722,15 @@
 
             // If model already uses front as back, reflect that on load
             const alreadyUsingSame = "{{ $model->use_front_as_back ? '1' : '0' }}" === '1';
+            // If model already uses front as back, reflect that AFTER dropzones are initialized
             if (alreadyUsingSame) {
-                $('#dz-back').addClass('d-none');
-                $('#dz-front .label-text').text('Upload Print File (Front, Back)');
-                backModalShown = true;
+                // Wait for updateTemplateTypeDropzones to finish showing the dropzones
+                setTimeout(function () {
+                    $('#dz-back').addClass('d-none');
+                    $('#dz-front .label-text').text('Upload Print File (Front, Back)');
+                    backModalShown = true;
+                }, 100);
             }
-
             $(document).on('change', '.type-checkbox', function () {
                 const isBack = $(this).data('type-name') === 'back';
                 const isChecked = $(this).is(':checked');
@@ -974,7 +975,13 @@
                     dz.classList.remove("col-md-4", "col-md-6", "col-md-12");
                 }
             });
-
+// Re-apply "use same design" state after dropzones are toggled
+            if (document.getElementById('useFrontAsBack')?.value === '1') {
+                setTimeout(function () {
+                    $('#dz-back').addClass('d-none');
+                    $('#dz-front .label-text').text('Upload Print File (Front, Back)');
+                }, 0);
+            }
             const visibleDZ = [];
             console.log(selectedTypes.includes("front"), dzFront)
 
