@@ -374,7 +374,11 @@ class TemplateService extends BaseService
                         $model->clearMediaCollection('back_templates');
                         $model->clearMediaCollection('back-templates-preview');
                     }
-                    if ($hasBack) $model->clearMediaCollection('templates');
+                    if ($hasBack) {
+                        $model->clearMediaCollection('templates');
+                        $model->clearMediaCollection('templates-preview');
+                    }
+
                     if ($hasNone) {
                         $model->clearMediaCollection('templates');
                         $model->clearMediaCollection('templates-preview');

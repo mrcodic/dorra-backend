@@ -715,7 +715,7 @@
 
 
 @section('page-script')
-    <script !src="">
+    <script>
         @if($model->approach == 'without_editor')
         $(function () {
             let backModalShown = false;
@@ -729,22 +729,34 @@
                 }, 150);
             }
 
-            // Use $(document).on to catch the event AFTER handleTypeChangeAndResetDZ runs
             $(document).on('change', '.type-checkbox', function () {
-                const isBack = $(this).data('type-name') === 'back';
+                const isBack   = $(this).data('type-name') === 'back';
+                const isFront  = $(this).data('type-name') === 'front';
                 const isChecked = $(this).is(':checked');
 
-                if (isBack && isChecked && !backModalShown) {
+                const frontChecked = $('.type-checkbox[data-type-name="front"]').is(':checked');
+                const backChecked  = $('.type-checkbox[data-type-name="back"]').is(':checked');
+
+                // Show modal only if BOTH front and back are checked
+                if ((isBack || isFront) && isChecked && frontChecked && backChecked && !backModalShown) {
                     backModalShown = true;
                     setTimeout(function () {
                         const modal = new bootstrap.Modal(document.getElementById('backDesignModal'));
                         modal.show();
-                    }, 50); // slight delay so dropzone renders first
+                    }, 50);
                 }
 
+                // Reset when back is unchecked
                 if (isBack && !isChecked) {
-                    backModalShown = false; // ← reset so modal shows again on re-check
+                    backModalShown = false;
                     document.getElementById('uploadedBackTemplateImage').value = '';
+                    document.getElementById('useFrontAsBack').value = '0';
+                    $('#dz-front .label-text').text('Upload Print File (Front)');
+                }
+
+                // Reset when front is unchecked
+                if (isFront && !isChecked) {
+                    backModalShown = false;
                     document.getElementById('useFrontAsBack').value = '0';
                     $('#dz-front .label-text').text('Upload Print File (Front)');
                 }
@@ -756,14 +768,12 @@
                 $('#dz-front .label-text').text('Upload Print File (Front, Back)');
                 document.getElementById('uploadedBackTemplateImage').value = '';
                 bootstrap.Modal.getInstance(document.getElementById('backDesignModal')).hide();
-                // don't reset backModalShown here — stays true until back is unchecked
             });
 
             $('#useDifferentDesignBtn').on('click', function () {
                 document.getElementById('useFrontAsBack').value = '0';
                 $('#dz-front .label-text').text('Upload Print File (Front)');
                 bootstrap.Modal.getInstance(document.getElementById('backDesignModal')).hide();
-                // don't reset backModalShown here either — user made their choice
             });
         });
         @endif

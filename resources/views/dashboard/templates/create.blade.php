@@ -630,41 +630,50 @@ $category = \App\Models\Category::find(request('category_id'));
         $(function () {
             let backModalShown = false;
 
-            // Watch for "back" checkbox being checked
             $(document).on('change', '.type-checkbox', function () {
                 const isBack = $(this).data('type-name') === 'back';
+                const isFront = $(this).data('type-name') === 'front';
                 const isChecked = $(this).is(':checked');
 
-                if (isBack && isChecked && !backModalShown) {
+                const frontChecked = $('.type-checkbox[data-type-name="front"]').is(':checked');
+                const backChecked  = $('.type-checkbox[data-type-name="back"]').is(':checked');
+
+                // Show modal only if BOTH front and back are checked
+                if ((isBack || isFront) && isChecked && frontChecked && backChecked && !backModalShown) {
                     backModalShown = true;
                     const modal = new bootstrap.Modal(document.getElementById('backDesignModal'));
                     modal.show();
                 }
 
-                // If back is unchecked, reset flag so modal shows again if re-checked
+                // Reset when back is unchecked
                 if (isBack && !isChecked) {
                     backModalShown = false;
                     document.getElementById('uploadedBackTemplateImage').value = '';
                     document.getElementById('useFrontAsBack').value = '0';
+                    $('#dz-front .label-text').text('Upload Print File (Front)');
+                }
 
+                // Reset when front is unchecked
+                if (isFront && !isChecked) {
+                    backModalShown = false;
+                    document.getElementById('useFrontAsBack').value = '0';
                     $('#dz-front .label-text').text('Upload Print File (Front)');
                 }
             });
 
-            // "Use Same Design" — copy front media ID into back hidden input
             $('#useSameDesignBtn').on('click', function () {
                 document.getElementById('useFrontAsBack').value = '1';
                 $('#dz-back').addClass('d-none');
                 $('#dz-front .label-text').text('Upload Print File (Front, Back)');
                 document.getElementById('uploadedBackTemplateImage').value = '';
-
                 bootstrap.Modal.getInstance(document.getElementById('backDesignModal')).hide();
             });
-            // "Upload Different" — just close modal, let user upload normally
-                $('#useDifferentDesignBtn').on('click', function () {
-                    document.getElementById('useFrontAsBack').value = '0';
-                    bootstrap.Modal.getInstance(document.getElementById('backDesignModal')).hide();
-                });
+
+            $('#useDifferentDesignBtn').on('click', function () {
+                document.getElementById('useFrontAsBack').value = '0';
+                $('#dz-front .label-text').text('Upload Print File (Front)');
+                bootstrap.Modal.getInstance(document.getElementById('backDesignModal')).hide();
+            });
         });
         $(document).ready(function () {
             $('#categoriesSelect').trigger('change');
