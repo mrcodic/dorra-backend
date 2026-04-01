@@ -370,11 +370,16 @@ class TemplateService extends BaseService
                 $hasNone = in_array(3, $selectedTypeValues);
 
                 if (!($hasFront && $hasBack)) {
-                    if ($hasFront) $model->clearMediaCollection('back_templates');
+                    if ($hasFront) {
+                        $model->clearMediaCollection('back_templates');
+                        $model->clearMediaCollection('back-templates-preview');
+                    }
                     if ($hasBack) $model->clearMediaCollection('templates');
                     if ($hasNone) {
                         $model->clearMediaCollection('templates');
+                        $model->clearMediaCollection('templates-preview');
                         $model->clearMediaCollection('back_templates');
+                        $model->clearMediaCollection('back-templates-preview');
                     }
                 }
             }
@@ -411,7 +416,7 @@ class TemplateService extends BaseService
                     'collection_name' => 'templates',
                 ]);
                 $this->imageService->processUploaded($validatedData['template_image_front_id'] ?? $validatedData['template_image_none_id']);
-                
+
             }
 
             if (isset($validatedData['template_image_back_id'])) {
