@@ -1044,7 +1044,6 @@
     </script>
     <script>
         Dropzone.autoDiscover = false;
-        // 🔹 قائمة كل dropzones عشان نقدر نمسحها بسهولة
         const templateDropzones = {
             front: null,
             back: null,
@@ -1060,15 +1059,19 @@
             headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
             addRemoveLinks: true,
             init: function () {
+                let dz = this;
+
                 this.on("addedfile", function (file) {
+                    if (file._isMock) return;
+
                     const reader = new FileReader();
-                    const dz = this;
+                    const dzRef = this;
 
                     reader.onload = function (e) {
                         const img = new Image();
                         img.onload = function () {
                             if (img.width < 1000 || img.height < 1000) {
-                                dz.removeFile(file);
+                                dzRef.removeFile(file);
                                 Toastify({
                                     text: `Image must be at least 1000×1000px. Your image is ${img.width}×${img.height}px.`,
                                     duration: 3000,
@@ -1085,21 +1088,21 @@
                     reader.readAsDataURL(file);
                 });
 
-                let dz = this;
                 @if(!empty($media = $model->getFirstMedia('templates')) && $model->types->contains(\App\Enums\Template\TypeEnum::FRONT->value))
                 let modelMockFile = {
                     name: "{{ $media->file_name }}",
                     size: {{ $media->size ?? 12345 }},
-                    _hiddenInputId: "{{ $media->id }}"
+                    _hiddenInputId: "{{ $media->id }}",
+                    _isMock: true,
                 };
                 document.getElementById("uploadedFrontTemplateImage").value = "{{ $media->id }}";
-
 
                 dz.emit("addedfile", modelMockFile);
                 dz.emit("thumbnail", modelMockFile, "{{ $media->getUrl() }}");
                 dz.emit("complete", modelMockFile);
                 dz.files.push(modelMockFile);
                 @endif
+
                     this.on("success", function (file, response) {
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
@@ -1109,7 +1112,6 @@
 
                 this.on("removedfile", function (file) {
                     document.getElementById("uploadedFrontTemplateImage").value = "";
-
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
@@ -1131,15 +1133,19 @@
             headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
             addRemoveLinks: true,
             init: function () {
+                let dz = this;
+
                 this.on("addedfile", function (file) {
+                    if (file._isMock) return;
+
                     const reader = new FileReader();
-                    const dz = this;
+                    const dzRef = this;
 
                     reader.onload = function (e) {
                         const img = new Image();
                         img.onload = function () {
                             if (img.width < 1000 || img.height < 1000) {
-                                dz.removeFile(file);
+                                dzRef.removeFile(file);
                                 Toastify({
                                     text: `Image must be at least 1000×1000px. Your image is ${img.width}×${img.height}px.`,
                                     duration: 3000,
@@ -1156,30 +1162,30 @@
                     reader.readAsDataURL(file);
                 });
 
-                let dz = this;
                 @if(!empty($media = $model->getFirstMedia('back_templates')))
                 let modelMockFile = {
                     name: "{{ $media->file_name }}",
                     size: {{ $media->size ?? 12345 }},
-                    _hiddenInputId: "{{ $media->id }}"
+                    _hiddenInputId: "{{ $media->id }}",
+                    _isMock: true,
                 };
                 document.getElementById("uploadedBackTemplateImage").value = "{{ $media->id }}";
-
 
                 dz.emit("addedfile", modelMockFile);
                 dz.emit("thumbnail", modelMockFile, "{{ $media->getUrl() }}");
                 dz.emit("complete", modelMockFile);
                 dz.files.push(modelMockFile);
                 @endif
+
                     this.on("success", function (file, response) {
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedBackTemplateImage").value = response.data.id;
                     }
                 });
+
                 this.on("removedfile", function (file) {
                     document.getElementById("uploadedBackTemplateImage").value = "";
-
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
@@ -1201,15 +1207,19 @@
             headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
             addRemoveLinks: true,
             init: function () {
+                let dz = this;
+
                 this.on("addedfile", function (file) {
+                    if (file._isMock) return;
+
                     const reader = new FileReader();
-                    const dz = this;
+                    const dzRef = this;
 
                     reader.onload = function (e) {
                         const img = new Image();
                         img.onload = function () {
                             if (img.width < 1000 || img.height < 1000) {
-                                dz.removeFile(file);
+                                dzRef.removeFile(file);
                                 Toastify({
                                     text: `Image must be at least 1000×1000px. Your image is ${img.width}×${img.height}px.`,
                                     duration: 3000,
@@ -1225,31 +1235,31 @@
 
                     reader.readAsDataURL(file);
                 });
-                
-                let dz = this;
+
                 @if(!empty($media = $model->getFirstMedia('templates')) && $model->types->contains(\App\Enums\Template\TypeEnum::NONE->value))
                 let modelMockFile = {
                     name: "{{ $media->file_name }}",
                     size: {{ $media->size ?? 12345 }},
-                    _hiddenInputId: "{{ $media->id }}"
+                    _hiddenInputId: "{{ $media->id }}",
+                    _isMock: true,
                 };
                 document.getElementById("uploadedNoneTemplateImage").value = "{{ $media->id }}";
-
 
                 dz.emit("addedfile", modelMockFile);
                 dz.emit("thumbnail", modelMockFile, "{{ $media->getUrl() }}");
                 dz.emit("complete", modelMockFile);
                 dz.files.push(modelMockFile);
                 @endif
+
                     this.on("success", function (file, response) {
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedNoneTemplateImage").value = response.data.id;
                     }
                 });
+
                 this.on("removedfile", function (file) {
                     document.getElementById("uploadedNoneTemplateImage").value = "";
-
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
@@ -1262,36 +1272,31 @@
             },
         });
 
-
         // ✅ لما المستخدم يغير الأنواع (front/back/none)
         function handleTypeChangeAndResetDZ() {
             const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox'))
                 .filter(cb => cb.checked)
                 .map(cb => cb.dataset.typeName);
 
-            // الأنواع المتاحة
             const allTypes = ['front', 'back', 'none'];
 
             allTypes.forEach(type => {
                 const dz = templateDropzones[type];
                 const hiddenInput = document.getElementById(`uploaded${type.charAt(0).toUpperCase() + type.slice(1)}TemplateImage`);
 
-                // لو النوع مش متعلم عليه → امسح الملفات القديمة
                 if (!selectedTypes.includes(type)) {
                     if (dz && dz.files.length > 0) {
-                        dz.removeAllFiles(true); // remove all files from dropzone
+                        dz.removeAllFiles(true);
                     }
                     if (hiddenInput) hiddenInput.value = "";
                 }
             });
 
-            // شغّل updateTemplateTypeDropzones() لتحديث العرض
             if (typeof updateTemplateTypeDropzones === "function") {
                 updateTemplateTypeDropzones();
             }
         }
 
-        // ✅ اربط الحدث ده
         document.querySelectorAll('.type-checkbox').forEach(cb => {
             cb.addEventListener('change', handleTypeChangeAndResetDZ);
         });
