@@ -410,6 +410,8 @@ class TemplateService extends BaseService
                     'model_id' => $model->id,
                     'collection_name' => 'templates',
                 ]);
+                $this->imageService->processUploaded($validatedData['template_image_front_id'] ?? $validatedData['template_image_none_id']);
+                
             }
 
             if (isset($validatedData['template_image_back_id'])) {
@@ -422,6 +424,7 @@ class TemplateService extends BaseService
                     'model_id' => $model->id,
                     'collection_name' => 'back_templates',
                 ]);
+                $this->imageService->processUploaded($validatedData['template_image_back_id'],'back-templates');
             }
 
             $mockupIds = collect($validatedData['mockup_ids'] ?? [])->map(fn($id) => (int)$id);
