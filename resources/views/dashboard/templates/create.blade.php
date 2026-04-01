@@ -1574,7 +1574,7 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
             url: "{{ route('media.store') }}",
             paramName: "file",
             maxFiles: 1,
-            maxFilesize: 30,
+            // maxFilesize: 30,
             acceptedFiles: "image/png,image/jpeg,image/webp",
             headers: {
                 "X-CSRF-TOKEN": "{{ csrf_token() }}"
