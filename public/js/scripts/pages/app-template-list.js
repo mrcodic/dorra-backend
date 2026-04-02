@@ -225,7 +225,6 @@ $(document).on("click", ".open-delete-template-modal", function () {
     const action     = $(this).data("action");
 
     const categories = $(this).data("categories");
-    console.log(categories)
     // Set form action
     $("#deleteTemplateForm").attr("action", action);
 
