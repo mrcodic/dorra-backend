@@ -116,8 +116,7 @@
                                     data-bs-target="#deleteTemplateModal"
                                     data-id="{{ $template->id }}"
                                     data-action="{{ route('product-templates.destroy', $template->id) }}"
-                                    data-products="{{ $template->products->pluck('name')->implode(', ') }}"
-                                    data-categories="{{ $template->categories->pluck('name')->implode(', ') }}">
+                                    data-products="{{ $template->products->pluck('name')->merge($template->categories->pluck('product.name'))->unique()->implode(', ') }}">
                                 <i data-feather="trash-2" class="me-1 text-danger"></i>Delete
                             </button>
                         </li>
