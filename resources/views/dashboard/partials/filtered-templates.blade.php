@@ -107,7 +107,6 @@
                             </form>
                         </li>
                     @endcan
-                        @dump($template->products->first()?->category)
                     @can('product-templates_delete')
                         <li>
                             {{-- ✅ data-* attributes carry model data to the modal --}}

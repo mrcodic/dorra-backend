@@ -82,6 +82,32 @@ class Mockup extends Model implements HasMedia
         });
     }
 
+    protected function baseImageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                foreach ([['front', 'base'], ['back', 'base'], ['none', 'base']] as [$side, $role]) {
+                    $url = $this->media()
+                        ->where('collection_name', 'mockups')
+                        ->where('custom_properties->side', $side)
+                        ->where('custom_properties->role', $role)
+                        ->value('file_name');
+
+                    if ($url) {
+
+                        return $this->media()
+                            ->where('collection_name', 'mockups')
+                            ->where('custom_properties->side', $side)
+                            ->where('custom_properties->role', $role)
+                            ->first()
+                            ->getFullUrl();
+                    }
+                }
+
+                return null;
+            }
+        );
+    }
     protected function getSideMediaUrl(string $side, string $role)
     {
         $media = $this->getMedia('mockups')->first(function ($media) use ($side, $role) {
