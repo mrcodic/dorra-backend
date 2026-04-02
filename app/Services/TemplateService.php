@@ -417,7 +417,8 @@ class TemplateService extends BaseService
                     $model->getMedia('templates')
                         ->where('id', '!=', $newId)
                         ->each->delete();
-
+                    $model->getMedia('templates-preview')
+                        ->each->delete();
                     Media::whereKey($newId)->update([
                         'model_type' => get_class($model),
                         'model_id' => $model->id,
@@ -435,7 +436,8 @@ class TemplateService extends BaseService
                     $model->getMedia('back_templates')
                         ->where('id', '!=', $validatedData['template_image_back_id'])
                         ->each->delete();
-
+                    $model->getMedia('back-templates-preview')
+                        ->each->delete();
                     Media::whereKey($validatedData['template_image_back_id'])->update([
                         'model_type' => get_class($model),
                         'model_id' => $model->id,
