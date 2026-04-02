@@ -1507,7 +1507,6 @@
             </label>
             <div class="d-flex gap-1">
                 <button type="button" class="btn btn-sm btn-outline-secondary js-reset-warp" data-side="${type}">Reset</button>
-                <button type="button" class="btn btn-sm btn-primary js-save-warp" data-side="${type}">Save Warp</button>
             </div>
         </div>
         <div class="position-relative" style="line-height:0;border:1px solid #CED5D4;border-radius:8px;overflow:hidden;">

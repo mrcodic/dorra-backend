@@ -2037,22 +2037,30 @@
     }
 
     function syncWarpInput(side) {
-        let input = document.getElementById(`warp-input-${side}`);
-        if (!input) {
-            input      = document.createElement('input');
-            input.type = 'hidden';
-            input.id   = `warp-input-${side}`;
-            input.name = `warp_points[${side}]`;
-            document.getElementById('editMockupForm').appendChild(input);
-        }
+        if (!warpState[side]) return;
 
-        if (warpState[side]) {
-            const [tl, tr, br, bl] = warpState[side].points;
+        const form = document.getElementById('editMockupForm');
+        const [tl, tr, br, bl] = warpState[side].points;
 
-            // ✅ Send in the same shape stored in DB: {tl, tr, br, bl}
-            input.value = JSON.stringify({ tl, tr, br, bl });
-        }
+        const points = { tl, tr, br, bl };
+
+        // ✅ Remove old warp inputs for this side
+        form.querySelectorAll(`[data-warp-side="${side}"]`).forEach(el => el.remove());
+
+        // ✅ Write flat inputs — no JSON.stringify, no escaping
+        Object.entries(points).forEach(([corner, coords]) => {
+            ['x', 'y'].forEach(axis => {
+                const input       = document.createElement('input');
+                input.type        = 'hidden';
+                input.name        = `warp_points[${side}][${corner}][${axis}]`;
+                input.value       = coords[axis];
+                input.dataset.warpSide = side;   // for cleanup on re-sync
+                form.appendChild(input);
+            });
+        });
     }
+
+
 
     function resetWarp(side) {
         if (!warpState[side]) return;
@@ -2075,28 +2083,6 @@
         Toastify({ text: 'Reset to default corners', backgroundColor: '#6c757d', duration: 1200 }).showToast();
     });
 
-    $(document).on('click', '.js-save-warp', function () {
-        const side     = $(this).data('side');
-        const mockupId = "{{ $model->id }}";  // ✅ always available on edit page
-
-        syncWarpInput(side);
-
-        fetch(`/admin/mockups/${mockupId}/side-settings/${side}`, {
-            method:  'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            },
-            body: JSON.stringify({ warp_points: warpState[side]?.points }),
-        })
-            .then(r => r.json())
-            .then(() => {
-                Toastify({ text: `Warp points saved for ${side}`, backgroundColor: '#28a745', duration: 1500 }).showToast();
-            })
-            .catch(() => {
-                Toastify({ text: 'Save failed', backgroundColor: '#dc3545', duration: 1500 }).showToast();
-            });
-    });
 
     // Disable Dropzone auto-discovery
     Dropzone.autoDiscover = false;
@@ -2183,7 +2169,7 @@
             </label>
             <div class="d-flex gap-1">
                 <button type="button" class="btn btn-sm btn-outline-secondary js-reset-warp" data-side="${type}">Reset</button>
-                <button type="button" class="btn btn-sm btn-primary js-save-warp" data-side="${type}">Save Warp</button>
+<!--                <button type="button" class="btn btn-sm btn-primary js-save-warp" data-side="${type}">Save Warp</button>-->
             </div>
         </div>
         <div class="position-relative" style="line-height:0;border:1px solid #CED5D4;border-radius:8px;overflow:hidden;">
