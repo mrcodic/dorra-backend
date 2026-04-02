@@ -223,7 +223,7 @@ $(document).on("submit", "#bulk-delete-form", function (e) {
 
 $(document).on("click", ".open-delete-template-modal", function () {
     const action     = $(this).data("action");
-    const products   = $(this).data("products");
+
     const categories = $(this).data("categories");
 
     // Set form action
