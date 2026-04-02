@@ -110,7 +110,6 @@
 
                     @can('product-templates_delete')
                         <li>
-                            @dd($template->products)
                             {{-- ✅ data-* attributes carry model data to the modal --}}
                             <button class="dropdown-item text-danger open-delete-template-modal w-100"
                                     data-bs-toggle="modal"
