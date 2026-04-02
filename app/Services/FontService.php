@@ -19,14 +19,14 @@ class FontService extends BaseService
         $query = $this->repository->query()
             ->select($columns)
             ->with($relations)
-//            ->when(request()->filled('style_name'),function ($query) use ($styleName){
-//                $query->where(function ($query) use ($styleName) {
-//                    $query->where('name', 'like', '%' . $styleName . '%')
-//                        ->orWhereHas('fontStyles', function ($query) use ($styleName) {
-//                            $query->where('name', 'like', '%' . $styleName . '%');
-//                        });
-//                });
-//            })
+            ->when(request()->filled('style_name'),function ($query) use ($styleName){
+                $query->where(function ($query) use ($styleName) {
+                    $query->where('name', 'like', '%' . $styleName . '%')
+                        ->orWhereHas('fontStyles', function ($query) use ($styleName) {
+                            $query->where('name', 'like', '%' . $styleName . '%');
+                        });
+                });
+            })
             ->withCount($counts);
         return $paginate ? $query->paginate($perPage) : $query->get($columns);
     }
