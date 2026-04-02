@@ -46,29 +46,30 @@ class TemplateService extends BaseService
         $relations = [], bool $paginate = false, $columns = ['*'], $perPage = 16, $counts = [])
     {
         request('with_design_data', true);
+        $locale = app()->getLocale();
+        $search = request('search');
+        $relations = array_merge($relations, [
+            'products:id,name,category_id',
+            'tags' => function ($q) use ($locale, $search) {
 
+                if ($search !== '') {
+                    $q->whereRaw(
+                        "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?",
+                        ["%{$search}%"]
+                    );
+                }
+            },
+            'types',
+        ]);
 
         $requested = request('per_page', $perPage);
         $pageSize = $requested === 'all' ? null : (int)$requested;
 
         $productId = request('product_id');
         $categoryId = request('product_without_category_id');
-        $locale = app()->getLocale();
-        $search = request('search');
-        $query = $this->repository
-            ->query()->with([
-                'products:id,name',
-                'tags' => function ($q) use ($locale, $search) {
 
-                    if ($search !== '') {
-                        $q->whereRaw(
-                            "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?",
-                            ["%{$search}%"]
-                        );
-                    }
-                },
-                'types',
-            ])->when(request()->filled('search_value'), function ($q) use ($locale) {
+        $query = $this->repository
+            ->query()->with($relations)->when(request()->filled('search_value'), function ($q) use ($locale) {
                 if (hasMeaningfulSearch(request('search_value'))) {
 
                     $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$locale}\"'))) LIKE ?", [
@@ -191,7 +192,7 @@ class TemplateService extends BaseService
 
 //                        });
 //                })
-        ->orderByDesc('is_best_seller')
+                ->orderByDesc('is_best_seller')
                 ->latest();
 
 
@@ -252,7 +253,7 @@ class TemplateService extends BaseService
                         'model_id' => $model->id,
                         'collection_name' => 'back_templates',
                     ]);
-                $this->imageService->processUploaded($validatedData['template_image_back_id'],'back-templates');
+                $this->imageService->processUploaded($validatedData['template_image_back_id'], 'back-templates');
 
             }
             $mockupIds = $validatedData['mockup_ids'] ?? [];
@@ -404,27 +405,45 @@ class TemplateService extends BaseService
                 ]);
             }
 
-            if (isset($validatedData['template_image_front_id']) || isset($validatedData['template_image_none_id'])) {
-                $model->getMedia('templates')
-                    ->where(function ($query) use ($validatedData) {
-                        $query->where('id', '!=', $validatedData['template_image_front_id'])
-                            ->orWhere('id', '!=', $validatedData['template_image_none_id']);
-                    })
-                    ->each->delete();
+            $frontId = $validatedData['template_image_front_id'] ?? null;
+            $noneId = $validatedData['template_image_none_id'] ?? null;
+            $newId = $frontId ?? $noneId;
 
-                Media::where(function ($query) use ($validatedData) {
-                    $query->whereKey($validatedData['template_image_front_id'])
-                        ->orWhere('id', $validatedData['template_image_none_id']);
-                })->update([
-                    'model_type' => get_class($model),
-                    'model_id' => $model->id,
-                    'collection_name' => 'templates',
-                ]);
-                $this->imageService->processUploaded($validatedData['template_image_front_id'] ?? $validatedData['template_image_none_id']);
+            if ($newId) {
+                $alreadyAttached = $model->getMedia('templates')
+                    ->contains('id', $newId);
 
+                if (!$alreadyAttached) {
+                    $model->getMedia('templates')
+                        ->where('id', '!=', $newId)
+                        ->each->delete();
+
+                    Media::whereKey($newId)->update([
+                        'model_type' => get_class($model),
+                        'model_id' => $model->id,
+                        'collection_name' => 'templates',
+                    ]);
+
+                    $this->imageService->processUploaded($newId);
+                }
             }
-
             if (isset($validatedData['template_image_back_id'])) {
+                $alreadyAttached = $model->getMedia('back_templates')
+                    ->contains('id', $validatedData['template_image_back_id']);
+
+                if (!$alreadyAttached) {
+                    $model->getMedia('back_templates')
+                        ->where('id', '!=', $validatedData['template_image_back_id'])
+                        ->each->delete();
+
+                    Media::whereKey($validatedData['template_image_back_id'])->update([
+                        'model_type' => get_class($model),
+                        'model_id' => $model->id,
+                        'collection_name' => 'back_templates',
+                    ]);
+
+                    $this->imageService->processUploaded($validatedData['template_image_back_id'], 'back-templates-preview');
+                }
                 $model->getMedia('back_templates')
                     ->where('id', '!=', $validatedData['template_image_back_id'])
                     ->each->delete();
@@ -434,7 +453,7 @@ class TemplateService extends BaseService
                     'model_id' => $model->id,
                     'collection_name' => 'back_templates',
                 ]);
-                $this->imageService->processUploaded($validatedData['template_image_back_id'],'back-templates');
+                $this->imageService->processUploaded($validatedData['template_image_back_id'], 'back-templates');
             }
 
             $mockupIds = collect($validatedData['mockup_ids'] ?? [])->map(fn($id) => (int)$id);

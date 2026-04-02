@@ -69,10 +69,7 @@ class TemplateController extends DashboardController
             ],
         ];
         $this->methodRelations = [
-            'index' => ["tags", "media","products" => function($query) {
-        $query->select('products.id', 'products.name', 'products.category_id')
-            ->with('category');
-    },"categories", "types"],
+            'index' => ["media","categories", "types"],
             'edit' => ['products', 'types']
         ];
 
