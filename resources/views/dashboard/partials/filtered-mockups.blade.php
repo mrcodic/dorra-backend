@@ -20,22 +20,6 @@ $side => [
         @endcan
 
         <div style="background-color: #F4F6F6;height:200px">
-            @php
-            $media = $mockup->getMedia('mockups');
-
-            $url = $media->first(fn ($m) =>
-            data_get($m, 'custom_properties.side') === 'front' &&
-            data_get($m, 'custom_properties.role') === 'base'
-            )?->getFullUrl()
-            ?? $media->first(fn ($m) =>
-            data_get($m, 'custom_properties.side') === 'back' &&
-            data_get($m, 'custom_properties.role') === 'base'
-            )?->getFullUrl()
-            ?? $media->first(fn ($m) =>
-            data_get($m, 'custom_properties.side') === 'none' &&
-            data_get($m, 'custom_properties.role') === 'base'
-            )?->getFullUrl();
-            @endphp
             <img src="{{ $mockup->base_image_url
             ?: asset('images/default-photo.png') }}" class="mx-auto d-block rounded-top"
                 style="height:100%; width:auto; max-width:100%;" alt="Template Image">

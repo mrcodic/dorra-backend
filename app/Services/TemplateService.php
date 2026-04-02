@@ -176,21 +176,22 @@ class TemplateService extends BaseService
 
             $query = $query
                 ->whereStatus(StatusEnum::LIVE)
-                ->where(function ($q) {
-                    $q->where('approach', '!=', 'without_editor')
-                        ->orWhere(function ($q) {
-                            $q->where('approach', 'without_editor')
-                                ->whereHas('mockups', function ($q) {
-                                    $categoryId =
-                                        request('product_without_category_id')
-                                        ?? $this->productRepository->query()->find(request('product_id'))?->category_id;
+//                ->where(function ($q) {
+//                    $q->where('approach', '!=', 'without_editor')
+//                        ->orWhere(function ($q) {
+//                            $q->where('approach', 'without_editor')
+//                                ->whereHas('mockups', function ($q) {
+//                                    $categoryId =
+//                                        request('product_without_category_id')
+//                                        ?? $this->productRepository->query()->find(request('product_id'))?->category_id;
+//
+//                                    $q->where('mockups.category_id', $categoryId)
+//                                        ->where('mockup_template.colors', '!=', '[]');
+//                                });
 
-                                    $q->where('mockups.category_id', $categoryId)
-                                        ->where('mockup_template.colors', '!=', '[]');
-                                });
-
-                        });
-                })->orderByDesc('is_best_seller')
+//                        });
+//                })
+        ->orderByDesc('is_best_seller')
                 ->latest();
 
 
