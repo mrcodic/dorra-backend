@@ -109,7 +109,6 @@
                     @endcan
 
                     @can('product-templates_delete')
-                        @dd($template->products->load('category')->pluck('category.name'),$template->products)
                         <li>
                             {{-- ✅ data-* attributes carry model data to the modal --}}
                             <button class="dropdown-item text-danger open-delete-template-modal w-100"
@@ -117,7 +116,8 @@
                                     data-bs-target="#deleteTemplateModal"
                                     data-id="{{ $template->id }}"
                                     data-action="{{ route('product-templates.destroy', $template->id) }}"
-                                    data-categories="{{ $template->products->load('category')->pluck('category.name')->merge($template->categories->pluck('name'))->unique()->implode(', ') }}">
+                                    data-categories="{{ $template->products->load('category')->pluck('category.name:en')
+                            ->merge($template->categories->pluck('name'))->unique()->implode(', ') }}">
                                 <i data-feather="trash-2" class="me-1 text-danger"></i>Delete
                             </button>
                         </li>
