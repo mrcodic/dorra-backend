@@ -234,8 +234,9 @@ $(document).on("click", ".open-delete-template-modal", function () {
     const $categoriesList = $("#deleteModalCategoriesList");
     if (categories && $.trim(categories) !== '') {
         $categoriesList.html(
-
-            categories.split(', ').map(c => `<span class="badge bg-secondary">${c}</span>`).join('')
+            categories.split(', ').map(c =>
+                `<span class="badge bg-secondary fs-5 px-3 py-2 me-2 mb-2 rounded-pill shadow-sm">${c}</span>`
+            ).join('')
         );
         $categoriesWrap.removeClass('d-none');
     } else {
