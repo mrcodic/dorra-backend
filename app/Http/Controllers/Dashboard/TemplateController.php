@@ -69,10 +69,7 @@ class TemplateController extends DashboardController
             ],
         ];
         $this->methodRelations = [
-            'index' => ["tags", "media",     "products" => function($query) {
-                $query->select('products.id', 'products.name', 'products.category_id');
-            },
-                "products.category","categories", "types"],
+            'index' => ["tags", "media", "products.category","categories", "types"],
             'edit' => ['products', 'types']
         ];
 
@@ -81,6 +78,11 @@ class TemplateController extends DashboardController
     public function index()
     {
         $data = $this->service->getAll($this->getRelations('index'), $this->usePagination, perPage: request('per_page', 16));
+        $data->each(function ($template) {
+            $template->products->each(function ($product) {
+                $product->loadMissing('category');
+            });
+        });
         $associatedData = $this->getAssociatedData('index');
         if (request()->ajax()) {
             if (request('request_type') === 'api') {
