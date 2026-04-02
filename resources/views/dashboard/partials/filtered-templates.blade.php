@@ -109,6 +109,7 @@
                     @endcan
 
                     @can('product-templates_delete')
+                        @dd($template->products->load('category')->pluck('category.name'),$template->products)
                         <li>
                             {{-- ✅ data-* attributes carry model data to the modal --}}
                             <button class="dropdown-item text-danger open-delete-template-modal w-100"
