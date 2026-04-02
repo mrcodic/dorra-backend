@@ -229,23 +229,13 @@ $(document).on("click", ".open-delete-template-modal", function () {
     // Set form action
     $("#deleteTemplateForm").attr("action", action);
 
-    // Populate Products
-    const $productsWrap = $("#deleteModalProducts");
-    const $productsList = $("#deleteModalProductsList");
-    if (products && $.trim(products) !== '') {
-        $productsList.html(
-            products.split(', ').map(p => `<span class="badge bg-primary">${p}</span>`).join('')
-        );
-        $productsWrap.removeClass('d-none');
-    } else {
-        $productsWrap.addClass('d-none');
-    }
 
     // Populate Categories
     const $categoriesWrap = $("#deleteModalCategories");
     const $categoriesList = $("#deleteModalCategoriesList");
     if (categories && $.trim(categories) !== '') {
         $categoriesList.html(
+
             categories.split(', ').map(c => `<span class="badge bg-secondary">${c}</span>`).join('')
         );
         $categoriesWrap.removeClass('d-none');
