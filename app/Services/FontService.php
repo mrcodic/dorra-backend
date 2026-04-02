@@ -28,6 +28,7 @@ class FontService extends BaseService
                 });
             })
             ->withCount($counts);
+        dd($query->toSql(), $query->getBindings());
         return $paginate ? $query->paginate($perPage) : $query->get($columns);
     }
 
