@@ -2045,22 +2045,29 @@
             input.name = `warp_points[${side}]`;
             document.getElementById('editMockupForm').appendChild(input);
         }
+
         if (warpState[side]) {
-            input.value = JSON.stringify(warpState[side].points);
+            const [tl, tr, br, bl] = warpState[side].points;
+
+            // ✅ Send in the same shape stored in DB: {tl, tr, br, bl}
+            input.value = JSON.stringify({ tl, tr, br, bl });
         }
     }
 
     function resetWarp(side) {
         if (!warpState[side]) return;
         warpState[side].points = [
-            { x: 0.1, y: 0.1 },
-            { x: 0.9, y: 0.1 },
-            { x: 0.9, y: 0.9 },
-            { x: 0.1, y: 0.9 },
+            { x: 0.1, y: 0.1 },   // tl
+            { x: 0.9, y: 0.1 },   // tr
+            { x: 0.9, y: 0.9 },   // br
+            { x: 0.1, y: 0.9 },   // bl
         ];
+
+        // re-init editor with current image
         const imgEl = document.getElementById(`warp-preview-${side}`);
         if (imgEl?.src) initWarpEditor(side, imgEl.src);
-        syncWarpInput(side);
+
+        syncWarpInput(side); // ✅ now sends {tl, tr, br, bl}
     }
 
     $(document).on('click', '.js-reset-warp', function () {
