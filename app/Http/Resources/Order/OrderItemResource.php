@@ -23,6 +23,11 @@ class OrderItemResource extends JsonResource
            'quantity' => $this->quantity,
             'color' => $this->color,
             'total_price' => $this->sub_total,
+            'mockup_design_image' =>
+                $this->itemable?->getFirstMediaUrl('front-mockup-designs') ?:
+                    $this->itemable?->getFirstMediaUrl('none-mockup-designs') ?:
+                        $this->itemable?->getFirstMediaUrl('back-mockup-designs')
+            ,
             'design_image' =>($this->approach == 'without_editor'
                 ? $this->itemable?->getFirstMediaUrl($collectionName.'-preview')
                 : $this->itemable?->getFirstMediaUrl($collectionName)),
