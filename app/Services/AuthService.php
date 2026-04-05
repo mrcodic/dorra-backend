@@ -51,8 +51,7 @@ class AuthService
             ->where('show_for_new_registered_users', true)
             ->where('expired_at','>=',now())
             ->latest()
-            ->first()
-            ->value('id')
+            ->first()?->id
             ??null;
         $user = $this->userRepository->create($validatedData);
 
