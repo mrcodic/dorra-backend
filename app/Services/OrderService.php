@@ -84,7 +84,7 @@ class OrderService extends BaseService
     public function showUserOrder($id)
     {
         return $this->repository->query()
-            ->whereBelongsTo(auth('sanctum')->user())
+            ->whereBelongsTo(getAuthOrGuest())
             ->whereKey($id)
             ->when(request('status'), function ($query) {
                 $query->where('status', request('status'));
