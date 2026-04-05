@@ -16,7 +16,6 @@ class UpdateTemplateEditorRequest extends BaseRequest
     }
     public function rules(): array
     {
-        dd("kjkk");
         $template = $this->route('template');
         $types = $template?->types->pluck('value')->map(fn ($t) => $t->value)->toArray() ?? [];
 
