@@ -151,6 +151,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
 
+        Route::post('discount-code', [MainController::class, 'discountCode']);
         Route::post('logout', LogoutController::class);
 
         Route::group(['prefix' => 'profile', 'controller' => ProfileController::class], function () {

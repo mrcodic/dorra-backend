@@ -33,6 +33,7 @@ class UserResource extends JsonResource
             'connected_accounts' => SocialAccountResource::collection($this->whenLoaded('socialAccounts')),
             'notification_types' => NotificationTypeResource::collection($this->whenLoaded('notificationTypes')),
             'token' => $this->when(isset($this->token), $this->token),
+
         ];
     }
 

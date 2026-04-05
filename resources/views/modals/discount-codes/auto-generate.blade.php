@@ -69,7 +69,7 @@
                             <input type="date" name="expired_at" id="createExpiryDate" class="form-control">
                         </div>
                     </div>
-                    <div class="form-group mb-2">
+                    <div class="form-group mb-2 new-registered-users d-none">
                         <input type="hidden" name="show_for_new_registered_users" value="0">
                         <div class="form-check">
                             <input
@@ -159,6 +159,7 @@
             if (mode === '2') {
                 $('#numberOfCodesWrapper').addClass('d-none');
                 $('#numberOfCodes').val('').prop('required', false);
+                $('.new-registered-users').removeClass('d-none');
 
                 $('#prefixFieldWrapper label').text('Custom Code');
                 $('#createPrefix')
@@ -166,6 +167,7 @@
                     .attr('maxlength', 255);
             } else {
                 $('#numberOfCodesWrapper').removeClass('d-none');
+                $('.new-registered-users').addClass('d-none');
                 $('#numberOfCodes').prop('required', false);
 
                 $('#prefixFieldWrapper label').text('Prefix (Write 4 char)');

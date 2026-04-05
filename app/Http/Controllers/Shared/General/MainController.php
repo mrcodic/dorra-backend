@@ -18,6 +18,7 @@ use App\Http\Resources\{CategoryResource,
     CountryResource,
     Design\DesignResource,
     DimensionResource,
+    DiscountCodeResource,
     FlagResource,
     FolderResource,
     FontResource,
@@ -31,8 +32,7 @@ use App\Http\Resources\{CategoryResource,
     TagResource,
     TeamResource,
     Template\TemplateResource,
-    Template\TypeResource
-};
+    Template\TypeResource};
 use App\Models\CountryCode;
 use App\Models\GlobalAsset;
 use App\Models\Type;
@@ -131,6 +131,10 @@ class MainController extends Controller
 
     }
 
+    public function discountCode(): DiscountCodeResource
+    {
+        return DiscountCodeResource::make(auth('sanctum')->user()->discountCode);
+    }
     public function countries()
     {
         return Response::api(data: CountryResource::collection($this->countryRepository->all()));

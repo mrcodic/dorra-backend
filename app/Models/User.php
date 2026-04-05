@@ -46,6 +46,7 @@ class User extends Authenticatable implements HasMedia
         'last_login_ip',
         'last_login_at',
         'free_credits_used',
+        'discount_code_id',
     ];
 
     /**
@@ -73,6 +74,10 @@ class User extends Authenticatable implements HasMedia
         parent::booted();
     }
 
+    public function discountCode(): BelongsTo
+    {
+        return $this->belongsTo(DiscountCode::class);
+    }
     public function notificationTypes(): BelongsToMany
     {
         return $this->belongsToMany(NotificationType::class)

@@ -8,6 +8,7 @@ use App\Repositories\Implementations\SocialAccountRepository;
 use App\Repositories\Interfaces\AdminRepositoryInterface;
 use App\Repositories\Interfaces\CartRepositoryInterface;
 use App\Repositories\Interfaces\DesignRepositoryInterface;
+use App\Repositories\Interfaces\DiscountCodeRepositoryInterface;
 use App\Repositories\Interfaces\GuestRepositoryInterface;
 use App\Repositories\Interfaces\ShippingAddressRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
@@ -36,6 +37,7 @@ class AuthService
         public ShippingAddressRepositoryInterface $shippingAddressRepository,
         public GuestRepositoryInterface           $guestRepository,
         public AdminRepositoryInterface           $adminRepository,
+        public DiscountCodeRepositoryInterface    $discountCodeRepository,
     ) {}
 
     public function register($validatedData): false|User
@@ -45,6 +47,12 @@ class AuthService
         }
 
         $validatedData['email_verified_at'] = now();
+        $validatedData['discount_code_id'] = $this->discountCodeRepository->query()
+            ->where('show_for_new_registered_users', true)
+            ->latest()
+            ->first()
+            ->value('id')
+            ??null;
         $user = $this->userRepository->create($validatedData);
 
         if (!empty($validatedData['image'])) {
