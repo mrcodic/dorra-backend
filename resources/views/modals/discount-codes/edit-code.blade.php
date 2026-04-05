@@ -11,14 +11,18 @@
                 <input type="hidden" id="codeId">
                 <div class="modal-body flex-grow-1">
                     <div class="form-group mb-2">
+                        <label class="label-text mb-1">Code Mode</label>
+                        <input type="text" id="codeMode" class="form-control" disabled>
+                    </div>
+                    <div class="form-group mb-2">
                         <label for="discountType" class="label-text mb-1">Type</label>
                         <input type="text" id="discountType" class="form-control" disabled>
 
                     </div>
 
                     <div class="form-group mb-2">
-                        <label for="prefix" class="label-text mb-1">Prefix</label>
-                        <input type="text" name="code" id="prefix" class="form-control" placeholder="Add prefix here"
+                        <label for="prefix" class="label-text mb-1">Code Name</label>
+                        <input type="text" name="code" id="prefix" class="form-control" placeholder="Add Name here"
                             disabled>
                     </div>
 

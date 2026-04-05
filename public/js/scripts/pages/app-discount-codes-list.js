@@ -64,7 +64,9 @@ const dt_user_table = $(".code-list-table").DataTable({
                         data-used="${row.used}"
                         data-type="${row.type}"
                         data-prefix="${row.prefix}"
+                        data-name="${row.code}"
                         data-value="${row.value}"
+                        data-code_mode="${row.code_mode}"
                         data-expired_at="${row.expired_at}"
                         data-usage="${row.max_usage}"
                         data-scope="${row.scope}"
@@ -269,7 +271,7 @@ $("#showCodeModal").on("show.bs.modal", function (event) {
     // Store values in Edit button's data attributes
     const editBtn = $("#editDiscountBtn");
     editBtn.data("type", type);
-    editBtn.data("prefix", prefix);
+    editBtn.data("prefix", name);
     editBtn.data("value", value);
     editBtn.data("usage", usage);
     editBtn.data("scope", scope);
@@ -282,20 +284,28 @@ $("#showCodeModal").on("show.bs.modal", function (event) {
 
 $("#editCodeModal").on("show.bs.modal", function (event) {
     const button = $(event.relatedTarget);
-
+    console.log(button.data("name"))
     // Set form action URL
     const actionUrl = button.data("action");
     $("#editDiscountForm").attr("action", actionUrl);
 
     const scope = button.data("scope") || "";
+    const codeMode = button.data("code_mode");
+    let modeText = '';
 
+    if (codeMode == 1) {
+        modeText = 'Generated Codes';
+    } else if (codeMode == 2) {
+        modeText = 'Custom Code';
+    }
+    console.log(modeText,"adsf")
     $("#discountType").val(button.data("type"));
-    $("#prefix").val(button.data("prefix") || "");
+    $("#prefix").val(button.data("name") || "");
     $("#discountValue").val(button.data("value") || "");
     $("#restrictions").val(button.data("usage") || "");
     $("#expiryDate").val(button.data("expired_at") || "");
     $("#scopeType").val(scope);
-
+    $("#codeMode").val(modeText);
     const $productContainer = $("#selectedProducts").empty();
     const $categoryContainer = $("#selectedCategories").empty();
 
