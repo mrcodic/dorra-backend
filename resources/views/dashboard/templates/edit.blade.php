@@ -1578,8 +1578,7 @@
 
             const pickName = (item) => {
                 if (item?.name && typeof item.name === 'object' && item.name[LOCALE]) return item.name[LOCALE];
-                return item?.name ?? item?.title ?? `#${item?.id ?? ''}`;
-            };
+                return `${item?.name_en ?? ''}(${item?.name_ar ?? ''})` || item?.title || `#${item?.id ?? ''}`;            };
             const unpack = (resp) => Array.isArray(resp?.data) ? resp.data : (Array.isArray(resp) ? resp : []);
 
             async function refreshSubs({preserveSelection = true} = {}) {
@@ -1605,6 +1604,7 @@
                         const keep = preserveSelection ? (($subs.val() || PRESEL_SUBS || []).map(String)) : [];
                         $subs.empty();
                         items.forEach(it => {
+                            console.log(it)
                             if (it?.id == null) return;
                             const id = String(it.id);
                             const isSelected = keep.includes(id);
