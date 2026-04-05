@@ -49,6 +49,7 @@ class AuthService
         $validatedData['email_verified_at'] = now();
         $validatedData['discount_code_id'] = $this->discountCodeRepository->query()
             ->where('show_for_new_registered_users', true)
+            ->where('expired_at','>=',now())
             ->latest()
             ->first()
             ->value('id')
