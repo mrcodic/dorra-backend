@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -18,7 +19,7 @@ use Spatie\Translatable\HasTranslations;
 #[ObservedBy(CategoryObserver::class)]
 class Category extends Model implements HasMedia
 {
-    use InteractsWithMedia, HasTranslations;
+    use InteractsWithMedia, HasTranslations,SoftDeletes;
 
     public $translatable = ['name', 'description'];
     protected $fillable = [

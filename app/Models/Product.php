@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Mockup;
 use App\Enums\Product\StatusEnum;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, H
 
 class Product extends Model implements HasMedia
 {
-    use InteractsWithMedia, HasTranslations;
+    use InteractsWithMedia, HasTranslations,SoftDeletes;
 
     public $translatable = ['name', 'description',];
     protected $fillable = [

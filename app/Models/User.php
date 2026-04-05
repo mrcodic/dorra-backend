@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Interfaces\Auth\MustVerifyEmail;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\Permission\Traits\HasRoles;
@@ -24,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\{BelongsTo,
 class User extends Authenticatable implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, InteractsWithMedia, HasRoles;
+    use HasFactory, Notifiable, HasApiTokens, InteractsWithMedia, HasRoles,SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

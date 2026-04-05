@@ -10,7 +10,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Industry extends Model
 {
-    use HasTranslations;
+    use HasTranslations,SoftDeletes;
 
     public $translatable = ['name'];
     protected $fillable = [
