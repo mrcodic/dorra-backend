@@ -133,7 +133,7 @@ class MainController extends Controller
 
     public function discountCode(): DiscountCodeResource
     {
-        return DiscountCodeResource::make(auth('sanctum')->user()->discountCode);
+        return Response::api( data: DiscountCodeResource::make(auth('sanctum')->user()->discountCode));
     }
     public function countries()
     {
