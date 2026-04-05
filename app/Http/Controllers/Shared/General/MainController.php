@@ -131,7 +131,7 @@ class MainController extends Controller
 
     }
 
-    public function discountCode(): DiscountCodeResource
+    public function discountCode()
     {
         return Response::api( data: DiscountCodeResource::make(auth('sanctum')->user()->discountCode));
     }
