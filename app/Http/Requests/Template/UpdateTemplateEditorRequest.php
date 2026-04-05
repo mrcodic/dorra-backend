@@ -4,64 +4,62 @@ namespace App\Http\Requests\Template;
 
 use App\Enums\OrientationEnum;
 use App\Enums\SafetyAreaEnum;
+use App\Enums\Template\StatusEnum;
 use App\Enums\Template\TypeEnum;
 use App\Http\Requests\Base\BaseRequest;
+use App\Models\CountryCode;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
+use Propaganistas\LaravelPhone\Rules\Phone;
 
 class UpdateTemplateEditorRequest extends BaseRequest
 {
+    /**
+     * Determine if the v1 is authorized to make this request.
+     */
     public function authorize(): bool
     {
         return true;
     }
+
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         $template = $this->route('template');
-        $types = $template?->types->pluck('value')->map(fn ($t) => $t->value)->toArray() ?? [];
+        $types = $template?->types->pluck('value')->map(fn($t) => $t->value)->toArray() ?? [];
 
         $hasFront = in_array(TypeEnum::FRONT->value, $types);
         $hasBack  = in_array(TypeEnum::BACK->value, $types);
         $hasNone  = in_array(TypeEnum::NONE->value, $types);
 
-        $isUpdatingFrontDesign = $this->has('design_data');
-        $isUpdatingBackDesign  = $this->has('design_back_data');
-
         $designDataRules = ($hasFront || $hasNone)
-            ? [
-                'sometimes',
-                'json',
-                function ($attribute, $value, $fail) {
-                    if ($value === 'null') {
-                        $fail($attribute . ' cannot be null.');
-                    }
-
-                    $decoded = json_decode($value, true);
-
-                    if (empty($decoded)) {
-                        $fail($attribute . ' cannot be empty.');
-                    }
+            ? ['sometimes', 'json', function ($attribute, $value, $fail) {
+                if ($value === 'null') {
+                    $fail($attribute . ' cannot be null.');
                 }
-            ]
+                $decoded = json_decode($value, true);
+                if (empty($decoded)) {
+                    $fail($attribute . ' cannot be empty.');
+                }
+            }]
             : ['nullable'];
 
         $designBackDataRules = $hasBack
-            ? [
-                'sometimes',
-                'json',
-                function ($attribute, $value, $fail) {
-                    if ($value === 'null') {
-                        $fail($attribute . ' cannot be null.');
-                    }
-
-                    $decoded = json_decode($value, true);
-
-                    if (empty($decoded)) {
-                        $fail($attribute . ' cannot be empty.');
-                    }
+            ? ['sometimes', 'json', function ($attribute, $value, $fail) {
+                if ($value === 'null') {
+                    $fail($attribute . ' cannot be null.');
                 }
-            ]
+                $decoded = json_decode($value, true);
+                if (empty($decoded)) {
+                    $fail($attribute . ' cannot be empty.');
+                }
+            }]
             : ['nullable'];
-
         return [
             'name.en' => [
                 'sometimes',
@@ -72,23 +70,12 @@ class UpdateTemplateEditorRequest extends BaseRequest
                 'sometimes',
                 'string',
                 'max:255',
-            ],
 
+            ],
             'design_data' => $designDataRules,
             'design_back_data' => $designBackDataRules,
-
-            'base64_preview_image' => [
-                Rule::requiredIf(($hasFront || $hasNone) && $isUpdatingFrontDesign),
-                'nullable',
-                'string',
-            ],
-
-            'back_base64_preview_image' => [
-                Rule::requiredIf($hasBack && $isUpdatingBackDesign),
-                'nullable',
-                'string',
-            ],
-
+            'base64_preview_image' => ['sometimes', 'string'],
+            'back_base64_preview_image' => ['sometimes', 'string'],
             'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
             'colors' => ['sometimes', 'array'],
             'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
@@ -98,6 +85,9 @@ class UpdateTemplateEditorRequest extends BaseRequest
             'cut_margin' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
             'font_styles_ids' => ['nullable', 'array'],
             'font_styles_ids.*' => ['integer', 'exists:font_styles,id'],
+
         ];
     }
+
+
 }

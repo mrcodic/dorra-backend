@@ -68,14 +68,7 @@ class StoreTemplateRequest extends BaseRequest
                 'exists:media,id',
             ],
             'template_image_id' => ['nullable','exists:media,id'],
-            'design_data' => [
-                Rule::requiredIf(function () {
-                    $types = (array) request('types', []);
-
-                    return in_array(TypeEnum::FRONT->value, $types)
-                        || in_array(TypeEnum::NONE->value, $types);
-                }),
-                'sometimes', 'json', function ($attribute, $value, $fail) {
+            'design_data' => ['sometimes', 'json', function ($attribute, $value, $fail) {
                 if ($value === 'null') {
                     $fail($attribute . ' cannot be null.');
                 }
@@ -85,9 +78,7 @@ class StoreTemplateRequest extends BaseRequest
                     $fail($attribute . ' cannot be empty.');
                 }
             },],
-            'design_back_data' => [
-                Rule::requiredIf(fn()=> in_array(TypeEnum::BACK->value, (array)request('types', []) )),
-                'sometimes', 'json', function ($attribute, $value, $fail) {
+            'design_back_data' => ['sometimes', 'json', function ($attribute, $value, $fail) {
                 if ($value === 'null') {
                     $fail($attribute . ' cannot be null.');
                 }
@@ -97,17 +88,8 @@ class StoreTemplateRequest extends BaseRequest
                     $fail($attribute . ' cannot be empty.');
                 }
             },],
-            'base64_preview_image' => [
-                Rule::requiredIf(function () {
-                    $types = (array) request('types', []);
-
-                    return in_array(TypeEnum::FRONT->value, $types)
-                        || in_array(TypeEnum::NONE->value, $types);
-                }),
-                'sometimes', 'string'],
-            'back_base64_preview_image' => [
-                Rule::requiredIf(fn()=> in_array(TypeEnum::BACK->value, (array)request('types', []) )),
-                'sometimes', 'string'],
+            'base64_preview_image' => ['sometimes', 'string'],
+            'back_base64_preview_image' => ['sometimes', 'string'],
             'specifications' => ['sometimes', 'array'],
             'specifications.*' => ['sometimes', 'integer', 'exists:product_specifications,id'],
             'source_design_svg' => ['nullable', 'file'],
