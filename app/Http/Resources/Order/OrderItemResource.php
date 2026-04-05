@@ -24,13 +24,13 @@ class OrderItemResource extends JsonResource
             'color' => $this->color,
             'total_price' => $this->sub_total,
             'design_image' =>($this->approach == 'without_editor'
-                ? $this->getFirstMediaUrl($collectionName.'-preview')
-                : $this->getFirstMediaUrl($collectionName)),
+                ? $this->itemable?->getFirstMediaUrl($collectionName.'-preview')
+                : $this->itemable?->getFirstMediaUrl($collectionName)),
             'back_design_image' => $this->use_front_as_back
-                ? $this->getFirstMediaUrl($collectionName.'-preview')
-                : ($this->approach == 'without_editor'
-                    ? $this->getFirstMediaUrl('back-'.$collectionName.'-preview')
-                    : $this->getFirstMediaUrl('back_'.$collectionName)),
+                ? $this->itemable?->getFirstMediaUrl($collectionName.'-preview')
+                : ($this->itemable?->approach == 'without_editor'
+                    ? $this->itemable?->getFirstMediaUrl('back-'.$collectionName.'-preview')
+                    : $this->itemable?->getFirstMediaUrl('back_'.$collectionName)),
             'specs' => OrderItemSpecResource::collection($this->whenLoaded('specs')),
             'item_type' => [
                 'value' => $this->type?->value,
