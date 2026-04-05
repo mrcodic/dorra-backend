@@ -21,6 +21,10 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $lastOffer = $this?->lastOffer;
+        $sub  = (float) $this->getAttribute('base_price');
+        $val  = (float) ($lastOffer?->getRawOriginal('value') ?? 0);
+        $after = $lastOffer ? round($sub * (1 - ($val / 100)), 2) : null;
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
@@ -28,6 +32,8 @@ class ProductResource extends JsonResource
             'category' => CategoryResource::make($this->whenLoaded('category')),
             'has_custom_prices' => $this->when(isset($this->has_custom_prices), $this->has_custom_prices),
             'base_price' => $this->when(isset($this->base_price), $this->base_price),
+            'price_after_offer' => is_null($after) ? null : sprintf('%.2f', round($after, 2)),
+
             'custom_prices' => ProductPriceResource::collection($this->whenLoaded('prices')),
             'rating' => $this->rating,
             'reviews_count' => $this->when(isset($this->reviews_count), $this->reviews_count),

@@ -19,12 +19,17 @@ class CategoryResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $lastOffer = $this?->lastOffer;
+        $sub  = (float) $this->getAttribute('base_price');
+        $val  = (float) ($lastOffer?->getRawOriginal('value') ?? 0);
+        $after = $lastOffer ? round($sub * (1 - ($val / 100)), 2) : null;
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
             'description' => $this->description,
             'has_custom_prices' => $this->has_custom_prices,
             'base_price' => $this->base_price,
+            'price_after_offer' => is_null($after) ? null : sprintf('%.2f', round($after, 2)),
             'custom_prices' => ProductPriceResource::collection($this->whenLoaded('prices')),
             'image' => $this->whenLoaded('media', fn() => $this->getFirstMediaUrl("categories")),
             'main_image' => $this->whenLoaded('media', function () {

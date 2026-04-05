@@ -16,7 +16,7 @@ class StoreDiscountCodeRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'code' => ['required', 'string', 'max:4', 'unique:discount_codes,code'],
+            'code' => ['required', 'string', 'unique:discount_codes,code'],
             'type' => ['required', 'in:'.TypeEnum::getValuesAsString()],
             'value' => ['required', 'numeric', 'min:0'],
             'max_usage' => ['required', 'integer', 'min:1'],

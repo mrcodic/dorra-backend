@@ -20,6 +20,8 @@ class DiscountCode extends Model
         'used',
         'expired_at',
         'scope',
+        'code_mode',
+        'show_for_new_registered_users',
     ];
 
     protected static function booted()
