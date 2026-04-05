@@ -24,6 +24,10 @@ class DiscountCode extends Model
         'show_for_new_registered_users',
     ];
 
+    protected $casts = [
+        'expired_at' => 'datetime',
+
+    ];
     public function products(): MorphToMany
     {
         return $this->morphedByMany(Product::class, 'discountable');
