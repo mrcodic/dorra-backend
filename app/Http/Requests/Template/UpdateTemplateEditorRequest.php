@@ -74,8 +74,13 @@ class UpdateTemplateEditorRequest extends BaseRequest
             ],
             'design_data' => $designDataRules,
             'design_back_data' => $designBackDataRules,
-            'base64_preview_image' => ['sometimes', 'string'],
-            'back_base64_preview_image' => ['sometimes', 'string'],
+            'base64_preview_image' => [
+                Rule::requiredIf($hasFront || $hasNone),
+                'sometimes', 'string'
+            ],
+            'back_base64_preview_image' => [
+                Rule::requiredIf($hasBack),
+                'sometimes', 'string'],
             'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
             'colors' => ['sometimes', 'array'],
             'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
