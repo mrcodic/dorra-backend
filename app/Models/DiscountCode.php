@@ -24,14 +24,6 @@ class DiscountCode extends Model
         'show_for_new_registered_users',
     ];
 
-    protected static function booted()
-    {
-        static::creating(function ($discountCode) {
-            $discountCode->code = $discountCode->code . Str::random();
-        });
-        parent::booted();
-    }
-
     public function products(): MorphToMany
     {
         return $this->morphedByMany(Product::class, 'discountable');

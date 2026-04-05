@@ -66,8 +66,15 @@ class DiscountCodeService extends BaseService
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $count = $validatedData['number_of_discount_codes'] ?? 1;
+
         return collect()->times($count, function () use ($validatedData, $relationsToStore, $relationsToLoad) {
+
+            if ($validatedData['code_mode'] == 1){
+                $validatedData['code'] = $validatedData['code']. Str::random(4);
+            }
             $discountCode = $this->repository->create($validatedData);
+
+
             if ($validatedData['scope'] == 2) {
                 $discountCode->products()->attach($validatedData['product_ids']);
             } elseif($validatedData['scope'] == 1) {

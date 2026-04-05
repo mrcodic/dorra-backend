@@ -17,6 +17,8 @@ class StoreDiscountCodeRequest extends BaseRequest
     {
         return [
             'code' => ['required', 'string', 'unique:discount_codes,code'],
+            'code_mode' => ['required', 'in:1,2'],
+            'show_for_new_registered_users' => ['required', 'boolean'],
             'type' => ['required', 'in:'.TypeEnum::getValuesAsString()],
             'value' => ['required', 'numeric', 'min:0'],
             'max_usage' => ['required', 'integer', 'min:1'],

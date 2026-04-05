@@ -17,12 +17,12 @@
                         <label class="label-text mb-1 d-block">Code Mode</label>
 
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="code_mode" id="generatedMode" value="generated" checked>
+                            <input class="form-check-input" type="radio" name="code_mode" id="generatedMode" value="1" checked>
                             <label class="form-check-label text-black fs-16" for="generatedMode">Generated Codes</label>
                         </div>
 
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="code_mode" id="customMode" value="custom">
+                            <input class="form-check-input" type="radio" name="code_mode" id="customMode" value="2">
                             <label class="form-check-label text-black fs-16" for="customMode">Custom Code</label>
                         </div>
                     </div>
@@ -156,7 +156,7 @@
         function toggleCodeModeFields() {
             const mode = $('input[name="code_mode"]:checked').val();
 
-            if (mode === 'custom') {
+            if (mode === '2') {
                 $('#numberOfCodesWrapper').addClass('d-none');
                 $('#numberOfCodes').val('').prop('required', false);
 
