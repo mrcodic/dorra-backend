@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\App;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -22,7 +23,7 @@ use Spatie\Translatable\HasTranslations;
 #[ObservedBy(TemplateObserver::class)]
 class Template extends Model implements HasMedia
 {
-    use HasUuids, HasTranslations, InteractsWithMedia;
+    use HasUuids, HasTranslations, InteractsWithMedia,SoftDeletes;
 
     public $translatable = ['name', 'description'];
 
