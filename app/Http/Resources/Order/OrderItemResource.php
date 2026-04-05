@@ -16,13 +16,21 @@ class OrderItemResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $collectionName = Str::plural(Str::lower(class_basename($this->itemable)));
         return [
             'id' => $this->id,
-           'product_name' => $this->product?->name,
+           'product_name' => $this->orderable?->name,
            'quantity' => $this->quantity,
             'color' => $this->color,
             'total_price' => $this->sub_total,
-            'design_image' => $this->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($this->itemable)))),
+            'design_image' =>($this->approach == 'without_editor'
+                ? $this->getFirstMediaUrl($collectionName.'-preview')
+                : $this->getFirstMediaUrl($collectionName)),
+            'back_design_image' => $this->use_front_as_back
+                ? $this->getFirstMediaUrl($collectionName.'-preview')
+                : ($this->approach == 'without_editor'
+                    ? $this->getFirstMediaUrl('back-'.$collectionName.'-preview')
+                    : $this->getFirstMediaUrl('back_'.$collectionName)),
             'specs' => OrderItemSpecResource::collection($this->whenLoaded('specs')),
             'item_type' => [
                 'value' => $this->type?->value,
