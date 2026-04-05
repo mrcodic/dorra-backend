@@ -19,6 +19,7 @@ return new class extends Migration
             'mockups',
             'orders',
             'industries',
+            'templates',
         ];
 
         foreach ($tables as $tableName) {
