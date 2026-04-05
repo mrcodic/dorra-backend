@@ -195,7 +195,6 @@ class AuthService
     public function login($validatedData): ?User
     {
         $user = $this->userRepository->findByEmail($validatedData['email']);
-        dd($user->discount_code_id && $user->created_at->addMonth()->isPast());
         if ($user->discount_code_id && $user->created_at->addMonth()->isPast())
         {
             $user->update(['discount_code_id' => null]);
