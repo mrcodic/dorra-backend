@@ -146,6 +146,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::get('zones', [MainController::class, 'zones']);
     Route::get('countries', [MainController::class, 'countries']);
     Route::apiResource('shipping-addresses', ShippingAddressController::class);
+    Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
 
 
     Route::middleware('auth:sanctum')->group(function () {
@@ -197,7 +198,6 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
         Route::post('cancel-order/{order}', [OrderController::class, 'cancelOrder']);
         Route::post('buy-order-again', [PaymentController::class, 'buyOrderAgain']);
         Route::post('orders/items/{orderItem}/download', [OrderController::class, 'downloadItem']);
-        Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
 
         Route::apiResource('ai-assets', AiAssetController::class)->only(['index', 'store']);
 
