@@ -391,17 +391,28 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                                         </div>
                                     </div>
 
+                                        <div class="row align-items-end">
+                                            <div class="col-md-9 form-group mb-2">
+                                                <label for="tagsSelect" class="label-text mb-1">Tags</label>
+                                                <select id="tagsSelect" class="form-select select2" name="tags[]" multiple>
+                                                    @foreach($associatedData['tags'] as $tag)
+                                                        <option value="{{ $tag->id }}">
+                                                            {{ $tag->getTranslation('name', app()->getLocale()) }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            @can("tags_create")
+                                                <div class="col-3 col-md-3 mb-2 text-md-end">
+                                                    <a class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-1"
+                                                       data-bs-toggle="modal" data-bs-target="#addTagModal">
+                                                        <i data-feather="plus"></i>
+                                                        Add New Tag
+                                                    </a>
+                                                </div>
+                                            @endcan
+                                        </div>
 
-                                    <div class="form-group mb-2">
-                                        <label for="tagsSelect" class="label-text mb-1">Tags</label>
-                                        <select id="tagsSelect" class="form-select select2" name="tags[]" multiple>
-                                            @foreach($associatedData['tags'] as $tag)
-                                                <option value="{{ $tag->id }}">
-                                                    {{ $tag->getTranslation('name', app()->getLocale()) }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
                                     @if(request()->query('q') == 'with')
 
                                         <div class="position-relative mt-3 text-center">
@@ -618,6 +629,7 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
         </div>
 
     </section>
+    @include('modals.tags.add-tag')
     @php
         // لو route محتاج parameter اسمه mockup
         $mockupUpdateUrlTemplate = route('mockups.edit', ['mockup' => '__ID__']);
@@ -627,6 +639,21 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
 @section('vendor-script')
 
     <script>
+        handleAjaxFormSubmit("#addTagForm", {
+            successMessage: "Tag Added Successfully",
+            onSuccess: function (response) {
+
+                $('#addTagModal').modal('hide');
+
+                var newTag = response.data;
+                console.log(newTag.name['en'])
+                var newOption = new Option(newTag.name['en'], newTag.id, true, true);
+                $('#tagsSelect').append(newOption).trigger('change');
+
+                // 3. Reset the form fields
+                $('#addTagForm')[0].reset();
+            }
+        });
         $(function () {
             let backModalShown = false;
 
@@ -1859,7 +1886,8 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
             });
             $('#tagsSelect').select2({
                 placeholder: "Choose Tags",
-                allowClear: true
+                allowClear: true,
+
             });
             $('#colorsSelect').select2({
                 placeholder: "Choose Colors",

@@ -474,16 +474,26 @@
                                         </div>
                                     </div>
 
-
-                                    <div class="form-group mb-2">
-                                        <label for="tagsSelect" class="label-text mb-1">Tags</label>
-                                        <select id="tagsSelect" class="form-select select2" name="tags[]" multiple>
-                                            @foreach($associatedData['tags'] as $tag)
-                                                <option value="{{ $tag->id }}" @selected($model->tags->contains($tag))>
-                                                    {{ $tag->getTranslation('name', app()->getLocale()) }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                    <div class="row align-items-end">
+                                        <div class="col-md-9 form-group mb-2">
+                                            <label for="tagsSelect" class="label-text mb-1">Tags</label>
+                                            <select id="tagsSelect" class="form-select select2" name="tags[]" multiple>
+                                                @foreach($associatedData['tags'] as $tag)
+                                                    <option value="{{ $tag->id }}" @selected($model->tags->contains($tag))>
+                                                        {{ $tag->getTranslation('name', app()->getLocale()) }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        @can("tags_create")
+                                            <div class="col-3 col-md-3 mb-2 text-md-end">
+                                                <a class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-1"
+                                                   data-bs-toggle="modal" data-bs-target="#addTagModal">
+                                                    <i data-feather="plus"></i>
+                                                    Add New Tag
+                                                </a>
+                                            </div>
+                                        @endcan
                                     </div>
                                     @if($model->approach == 'with_editor')
                                         <div class="position-relative mt-3 text-center">
@@ -705,6 +715,8 @@
 
     <input type="hidden" name="use_front_as_back" id="useFrontAsBack"
            value="{{ $model->use_front_as_back ? '1' : '0' }}">
+    @include('modals.tags.add-tag')
+
 @endsection
 
 
@@ -716,6 +728,22 @@
 
 @section('page-script')
     <script>
+        handleAjaxFormSubmit("#addTagForm", {
+            successMessage: "Tag Added Successfully",
+            onSuccess: function (response) {
+
+                $('#addTagModal').modal('hide');
+
+                var newTag = response.data;
+                console.log(newTag.name['en'])
+                var newOption = new Option(newTag.name['en'], newTag.id, true, true);
+                $('#tagsSelect').append(newOption).trigger('change');
+
+                // 3. Reset the form fields
+                $('#addTagForm')[0].reset();
+            }
+        });
+
         @if($model->approach == 'without_editor')
         $(function () {
             let backModalShown = false;
