@@ -118,6 +118,7 @@ class PaymentController extends Controller
                         'sub_total' => $subTotal,
                         'itemable_type' => $orderItem->itemable_type,
                         'itemable_id' => $orderItem->itemable_id,
+                        'type' => $orderItem->type,
                     ]);
 
 
