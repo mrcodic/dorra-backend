@@ -172,6 +172,7 @@ class CartService extends BaseService
                 ->first();
             $guestId = $guest?->id;
         }
+        dd($userId, $guestId);
         if (!$userId && !$guestId) {
             return null;
         }
