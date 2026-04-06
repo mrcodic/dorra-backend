@@ -87,7 +87,7 @@ class PaymentController extends Controller
             $cart = $this->cartService->getCurrentUserOrGuestCart();
 
             collect($order->orderItems)->each(function ($orderItem) use ($cart) {
-                $existingCartItem = $cart->items()
+                $existingCartItem = $cart?->items()
                     ->where('cartable_id', $orderItem->orderable_id)
                     ->where('cartable_type', $orderItem->orderable_type)
                     ->first();
