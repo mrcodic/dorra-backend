@@ -2115,6 +2115,7 @@
 
                 }
                 setTimeout(function () {
+                    const params = new URLSearchParams(window.location.search);
                     params.set('product_without_category_id', params.get('category_id'));
                     params.delete('category_id');
                     window.location.href = '/product-templates?' + params.toString();

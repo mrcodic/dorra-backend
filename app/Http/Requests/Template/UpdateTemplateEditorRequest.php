@@ -32,6 +32,7 @@ class UpdateTemplateEditorRequest extends BaseRequest
     {
         $template = $this->route('template');
         $types = $template?->types->pluck('value')->map(fn($t) => $t->value)->toArray() ?? [];
+        dd($types);
 
         $hasFront = in_array(TypeEnum::FRONT->value, $types);
         $hasBack  = in_array(TypeEnum::BACK->value, $types);
