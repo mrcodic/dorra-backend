@@ -85,7 +85,7 @@ class CartService extends BaseService
                     $priceDetails['sub_total'],
                     $request->cartable_id,
                     $request->cartable_type,
-                    $request->color ?? $design &&  $design?->linked_to_mockup ? $design?->mockup_color : null,
+                        $request->color ?? $design && $design?->linked_to_mockup ? $design?->mockup_color : null,
                 );
 
                 $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
@@ -172,7 +172,6 @@ class CartService extends BaseService
                 ->first();
             $guestId = $guest?->id;
         }
-        dd($userId, $guestId);
         if (!$userId && !$guestId) {
             return null;
         }
@@ -188,7 +187,7 @@ class CartService extends BaseService
                 },
                 'items.itemable' => function (MorphTo $itemable) {
                     $itemable->constrain([
-                        Design::class => fn($q) => $q->select(['id', 'name', 'price','linked_to_mockup','mockup_id'])->with(['mockup', 'products']),
+                        Design::class => fn($q) => $q->select(['id', 'name', 'price', 'linked_to_mockup', 'mockup_id'])->with(['mockup', 'products']),
                         Template::class => fn($q) => $q->select(['id', 'name', 'price'])->with('products'),
                     ]);
                 },
@@ -198,6 +197,14 @@ class CartService extends BaseService
         if ($cart && $cart->expires_at?->isPast()) {
             $cart->delete();
             return null;
+        }
+        if (!$cart) {
+            return $this->repository->query()->create([
+                'user_id' => $userId,
+                'guest_id' => $guestId,
+
+
+            ]);
         }
         return $cart;
     }
@@ -337,16 +344,16 @@ class CartService extends BaseService
     public function priceDetails($cartItem)
     {
         return $cartItem?->load([
-                'itemable:id', 'itemable.media', 'product',
-                'cartable' => function (MorphTo $cartable) {
-                    $cartable->constrain([
-                        Product::class => fn($q) => $q->withLastOfferId()->with('lastOffer'),
-                        Category::class => fn($q) => $q->withLastOfferId()->with('lastOffer'),
-                    ]);
-                },
-                'cartable.specifications.options', 'specs',
-                'itemable', 'specs.productSpecificationOption',
-                'specs.productSpecification']);
+            'itemable:id', 'itemable.media', 'product',
+            'cartable' => function (MorphTo $cartable) {
+                $cartable->constrain([
+                    Product::class => fn($q) => $q->withLastOfferId()->with('lastOffer'),
+                    Category::class => fn($q) => $q->withLastOfferId()->with('lastOffer'),
+                ]);
+            },
+            'cartable.specifications.options', 'specs',
+            'itemable', 'specs.productSpecificationOption',
+            'specs.productSpecification']);
     }
 
     public function updatePriceDetails($validatedData, $itemId)
