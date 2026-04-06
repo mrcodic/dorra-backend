@@ -358,6 +358,7 @@ class CartService extends BaseService
 
         $product = $cartItem->cartable;
         $priceDetails = $this->calculatePriceDetails($validatedData, $product, price: $cartItem->product_price);
+        $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
 
         $cartItem->update([
             'sub_total' => $priceDetails['sub_total'],
@@ -371,7 +372,6 @@ class CartService extends BaseService
             ]);
             $message = "Since the cart total is now lower, the discount code is no longer valid.";
         }
-        $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
         return [$message, $cartItem];
     }
 
