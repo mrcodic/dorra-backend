@@ -32,61 +32,55 @@ class UpdateTemplateEditorRequest extends BaseRequest
     {
         $template = $this->route('template');
         $types = $template?->types->pluck('value')->map(fn($t) => $t->value)->toArray() ?? [];
-        dd($types);
 
         $hasFront = in_array(TypeEnum::FRONT->value, $types);
         $hasBack  = in_array(TypeEnum::BACK->value, $types);
         $hasNone  = in_array(TypeEnum::NONE->value, $types);
 
         $designDataRules = ($hasFront || $hasNone)
-            ? ['sometimes', 'json', function ($attribute, $value, $fail) {
+            ? ['required', 'json', function ($attribute, $value, $fail) {
                 if ($value === 'null') {
                     $fail($attribute . ' cannot be null.');
                 }
-                $decoded = json_decode($value, true);
-                if (empty($decoded)) {
+                if (empty(json_decode($value, true))) {
                     $fail($attribute . ' cannot be empty.');
                 }
             }]
             : ['nullable'];
 
         $designBackDataRules = $hasBack
-            ? ['sometimes', 'json', function ($attribute, $value, $fail) {
+            ? ['required', 'json', function ($attribute, $value, $fail) {
                 if ($value === 'null') {
                     $fail($attribute . ' cannot be null.');
                 }
-                $decoded = json_decode($value, true);
-                if (empty($decoded)) {
+                if (empty(json_decode($value, true))) {
                     $fail($attribute . ' cannot be empty.');
                 }
             }]
             : ['nullable'];
+
+
+        $previewImageRules     = ($hasFront || $hasNone) ? ['required', 'string'] : ['nullable', 'string'];
+
+
+        $backPreviewImageRules = $hasBack ? ['required', 'string'] : ['nullable', 'string'];
+
         return [
-            'name.en' => [
-                'sometimes',
-                'string',
-                'max:255',
-            ],
-            'name.ar' => [
-                'sometimes',
-                'string',
-                'max:255',
-
-            ],
-            'design_data' => $designDataRules,
-            'design_back_data' => $designBackDataRules,
-            'base64_preview_image' => ['sometimes', 'string'],
-            'back_base64_preview_image' => ['sometimes', 'string'],
-            'source_design_svg' => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
-            'colors' => ['sometimes', 'array'],
-            'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
-            'safety_area' => ['sometimes', 'numeric'],
-            'border' => ['sometimes', 'numeric'],
-            'go_to_editor' => ['sometimes', 'boolean'],
-            'cut_margin' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
-            'font_styles_ids' => ['nullable', 'array'],
-            'font_styles_ids.*' => ['integer', 'exists:font_styles,id'],
-
+            'name.en'                    => ['sometimes', 'string', 'max:255'],
+            'name.ar'                    => ['sometimes', 'string', 'max:255'],
+            'design_data'                => $designDataRules,
+            'design_back_data'           => $designBackDataRules,
+            'base64_preview_image'       => $previewImageRules,           
+            'back_base64_preview_image'  => $backPreviewImageRules,
+            'source_design_svg'          => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
+            'colors'                     => ['sometimes', 'array'],
+            'orientation'                => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
+            'safety_area'                => ['sometimes', 'numeric'],
+            'border'                     => ['sometimes', 'numeric'],
+            'go_to_editor'               => ['sometimes', 'boolean'],
+            'cut_margin'                 => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
+            'font_styles_ids'            => ['nullable', 'array'],
+            'font_styles_ids.*'          => ['integer', 'exists:font_styles,id'],
         ];
     }
 
