@@ -114,7 +114,7 @@ class CartService extends BaseService
             })->sum();
         $basePrice = $product->base_price ?? $productPriceValue;
 
-        $subTotal = ($product->base_price ?? $productPriceValue) + $specsSum;
+        $subTotal = $basePrice + $specsSum;
         $calculatePrices = [
             'product_price' => $basePrice,
             'specs_sum' => $specsSum,
