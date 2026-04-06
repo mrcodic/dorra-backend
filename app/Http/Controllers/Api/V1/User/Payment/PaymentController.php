@@ -129,7 +129,7 @@ class PaymentController extends Controller
                         return !in_array(null, $spec, true);
                     });
                     if (!empty($filtered)) {
-                        $cartItem->specs()->createMany($filtered);
+                        $cartItem?->specs()->createMany($filtered);
                     }
                 }
             });
