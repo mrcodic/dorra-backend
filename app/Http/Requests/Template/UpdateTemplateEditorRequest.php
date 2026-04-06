@@ -38,7 +38,7 @@ class UpdateTemplateEditorRequest extends BaseRequest
         $hasNone  = in_array(TypeEnum::NONE->value, $types);
 
         $designDataRules = ($hasFront || $hasNone)
-            ? ['required', 'json', function ($attribute, $value, $fail) {
+            ? ['required_with:design_data', 'json', function ($attribute, $value, $fail) {
                 if ($value === 'null') {
                     $fail($attribute . ' cannot be null.');
                 }
@@ -49,7 +49,7 @@ class UpdateTemplateEditorRequest extends BaseRequest
             : ['nullable'];
 
         $designBackDataRules = $hasBack
-            ? ['required', 'json', function ($attribute, $value, $fail) {
+            ? ['required_with:design_back_data', 'json', function ($attribute, $value, $fail) {
                 if ($value === 'null') {
                     $fail($attribute . ' cannot be null.');
                 }
@@ -59,18 +59,20 @@ class UpdateTemplateEditorRequest extends BaseRequest
             }]
             : ['nullable'];
 
+        $previewImageRules     = ($hasFront || $hasNone)
+            ? ['required_with:base64_preview_image', 'string']
+            : ['nullable', 'string'];
 
-        $previewImageRules     = ($hasFront || $hasNone) ? ['required', 'string'] : ['nullable', 'string'];
-
-
-        $backPreviewImageRules = $hasBack ? ['required', 'string'] : ['nullable', 'string'];
+        $backPreviewImageRules = $hasBack
+            ? ['required_with:back_base64_preview_image', 'string']
+            : ['nullable', 'string'];
 
         return [
             'name.en'                    => ['sometimes', 'string', 'max:255'],
             'name.ar'                    => ['sometimes', 'string', 'max:255'],
             'design_data'                => $designDataRules,
             'design_back_data'           => $designBackDataRules,
-            'base64_preview_image'       => $previewImageRules,           
+            'base64_preview_image'       => $previewImageRules,
             'back_base64_preview_image'  => $backPreviewImageRules,
             'source_design_svg'          => ['nullable', 'file', 'mimetypes:image/svg+xml', 'max:2048'],
             'colors'                     => ['sometimes', 'array'],
