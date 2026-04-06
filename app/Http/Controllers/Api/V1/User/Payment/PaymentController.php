@@ -85,7 +85,7 @@ class PaymentController extends Controller
         $this->handleTransaction(function () use ($request) {
             $order = $this->orderRepository->query()->with('orderItems.specs')->find($request->get('order_id'));
             $cart = $this->cartService->getCurrentUserOrGuestCart();
-
+dd($order,$cart);
             collect($order->orderItems)->each(function ($orderItem) use ($cart) {
                 $existingCartItem = $cart?->items()
                     ->where('cartable_id', $orderItem->orderable_id)
