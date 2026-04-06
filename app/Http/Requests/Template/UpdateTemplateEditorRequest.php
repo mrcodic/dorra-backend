@@ -38,7 +38,7 @@ class UpdateTemplateEditorRequest extends BaseRequest
         $hasNone  = in_array(TypeEnum::NONE->value, $types);
 
         $designDataRules = ($hasFront || $hasNone)
-            ? ['required_with:design_data', 'json', function ($attribute, $value, $fail) {
+            ? ['required_with:base64_preview_image', 'json', function ($attribute, $value, $fail) {
                 if ($value === 'null') {
                     $fail($attribute . ' cannot be null.');
                 }
@@ -46,10 +46,10 @@ class UpdateTemplateEditorRequest extends BaseRequest
                     $fail($attribute . ' cannot be empty.');
                 }
             }]
-            : ['nullable'];
+            : ['prohibited'];
 
         $designBackDataRules = $hasBack
-            ? ['required_with:design_back_data', 'json', function ($attribute, $value, $fail) {
+            ? ['required_with:back_base64_preview_image', 'json', function ($attribute, $value, $fail) {
                 if ($value === 'null') {
                     $fail($attribute . ' cannot be null.');
                 }
@@ -57,15 +57,15 @@ class UpdateTemplateEditorRequest extends BaseRequest
                     $fail($attribute . ' cannot be empty.');
                 }
             }]
-            : ['nullable'];
+            : ['prohibited'];
 
-        $previewImageRules     = ($hasFront || $hasNone)
-            ? ['required_with:base64_preview_image', 'string']
-            : ['nullable', 'string'];
+        $previewImageRules = ($hasFront || $hasNone)
+            ? ['required_with:design_data', 'string']
+            : ['prohibited'];
 
         $backPreviewImageRules = $hasBack
-            ? ['required_with:back_base64_preview_image', 'string']
-            : ['nullable', 'string'];
+            ? ['required_with:design_back_data', 'string']
+            : ['prohibited'];
 
         return [
             'name.en'                    => ['sometimes', 'string', 'max:255'],
