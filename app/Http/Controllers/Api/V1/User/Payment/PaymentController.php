@@ -107,7 +107,7 @@ class PaymentController extends Controller
                             ) * $orderItem->quantity;
                     }
 
-                    $cartItem = $cart->items()->create([
+                    $cartItem = $cart?->items()->create([
                         'cartable_id' => $orderItem->orderable_id,
                         'cartable_type' => $orderItem->orderable_type,
                         'product_price_id' => $orderItem->product_price_id,
