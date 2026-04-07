@@ -148,6 +148,13 @@
 </div>
 
 <script>
+    $('#showForNewRegisteredUser').on('change', function () {
+        if ($(this).is(':checked')) {
+            $('#createRestrictions').closest('.form-group').addClass('d-none').val('');
+        } else {
+            $('#createRestrictions').closest('.form-group').removeClass('d-none');
+        }
+    });
     $(function () {
         $('.select2').select2({
             dropdownParent: $('#createCodeTemplateModal')
@@ -169,6 +176,11 @@
                 $('#numberOfCodesWrapper').removeClass('d-none');
                 $('.new-registered-users').addClass('d-none');
                 $('#numberOfCodes').prop('required', false);
+
+                // ✅ Reset max_usage visibility when switching back
+                $('#showForNewRegisteredUser').prop('checked', false);
+                $('#createRestrictions').closest('.form-group').removeClass('d-none');
+                $('#createRestrictions').val('');
 
                 $('#prefixFieldWrapper label').text('Prefix (Write 4 char)');
                 $('#createPrefix')

@@ -43,12 +43,14 @@ class DiscountCode extends Model
             return $value;
         });
     }
-
     public function scopeIsNotValid(Builder $query): Builder
     {
         return $query->where(function ($q) {
             $q->where('expired_at', '<=', now())
-                ->orWhereColumn('used', 'max_usage');
+                ->orWhere(function ($q) {
+                    $q->whereNotNull('max_usage')
+                        ->whereColumn('used', 'max_usage');
+                });
         });
     }
 
