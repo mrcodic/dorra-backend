@@ -21,7 +21,7 @@ class StoreDiscountCodeRequest extends BaseRequest
             'show_for_new_registered_users' => ['required', 'boolean'],
             'type' => ['required', 'in:'.TypeEnum::getValuesAsString()],
             'value' => ['required', 'numeric', 'min:0'],
-            'max_usage' => ['required', 'integer', 'min:1'],
+            'max_usage' => ['sometimes', 'integer', 'min:1'],
             'expired_at' => ['required', 'date', 'after:today'],
             'number_of_discount_codes' => ['nullable', 'integer', 'min:1'],
             'scope' => ['required', 'in:'.ScopeEnum::getValuesAsString()],
