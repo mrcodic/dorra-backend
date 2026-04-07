@@ -46,7 +46,10 @@ class DiscountCode extends Model
     public function scopeIsNotValid(Builder $query): Builder
     {
         return $query->where(function ($q) {
-            $q->where('expired_at', '<=', now())
+            $q->where(function ($q){
+                $q->whereNotNull('expired_at')
+                    ->where('expired_at', '<=', now());
+            })
                 ->orWhere(function ($q) {
                     $q->whereNotNull('max_usage')
                         ->whereColumn('used', 'max_usage');
