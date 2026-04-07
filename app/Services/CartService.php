@@ -266,6 +266,7 @@ class CartService extends BaseService
             throw ValidationException::withMessages(['offer' => ["You can't apply discount when at least one item is offered."]]);
 
         }
+        dd($items->pluck('cartable')->filter()->unique());
         $cartables = $items->pluck('cartable.id')->filter()->unique();
         $allSameCartable = $cartables->count() === 1;
         $cartable = $allSameCartable ? $items->first()->cartable: null;
@@ -292,6 +293,10 @@ class CartService extends BaseService
                 )
                 : '0%',
             'value' => getDiscountAmount($discountCode, $cart->price) ?? 0,
+            'type' => [
+                'value' => $this->scope?->value,
+                'label' => method_exists($this->scope, 'label') ? $this->scope?->label() : null,
+            ],
         ];
     }
 
