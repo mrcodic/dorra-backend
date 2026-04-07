@@ -22,7 +22,7 @@ class StoreDiscountCodeRequest extends BaseRequest
             'type' => ['required', 'in:'.TypeEnum::getValuesAsString()],
             'value' => ['required', 'numeric', 'min:0'],
             'max_usage' => ['sometimes', 'integer', 'min:1'],
-            'expired_at' => ['required', 'date', 'after:today'],
+            'expired_at' => ['sometimes', 'date', 'after:today'],
             'number_of_discount_codes' => ['nullable', 'integer', 'min:1'],
             'scope' => ['required', 'in:'.ScopeEnum::getValuesAsString()],
             'product_ids' => ['required_if:scope,2', 'array'],

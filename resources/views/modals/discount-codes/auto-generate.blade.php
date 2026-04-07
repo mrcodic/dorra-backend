@@ -150,18 +150,35 @@
 <script>
     $('#showForNewRegisteredUser').on('change', function () {
         if ($(this).is(':checked')) {
+            // Hide & disable max_usage
             $('#createRestrictions')
                 .closest('.form-group')
                 .addClass('d-none');
             $('#createRestrictions')
                 .val('')
-                .prop('disabled', true); // ✅ excluded from payload
+                .prop('disabled', true);
+
+            // ✅ Hide & disable expired_at
+            $('#createExpiryDate')
+                .closest('.form-group')
+                .addClass('d-none');
+            $('#createExpiryDate')
+                .val('')
+                .prop('disabled', true);
         } else {
+            // Show & enable max_usage
             $('#createRestrictions')
                 .closest('.form-group')
                 .removeClass('d-none');
             $('#createRestrictions')
-                .prop('disabled', false); // ✅ included in payload
+                .prop('disabled', false);
+
+            // ✅ Show & enable expired_at
+            $('#createExpiryDate')
+                .closest('.form-group')
+                .removeClass('d-none');
+            $('#createExpiryDate')
+                .prop('disabled', false);
         }
     });
     $(function () {
@@ -186,12 +203,21 @@
                 $('.new-registered-users').addClass('d-none');
                 $('#numberOfCodes').prop('required', false);
 
-                // ✅ Reset max_usage visibility when switching back
+
                 $('#showForNewRegisteredUser').prop('checked', false);
+
                 $('#createRestrictions')
                     .closest('.form-group')
                     .removeClass('d-none');
                 $('#createRestrictions')
+                    .val('')
+                    .prop('disabled', false);
+
+            // ✅ Reset expiry date
+                $('#createExpiryDate')
+                    .closest('.form-group')
+                    .removeClass('d-none');
+                $('#createExpiryDate')
                     .val('')
                     .prop('disabled', false);
 

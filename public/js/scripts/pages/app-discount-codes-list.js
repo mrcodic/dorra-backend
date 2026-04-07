@@ -293,7 +293,7 @@ $("#editCodeModal").on("show.bs.modal", function (event) {
     const scope = button.data("scope") || "";
     const codeMode = button.data("code_mode");
     const isNewRegistered = button.data("show_for_new_registered_users") == 1; // ✅ new
-    console.log()
+
     let modeText = '';
     if (codeMode == 1) {
         modeText = 'Generated Codes';
@@ -315,8 +315,18 @@ $("#editCodeModal").on("show.bs.modal", function (event) {
             .prop('disabled', true)
             .closest('.form-group')
             .addClass('d-none');
+        $("#expiryDate")
+            .val('')
+            .prop('disabled', true)
+            .closest('.form-group')
+            .addClass('d-none');
     } else {
         $("#restrictions")
+            .val(button.data("usage") || "")
+            .prop('disabled', false)
+            .closest('.form-group')
+            .removeClass('d-none');
+        $("#expiryDate")
             .val(button.data("usage") || "")
             .prop('disabled', false)
             .closest('.form-group')
