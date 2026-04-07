@@ -269,7 +269,6 @@ class CartService extends BaseService
         $cartables = $items->pluck('cartable.id')->filter()->unique();
         $allSameCartable = $cartables->count() === 1;
         $cartable = $allSameCartable ? $items->first()->cartable: null;
-        dd($cartable);
         $request->validate([
             'code' => ['required', new ValidDiscountCode($cartable,  $cart)],
         ]);
