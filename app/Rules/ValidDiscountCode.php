@@ -36,7 +36,7 @@ class ValidDiscountCode implements ValidationRule
             $fail('This discount code is no longer valid.');
             return;
         }
-dd($code?->products->contains($this->product));
+dd($code?->products->contains($this->product),$this->product);
         if (!$code?->products->contains($this->product) && !$code?->categories->contains($this->category) && $code?->scope != ScopeEnum::GENERAL) {
             $fail('This discount code is not valid for the selected product or category.');
         }
