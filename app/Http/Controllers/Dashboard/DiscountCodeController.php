@@ -27,7 +27,9 @@ class DiscountCodeController extends DashboardController
         $this->resourceTable = 'discount_codes';
         $this->assoiciatedData = [
             'index' => [
-                'categories' => $this->categoryRepository->query()->whereNull('parent_id')->get(['id', 'name']),
+                'categories' => $this->categoryRepository->query()
+                ->where('is_has_category', 0)->
+                whereNull('parent_id')->get(['id', 'name']),
                 'products' => $this->productRepository->all(columns: ['id', 'name']),
             ],
         ];
