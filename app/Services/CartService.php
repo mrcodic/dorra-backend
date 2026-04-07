@@ -272,6 +272,7 @@ class CartService extends BaseService
         $allSameCategory = $categories->count() === 1;
         $product = $allSameProduct ? $items->first()->product : null;
         $category = $allSameCategory ? $items->first()->product->category : null;
+        dd($items->first()->product,$items->first()->product->category, $items);
         $request->validate([
             'code' => ['required', new ValidDiscountCode($product, $category, $cart)],
         ]);
