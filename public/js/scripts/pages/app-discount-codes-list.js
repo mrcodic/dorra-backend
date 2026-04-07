@@ -293,7 +293,7 @@ $("#editCodeModal").on("show.bs.modal", function (event) {
     const scope = button.data("scope") || "";
     const codeMode = button.data("code_mode");
     const isNewRegistered = button.data("show_for_new_registered_users") == 1; // ✅ new
-
+    console.log()
     let modeText = '';
     if (codeMode == 1) {
         modeText = 'Generated Codes';

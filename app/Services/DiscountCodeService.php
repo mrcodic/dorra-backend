@@ -22,7 +22,7 @@ class DiscountCodeService extends BaseService
     public function getData()
     {
         $discountCodes = $this->repository
-            ->query(['id', 'code', 'type', 'max_usage', 'used', 'expired_at', 'scope','value','code_mode'])
+            ->query(['id', 'code', 'type', 'max_usage', 'used', 'expired_at', 'scope','value','code_mode','show_for_new_registered_users'])
             ->with(['categories:id,name','products:id,name'])
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
