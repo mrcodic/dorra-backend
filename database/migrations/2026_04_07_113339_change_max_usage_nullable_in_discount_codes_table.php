@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('discount_codes', function (Blueprint $table) {
-            $table->unsignedInteger('max_usage')->nullable()->change();
+            $table->integer('max_usage')->nullable()->change();
             $table->date('expired_at')->nullable()->change();
         });
     }
@@ -20,7 +20,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('discount_codes', function (Blueprint $table) {
-            $table->unsignedInteger('max_usage')->nullable(false)->change();
+            $table->integer('max_usage')->nullable(false)->change();
             $table->date('expired_at')->nullable(false)->change();
         });
     }
