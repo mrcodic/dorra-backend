@@ -276,7 +276,7 @@ class CartService extends BaseService
             ? $cartables->pluck('id')->intersect(
                 $discountCode->products->pluck('id')
             )
-            : $cartables->pluck('category_id')->intersect(
+            : $cartables->pluck('id')->intersect(
                 $discountCode->categories->pluck('id')
             );
         dd($matched);
