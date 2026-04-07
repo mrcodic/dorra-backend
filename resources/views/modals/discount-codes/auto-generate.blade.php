@@ -150,9 +150,18 @@
 <script>
     $('#showForNewRegisteredUser').on('change', function () {
         if ($(this).is(':checked')) {
-            $('#createRestrictions').closest('.form-group').addClass('d-none').val('');
+            $('#createRestrictions')
+                .closest('.form-group')
+                .addClass('d-none');
+            $('#createRestrictions')
+                .val('')
+                .prop('disabled', true); // ✅ excluded from payload
         } else {
-            $('#createRestrictions').closest('.form-group').removeClass('d-none');
+            $('#createRestrictions')
+                .closest('.form-group')
+                .removeClass('d-none');
+            $('#createRestrictions')
+                .prop('disabled', false); // ✅ included in payload
         }
     });
     $(function () {
@@ -179,8 +188,12 @@
 
                 // ✅ Reset max_usage visibility when switching back
                 $('#showForNewRegisteredUser').prop('checked', false);
-                $('#createRestrictions').closest('.form-group').removeClass('d-none');
-                $('#createRestrictions').val('');
+                $('#createRestrictions')
+                    .closest('.form-group')
+                    .removeClass('d-none');
+                $('#createRestrictions')
+                    .val('')
+                    .prop('disabled', false);
 
                 $('#prefixFieldWrapper label').text('Prefix (Write 4 char)');
                 $('#createPrefix')
