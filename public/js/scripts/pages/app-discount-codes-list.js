@@ -327,7 +327,7 @@ $("#editCodeModal").on("show.bs.modal", function (event) {
             .closest('.form-group')
             .removeClass('d-none');
         $("#expiryDate")
-            .val(button.data("usage") || "")
+            .val(button.data("expired_at") || "")
             .prop('disabled', false)
             .closest('.form-group')
             .removeClass('d-none');
