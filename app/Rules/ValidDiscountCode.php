@@ -44,6 +44,10 @@ class ValidDiscountCode implements ValidationRule
             $fail('This promotional code is only available for new users within their first month of registration.');
             return;
         }
+        if ($code?->show_for_new_registered_users && auth('sanctum')->user()?->discount_code_id !== $code?->id) {
+            $fail('This promotional code is not assigned to your account.');
+            return;
+        }
         if (!$code?->products->contains($this->cartable) && !$code?->categories->contains($this->cartable) && $code?->scope != ScopeEnum::GENERAL) {
             $fail('This discount code is not valid for the selected product or category.');
         }
