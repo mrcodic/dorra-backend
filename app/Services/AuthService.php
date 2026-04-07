@@ -169,7 +169,6 @@ class AuthService
             ];
 
         } catch (Exception $exception) {
-            dd($exception->getMessage());
             Log::error($exception->getMessage());
             return false;
         }
