@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Enums\DiscountCode\ScopeEnum;
 use App\Enums\DiscountCode\TypeEnum;
 use App\Models\{CartItem, Category, Design, Guest, Product, Template, User};
 use App\Repositories\Interfaces\{CartItemRepositoryInterface,
@@ -267,19 +266,6 @@ class CartService extends BaseService
             throw ValidationException::withMessages(['offer' => ["You can't apply discount when at least one item is offered."]]);
 
         }
-        $discountCode = $this->discountCodeRepository->query()
-            ->whereCode($request->code)
-            ->firstOrFail();
-        $cartables = $items->pluck('cartable')->filter();
-
-        $matched = $discountCode->scope == ScopeEnum::PRODUCT
-            ? $cartables->pluck('id')->intersect(
-                $discountCode->products->pluck('id')
-            )
-            : $cartables->pluck('id')->intersect(
-                $discountCode->categories->pluck('id')
-            );
-        dd($matched);
         $cartables = $items->pluck('cartable.id')->filter()->unique();
         $allSameCartable = $cartables->count() === 1;
         $cartable = $allSameCartable ? $items->first()->cartable: null;
@@ -306,10 +292,6 @@ class CartService extends BaseService
                 )
                 : '0%',
             'value' => getDiscountAmount($discountCode, $cart->price) ?? 0,
-            'type' => [
-                'value' => $this->scope?->value,
-                'label' => method_exists($this->scope, 'label') ? $this->scope?->label() : null,
-            ],
         ];
     }
 
