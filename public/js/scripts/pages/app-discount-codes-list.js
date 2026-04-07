@@ -50,6 +50,7 @@ const dt_user_table = $(".code-list-table").DataTable({
                         data-prefix="${row.prefix}"
                         data-value="${row.value}"
                         data-expired_at="${row.expired_at}"
+                         data-show_for_new_registered_users="${row.show_for_new_registered_users}"
                         data-usage="${row.max_usage}"
                         data-scope="${row.scope}"
                          data-categories='${JSON.stringify(row.categories)}'
@@ -68,6 +69,7 @@ const dt_user_table = $(".code-list-table").DataTable({
                         data-value="${row.value}"
                         data-code_mode="${row.code_mode}"
                         data-expired_at="${row.expired_at}"
+                         data-show_for_new_registered_users="${row.show_for_new_registered_users}"
                         data-usage="${row.max_usage}"
                         data-scope="${row.scope}"
                          data-categories='${JSON.stringify(row.categories)}'
@@ -284,32 +286,54 @@ $("#showCodeModal").on("show.bs.modal", function (event) {
 
 $("#editCodeModal").on("show.bs.modal", function (event) {
     const button = $(event.relatedTarget);
-    console.log(button.data("name"))
-    // Set form action URL
+
     const actionUrl = button.data("action");
     $("#editDiscountForm").attr("action", actionUrl);
 
     const scope = button.data("scope") || "";
     const codeMode = button.data("code_mode");
-    let modeText = '';
+    const isNewRegistered = button.data("show_for_new_registered_users") == 1; // ✅ new
 
+    let modeText = '';
     if (codeMode == 1) {
         modeText = 'Generated Codes';
     } else if (codeMode == 2) {
         modeText = 'Custom Code';
     }
-    console.log(modeText,"adsf")
+
     $("#discountType").val(button.data("type"));
     $("#prefix").val(button.data("name") || "");
     $("#discountValue").val(button.data("value") || "");
-    $("#restrictions").val(button.data("usage") || "");
     $("#expiryDate").val(button.data("expired_at") || "");
     $("#scopeType").val(scope);
     $("#codeMode").val(modeText);
+
+    // ✅ Show/hide restrictions based on show_for_new_registered_users
+    if (isNewRegistered) {
+        $("#restrictions")
+            .val('')
+            .prop('disabled', true)
+            .closest('.form-group')
+            .addClass('d-none');
+    } else {
+        $("#restrictions")
+            .val(button.data("usage") || "")
+            .prop('disabled', false)
+            .closest('.form-group')
+            .removeClass('d-none');
+    }
+
+    // ✅ Show for new registered users — read only indicator
+    const $newRegisteredField = $('#editNewRegisteredField');
+    if (isNewRegistered) {
+        $newRegisteredField.removeClass('d-none');
+    } else {
+        $newRegisteredField.addClass('d-none');
+    }
+
     const $productContainer = $("#selectedProducts").empty();
     const $categoryContainer = $("#selectedCategories").empty();
 
-    // Show/hide based on scope
     if (scope === "Product") {
         $("#selectedProducts").closest(".form-group").show();
         $("#selectedCategories").closest(".form-group").hide();
@@ -317,7 +341,6 @@ $("#editCodeModal").on("show.bs.modal", function (event) {
         $("#selectedProducts").closest(".form-group").hide();
         $("#selectedCategories").closest(".form-group").show();
     } else {
-        // Show both or hide both if scope is undefined or something else
         $("#selectedProducts").closest(".form-group").hide();
         $("#selectedCategories").closest(".form-group").hide();
     }
@@ -325,16 +348,12 @@ $("#editCodeModal").on("show.bs.modal", function (event) {
     try {
         const products = JSON.parse(button.attr("data-products") || "[]");
         products.forEach((product) => {
-            $productContainer.append(
-                `<span class="badge bg-primary">${product.name[locale]}</span>`
-            );
+            $productContainer.append(`<span class="badge bg-primary">${product.name[locale]}</span>`);
         });
 
         const categories = JSON.parse(button.attr("data-categories") || "[]");
         categories.forEach((category) => {
-            $categoryContainer.append(
-                `<span class="badge bg-primary">${category.name[locale]}</span>`
-            );
+            $categoryContainer.append(`<span class="badge bg-primary">${category.name[locale]}</span>`);
         });
     } catch (err) {
         console.error("Failed to parse products/categories JSON", err);

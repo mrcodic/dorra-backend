@@ -31,7 +31,11 @@
                         <input type="text" name="value" id="discountValue" class="form-control"
                             placeholder="Enter discount value here" disabled>
                     </div>
-
+                    <!-- ✅ Show for new registered users indicator -->
+                    <div class="form-group mb-2 d-none" id="editNewRegisteredField">
+                        <label class="label-text mb-1">New Registered Users</label>
+                        <input type="text" class="form-control" value="This code is for new registered users only" readonly disabled>
+                    </div>
 
                     <div class="d-flex flex-column flex-md-row gap-1">
                         <div class="form-group col-12 col-md-6">
