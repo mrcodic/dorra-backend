@@ -142,7 +142,7 @@ class AuthService
             $user->token = $plainTextToken;
             if ($user->created_at->addMonth()->isPast())
             {
-                $user->update(['discount_code_id' => null]);
+                auth('sanctum')->user()->update(['discount_code_id' => null]);
             }
 
             $state = $this->decodeState(request('state'));
