@@ -141,7 +141,7 @@ class AuthService
 
             $plainTextToken = $user->createToken($user->email, expiresAt: now()->addDays(30))->plainTextToken;
             $user->token = $plainTextToken;
-            if ($user->discount_code_id && $user->created_at->addMonth()->isPast())
+            if ($user->created_at->addMonth()->isPast())
             {
                 $user->update(['discount_code_id' => null]);
             }
