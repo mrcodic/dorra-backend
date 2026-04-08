@@ -85,7 +85,7 @@ class CartService extends BaseService
                     $priceDetails['sub_total'],
                     $request->cartable_id,
                     $request->cartable_type,
-                        $request->color ?? $design && $design?->linked_to_mockup ? $design?->mockup_color : null,
+                        $request->color ?? $design && $design?->mockup_id ? $design?->mockup_color : null,
                 );
 
                 $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
@@ -187,7 +187,7 @@ class CartService extends BaseService
                 },
                 'items.itemable' => function (MorphTo $itemable) {
                     $itemable->constrain([
-                        Design::class => fn($q) => $q->select(['id', 'name', 'price', 'linked_to_mockup', 'mockup_id'])->with(['mockup', 'products']),
+                        Design::class => fn($q) => $q->select(['id', 'name', 'price', 'mockup_id'])->with(['mockup', 'products']),
                         Template::class => fn($q) => $q->select(['id', 'name', 'price'])->with('products'),
                     ]);
                 },
