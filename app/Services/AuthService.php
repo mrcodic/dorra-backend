@@ -139,12 +139,11 @@ class AuthService
             );
 
             $plainTextToken = $user->createToken($user->email, expiresAt: now()->addDays(30))->plainTextToken;
-            $user->token = $plainTextToken;
             if ($user->created_at->addMonth()->isPast())
             {
-                unset($user->token);
                 $user->update(['discount_code_id' => null]);
             }
+            $user->token = $plainTextToken;
 
             $state = $this->decodeState(request('state'));
 
