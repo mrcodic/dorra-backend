@@ -157,7 +157,7 @@ class PaymentController extends Controller
                 if ($cart->discountCode && !$cart->discountCode->show_for_new_registered_users) {
                     $cart->discountCode->increment('used');
                 }
-                if ($cart->discountCode->show_for_new_registered_users){
+                if ($cart->discountCode?->show_for_new_registered_users){
                     auth('sanctum')->user()->update(['discount_code_id' => null]);
                 }
                 $cart->update([
