@@ -29,7 +29,7 @@ class Design extends Model implements HasMedia
     use HasUuids, InteractsWithMedia, HasTranslations, softDeletes;
 
     public $translatable = ['name', 'description'];
-
+    protected $appends = ['linked_to_mockup'];
     protected $fillable = [
         'cookie_id',
         'user_id',
@@ -48,7 +48,6 @@ class Design extends Model implements HasMedia
         'orientation',
         'price',
         'total_price',
-        'linked_to_mockup',
         'mockup_id',
         'mockup_color',
         'design_mockup_area',
@@ -61,8 +60,12 @@ class Design extends Model implements HasMedia
     protected $casts = [
         'orientation' => OrientationEnum::class,
         'design_mockup_area' => 'array',
-        'linked_to_mockup' => 'boolean',
-        ];
+    ];
+
+    public function getLinkedToMockupAttribute(): bool
+    {
+        return !is_null($this->mockup_id);
+    }
 
     public function guest(): BelongsTo
     {
@@ -205,7 +208,7 @@ class Design extends Model implements HasMedia
 
     public function cartItems(): BelongsToMany
     {
-        return $this->belongsToMany(Cart::class, 'cart_items','itemable_id')->withPivot([
+        return $this->belongsToMany(Cart::class, 'cart_items', 'itemable_id')->withPivot([
             'sub_total', 'total_price'
         ]);
     }
@@ -224,17 +227,20 @@ class Design extends Model implements HasMedia
             'mediable'
         )->withPivot('type')->withTimestamps();
     }
+
     public function getFrontImageUrl(): string
     {
-        return $this->getFirstMediaUrl('designs') ?:  asset('images/default-product.png');
+        return $this->getFirstMediaUrl('designs') ?: asset('images/default-product.png');
     }
+
     public function getBackImageUrl(): string
     {
-        return $this->getFirstMediaUrl('back_designs') ?:  asset('images/default-product.png');
+        return $this->getFirstMediaUrl('back_designs') ?: asset('images/default-product.png');
     }
+
     public function getNoneImageUrl(): string
     {
-        return $this->getFirstMediaUrl('designs') ?:  asset('images/default-product.png');
+        return $this->getFirstMediaUrl('designs') ?: asset('images/default-product.png');
     }
 
     public function getImageUrlForType(string $type): array|string
@@ -242,14 +248,15 @@ class Design extends Model implements HasMedia
         $type = strtolower($type);
         return match ($type) {
             'front' => $this->getFrontImageUrl(),
-            'back'  => $this->getBackImageUrl(),
-            'both'  => [
+            'back' => $this->getBackImageUrl(),
+            'both' => [
                 'front' => $this->getFrontImageUrl(),
-                'back'  => $this->getBackImageUrl(),
+                'back' => $this->getBackImageUrl(),
             ],
             default => $this->getNoneImageUrl(),
         };
     }
+
     public function registerMediaConversions($media = null): void
     {
         $this->addMediaConversion('front_png')
