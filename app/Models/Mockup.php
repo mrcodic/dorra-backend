@@ -51,10 +51,7 @@ class Mockup extends Model implements HasMedia
         'colors' => '["#000000","#ffffff"]',
     ];
 
-    public function booted()
-    {
-        static::deleted();
-}
+  
     protected function templateColors(): Attribute
     {
         return Attribute::get(function () {
