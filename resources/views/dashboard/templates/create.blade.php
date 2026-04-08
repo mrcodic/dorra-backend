@@ -220,7 +220,7 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                                                 </div>
                                             @endif
 
-                                                @if($HasMockupCategory && !$HasMockupCategory->has_mockup)
+                                                @if(($HasMockupCategory && !$HasMockupCategory->has_mockup) || !$HasMockupCategory)
                                             <!-- MODEL  -->
                                             <div class="form-group mb-2 col-md-6 d-none" id="dz-model">
                                                 <label class="label-text mb-1">Template Model Image</label>
