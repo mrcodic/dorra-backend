@@ -29,6 +29,7 @@ class CartItemResource extends JsonResource
                     ? new DesignResource($item)
                     : new TemplateResource($item);
             }),
+            'show_edit_design' => $item instanceof Design,
             'specs' => CartItemSpecsResource::collection($this->whenLoaded('specs')),
             'product' => $this->when($cartable, function () use ($cartable) {
                 return $cartable instanceof Product
