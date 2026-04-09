@@ -18,7 +18,9 @@ class ValidDiscountCode implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $code = DiscountCode::whereCode($value)->first();
+        $code = DiscountCode::where(function ($query) use ($value) {
+            $query->where('code', $value)->orWhere('id', $value);
+        })->first();
         if (!$code) {
             $fail('Discount code does not exist.');
             return;
