@@ -59,13 +59,12 @@ class CheckoutRequest extends FormRequest
 
     public function rules(): array
     {
-        dd(getAuthOrGuest());
         $isoCode = CountryCode::find($this->country_code_id)?->iso_code ?? 'US';
 
         return [
             'payment_method_id' => 'exists:payment_methods,id',
             'discount_code_id' => ['nullable', 'exists:discount_codes,id'],
-            'country_code_id' => ['sometimes', 'exists:country_codes,id',new ValidDiscountCode(cart: request()->user()?->cart)],
+            'country_code_id' => ['sometimes', 'exists:country_codes,id',new ValidDiscountCode(cart: getAuthOrGuest()->cart)],
             'first_name' => ['sometimes', 'string'],
             'last_name' => ['sometimes', 'string'],
             'email' => ['sometimes', 'email'],
