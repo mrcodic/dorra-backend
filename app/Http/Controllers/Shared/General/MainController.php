@@ -138,7 +138,7 @@ class MainController extends Controller
         {
             $user->update(['discount_code_id' => null]);
         }
-        return Response::api( data: auth('sanctum')->user()->discountCode ? DiscountCodeResource::make(auth('sanctum')->user()->discountCode): collect([]));
+        return Response::api( data: $user->discountCode ? DiscountCodeResource::make($user->discountCode): collect([]));
     }
     public function countries()
     {
