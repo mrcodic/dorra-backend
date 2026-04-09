@@ -32,6 +32,7 @@ class CartResource extends JsonResource
             ],
             'delivery' => $this->delivery_amount,
             'discount' => [
+                'id' => $this->discountCode?->id,
                 'code' => $this->discountCode?->code,
                 'ratio' => $this->price
                     ? (
