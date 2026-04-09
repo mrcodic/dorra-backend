@@ -64,7 +64,7 @@ class CheckoutRequest extends FormRequest
         return [
             'payment_method_id' => 'exists:payment_methods,id',
             'discount_code_id' => ['nullable', 'exists:discount_codes,id'],
-            'country_code_id' => ['sometimes', 'exists:country_codes,id',new ValidDiscountCode(cart: request()->user()->cart)],
+            'country_code_id' => ['sometimes', 'exists:country_codes,id',new ValidDiscountCode(cart: request()->user()?->cart)],
             'first_name' => ['sometimes', 'string'],
             'last_name' => ['sometimes', 'string'],
             'email' => ['sometimes', 'email'],
