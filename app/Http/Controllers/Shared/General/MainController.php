@@ -133,6 +133,10 @@ class MainController extends Controller
 
     public function discountCode()
     {
+        if (auth('sanctum')->user()->discount_code_id && auth('sanctum')->user()->created_at->addMonth()->isPast())
+        {
+            auth('sanctum')->user()->update(['discount_code_id' => null]);
+        }
         return Response::api( data: auth('sanctum')->user()->discountCode ? DiscountCodeResource::make(auth('sanctum')->user()->discountCode): collect([]));
     }
     public function countries()
