@@ -59,7 +59,7 @@ class CheckoutRequest extends FormRequest
 
     public function rules(): array
     {
-        dd(request()->user(),auth()->user());
+        dd(getAuthOrGuest());
         $isoCode = CountryCode::find($this->country_code_id)?->iso_code ?? 'US';
 
         return [
