@@ -677,7 +677,6 @@ class OrderService extends BaseService
                 'discountCode' => ['This discount code is not valid.'],
             ]);
         }
-
         $subTotal = $cart->items->sum(fn($item) => $item->sub_total_after_offer ?? $item->sub_total);
 
         // create order + items + address inside transaction
