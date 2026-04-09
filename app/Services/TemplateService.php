@@ -197,12 +197,12 @@ class TemplateService extends BaseService
 
 
             return $paginate
-                ? $query->paginate($requested)
+                ? $query->paginate($pageSize)
                 : $query->get();
         }
 
         return $paginate
-            ? $query->latest()->paginate($requested)
+            ? $query->latest()->paginate($pageSize)
             : $query->latest()->get();
     }
 
