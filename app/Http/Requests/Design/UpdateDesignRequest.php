@@ -165,7 +165,7 @@ class UpdateDesignRequest extends BaseRequest
             'files.*' => [
                 'file',
 //                'mimes:png',
-                'max:2048'
+                'max:12288'
             ],
             'font_styles_ids' => ['nullable', 'array'],
             'font_styles_ids.*' => ['integer', 'exists:font_styles,id'],
