@@ -1445,7 +1445,7 @@
                     if (block) block.remove();
 
                     // Destroy dropzone instances for this type
-                    ['base', 'mask', 'shadow'].forEach(part => {
+                    ['base', 'mask', 'shadow', 'displacement', 'light'].forEach(part => {
                         const key = `${type}-${part}`;
                         if (dropzoneInstances[key]) {
                             dropzoneInstances[key].destroy();
@@ -1505,6 +1505,29 @@
                     </div>
                 </div>
             </div>
+
+            <div class="mb-2">
+                <label class="form-label label-text">${typeLabel} Displacement Image</label>
+                <div id="dz-${type}-displacement" class="dropzone dropzone-area">
+                    <div class="dz-message">
+                        <i data-feather="upload-cloud" style="width:28px;height:28px;stroke:#24B094;"></i>
+                        <p class="mt-1 mb-0">Drag &amp; drop or <u>click to upload</u></p>
+                        <small class="text-muted">PNG accepted</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label label-text">${typeLabel} Highlight Image</label>
+                <div id="dz-${type}-light" class="dropzone dropzone-area">
+                    <div class="dz-message">
+                        <i data-feather="upload-cloud" style="width:28px;height:28px;stroke:#24B094;"></i>
+                        <p class="mt-1 mb-0">Drag &amp; drop or <u>click to upload</u></p>
+                        <small class="text-muted">PNG accepted</small>
+                    </div>
+                </div>
+            </div>
+
  <div id="warp-editor-${type}" class="mt-3 d-none">
         <div class="d-flex justify-content-between align-items-center mb-1">
             <label class="label-text">
@@ -1536,6 +1559,8 @@
                     initDropzone(type, 'base');
                     initDropzone(type, 'mask');
                     initDropzone(type, 'shadow');
+                    initDropzone(type, 'displacement');
+                    initDropzone(type, 'light');
                 }, 50);
             });
         }
@@ -1571,7 +1596,7 @@
 
                 // Send custom properties with every upload
                 params: {
-                    "customProperties[role]": part,   // base | mask | shadow
+                    "customProperties[role]": part,   // base | mask | shadow | displacement | light
                     "customProperties[side]": type,   // front | back | none
                 },
 

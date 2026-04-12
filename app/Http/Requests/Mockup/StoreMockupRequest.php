@@ -5,7 +5,6 @@ namespace App\Http\Requests\Mockup;
 use App\Enums\Mockup\TypeEnum;
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\Category;
-use App\Models\Product;
 use Illuminate\Validation\Rule;
 
 class StoreMockupRequest extends BaseRequest
@@ -18,19 +17,17 @@ class StoreMockupRequest extends BaseRequest
         return true;
     }
 
-
     /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-
-
     public function rules()
     {
         $types = request('types', []);
         $approach = request('approach') ?? request('q');
         $isWithout = $approach === 'without_editor' || $approach === 'without';
+
         return [
             'name' => [
                 'required',
@@ -48,6 +45,7 @@ class StoreMockupRequest extends BaseRequest
             'warp_points' => ['nullable', 'array'],
             'templates' => ['nullable', 'array'],
             'templates.*.template_id' => ['nullable', 'exists:templates,id'],
+
             'templates.*.front_x' => ['nullable', 'numeric', 'min:0'],
             'templates.*.front_y' => ['nullable', 'numeric', 'min:0'],
             'templates.*.front_width' => ['nullable', 'numeric', 'min:0'],
@@ -70,44 +68,71 @@ class StoreMockupRequest extends BaseRequest
                 'required',
                 'array',
             ],
+
+            // FRONT
             'front_base_image_id' => [
                 Rule::requiredIf(in_array(1, $types)),
-                'exists:media,id'
+                'exists:media,id',
             ],
             'front_mask_image_id' => [
                 Rule::requiredIf(in_array(1, $types)),
-                'exists:media,id'
+                'exists:media,id',
             ],
             'front_shadow_image_id' => [
                 Rule::requiredIf(in_array(1, $types)),
-                'exists:media,id'
+                'exists:media,id',
+            ],
+            'front_displacement_image_id' => [
+                Rule::requiredIf(in_array(1, $types)),
+                'exists:media,id',
+            ],
+            'front_light_image_id' => [
+                Rule::requiredIf(in_array(1, $types)),
+                'exists:media,id',
             ],
 
+            // BACK
             'back_base_image_id' => [
                 Rule::requiredIf(in_array(2, $types)),
-                'exists:media,id'
-
+                'exists:media,id',
             ],
             'back_mask_image_id' => [
                 Rule::requiredIf(in_array(2, $types)),
-                'exists:media,id'
+                'exists:media,id',
             ],
             'back_shadow_image_id' => [
                 Rule::requiredIf(in_array(2, $types)),
-                'exists:media,id'
+                'exists:media,id',
+            ],
+            'back_displacement_image_id' => [
+                Rule::requiredIf(in_array(2, $types)),
+                'exists:media,id',
+            ],
+            'back_light_image_id' => [
+                Rule::requiredIf(in_array(2, $types)),
+                'exists:media,id',
             ],
 
+            // NONE / GENERAL
             'none_base_image_id' => [
                 Rule::requiredIf(in_array(3, $types)),
-                'exists:media,id'
+                'exists:media,id',
             ],
             'none_mask_image_id' => [
                 Rule::requiredIf(in_array(3, $types)),
-                'exists:media,id'
+                'exists:media,id',
             ],
             'none_shadow_image_id' => [
                 Rule::requiredIf(in_array(3, $types)),
-                'exists:media,id'
+                'exists:media,id',
+            ],
+            'none_displacement_image_id' => [
+                Rule::requiredIf(in_array(3, $types)),
+                'exists:media,id',
+            ],
+            'none_light_image_id' => [
+                Rule::requiredIf(in_array(3, $types)),
+                'exists:media,id',
             ],
         ];
     }
@@ -125,8 +150,7 @@ class StoreMockupRequest extends BaseRequest
     {
         return [
             'templates' => 'positions',
-            'category_id' => 'product_id'
+            'category_id' => 'product_id',
         ];
     }
-
 }

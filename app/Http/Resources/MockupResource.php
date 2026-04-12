@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-
 use App\Http\Resources\Template\TypeResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -16,7 +15,6 @@ class MockupResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-
         $types = $this->whenLoaded('types', fn() => $this->types, collect());
 
         $images = $types->mapWithKeys(function ($type) {
@@ -31,9 +29,20 @@ class MockupResource extends JsonResource
                 return $media->getCustomProperty('side') === $sideName &&
                     $media->getCustomProperty('role') === 'mask';
             });
+
             $shadowMedia = $this->getMedia('mockups')->first(function ($media) use ($sideName) {
                 return $media->getCustomProperty('side') === $sideName &&
                     $media->getCustomProperty('role') === 'shadow';
+            });
+
+            $displacementMedia = $this->getMedia('mockups')->first(function ($media) use ($sideName) {
+                return $media->getCustomProperty('side') === $sideName &&
+                    $media->getCustomProperty('role') === 'displacement';
+            });
+
+            $lightMedia = $this->getMedia('mockups')->first(function ($media) use ($sideName) {
+                return $media->getCustomProperty('side') === $sideName &&
+                    $media->getCustomProperty('role') === 'light';
             });
 
             return [
@@ -41,16 +50,17 @@ class MockupResource extends JsonResource
                     'base_url' => optional($baseMedia)->getFullUrl(),
                     'mask_url' => optional($maskMedia)->getFullUrl(),
                     'shadow_url' => optional($shadowMedia)->getFullUrl(),
+                    'displacement_url' => optional($displacementMedia)->getFullUrl(),
+                    'light_url' => optional($lightMedia)->getFullUrl(),
                 ],
             ];
         });
+
         return [
             'id' => $this->id,
             'name' => $this->name,
-
             'types' => TypeResource::collection($this->whenLoaded('types')),
             'product' => CategoryResource::make($this->whenLoaded('category')),
-
             'colors' => $this->templateColors ?: $this->colors,
             'base_image_url' => $this->base_image_url,
             'area_top' => $this->area_top,
@@ -60,9 +70,7 @@ class MockupResource extends JsonResource
             'side_settings' => MockupSideSettingResource::collection($this->whenLoaded('sideSettings')),
             'mockup_template_urls' => $this->getMedia('generated_mockups')
                 ->map(fn($m) => $m->getFullUrl()),
-
             'images' => $images,
         ];
     }
-
 }

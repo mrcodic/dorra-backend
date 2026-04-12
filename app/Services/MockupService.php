@@ -277,7 +277,7 @@ class MockupService extends BaseService
         });
         $model->types->each(function ($type) use ($model) {
             $typeName = strtolower($type->value->name);
-            $mediaTypes = ['base_image', 'mask_image', 'shadow_image'];
+            $mediaTypes = ['base_image', 'mask_image', 'shadow_image', 'displacement_image', 'light_image'];
             foreach ($mediaTypes as $mediaType) {
                 $inputName = $typeName. '_' . $mediaType . '_id';
                 if (!request()->filled($inputName)) {
@@ -376,7 +376,7 @@ class MockupService extends BaseService
 
             $model->types->each(function ($type) use ($model) {
                 $typeName = strtolower($type->value->name);
-                $mediaTypes = ['base_image', 'mask_image', 'shadow_image'];
+                $mediaTypes = ['base_image', 'mask_image', 'shadow_image', 'displacement_image', 'light_image'];
                 foreach ($mediaTypes as $mediaType) {
                     $inputName = $typeName. '_' . $mediaType . '_id';
                     if (!request()->filled($inputName)) {
