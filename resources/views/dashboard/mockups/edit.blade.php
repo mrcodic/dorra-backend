@@ -134,44 +134,57 @@
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 @endsection
 @php
+    $mediaCollection = $model->getMedia('mockups');
+
     $existingMedia = [
         'front' => [
-            'base_image'   => $model->front_base_image_url   ?? null,
-            'mask_image'   => $model->front_mask_image_url   ?? null,
-            'shadow_image' => $model->front_shadow_image_url ?? null,
+            'base_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'base')->first()?->getFullUrl(),
+            'mask_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'mask')->first()?->getFullUrl(),
+            'shadow_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'shadow')->first()?->getFullUrl(),
+            'displacement_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'displacement')->first()?->getFullUrl(),
+            'light_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'light')->first()?->getFullUrl(),
         ],
         'back' => [
-            'base_image'   => $model->back_base_image_url   ?? null,
-            'mask_image'   => $model->back_mask_image_url   ?? null,
-            'shadow_image' => $model->back_shadow_image_url ?? null,
+            'base_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'base')->first()?->getFullUrl(),
+            'mask_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'mask')->first()?->getFullUrl(),
+            'shadow_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'shadow')->first()?->getFullUrl(),
+            'displacement_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'displacement')->first()?->getFullUrl(),
+            'light_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'light')->first()?->getFullUrl(),
         ],
         'none' => [
-            'base_image'   => $model->none_base_image_url   ?? null,
-            'mask_image'   => $model->none_mask_image_url   ?? null,
-            'shadow_image' => $model->none_shadow_image_url ?? null,
+            'base_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'base')->first()?->getFullUrl(),
+            'mask_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'mask')->first()?->getFullUrl(),
+            'shadow_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'shadow')->first()?->getFullUrl(),
+            'displacement_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'displacement')->first()?->getFullUrl(),
+            'light_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'light')->first()?->getFullUrl(),
         ],
     ];
-
-    $mediaCollection = $model->getMedia('mockups');
 
     $existingMediaIds = [
         'front' => [
-            'base_image'   => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'base')->first()?->id,
-            'mask_image'   => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'mask')->first()?->id,
+            'base_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'base')->first()?->id,
+            'mask_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'mask')->first()?->id,
             'shadow_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'shadow')->first()?->id,
+            'displacement_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'displacement')->first()?->id,
+            'light_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'light')->first()?->id,
         ],
         'back' => [
-            'base_image'   => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'base')->first()?->id,
-            'mask_image'   => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'mask')->first()?->id,
+            'base_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'base')->first()?->id,
+            'mask_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'mask')->first()?->id,
             'shadow_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'shadow')->first()?->id,
+            'displacement_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'displacement')->first()?->id,
+            'light_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'light')->first()?->id,
         ],
         'none' => [
-            'base_image'   => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'base')->first()?->id,
-            'mask_image'   => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'mask')->first()?->id,
+            'base_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'base')->first()?->id,
+            'mask_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'mask')->first()?->id,
             'shadow_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'shadow')->first()?->id,
+            'displacement_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'displacement')->first()?->id,
+            'light_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'light')->first()?->id,
         ],
     ];
-        $existingWarpPoints = [
+
+    $existingWarpPoints = [
         'front' => $model->sideSettings->firstWhere('side', 'front')?->warp_points ?? null,
         'back'  => $model->sideSettings->firstWhere('side', 'back')?->warp_points  ?? null,
         'none'  => $model->sideSettings->firstWhere('side', 'none')?->warp_points  ?? null,
@@ -430,10 +443,12 @@
                 return str.charAt(0).toUpperCase() + str.slice(1);
             }
 
-            function preloadFile(type, baseUrl, maskUrl, shadowUrl) {
+            function preloadFile(type, baseUrl, maskUrl, shadowUrl, displacementUrl, lightUrl) {
                 const baseInput = document.getElementById(`${type}-base-input`);
                 const maskInput = document.getElementById(`${type}-mask-input`);
                 const shadowInput = document.getElementById(`${type}-shadow-input`);
+                const displacementInput = document.getElementById(`${type}-displacement-input`);
+                const lightInput = document.getElementById(`${type}-light-input`);
 
                 const block = document.getElementById(`${type}-file-block`);
                 if (!block) return;
@@ -441,6 +456,8 @@
                 const basePreview = block.querySelector(`.upload-area[data-input-id="${type}-base-input"] .preview`);
                 const maskPreview = block.querySelector(`.upload-area[data-input-id="${type}-mask-input"] .preview`);
                 const shadowPreview = block.querySelector(`.upload-area[data-input-id="${type}-shadow-input"] .preview`);
+                const displacementPreview = block.querySelector(`.upload-area[data-input-id="${type}-displacement-input"] .preview`);
+                const lightPreview = block.querySelector(`.upload-area[data-input-id="${type}-light-input"] .preview`);
 
                 const canvas = window[`canvas${capitalize(type)}`];
                 const wrapperId = `editor${capitalize(type)}Wrapper`;
@@ -504,6 +521,42 @@
                             });
                     }
                 }
+
+                // -----------------------------
+                // Displacement image
+                // -----------------------------
+                if (displacementUrl && displacementPreview) {
+                    displacementPreview.innerHTML = `<img src="${displacementUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
+                    document.getElementById(wrapperId)?.classList.remove('d-none');
+
+                    if (displacementInput) {
+                        fetch(displacementUrl)
+                            .then(res => res.blob())
+                            .then(blob => {
+                                const dt = new DataTransfer();
+                                dt.items.add(new File([blob], 'displacement.png', { type: blob.type }));
+                                displacementInput.files = dt.files;
+                            });
+                    }
+                }
+
+                // -----------------------------
+                // Highlight image
+                // -----------------------------
+                if (lightUrl && lightPreview) {
+                    lightPreview.innerHTML = `<img src="${lightUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
+                    document.getElementById(wrapperId)?.classList.remove('d-none');
+
+                    if (lightInput) {
+                        fetch(lightUrl)
+                            .then(res => res.blob())
+                            .then(blob => {
+                                const dt = new DataTransfer();
+                                dt.items.add(new File([blob], 'light.png', { type: blob.type }));
+                                lightInput.files = dt.files;
+                            });
+                    }
+                }
             }
 
 
@@ -524,7 +577,9 @@
                         "{{ strtolower($type->value->name) }}",
                         "{{ $model->{ strtolower($type->value->name) . '_base_image_url' } ?? '' }}",
                         "{{ $model->{ strtolower($type->value->name) . '_mask_image_url' } ?? '' }}",
-                        "{{ $model->{ strtolower($type->value->name) . '_shadow_image_url' } ?? '' }}"
+                        "{{ $model->{ strtolower($type->value->name) . '_shadow_image_url' } ?? '' }}",
+                        "{{ $existingMedia[strtolower($type->value->name)]['displacement_image'] ?? '' }}",
+                        "{{ $existingMedia[strtolower($type->value->name)]['light_image'] ?? '' }}"
                     );
                 }, 50); // 50ms delay usually enough
             })();
@@ -1109,56 +1164,69 @@
 
                 const back = tpl.back_base64_preview_image || '';
                 const img = front || back || none || "{{ asset('images/placeholder.svg') }}";
-                const editorBaseUrl = "{{ rtrim(config('services.editor_url'), '/') }}/mockups/";
-                const editorUrl = `${editorBaseUrl}${id}`;
+
+                const editorBaseUrl = "{{ rtrim(config('services.editor_url'), '/') }}/mokup/";
+                const mockupId = "{{ $model->id }}";
+                const productId = $('#productsSelect').val() || "{{ $model->category_id }}";
+
+                const editorUrl = `${editorBaseUrl}${mockupId}?${new URLSearchParams({
+                    templateId: id,
+                    is_has_category: '0',
+                    product_id: String(productId || '')
+                }).toString()}`;
+
                 return `
-      <div class="template-card h-100 position-relative"
-           data-id="${id}"
-           data-index="${index}"
-           data-front="${front}"
-           data-back="${back}"
-           data-none="${none}">
+                <div class="template-card h-100 position-relative"
+                    data-id="${id}"
+                    data-index="${index}"
+                    data-front="${front}"
+                    data-back="${back}"
+                    data-none="${none}">
 
-        ${isAttached ? `
-          <span class="badge bg-success position-absolute"
-                style="top:10px;left:10px;z-index:10;">
-            Attached
-          </span>
-        ` : ``}
+                    ${isAttached ? `
+                    <span class="badge bg-success position-absolute"
+                            style="top:10px;left:10px;z-index:10;">
+                        Attached
+                    </span>
+                    ` : ``}
 
-        <div class="card rounded-3 shadow-sm" style="border:1px solid #24B094;">
-          <div class="d-flex justify-content-center align-items-center"
-               style="background-color:#F4F6F6;height:200px;border-radius:12px;padding:10px;">
-            <img src="${img}" class="mx-auto d-block"
-                 style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:5px;"
-                 alt="${name}">
-          </div>
+                    <div class="card rounded-3 shadow-sm" style="border:1px solid #24B094;">
+                    <div class="d-flex justify-content-center align-items-center"
+                        style="background-color:#F4F6F6;height:200px;border-radius:12px;padding:10px;">
+                        <img src="${img}" class="mx-auto d-block"
+                            style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:5px;"
+                            alt="${name}">
+                    </div>
 
-          <div class="card-body py-2">
-            <h6 class="card-title mb-0 text-truncate fs-5">${name}</h6>
-          </div>
+                    <div class="card-body py-2">
+                        <h6 class="card-title mb-0 text-truncate fs-5">${name}</h6>
+                    </div>
 
-          <div class="d-flex gap-1 px-1 pb-2">
-            <button type="button" class="btn btn-sm btn-primary w-100 js-show-on-mockup">Show on Mockup</button>
-  <a href="${editorUrl}"
-                       target="_blank"
-                       class="btn btn-sm btn-primary w-100">
-                        Show with Editor
-                    </a>
-            <button type="button" class="btn btn-sm btn-outline-primary w-100 js-save-positions">Save Positions</button>
-          </div>
+                    <div class="d-flex gap-1 px-1 pb-2">
+                        <button type="button" class="btn btn-sm btn-primary w-100 js-show-on-mockup">Show on Mockup</button>
 
-          <div class="mb-2" style="padding-left:10px">
-            <label class="label-text mb-1 d-block">Colors</label>
-            <div class="d-flex flex-wrap align-items-center gap-1">
-              <button type="button" class="openColorPicker gradient-picker-trigger border"></button>
-              <span class="selected-colors d-flex gap-1 flex-wrap align-items-center"></span>
-            </div>
-            <div class="colorsInputContainer"></div>
-          </div>
-        </div>
-      </div>
-    `;
+                        <a href="${editorUrl}"
+                        target="_blank"
+                        class="btn btn-sm btn-primary w-100">
+                            Show with Editor
+                        </a>
+
+                        <button type="button" class="btn btn-sm btn-outline-primary w-100 js-save-positions">
+                            Save Positions
+                        </button>
+                    </div>
+
+                    <div class="mb-2" style="padding-left:10px">
+                        <label class="label-text mb-1 d-block">Colors</label>
+                        <div class="d-flex flex-wrap align-items-center gap-1">
+                        <button type="button" class="openColorPicker gradient-picker-trigger border"></button>
+                        <span class="selected-colors d-flex gap-1 flex-wrap align-items-center"></span>
+                        </div>
+                        <div class="colorsInputContainer"></div>
+                    </div>
+                    </div>
+                </div>
+                `;
             }
 
             // =========================
@@ -2107,7 +2175,7 @@
                 const block = document.getElementById(`${type}-file-block`);
                 if (block) block.remove();
 
-                ['base_image', 'mask_image', 'shadow_image'].forEach(part => {
+                ['base_image', 'mask_image', 'shadow_image', 'displacement_image', 'light_image'].forEach(part => {
                     const key = `${type}-${part}`;
                     if (dropzoneInstances[key]) {
                         dropzoneInstances[key].destroy();
@@ -2167,6 +2235,28 @@
                 </div>
             </div>
 
+            <div class="mb-2">
+                <label class="form-label label-text">${typeLabel} Displacement Image</label>
+                <div id="dz-${type}-displacement_image" class="dropzone dropzone-area">
+                    <div class="dz-message">
+                        <i data-feather="upload-cloud" style="width:28px;height:28px;stroke:#24B094;"></i>
+                        <p class="mt-1 mb-0">Drag &amp; drop or <u>click to upload</u></p>
+                        <small class="text-muted">PNG only</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label label-text">${typeLabel} Highlight Image</label>
+                <div id="dz-${type}-light_image" class="dropzone dropzone-area">
+                    <div class="dz-message">
+                        <i data-feather="upload-cloud" style="width:28px;height:28px;stroke:#24B094;"></i>
+                        <p class="mt-1 mb-0">Drag &amp; drop or <u>click to upload</u></p>
+                        <small class="text-muted">PNG only</small>
+                    </div>
+                </div>
+            </div>
+
     <div id="warp-editor-${type}" class="mt-3 d-none">
         <div class="d-flex justify-content-between align-items-center mb-1">
             <label class="label-text">
@@ -2197,6 +2287,8 @@
                 initDropzone(type, 'base_image');
                 initDropzone(type, 'mask_image');
                 initDropzone(type, 'shadow_image');
+                initDropzone(type, 'displacement_image');
+                initDropzone(type, 'light_image');
             }, 50);
         });
     }
@@ -2231,7 +2323,7 @@
             dictInvalidFileType: "Only PNG files are allowed.",
 
             params: {
-                "customProperties[role]": part.replace('_image', ''),  // base | mask | shadow
+                "customProperties[role]": part.replace('_image', ''),  // base | mask | shadow | displacement | light
                 "customProperties[side]": type,                         // front | back | none
             },
 

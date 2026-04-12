@@ -366,8 +366,15 @@
 
                 const back = tpl.back_base64_preview_image || '';
                 const img = front || back || none || "{{ asset('images/placeholder.svg') }}";
-                const editorBaseUrl = "{{ rtrim(config('services.editor_url'), '/') }}/mockups/";
-                const editorUrl = `${editorBaseUrl}${id}`;
+                const editorBaseUrl = "{{ rtrim(config('services.editor_url'), '/') }}/mokup/";
+                const mockupId = "{{ $model->id }}";
+                const productId = $('#productsSelect').val() || "{{ $model->category_id }}";
+
+                const editorUrl = `${editorBaseUrl}${mockupId}?${new URLSearchParams({
+                    templateId: id,
+                    is_has_category: '0',
+                    product_id: String(productId || '')
+                }).toString()}`;
 
                 return `
         <div class="template-card h-100"
