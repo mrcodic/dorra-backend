@@ -346,7 +346,7 @@
             }
 
             function buildTemplateInnerCard(tpl, index = 0) {
-                const id   = tpl.id;
+                const id = tpl.id;
                 const name = typeof tpl.name === 'object'
                     ? (tpl.name[locale] ?? Object.values(tpl.name)[0])
                     : (tpl.name || ('Template #' + id));
@@ -354,66 +354,72 @@
                 const hasType3 = tpl.types?.some(t => t.value === 3);
 
                 let front = '';
-                let none  = '';
+                let none = '';
 
                 if (hasType3) {
-                    none  = tpl.source_design_svg || '';
+                    none = tpl.source_design_svg || '';
                     front = '';
                 } else {
                     front = tpl.source_design_svg || '';
-                    none  = '';
+                    none = '';
                 }
 
-                const back  = tpl.back_base64_preview_image || '';
-                const img   = front || back ||none || "{{ asset('images/placeholder.svg') }}";
+                const back = tpl.back_base64_preview_image || '';
+                const img = front || back || none || "{{ asset('images/placeholder.svg') }}";
+                const editorBaseUrl = "{{ rtrim(config('services.editor_url'), '/') }}/mockups/";
+                const editorUrl = `${editorBaseUrl}${id}`;
 
                 return `
-                <div class="template-card h-100"
-                     data-id="${id}"
-                     data-index="${index}"
-                     data-front="${front}"
-                     data-back="${back}"
-                     data-none="${none}"
->
-                    <div class="card rounded-3 shadow-sm" style="border:1px solid #24B094;">
-                        <div class="d-flex justify-content-center align-items-center"
-                             style="background-color:#F4F6F6;height:200px;border-radius:12px;padding:10px;">
-                            <img
-                                src="${img}"
-                                class="mx-auto d-block"
-                                style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:5px;"
-                                alt="${name}">
-                        </div>
-
-                        <div class="card-body py-2">
-                            <h6 class="card-title mb-0 text-truncate fs-5">${name}</h6>
-                        </div>
-
-                        <div class="d-flex gap-1 px-1 pb-2">
-                            <button type="button"
-                                    class="btn btn-sm btn-primary w-100 js-show-on-mockup">
-                                Show on Mockup
-                            </button>
-                            <button type="button"
-                                    class="btn btn-sm btn-outline-primary w-100 js-save-positions">
-                                Save Positions
-                            </button>
-                        </div>
-
-                        <div class="mb-2" style="padding-left: 10px">
-                            <label class="label-text mb-1 d-block">Colors</label>
-                            <div class="d-flex flex-wrap align-items-center gap-1">
-                               <button type="button" class="openColorPicker gradient-picker-trigger border"></button>
-
-                                <span  class="selected-colors d-flex gap-1 flex-wrap align-items-center"></span>
-                            </div>
-                            <div class="colorsInputContainer"></div>
-                        </div>
-                    </div>
+        <div class="template-card h-100"
+             data-id="${id}"
+             data-index="${index}"
+             data-front="${front}"
+             data-back="${back}"
+             data-none="${none}">
+            <div class="card rounded-3 shadow-sm" style="border:1px solid #24B094;">
+                <div class="d-flex justify-content-center align-items-center"
+                     style="background-color:#F4F6F6;height:200px;border-radius:12px;padding:10px;">
+                    <img
+                        src="${img}"
+                        class="mx-auto d-block"
+                        style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:5px;"
+                        alt="${name}">
                 </div>
-            `;
-            }
 
+                <div class="card-body py-2">
+                    <h6 class="card-title mb-0 text-truncate fs-5">${name}</h6>
+                </div>
+
+                <div class="d-flex gap-1 px-1 pb-2">
+                    <button type="button"
+                            class="btn btn-sm btn-primary w-100 js-show-on-mockup">
+                        Show on Mockup
+                    </button>
+
+                    <a href="${editorUrl}"
+                       target="_blank"
+                       class="btn btn-sm btn-primary w-100">
+                        Show with Editor
+                    </a>
+
+                    <button type="button"
+                            class="btn btn-sm btn-outline-primary w-100 js-save-positions">
+                        Save Positions
+                    </button>
+                </div>
+
+                <div class="mb-2" style="padding-left: 10px">
+                    <label class="label-text mb-1 d-block">Colors</label>
+                    <div class="d-flex flex-wrap align-items-center gap-1">
+                        <button type="button" class="openColorPicker gradient-picker-trigger border"></button>
+                        <span class="selected-colors d-flex gap-1 flex-wrap align-items-center"></span>
+                    </div>
+                    <div class="colorsInputContainer"></div>
+                </div>
+            </div>
+        </div>
+    `;
+            }
             // =========================
             // Cards (أول 3 بس)
             // =========================

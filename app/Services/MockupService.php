@@ -464,7 +464,7 @@ class MockupService extends BaseService
     public function showAndUpdateRecent($id)
     {
         $mockup = $this->repository->find($id);
-        return $mockup->load('types');
+        return $mockup->load(['types','sideSettings']);
 //        return auth('web')->user()->recentMockups()->syncWithoutDetaching([$mockup->id]);
     }
 

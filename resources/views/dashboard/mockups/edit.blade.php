@@ -1109,7 +1109,8 @@
 
                 const back = tpl.back_base64_preview_image || '';
                 const img = front || back || none || "{{ asset('images/placeholder.svg') }}";
-
+                const editorBaseUrl = "{{ rtrim(config('services.editor_url'), '/') }}/mockups/";
+                const editorUrl = `${editorBaseUrl}${id}`;
                 return `
       <div class="template-card h-100 position-relative"
            data-id="${id}"
@@ -1139,6 +1140,11 @@
 
           <div class="d-flex gap-1 px-1 pb-2">
             <button type="button" class="btn btn-sm btn-primary w-100 js-show-on-mockup">Show on Mockup</button>
+  <a href="${editorUrl}"
+                       target="_blank"
+                       class="btn btn-sm btn-primary w-100">
+                        Show with Editor
+                    </a>
             <button type="button" class="btn btn-sm btn-outline-primary w-100 js-save-positions">Save Positions</button>
           </div>
 
