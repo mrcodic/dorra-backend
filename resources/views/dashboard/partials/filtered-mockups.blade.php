@@ -58,8 +58,12 @@ $side => [
                     data-images='@json($images)' data-colors='@json($mockup->templates->pluck('pivot.colors')->flatten()
     ->filter()
     ->values()
-    ->all() ?? [])' data-bs-toggle="modal"
-                    data-bs-target="#showMockupModal">
+    ->all() ?? [])'
+{{--                        data-bs-toggle="modal"--}}
+{{--                    data-bs-target="#showMockupModal"--}}
+                    href ="{{config('services.editor_url'). '/mokup/'.$mockup->id.
+            "?templateId=&&is_has_category=0&&product_id=$mockup->category->id"}}"
+                >
                     Show
                 </button>
                 @endcan
