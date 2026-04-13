@@ -215,6 +215,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::resource('/sub-industries', SubIndustryController::class);
 
         Route::group(['prefix' => 'templates', 'as' => 'templates.', 'controller' => TemplateController::class,], function () {
+            Route::put('/{template}/mockups/{mockup}','uploadaModelImage');
+
             Route::get('/data', [TemplateController::class, 'getData'])->name('data');
             Route::get('/search', 'search')->name('search');
             Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');

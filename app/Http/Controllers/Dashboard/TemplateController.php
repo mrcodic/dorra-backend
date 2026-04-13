@@ -24,7 +24,8 @@ use App\Repositories\Interfaces\{CategoryRepositoryInterface,
     ProductRepositoryInterface,
     ProductSpecificationRepositoryInterface,
     TagRepositoryInterface,
-    TemplateRepositoryInterface};
+    TemplateRepositoryInterface
+};
 use App\Services\TemplateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Cache, Response, Validator};
@@ -39,10 +40,10 @@ class TemplateController extends DashboardController
         public TagRepositoryInterface                  $tagRepository,
         public ProductSpecificationRepositoryInterface $productSpecificationRepository,
         public ProductRepositoryInterface              $productRepositoryInterface,
-        public CategoryRepositoryInterface              $categoryRepository,
-        public FlagRepositoryInterface                  $flagRepository,
-        public IndustryRepositoryInterface              $industryRepository,
-        public MockupRepositoryInterface              $mockupRepository,
+        public CategoryRepositoryInterface             $categoryRepository,
+        public FlagRepositoryInterface                 $flagRepository,
+        public IndustryRepositoryInterface             $industryRepository,
+        public MockupRepositoryInterface               $mockupRepository,
 
     )
     {
@@ -62,14 +63,14 @@ class TemplateController extends DashboardController
                 'categories' => $this->categoryRepository->query()->get(['id', 'name']),
                 'industries' => $this->industryRepository->query()->whereNull('parent_id')->get(['id', 'name']),
                 'sub_industries' => $this->industryRepository->query()->whereNotNull('parent_id')->get(['id', 'name']),
-                'product_with_categories' => $this->categoryRepository->query()->where('is_has_category',1)->has('products')->get(['id', 'name']),
-                'product_without_categories' => $this->categoryRepository->query()->where('is_has_category',0)->get(['id', 'name']),
+                'product_with_categories' => $this->categoryRepository->query()->where('is_has_category', 1)->has('products')->get(['id', 'name']),
+                'product_without_categories' => $this->categoryRepository->query()->where('is_has_category', 0)->get(['id', 'name']),
                 'tags' => $this->tagRepository->query()->get(['id', 'name']),
                 'mockups' => $this->mockupRepository->query()->with(['media'])->get(),
             ],
         ];
         $this->methodRelations = [
-            'index' => ["media","categories", "types"],
+            'index' => ["media", "categories", "types"],
             'edit' => ['products', 'types']
         ];
 
@@ -113,12 +114,12 @@ class TemplateController extends DashboardController
     public function storeAndRedirect(StoreTemplateRequest $request)
     {
         $template = $this->templateService->storeResource($request->validated());
-        if ($request->filled('mockup_id')){
+        if ($request->filled('mockup_id')) {
             return Response::api(data: [
                 "mockup_redirect_url" => route('mockups.edit', [
                     'mockup' => $request->mockup_id,
                     'template_id' => $template->id,
-                    ])
+                ])
             ]);
         }
         return Response::api(data: [
@@ -126,13 +127,14 @@ class TemplateController extends DashboardController
                 config('services.editor_url') . 'templates/' . $template->id . '?is_clear'
         ]);
     }
+
     public function update(Request $request, string $id)
     {
         $rules = $this->updateRequestClass->rules($id);
         $messages = [
             'dimension_id.required' => 'You must choose size',
-            'dimension_id.integer'  => 'You must choose size',
-            'dimension_id.exists'   => 'Selected size is invalid',
+            'dimension_id.integer' => 'You must choose size',
+            'dimension_id.exists' => 'Selected size is invalid',
         ];
 
         $validated = Validator::make(
@@ -141,7 +143,7 @@ class TemplateController extends DashboardController
             $messages
         )->validate();
         $model = $this->service->updateResource($validated, $id);
-        if ($request->filled('mockup_id')){
+        if ($request->filled('mockup_id')) {
             return Response::api(data: [
                 "mockup_redirect_url" => route('mockups.edit', [
                     'mockup' => $request->mockup_id,
@@ -162,11 +164,12 @@ class TemplateController extends DashboardController
         $template = $this->templateService->updateEditorData($request->validated(), $template->id);
         return Response::api(data: $this->resourceClass::make($template));
     }
+
     public function show($id)
     {
         return Response::api(data: TemplateResource::make($this->templateService->showResource($id,
             ['products.dimensions', 'types',
-                'dimension','libraryMedia'])));
+                'dimension', 'libraryMedia'])));
     }
 
     public function getProductTemplates()
@@ -266,11 +269,11 @@ class TemplateController extends DashboardController
     public function import(Request $request)
     {
         $request->validate([
-            'file'   => ['required','file','mimes:xlsx,xls,csv,txt'],
-            'images' => ['required','file','mimes:zip'],
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv,txt'],
+            'images' => ['required', 'file', 'mimes:zip'],
         ]);
 
-        $batch = (string) Str::uuid();
+        $batch = (string)Str::uuid();
 
         $excelRel = $request->file('file')->storeAs(
             "imports/$batch",
@@ -287,7 +290,7 @@ class TemplateController extends DashboardController
         ImportTemplatesFromExcel::dispatch($excelRel, $zipRel, $batch);
 
         return Response::api(data: [
-            'batch'  => $batch,
+            'batch' => $batch,
             'status' => 'queued',
         ]);
     }
@@ -295,7 +298,7 @@ class TemplateController extends DashboardController
     public function toggleBestSeller(Template $template)
     {
         $template->update([
-            'is_best_seller' => ! $template->is_best_seller
+            'is_best_seller' => !$template->is_best_seller
         ]);
 
         return Response::api(data: TemplateResource::make($template));
@@ -332,10 +335,11 @@ class TemplateController extends DashboardController
         $template->libraryMedia()->detach($media);
         return Response::api();
     }
+
     public function attachMultipleFonts(Request $request, Template $template)
     {
         $validated = $request->validate([
-            'font_media_id' => ['required','exists:font_styles,id']
+            'font_media_id' => ['required', 'exists:font_styles,id']
         ]);
 
         $fontStyle = FontStyle::find($validated['font_media_id']);
@@ -347,6 +351,21 @@ class TemplateController extends DashboardController
         $template->libraryMedia()->syncWithoutDetaching([
             $firstMedia->id => ['type' => 'font']
         ]);
+        return Response::api();
+    }
+
+    public function uploadaModelImage(Template $tempalte, Mockup $mockup, Request $request)
+    {
+        $request->validate([
+            'model_image' => ['required', 'image'],
+        ]);
+        $template->addMedia($request->file('model_image'))
+            ->usingFileName("tpl_{$template->id}_cat{$mockup->category_id}.png")
+            ->withCustomProperties([
+                'template_id' => (string)$template->id,
+                'category_id' => (int)$mockup->category_id,
+            ])
+            ->toMediaCollection('rendered_mockups');
         return Response::api();
     }
 }
