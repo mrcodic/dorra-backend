@@ -54,15 +54,17 @@ $side => [
 
             <div class="d-flex flex-wrap w-100 mt-1" style="gap:5px">
                 @can('mockups_show')
-                <button type="button" class="btn btn-outline-secondary flex-fill show-mockup-btn"
-                    data-images='@json($images)' data-colors='@json($mockup->templates->pluck('pivot.colors')->flatten()
-    ->filter()
-    ->values()
-    ->all() ?? [])'
+                <button type="button" class="btn btn-outline-secondary flex-fill"
+{{--                <button type="button" class="btn btn-outline-secondary flex-fill show-mockup-btn"--}}
+{{--                    data-images='@json($images)' data-colors='@json($mockup->templates->pluck('pivot.colors')->flatten()--}}
+{{--    ->filter()--}}
+{{--    ->values()--}}
+{{--    ->all() ?? [])'--}}
 {{--                        data-bs-toggle="modal"--}}
 {{--                    data-bs-target="#showMockupModal"--}}
                     href ="{{config('services.editor_url'). '/mokup/'.$mockup->id.
             "?templateId=&&is_has_category=0&&product_id=$mockup->category->id"}}"
+                        target="_blank"
                 >
                     Show
                 </button>
