@@ -53,7 +53,7 @@ $side => [
             </div>
 
             <div class="d-flex flex-wrap w-100 mt-1" style="gap:5px">
-                @can('mockups_show')
+{{--                @can('mockups_show')--}}
 {{--                <a type="button" class="btn btn-outline-secondary flex-fill"--}}
 {{--                <button type="button" class="btn btn-outline-secondary flex-fill show-mockup-btn"--}}
 {{--                    data-images='@json($images)' data-colors='@json($mockup->templates->pluck('pivot.colors')->flatten()--}}
