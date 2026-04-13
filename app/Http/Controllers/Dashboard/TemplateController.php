@@ -7,7 +7,7 @@ use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Base\DashboardController;
 use App\Jobs\ImportTemplatesFromExcel;
 use App\Models\FontStyle;
-use App\Models\Template;
+use App\Models\{Template,Mockup};
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
