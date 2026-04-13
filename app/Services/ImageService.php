@@ -26,7 +26,6 @@ class ImageService
         $width  = $imagick->getImageWidth();
         $height = $imagick->getImageHeight();
 
-        // Validate minimum dimensions
         $this->validateDimensions($width, $height);
 
         $original->update([
@@ -76,54 +75,47 @@ class ImageService
 
         $preview = new Imagick($filePath . '[0]');
 
-        // Remove metadata
+        // Remove metadata only
         $preview->stripImage();
 
-        // Force preview format to JPEG for better compression
-        $preview->setImageFormat('jpeg');
-        $preview->setImageCompression(Imagick::COMPRESSION_JPEG);
-        $preview->setImageCompressionQuality(85);
-        $preview->setInterlaceScheme(Imagick::INTERLACE_JPEG);
+        // ✅ Keep original format — no conversion to JPEG
+        $originalFormat = strtolower($preview->getImageFormat()); // e.g. 'png', 'webp'
+        $originalMime   = $this->getMimeType($originalFormat);
 
-        // Flatten transparency if exists, because JPEG does not support alpha
-        if ($preview->getImageAlphaChannel()) {
-            $background = new Imagick();
-            $background->newImage(
-                $preview->getImageWidth(),
-                $preview->getImageHeight(),
-                new ImagickPixel('white')
-            );
-            $background->setImageFormat('jpeg');
-            $background->compositeImage($preview, Imagick::COMPOSITE_OVER, 0, 0);
-            $preview->destroy();
-            $preview = $background;
-        }
+        // ✅ Set compression based on format
+        match ($originalFormat) {
+            'png'  => $preview->setImageCompression(Imagick::COMPRESSION_ZIP),
+            'webp' => $preview->setImageCompressionQuality(85),
+            default => null,
+        };
+
+        // ✅ NO alpha flattening — keep transparency as-is
 
         $this->compressToLimit(
             imagick: $preview,
             maxBytes: config('media.preview.max_size', 1 * 1024 * 1024),
+            format: $originalFormat,
         );
 
-        $tmpPath = tempnam(sys_get_temp_dir(), 'preview_') . '.jpg';
-        $previewFileName = pathinfo($original->file_name, PATHINFO_FILENAME) . '_preview.jpg';
+        $previewFileName = pathinfo($original->file_name, PATHINFO_FILENAME) . '_preview.' . $originalFormat;
+        $tmpPath         = tempnam(sys_get_temp_dir(), 'preview_') . '.' . $originalFormat;
 
         $preview->writeImage($tmpPath);
-
         clearstatcache(true, $tmpPath);
 
         $previewMedia = handleMediaUploads(
             files: new UploadedFile(
                 path: $tmpPath,
                 originalName: $previewFileName,
-                mimeType: 'image/jpeg',
+                mimeType: $originalMime,
                 test: true,
             ),
             modelData: $original->model,
             collectionName: $previewCollection,
             customProperties: [
-                'width' => $preview->getImageWidth(),
-                'height' => $preview->getImageHeight(),
-                'has_alpha' => false,
+                'width'       => $preview->getImageWidth(),
+                'height'      => $preview->getImageHeight(),
+                'has_alpha'   => (bool) $preview->getImageAlphaChannel(),
                 'original_id' => $original->id,
             ],
         );
@@ -133,41 +125,59 @@ class ImageService
 
         return $previewMedia;
     }
-    private function compressToLimit(Imagick $imagick, int $maxBytes): void
+
+    private function getMimeType(string $format): string
     {
-        $quality = 85;
+        return match ($format) {
+            'png'  => 'image/png',
+            'webp' => 'image/webp',
+            'gif'  => 'image/gif',
+            'tiff' => 'image/tiff',
+            default => 'image/' . $format,
+        };
+    }
+
+    private function compressToLimit(Imagick $imagick, int $maxBytes, string $format = 'png'): void
+    {
+        $quality    = 85;
         $minQuality = 20;
-        $step = 5;
+        $step       = 5;
 
-        $imagick->setImageCompression(Imagick::COMPRESSION_JPEG);
-        $imagick->setImageCompressionQuality($quality);
+        // Only set quality-based compression for formats that support it
+        $supportsQuality = in_array($format, ['webp', 'jpeg', 'jpg']);
 
-        // First try quality reduction
-        while ($quality >= $minQuality) {
+        if ($supportsQuality) {
             $imagick->setImageCompressionQuality($quality);
 
-            if (strlen($imagick->getImageBlob()) <= $maxBytes) {
-                return;
-            }
+            while ($quality >= $minQuality) {
+                $imagick->setImageCompressionQuality($quality);
 
-            $quality -= $step;
+                if (strlen($imagick->getImageBlob()) <= $maxBytes) {
+                    return;
+                }
+
+                $quality -= $step;
+            }
         }
 
-        // If still too large, resize gradually
+        // Resize gradually if still too large (works for all formats)
         while (strlen($imagick->getImageBlob()) > $maxBytes) {
-            $currentWidth = $imagick->getImageWidth();
+            $currentWidth  = $imagick->getImageWidth();
             $currentHeight = $imagick->getImageHeight();
 
-            // prevent endless loop on very small images
             if ($currentWidth <= 300 || $currentHeight <= 300) {
                 break;
             }
 
-            $newWidth = (int) round($currentWidth * 0.9);
+            $newWidth  = (int) round($currentWidth * 0.9);
             $newHeight = (int) round($currentHeight * 0.9);
 
             $imagick->resizeImage($newWidth, $newHeight, Imagick::FILTER_LANCZOS, 1, true);
-            $imagick->setImageCompressionQuality($minQuality);
+
+            // For PNG reduce compression level instead of quality
+            if ($format === 'png') {
+                $imagick->setImageCompressionQuality(9); // max PNG compression
+            }
         }
     }
 }
