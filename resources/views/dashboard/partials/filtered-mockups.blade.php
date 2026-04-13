@@ -54,7 +54,7 @@ $side => [
 
             <div class="d-flex flex-wrap w-100 mt-1" style="gap:5px">
                 @can('mockups_show')
-                <a type="button" class="btn btn-outline-secondary flex-fill"
+{{--                <a type="button" class="btn btn-outline-secondary flex-fill"--}}
 {{--                <button type="button" class="btn btn-outline-secondary flex-fill show-mockup-btn"--}}
 {{--                    data-images='@json($images)' data-colors='@json($mockup->templates->pluck('pivot.colors')->flatten()--}}
 {{--    ->filter()--}}
@@ -62,14 +62,20 @@ $side => [
 {{--    ->all() ?? [])'--}}
 {{--                        data-bs-toggle="modal"--}}
 {{--                    data-bs-target="#showMockupModal"--}}
-                    href ="{{config('services.editor_url'). '/mokup/'.$mockup->id.
-            "?templateId=&&is_has_category=0&&product_id=$mockup->category->id"}}"
-                        target="_blank"
-                >
-                    Show
-                </a>
-                @endcan
-
+{{--                    href ="{{config('services.editor_url'). '/mokup/'.$mockup->id.--}}
+{{--            "?templateId=&&is_has_category=0&&product_id=$mockup->category->id"}}"--}}
+{{--                        target="_blank"--}}
+{{--                >--}}
+{{--                    Show--}}
+{{--                </a>--}}
+{{--                @endcan--}}
+                    @can('mockups_show')
+                        <a href="{{ config('services.editor_url') . '/mokup/' . $mockup->id . '?templateId=&is_has_category=0&product_id=' . $mockup->category?->id }}"
+                           target="_blank"
+                           class="btn btn-outline-secondary flex-fill">
+                            Show
+                        </a>
+                    @endcan
                 @can('mockups_update')
                 <a href="{{ route('mockups.edit',$mockup->id) }}"
                     class="btn btn-outline-secondary flex-fill edit-mockup-btn">
