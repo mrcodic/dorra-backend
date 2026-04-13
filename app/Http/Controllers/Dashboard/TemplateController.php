@@ -354,18 +354,20 @@ class TemplateController extends DashboardController
         return Response::api();
     }
 
-    public function uploadaModelImage(Template $tempalte, Mockup $mockup, Request $request)
+    public function uploadModelImage(Template $template, Mockup $mockup, Request $request)
     {
         $request->validate([
             'model_image' => ['required', 'image'],
         ]);
-        $template->addMedia($request->file('model_image'))
+
+        $template
+            ->addMedia($request->file('model_image'))
             ->usingFileName("tpl_{$template->id}_cat{$mockup->category_id}.png")
             ->withCustomProperties([
-                'template_id' => (string)$template->id,
-                'category_id' => (int)$mockup->category_id,
+                'template_id' => (string) $template->id,
+                'category_id' => (int) $mockup->category_id,
             ])
             ->toMediaCollection('rendered_mockups');
+
         return Response::api();
-    }
-}
+    }}
