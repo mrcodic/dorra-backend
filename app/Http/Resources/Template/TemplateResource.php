@@ -21,6 +21,7 @@ class TemplateResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        dump($this->mockups);
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
@@ -52,17 +53,7 @@ class TemplateResource extends JsonResource
                     'mockup_id'   => $mockup->id,
                     'mockup_name' => $mockup->name,
                     'colors'      => $colors,
-                    'positions'   => collect($positions)->map(fn($position) => [
-                        'name' => $position['name'] ?? null,
-                        'p1x'  => $position['p1x'] ?? null,
-                        'p1y'  => $position['p1y'] ?? null,
-                        'p2x'  => $position['p2x'] ?? null,
-                        'p2y'  => $position['p2y'] ?? null,
-                        'p3x'  => $position['p3x'] ?? null,
-                        'p3y'  => $position['p3y'] ?? null,
-                        'p4x'  => $position['p4x'] ?? null,
-                        'p4y'  => $position['p4y'] ?? null,
-                    ])->values()->all(),
+                    'positions'   =>$positions,
                 ];
             })->values()->all()
             ),
