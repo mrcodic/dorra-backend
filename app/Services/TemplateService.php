@@ -633,7 +633,7 @@ class TemplateService extends BaseService
         $recent = request()->boolean('recent');
 
         return $this->repository->query()
-            ->with(['media', 'products', 'types'])
+            ->with(['media', 'products', 'types','mockups'])
             ->when($search, function ($query) use ($search) {
                 $locale = app()->getLocale();
                 $query->where("name->{$locale}", 'LIKE', "%{$search}%");
