@@ -21,4 +21,12 @@ enum TypeEnum : int
             self::NONE => "None",
         };
     }
+    public function key(): string
+    {
+        return match ($this) {
+            self::FRONT => 'front',
+            self::BACK  => 'back',
+            self::NONE  => 'none',
+        };
+    }
 }

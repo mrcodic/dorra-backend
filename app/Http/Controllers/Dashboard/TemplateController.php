@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Enums\HttpEnum;
+use App\Enums\Mockup\TypeEnum;
 use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Base\DashboardController;
 use App\Jobs\ImportTemplatesFromExcel;
 use App\Models\FontStyle;
+use Illuminate\Validation\Rule;
 use App\Models\{Template, Mockup};
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -361,7 +363,9 @@ class TemplateController extends DashboardController
     {
         $request->validate([
             'positions' => ['required', 'array'],
-            'positions.*.name' => ['required', 'string', 'max:100', 'in:front,back,none'],
+            'positions.*.name' => ['required', 'string', 'max:100',
+                Rule::in($mockup->types->map(fn($type) => TypeEnum::from($type->value)->key())->toArray()),
+            ],
             'positions.*.p1x' => ['required', 'numeric', 'min:0', 'max:100'],
             'positions.*.p1y' => ['required', 'numeric', 'min:0', 'max:100'],
             'positions.*.p2x' => ['required', 'numeric', 'min:0', 'max:100'],
@@ -372,8 +376,23 @@ class TemplateController extends DashboardController
             'positions.*.p4y' => ['required', 'numeric', 'min:0', 'max:100'],
             'colors' => ['required', 'array'],
             'files' => ['required', 'array'],
-            'files.*.side' => ['string', 'max:100', 'in:front,back,none'],
-            'files.*.color' => ['string'],
+            'files.*.side' => [
+                'string',
+                'max:100',
+                Rule::in($mockup->types->map(fn($type) => TypeEnum::from($type->value)->key())->toArray()),
+            ],
+            'files.*.color' => [
+                'string',
+                function ($attribute, $value, $fail) use ($request) {
+                    $colors = $request->input('colors', []);
+                    $normalizedColors = array_map(fn($c) => strtolower(ltrim($c, '#')), $colors);
+                    $normalizedValue  = strtolower(ltrim($value, '#'));
+
+                    if (!in_array($normalizedValue, $normalizedColors)) {
+                        $fail("The $attribute must be one of the provided colors.");
+                    }
+                },
+            ],
             'files.*.file' => ['image'],
         ]);
 
