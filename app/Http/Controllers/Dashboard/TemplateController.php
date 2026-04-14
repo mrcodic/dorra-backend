@@ -429,7 +429,8 @@ class TemplateController extends DashboardController
             $mockup->getMedia('generated_mockups')
                 ->filter(fn($m) => $m->getCustomProperty('template_id') == $template->id &&
                     $m->getCustomProperty('side') == $side &&
-                    strtolower($m->getCustomProperty('hex')) == strtolower($safeHex)
+                    strtolower($m->getCustomProperty('hex')) == strtolower($safeHex)&&
+                    $m->getCustomProperty('category_id') == $mockup->category_id
                 )
                 ->each->delete();
 
@@ -439,7 +440,7 @@ class TemplateController extends DashboardController
                     ->withCustomProperties([
                         'side' => $side,
                         'template_id' => (string)$template->id,
-                        'hex' => $hex,
+                        'hex' => $safeHex,
                         'category_id' => (int)$mockup->category_id,
                     ])
                     ->toMediaCollection('generated_mockups');
