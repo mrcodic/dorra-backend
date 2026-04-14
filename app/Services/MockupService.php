@@ -45,8 +45,7 @@ class MockupService extends BaseService
         $mockups = $this->repository
             ->query()
             ->when($categoryId, fn($q) => $q->whereCategoryId($categoryId))
-            ->when($templateId, fn($q) => $q->whereHas('templates', fn($qq) => $qq->where('templates.id', $templateId)
-            ))
+            ->when($templateId, fn($q) => $q->whereHas('templates', fn($qq) => $qq->where('templates.id', $templateId)))
             ->with([
                 'templates:id',
                 'types:id,value',
@@ -59,8 +58,9 @@ class MockupService extends BaseService
             ])
             ->get();
 
+        // Normalize to no '#' to match stored hex format
         $requestedColor = $color
-            ? (str_starts_with($color, '#') ? strtolower($color) : '#' . strtolower($color))
+            ? strtolower(ltrim($color, '#'))
             : null;
 
         $filtered = $mockups->filter(fn($mockup) => $mockup->templates->contains('id', $templateId));
@@ -99,7 +99,9 @@ class MockupService extends BaseService
                     ->values()
                     ->all();
 
-                $activeColor = $requestedColor ?? (count($colors) ? strtolower($colors[0]) : null);
+                // Normalize first color to no '#' to match stored format
+                $activeColor = $requestedColor
+                    ?? (count($colors) ? strtolower(ltrim($colors[0], '#')) : null);
 
                 $mockupMedia = $mockup->media
                     ->where('collection_name', 'generated_mockups')
@@ -107,8 +109,12 @@ class MockupService extends BaseService
                         if ($m->getCustomProperty('template_id') != $templateId) {
                             return false;
                         }
-                        $hex = strtolower($m->getCustomProperty('hex', ''));
-                        return !$activeColor || $hex === strtolower($activeColor);
+
+                        // Both sides normalized without '#'
+                        $storedHex  = strtolower(ltrim($m->getCustomProperty('hex', ''), '#'));
+                        $compareHex = $activeColor ? strtolower(ltrim($activeColor, '#')) : null;
+
+                        return !$compareHex || $storedHex === $compareHex;
                     });
 
                 $pickBySide = fn(string $side) => $mockupMedia
@@ -125,15 +131,14 @@ class MockupService extends BaseService
 
                 return [
                     'mockup_id' => $mockup->id,
-//                    'active_color' => $activeColor,
-                    'urls' => $urls,
+                    'urls'      => $urls,
                 ];
             })
             ->values()
             ->all();
 
         return [
-            'colors' => $allColors,
+            'colors'  => $allColors,
             'mockups' => $result,
         ];
     }

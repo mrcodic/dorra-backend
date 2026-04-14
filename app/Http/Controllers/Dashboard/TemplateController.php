@@ -459,7 +459,7 @@ class TemplateController extends DashboardController
                     ->withCustomProperties([
                         'side' => $side,
                         'template_id' => (string)$template->id,
-                        'hex' => $hex,
+                        'hex' => $safeHex,
                         'category_id' => (int)$mockup->category_id,
                     ])
                     ->toMediaCollection('generated_mockups');
