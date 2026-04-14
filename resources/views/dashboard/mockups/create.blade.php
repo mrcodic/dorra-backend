@@ -367,8 +367,8 @@
                 const back = tpl.back_base64_preview_image || '';
                 const img = front || back || none || "{{ asset('images/placeholder.svg') }}";
                 const editorBaseUrl = "{{ rtrim(config('services.editor_url'), '/') }}/mokup/";
-                const mockupId = "{{ $model->id }}";
-                const productId = $('#productsSelect').val() || "{{ $model->category_id }}";
+                {{--const mockupId = "{{ $model->id }}";--}}
+                {{--const productId = $('#productsSelect').val() || "{{ $model->category_id }}";--}}
 
                 const editorUrl = `${editorBaseUrl}${mockupId}?${new URLSearchParams({
                     templateId: id,
