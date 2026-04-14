@@ -444,7 +444,12 @@ class TemplateController extends DashboardController
             $side = $fileData['side'] ?? 'front';
             $hex = $fileData['color'] ?? '#000000';
             $safeHex = ltrim($hex, '#');
-
+dd(        $mockup->getMedia('generated_mockups')
+    ->filter(fn($m) => $m->getCustomProperty('template_id') == $template->id &&
+        $m->getCustomProperty('side') == $side &&
+        strtolower($m->getCustomProperty('hex')) == strtolower($safeHex)&&
+        $m->getCustomProperty('category_id') == $mockup->category_id
+    )->get());
             $mockup->getMedia('generated_mockups')
                 ->filter(fn($m) => $m->getCustomProperty('template_id') == $template->id &&
                     $m->getCustomProperty('side') == $side &&
