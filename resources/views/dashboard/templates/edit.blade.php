@@ -684,10 +684,7 @@
             </div>
         </div>
     </section>
-    @php
-        // لو route محتاج parameter اسمه mockup
-        $mockupEditUrlTemplate = route('mockups.edit', ['mockup' => '__MOCKUP__']);
-    @endphp
+
 
         <!-- Back Design Modal -->
     <div class="modal fade" id="backDesignModal" tabindex="-1" aria-hidden="true">
@@ -830,7 +827,7 @@
                     $hiddenWrap.append(`<input type="hidden" name="mockup_ids[]" value="${id}">`);
                 });
             }
-
+            const editUrlTemplate = "{{ config('services.editor_url') }}mokup/{id}?templateId={{ request('template_id') }}&is_has_category=0&product_id={categoryId}";
             // ── Render mockup cards ──────────────────────────────────────────────
             function renderMockupCards(items) {
                 $cardsWrap.empty();
@@ -841,63 +838,61 @@
                     return;
                 }
 
-                const editUrlTemplate = `{{ $mockupEditUrlTemplate }}`;
-
                 items.forEach(mockup => {
-                    const id = String(mockup.id);
-                    const name = mockup.name ?? ('Mockup #' + id);
+                    const id       = String(mockup.id);
+                    const name     = mockup.name ?? ('Mockup #' + id);
+                    const categoryId = mockup.category_id ?? '';
 
-                    const images = mockup?.images || {};
+                    const images   = mockup?.images || {};
                     const firstKey = Object.keys(images)[0];
-                    const img = (firstKey && images[firstKey]?.base_url)
+                    const img      = (firstKey && images[firstKey]?.base_url)
                         || "{{ asset('images/placeholder.svg') }}";
 
                     const isSelected = selected.has(id);
 
-                    // Build the "Show on Mockup" edit URL with template context
-                    const editUrl = editUrlTemplate.replace('__MOCKUP__', id);
-                    const href = `${editUrl}?template_id={{ $model->id }}`;
+                    // Build URL per mockup
+                    const href = editUrlTemplate
+                        .replace('{id}', id)
+                        .replace('{categoryId}', categoryId);
 
                     $cardsWrap.append(`
-                  <div class="col-12 col-md-4 col-lg-2">
-                    <div class="mockup-card${isSelected ? ' selected' : ''}" data-id="${id}">
-                      <div class="card rounded-3 shadow-sm position-relative" style="border:1px solid #24B094;">
+          <div class="col-12 col-md-4 col-lg-2">
+            <div class="mockup-card${isSelected ? ' selected' : ''}" data-id="${id}">
+              <div class="card rounded-3 shadow-sm position-relative" style="border:1px solid #24B094;">
 
-                        <!-- checkbox — NO name attribute, purely visual indicator -->
-                        <div class="position-absolute" style="top:10px;left:10px;z-index:20;">
-                          <input
-                            class="form-check-input js-mockup-checkbox"
-                            type="checkbox"
-                            value="${id}"
-                            ${isSelected ? 'checked' : ''}
-                          />
-                        </div>
+                <div class="position-absolute" style="top:10px;left:10px;z-index:20;">
+                  <input
+                    class="form-check-input js-mockup-checkbox"
+                    type="checkbox"
+                    value="${id}"
+                    ${isSelected ? 'checked' : ''}
+                  />
+                </div>
 
-                        <div class="d-flex justify-content-center align-items-center"
-                             style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">
-                          <img src="${img}" class="mx-auto d-block"
-                               style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:8px;"
-                               alt="${name}">
-                        </div>
+                <div class="d-flex justify-content-center align-items-center"
+                     style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">
+                  <img src="${img}" class="mx-auto d-block"
+                       style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:8px;"
+                       alt="${name}">
+                </div>
 
-                        <div class="card-body py-2">
-                          <h6 class="card-title mb-2 text-truncate">${name}</h6>
-                          <button type="button"
-                                  class="btn btn-sm btn-primary w-100 js-show-on-mockup"
-                                  data-id="${id}"
-                                  data-href="${href}">
-                            Show on Mockup
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                `);
+                <div class="card-body py-2">
+                  <h6 class="card-title mb-2 text-truncate">${name}</h6>
+                  <button type="button"
+                          class="btn btn-sm btn-primary w-100 js-show-on-mockup"
+                          data-id="${id}"
+                          data-href="${href}">
+                    Show on Mockup
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `);
                 });
 
                 syncHiddenInputs();
             }
-
             // ── Toggle selection — shared by card click and checkbox click ───────
             function toggleMockup(id) {
                 id = String(id);

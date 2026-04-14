@@ -70,7 +70,7 @@ $side => [
 {{--                </a>--}}
 {{--                @endcan--}}
                     @can('mockups_show')
-                        <a href="{{ config('services.editor_url') . 'mokup/' . $mockup->id . '?templateId=&is_has_category=0&product_id=' . $mockup->category?->id }}"
+                        <a href="{{ config('services.editor_url') . 'mokup/' . $mockup->id . '?is_has_category=0&product_id=' . $mockup->category?->id }}"
                            target="_blank"
                            class="btn btn-outline-secondary flex-fill">
                             Show

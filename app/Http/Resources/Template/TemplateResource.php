@@ -44,7 +44,18 @@ class TemplateResource extends JsonResource
             'types' => TypeResource::collection($this->whenLoaded('types')),
             'tags' => TagResource::collection($this->whenLoaded('tags')),
             'products' => ProductResource::collection($this->whenLoaded('products')),
-            'mockups' => MockupResource::collection($this->whenLoaded('mockups')),
+            'mockups' => $this->whenLoaded('mockups', fn() =>
+            $this->mockups->map(function ($mockup) {
+                $colors = $mockup->pivot->colors ?? [];
+                $positions = $mockup->pivot->positions ?? [];
+                return [
+                    'mockup_id'   => $mockup->id,
+                    'mockup_name' => $mockup->name,
+                    'colors'      => $colors,
+                    'positions'   =>$positions
+                ];
+            })->values()->all()
+            ),
             'source_design_svg' => $this->when(isset($this->image), $this->image),
             'back_base64_preview_image' => $this->use_front_as_back
                 ? $this->getFirstMediaUrl('templates-preview')
