@@ -47,7 +47,9 @@ class TemplateResource extends JsonResource
             'mockups' => $this->whenLoaded('mockups', fn() =>
             $this->mockups->map(function ($mockup) {
                 $colors = $mockup->pivot->colors ?? [];
-                $positions = $mockup->pivot->positions ?? [];
+                $positions = is_array($mockup->pivot->positions)
+                    ? $mockup->pivot->positions
+                    : json_decode($mockup->pivot->positions ?? '[]', true);
                 return [
                     'mockup_id'   => $mockup->id,
                     'mockup_name' => $mockup->name,
