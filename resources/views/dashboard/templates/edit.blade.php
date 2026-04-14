@@ -841,7 +841,7 @@
                 items.forEach(mockup => {
                     const id       = String(mockup.id);
                     const name     = mockup.name ?? ('Mockup #' + id);
-                    const categoryId = mockup.category_id ?? '';
+                    const categoryId = mockup.category?.id ?? '';
 
                     const images   = mockup?.images || {};
                     const firstKey = Object.keys(images)[0];
