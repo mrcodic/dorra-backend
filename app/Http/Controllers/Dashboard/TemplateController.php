@@ -364,7 +364,7 @@ class TemplateController extends DashboardController
         $request->validate([
             'positions' => ['required', 'array'],
             'positions.*.name' => ['required', 'string', 'max:100',
-                Rule::in($mockup->types->map(fn($type) => TypeEnum::from($type->value)->key())->toArray()),
+                Rule::in($mockup->types->map(fn($type) => $type->value->key())->toArray()),
             ],
             'positions.*.p1x' => ['required', 'numeric', 'min:0', 'max:100'],
             'positions.*.p1y' => ['required', 'numeric', 'min:0', 'max:100'],
@@ -379,7 +379,7 @@ class TemplateController extends DashboardController
             'files.*.side' => [
                 'string',
                 'max:100',
-                Rule::in($mockup->types->map(fn($type) => TypeEnum::from($type->value)->key())->toArray()),
+                Rule::in($mockup->types->map(fn($type) => $type->value->key())->toArray()),
             ],
             'files.*.color' => [
                 'string',
