@@ -253,35 +253,35 @@
                         </div>
                     </div>
                     <!-- العمود اليمين: الـ editor / preview -->
-                    <div class="row">
-                        <div class="d-none col-lg-6 d-flex flex-column align-items-center mb-1" id="editorFrontWrapper">
-                            <label class="label-text">Mockup Editor (Front)</label>
-                            <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="480"
-                                width="480"></canvas>
-                        </div>
-                        <div class="d-none col-lg-6 d-flex flex-column align-items-center mb-1" id="editorBackWrapper">
-                            <label class="label-text">Mockup Editor (Back)</label>
-                            <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="480px"
-                                width="480px"></canvas>
-                        </div>
+{{--                    <div class="row">--}}
+{{--                        <div class="d-none col-lg-6 d-flex flex-column align-items-center mb-1" id="editorFrontWrapper">--}}
+{{--                            <label class="label-text">Mockup Editor (Front)</label>--}}
+{{--                            <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="480"--}}
+{{--                                width="480"></canvas>--}}
+{{--                        </div>--}}
+{{--                        <div class="d-none col-lg-6 d-flex flex-column align-items-center mb-1" id="editorBackWrapper">--}}
+{{--                            <label class="label-text">Mockup Editor (Back)</label>--}}
+{{--                            <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="480px"--}}
+{{--                                width="480px"></canvas>--}}
+{{--                        </div>--}}
 
-                        <div class="d-none col-lg-6 d-flex flex-column align-items-center mb-1" id="editorNoneWrapper">
-                            <label class="label-text">Mockup Editor (General)</label>
-                            <canvas id="mockupCanvasNone" class="w-100" height="480" width="480"
-                                style="border:1px solid #ccc;"></canvas>
-                        </div>
-                    </div>
+{{--                        <div class="d-none col-lg-6 d-flex flex-column align-items-center mb-1" id="editorNoneWrapper">--}}
+{{--                            <label class="label-text">Mockup Editor (General)</label>--}}
+{{--                            <canvas id="mockupCanvasNone" class="w-100" height="480" width="480"--}}
+{{--                                style="border:1px solid #ccc;"></canvas>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
 {{--                    @if($model->approach == 'without_editor')--}}
 
-                    <div class="form-group my-2 d-none" id="templatesCardsWrapper">
-                        <label class="form-label mb-2">Choose Template</label>
+{{--                    <div class="form-group my-2 d-none" id="templatesCardsWrapper">--}}
+{{--                        <label class="form-label mb-2">Choose Template</label>--}}
 
-                        {{-- هنا هتنضاف الكروت بالـ JS --}}
-                        <div id="templatesCardsContainer" class="row g-1 p-1 bg-white border rounded-3 shadow-sm"></div>
-                        <input type="hidden" name="template_id" id="selectedTemplateId" class="col-md-3">
-                        <div id="templatesHiddenContainer"></div>
+{{--                        --}}{{-- هنا هتنضاف الكروت بالـ JS --}}
+{{--                        <div id="templatesCardsContainer" class="row g-1 p-1 bg-white border rounded-3 shadow-sm"></div>--}}
+{{--                        <input type="hidden" name="template_id" id="selectedTemplateId" class="col-md-3">--}}
+{{--                        <div id="templatesHiddenContainer"></div>--}}
 
-                    </div>
+{{--                    </div>--}}
 {{--                    @endif--}}
 
 
