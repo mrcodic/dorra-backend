@@ -827,7 +827,7 @@
                     $hiddenWrap.append(`<input type="hidden" name="mockup_ids[]" value="${id}">`);
                 });
             }
-            const editUrlTemplate = "{{ config('services.editor_url') }}mokup/{id}?templateId={{ request('template_id') }}&is_has_category=0&product_id={categoryId}";
+            const editUrlTemplate = "{{ config('services.editor_url') }}mokup/{id}?templateId={{ $model->id }}&is_has_category=0&product_id={categoryId}";
             // ── Render mockup cards ──────────────────────────────────────────────
             function renderMockupCards(items) {
                 $cardsWrap.empty();
@@ -927,17 +927,18 @@
                 e.preventDefault();
                 e.stopPropagation();
 
-                const id = String($(this).data('id'));
+                const id   = String($(this).data('id'));
+                const href = $(this).data('href'); // ✅ read from the button
 
-                // Ensure this mockup is selected before submitting
-                if (!selected.has(id)) {
-                    toggleMockup(id);
-                }
+                if (!selected.has(id)) toggleMockup(id);
 
                 $('#selectedMockupId').val(id);
+
+                // ✅ open editor URL then submit form
+                if (href) window.open(href, '_blank');
+
                 $('#editTemplateForm').submit();
             });
-
             // ── Fetch available mockups from server ──────────────────────────────
             function fetchMockups() {
                 const idsWithCat = $withCat.val() || [];
