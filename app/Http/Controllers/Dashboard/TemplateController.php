@@ -7,7 +7,7 @@ use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Base\DashboardController;
 use App\Jobs\ImportTemplatesFromExcel;
 use App\Models\FontStyle;
-use App\Models\{Template,Mockup};
+use App\Models\{Template, Mockup};
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
@@ -354,20 +354,91 @@ class TemplateController extends DashboardController
         return Response::api();
     }
 
-    public function uploadModelImage(Template $template, Mockup $mockup, Request $request)
+    /**
+     * Save mockup positions, colors, and upload generated mockup files
+     */
+    public function savePositionsAndUploadMockups(Template $template, Mockup $mockup, Request $request)
+    {
+        $request->validate([
+            'positions' => ['required', 'array'],
+            'positions.*.name' => ['required', 'string', 'max:100', 'in:front,back,none'],
+            'positions.*.p1x' => ['required', 'numeric', 'min:0', 'max:100'],
+            'positions.*.p1y' => ['required', 'numeric', 'min:0', 'max:100'],
+            'positions.*.p2x' => ['required', 'numeric', 'min:0', 'max:100'],
+            'positions.*.p2y' => ['required', 'numeric', 'min:0', 'max:100'],
+            'positions.*.p3x' => ['required', 'numeric', 'min:0', 'max:100'],
+            'positions.*.p3y' => ['required', 'numeric', 'min:0', 'max:100'],
+            'positions.*.p4x' => ['required', 'numeric', 'min:0', 'max:100'],
+            'positions.*.p4y' => ['required', 'numeric', 'min:0', 'max:100'],
+            'colors' => ['required', 'array'],
+            'files' => ['required', 'array'],
+            'files.*.side' => ['string', 'max:100', 'in:front,back,none'],
+            'files.*.color' => ['string'],
+            'files.*.file' => ['image'],
+        ]);
+
+        $template->mockups()->syncWithoutDetaching([
+            $mockup->id => [
+                'positions' => $request->input('positions'),
+                'colors' => $request->input('colors')
+            ]
+        ]);
+
+        $this->uploadMockupFiles($template, $mockup, $request);
+        return Response::api();
+    }
+
+    /**
+     * Upload template model image
+     */
+    public function uploadTemplateImage(Template $template, Mockup $mockup, Request $request)
     {
         $request->validate([
             'model_image' => ['required', 'image'],
         ]);
 
-        $template
-            ->addMedia($request->file('model_image'))
-            ->usingFileName("tpl_{$template->id}_cat{$mockup->category_id}.png")
-            ->withCustomProperties([
-                'template_id' => (string) $template->id,
-                'category_id' => (int) $mockup->category_id,
-            ])
-            ->toMediaCollection('rendered_mockups');
+        if ($request->hasFile('model_image')) {
+            $template
+                ->addMedia($request->file('model_image'))
+                ->usingFileName("tpl_{$template->id}_cat{$mockup->category_id}.png")
+                ->withCustomProperties([
+                    'template_id' => (string)$template->id,
+                    'category_id' => (int)$mockup->category_id,
+                ])
+                ->toMediaCollection('rendered_mockups');
+        }
 
         return Response::api();
-    }}
+    }
+
+    /**
+     * Helper method to upload mockup files
+     */
+    private function uploadMockupFiles(Template $template, Mockup $mockup, Request $request)
+    {
+        foreach ($request->input('files') as $index => $fileData) {
+            $side = $fileData['side'] ?? 'front';
+            $hex = $fileData['color'] ?? '#000000';
+            $safeHex = ltrim($hex, '#');
+
+            $mockup->getMedia('generated_mockups')
+                ->filter(fn($m) => $m->getCustomProperty('template_id') == $template->id &&
+                    $m->getCustomProperty('side') == $side &&
+                    strtolower($m->getCustomProperty('hex')) == strtolower($safeHex)
+                )
+                ->each->delete();
+
+            if ($request->hasFile("files.{$index}.file")) {
+                $mockup->addMedia($request->file("files.{$index}.file"))
+                    ->usingFileName("mockup_{$side}_tpl{$template->id}_{$safeHex}.png")
+                    ->withCustomProperties([
+                        'side' => $side,
+                        'template_id' => (string)$template->id,
+                        'hex' => $hex,
+                        'category_id' => (int)$mockup->category_id,
+                    ])
+                    ->toMediaCollection('generated_mockups');
+            }
+        }
+    }
+}

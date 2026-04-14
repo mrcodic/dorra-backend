@@ -215,7 +215,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::resource('/sub-industries', SubIndustryController::class);
 
         Route::group(['prefix' => 'templates', 'as' => 'templates.', 'controller' => TemplateController::class,], function () {
-            Route::put('/{template}/mockups/{mockup}','uploadaModelImage');
+            Route::put('/{template}/mockups/{mockup}/positions','savePositionsAndUploadMockups');
+            Route::put('/{template}/mockups/{mockup}/image','uploadTemplateImage');
 
             Route::get('/data', [TemplateController::class, 'getData'])->name('data');
             Route::get('/search', 'search')->name('search');
