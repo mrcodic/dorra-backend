@@ -60,6 +60,7 @@ class TemplateService extends BaseService
                 }
             },
             'types',
+            'mockups'
         ]);
 
         $requested = request('per_page', $perPage);
