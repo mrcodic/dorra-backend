@@ -398,6 +398,11 @@ class TemplateController extends DashboardController
         ]);
 
         if ($request->hasFile('model_image')) {
+            $template->getMedia('rendered_mockups')
+                ->filter(fn($t) => $t->getCustomProperty('template_id') == $template->id &&
+                    $t->getCustomProperty('category_id') == $mockup->category_id
+                )
+                ->each->delete();
             $template
                 ->addMedia($request->file('model_image'))
                 ->usingFileName("tpl_{$template->id}_cat{$mockup->category_id}.png")
