@@ -396,12 +396,17 @@ class TemplateController extends DashboardController
             'files.*.file' => ['image'],
         ]);
 
-        $template->mockups()->syncWithoutDetaching([
-            $mockup->id => [
+        if ($template->mockups()->where('mockup_id', $mockup->id)->exists()) {
+            $template->mockups()->updateExistingPivot($mockup->id, [
                 'positions' => $request->input('positions'),
-                'colors' => $request->input('colors')
-            ]
-        ]);
+                'colors' => $request->input('colors'),
+            ]);
+        } else {
+            $template->mockups()->attach($mockup->id, [
+                'positions' => $request->input('positions'),
+                'colors' => $request->input('colors'),
+            ]);
+        }
 
         $this->uploadMockupFiles($template, $mockup, $request);
         return Response::api();

@@ -774,11 +774,7 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                     <div class="card-body py-2">
                       <h6 class="card-title mb-2 text-truncate">${name}</h6>
 
-                ${ !isWithEditor ?`<button type="button"
-                              class="btn btn-sm btn-primary w-100 js-show-on-mockup"
-                              data-id="${id}">
-                        Show on Mockup
-                      </button>` :''}
+
                     </div>
                   </div>
                 </div>
