@@ -63,6 +63,10 @@ class MockupResource extends JsonResource
             'product' => CategoryResource::make($this->whenLoaded('category')),
             'colors' => $this->templateColors ?: $this->colors,
             'base_image_url' => $this->base_image_url,
+            'area_top' => $this->area_top,
+            'area_left' => $this->area_left,
+            'area_width' => $this->area_width,
+            'area_height' => $this->area_height,
             'side_settings' => MockupSideSettingResource::collection($this->whenLoaded('sideSettings')),
             'mockup_template_urls' => $this->getMedia('generated_mockups')
                 ->map(fn($m) => $m->getFullUrl()),

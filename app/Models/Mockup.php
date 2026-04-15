@@ -55,7 +55,7 @@ class Mockup extends Model implements HasMedia
     protected function templateColors(): Attribute
     {
         return Attribute::get(function () {
-            $templateId = request('template_id') ?? request('templateId');
+            $templateId = request('template_id');
 
             $templates = $this->relationLoaded('templates')
                 ? $this->templates
