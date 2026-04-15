@@ -611,6 +611,7 @@ class TemplateService extends BaseService
         $tags   = array_filter((array) request()->input('tags'));
         $types  = array_filter((array) request()->input('types'));
         $recent = request()->boolean('recent');
+        $templateOrderId = request()->input('template_order_id');
 
         $categoryId = $categoryId ? (int) $categoryId : null;
 
@@ -673,6 +674,9 @@ class TemplateService extends BaseService
                 });
             })
             ->orderByDesc('is_best_seller')
+            ->when($templateOrderId, function ($query) use ($templateOrderId) {
+                $query->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END ASC', [(int) $templateOrderId]);
+            })
             ->when($recent, function ($query) {
                 $query->orderByDesc('updated_at');
             }, function ($query) {
