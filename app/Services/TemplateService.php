@@ -262,8 +262,6 @@ class TemplateService extends BaseService
             $model->types()->sync($validatedData['types']);
 
             if (!empty($mockupIds)) {
-//                $positions = $this->defaultPositionsForTypes($selectedTypeValues);
-
                 $pivotData = collect($mockupIds)->mapWithKeys(function ($mockupId)  {
                     return [
                         (int)$mockupId => [
@@ -274,44 +272,11 @@ class TemplateService extends BaseService
                 })->toArray();
 
                 $model->mockups()->syncWithoutDetaching($pivotData);
-//                foreach ($mockupIds as $mockupId) {
-//                    $mockup = Mockup::find((int)$mockupId);
-//                    if (!$mockup) continue;
-//                    HandleMockupFilesJob::dispatch($mockup);
-//                }
-
-
             }
-            $model->types->each(function ($type) use ($model) {
-                $side = strtolower($type->value->name);
-                $collection = match ($side) {
-                    'back' => 'back_templates',
-                    default => 'templates',
-                };
-                $media = $model->getFirstMedia($collection);
-                if (!$media || !file_exists($media->getPath())) return;
-//                $this->renderMockups($model, $collection);
-            });
+
             $model->tags()->sync($validatedData['tags'] ?? []);
             $model->flags()->sync($validatedData['flags'] ?? []);
-            collect($colors)->each(function ($color) use ($model) {
-                if (empty($color['image_id'])) {
-                    return;
-                }
 
-                $media = Media::where('id', $color['image_id'])->first();
-
-                if ($media) {
-                    $media->update([
-                        'model_type' => get_class($model),
-                        'model_id' => $model->id,
-                        'collection_name' => 'color_templates',
-                    ]);
-
-                    $media->setCustomProperty('color_hex', $color['value']);
-                    $media->save();
-                }
-            });
             return $model->refresh();
         });
 
@@ -464,49 +429,52 @@ class TemplateService extends BaseService
 
             $newMockupIds = $mockupIds->diff($existingMockupIds);
             $removedMockupIds = $existingMockupIds->diff($mockupIds);
-
             if ($mockupIds->isNotEmpty()) {
-//                $positions = $this->defaultPositionsForTypes($selectedTypeValues);
                 $model->mockups()->syncWithoutDetaching(
                     collect($mockupIds)->mapWithKeys(fn ($id) => [
                         $id => ['positions' => [], 'colors' => []]
                     ])->toArray()
                 );
-//
-////                $model->types->each(function ($type) use ($model) {
-////                    $side = strtolower($type->value->name);
-////                    $collection = $side === 'back' ? 'back_templates' : 'templates';
-////                    $media = $model->getFirstMedia($collection);
-////                    if (!$media || !file_exists($media->getPath())) return;
-//////                    $this->renderMockups($model, $collection);
-////                });
-//
-////                foreach ($newMockupIds as $mockupId) {
-////                    $mockup = Mockup::find($mockupId);
-////                    if (!$mockup) continue;
-////                    HandleMockupFilesJob::dispatch($mockup, 'create');
-////                }
-////
-////                if ($typesChanged) {
-////                    foreach ($mockupIds->diff($newMockupIds) as $mockupId) {
-////                        $mockup = Mockup::find($mockupId);
-////                        if (!$mockup) continue;
-////                        HandleMockupFilesJob::dispatch($mockup, 'update');
-////                    }
-////                }
-//
+
+                if ($typesChanged) {
+                    $idsToDetach = $mockupIds->diff($newMockupIds);
+
+                    foreach ($idsToDetach as $mockupId) {
+                        $mockup = Mockup::find($mockupId);
+                        if (!$mockup) {
+                            continue;
+                        }
+
+                        $this->deleteGeneratedMockupMedia($mockup, $model->id);
+                    }
+
+                    $model->mockups()->detach($idsToDetach->values()->all());
+                }
             } else {
+                $attachedMockupIds = $model->mockups()->pluck('mockups.id');
+
+                foreach ($attachedMockupIds as $mockupId) {
+                    $mockup = Mockup::find($mockupId);
+                    if (!$mockup) {
+                        continue;
+                    }
+
+                    $this->deleteGeneratedMockupMedia($mockup, $model->id);
+                }
+
                 $model->mockups()->detach();
             }
 
-//            foreach ($removedMockupIds as $removedId) {
-//                $removedMockup = Mockup::find($removedId);
-//                if (!$removedMockup) continue;
-//
-//                $removedMockup->getMedia('generated_mockups')
-//                    ->filter(fn($m) => $m->getCustomProperty('template_id') === $model->id)
-//                    ->each->delete();
-//            }
+            foreach ($removedMockupIds as $removedId) {
+                $removedMockup = Mockup::find($removedId);
+                if (!$removedMockup) {
+                    continue;
+                }
+
+                $this->deleteGeneratedMockupMedia($removedMockup, $model->id);
+
+                $model->mockups()->detach($removedId);
+            }
 
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->categories()->sync($validatedData['category_ids'] ?? []);
@@ -519,22 +487,6 @@ class TemplateService extends BaseService
                 ->whereNotIn('id', $imageIds)
                 ->each->delete();
 
-            collect($colors)->each(function ($color) use ($model) {
-                if (empty($color['image_id'])) return;
-
-                $media = Media::where('id', $color['image_id'])->first();
-                if ($media) {
-                    $media->update([
-                        'model_type' => get_class($model),
-                        'model_id' => $model->id,
-                        'collection_name' => 'color_templates',
-                    ]);
-                    $media->setCustomProperty('color_hex', $color['value']);
-                    $media->save();
-                }
-            });
-
-
             return $model;
         });
 
@@ -544,7 +496,16 @@ class TemplateService extends BaseService
 
         return $model->load($relationsToLoad);
     }
-
+    protected function deleteGeneratedMockupMedia(Mockup $mockup, int $templateId): void
+    {
+        $mockup->getMedia('generated_mockups')
+            ->filter(fn ($media) =>
+                $media->getCustomProperty('template_id') == $templateId &&
+                $media->getCustomProperty('category_id') == $mockup->category_id
+            )
+            ->each
+            ->delete();
+    }
     public function updateEditorData($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->repository->update($validatedData, $id);

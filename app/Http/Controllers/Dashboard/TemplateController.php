@@ -171,7 +171,7 @@ class TemplateController extends DashboardController
     {
         return Response::api(data: TemplateResource::make($this->templateService->showResource($id,
             ['products.dimensions', 'types',
-                'dimension', 'libraryMedia'])));
+                'dimension', 'libraryMedia','mockups'])));
     }
 
     public function getProductTemplates()
