@@ -465,39 +465,39 @@ class TemplateService extends BaseService
             $newMockupIds = $mockupIds->diff($existingMockupIds);
             $removedMockupIds = $existingMockupIds->diff($mockupIds);
 
-            if ($mockupIds->isNotEmpty()) {
-//                $positions = $this->defaultPositionsForTypes($selectedTypeValues);
-                $model->mockups()->syncWithoutDetaching(
-                    collect($mockupIds)->mapWithKeys(fn ($id) => [
-                        $id => ['positions' => [], 'colors' => []]
-                    ])->toArray()
-                );
-
-                $model->types->each(function ($type) use ($model) {
-                    $side = strtolower($type->value->name);
-                    $collection = $side === 'back' ? 'back_templates' : 'templates';
-                    $media = $model->getFirstMedia($collection);
-                    if (!$media || !file_exists($media->getPath())) return;
-//                    $this->renderMockups($model, $collection);
-                });
-
-//                foreach ($newMockupIds as $mockupId) {
-//                    $mockup = Mockup::find($mockupId);
-//                    if (!$mockup) continue;
-//                    HandleMockupFilesJob::dispatch($mockup, 'create');
-//                }
+//            if ($mockupIds->isNotEmpty()) {
+////                $positions = $this->defaultPositionsForTypes($selectedTypeValues);
+//                $model->mockups()->syncWithoutDetaching(
+//                    collect($mockupIds)->mapWithKeys(fn ($id) => [
+//                        $id => ['positions' => [], 'colors' => []]
+//                    ])->toArray()
+//                );
 //
-//                if ($typesChanged) {
-//                    foreach ($mockupIds->diff($newMockupIds) as $mockupId) {
-//                        $mockup = Mockup::find($mockupId);
-//                        if (!$mockup) continue;
-//                        HandleMockupFilesJob::dispatch($mockup, 'update');
-//                    }
-//                }
-
-            } else {
-                $model->mockups()->detach();
-            }
+////                $model->types->each(function ($type) use ($model) {
+////                    $side = strtolower($type->value->name);
+////                    $collection = $side === 'back' ? 'back_templates' : 'templates';
+////                    $media = $model->getFirstMedia($collection);
+////                    if (!$media || !file_exists($media->getPath())) return;
+//////                    $this->renderMockups($model, $collection);
+////                });
+//
+////                foreach ($newMockupIds as $mockupId) {
+////                    $mockup = Mockup::find($mockupId);
+////                    if (!$mockup) continue;
+////                    HandleMockupFilesJob::dispatch($mockup, 'create');
+////                }
+////
+////                if ($typesChanged) {
+////                    foreach ($mockupIds->diff($newMockupIds) as $mockupId) {
+////                        $mockup = Mockup::find($mockupId);
+////                        if (!$mockup) continue;
+////                        HandleMockupFilesJob::dispatch($mockup, 'update');
+////                    }
+////                }
+//
+//            } else {
+//                $model->mockups()->detach();
+//            }
 
 //            foreach ($removedMockupIds as $removedId) {
 //                $removedMockup = Mockup::find($removedId);

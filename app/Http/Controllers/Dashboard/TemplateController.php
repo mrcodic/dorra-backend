@@ -126,7 +126,7 @@ class TemplateController extends DashboardController
         }
         return Response::api(data: [
             "redirect_url" =>
-                config('services.editor_url') . 'templates/' . $template->id . '?is_clear'
+                config('services.editor_url') . 'templates/' . $template->id . '?is_clear&product_id='.request('product_without_category_id')
         ]);
     }
 
@@ -154,7 +154,7 @@ class TemplateController extends DashboardController
             ]);
         }
         if ($request->boolean('go_to_editor')) {
-            return Response::api(data: ['editor_url' => config('services.editor_url') . 'templates/' . $model->id . '?is_clear=1']);
+            return Response::api(data: ['editor_url' => config('services.editor_url') . 'templates/' . $model->id . '?is_clear=1&product_id='.request('product_without_category_id')]);
         }
 
         return Response::api(data: $this->resourceClass::make($model));
@@ -195,7 +195,7 @@ class TemplateController extends DashboardController
                 })->live()->get();
             return view('dashboard.orders.steps.step3', compact('templates'))->render();
         }
-        
+
             $templateData = TemplateResource::collection($templates)
                 ->additional([
                     'product' => [

@@ -755,14 +755,7 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                   <div class="card rounded-3 shadow-sm" style="border:1px solid #24B094;">
 
                     <!-- checkbox — NO name attribute, purely visual -->
-                    <div class="position-absolute" style="top:10px;left:10px;z-index:20;">
-                      <input
-                        class="form-check-input js-mockup-checkbox"
-                        type="checkbox"
-                        value="${id}"
-                        ${isSelected ? 'checked' : ''}
-                      />
-                    </div>
+
 
                     <div class="d-flex justify-content-center align-items-center"
                          style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">

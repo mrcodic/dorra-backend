@@ -1535,26 +1535,7 @@
                 </div>
             </div>
 
- <div id="warp-editor-${type}" class="mt-3 d-none">
-        <div class="d-flex justify-content-between align-items-center mb-1">
-            <label class="label-text">
-                Warp Points
-                <span class="badge bg-secondary ms-1" style="font-size:10px;">drag corners</span>
-            </label>
-            <div class="d-flex gap-1">
-                <button type="button" class="btn btn-sm btn-outline-secondary js-reset-warp" data-side="${type}">Reset</button>
-            </div>
-        </div>
-        <div class="position-relative" style="line-height:0;border:1px solid #CED5D4;border-radius:8px;overflow:hidden;">
-            <img id="warp-preview-${type}" src="" alt="mockup preview"
-                 style="width:100%;display:block;pointer-events:none;">
-            <canvas id="warp-canvas-${type}"
-                    style="position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair;touch-action:none;">
-            </canvas>
-        </div>
-        <small class="text-muted d-block mt-1">Points saved as % — resolution independent</small>
-        <input type="hidden" name="warp_points[${type}]" id="warp-input-${type}" value="">
-    </div>
+
         `;
 
                 document.getElementById('fileInputsContainer').appendChild(block);

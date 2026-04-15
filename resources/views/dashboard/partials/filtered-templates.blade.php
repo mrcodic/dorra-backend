@@ -45,7 +45,7 @@
                         @if($template->approach == 'with_editor')
                             <li>
                                 <a class="dropdown-item"
-                                   href="{{ config('services.editor_url') . 'templates/' . $template->id . '?is_clear' }}"
+                                   href="{{ config('services.editor_url') . 'templates/' . $template->id . "?is_clear&product_id=".request('product_without_category_id') }}"
                                    target="_blank">
                                     <i data-feather="eye" class="me-1"></i>Show
                                 </a>
