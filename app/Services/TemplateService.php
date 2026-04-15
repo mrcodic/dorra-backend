@@ -563,6 +563,10 @@ class TemplateService extends BaseService
         return $model->load($relationsToLoad);
     }
 
+    public function changeStatus($validatedData,$id)
+    {
+        return $this->repository->update($validatedData, $id);
+    }
     public function getProductTemplates($categoryId)
     {
         $search = trim((string) request()->input('search', ''));
