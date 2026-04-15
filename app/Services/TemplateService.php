@@ -465,13 +465,13 @@ class TemplateService extends BaseService
             $newMockupIds = $mockupIds->diff($existingMockupIds);
             $removedMockupIds = $existingMockupIds->diff($mockupIds);
 
-//            if ($mockupIds->isNotEmpty()) {
-////                $positions = $this->defaultPositionsForTypes($selectedTypeValues);
-//                $model->mockups()->syncWithoutDetaching(
-//                    collect($mockupIds)->mapWithKeys(fn ($id) => [
-//                        $id => ['positions' => [], 'colors' => []]
-//                    ])->toArray()
-//                );
+            if ($mockupIds->isNotEmpty()) {
+//                $positions = $this->defaultPositionsForTypes($selectedTypeValues);
+                $model->mockups()->syncWithoutDetaching(
+                    collect($mockupIds)->mapWithKeys(fn ($id) => [
+                        $id => ['positions' => [], 'colors' => []]
+                    ])->toArray()
+                );
 //
 ////                $model->types->each(function ($type) use ($model) {
 ////                    $side = strtolower($type->value->name);
@@ -495,9 +495,9 @@ class TemplateService extends BaseService
 ////                    }
 ////                }
 //
-//            } else {
-//                $model->mockups()->detach();
-//            }
+            } else {
+                $model->mockups()->detach();
+            }
 
 //            foreach ($removedMockupIds as $removedId) {
 //                $removedMockup = Mockup::find($removedId);
