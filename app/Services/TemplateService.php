@@ -605,16 +605,28 @@ class TemplateService extends BaseService
         return $model->load($relationsToLoad);
     }
 
-    public function getProductTemplates($productId)
+    public function getProductTemplates($categoryId)
     {
-        $search = trim(request()->input('search'));
-        $tags = array_filter((array)request()->input('tags'));
-        $types = array_filter((array)request()->input('types'));
+        $search = trim((string) request()->input('search', ''));
+        $tags   = array_filter((array) request()->input('tags'));
+        $types  = array_filter((array) request()->input('types'));
         $recent = request()->boolean('recent');
 
+        $categoryId = $categoryId ? (int) $categoryId : null;
+
         return $this->repository->query()
-            ->with(['media', 'products', 'types','mockups'])
-            ->when($search, function ($query) use ($search) {
+            ->with([
+                'media',
+                'products:id,name,category_id',
+                'types',
+                'mockups' => function ($q) use ($categoryId) {
+                    if ($categoryId) {
+                        $q->where('mockups.category_id', $categoryId);
+                    }
+                },
+            ])
+            ->whereStatus(StatusEnum::LIVE)
+            ->when($search !== '', function ($query) use ($search) {
                 $locale = app()->getLocale();
                 $query->where("name->{$locale}", 'LIKE', "%{$search}%");
             })
@@ -627,23 +639,45 @@ class TemplateService extends BaseService
                 $q->where('approach', request('approach'));
             })
             ->when(!empty($types), function ($query) use ($types) {
+                $types = array_map('intval', $types);
+
+                // نفس منطق getAll
                 $query->whereHas('types', function ($q) use ($types) {
-                    $q->whereIn('types.id', $types);
+                    $q->whereIn('types.value', $types);
+                }, '=', count($types));
+
+                $query->whereDoesntHave('types', function ($q) use ($types) {
+                    $q->whereNotIn('types.value', $types);
                 });
             })
-            ->when($recent === true, function ($query) {
-                $query->whereNotNull('updated_at')
-                    ->orderByDesc('updated_at')
-                    ->take(10);
+            ->when($categoryId, function ($query) use ($categoryId) {
+                $query->where(function ($q) use ($categoryId) {
+                    $q->whereHas('categories', function ($sub) use ($categoryId) {
+                        $sub->where('categories.id', $categoryId);
+                    })
+                        ->orWhereHas('products.category', function ($sub) use ($categoryId) {
+                            $sub->where('categories.id', $categoryId);
+                        })
+                        ->orWhereHas('products', function ($sub) use ($categoryId) {
+                            $category = $this->categoryRepository->find($categoryId);
+
+                            if ($category) {
+                                $sub->whereIn('products.id', $category->products->pluck('id'));
+                            } else {
+                                $sub->whereRaw('1 = 0');
+                            }
+                        })
+                        ->orWhereHas('mockups', function ($sub) use ($categoryId) {
+                            $sub->where('mockups.category_id', $categoryId);
+                        });
+                });
+            })
+            ->orderByDesc('is_best_seller')
+            ->when($recent, function ($query) {
+                $query->orderByDesc('updated_at');
             }, function ($query) {
-                $query->oldest();
+                $query->latest();
             })
-            ->when(!is_null($productId), function ($query) use ($productId) {
-                $query->whereHas('products', function ($q) use ($productId) {
-                    $q->where('products.id', $productId);
-                });
-            })->orderByDesc('is_best_seller')
-            ->latest()
             ->paginate(10);
     }
 

@@ -176,41 +176,28 @@ class TemplateController extends DashboardController
 
     public function getProductTemplates()
     {
+        $categoryId = request()->input('product_without_category_id');
 
-        $productId = request()->input('productId');
-        $templates = $this->templateService->getProductTemplates($productId);
-        if (request()->ajax()) {
-            if (!$productId) {
-                $cacheKey = getOrderStepCacheKey();
-                $stepData = Cache::get($cacheKey, []);
-                $productId = $stepData['product_id'] ?? null;
-            }
-            if (!$productId) {
-                return Response::api(HttpEnum::BAD_REQUEST, errors: ['error' => 'Product not selected.']);
-            }
-            $templates = $this->templateRepository->query()->with(['products'])
-                ->when($productId, function ($query) use ($productId) {
-                    $query->whereHas('products', function ($q) use ($productId) {
-                        $q->where('products.id', $productId);
-                    });
-                })->live()->get();
-            return view('dashboard.orders.steps.step3', compact('templates'))->render();
+        if (!$categoryId) {
+            return Response::api(
+                HttpEnum::BAD_REQUEST,
+                errors: ['error' => 'Category not selected.']
+            );
         }
 
-        $templateData = TemplateResource::collection($templates)
-            ->additional([
-                'product' => [
-                    'name' => $this->productRepositoryInterface->query()->whereKey($productId)?->value('name')
-                ]
-            ])
-            ->response()
-            ->getData(true);
+        $templates = $this->templateService->getProductTemplates((int) $categoryId);
 
-        return Response::api(
-            data: $templateData
-        );
+        if (request()->ajax() && !request()->expectsJson()) {
+            return view('dashboard.orders.steps.step3', [
+                'templates' => $templates instanceof \Illuminate\Contracts\Pagination\Paginator
+                    ? $templates->getCollection()
+                    : $templates
+            ])->render();
+        }
 
+        $templateData = TemplateResource::collection($templates)->response()->getData(true);
 
+        return Response::api(data: $templateData);
     }
 
     public function changeStatus(Request $request, $id)
