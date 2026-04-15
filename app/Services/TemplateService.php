@@ -493,7 +493,7 @@ class TemplateService extends BaseService
             ])
             ->toArray();
     }
-    protected function deleteGeneratedMockupMedia(Mockup $mockup, int $templateId): void
+    protected function deleteGeneratedMockupMedia(Mockup $mockup,  $templateId): void
     {
         $mockup->getMedia('generated_mockups')
             ->filter(fn ($media) =>
@@ -637,7 +637,7 @@ class TemplateService extends BaseService
             })
             ->orderByDesc('is_best_seller')
             ->when($templateOrderId, function ($query) use ($templateOrderId) {
-                $query->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END ASC', [(int) $templateOrderId]);
+                $query->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END ASC', [$templateOrderId]);
             })
             ->when($recent, function ($query) {
                 $query->orderByDesc('updated_at');
