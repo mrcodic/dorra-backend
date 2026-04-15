@@ -424,32 +424,19 @@ class TemplateService extends BaseService
                 $this->imageService->processUploaded($validatedData['template_image_back_id'], 'back-templates');
             }
 
-            $mockupIds = collect($validatedData['mockup_ids'] ?? [])->map(fn($id) => (int)$id);
+            $mockupIds = collect($validatedData['mockup_ids'] ?? [])->map(fn ($id) => (int) $id);
             $existingMockupIds = $model->mockups->pluck('id');
 
             $newMockupIds = $mockupIds->diff($existingMockupIds);
             $removedMockupIds = $existingMockupIds->diff($mockupIds);
+
             if ($mockupIds->isNotEmpty()) {
-                $model->mockups()->syncWithoutDetaching(
-                    collect($mockupIds)->mapWithKeys(fn ($id) => [
-                        $id => ['positions' => [], 'colors' => []]
-                    ])->toArray()
-                );
-
-                if ($typesChanged) {
-                    $idsToDetach = $mockupIds->diff($newMockupIds);
-
-                    foreach ($idsToDetach as $mockupId) {
-                        $mockup = Mockup::find($mockupId);
-                        if (!$mockup) {
-                            continue;
-                        }
-
-                        $this->deleteGeneratedMockupMedia($mockup, $model->id);
-                    }
-
-                    $model->mockups()->detach($idsToDetach->values()->all());
+                if ($newMockupIds->isNotEmpty()) {
+                    $model->mockups()->syncWithoutDetaching(
+                        $this->buildMockupAttachPayload($newMockupIds)
+                    );
                 }
+
             } else {
                 $attachedMockupIds = $model->mockups()->pluck('mockups.id');
 
@@ -472,7 +459,6 @@ class TemplateService extends BaseService
                 }
 
                 $this->deleteGeneratedMockupMedia($removedMockup, $model->id);
-
                 $model->mockups()->detach($removedId);
             }
 
@@ -495,6 +481,17 @@ class TemplateService extends BaseService
         }
 
         return $model->load($relationsToLoad);
+    }
+    protected function buildMockupAttachPayload($mockupIds): array
+    {
+        return collect($mockupIds)
+            ->mapWithKeys(fn ($id) => [
+                (int) $id => [
+                    'positions' => [],
+                    'colors' => [],
+                ],
+            ])
+            ->toArray();
     }
     protected function deleteGeneratedMockupMedia(Mockup $mockup, int $templateId): void
     {
