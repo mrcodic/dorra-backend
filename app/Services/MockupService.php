@@ -239,18 +239,18 @@ class MockupService extends BaseService
     {
         $model = $this->handleTransaction(function () use ($validatedData) {
             $model = $this->repository->create($validatedData);
-            if (!empty($warpPoints = $validatedData['warp_points'])) {
-                foreach ($warpPoints as $side => $points) {
-                    $model->sideSettings()->updateOrCreate(
-                        ['side' => $side],
-                        [
-                            'is_active' => true,
-                            'warp_points' => $points,
-                        ]
-                    );
-                }
-
-            }
+//            if (!empty($warpPoints = $validatedData['warp_points'])) {
+//                foreach ($warpPoints as $side => $points) {
+//                    $model->sideSettings()->updateOrCreate(
+//                        ['side' => $side],
+//                        [
+//                            'is_active' => true,
+//                            'warp_points' => $points,
+//                        ]
+//                    );
+//                }
+//
+//            }
             $model->types()->attach(Arr::get($validatedData, 'types') ?? []);
 //            if (!empty($validatedData['templates'])) {
 //                collect($validatedData['templates'])->each(function ($template) use ($model) {
@@ -313,18 +313,18 @@ class MockupService extends BaseService
             $before = $this->repository->find($id);
             $oldCategoryId = $before->category_id;
             $model = $this->repository->update($validatedData, $id);
-            if (!empty($warpPoints = $validatedData['warp_points'])) {
-                foreach ($warpPoints as $side => $points) {
-                    $model->sideSettings()->updateOrCreate(
-                        ['side' => $side],
-                        [
-                            'is_active' => true,
-                            'warp_points' => $points,
-                        ]
-                    );
-                }
-
-            }
+//            if (!empty($warpPoints = $validatedData['warp_points'])) {
+//                foreach ($warpPoints as $side => $points) {
+//                    $model->sideSettings()->updateOrCreate(
+//                        ['side' => $side],
+//                        [
+//                            'is_active' => true,
+//                            'warp_points' => $points,
+//                        ]
+//                    );
+//                }
+//
+//            }
             $categoryChanged = (int)$oldCategoryId !== (int)($validatedData['category_id'] ?? $model->category_id);
             // Sync types (OK)
 
@@ -469,7 +469,7 @@ class MockupService extends BaseService
     public function showAndUpdateRecent($id)
     {
         $mockup = $this->repository->find($id);
-        return $mockup->load(['types','sideSettings']);
+        return $mockup->load(['types']);
 //        return auth('web')->user()->recentMockups()->syncWithoutDetaching([$mockup->id]);
     }
 

@@ -55,26 +55,19 @@ class Mockup extends Model implements HasMedia
     protected function templateColors(): Attribute
     {
         return Attribute::get(function () {
-            $templateId = request('template_id');
 
             $templates = $this->relationLoaded('templates')
                 ? $this->templates
                 : $this->templates()->withPivot(['colors', 'positions'])->get();
 
-            $templates = collect($templates);
-
-            if (!empty($templateId)) {
-                $templates = $templates->where('id', (int) $templateId);
-            }
-
-            $colors = $templates
+            return $templates
                 ->flatMap(function ($tpl) {
+
                     $colors = $tpl->pivot->colors ?? [];
 
                     if (is_string($colors)) {
                         $colors = json_decode($colors, true) ?: [];
                     }
-
                     if (!is_array($colors)) {
                         $colors = [];
                     }
@@ -87,10 +80,9 @@ class Mockup extends Model implements HasMedia
                 ->unique()
                 ->values()
                 ->all();
-
-            return !empty($colors) ? $colors : ($this->colors ?? []);
         });
     }
+
     protected function baseImageUrl(): Attribute
     {
         return Attribute::make(
