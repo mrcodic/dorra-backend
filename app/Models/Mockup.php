@@ -60,29 +60,35 @@ class Mockup extends Model implements HasMedia
                 ? $this->templates
                 : $this->templates()->withPivot(['colors', 'positions'])->get();
 
-            return $templates
-                ->flatMap(function ($tpl) {
+            return function (?int $templateId = null) use ($templates) {
 
-                    $colors = $tpl->pivot->colors ?? [];
+                $filtered = $templateId
+                    ? $templates->where('id', $templateId)
+                    : $templates;
 
-                    if (is_string($colors)) {
-                        $colors = json_decode($colors, true) ?: [];
-                    }
-                    if (!is_array($colors)) {
-                        $colors = [];
-                    }
+                return $filtered
+                    ->flatMap(function ($tpl) {
 
-                    return collect($colors)
-                        ->filter(fn ($c) => is_string($c))
-                        ->map(fn ($c) => strtoupper(trim($c)))
-                        ->filter(fn ($c) => preg_match('/^#([A-F0-9]{3}|[A-F0-9]{6})$/', $c));
-                })
-                ->unique()
-                ->values()
-                ->all();
+                        $colors = $tpl->pivot->colors ?? [];
+
+                        if (is_string($colors)) {
+                            $colors = json_decode($colors, true) ?: [];
+                        }
+                        if (!is_array($colors)) {
+                            $colors = [];
+                        }
+
+                        return collect($colors)
+                            ->filter(fn ($c) => is_string($c))
+                            ->map(fn ($c) => strtoupper(trim($c)))
+                            ->filter(fn ($c) => preg_match('/^#([A-F0-9]{3}|[A-F0-9]{6})$/', $c));
+                    })
+                    ->unique()
+                    ->values()
+                    ->all();
+            };
         });
     }
-
     protected function baseImageUrl(): Attribute
     {
         return Attribute::make(
