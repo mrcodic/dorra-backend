@@ -452,6 +452,9 @@ class TemplateController extends DashboardController
             'side' =>['required','string','in:front,back,none'],
 
         ]);
+        $template->mockups()->updateExistingPivot($template->id,[
+            'model_color' => $request->model_color
+        ]);
         Media::query()
             ->where('model_type', Mockup::class)
             ->where('model_id', $mockup->id)
