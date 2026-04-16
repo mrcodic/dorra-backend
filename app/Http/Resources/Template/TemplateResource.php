@@ -9,6 +9,7 @@ use App\Http\Resources\MockupResource;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\TagResource;
 use App\Models\Guest;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -21,6 +22,7 @@ class TemplateResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $categoryId = Product::find(request('product_id'))?->category?->id;
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
@@ -70,7 +72,7 @@ class TemplateResource extends JsonResource
             'template_model_image' => $this->getMedia('generated_mockups')
                 ->first(fn($m) =>
 //                    in_array($m->getCustomProperty('side'), ['front', 'none','back']) &&
-                    (int)$m->getCustomProperty('category_id') === (int)request('product_without_category_id') &&
+                    (int)$m->getCustomProperty('category_id') === (int)request('product_without_category_id') ?? $categoryId &&
                     $m->getCustomProperty('model_image') === true &&
                     (string)$m->getCustomProperty('template_id') === (string)$this->id
                 )
