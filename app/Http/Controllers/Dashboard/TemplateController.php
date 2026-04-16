@@ -439,6 +439,7 @@ class TemplateController extends DashboardController
                         'template_id' => (string)$template->id,
                         'hex' => $safeHex,
                         'category_id' => (int)$mockup->category_id,
+                        'model_image' => 0,
                     ])
                     ->toMediaCollection('generated_mockups');
             }
