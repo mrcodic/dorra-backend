@@ -464,7 +464,7 @@ class TemplateController extends DashboardController
             ->where('model_id', $mockup->id)
             ->where('collection_name', 'generated_mockups')
             ->where('custom_properties->template_id', (string) $template->id)
-            ->where('custom_properties->hex', (string) $request->model_color)
+//            ->where('custom_properties->hex', (string) $request->model_color)
             ->where('custom_properties->side', (string) $request->side)
             ->where('custom_properties->category_id', (int) $mockup->category_id)->get());
         Media::query()
