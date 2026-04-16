@@ -448,12 +448,15 @@ class TemplateController extends DashboardController
     public function setTemplateImage(Template $template, Mockup $mockup, Request $request)
     {
         $request->validate([
-            'model_color' =>['required','string'],
-            'side' =>['required','string','in:front,back,none'],
-
+            'model_color' => ['required', 'string'],
+            'side'        => ['required', 'string', 'in:front,back,none'],
         ]);
-        $template->mockups()->updateExistingPivot($template->id,[
-            'model_color' => $request->model_color
+
+
+        $template->mockups()->syncWithoutDetaching([
+            $mockup->id => [
+                'model_color' => $request->model_color,
+            ]
         ]);
         Media::query()
             ->where('model_type', Mockup::class)
@@ -464,9 +467,9 @@ class TemplateController extends DashboardController
             ->where('custom_properties->side', (string) $request->side)
             ->where('custom_properties->category_id', (int) $mockup->category_id)
             ->update([
-                'custom_properties->model_image'  => true
+                'custom_properties->model_image' => true,
             ]);
-        return Response::api();
 
+        return Response::api();
     }
 }
