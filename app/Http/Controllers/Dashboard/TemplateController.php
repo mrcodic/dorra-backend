@@ -467,7 +467,7 @@ class TemplateController extends DashboardController
             ->where('custom_properties->side', (string) $request->side)
             ->where('custom_properties->category_id', (int) $mockup->category_id)
             ->update([
-                'custom_properties->model_image' => true,
+                'custom_properties->model_image' => 1,
             ]);
 
         return Response::api();
