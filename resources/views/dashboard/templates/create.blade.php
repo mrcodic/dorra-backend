@@ -233,7 +233,7 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                                                            id="uploadedTemplateImage">
                                                 </div>
                                                 <small class="form-text text-muted">
-                                                    If no size is selected, the default 618×700 will be applied.
+                                                    Upload an image with an 8:9 aspect ratio (for example, 618 × 700 px).
                                                 </small>
                                             </div>
                                                 @endif

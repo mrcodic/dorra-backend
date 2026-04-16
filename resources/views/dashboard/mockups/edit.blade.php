@@ -2211,6 +2211,9 @@
                         <small class="text-muted">PNG only</small>
                     </div>
                 </div>
+    <small class="form-text text-muted">
+                                                            Upload an image with an 8:9 aspect ratio (for example, 618 × 700 px).
+                                                        </small>
             </div>
 
             <div class="mb-2">
@@ -2222,6 +2225,9 @@
                         <small class="text-muted">PNG only</small>
                     </div>
                 </div>
+    <small class="form-text text-muted">
+                                                            Upload an image with an 8:9 aspect ratio (for example, 618 × 700 px).
+                                                        </small>
             </div>
 
             <div class="mb-2">
@@ -2233,6 +2239,9 @@
                         <small class="text-muted">PNG only</small>
                     </div>
                 </div>
+    <small class="form-text text-muted">
+                                                            Upload an image with an 8:9 aspect ratio (for example, 618 × 700 px).
+                                                        </small>
             </div>
 
             <div class="mb-2">
@@ -2244,6 +2253,9 @@
                         <small class="text-muted">PNG only</small>
                     </div>
                 </div>
+    <small class="form-text text-muted">
+                                                            Upload an image with an 8:9 aspect ratio (for example, 618 × 700 px).
+                                                        </small>
             </div>
 
             <div class="mb-2">
@@ -2255,6 +2267,9 @@
                         <small class="text-muted">PNG only</small>
                     </div>
                 </div>
+    <small class="form-text text-muted">
+                                                            Upload an image with an 8:9 aspect ratio (for example, 618 × 700 px).
+                                                        </small>
             </div>
 
 
