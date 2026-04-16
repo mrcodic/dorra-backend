@@ -69,12 +69,13 @@ class TemplateResource extends JsonResource
                     : $this->getFirstMediaUrl('back_templates')),
             'has_mockup' => (boolean)$this->products->contains('has_mockup', true),
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
-            'template_model_image' => $this->getMedia('generated_mockups')
-                ->first(fn($m) =>
-                    (int)$m->getCustomProperty('category_id') === (int)(request('product_without_category_id') ?? $categoryId) &&
-                    $m->getCustomProperty('model_image') == 1 &&
-                    (string)$m->getCustomProperty('template_id') === (string)$this->id
-                )
+            'template_model_image' => \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
+                ->where('model_type', \App\Models\Mockup::class)
+                ->where('collection_name', 'generated_mockups')
+                ->where('custom_properties->template_id', (string) $this->id)
+                ->where('custom_properties->model_image', 1)
+                ->where('custom_properties->category_id', (int)(request('product_without_category_id') ?? $categoryId))
+                ->first()
                 ?->getUrl() ?: $this->getFirstMediaUrl('template_model_image'),
             'orientation' => [
                 'value' => $this->orientation?->value,
