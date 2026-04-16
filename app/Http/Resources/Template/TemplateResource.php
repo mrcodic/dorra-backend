@@ -73,7 +73,7 @@ class TemplateResource extends JsonResource
                 ->first(fn($m) =>
 //                    in_array($m->getCustomProperty('side'), ['front', 'none','back']) &&
                     (int)$m->getCustomProperty('category_id') === (int)request('product_without_category_id') ?? $categoryId &&
-                    $m->getCustomProperty('model_image') === true &&
+                    $m->getCustomProperty('model_image') == true &&
                     (string)$m->getCustomProperty('template_id') === (string)$this->id
                 )
                 ?->getUrl() ?: $this->getFirstMediaUrl('template_model_image'),
