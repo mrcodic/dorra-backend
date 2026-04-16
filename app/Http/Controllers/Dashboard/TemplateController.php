@@ -393,19 +393,16 @@ class TemplateController extends DashboardController
                 },
             ],
             'files.*.file' => ['image'],
-            'model_color' =>['required','string'],
         ]);
 
         if ($template->mockups()->where('mockup_id', $mockup->id)->exists()) {
             $template->mockups()->updateExistingPivot($mockup->id, [
                 'positions' => $request->input('positions'),
-                'model_color' => $request->input('model_color'),
                 'colors' => $request->input('colors'),
             ]);
         } else {
             $template->mockups()->attach($mockup->id, [
                 'positions' => $request->input('positions'),
-                'model_color' => $request->input('model_color'),
                 'colors' => $request->input('colors'),
             ]);
         }
@@ -441,11 +438,32 @@ class TemplateController extends DashboardController
                         'side' => $side,
                         'template_id' => (string)$template->id,
                         'hex' => $safeHex,
-                        'model_image' => $hex == $request->input('model_color'),
                         'category_id' => (int)$mockup->category_id,
                     ])
                     ->toMediaCollection('generated_mockups');
             }
         }
+    }
+
+    public function setTemplateImage(Template $template, Mockup $mockup, Request $request)
+    {
+        $request->validate([
+            'model_color' =>['required','string'],
+            'side' =>['required','string','in:front,back,none'],
+
+        ]);
+        Media::query()
+            ->where('model_type', Mockup::class)
+            ->where('model_id', $mockup->id)
+            ->where('collection_name', 'generated_mockups')
+            ->where('custom_properties->template_id', (string) $template->id)
+            ->where('custom_properties->hex', (string) $request->model_color)
+            ->where('custom_properties->side', (string) $request->side)
+            ->where('custom_properties->category_id', (int) $mockup->category_id)
+            ->update([
+                'custom_properties->model_image'  => true
+            ]);
+        return Response::api();
+
     }
 }
