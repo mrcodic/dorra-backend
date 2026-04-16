@@ -393,16 +393,19 @@ class TemplateController extends DashboardController
                 },
             ],
             'files.*.file' => ['image'],
+            'model_color' =>['required','string'],
         ]);
 
         if ($template->mockups()->where('mockup_id', $mockup->id)->exists()) {
             $template->mockups()->updateExistingPivot($mockup->id, [
                 'positions' => $request->input('positions'),
+                'model_color' => $request->input('model_color'),
                 'colors' => $request->input('colors'),
             ]);
         } else {
             $template->mockups()->attach($mockup->id, [
                 'positions' => $request->input('positions'),
+                'model_color' => $request->input('model_color'),
                 'colors' => $request->input('colors'),
             ]);
         }
@@ -411,33 +414,7 @@ class TemplateController extends DashboardController
         return Response::api();
     }
 
-    /**
-     * Upload template model image
-     */
-    public function uploadTemplateImage(Template $template, Mockup $mockup, Request $request)
-    {
-        $request->validate([
-            'model_image' => ['required', 'image'],
-        ]);
 
-        if ($request->hasFile('model_image')) {
-            $template->getMedia('rendered_mockups')
-                ->filter(fn($t) => $t->getCustomProperty('template_id') == $template->id &&
-                    $t->getCustomProperty('category_id') == $mockup->category_id
-                )
-                ->each->delete();
-            $template
-                ->addMedia($request->file('model_image'))
-                ->usingFileName("tpl_{$template->id}_cat{$mockup->category_id}.png")
-                ->withCustomProperties([
-                    'template_id' => (string)$template->id,
-                    'category_id' => (int)$mockup->category_id,
-                ])
-                ->toMediaCollection('rendered_mockups');
-        }
-
-        return Response::api();
-    }
 
     /**
      * Helper method to upload mockup files
@@ -464,6 +441,7 @@ class TemplateController extends DashboardController
                         'side' => $side,
                         'template_id' => (string)$template->id,
                         'hex' => $safeHex,
+                        'model_image' => $hex == $request->input('model_color'),
                         'category_id' => (int)$mockup->category_id,
                     ])
                     ->toMediaCollection('generated_mockups');

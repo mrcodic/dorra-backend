@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class MockupTemplate extends Pivot
@@ -20,19 +21,20 @@ class MockupTemplate extends Pivot
         'mockup_id',
         'template_id',
         'positions',
-        'colors'
+        'colors',
+        'model_color'
     ];
     protected $attributes = [
           'colors' => '[]',
           'positions' => '[]',
     ];
 
-    public function mockup()
+    public function mockup(): BelongsTo
     {
         return $this->belongsTo(Mockup::class);
     }
 
-    public function template()
+    public function template(): BelongsTo
     {
         return $this->belongsTo(Template::class);
     }

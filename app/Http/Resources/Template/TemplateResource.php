@@ -53,6 +53,7 @@ class TemplateResource extends JsonResource
                 return [
                     'mockup_id'   => $mockup->id,
                     'mockup_name' => $mockup->name,
+                    'mockup_model_color' => $mockup->pivot->model_color,
                     'colors'      => $colors,
                     'positions'   =>$positions,
                 ];
@@ -66,10 +67,11 @@ class TemplateResource extends JsonResource
                     : $this->getFirstMediaUrl('back_templates')),
             'has_mockup' => (boolean)$this->products->contains('has_mockup', true),
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
-            'template_model_image' => $this->getMedia('rendered_mockups')
+            'template_model_image' => $this->getMedia('generated_mockups')
                 ->first(fn($m) =>
 //                    in_array($m->getCustomProperty('side'), ['front', 'none','back']) &&
                     (int)$m->getCustomProperty('category_id') === (int)request('product_without_category_id') &&
+                    $m->getCustomProperty('model_image') === true &&
                     (string)$m->getCustomProperty('template_id') === (string)$this->id
                 )
                 ?->getUrl() ?: $this->getFirstMediaUrl('template_model_image'),

@@ -11,7 +11,6 @@ use App\Http\Controllers\Shared\LibraryAssetController;
 use Illuminate\Support\Facades\Route;
 
 Route::put('templates/{template}/mockups/{mockup}/positions',[TemplateController::class,'savePositionsAndUploadMockups']);
-Route::put('templates/{template}/mockups/{mockup}/image',[TemplateController::class,'uploadTemplateImage']);
 Route::get('templates', [TemplateController::class, 'getProductTemplates'])->name("templates.products");
 Route::apiResource('templates', TemplateController::class)->only(['store', 'show', 'destroy']);
 Route::patch('templates/{template}', [TemplateController::class,'updateEditorData']);
