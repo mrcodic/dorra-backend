@@ -418,34 +418,56 @@ class TemplateController extends DashboardController
      */
     private function uploadMockupFiles(Template $template, Mockup $mockup, Request $request)
     {
+        $oldColors = $template->mockups()->where('mockup_id', $mockup->id)->first()->pivot->colors ?? [];
+        $newColors = $request->input('colors', []);
+
+        $normalize = fn($c) => strtolower(ltrim($c, '#'));
+
+        $oldNormalized = array_map($normalize, $oldColors);
+        $newNormalized = array_map($normalize, $newColors);
+
+        $deletedColors = array_diff($oldNormalized, $newNormalized);
+
+        if (!empty($deletedColors)) {
+            foreach ($deletedColors as $deletedHex) {
+                $mockup->media()
+                    ->where('collection_name', 'generated_mockups')
+                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$template->id])
+                    ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$deletedHex])
+                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(string)$mockup->category_id])
+                    ->cursor()
+                    ->each->delete();
+            }
+        }
+
+
         foreach ($request->input('files') as $index => $fileData) {
-            $side = $fileData['side'] ?? 'front';
-            $hex = $fileData['color'] ?? '#000000';
+            $side    = $fileData['side']  ?? 'front';
+            $hex     = $fileData['color'] ?? '#000000';
             $safeHex = ltrim($hex, '#');
-            $colors = $template->mockups()->where('mockup_id', $mockup->id)->first()->pivot->colors;
-            dd($colors,$request->colors);
-            $mockup->getMedia('generated_mockups')
-                ->filter(fn($m) => $m->getCustomProperty('template_id') == $template->id &&
-                    $m->getCustomProperty('side') == $side &&
-                    $m->getCustomProperty('hex') != $safeHex &&
-                    $m->getCustomProperty('category_id') == $mockup->category_id
-                )
+            
+            $mockup->media()
+                ->where('collection_name', 'generated_mockups')
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$template->id])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$side])
+                ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [strtolower($safeHex)])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(string)$mockup->category_id])
+                ->cursor()
                 ->each->delete();
 
             if ($request->hasFile("files.{$index}.file")) {
                 $mockup->addMedia($request->file("files.{$index}.file"))
                     ->usingFileName("mockup_{$side}_tpl{$template->id}_{$safeHex}.png")
                     ->withCustomProperties([
-                        'side' => $side,
+                        'side'        => $side,
                         'template_id' => (string)$template->id,
-                        'hex' => $safeHex,
+                        'hex'         => $safeHex,
                         'category_id' => (int)$mockup->category_id,
                     ])
                     ->toMediaCollection('generated_mockups');
             }
         }
     }
-
     public function setTemplateImage(Template $template, Mockup $mockup, Request $request)
     {
         $request->validate([
