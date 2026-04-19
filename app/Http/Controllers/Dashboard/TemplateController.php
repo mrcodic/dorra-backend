@@ -422,14 +422,23 @@ class TemplateController extends DashboardController
             $side = $fileData['side'] ?? 'front';
             $hex = $fileData['color'] ?? '#000000';
             $safeHex = ltrim($hex, '#');
+dd( $mockup->media()
+    ->where('collection_name', 'generated_mockups')
+    ->where(fn($q) => $q
+        ->whereJsonContains('custom_properties->template_id', (string)$template->id)
+        ->whereJsonContains('custom_properties->side', $side)
+        ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [strtolower($safeHex)])
+        ->whereJsonContains('custom_properties->category_id', (int)$mockup->category_id)
+    )->get());
             $mockup->media()
                 ->where('collection_name', 'generated_mockups')
-                ->where('custom_properties->template_id', (string)$template->id)
-                ->where('custom_properties->side', $side)
-                ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [strtolower($safeHex)])
-                ->where('custom_properties->category_id', (int)$mockup->category_id)
-                ->cursor()
-                ->each->delete();
+                ->where(fn($q) => $q
+                    ->whereJsonContains('custom_properties->template_id', (string)$template->id)
+                    ->whereJsonContains('custom_properties->side', $side)
+                    ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [strtolower($safeHex)])
+                    ->whereJsonContains('custom_properties->category_id', (int)$mockup->category_id)
+                )
+                ->delete();
 
             if ($request->hasFile("files.{$index}.file")) {
                 $mockup->addMedia($request->file("files.{$index}.file"))
