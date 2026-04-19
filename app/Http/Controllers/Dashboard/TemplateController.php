@@ -426,6 +426,7 @@ class TemplateController extends DashboardController
             $mockup->getMedia('generated_mockups')
                 ->filter(fn($m) => $m->getCustomProperty('template_id') == $template->id &&
                     $m->getCustomProperty('side') == $side &&
+                    $m->getCustomProperty('hex') != $safeHex &&
                     $m->getCustomProperty('category_id') == $mockup->category_id
                 )
                 ->each->delete();
