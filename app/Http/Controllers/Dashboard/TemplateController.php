@@ -358,20 +358,12 @@ class TemplateController extends DashboardController
     /**
      * Save mockup positions, colors, and upload generated mockup files
      */
-
     public function savePositionsAndUploadMockups(Template $template, Mockup $mockup, Request $request)
     {
-        $allowedSides = $mockup->types
-            ->map(fn ($type) => $type->value->key())
-            ->toArray();
-
         $request->validate([
             'positions' => ['required', 'array'],
-            'positions.*.name' => [
-                'required',
-                'string',
-                'max:100',
-                Rule::in($allowedSides),
+            'positions.*.name' => ['required', 'string', 'max:100',
+                Rule::in($mockup->types->map(fn($type) => $type->value->key())->toArray()),
             ],
             'positions.*.p1x' => ['required', 'numeric', 'min:0', 'max:100'],
             'positions.*.p1y' => ['required', 'numeric', 'min:0', 'max:100'],
@@ -381,146 +373,79 @@ class TemplateController extends DashboardController
             'positions.*.p3y' => ['required', 'numeric', 'min:0', 'max:100'],
             'positions.*.p4x' => ['required', 'numeric', 'min:0', 'max:100'],
             'positions.*.p4y' => ['required', 'numeric', 'min:0', 'max:100'],
-
             'colors' => ['required', 'array'],
-            'colors.*' => ['required', 'string'],
-
             'files' => ['required', 'array'],
             'files.*.side' => [
-                'nullable',
                 'string',
                 'max:100',
-                Rule::in($allowedSides),
+                Rule::in($mockup->types->map(fn($type) => $type->value->key())->toArray()),
             ],
             'files.*.color' => [
-                'nullable',
                 'string',
                 function ($attribute, $value, $fail) use ($request) {
                     $colors = $request->input('colors', []);
-                    $normalizedColors = array_map(
-                        fn ($c) => $this->normalizeHex($c),
-                        $colors
-                    );
+                    $normalizedColors = array_map(fn($c) => strtolower(ltrim($c, '#')), $colors);
+                    $normalizedValue  = strtolower(ltrim($value, '#'));
 
-                    $normalizedValue = $this->normalizeHex($value);
-
-                    if (!in_array($normalizedValue, $normalizedColors, true)) {
-                        $fail("The {$attribute} must be one of the provided colors.");
+                    if (!in_array($normalizedValue, $normalizedColors)) {
+                        $fail("The $attribute must be one of the provided colors.");
                     }
                 },
             ],
-            'files.*.file' => ['nullable', 'image'],
+            'files.*.file' => ['image'],
         ]);
-
-        $existingMockup = $template->mockups()->where('mockup_id', $mockup->id)->first();
-
-        $oldColors = [];
-        if ($existingMockup && $existingMockup->pivot) {
-            $oldColors = collect($existingMockup->pivot->colors ?? [])
-                ->map(fn ($color) => $this->normalizeHex($color))
-                ->filter()
-                ->unique()
-                ->values()
-                ->all();
-        }
-
-        $newColors = collect($request->input('colors', []))
-            ->map(fn ($color) => $this->normalizeHex($color))
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
-
-        if ($existingMockup) {
+        $this->uploadMockupFiles($template, $mockup, $request);
+        if ($template->mockups()->where('mockup_id', $mockup->id)->exists()) {
             $template->mockups()->updateExistingPivot($mockup->id, [
-                'positions' => $request->input('positions', []),
-                'colors'    => $request->input('colors', []),
+                'positions' => $request->input('positions'),
+                'colors' => $request->input('colors'),
             ]);
         } else {
             $template->mockups()->attach($mockup->id, [
-                'positions' => $request->input('positions', []),
-                'colors'    => $request->input('colors', []),
+                'positions' => $request->input('positions'),
+                'colors' => $request->input('colors'),
             ]);
         }
-
-        $this->uploadMockupFiles($template, $mockup, $request, $oldColors, $newColors);
 
         return Response::api();
     }
 
+
+
     /**
      * Helper method to upload mockup files
      */
-    private function uploadMockupFiles(
-        Template $template,
-        Mockup $mockup,
-        Request $request,
-        array $oldColors = [],
-        array $newColors = []
-    ): void {
-        $removedColors = array_values(array_diff($oldColors, $newColors));
-
-        /*
-        |--------------------------------------------------------------------------
-        | Delete media for colors removed from pivot
-        |--------------------------------------------------------------------------
-        */
-        if (!empty($removedColors)) {
-            $mockup->getMedia('generated_mockups')
-                ->filter(function ($media) use ($template, $mockup, $removedColors) {
-                    return (string) $media->getCustomProperty('template_id') === (string) $template->id
-                        && (int) $media->getCustomProperty('category_id') === (int) $mockup->category_id
-                        && (string) $media->getCustomProperty('model_image') !== '1'
-                        && in_array(
-                            strtolower((string) $media->getCustomProperty('hex')),
-                            $removedColors,
-                            true
-                        );
-                })
-                ->each
-                ->delete();
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Replace uploaded files for same side + color
-        |--------------------------------------------------------------------------
-        */
-        foreach ($request->input('files', []) as $index => $fileData) {
-            if (!$request->hasFile("files.{$index}.file")) {
-                continue;
-            }
-
-            $side = $fileData['side'] ?? 'front';
-            $hex  = $this->normalizeHex($fileData['color'] ?? '000000');
-
-            $mockup->getMedia('generated_mockups')
-                ->filter(function ($media) use ($template, $mockup, $side, $hex) {
-                    return (string) $media->getCustomProperty('template_id') === (string) $template->id
-                        && (int) $media->getCustomProperty('category_id') === (int) $mockup->category_id
-                        && (string) $media->getCustomProperty('model_image') !== '1'
-                        && (string) $media->getCustomProperty('side') === (string) $side
-                        && strtolower((string) $media->getCustomProperty('hex')) === $hex;
-                })
-                ->each
-                ->delete();
-
-            $mockup->addMedia($request->file("files.{$index}.file"))
-                ->usingFileName("mockup_{$side}_tpl{$template->id}_{$hex}.png")
-                ->withCustomProperties([
-                    'side'        => $side,
-                    'template_id' => (string) $template->id,
-                    'hex'         => $hex,
-                    'category_id' => (int) $mockup->category_id,
-                ])
-                ->toMediaCollection('generated_mockups');
-        }
-    }
-
-    private function normalizeHex(?string $hex): string
+    private function uploadMockupFiles(Template $template, Mockup $mockup, Request $request)
     {
-        return strtolower(ltrim(trim((string) $hex), '#'));
+        $colors = $template->mockups()->where('mockup_id', $mockup->id)->first()->pivot->colors;
+
+        foreach ($request->input('files') as $index => $fileData) {
+            $side = $fileData['side'] ?? 'front';
+            $hex = $fileData['color'] ?? '#000000';
+            $safeHex = ltrim($hex, '#');
+
+            $mockup->getMedia('generated_mockups')
+                ->filter(fn($m) => $m->getCustomProperty('template_id') == $template->id &&
+                    $m->getCustomProperty('side') == $side &&
+                    ($m->getCustomProperty('model_image') !== 1 && in_array($hex,array_diff($colors,$request->colors))) &&
+                    $m->getCustomProperty('category_id') == $mockup->category_id
+                )
+                ->each->delete();
+
+            if ($request->hasFile("files.{$index}.file")) {
+                $mockup->addMedia($request->file("files.{$index}.file"))
+                    ->usingFileName("mockup_{$side}_tpl{$template->id}_{$safeHex}.png")
+                    ->withCustomProperties([
+                        'side' => $side,
+                        'template_id' => (string)$template->id,
+                        'hex' => $safeHex,
+                        'category_id' => (int)$mockup->category_id,
+                    ])
+                    ->toMediaCollection('generated_mockups');
+            }
+        }
     }
+
     public function setTemplateImage(Template $template, Mockup $mockup, Request $request)
     {
         $request->validate([
@@ -528,7 +453,15 @@ class TemplateController extends DashboardController
             'side'        => ['required', 'string', 'in:front,back,none'],
         ]);
 
+        $attachedMockupIds = $template->mockups()->pluck('mockups.id')->toArray();
 
+        foreach ($attachedMockupIds as $attachedMockupId) {
+            if ((int) $attachedMockupId !== (int) $mockup->id) {
+                $template->mockups()->updateExistingPivot($attachedMockupId, [
+                    'model_color' => null,
+                ]);
+            }
+        }
         $template->mockups()->syncWithoutDetaching([
             $mockup->id => [
                 'model_color' => $request->model_color,
