@@ -427,7 +427,6 @@ dd( $mockup->media()
     ->where(fn($q) => $q
         ->whereJsonContains('custom_properties->template_id', (string)$template->id)
         ->whereJsonContains('custom_properties->side', $side)
-        ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [strtolower($safeHex)])
         ->whereJsonContains('custom_properties->category_id', (int)$mockup->category_id)
     )->get());
             $mockup->media()
