@@ -358,8 +358,6 @@ class TemplateController extends DashboardController
     /**
      * Save mockup positions, colors, and upload generated mockup files
      */
-    use Illuminate\Http\Request;
-    use Illuminate\Validation\Rule;
 
     public function savePositionsAndUploadMockups(Template $template, Mockup $mockup, Request $request)
     {
