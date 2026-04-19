@@ -422,22 +422,13 @@ class TemplateController extends DashboardController
             $side = $fileData['side'] ?? 'front';
             $hex = $fileData['color'] ?? '#000000';
             $safeHex = ltrim($hex, '#');
-dd( $mockup->media()
-    ->where('collection_name', 'generated_mockups')
-    ->where(fn($q) => $q
-        ->whereJsonContains('custom_properties->template_id', (string)$template->id)
-        ->whereJsonContains('custom_properties->side', $side)
-        ->whereJsonContains('custom_properties->category_id', (int)$mockup->category_id)
-    )->get());
-            $mockup->media()
-                ->where('collection_name', 'generated_mockups')
-                ->where(fn($q) => $q
-                    ->whereJsonContains('custom_properties->template_id', (string)$template->id)
-                    ->whereJsonContains('custom_properties->side', $side)
-                    ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [strtolower($safeHex)])
-                    ->whereJsonContains('custom_properties->category_id', (int)$mockup->category_id)
+
+            $mockup->getMedia('generated_mockups')
+                ->filter(fn($m) => $m->getCustomProperty('template_id') == $template->id &&
+                    $m->getCustomProperty('side') == $side &&
+                    $m->getCustomProperty('category_id') == $mockup->category_id
                 )
-                ->delete();
+                ->each->delete();
 
             if ($request->hasFile("files.{$index}.file")) {
                 $mockup->addMedia($request->file("files.{$index}.file"))
