@@ -419,6 +419,8 @@ class TemplateController extends DashboardController
      */
     private function uploadMockupFiles(Template $template, Mockup $mockup, Request $request,$oldColors)
     {
+        $newColors = $template->mockups()->where('mockup_id', $mockup->id)->first()->pivot->colors;
+        $removedColors = array_values(array_diff($oldColors, $newColors));
         $modelColor = $template->mockups()->where('mockup_id', $mockup->id)->first()->pivot->model_color;
         foreach ($request->input('files') as $index => $fileData) {
             $side = $fileData['side'] ?? 'front';
@@ -428,7 +430,7 @@ class TemplateController extends DashboardController
             $mockup->getMedia('generated_mockups')
                 ->filter(fn($m) => $m->getCustomProperty('template_id') == $template->id &&
                     $m->getCustomProperty('side') == $side &&
-                    ($m->getCustomProperty('model_image') !== 1 || in_array($modelColor,array_intersect($request->colors,$oldColors ))) &&
+                    ($m->getCustomProperty('model_image') !== 1 || in_array($modelColor,$removedColors) &&
                     $m->getCustomProperty('category_id') == $mockup->category_id
                 )
                 ->each->delete();
