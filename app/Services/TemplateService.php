@@ -609,15 +609,15 @@ class TemplateService extends BaseService
                         ->orWhereHas('products.category', function ($sub) use ($categoryId) {
                             $sub->where('categories.id', $categoryId);
                         })
-                        ->orWhereHas('products', function ($sub) use ($categoryId) {
-                            $category = $this->categoryRepository->find($categoryId);
-
-                            if ($category) {
-                                $sub->whereIn('products.id', $category->products->pluck('id'));
-                            } else {
-                                $sub->whereRaw('1 = 0');
-                            }
-                        })
+//                        ->orWhereHas('products', function ($sub) use ($categoryId) {
+//                            $category = $this->categoryRepository->find($categoryId);
+//
+//                            if ($category) {
+//                                $sub->whereIn('products.id', $category->products->pluck('id'));
+//                            } else {
+//                                $sub->whereRaw('1 = 0');
+//                            }
+//                        })
                         ->orWhereHas('mockups', function ($sub) use ($categoryId) {
                             $sub->where('mockups.category_id', $categoryId);
                         });
