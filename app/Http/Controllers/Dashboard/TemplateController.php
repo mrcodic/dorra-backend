@@ -419,7 +419,7 @@ class TemplateController extends DashboardController
     {
         $colors = $template->mockups()->where('mockup_id', $mockup->id)->first()->pivot->colors;
         $modelColor = $template->mockups()->where('mockup_id', $mockup->id)->first()->pivot->model_color;
-        dd(in_array($modelColor,array_diff($request->colors,$colors)),$modelColor,$colors,$request->colors,array_diff($request->colors,$colors));
+        dd(in_array($modelColor,array_diff($colors, $request->colors)),$modelColor,$colors,$request->colors,array_diff($request->colors,$colors));
         foreach ($request->input('files') as $index => $fileData) {
             $side = $fileData['side'] ?? 'front';
             $hex = $fileData['color'] ?? '#000000';
