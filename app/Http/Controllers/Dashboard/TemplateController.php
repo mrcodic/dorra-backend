@@ -417,39 +417,131 @@ class TemplateController extends DashboardController
     /**
      * Helper method to upload mockup files
      */
-    private function uploadMockupFiles(Template $template, Mockup $mockup, Request $request,$oldColors)
+    private function uploadMockupFiles(Template $template, Mockup $mockup, Request $request, array $oldColors): void
     {
-        $newColors = $template->mockups()->where('mockup_id', $mockup->id)->first()->pivot->colors;
+        $pivotMockup = $template->mockups()->where('mockup_id', $mockup->id)->first();
+
+        $newColors = collect($pivotMockup?->pivot?->colors ?? [])
+            ->map(fn ($color) => $this->normalizeHex($color))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $oldColors = collect($oldColors)
+            ->map(fn ($color) => $this->normalizeHex($color))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
         $removedColors = array_values(array_diff($oldColors, $newColors));
-        $modelColor = $template->mockups()->where('mockup_id', $mockup->id)->first()->pivot->model_color;
-        foreach ($request->input('files') as $index => $fileData) {
+
+        $modelColor = $pivotMockup?->pivot?->model_color
+            ? $this->normalizeHex($pivotMockup->pivot->model_color)
+            : null;
+
+        /*
+        |--------------------------------------------------------------------------
+        | 1) Delete media for removed colors
+        | Keep the current model image unless its own color was removed.
+        |--------------------------------------------------------------------------
+        */
+        if (!empty($removedColors)) {
+            $mockup->getMedia('generated_mockups')
+                ->filter(function ($media) use ($template, $mockup, $removedColors, $modelColor) {
+                    if ((string) $media->getCustomProperty('template_id') !== (string) $template->id) {
+                        return false;
+                    }
+
+                    if ((int) $media->getCustomProperty('category_id') !== (int) $mockup->category_id) {
+                        return false;
+                    }
+
+                    $mediaHex = $this->normalizeHex($media->getCustomProperty('hex'));
+                    $isModelImage = (int) $media->getCustomProperty('model_image') === 1;
+
+                    if (!in_array($mediaHex, $removedColors, true)) {
+                        return false;
+                    }
+
+                    // do not delete the selected model image unless its own color was removed
+                    if ($isModelImage && $mediaHex === $modelColor && !in_array($modelColor, $removedColors, true)) {
+                        return false;
+                    }
+
+                    return true;
+                })
+                ->each
+                ->delete();
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | 2) Replace uploaded files only for exact same side + color
+        |--------------------------------------------------------------------------
+        */
+        foreach ($request->input('files', []) as $index => $fileData) {
+            if (!$request->hasFile("files.{$index}.file")) {
+                continue;
+            }
+
             $side = $fileData['side'] ?? 'front';
-            $hex = $fileData['color'] ?? '#000000';
-            $safeHex = ltrim($hex, '#');
+            $hex  = $this->normalizeHex($fileData['color'] ?? '#000000');
 
             $mockup->getMedia('generated_mockups')
-                ->filter(fn($m) => $m->getCustomProperty('template_id') == $template->id &&
-                   ($m->getCustomProperty('side') == $side &&
-                    $m->getCustomProperty('category_id') == $mockup->category_id) ||
-                    (in_array($modelColor,$removedColors)
-                    )
-                )
-                ->each->delete();
+                ->filter(function ($media) use ($template, $mockup, $side, $hex, $modelColor) {
+                    if ((string) $media->getCustomProperty('template_id') !== (string) $template->id) {
+                        return false;
+                    }
 
-            if ($request->hasFile("files.{$index}.file")) {
-                $mockup->addMedia($request->file("files.{$index}.file"))
-                    ->usingFileName("mockup_{$side}_tpl{$template->id}_{$safeHex}.png")
-                    ->withCustomProperties([
-                        'side' => $side,
-                        'template_id' => (string)$template->id,
-                        'hex' => $safeHex,
-                        'category_id' => (int)$mockup->category_id,
-                    ])
-                    ->toMediaCollection('generated_mockups');
+                    if ((int) $media->getCustomProperty('category_id') !== (int) $mockup->category_id) {
+                        return false;
+                    }
+
+                    if ((string) $media->getCustomProperty('side') !== (string) $side) {
+                        return false;
+                    }
+
+                    $mediaHex = $this->normalizeHex($media->getCustomProperty('hex'));
+                    if ($mediaHex !== $hex) {
+                        return false;
+                    }
+
+                    $isModelImage = (int) $media->getCustomProperty('model_image') === 1;
+
+                    // never delete active model image here
+                    if ($isModelImage && $mediaHex === $modelColor) {
+                        return false;
+                    }
+
+                    return true;
+                })
+                ->each
+                ->delete();
+
+            $customProperties = [
+                'side'        => $side,
+                'template_id' => (string) $template->id,
+                'hex'         => $hex,
+                'category_id' => (int) $mockup->category_id,
+            ];
+
+            if ($modelColor && $hex === $modelColor) {
+                $customProperties['model_image'] = 1;
             }
+
+            $mockup->addMedia($request->file("files.{$index}.file"))
+                ->usingFileName("mockup_{$side}_tpl{$template->id}_{$hex}.png")
+                ->withCustomProperties($customProperties)
+                ->toMediaCollection('generated_mockups');
         }
     }
 
+    private function normalizeHex(?string $hex): string
+    {
+        return strtolower(ltrim(trim((string) $hex), '#'));
+    }
     public function setTemplateImage(Template $template, Mockup $mockup, Request $request)
     {
         $request->validate([
@@ -457,41 +549,61 @@ class TemplateController extends DashboardController
             'side'        => ['required', 'string', 'in:front,back,none'],
         ]);
 
+        $normalizedColor = $this->normalizeHex($request->model_color);
+
         $attachedMockupIds = $template->mockups()->pluck('mockups.id')->toArray();
 
         foreach ($attachedMockupIds as $attachedMockupId) {
-            if ((int) $attachedMockupId !== (int) $mockup->id) {
-                $template->mockups()->updateExistingPivot($attachedMockupId, [
-                    'model_color' => null,
-                ]);
-            }
+            $template->mockups()->updateExistingPivot($attachedMockupId, [
+                'model_color' => ((int) $attachedMockupId === (int) $mockup->id)
+                    ? $request->model_color
+                    : null,
+            ]);
         }
-        $template->mockups()->syncWithoutDetaching([
-            $mockup->id => [
+
+        if (!in_array((int) $mockup->id, array_map('intval', $attachedMockupIds), true)) {
+            $template->mockups()->attach($mockup->id, [
                 'model_color' => $request->model_color,
-            ]
-        ]);
+            ]);
+        }
+
         Media::query()
             ->where('model_type', Mockup::class)
             ->where('collection_name', 'generated_mockups')
             ->where('custom_properties->template_id', (string) $template->id)
-            ->where('custom_properties->category_id', (int) $mockup->category_id)
-            ->where('custom_properties->model_image', 1)
+            ->get()
             ->each(function (Media $media) {
-                $media->setCustomProperty('model_image', 0)->save();
+                $media->setCustomProperty('model_image', 0);
+                $media->save();
             });
 
-        Media::query()
+        $query = Media::query()
             ->where('model_type', Mockup::class)
             ->where('model_id', $mockup->id)
             ->where('collection_name', 'generated_mockups')
             ->where('custom_properties->template_id', (string) $template->id)
-            ->where('custom_properties->hex', (string) ltrim(trim((string) $request->model_color), '#'))
-            ->where('custom_properties->side', (string) $request->side)
-            ->where('custom_properties->category_id', (int) $mockup->category_id)
-            ->each(function (Media $media) {
-                $media->setCustomProperty('model_image', 1)->save();
-            });;
+            ->where('custom_properties->hex', $normalizedColor);
+
+        if ($request->side !== 'none') {
+            $query->where('custom_properties->side', (string) $request->side);
+        }
+
+        $matchedMedia = $query->get();
+
+        if ($matchedMedia->isEmpty() && $request->side !== 'none') {
+            $matchedMedia = Media::query()
+                ->where('model_type', Mockup::class)
+                ->where('model_id', $mockup->id)
+                ->where('collection_name', 'generated_mockups')
+                ->where('custom_properties->template_id', (string) $template->id)
+                ->where('custom_properties->hex', $normalizedColor)
+                ->get();
+        }
+
+        $matchedMedia->each(function (Media $media) {
+            $media->setCustomProperty('model_image', 1);
+            $media->save();
+        });
 
         return Response::api();
     }
