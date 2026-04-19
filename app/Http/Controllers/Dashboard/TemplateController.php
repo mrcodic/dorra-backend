@@ -417,7 +417,7 @@ class TemplateController extends DashboardController
      */
     private function uploadMockupFiles(Template $template, Mockup $mockup, Request $request)
     {
-        $colors = $template->mockups()->where('mockup_id', $mockup->id)->first()->pivot->color;
+        $colors = $template->mockups()->where('mockup_id', $mockup->id)->first()->pivot->colors;
         $modelColor = $template->mockups()->where('mockup_id', $mockup->id)->first()->pivot->model_color;
         dd(in_array($modelColor,array_diff($colors,$request->colors)));
         foreach ($request->input('files') as $index => $fileData) {
