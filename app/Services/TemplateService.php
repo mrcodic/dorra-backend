@@ -569,21 +569,24 @@ class TemplateService extends BaseService
     }
     public function getProductTemplates($categoryId)
     {
-        $search          = trim((string) request()->input('search', ''));
-        $tags            = array_filter((array) request()->input('tags'));
-        $types           = array_filter((array) request()->input('types'));
-        $recent          = request()->boolean('recent');
+        $search = trim((string) request()->input('search', ''));
+        $tags   = array_filter((array) request()->input('tags'));
+        $types  = array_filter((array) request()->input('types'));
+        $recent = request()->boolean('recent');
         $templateOrderId = request()->input('template_order_id');
-        $categoryId      = $categoryId ? (int) $categoryId : null;
+
+        $categoryId = $categoryId ? (int) $categoryId : null;
 
         return $this->repository->query()
             ->with([
                 'media',
                 'products:id,name,category_id',
                 'types',
-                'mockups' => fn($q) => $categoryId
-                    ? $q->where('mockups.category_id', $categoryId)
-                    : $q,
+                'mockups' => function ($q) use ($categoryId) {
+                    if ($categoryId) {
+                        $q->where('mockups.category_id', $categoryId);
+                    }
+                },
             ])
             ->whereStatus(StatusEnum::LIVE)
             ->when($search !== '', function ($query) use ($search) {
@@ -591,48 +594,59 @@ class TemplateService extends BaseService
                 $query->where("name->{$locale}", 'LIKE', "%{$search}%");
             })
             ->when(!empty($tags), function ($query) use ($tags) {
-                $query->whereHas('tags', fn($q) => $q->whereIn('tags.id', $tags));
-            })
-            ->when(request()->filled('approach'), fn($q) => $q->where('approach', request('approach')))
-
-            // ← OR logic between category and types
-            ->when($categoryId || !empty($types), function ($query) use ($categoryId, $types) {
-                $query->where(function ($q) use ($categoryId, $types) {
-
-                    if ($categoryId) {
-                        $q->where(function ($sub) use ($categoryId) {
-                            $sub->whereHas('categories', fn($s) => $s->where('categories.id', $categoryId))
-                                ->orWhereHas('products.category', fn($s) => $s->where('categories.id', $categoryId))
-                                ->orWhereHas('products', function ($s) use ($categoryId) {
-                                    $category = $this->categoryRepository->find($categoryId);
-                                    $category
-                                        ? $s->whereIn('products.id', $category->products->pluck('id'))
-                                        : $s->whereRaw('1 = 0');
-                                })
-                                ->orWhereHas('mockups', fn($s) => $s->where('mockups.category_id', $categoryId));
-                        });
-                    }
-
-                    if (!empty($types)) {
-                        $types  = array_map('intval', $types);
-                        $method = $categoryId ? 'orWhere' : 'where'; // ← OR only when category also present
-
-                        $q->{$method}(function ($sub) use ($types) {
-                            $sub->whereHas('types', fn($s) => $s->whereIn('types.value', $types), '=', count($types))
-                                ->whereDoesntHave('types', fn($s) => $s->whereNotIn('types.value', $types));
-                        });
-                    }
+                $query->whereHas('tags', function ($q) use ($tags) {
+                    $q->whereIn('tags.id', $tags);
                 });
             })
+            ->when(request()->filled('approach'), function ($q) {
+                $q->where('approach', request('approach'));
+            })
+            ->when($categoryId, function ($query) use ($categoryId) {
+                $query->where(function ($q) use ($categoryId) {
+                    $q->whereHas('categories', function ($sub) use ($categoryId) {
+                        $sub->where('categories.id', $categoryId);
+                    })
+                        ->orWhereHas('products.category', function ($sub) use ($categoryId) {
+                            $sub->where('categories.id', $categoryId);
+                        })
+                        ->orWhereHas('products', function ($sub) use ($categoryId) {
+                            $category = $this->categoryRepository->find($categoryId);
 
+                            if ($category) {
+                                $sub->whereIn('products.id', $category->products->pluck('id'));
+                            } else {
+                                $sub->whereRaw('1 = 0');
+                            }
+                        })
+                        ->orWhereHas('mockups', function ($sub) use ($categoryId) {
+                            $sub->where('mockups.category_id', $categoryId);
+                        });
+                });
+            })
+            ->when(!empty($types), function ($query) use ($types) {
+                $types = array_map('intval', $types);
+
+                // نفس منطق getAll
+                $query->whereHas('types', function ($q) use ($types) {
+                    $q->whereIn('types.value', $types);
+                }, '=', count($types));
+
+                $query->whereDoesntHave('types', function ($q) use ($types) {
+                    $q->whereNotIn('types.value', $types);
+                });
+            })
             ->orderByDesc('is_best_seller')
-            ->when($templateOrderId, fn($q) => $q->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END ASC', [$templateOrderId]))
-            ->when($recent,
-                fn($q) => $q->orderByDesc('updated_at'),
-                fn($q) => $q->latest()
-            )
+            ->when($templateOrderId, function ($query) use ($templateOrderId) {
+                $query->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END ASC', [$templateOrderId]);
+            })
+            ->when($recent, function ($query) {
+                $query->orderByDesc('updated_at');
+            }, function ($query) {
+                $query->latest();
+            })
             ->paginate(10);
     }
+
 
     public function templateAssets()
     {
