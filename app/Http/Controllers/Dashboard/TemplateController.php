@@ -395,51 +395,71 @@ class TemplateController extends DashboardController
             'files.*.file' => ['image'],
         ]);
 
+        // ← Read OLD colors BEFORE updating pivot
+        $oldColors = $template->mockups()
+            ->where('mockup_id', $mockup->id)
+            ->first()?->pivot->colors ?? [];
+
         if ($template->mockups()->where('mockup_id', $mockup->id)->exists()) {
             $template->mockups()->updateExistingPivot($mockup->id, [
                 'positions' => $request->input('positions'),
-                'colors' => $request->input('colors'),
+                'colors'    => $request->input('colors'),
             ]);
         } else {
             $template->mockups()->attach($mockup->id, [
                 'positions' => $request->input('positions'),
-                'colors' => $request->input('colors'),
+                'colors'    => $request->input('colors'),
             ]);
         }
 
-        $this->uploadMockupFiles($template, $mockup, $request);
+        $this->uploadMockupFiles($template, $mockup, $request, $oldColors); // ← pass old colors
         return Response::api();
     }
 
-
-
-    /**
-     * Helper method to upload mockup files
-     */
-    private function uploadMockupFiles(Template $template, Mockup $mockup, Request $request)
+    private function uploadMockupFiles(Template $template, Mockup $mockup, Request $request, array $oldColors = [])
     {
-        foreach ($request->input('files') as $index => $fileData) {
-            $side = $fileData['side'] ?? 'front';
-            $hex = $fileData['color'] ?? '#000000';
-            $safeHex = ltrim($hex, '#');
-            $colors = $template->mockups()->where('mockup_id', $mockup->id)->first()->pivot->colors;
+        $normalize    = fn($c) => strtolower(ltrim($c, '#'));
+        $newColors    = array_map($normalize, $request->input('colors', []));
+        $oldColors    = array_map($normalize, $oldColors);
 
-            $mockup->getMedia('generated_mockups')
-                ->filter(fn($m) => $m->getCustomProperty('template_id') == $template->id &&
-                    $m->getCustomProperty('side') == $side &&
-                    ($m->getCustomProperty('model_image') !== 1 && in_array($hex,array_diff($colors,$request->colors))) &&
-                    $m->getCustomProperty('category_id') == $mockup->category_id
-                )
+        // Colors removed by user → delete their media
+        $deletedColors = array_diff($oldColors, $newColors);
+
+        foreach ($deletedColors as $deletedHex) {
+            $mockup->media()
+                ->where('collection_name', 'generated_mockups')
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$template->id])
+                ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$deletedHex])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(string)$mockup->category_id])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) != ?", ['1'])
+                ->cursor()
+                ->each->delete();
+        }
+
+        // Upload new files (replace existing for same side+hex)
+        foreach ($request->input('files') as $index => $fileData) {
+            $side    = $fileData['side']  ?? 'front';
+            $hex     = $fileData['color'] ?? '#000000';
+            $safeHex = $normalize($hex);
+
+            $mockup->media()
+                ->where('collection_name', 'generated_mockups')
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$template->id])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$side])
+                ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$safeHex])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(string)$mockup->category_id])
+                ->cursor()
                 ->each->delete();
 
             if ($request->hasFile("files.{$index}.file")) {
                 $mockup->addMedia($request->file("files.{$index}.file"))
                     ->usingFileName("mockup_{$side}_tpl{$template->id}_{$safeHex}.png")
                     ->withCustomProperties([
-                        'side' => $side,
+                        'side'        => $side,
                         'template_id' => (string)$template->id,
-                        'hex' => $safeHex,
+                        'hex'         => $safeHex,
                         'category_id' => (int)$mockup->category_id,
+                        'model_image' => 0,
                     ])
                     ->toMediaCollection('generated_mockups');
             }
