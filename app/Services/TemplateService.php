@@ -601,18 +601,6 @@ class TemplateService extends BaseService
             ->when(request()->filled('approach'), function ($q) {
                 $q->where('approach', request('approach'));
             })
-            ->when(!empty($types), function ($query) use ($types) {
-                $types = array_map('intval', $types);
-
-                // نفس منطق getAll
-                $query->whereHas('types', function ($q) use ($types) {
-                    $q->whereIn('types.value', $types);
-                }, '=', count($types));
-
-                $query->whereDoesntHave('types', function ($q) use ($types) {
-                    $q->whereNotIn('types.value', $types);
-                });
-            })
             ->when($categoryId, function ($query) use ($categoryId) {
                 $query->where(function ($q) use ($categoryId) {
                     $q->whereHas('categories', function ($sub) use ($categoryId) {
@@ -633,6 +621,18 @@ class TemplateService extends BaseService
                         ->orWhereHas('mockups', function ($sub) use ($categoryId) {
                             $sub->where('mockups.category_id', $categoryId);
                         });
+                });
+            })
+            ->when(!empty($types), function ($query) use ($types) {
+                $types = array_map('intval', $types);
+
+                // نفس منطق getAll
+                $query->whereHas('types', function ($q) use ($types) {
+                    $q->whereIn('types.value', $types);
+                }, '=', count($types));
+
+                $query->whereDoesntHave('types', function ($q) use ($types) {
+                    $q->whereNotIn('types.value', $types);
                 });
             })
             ->orderByDesc('is_best_seller')
