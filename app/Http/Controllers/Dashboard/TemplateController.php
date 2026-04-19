@@ -423,8 +423,7 @@ class TemplateController extends DashboardController
             $hex = $fileData['color'] ?? '#000000';
             $safeHex = ltrim($hex, '#');
 
-            $mockup->media()
-                ->where('collection_name', 'generated_mockups')
+            $mockup->getMedia('generated_mockups')
                 ->filter(fn($m) => $m->getCustomProperty('template_id') == $template->id &&
                     $m->getCustomProperty('side') == $side &&
                     strtolower($m->getCustomProperty('hex')) == strtolower($safeHex)&&
