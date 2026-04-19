@@ -601,28 +601,7 @@ class TemplateService extends BaseService
             ->when(request()->filled('approach'), function ($q) {
                 $q->where('approach', request('approach'));
             })
-            ->when($categoryId, function ($query) use ($categoryId) {
-                $query->where(function ($q) use ($categoryId) {
-                    $q->whereHas('categories', function ($sub) use ($categoryId) {
-                        $sub->where('categories.id', $categoryId);
-                    })
-                        ->orWhereHas('products.category', function ($sub) use ($categoryId) {
-                            $sub->where('categories.id', $categoryId);
-                        })
-//                        ->orWhereHas('products', function ($sub) use ($categoryId) {
-//                            $category = $this->categoryRepository->find($categoryId);
-//
-//                            if ($category) {
-//                                $sub->whereIn('products.id', $category->products->pluck('id'));
-//                            } else {
-//                                $sub->whereRaw('1 = 0');
-//                            }
-//                        })
-                        ->orWhereHas('mockups', function ($sub) use ($categoryId) {
-                            $sub->where('mockups.category_id', $categoryId);
-                        });
-                });
-            })
+
             ->when(!empty($types), function ($query) use ($types) {
                 $types = array_map('intval', $types);
 
@@ -633,6 +612,27 @@ class TemplateService extends BaseService
 
                 $query->whereDoesntHave('types', function ($q) use ($types) {
                     $q->whereNotIn('types.value', $types);
+                });
+            }) ->when($categoryId, function ($query) use ($categoryId) {
+                $query->where(function ($q) use ($categoryId) {
+                    $q->whereHas('categories', function ($sub) use ($categoryId) {
+                        $sub->where('categories.id', $categoryId);
+                    })
+                        ->orWhereHas('products.category', function ($sub) use ($categoryId) {
+                            $sub->where('categories.id', $categoryId);
+                        })
+                        ->orWhereHas('products', function ($sub) use ($categoryId) {
+                            $category = $this->categoryRepository->find($categoryId);
+
+                            if ($category) {
+                                $sub->whereIn('products.id', $category->products->pluck('id'));
+                            } else {
+                                $sub->whereRaw('1 = 0');
+                            }
+                        })
+                        ->orWhereHas('mockups', function ($sub) use ($categoryId) {
+                            $sub->where('mockups.category_id', $categoryId);
+                        });
                 });
             })
             ->orderByDesc('is_best_seller')
