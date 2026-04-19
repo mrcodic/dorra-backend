@@ -394,7 +394,8 @@ class TemplateController extends DashboardController
             ],
             'files.*.file' => ['image'],
         ]);
-        $this->uploadMockupFiles($template, $mockup, $request);
+        $oldColors = $template->mockups()->where('mockup_id', $mockup->id)->first()->pivot->colors;
+
         if ($template->mockups()->where('mockup_id', $mockup->id)->exists()) {
             $template->mockups()->updateExistingPivot($mockup->id, [
                 'positions' => $request->input('positions'),
@@ -406,6 +407,7 @@ class TemplateController extends DashboardController
                 'colors' => $request->input('colors'),
             ]);
         }
+        $this->uploadMockupFiles($template, $mockup, $request,$oldColors);
 
         return Response::api();
     }
@@ -415,11 +417,10 @@ class TemplateController extends DashboardController
     /**
      * Helper method to upload mockup files
      */
-    private function uploadMockupFiles(Template $template, Mockup $mockup, Request $request)
+    private function uploadMockupFiles(Template $template, Mockup $mockup, Request $request,$oldColors)
     {
-        $colors = $template->mockups()->where('mockup_id', $mockup->id)->first()->pivot->colors;
         $modelColor = $template->mockups()->where('mockup_id', $mockup->id)->first()->pivot->model_color;
-        dd(in_array($modelColor,array_intersect($request->colors,$colors )),$modelColor,$colors,$request->colors,array_diff($request->colors,$colors));
+        dd(in_array($modelColor,array_intersect($request->colors,$oldColors )),$modelColor,$oldColors,$request->colors,array_diff($request->colors,$oldColors));
         foreach ($request->input('files') as $index => $fileData) {
             $side = $fileData['side'] ?? 'front';
             $hex = $fileData['color'] ?? '#000000';
