@@ -215,8 +215,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::resource('/sub-industries', SubIndustryController::class);
 
         Route::group(['prefix' => 'templates', 'as' => 'templates.', 'controller' => TemplateController::class,], function () {
-            Route::put('/{template}/mockups/{mockup}/positions','savePositionsAndUploadMockups');
-            Route::put('templates/{template}/mockups/{mockup}/image',[TemplateController::class,'setTemplateImage']);
+
 
             Route::get('/data', [TemplateController::class, 'getData'])->name('data');
             Route::get('/search', 'search')->name('search');
@@ -321,7 +320,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::put('reviews/{review}/reply', 'deleteReply')->name('reviews.reply.destroy');
             Route::put('reviews/{review}', 'replyReview')->name('reviews.reply');
         });
-
+        Route::put('templates/{template}/mockups/{mockup}/positions',[TemplateController::class,'savePositionsAndUploadMockups']);
+        Route::put('templates/{template}/mockups/{mockup}/image',[TemplateController::class,'setTemplateImage']);
         Route::controller(MainController::class)->group(function () {
             Route::get('states', 'states')->name('states');
             Route::get('sub-categories', 'subCategories')->name('sub-categories');

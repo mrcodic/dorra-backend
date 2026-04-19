@@ -427,7 +427,8 @@ class TemplateController extends DashboardController
                 ->filter(fn($m) => $m->getCustomProperty('template_id') == $template->id &&
                     $m->getCustomProperty('side') == $side &&
                     strtolower($m->getCustomProperty('hex')) == strtolower($safeHex)&&
-                    $m->getCustomProperty('category_id') == $mockup->category_id
+                    $m->getCustomProperty('category_id') == $mockup->category_id &&
+                    $m->getCustomProperty('template_id') == $template->id
                 )
                 ->each->delete();
 
