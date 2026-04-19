@@ -629,7 +629,7 @@ class TemplateService extends BaseService
                             } else {
                                 $sub->whereRaw('1 = 0');
                             }
-                        })
+                        });
 //                        ->orWhereHas('mockups', function ($sub) use ($categoryId) {
 //                            $sub->where('mockups.category_id', $categoryId);
 //                        });
