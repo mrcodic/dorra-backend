@@ -428,7 +428,7 @@ dd( $mockup->getMedia('generated_mockups')
         $m->getCustomProperty('side') == $side &&
         ($m->getCustomProperty('model_image') !== 1 && in_array($hex,array_diff($colors,$request->colors))) &&
         $m->getCustomProperty('category_id') == $mockup->category_id
-    ));
+    ),$hex);
             $mockup->getMedia('generated_mockups')
                 ->filter(fn($m) => $m->getCustomProperty('template_id') == $template->id &&
                     $m->getCustomProperty('side') == $side &&
