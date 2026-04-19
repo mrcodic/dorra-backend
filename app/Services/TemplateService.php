@@ -630,9 +630,9 @@ class TemplateService extends BaseService
                                 $sub->whereRaw('1 = 0');
                             }
                         })
-                        ->orWhereHas('mockups', function ($sub) use ($categoryId) {
-                            $sub->where('mockups.category_id', $categoryId);
-                        });
+//                        ->orWhereHas('mockups', function ($sub) use ($categoryId) {
+//                            $sub->where('mockups.category_id', $categoryId);
+//                        });
                 });
             })
             ->orderByDesc('is_best_seller')
