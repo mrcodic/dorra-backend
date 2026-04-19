@@ -418,13 +418,17 @@ class TemplateController extends DashboardController
     private function uploadMockupFiles(Template $template, Mockup $mockup, Request $request)
     {
         $colors = $template->mockups()->where('mockup_id', $mockup->id)->first()->pivot->colors;
-        
-        dd(array_diff($colors,$request->colors));
+
         foreach ($request->input('files') as $index => $fileData) {
             $side = $fileData['side'] ?? 'front';
             $hex = $fileData['color'] ?? '#000000';
             $safeHex = ltrim($hex, '#');
-
+dd( $mockup->getMedia('generated_mockups')
+    ->filter(fn($m) => $m->getCustomProperty('template_id') == $template->id &&
+        $m->getCustomProperty('side') == $side &&
+        ($m->getCustomProperty('model_image') !== 1 && in_array($hex,array_diff($colors,$request->colors))) &&
+        $m->getCustomProperty('category_id') == $mockup->category_id
+    )->get());
             $mockup->getMedia('generated_mockups')
                 ->filter(fn($m) => $m->getCustomProperty('template_id') == $template->id &&
                     $m->getCustomProperty('side') == $side &&
