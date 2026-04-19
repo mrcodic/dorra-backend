@@ -30,17 +30,14 @@ class MockupService extends BaseService
 
     public function getMockups(): array
     {
-        $categoryId = request('product_id');
+        $categoryId  = request('product_id');
         $productType = request('type');
-        $templateId = request('template_id');
-        $color = request('color');
+        $templateId  = request('template_id');
+        $color       = request('color');
 
         $categoryId = $productType === 'category'
             ? $categoryId
-            : $this->productRepository
-                ->query()
-                ->whereId($categoryId)
-                ->value('category_id');
+            : $this->productRepository->query()->whereId($categoryId)->value('category_id');
 
         $mockups = $this->repository
             ->query()
@@ -58,88 +55,74 @@ class MockupService extends BaseService
             ])
             ->get();
 
-        // Normalize to no '#' to match stored hex format
-        $requestedColor = $color
-            ? strtolower(ltrim($color, '#'))
-            : null;
+        $requestedColor = $color ? strtolower(ltrim($color, '#')) : null;
 
-        $filtered = $mockups->filter(fn($mockup) => $mockup->templates->contains('id', $templateId));
+        $filtered = $mockups->filter(fn($mockup) => $mockup->templates->contains('id', $templateId))->values();
 
-        // --- All colors across all mockups ---
+        $parseColors = function ($tpl) {
+            $c = $tpl->pivot->colors ?? [];
+            if (is_string($c)) $c = json_decode($c, true) ?: [];
+            return is_array($c) ? $c : [];
+        };
+
+        // All colors across all mockups
         $allColors = $filtered
             ->flatMap(fn($mockup) => $mockup->templates
                 ->filter(fn($tpl) => $tpl->id == $templateId)
-                ->flatMap(function ($tpl) {
-                    $c = $tpl->pivot->colors ?? [];
-                    if (is_string($c)) {
-                        $c = json_decode($c, true) ?: [];
-                    }
-                    return is_array($c) ? $c : [];
-                })
+                ->flatMap($parseColors)
             )
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
+            ->filter()->unique()->values()->all();
+
+        // ← If no color requested, use first color of the FIRST mockup
+        $firstMockup      = $filtered->first();
+        $firstMockupColors = $firstMockup
+            ? collect($firstMockup->templates
+                ->filter(fn($tpl) => $tpl->id == $templateId)
+                ->flatMap($parseColors)
+                ->filter()->unique()->values()->all()
+            )
+            : collect();
+
+        $activeColor = $requestedColor
+            ?? ($firstMockupColors->isNotEmpty()
+                ? strtolower(ltrim($firstMockupColors->first(), '#'))
+                : null);
 
         $result = $filtered
-            ->map(function ($mockup) use ($templateId, $requestedColor) {
-
-                $colors = $mockup->templates
-                    ->filter(fn($tpl) => $tpl->id == $templateId)
-                    ->flatMap(function ($tpl) {
-                        $c = $tpl->pivot->colors ?? [];
-                        if (is_string($c)) {
-                            $c = json_decode($c, true) ?: [];
-                        }
-                        return is_array($c) ? $c : [];
-                    })
-                    ->filter()
-                    ->unique()
-                    ->values()
-                    ->all();
-
-                // Normalize first color to no '#' to match stored format
-                $activeColor = $requestedColor
-                    ?? (count($colors) ? strtolower(ltrim($colors[0], '#')) : null);
+            ->map(function ($mockup) use ($templateId, $activeColor, $parseColors) {
 
                 $mockupMedia = $mockup->media
                     ->where('collection_name', 'generated_mockups')
                     ->filter(function ($m) use ($templateId, $activeColor) {
-                        if ($m->getCustomProperty('template_id') != $templateId) {
+                        if ((string) $m->getCustomProperty('template_id') !== (string) $templateId) {
                             return false;
                         }
 
-                        // Both sides normalized without '#'
-                        $storedHex  = strtolower(ltrim($m->getCustomProperty('hex', ''), '#'));
-                        $compareHex = $activeColor ? strtolower(ltrim($activeColor, '#')) : null;
+                        $storedHex = strtolower(ltrim($m->getCustomProperty('hex', ''), '#'));
 
-                        return !$compareHex || $storedHex === $compareHex;
+                        return !$activeColor || $storedHex === $activeColor;
                     });
 
                 $pickBySide = fn(string $side) => $mockupMedia
                     ->filter(fn($m) => $m->getCustomProperty('side') === $side)
                     ->map(fn($m) => $m->getFullUrl())
-                    ->values()
-                    ->all();
-
-                $urls = array_values(array_merge(
-                    $pickBySide('front'),
-                    $pickBySide('back'),
-                    $pickBySide('none'),
-                ));
+                    ->values()->all();
 
                 return [
                     'mockup_id' => $mockup->id,
-                    'urls'      => $urls,
+                    'urls'      => array_values(array_merge(
+                        $pickBySide('front'),
+                        $pickBySide('back'),
+                        $pickBySide('none'),
+                    )),
                 ];
             })
-            ->values()
-            ->all();
+            ->values()->all();
 
         return [
-            'colors'  => $allColors,
-            'mockups' => $result,
+            'colors'       => $allColors,
+            'active_color' => $activeColor,
+            'mockups'      => $result,
         ];
     }
 
