@@ -427,7 +427,7 @@ class TemplateController extends DashboardController
             $mockup->getMedia('generated_mockups')
                 ->filter(fn($m) => $m->getCustomProperty('template_id') == $template->id &&
                     $m->getCustomProperty('side') == $side &&
-                    $m->getCustomProperty('model_image') !== 1 &&
+                    ($m->getCustomProperty('model_image') !== 1 && in_array($hex,array_diff($colors,$request->colors))) &&
                     $m->getCustomProperty('hex') != $safeHex &&
                     $m->getCustomProperty('category_id') == $mockup->category_id
                 )
