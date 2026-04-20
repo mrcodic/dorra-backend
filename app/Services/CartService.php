@@ -52,7 +52,7 @@ class CartService extends BaseService
                 ->when($userId, fn($query) => $query->where('user_id', $userId))
                 ->when(!$userId && $guestId, fn($query) => $query->where('guest_id', $guestId))
                 ->first();
-
+            $designSpecs = [];
             if (!$cart) {
                 $cart = $this->repository->query()->create([
                     'user_id' => $userId,
@@ -67,6 +67,12 @@ class CartService extends BaseService
                 if ($request->design_id) {
                     $request->cartable_id = $design->designable_id;
                     $request->cartable_type = $design->designable_type;
+                    $designSpecs = $design->specifications->map(function ($specification) {
+                        return [
+                            'id'     => $specification->id,
+                            'option' => $specification->pivot->option_id,
+                        ];
+                    })->toArray();
                 }
                 $product = $request->cartable_type === 'App\\Models\\Product'
                     ? $this->productRepository->query()->find($request->cartable_id)
@@ -87,8 +93,8 @@ class CartService extends BaseService
                     $request->cartable_type,
                         $request->color ?? $design && $design?->mockup_id ? $design?->mockup_color : null,
                 );
-
-                $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
+                $specs = Arr::get($validatedData, 'specs', []);
+                $this->handleSpecs($specs ?? $designSpecs, $cartItem);
             } else {
                 $cart->addItem(
                     $design ?? $template,
