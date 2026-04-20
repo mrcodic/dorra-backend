@@ -16,7 +16,7 @@ class StoreShippingAddressRequest extends BaseRequest
     }
     public function prepareForValidation(): void
     {
-        $cookieValue = getCookie('dorra_auth_cookie_id')['value'];
+        $cookieValue = getCookie('cookie_id')['value'];
         $guestId = null;
         if ($cookieValue) {
             $guest = Guest::firstOrCreate(['cookie_value' => $cookieValue]);
@@ -41,7 +41,7 @@ class StoreShippingAddressRequest extends BaseRequest
             'zone_id' => ['required', 'exists:zones,id'],
             'user_id' => ['nullable', 'exists:users,id'],
             'guest_id' => ['nullable', 'exists:guests,id'],
-            'dorra_auth_cookie_id' => ['nullable'],
+            'cookie_id' => ['nullable'],
             ];
 
     }

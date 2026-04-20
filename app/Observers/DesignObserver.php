@@ -56,6 +56,9 @@ class DesignObserver
             ]);
             CopyDesignMediaJob::dispatch($design, $designVersion);
         }
+        if ($design->wasChanged('mockup_color')){
+            getAuthOrGuest()->cartItems()->whereMorphedTo('itemable',$design)->update(['color' => $design->mockup_color]);
+        }
 
     }
     public function deleting(Design $design): void

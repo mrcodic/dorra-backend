@@ -216,7 +216,7 @@ class DesignService extends BaseService
     public function getDesigns()
     {
         $userId = auth('sanctum')->id();
-        $cookieValue = request()->cookie('dorra_auth_cookie_id');
+        $cookieValue = request()->cookie('cookie_id');
         $guestId = null;
 
         if (!$userId && $cookieValue) {
