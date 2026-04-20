@@ -15,7 +15,7 @@ function getAuthOrGuest()
         return $user;
     }
 
-    $cookieData = getCookie('dorra_auth_cookie_id');
+    $cookieData = getCookie('cookie_id');
     $cookieValue = $cookieData['value'];
 
     $guest = Guest::query()->firstOrCreate(['cookie_value' => $cookieValue]);
@@ -71,10 +71,10 @@ function getOrderStepCacheKey(): string
         return 'order_step_data_' . auth()->id();
     }
 
-    $cookieId = request()->cookie('dorra_auth_cookie_id') ?? (string)Str::uuid();
+    $cookieId = request()->cookie('cookie_id') ?? (string)Str::uuid();
 
-    if (!request()->hasCookie('dorra_auth_cookie_id')) {
-        cookie()->queue(cookie('dorra_auth_cookie_id', $cookieId, 60 * 24 * 30));
+    if (!request()->hasCookie('cookie_id')) {
+        cookie()->queue(cookie('cookie_id', $cookieId, 60 * 24 * 30));
     }
 
     return 'order_step_data_guest_' . $cookieId;

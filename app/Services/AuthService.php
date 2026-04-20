@@ -155,7 +155,7 @@ class AuthService
 
 
             $redirectUrl = $state['url'] == 'Home' ? config('services.site_url').$state['url'] : $state['url'];
-            $cookieValue = request()->cookie('dorra_auth_dorra_auth_cookie_id') ?? ($state['cid'] ?? null);
+            $cookieValue = request()->cookie('dorra_auth_cookie_id') ?? ($state['cid'] ?? null);
 
             if ($cookieValue) {
                 $this->migrateGuestDataToUser($user, $cookieValue);
@@ -219,7 +219,7 @@ class AuthService
     public function logout($request)
     {
         $user = $request->user();
-        $cookieValue = request()->cookie('dorra_auth_cookie_id');
+        $cookieValue = request()->cookie('cookie_id');
         $user->currentAccessToken()->delete();
 
         if ($cookieValue) {
@@ -249,7 +249,7 @@ class AuthService
 
     private function migrateGuestDataToUser(User $user, $cookieGoogle = null): void
     {
-        $cookieValue = request()->cookie('dorra_auth_cookie_id') ?: $cookieGoogle;
+        $cookieValue = request()->cookie('cookie_id') ?: $cookieGoogle;
 
         $guest = $this->guestRepository->query()
             ->where('cookie_value', $cookieValue)

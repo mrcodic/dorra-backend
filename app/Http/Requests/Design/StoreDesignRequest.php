@@ -152,7 +152,7 @@ class  StoreDesignRequest extends BaseRequest
     protected function passedValidation()
     {
         $template = Template::find($this->template_id);
-        $cookieValue = getCookie('dorra_auth_cookie_id')['value'];
+        $cookieValue = getCookie('cookie_id')['value'];
         $activeGuard = getActiveGuard();
 
 

@@ -31,7 +31,7 @@ class Design extends Model implements HasMedia
     public $translatable = ['name', 'description'];
     protected $appends = ['linked_to_mockup'];
     protected $fillable = [
-        'dorra_auth_cookie_id',
+        'cookie_id',
         'user_id',
         'guest_id',
         'template_id',
@@ -190,7 +190,7 @@ class Design extends Model implements HasMedia
     public function isAddedToCart(): bool
     {
         $userId = auth('sanctum')->id();
-        $cookieId = request()->cookie('dorra_auth_cookie_id');
+        $cookieId = request()->cookie('cookie_id');
         $guestId = \App\Models\Guest::where('cookie_value', $cookieId)->value('id');
 
         return $this->cartItems()
