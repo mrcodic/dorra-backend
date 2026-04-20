@@ -12,7 +12,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
-class StoreDesignRequest extends BaseRequest
+class  StoreDesignRequest extends BaseRequest
 {
     public function authorize(): bool
     {
@@ -127,7 +127,7 @@ class StoreDesignRequest extends BaseRequest
             "specs" => ["sometimes", "array"],
             "specs.*.id" => ["sometimes", "exists:product_specifications,id"],
             "specs.*.option" => ["sometimes", "exists:product_specification_options,id"],
-            'orientation' => ['sometimes', 'in:' . OrientationEnum::getValuesAsString()],
+            'orientation' => ['nullable', 'in:' . OrientationEnum::getValuesAsString()],
             'mockup_id' => [Rule::requiredIf(function (){
                 $template = Template::find($this->template_id);
                 return $template?->approach == 'without_editor';
