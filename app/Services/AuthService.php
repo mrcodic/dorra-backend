@@ -68,7 +68,6 @@ class AuthService
 
     public function redirectToGoogle(Request $request)
     {
-        dd($request->cookie('cookie_id'));
         $cookieId = $request->cookie('cookie_id') ?? (string) Str::uuid();
 
         Cookie::queue(cookie(
@@ -157,6 +156,7 @@ class AuthService
 
             $redirectUrl = $state['url'] == 'Home' ? config('services.site_url').$state['url'] : $state['url'];
             $cookieValue = request()->cookie('dorra_auth_cookie_id') ?? ($state['cid'] ?? null);
+            dd($state['cid']);
             if ($cookieValue) {
                 $this->migrateGuestDataToUser($user, $cookieValue);
             }
