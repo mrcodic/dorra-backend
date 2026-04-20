@@ -156,7 +156,6 @@ class AuthService
 
             $redirectUrl = $state['url'] == 'Home' ? config('services.site_url').$state['url'] : $state['url'];
             $cookieValue = request()->cookie('cookie_id') ?? ($state['cid'] ?? null);
-            dd(request()->cookie('cookie_id'));
             if ($cookieValue) {
                 $this->migrateGuestDataToUser($user, $cookieValue);
             }
@@ -254,7 +253,7 @@ class AuthService
         $guest = $this->guestRepository->query()
             ->where('cookie_value', $cookieValue)
             ->first();
-
+dd($guest);
         if (!$guest) {
             return;
         }
