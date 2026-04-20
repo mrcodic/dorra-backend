@@ -235,7 +235,7 @@ class UpdateDesignRequest extends BaseRequest
                 'designable_id' => $this->input('product_id'),
             ]);
         }
-        $cookieValue = getCookie('cookie_id')['value'];
+        $cookieValue = getCookie('dorra_auth_cookie_id')['value'];
         $activeGuard = getActiveGuard();
         $userId = match ($activeGuard) {
             'web' => $this->input('user_id'),

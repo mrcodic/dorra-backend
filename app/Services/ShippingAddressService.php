@@ -20,7 +20,7 @@ class ShippingAddressService extends BaseService
     public function getUserOrGuestShippingAddresses()
     {
         $user = request()->user('sanctum');
-        $cookieValue = request()->cookie('cookie_id');
+        $cookieValue = request()->cookie('dorra_auth_cookie_id');
         $guestId = null;
 
         if (!$user && $cookieValue) {

@@ -57,7 +57,7 @@ class CartService extends BaseService
                 $cart = $this->repository->query()->create([
                     'user_id' => $userId,
                     'guest_id' => $guestId,
-                    ...Arr::except($validatedData, ['design_id', 'cookie_id']),
+                    ...Arr::except($validatedData, ['design_id', 'dorra_auth_cookie_id']),
                 ]);
             }
             $design = $request->getDesign();
@@ -164,7 +164,7 @@ class CartService extends BaseService
     public function resolveUserCart()
     {
         $userId = auth('sanctum')->id();
-        $cookieValue = request()->cookie('cookie_id');
+        $cookieValue = request()->cookie('dorra_auth_cookie_id');
         $guestId = null;
         if ($cookieValue && !$userId) {
             $guest = $this->guestRepository->query()
@@ -404,7 +404,7 @@ class CartService extends BaseService
             'cartable_type' => ['required', 'in:product,category'],
             'itemable_type' => ['required', 'in:template,design'],
         ]);
-        $cartId = auth('sanctum')->user()?->cart?->id ?? Guest::whereCookieValue(request()->cookie('cookie_id'))->first()?->cart?->id;
+        $cartId = auth('sanctum')->user()?->cart?->id ?? Guest::whereCookieValue(request()->cookie('dorra_auth_cookie_id'))->first()?->cart?->id;
         $mapItemTypes = [
             'template' => Template::class,
             'design' => Design::class,
