@@ -94,7 +94,7 @@ class CartService extends BaseService
                         $request->color ?? $design && $design?->mockup_id ? $design?->mockup_color : null,
                 );
                 $specs = Arr::get($validatedData, 'specs', []);
-                $this->handleSpecs($specs ?? $designSpecs, $cartItem);
+                $this->handleSpecs($specs ?: $designSpecs, $cartItem);
             } else {
                 $cart->addItem(
                     $design ?? $template,
