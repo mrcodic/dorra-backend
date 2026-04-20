@@ -68,6 +68,7 @@ class AuthService
 
     public function redirectToGoogle(Request $request)
     {
+        dd($request->cookie('cookie_id'));
         $cookieId = $request->cookie('cookie_id') ?? (string) Str::uuid();
 
         Cookie::queue(cookie(
