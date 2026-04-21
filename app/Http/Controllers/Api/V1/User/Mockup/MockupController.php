@@ -51,7 +51,7 @@ class MockupController extends Controller
         return Response::api(data:[
             'mockup_id' => $mockup->id,
             'template_id' => $design->template?->id,
-            'positions' => $mockupItem->pivot->positions,
+            'positions' => $mockupItem->pivot?->positions,
         ]);
     }
 }
