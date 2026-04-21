@@ -332,10 +332,10 @@ class PaymentController extends Controller
     public function handleFawryCallback(Request $request)
     {
         $payload = $request->all();
-        Log::channel('fawry')->info('Fawry webhook payload', $payload);
+        Log::info('Fawry webhook payload', $payload);
 
         if (!$this->verifySignature($payload)) {
-            Log::channel('fawry')->warning('Fawry webhook invalid signature');
+            Log::warning('Fawry webhook invalid signature');
             return response()->json(['error' => 'invalid signature'], 400);
         }
 
