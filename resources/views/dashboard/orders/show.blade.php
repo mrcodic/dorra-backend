@@ -184,16 +184,16 @@
                                         @endif
 
                                         {{-- Download button --}}
-                                        @if($designDownloadUrl)
-                                            <div class="mt-1">
-                                                <a href="{{ $designDownloadUrl }}"
-                                                   download
-                                                   target="_blank"
-                                                   class="btn btn-sm btn-primary">
-                                                    Download Design
-                                                </a>
-                                            </div>
-                                        @endif
+{{--                                        @if($designDownloadUrl)--}}
+{{--                                            <div class="mt-1">--}}
+{{--                                                <a href="{{ $designDownloadUrl }}"--}}
+{{--                                                   download--}}
+{{--                                                   target="_blank"--}}
+{{--                                                   class="btn btn-sm btn-primary">--}}
+{{--                                                    Download Design--}}
+{{--                                                </a>--}}
+{{--                                            </div>--}}
+{{--                                        @endif--}}
                                     </div>
                                 </div>
 
