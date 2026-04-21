@@ -92,8 +92,45 @@
             {{-- Top: Details + Codes + Status --}}
             <div class="p-1 d-flex flex-column flex-md-row gap-2 rounded-3" style="background-color: white">
                 <div class="d-flex flex-column">
-                    <img src="{{ $model->orderItem->orderable?->getMainImageUrl() ?: asset('/images/item-photo.png')}}"
-                         alt="item photo" class="mb-2" width="320px" height="320px">
+                    @php
+                        $orderItem = $model->orderItem;
+                        $itemable = $orderItem?->itemable;
+
+                        $isDesign = $itemable && get_class($itemable) === \App\Models\Design::class;
+
+                        $previewImage =
+                            $isDesign && $itemable->linked_to_mockup
+                                ? ($itemable->getFirstMediaUrl('front-mockup-designs') ?: $itemable->getFirstMediaUrl('none-mockup-designs'))
+                                : $itemable?->getFirstMediaUrl(\Illuminate\Support\Str::plural(\Illuminate\Support\Str::lower(class_basename($itemable))));
+
+                        $designDownloadUrl = $isDesign
+                            ? (
+                                $itemable->getFirstMediaUrl('designs')
+                                ?: $itemable->getFirstMediaUrl('front-mockup-designs')
+                                ?: $itemable->getFirstMediaUrl('none-mockup-designs')
+                            )
+                            : $itemable->getFirstMediaUrl('templates');
+                    @endphp
+
+                    <img
+                        src="{{ $previewImage ?: asset('/images/item-photo.png') }}"
+                        alt="item photo"
+                        class="mb-2"
+                        width="320px"
+                        height="320px"
+                    >
+
+                    @if($designDownloadUrl)
+                        <a
+                            href="{{ $designDownloadUrl }}"
+                            download
+                            target="_blank"
+                            class="btn btn-sm btn-primary mb-2"
+                        >
+                            <i data-feather="download" class="me-25"></i>
+                            Download Design
+                        </a>
+                    @endif
                     @if($model->jobEvents->last()?->admin)
                         <div class="d-flex flex-column">
                             <div class="d-flex flex-column gap-1">
