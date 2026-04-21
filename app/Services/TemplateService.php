@@ -594,6 +594,7 @@ class TemplateService extends BaseService
                 $query->where("name->{$locale}", 'LIKE', "%{$search}%");
             })
             ->when(!empty($tags), function ($query) use ($tags) {
+                $tags = array_map('intval', $tags);
                 $query->whereHas('tags', function ($q) use ($tags) {
                     $q->whereIn('tags.id', $tags);
                 });
