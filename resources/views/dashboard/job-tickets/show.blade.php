@@ -111,10 +111,7 @@
                         width="320px"
                         height="320px"
                     >
-
-                    @if($designDownloadUrl)
-
-                    @endif
+                    
                     @if($model->jobEvents->last()?->admin)
                         <div class="d-flex flex-column">
                             <div class="d-flex flex-column gap-1">
