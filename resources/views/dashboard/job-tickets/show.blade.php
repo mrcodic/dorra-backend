@@ -108,8 +108,6 @@
                         src="{{ $previewImage ?: asset('/images/item-photo.png') }}"
                         alt="item photo"
                         class="mb-2"
-                        width="320px"
-                        height="320px"
                     >
 
                     @if($model->jobEvents->last()?->admin)
