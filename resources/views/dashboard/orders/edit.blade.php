@@ -1,3 +1,4 @@
+@php use Illuminate\Support\Str; @endphp
 @extends('layouts/contentLayoutMaster')
 @section('title', 'Edit Order')
 @section('main-page', 'Orders')
@@ -185,71 +186,121 @@
                     <h5 class="fw-bold mt-3 mb-1 fs-16 text-black">Items</h5>
                     @foreach ($model->orderItems as $orderItem)
                         @php
-                            $product = $orderItem->itemable ;
+                            $product = $orderItem->itemable;
+
+                            $isDesign = $orderItem->itemable && get_class($orderItem->itemable) == \App\Models\Design::class;
+                            $isDownload = $orderItem->type == \App\Enums\Item\TypeEnum::DOWNLOAD;
+
+                            $previewImage =
+                                $isDesign && $orderItem->itemable->linked_to_mockup
+                                    ? ($orderItem->itemable->getFirstMediaUrl('front-mockup-designs') ?: $orderItem->itemable->getFirstMediaUrl('none-mockup-designs'))
+                                    : $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($orderItem->itemable))));
+
+
+                            $designDownloadUrl = null;
+
+                            if ($isDesign) {
+                                $designDownloadUrl =
+                                    $orderItem->itemable->getFirstMediaUrl('designs')
+                                    ?: $orderItem->itemable->getFirstMediaUrl('back_designs');
+                            }else{
+                                 $designDownloadUrl =
+                                    $orderItem->itemable->getFirstMediaUrl('templates')
+                                    ?: $orderItem->itemable->getFirstMediaUrl('back_templates');
+                            }
                         @endphp
-                        <div class="mb-1">
+
+                        <div class="mb-1 border rounded p-1">
                             <div class="d-flex align-items-start justify-content-between">
                                 <div class="d-flex">
                                     <img
-                                        src="{{
-   $orderItem->itemable && get_class($orderItem->itemable) ==\App\Models\Design::class && $orderItem->itemable->linked_to_mockup ?
-    $orderItem->itemable->getFirstMediaUrl('front-mockup-designs') ?? $orderItem->itemable->getFirstMediaUrl('none-mockup-designs')
-    : $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($orderItem->itemable))))
-     }}"
-                                        class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
+                                        src="{{ $previewImage }}"
+                                        class="me-3 rounded"
+                                        alt="Product"
+                                        style="width: 60px; height: 60px;"
+                                    >
 
                                     <div>
                                         <div class="fw-bold text-black fs-16">
                                             {{ $product->name ?? 'No Product Found' }}
-                                            @php
-                                                $isDownload = $orderItem->type == \App\Enums\Item\TypeEnum::DOWNLOAD;
-                                            @endphp
 
                                             <span class="badge ms-1 {{ $isDownload ? 'bg-info' : 'bg-success' }}">
-        {{ $isDownload ? 'Download' : 'Print' }}
-    </span>
+                            {{ $isDownload ? 'Download' : 'Print' }}
+                        </span>
                                         </div>
+
                                         <div class="text-dark fs-5">
                                             Qty: {{ $orderItem->quantity }}
                                         </div>
+
                                         @if($orderItem->color)
                                             <div class="text-dark small d-flex align-items-center mt-25">
                                                 <span class="me-1">Color:</span>
                                                 <span
                                                     class="rounded-circle border me-1"
                                                     style="
-                                width: 16px;
-                                height: 16px;
-                                display: inline-block;
-                                background-color: {{ $orderItem->color }};
-                            "
+                                    width: 16px;
+                                    height: 16px;
+                                    display: inline-block;
+                                    background-color: {{ $orderItem->color }};
+                                "
                                                 ></span>
                                                 <span class="text-muted">{{ $orderItem->color }}</span>
                                             </div>
                                         @endif
+
+                                        {{-- Download button --}}
+                                        @if($designDownloadUrl)
+                                            <div class="mt-1">
+                                                <a href="{{ $designDownloadUrl }}"
+                                                   download
+                                                   target="_blank"
+                                                   class="btn btn-sm btn-primary">
+                                                    Download Design
+                                                </a>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
+
                                 <div class="text-end">
                                     <div class="fw-bold text-black">
                                         {{ number_format($orderItem->sub_total ?? 0, 2) }}
                                     </div>
-                                    {{--                            @if ($model->orderItems->count() > 1 && $model->status == \App\Enums\Order\StatusEnum::PENDING)--}}
-                                    {{--                            <form class="delete-design-form d-inline" method="POST"--}}
-                                    {{--                                action="{{ route('orders.designs.delete', ['orderId' => $model->id, 'designId' => $orderItem->id]) }}">--}}
-                                    {{--                                @csrf--}}
-                                    {{--                                @method('DELETE')--}}
-                                    {{--                                <button type="submit" class="btn btn-sm btn-outline-danger mt-1 delete-design-btn"--}}
-                                    {{--                                    data-design-id="{{ $orderItem->id }}">--}}
-                                    {{--                                    Delete--}}
-                                    {{--                                </button>--}}
-                                    {{--                            </form>--}}
-                                    {{--                            @endif--}}
                                 </div>
                             </div>
+
+                            {{-- Design Mockup Area --}}
+                            @if(
+                                $isDesign &&
+                                !empty($orderItem->itemable->design_mockup_area) &&
+                                is_array($orderItem->itemable->design_mockup_area)
+                            )
+                                <div class="mt-1">
+                                    <h6 class="fw-bold mb-50">Design Mockup Areas</h6>
+
+                                    @foreach($orderItem->itemable->design_mockup_area as $index => $area)
+                                        <div class="mb-1 p-1 border rounded bg-light">
+                                            <p class="mb-50">
+                                                <strong>Area {{ $index + 1 }} ({{ $area['name'] ?? 'unknown' }}):</strong>
+                                            </p>
+
+                                            <ul style="padding-left: 20px; margin: 0;">
+                                                <li>Top-Left X: {{ $area['p1x'] ?? '-' }}</li>
+                                                <li>Top-Left Y: {{ $area['p1y'] ?? '-' }}</li>
+                                                <li>Top-Right X: {{ $area['p2x'] ?? '-' }}</li>
+                                                <li>Top-Right Y: {{ $area['p2y'] ?? '-' }}</li>
+                                                <li>Bottom-Left X: {{ $area['p3x'] ?? '-' }}</li>
+                                                <li>Bottom-Left Y: {{ $area['p3y'] ?? '-' }}</li>
+                                                <li>Bottom-Right X: {{ $area['p4x'] ?? '-' }}</li>
+                                                <li>Bottom-Right Y: {{ $area['p4y'] ?? '-' }}</li>
+                                            </ul>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
                     @endforeach
-
-
 
                     <!-- Pricing Summary -->
                     <h5 class="mt-3 mb-1 text-black fs-16">Pricing Details</h5>
