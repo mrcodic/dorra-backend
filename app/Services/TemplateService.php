@@ -588,7 +588,6 @@ class TemplateService extends BaseService
                     }
                 },
             ])
-            ->whereStatus(StatusEnum::LIVE)
             ->when($search !== '', function ($query) use ($search) {
                 $locale = app()->getLocale();
                 $query->where("name->{$locale}", 'LIKE', "%{$search}%");
