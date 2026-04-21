@@ -101,7 +101,7 @@
                         $previewImage =
                             $isDesign && $itemable->linked_to_mockup
                                 ? ($itemable->getFirstMediaUrl('front-mockup-designs') ?: $itemable->getFirstMediaUrl('none-mockup-designs'))
-                                : $itemable?->getFirstMediaUrl(\Illuminate\Support\Str::plural(\Illuminate\Support\Str::lower(class_basename($itemable))));
+                                : $orderItem->orderable?->getMainImageUrl();
                     @endphp
 
                     <img

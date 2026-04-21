@@ -60,7 +60,6 @@ class JobTicketService extends BaseService
             ->when(request()->filled('priority'), fn($q) => $q->where('priority', request('priority')))
             ->latest();
 
-
         return DataTables::of($jobs)
             ->addColumn('code', fn($job) => $job->code)
             ->editColumn('priority_label', fn($job) => $job->priority?->label() ?? '-')
@@ -71,7 +70,15 @@ class JobTicketService extends BaseService
             ->addColumn('order_item_name', fn($job) => $job->orderItem->orderable?->name ?? '-')
             ->addColumn('order_item_quantity', fn($job) => $job->orderItem?->quantity ?? '-')
             ->addColumn('order_item_id', fn($job) => $job->orderItem?->id ?? '-')
-            ->addColumn('order_item_image', fn($job) => $job->orderItem->orderable?->getMainImageUrl())
+            ->addColumn('order_item_image', function ($job){
+                $orderItem = $job->orderItem;
+                $itemable = $orderItem?->itemable;
+                $isDesign = $itemable && get_class($itemable) === \App\Models\Design::class;
+
+                return $isDesign && $itemable->linked_to_mockup
+                    ? ($itemable->getFirstMediaUrl('front-mockup-designs') ?: $itemable->getFirstMediaUrl('none-mockup-designs'))
+                    : $orderItem->orderable?->getMainImageUrl();
+            })
             ->addColumn('action', function () {
                 return [
                     'can_show' => (bool) auth()->user()->hasPermissionTo('jobs_show'),
