@@ -59,11 +59,11 @@ class DesignService extends BaseService
                 }
                 $template = $this->templateRepository
                     ->find($validatedData['template_id']);
-                $template->getMedia('templates-preview')
+                $template->getMedia('templates')
                     ->last()
                     ?->copy($design, 'designs');
 
-                $template->getMedia('back-templates-preview')
+                $template->getMedia('back-templates')
                     ->last()
                     ?->copy($design, 'back_designs');
                 if ($template->types) {
