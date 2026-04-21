@@ -46,7 +46,7 @@ class MockupController extends Controller
     public function positions(Mockup $mockup, Design $design)
     {
 //        if (!$design->template_id) throw ValidationException::withMessages(['message' => 'Design template not found']);
-        $mockupItem = $design->template->mockups()->where('mockups.id', $mockup->id)->first();
+        $mockupItem = $design->template?->mockups()->where('mockups.id', $mockup->id)->first();
         if (!$mockupItem) throw ValidationException::withMessages(['message' => 'Mockup is not attached to this template']);
         return Response::api(data:[
             'mockup_id' => $mockup->id,
