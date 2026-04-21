@@ -202,18 +202,20 @@
                                 <div class="d-flex flex-wrap align-items-center gap-1 justify-content-between">
                                     @foreach($model->orderItem->itemable->types as $type)
                                         @php
-                                            if (get_class($model->orderItem->itemable) == \App\Models\Design::class)
-                                            {
-                                                if(  $model->orderItem->itemable?->template?->approach == 'without_editor' )
-                                                    {
-                                                       $downloadUrl =  $model->orderItem->itemable?->template->getImageUrlForType($type->value->label());
-                                                    }
+                                            $downloadUrl = $model->orderItem->itemable->getImageUrlForType($type->value->label());
+                                                    
+                                                        if (get_class($model->orderItem->itemable) == \App\Models\Design::class)
+                                                        {
+                                                            if(  $model->orderItem->itemable?->template?->approach == 'without_editor' )
+                                                                {
+                                                                   $downloadUrl =  $model->orderItem->itemable?->template->getImageUrlForType($type->value->label());
+                                                                }
 
-                                            }
-                                            else{
-                                $downloadUrl = $model->orderItem->itemable->getImageUrlForType($type->value->label());
+                                                        }
+                                                        else{
+                                            $downloadUrl = $model->orderItem->itemable->getImageUrlForType($type->value->label());
 
-                                            }
+                                                        }
                                         @endphp
                                         <div class="d-flex flex-column">
                                             <p style="margin: 0; color: #121212">{{ $type->value->label() }} Design</p>
