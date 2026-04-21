@@ -588,11 +588,12 @@ class TemplateService extends BaseService
                     }
                 },
             ])
+            ->whereHas('media')
             ->when($search !== '', function ($query) use ($search) {
                 $locale = app()->getLocale();
                 $query->where("name->{$locale}", 'LIKE', "%{$search}%");
             })
-            ->when(!empty($tags), function ($query) use ($tags) {
+            ->when(!empty($tags) && !in_array('all', $tags), function ($query) use ($tags) {
                 $tags = array_map('intval', $tags);
                 $query->whereHas('tags', function ($q) use ($tags) {
                     $q->whereIn('tags.id', $tags);
@@ -603,8 +604,6 @@ class TemplateService extends BaseService
             })
             ->when(!empty($types), function ($query) use ($types) {
                 $types = array_map('intval', $types);
-
-                // نفس منطق getAll
                 $query->whereHas('types', function ($q) use ($types) {
                     $q->whereIn('types.value', $types);
                 }, '=', count($types));
