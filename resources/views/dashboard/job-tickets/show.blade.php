@@ -201,7 +201,7 @@
                                 <p style="color: #424746; margin: 0; font-size: 16px">Designs:</p>
                                 <div class="d-flex flex-wrap align-items-center gap-1 justify-content-between">
                                     @foreach($model->orderItem->itemable->types as $type)
-
+                                        @php
                                             if (get_class($model->orderItem->itemable) == \App\Models\Design::class)
                                             {
                                                 if(  $model->orderItem->itemable?->template?->approach == 'without_editor' )
@@ -214,7 +214,7 @@
                                 $downloadUrl = $model->orderItem->itemable->getImageUrlForType($type->value->label())
 
                                             }
-                                      
+                                        @endphp
                                         <div class="d-flex flex-column">
                                             <p style="margin: 0; color: #121212">{{ $type->value->label() }} Design</p>
                                             <img class="img-fluid rounded" style="max-height:200px"
