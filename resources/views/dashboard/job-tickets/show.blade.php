@@ -211,7 +211,7 @@
 
                                             }
                                             else{
-                                $downloadUrl = $model->orderItem->itemable->getImageUrlForType($type->value->label())
+                                $downloadUrl = $model->orderItem->itemable->getImageUrlForType($type->value->label());
 
                                             }
                                         @endphp
