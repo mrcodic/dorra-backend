@@ -50,8 +50,8 @@ class MockupController extends Controller
 //        if (!$mockupItem) throw ValidationException::withMessages(['message' => 'Mockup is not attached to this template']);
         return Response::api(data:[
             'mockup_id' => $mockup->id,
-            'template_id' => $design->template?->id,
-            'positions' => $mockupItem->pivot?->positions,
+            'template_id' => $design?->template?->id,
+            'positions' => $mockupItem?->pivot?->positions,
         ]);
     }
 }
