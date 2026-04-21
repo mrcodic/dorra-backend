@@ -601,7 +601,6 @@ class TemplateService extends BaseService
             ->when(request()->filled('approach'), function ($q) {
                 $q->where('approach', request('approach'));
             })
-
             ->when(!empty($types), function ($query) use ($types) {
                 $types = array_map('intval', $types);
 
