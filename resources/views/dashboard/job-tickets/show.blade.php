@@ -202,38 +202,32 @@
                                 <div class="d-flex flex-wrap align-items-center gap-1 justify-content-between">
                                     @foreach($model->orderItem->itemable->types as $type)
                                         @php
-                                            $downloadUrl = $model->orderItem->itemable->getImageUrlForType($type->value->label());
-                                                    
-                                                        if (get_class($model->orderItem->itemable) == \App\Models\Design::class)
-                                                        {
-                                                            if(  $model->orderItem->itemable?->template?->approach == 'without_editor' )
-                                                                {
-                                                                   $downloadUrl =  $model->orderItem->itemable?->template->getImageUrlForType($type->value->label());
-                                                                }
-
-                                                        }
-                                                        else{
-                                            $downloadUrl = $model->orderItem->itemable->getImageUrlForType($type->value->label());
-
-                                                        }
+                                            $itemable    = $model->orderItem->itemable;
+                                            $label       = $type->value->label();
+                                            $isDesign    = $itemable instanceof \App\Models\Design;
+                                            $useTemplate = $isDesign && $itemable->template?->approach === 'without_editor';
+                                            $downloadUrl = ($useTemplate ? $itemable->template : $itemable)->getImageUrlForType($label);
                                         @endphp
+
                                         <div class="d-flex flex-column">
-                                            <p style="margin: 0; color: #121212">{{ $type->value->label() }} Design</p>
-                                            <img class="img-fluid rounded" style="max-height:200px"
-                                                 src="{{$model->orderItem->itemable->getImageUrlForType($type->value->label())}}"
-                                                 alt="item photo">
-                                            <a
-                                                href="{{ $downloadUrl}} "
-                                                download
-                                                target="_blank"
-                                                class="btn btn-sm btn-primary mt-2 mb-2"
+                                            <p style="margin: 0; color: #121212">{{ $label }} Design</p>
+                                            <img
+                                                class="img-fluid rounded"
+                                                style="max-height: 200px"
+                                                src="{{ $downloadUrl }}"
+                                                alt="{{ $label }} item photo"
                                             >
-                                                <i data-feather="download" class="me-25"></i>
-                                                Download Design
+
+                                            href="{{ $downloadUrl }}"
+                                            download
+                                            target="_blank"
+                                            class="btn btn-sm btn-primary mt-2 mb-2"
+                                            >
+                                            <i data-feather="download" class="me-25"></i>
+                                            Download Design
                                             </a>
                                         </div>
-                                    @endforeach
-                                </div>
+                                    @endforeach                                </div>
                             </div>
                         </div>
                     @endif

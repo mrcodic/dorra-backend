@@ -150,7 +150,7 @@ class PaymentController extends Controller
     public function resetCart($transaction, mixed $paymentMethod, StatusEnum $paymentStatus, array $data): void
     {
         $this->handleTransaction(function () use ($transaction, $paymentMethod, $paymentStatus, $data) {
-            $cart = $transaction->order->user?->cart ?? $transaction->order->guest?->cart;
+            $cart = $transaction->payable?->user?->cart ?? $transaction->payable?->guest?->cart;
             if ($cart) {
                 $cart->items()->delete();
 
