@@ -102,14 +102,6 @@
                             $isDesign && $itemable->linked_to_mockup
                                 ? ($itemable->getFirstMediaUrl('front-mockup-designs') ?: $itemable->getFirstMediaUrl('none-mockup-designs'))
                                 : $itemable?->getFirstMediaUrl(\Illuminate\Support\Str::plural(\Illuminate\Support\Str::lower(class_basename($itemable))));
-
-                        $designDownloadUrl = $isDesign
-                            ? (
-                                $itemable->getFirstMediaUrl('designs')
-                                ?: $itemable->getFirstMediaUrl('front-mockup-designs')
-                                ?: $itemable->getFirstMediaUrl('none-mockup-designs')
-                            )
-                            : $itemable->getFirstMediaUrl('templates');
                     @endphp
 
                     <img
@@ -121,15 +113,7 @@
                     >
 
                     @if($designDownloadUrl)
-                        <a
-                            href="{{ $designDownloadUrl }}"
-                            download
-                            target="_blank"
-                            class="btn btn-sm btn-primary mb-2"
-                        >
-                            <i data-feather="download" class="me-25"></i>
-                            Download Design
-                        </a>
+
                     @endif
                     @if($model->jobEvents->last()?->admin)
                         <div class="d-flex flex-column">
@@ -210,6 +194,15 @@
                                             <img class="img-fluid rounded" style="max-height:200px"
                                                  src="{{$model->orderItem->itemable->getImageUrlForType($type->value->label())}}"
                                                  alt="item photo">
+                                            <a
+                                                href="{{ $model->orderItem->itemable->getImageUrlForType($type->value->label())}} "
+                                                download
+                                                target="_blank"
+                                                class="btn btn-sm btn-primary mb-2"
+                                            >
+                                                <i data-feather="download" class="me-25"></i>
+                                                Download Design
+                                            </a>
                                         </div>
                                     @endforeach
                                 </div>
