@@ -59,11 +59,14 @@ class DesignService extends BaseService
                 }
                 $template = $this->templateRepository
                     ->find($validatedData['template_id']);
-                $template->getMedia('templates-preview')
+                $collectionFrontName = $template->approach == 'with_editor'? 'templates': 'templates-preview';
+                $collectionBackName = $template->approach == 'with_editor'? 'back_templates': 'back-templates-preview';
+
+                $template->getMedia($collectionFrontName)
                     ->last()
                     ?->copy($design, 'designs');
 
-                $template->getMedia('back-templates-preview')
+                $template->getMedia($collectionBackName)
                     ->last()
                     ?->copy($design, 'back_designs');
                 if ($template->types) {
