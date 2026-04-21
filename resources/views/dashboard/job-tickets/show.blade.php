@@ -167,31 +167,31 @@
                                     <span class="text-muted">{{ $model->orderItem->color }}</span>
                                 </div>
                             @endif
-                            @if(
-            $model->orderItem->itemable
-        && get_class($model->orderItem->itemable) === \App\Models\Design::class
-                     && $model->orderItem->itemable->linked_to_mockup
-     )
+                            {{--                            @if(--}}
+                            {{--            $model->orderItem->itemable--}}
+                            {{--        && get_class($model->orderItem->itemable) === \App\Models\Design::class--}}
+                            {{--                     && $model->orderItem->itemable->linked_to_mockup--}}
+                            {{--     )--}}
 
-                                <p style="color: #424746; margin: 0; font-size: 16px">Mockup Positions on Design:</p>
+                            {{--                                <p style="color: #424746; margin: 0; font-size: 16px">Mockup Positions on Design:</p>--}}
 
-                                @foreach($model->orderItem->itemable->design_mockup_area as $index => $area)
-                                    <div style="margin-bottom: 10px;">
-                                        <p><strong>Area {{ $index + 1 }} ({{ $area['name'] ?? 'unknown' }}):</strong>
-                                        </p>
-                                        <ul style="padding-left: 20px; margin: 0;">
-                                            <li>Top-Left X: {{ $area['p1x'] }}</li>
-                                            <li>Top-Left Y: {{ $area['p1y'] }}</li>
-                                            <li>Top-Right X: {{ $area['p2x'] }}</li>
-                                            <li>Top-Right Y: {{ $area['p2y'] }}</li>
-                                            <li>Bottom-Left X: {{ $area['p3x'] }}</li>
-                                            <li>Bottom-Left Y: {{ $area['p3y'] }}</li>
-                                            <li>Bottom-Right X: {{ $area['p4x'] }}</li>
-                                            <li>Bottom-Right Y: {{ $area['p4y'] }}</li>
-                                        </ul>
-                                    </div>
-                                @endforeach
-                            @endif
+                            {{--                                @foreach($model->orderItem->itemable->design_mockup_area as $index => $area)--}}
+                            {{--                                    <div style="margin-bottom: 10px;">--}}
+                            {{--                                        <p><strong>Area {{ $index + 1 }} ({{ $area['name'] ?? 'unknown' }}):</strong>--}}
+                            {{--                                        </p>--}}
+                            {{--                                        <ul style="padding-left: 20px; margin: 0;">--}}
+                            {{--                                            <li>Top-Left X: {{ $area['p1x'] }}</li>--}}
+                            {{--                                            <li>Top-Left Y: {{ $area['p1y'] }}</li>--}}
+                            {{--                                            <li>Top-Right X: {{ $area['p2x'] }}</li>--}}
+                            {{--                                            <li>Top-Right Y: {{ $area['p2y'] }}</li>--}}
+                            {{--                                            <li>Bottom-Left X: {{ $area['p3x'] }}</li>--}}
+                            {{--                                            <li>Bottom-Left Y: {{ $area['p3y'] }}</li>--}}
+                            {{--                                            <li>Bottom-Right X: {{ $area['p4x'] }}</li>--}}
+                            {{--                                            <li>Bottom-Right Y: {{ $area['p4y'] }}</li>--}}
+                            {{--                                        </ul>--}}
+                            {{--                                    </div>--}}
+                            {{--                                @endforeach--}}
+                            {{--                            @endif--}}
                         </div>
                     </div>
                     <hr>
@@ -201,13 +201,27 @@
                                 <p style="color: #424746; margin: 0; font-size: 16px">Designs:</p>
                                 <div class="d-flex flex-wrap align-items-center gap-1 justify-content-between">
                                     @foreach($model->orderItem->itemable->types as $type)
+                                        @php
+                                            if (get_class($model->orderItem->itemable) == \App\Models\Design::class)
+                                            {
+                                                if(  $model->orderItem->itemable?->template?->approach == 'without_editor' )
+                                                    {
+                                                       $downloadUrl =  $model->orderItem->itemable?->template->getImageUrlForType($type->value->label());
+                                                    }
+
+                                            }
+                                            else{
+                                $downloadUrl = $model->orderItem->itemable->getImageUrlForType($type->value->label())
+
+                                            }
+                                        @endphp
                                         <div class="d-flex flex-column">
                                             <p style="margin: 0; color: #121212">{{ $type->value->label() }} Design</p>
                                             <img class="img-fluid rounded" style="max-height:200px"
                                                  src="{{$model->orderItem->itemable->getImageUrlForType($type->value->label())}}"
                                                  alt="item photo">
                                             <a
-                                                href="{{ $model->orderItem->itemable->getImageUrlForType($type->value->label())}} "
+                                                href="{{ $downloadUrl}} "
                                                 download
                                                 target="_blank"
                                                 class="btn btn-sm btn-primary mt-2 mb-2"
