@@ -205,34 +205,34 @@
                             </div>
 
                             {{-- Design Mockup Area --}}
-                            @if(
-                                $isDesign &&
-                                !empty($orderItem->itemable->design_mockup_area) &&
-                                is_array($orderItem->itemable->design_mockup_area)
-                            )
-                                <div class="mt-1">
-                                    <h6 class="fw-bold mb-50">Design Mockup Areas</h6>
+{{--                            @if(--}}
+{{--                                $isDesign &&--}}
+{{--                                !empty($orderItem->itemable->design_mockup_area) &&--}}
+{{--                                is_array($orderItem->itemable->design_mockup_area)--}}
+{{--                            )--}}
+{{--                                <div class="mt-1">--}}
+{{--                                    <h6 class="fw-bold mb-50">Design Mockup Areas</h6>--}}
 
-                                    @foreach($orderItem->itemable->design_mockup_area as $index => $area)
-                                        <div class="mb-1 p-1 border rounded bg-light">
-                                            <p class="mb-50">
-                                                <strong>Area {{ $index + 1 }} ({{ $area['name'] ?? 'unknown' }}):</strong>
-                                            </p>
+{{--                                    @foreach($orderItem->itemable->design_mockup_area as $index => $area)--}}
+{{--                                        <div class="mb-1 p-1 border rounded bg-light">--}}
+{{--                                            <p class="mb-50">--}}
+{{--                                                <strong>Area {{ $index + 1 }} ({{ $area['name'] ?? 'unknown' }}):</strong>--}}
+{{--                                            </p>--}}
 
-                                            <ul style="padding-left: 20px; margin: 0;">
-                                                <li>Top-Left X: {{ $area['p1x'] ?? '-' }}</li>
-                                                <li>Top-Left Y: {{ $area['p1y'] ?? '-' }}</li>
-                                                <li>Top-Right X: {{ $area['p2x'] ?? '-' }}</li>
-                                                <li>Top-Right Y: {{ $area['p2y'] ?? '-' }}</li>
-                                                <li>Bottom-Left X: {{ $area['p3x'] ?? '-' }}</li>
-                                                <li>Bottom-Left Y: {{ $area['p3y'] ?? '-' }}</li>
-                                                <li>Bottom-Right X: {{ $area['p4x'] ?? '-' }}</li>
-                                                <li>Bottom-Right Y: {{ $area['p4y'] ?? '-' }}</li>
-                                            </ul>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endif
+{{--                                            <ul style="padding-left: 20px; margin: 0;">--}}
+{{--                                                <li>Top-Left X: {{ $area['p1x'] ?? '-' }}</li>--}}
+{{--                                                <li>Top-Left Y: {{ $area['p1y'] ?? '-' }}</li>--}}
+{{--                                                <li>Top-Right X: {{ $area['p2x'] ?? '-' }}</li>--}}
+{{--                                                <li>Top-Right Y: {{ $area['p2y'] ?? '-' }}</li>--}}
+{{--                                                <li>Bottom-Left X: {{ $area['p3x'] ?? '-' }}</li>--}}
+{{--                                                <li>Bottom-Left Y: {{ $area['p3y'] ?? '-' }}</li>--}}
+{{--                                                <li>Bottom-Right X: {{ $area['p4x'] ?? '-' }}</li>--}}
+{{--                                                <li>Bottom-Right Y: {{ $area['p4y'] ?? '-' }}</li>--}}
+{{--                                            </ul>--}}
+{{--                                        </div>--}}
+{{--                                    @endforeach--}}
+{{--                                </div>--}}
+{{--                            @endif--}}
                         </div>
                     @endforeach
 
