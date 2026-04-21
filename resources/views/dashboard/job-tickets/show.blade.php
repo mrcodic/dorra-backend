@@ -108,6 +108,7 @@
                         src="{{ $previewImage ?: asset('/images/item-photo.png') }}"
                         alt="item photo"
                         class="mb-2"
+                        width="500px"
                     >
 
                     @if($model->jobEvents->last()?->admin)
@@ -151,11 +152,27 @@
                             <div class="d-flex align-items-center justify-content-between">
                                 <p style="margin: 0; color: #121212">{{ $model->orderItem->quantity }}</p>
                             </div>
+                            @if($model->orderItem->color)
+                                <div class="text-dark small d-flex align-items-center mt-25">
+                                    <span class="me-1">Color:</span>
+                                    <span
+                                        class="rounded-circle border me-1"
+                                        style="
+                                    width: 16px;
+                                    height: 16px;
+                                    display: inline-block;
+                                    background-color: {{ $model->orderItem->color }};
+                                "
+                                    ></span>
+                                    <span class="text-muted">{{ $model->orderItem->color }}</span>
+                                </div>
+                            @endif
                             @if(
             $model->orderItem->itemable
         && get_class($model->orderItem->itemable) === \App\Models\Design::class
                      && $model->orderItem->itemable->linked_to_mockup
      )
+
                                 <p style="color: #424746; margin: 0; font-size: 16px">Mockup Positions on Design:</p>
 
                                 @foreach($model->orderItem->itemable->design_mockup_area as $index => $area)
