@@ -111,7 +111,7 @@
                         width="320px"
                         height="320px"
                     >
-                    
+
                     @if($model->jobEvents->last()?->admin)
                         <div class="d-flex flex-column">
                             <div class="d-flex flex-column gap-1">
@@ -195,7 +195,7 @@
                                                 href="{{ $model->orderItem->itemable->getImageUrlForType($type->value->label())}} "
                                                 download
                                                 target="_blank"
-                                                class="btn btn-sm btn-primary mb-2"
+                                                class="btn btn-sm btn-primary mt-2 mb-2"
                                             >
                                                 <i data-feather="download" class="me-25"></i>
                                                 Download Design
