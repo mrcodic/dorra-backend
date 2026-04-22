@@ -218,7 +218,7 @@
                                                 alt="{{ $label }} item photo"
                                             >
 
-                                            href="{{ $downloadUrl }}"
+                                          <a  href="{{ $downloadUrl }}"
                                             download
                                             target="_blank"
                                             class="btn btn-sm btn-primary mt-2 mb-2"
@@ -227,7 +227,8 @@
                                             Download Design
                                             </a>
                                         </div>
-                                    @endforeach                                </div>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
                     @endif
