@@ -246,7 +246,7 @@
                 type: 'get',
                 data: {
                     _token:      "{{ csrf_token() }}",
-                    category_id: categoryId,
+                    category_ids : categoryId,
                 },
                 beforeSend() {
                     $products.prop('disabled', true).empty();   // loading state
