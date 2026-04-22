@@ -66,12 +66,6 @@ class ProcessConfirmedOrderJob implements ShouldQueue
         }
 
 
-        if ($order->paymentMethod?->code === 'cash_on_delivery') {
-            $order->updateQuietly([
-                'payment_status' => StatusEnum::PAID
-            ]);
-        }
-
         // Create job tickets for each item
         foreach ($order->orderItems as $orderItem) {
             if ($orderItem->type == TypeEnum::PRINT) {

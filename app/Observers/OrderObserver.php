@@ -83,7 +83,11 @@ class OrderObserver
             $inventory = Inventory::find($order->inventory_id);
             $inventory->update(["is_available" => false]);
         }
-
+        if ($order->wasChanged('status') && $order->status === StatusEnum::DELIVERED && $order->paymentMethod?->code === 'cash_on_delivery') {
+            $order->updateQuietly([
+                'payment_status' => \App\Enums\Payment\StatusEnum::PAID
+            ]);
+        }
 
     }
 
