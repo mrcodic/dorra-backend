@@ -17,13 +17,17 @@ class FlagService extends BaseService
 
     public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10, $counts = [])
     {
-        $relations = request('type') == 'templates' ? ['templates.products'] : ['products.media'];
+        $relations = request('type') === 'templates'
+            ? ['templates.products']
+            : [
+                'products' => fn($q) => $q->withLastOfferId()->with('media', 'lastOffer')
+            ];
+
         return $this->repository->query()
             ->select($columns)
             ->with($relations)
             ->get();
     }
-
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         $model = $this->repository->create($validatedData);
