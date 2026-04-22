@@ -102,7 +102,7 @@
                     </div>
 
                     {{-- ── scope=2 PRODUCT ──────────────────────────────────────── --}}
-                    <div class="d-none productsField">
+                    <div class="d-none productsField row">
 
                         {{-- Filter: pick a category to narrow products --}}
                         <div class="form-group mb-1 col-6">
@@ -233,35 +233,40 @@
         $('#productCategoryFilter').on('change', function () {
             const categoryId = $(this).val();
             const $products  = $('#productsSelect');
-            const saved      = $products.val() || [];
+            const saved      = $products.val() || [];   // حافظ على الـ selected
 
+            // ── مفيش category مختارة → فضي الـ select ─────────────────────────────
             if (!categoryId) {
-                // restore all products
-                $products.empty();
-                @foreach($associatedData['products'] as $product)
-                $products.append(new Option("{{ $product->name }}", "{{ $product->id }}"));
-                @endforeach
-                $products.val(saved).trigger('change');
+                $products.empty().trigger('change');
                 return;
             }
 
             $.ajax({
-                url: "{{ route('products.categories') }}",
+                url:  "{{ route('products.categories') }}",
                 type: 'POST',
-                data: { _token: "{{ csrf_token() }}", category_id: categoryId },
-                beforeSend: () => $products.prop('disabled', true),
-                success(response) {
-                    $products.empty();
-                    (response.data || []).forEach(p => {
-                        $products.append(new Option(p.name, p.id, false, saved.includes(String(p.id))));
-                    });
-                    $products.trigger('change');
+                data: {
+                    _token:      "{{ csrf_token() }}",
+                    category_id: categoryId,
                 },
-                error(xhr) { console.error('Error fetching products:', xhr.responseText); },
-                complete:   () => $products.prop('disabled', false),
+                beforeSend() {
+                    $products.prop('disabled', true).empty();   // loading state
+                },
+                success(response) {
+                    (response.data || []).forEach(product => {
+                        // لو كان متاختار قبل كده خليه selected
+                        const isSelected = saved.includes(String(product.id));
+                        $products.append(new Option(product.name, product.id, false, isSelected));
+                    });
+                    $products.trigger('change');    // refresh select2
+                },
+                error(xhr) {
+                    console.error('Error fetching products:', xhr.responseText);
+                },
+                complete() {
+                    $products.prop('disabled', false);
+                },
             });
         });
-
         // ══════════════════════════════════════════════════════════════════════
         // Filter: Product → fetch Categories
         // ══════════════════════════════════════════════════════════════════════
