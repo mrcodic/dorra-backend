@@ -17,9 +17,7 @@ class FlagService extends BaseService
 
     public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10, $counts = [])
     {
-        $relations = request('type') == 'templates' ? ['templates.products'] :
-            ['products.media',
-                'products.lastOffer' => fn($q) => $q->withLastOfferId()];
+        $relations = request('type') == 'templates' ? ['templates.products'] : ['products.media'];
         return $this->repository->query()
             ->select($columns)
             ->with($relations)
