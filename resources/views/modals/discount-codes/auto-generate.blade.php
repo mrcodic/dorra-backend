@@ -7,25 +7,26 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
 
                 <div class="modal-header mb-1">
-                    <h5 class="modal-title">Create Discount Code</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Create Discount Code</h5>
                 </div>
 
                 <div class="modal-body flex-grow-1">
 
-                    <!-- Code Mode -->
+                    <!-- Create mode -->
                     <div class="form-group mb-2">
                         <label class="label-text mb-1 d-block">Code Mode</label>
+
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="code_mode" id="generatedMode" value="1" checked>
                             <label class="form-check-label text-black fs-16" for="generatedMode">Generated Codes</label>
                         </div>
+
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="code_mode" id="customMode" value="2">
                             <label class="form-check-label text-black fs-16" for="customMode">Custom Code</label>
                         </div>
                     </div>
 
-                    <!-- Type -->
                     <div class="form-group mb-2">
                         <label for="createDiscountType" class="label-text mb-1">Type</label>
                         <select id="createDiscountType" class="form-select select2" name="type">
@@ -36,7 +37,7 @@
                         </select>
                     </div>
 
-                    <!-- Prefix -->
+                    <!-- Prefix field -->
                     <div class="form-group mb-2" id="prefixFieldWrapper">
                         <label for="createPrefix" class="label-text mb-1">Prefix (Write 4 char)</label>
                         <input type="text" name="code" id="createPrefix" class="form-control"
@@ -50,7 +51,6 @@
                                placeholder="Enter number of generated codes here">
                     </div>
 
-                    <!-- Discount Value -->
                     <div class="form-group mb-2">
                         <label for="createDiscountValue" class="label-text mb-1">Discount Value</label>
                         <input type="number" name="value" id="createDiscountValue" class="form-control"
@@ -63,93 +63,82 @@
                             <input type="number" name="max_usage" id="createRestrictions" class="form-control"
                                    placeholder="Enter number of usage times">
                         </div>
+
                         <div class="form-group mb-2 col-12 col-md-6">
                             <label for="createExpiryDate" class="label-text mb-1">Expiry Date</label>
                             <input type="date" name="expired_at" id="createExpiryDate" class="form-control">
                         </div>
                     </div>
-
-                    <!-- Show for new registered users -->
                     <div class="form-group mb-2 new-registered-users d-none">
                         <input type="hidden" name="show_for_new_registered_users" value="0">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox"
-                                   name="show_for_new_registered_users"
-                                   id="showForNewRegisteredUser" value="1">
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                name="show_for_new_registered_users"
+                                id="showForNewRegisteredUser"
+                                value="1"
+                            >
                             <label class="form-check-label text-black fs-16" for="showForNewRegisteredUser">
                                 Show for new registered users
                             </label>
                         </div>
                     </div>
-
                     <!-- Scope -->
                     <div class="form-group mb-2">
-                        <label class="label-text mb-1 d-block">Scope</label>
+                        <label class="label-text mb-1 d-block">Type</label>
+
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="scope" id="scopeGeneral" value="3" checked>
-                            <label class="form-check-label text-black fs-16" for="scopeGeneral">General</label>
+                            <input class="form-check-input" type="radio" name="scope" id="general" value="3">
+                            <label class="form-check-label text-black fs-16" for="general">General</label>
                         </div>
+
                         <div class="form-check form-check-inline">
-                            {{-- PRODUCT = 2 --}}
-                            <input class="form-check-input" type="radio" name="scope" id="scopeProducts" value="2">
-                            <label class="form-check-label text-black fs-16" for="scopeProducts">Products</label>
+                            <input class="form-check-input" type="radio" name="scope" id="applyToProducts" value="2" checked>
+                            <label class="form-check-label text-black fs-16" for="applyToProducts">Categories</label>
                         </div>
+
                         <div class="form-check form-check-inline">
-                            {{-- CATEGORY = 1 --}}
-                            <input class="form-check-input" type="radio" name="scope" id="scopeCategories" value="1">
-                            <label class="form-check-label text-black fs-16" for="scopeCategories">Categories</label>
+                            <input class="form-check-input" type="radio" name="scope" id="applyToCategories" value="1">
+                            <label class="form-check-label text-black fs-16" for="applyToCategories">Products</label>
                         </div>
                     </div>
 
-                    {{-- ── scope=2 PRODUCT ──────────────────────────────────────── --}}
-                    <div class="d-none productsField row">
-
-                        {{-- Filter: pick a category to narrow products --}}
-                        <div class="form-group mb-1 col-6">
-                            <label for="productCategoryFilter" class="label-text mb-1">Products</label>
-                            <select id="productCategoryFilter" class="form-select select2">
-                                @foreach($associatedData['product_with_categories'] as $category)
-                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        {{-- Result: products --}}
-                        <div class="form-group mb-2  col-6">
-                            <label for="productsSelect" class="label-text mb-1">Categories</label>
-                            <select id="productsSelect" name="product_ids[]"
-                                    class="form-select select2 productsSelect" multiple>
-                            </select>
-                        </div>
+                    <!-- Categories -->
+                    <div class="form-group mb-2 productsField" id="productsField">
+                        <label for="productsSelect" class="label-text mb-1">Categories</label>
+                        <select id="productsSelect" name="product_ids[]" class="form-select select2 productsSelect" multiple>
+                            @foreach($associatedData['products'] as $product)
+                                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
-                    {{-- ── scope=1 CATEGORY ────────────────────────────────────── --}}
-                    <div class="d-none categoriesField">
-
-                        {{-- Result: categories --}}
-                        <div class="form-group mb-2">
-                            <label for="categoriesSelect" class="label-text mb-1">Categories</label>
-                            <select id="categoriesSelect" name="category_ids[]"
-                                    class="form-select select2 categoriesSelect" multiple>
-                                @foreach($associatedData['categories'] as $category)
-                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                    <!-- Products -->
+                    <div class="form-group mb-2 d-none categoriesField" id="categoriesField">
+                        <label for="categoriesSelect" class="label-text mb-1">Products</label>
+                        <select id="categoriesSelect" name="category_ids[]" class="form-select select2 categoriesSelect" multiple>
+                            @foreach($associatedData['categories'] as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
                 </div>
 
                 <div class="modal-footer border-top-0 d-flex flex-wrap-reverse justify-content-between">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+
                     <div class="d-flex flex-wrap-reverse gap-1">
                         <button type="submit" class="btn btn-outline-secondary" id="generateBtn">
                             Generate
-                            <span id="generateLoader" class="spinner-border spinner-border-sm d-none"></span>
+                            <span id="generateLoader" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                         </button>
-                        <button type="button" class="btn btn-primary fs-5" id="SaveChangesButton">
+
+                        <button type="button" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
                             <span>Generate & Export</span>
-                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none"></span>
+                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
+                                  role="status" aria-hidden="true"></span>
                         </button>
                     </div>
                 </div>
@@ -159,255 +148,295 @@
 </div>
 
 <script>
+    $('#showForNewRegisteredUser').on('change', function () {
+        if ($(this).is(':checked')) {
+            // Hide & disable max_usage
+            $('#createRestrictions')
+                .closest('.form-group')
+                .addClass('d-none');
+            $('#createRestrictions')
+                .val('')
+                .prop('disabled', true);
+
+            // ✅ Hide & disable expired_at
+            $('#createExpiryDate')
+                .closest('.form-group')
+                .addClass('d-none');
+            $('#createExpiryDate')
+                .val('')
+                .prop('disabled', true);
+        } else {
+            // Show & enable max_usage
+            $('#createRestrictions')
+                .closest('.form-group')
+                .removeClass('d-none');
+            $('#createRestrictions')
+                .prop('disabled', false);
+
+            // ✅ Show & enable expired_at
+            $('#createExpiryDate')
+                .closest('.form-group')
+                .removeClass('d-none');
+            $('#createExpiryDate')
+                .prop('disabled', false);
+        }
+    });
     $(function () {
+        $('.select2').select2({
+            dropdownParent: $('#createCodeTemplateModal')
+        });
 
-        // ── Init Select2 (مرة واحدة بس) ───────────────────────────────────────
-        $('.select2').select2({ dropdownParent: $('#createCodeTemplateModal') });
-
-        // ══════════════════════════════════════════════════════════════════════
-        // Code Mode Toggle
-        // ══════════════════════════════════════════════════════════════════════
         function toggleCodeModeFields() {
-            const isCustom = $('input[name="code_mode"]:checked').val() === '2';
+            const mode = $('input[name="code_mode"]:checked').val();
 
-            $('#numberOfCodesWrapper').toggleClass('d-none', isCustom);
-            $('#numberOfCodes').val('').prop('required', false);
-            $('.new-registered-users').toggleClass('d-none', !isCustom);
+            if (mode === '2') {
+                $('#numberOfCodesWrapper').addClass('d-none');
+                $('#numberOfCodes').val('').prop('required', false);
+                $('.new-registered-users').removeClass('d-none');
 
-            if (!isCustom) {
-                // reset new-registered-users side effects
+                $('#prefixFieldWrapper label').text('Custom Code');
+                $('#createPrefix')
+                    .attr('placeholder', 'Enter custom code')
+                    .attr('maxlength', 255);
+            } else {
+                $('#numberOfCodesWrapper').removeClass('d-none');
+                $('.new-registered-users').addClass('d-none');
+                $('#numberOfCodes').prop('required', false);
+
+
                 $('#showForNewRegisteredUser').prop('checked', false);
-                $('#createRestrictions').closest('.form-group').removeClass('d-none');
-                $('#createRestrictions').val('').prop('disabled', false);
-                $('#createExpiryDate').closest('.form-group').removeClass('d-none');
-                $('#createExpiryDate').val('').prop('disabled', false);
-            }
 
-            $('#prefixFieldWrapper label').text(isCustom ? 'Custom Code' : 'Prefix (Write 4 char)');
-            $('#createPrefix')
-                .attr('placeholder', isCustom ? 'Enter custom code' : 'Add prefix here')
-                .attr('maxlength',   isCustom ? 255              : 4);
+                $('#createRestrictions')
+                    .closest('.form-group')
+                    .removeClass('d-none');
+                $('#createRestrictions')
+                    .val('')
+                    .prop('disabled', false);
+
+            // ✅ Reset expiry date
+                $('#createExpiryDate')
+                    .closest('.form-group')
+                    .removeClass('d-none');
+                $('#createExpiryDate')
+                    .val('')
+                    .prop('disabled', false);
+
+                $('#prefixFieldWrapper label').text('Prefix (Write 4 char)');
+                $('#createPrefix')
+                    .attr('placeholder', 'Add prefix here')
+                    .attr('maxlength', 4);
+            }
         }
 
-        $('input[name="code_mode"]').on('change', toggleCodeModeFields);
+        $('input[name="code_mode"]').on('change', function () {
+            toggleCodeModeFields();
+        });
+
         toggleCodeModeFields();
 
-        // ══════════════════════════════════════════════════════════════════════
-        // Show for new registered users
-        // ══════════════════════════════════════════════════════════════════════
-        $('#showForNewRegisteredUser').on('change', function () {
-            const hide = $(this).is(':checked');
-            $('#createRestrictions').closest('.form-group').toggleClass('d-none', hide);
-            $('#createRestrictions').val('').prop('disabled', hide);
-            $('#createExpiryDate').closest('.form-group').toggleClass('d-none', hide);
-            $('#createExpiryDate').val('').prop('disabled', hide);
-        });
-
-        // ══════════════════════════════════════════════════════════════════════
-        // Discount Value cap
-        // ══════════════════════════════════════════════════════════════════════
         $('#createDiscountValue').on('input', function () {
-            const isPercentage = $('#createDiscountType').val() === "{{ \App\Enums\DiscountCode\TypeEnum::PERCENTAGE->value }}";
-            const val = parseFloat(this.value);
-            if (isPercentage && val > 100) this.value = 100;
-            if (val < 1) this.value = 1;
+            const type = $('#createDiscountType').val();
+            const value = parseFloat(this.value);
+
+            if (type === "{{ \App\Enums\DiscountCode\TypeEnum::PERCENTAGE->value }}" && value > 100) {
+                this.value = 100;
+            }
+
+            if (value < 1) {
+                this.value = 1;
+            }
         });
 
-        // ══════════════════════════════════════════════════════════════════════
-        // Scope Toggle  (GENERAL=3 | PRODUCT=2 | CATEGORY=1)
-        // ══════════════════════════════════════════════════════════════════════
         $('input[name="scope"]').on('change', function () {
             const scope = parseInt(this.value);
-            $('.productsField').toggleClass('d-none', scope !== 2);
-            $('.categoriesField').toggleClass('d-none', scope !== 1);
 
-            // clear opposite field
-            if (scope !== 2) $('.productsSelect').val(null).trigger('change');
-            if (scope !== 1) $('.categoriesSelect').val(null).trigger('change');
+            if (scope === 2) {
+                $('.productsField').removeClass('d-none');
+                $('.categoriesField').addClass('d-none');
+                $('.categoriesSelect').val(null).trigger('change');
+            } else if (scope === 1) {
+                $('.categoriesField').removeClass('d-none');
+                $('.productsField').addClass('d-none');
+                $('.productsSelect').val(null).trigger('change');
+            } else {
+                $('.productsField, .categoriesField').addClass('d-none');
+                $('.productsSelect, .categoriesSelect').val(null).trigger('change');
+            }
         });
+
         $('input[name="scope"]:checked').trigger('change');
 
-        // ══════════════════════════════════════════════════════════════════════
-        // Filter: Category → fetch Products
-        // ══════════════════════════════════════════════════════════════════════
-        $('#productCategoryFilter').on('change', function () {
-            const categoryId = $(this).val();
-            const $products  = $('#productsSelect');
-            const saved      = $products.val() || [];   // حافظ على الـ selected
-
-            // ── مفيش category مختارة → فضي الـ select ─────────────────────────────
-            if (!categoryId) {
-                $products.empty().trigger('change');
-                return;
-            }
-
-            $.ajax({
-                url:  "{{ route('products.categories') }}",
-                type: 'POST',
-                data: {
-                    _token:      "{{ csrf_token() }}",
-                    category_ids : categoryId,
-                },
-                beforeSend() {
-                    $products.prop('disabled', true).empty();   // loading state
-                },
-                success(response) {
-                    (response.data || []).forEach(product => {
-                        // لو كان متاختار قبل كده خليه selected
-                        const isSelected = saved.includes(String(product.id));
-                        $products.append(new Option(product.name, product.id, false, isSelected));
-                    });
-                    $products.trigger('change');    // refresh select2
-                },
-                error(xhr) {
-                    console.error('Error fetching products:', xhr.responseText);
-                },
-                complete() {
-                    $products.prop('disabled', false);
-                },
-            });
-        });
-        // ══════════════════════════════════════════════════════════════════════
-        // Filter: Product → fetch Categories
-        // ══════════════════════════════════════════════════════════════════════
-        $('#categoryProductFilter').on('change', function () {
-            const productId   = $(this).val();
-            const $categories = $('#categoriesSelect');
-            const saved       = $categories.val() || [];
-
-            if (!productId) {
-                // restore all categories
-                $categories.empty();
-                @foreach($associatedData['categories'] as $category)
-                $categories.append(new Option("{{ $category->name }}", "{{ $category->id }}"));
-                @endforeach
-                $categories.val(saved).trigger('change');
-                return;
-            }
-
-            $.ajax({
-                url: "{{ route('products.categories') }}",
-                type: 'POST',
-                data: { _token: "{{ csrf_token() }}", product_id: productId },
-                beforeSend: () => $categories.prop('disabled', true),
-                success(response) {
-                    $categories.empty();
-                    (response.data || []).forEach(c => {
-                        $categories.append(new Option(c.name, c.id, false, saved.includes(String(c.id))));
-                    });
-                    $categories.trigger('change');
-                },
-                error(xhr) { console.error('Error fetching categories:', xhr.responseText); },
-                complete:   () => $categories.prop('disabled', false),
-            });
-        });
-
-        // ══════════════════════════════════════════════════════════════════════
-        // Reset modal on close
-        // ══════════════════════════════════════════════════════════════════════
-        $('#createCodeTemplateModal').on('hidden.bs.modal', function () {
-            $('#addDiscountForm')[0].reset();
-            $('#showForNewRegisteredUser').prop('checked', false);
-            $('.select2').val(null).trigger('change');
-            $('#productCategoryFilter, #categoryProductFilter').val(null).trigger('change');
-            toggleCodeModeFields();
-            $('input[name="scope"]:checked').trigger('change');
-        });
-
-        // ══════════════════════════════════════════════════════════════════════
-        // Submit — Generate
-        // ══════════════════════════════════════════════════════════════════════
         $('#addDiscountForm').on('submit', function (e) {
             e.preventDefault();
-            const form        = $(this);
-            const generateBtn = $('#generateBtn');
-            const exportBtn   = $('#SaveChangesButton');
-            const loader      = $('#generateLoader');
 
-            generateBtn.add(exportBtn).prop('disabled', true);
-            loader.removeClass('d-none');
+            let form = $(this);
+            let formData = new FormData(this);
+            let actionUrl = form.attr('action');
+
+            const generateBtn = $('#generateBtn');
+            const generateLoader = $('#generateLoader');
+            const exportBtn = $('#SaveChangesButton');
+
+            generateBtn.attr('disabled', true);
+            exportBtn.attr('disabled', true);
+            generateLoader.removeClass('d-none');
 
             $.ajax({
-                url:         form.attr('action'),
-                method:      'POST',
-                data:        new FormData(this),
+                url: actionUrl,
+                method: 'POST',
+                data: formData,
                 processData: false,
                 contentType: false,
-                success() {
-                    Toastify({ text: "Code added successfully!", duration: 2000,
-                        gravity: "top", position: "right", backgroundColor: "#28C76F", close: true }).showToast();
-                    $('#createCodeTemplateModal').modal('hide');
-                    $(".code-list-table").DataTable().ajax.reload();
+                    success: function (response) {
+                        Toastify({
+                            text: "Code added successfully!",
+                            duration: 2000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#28C76F",
+                            close: true,
+                        }).showToast();
+
+                        $('#createCodeTemplateModal').modal('hide');
+                        form[0].reset();
+                        $('#showForNewRegisteredUser').prop('checked', false);
+                        $('.select2').val(null).trigger('change');
+                        toggleCodeModeFields();
+                        $('input[name="scope"]:checked').trigger('change');
+                        $(".code-list-table").DataTable().ajax.reload();
+                    },
+                error: function (xhr) {
+                    let errors = xhr.responseJSON?.errors;
+
+                    if (errors) {
+                        Object.values(errors).forEach(errorArray => {
+                            errorArray.forEach(message => {
+                                Toastify({
+                                    text: message,
+                                    duration: 4000,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "#EA5455",
+                                    close: true,
+                                }).showToast();
+                            });
+                        });
+                    } else {
+                        Toastify({
+                            text: "Something went wrong. Please try again.",
+                            duration: 4000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455",
+                            close: true,
+                        }).showToast();
+                    }
                 },
-                error(xhr) { showErrors(xhr); },
-                complete() {
-                    generateBtn.add(exportBtn).prop('disabled', false);
-                    loader.addClass('d-none');
+                complete: function () {
+                    generateBtn.attr('disabled', false);
+                    exportBtn.attr('disabled', false);
+                    generateLoader.addClass('d-none');
                 }
             });
         });
 
-        // ══════════════════════════════════════════════════════════════════════
-        // Generate & Export
-        // ══════════════════════════════════════════════════════════════════════
         $('#SaveChangesButton').on('click', function () {
-            const btn    = $(this);
+            const button = $(this);
             const loader = $('#saveLoader');
+            const form = $('#addDiscountForm');
+            const formData = new FormData(form[0]);
+            const exportUrl = "{{ route('discount-codes.generate.export') }}";
 
-            btn.prop('disabled', true);
+            button.attr('disabled', true);
             loader.removeClass('d-none');
-            $('#generateBtn').prop('disabled', true);
+            $('button[type="submit"]').attr('disabled', true);
 
             $.ajax({
-                url:         "{{ route('discount-codes.generate.export') }}",
-                method:      'POST',
-                data:        new FormData($('#addDiscountForm')[0]),
+                url: exportUrl,
+                method: 'POST',
+                data: formData,
                 processData: false,
                 contentType: false,
-                xhrFields:   { responseType: 'blob' },
-                success(response, status, xhr) {
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function (response, status, xhr) {
                     const disposition = xhr.getResponseHeader('Content-Disposition');
-                    let filename = 'discount_codes.xlsx';
-                    const match = disposition?.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-                    if (match?.[1]) filename = match[1].replace(/['"]/g, '');
+                    let filename = "discount_codes.xlsx";
 
-                    const link = Object.assign(document.createElement('a'), {
-                        href: URL.createObjectURL(new Blob([response], {
-                            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                        })),
-                        download: filename,
+                    if (disposition && disposition.indexOf('attachment') !== -1) {
+                        const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                        if (match && match[1]) {
+                            filename = match[1].replace(/['"]/g, '');
+                        }
+                    }
+
+                    const blob = new Blob([response], {
+                        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                     });
+
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
 
-                    Toastify({ text: "File exported successfully!", duration: 2000,
-                        gravity: "top", position: "right", backgroundColor: "#28C76F", close: true }).showToast();
                     $('#createCodeTemplateModal').modal('hide');
+
+                    Toastify({
+                        text: "File exported successfully!",
+                        duration: 2000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#28C76F",
+                        close: true,
+                    }).showToast();
+
+                    form[0].reset();
+                    $('#showForNewRegisteredUser').prop('checked', false);
+                    $('.select2').val(null).trigger('change');
+                    toggleCodeModeFields();
+                    $('input[name="scope"]:checked').trigger('change');
                     $(".code-list-table").DataTable().ajax.reload();
                 },
-                error(xhr) { showErrors(xhr); },
-                complete() {
-                    btn.prop('disabled', false);
+                error: function (xhr) {
+                    let errors = xhr.responseJSON?.errors;
+
+                    if (errors) {
+                        Object.values(errors).forEach(errorArray => {
+                            errorArray.forEach(message => {
+                                Toastify({
+                                    text: message,
+                                    duration: 4000,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "#EA5455",
+                                    close: true,
+                                }).showToast();
+                            });
+                        });
+                    } else {
+                        Toastify({
+                            text: "Something went wrong. Please try again.",
+                            duration: 4000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455",
+                            close: true,
+                        }).showToast();
+                    }
+                },
+                complete: function () {
+                    button.attr('disabled', false);
                     loader.addClass('d-none');
-                    $('#generateBtn').prop('disabled', false);
+                    $('button[type="submit"]').attr('disabled', false);
                 }
             });
         });
 
-        // ══════════════════════════════════════════════════════════════════════
-        // Helper: show validation errors
-        // ══════════════════════════════════════════════════════════════════════
-        function showErrors(xhr) {
-            const errors = xhr.responseJSON?.errors;
-            const messages = errors
-                ? Object.values(errors).flat()
-                : ["Something went wrong. Please try again."];
-
-            messages.forEach(msg => Toastify({
-                text: msg, duration: 4000,
-                gravity: "top", position: "right", backgroundColor: "#EA5455", close: true,
-            }).showToast());
-        }
+        $('button[type="submit"]').on('click', function () {
+            $('#SaveChangesButton').attr('disabled', true);
+        });
     });
 </script>
