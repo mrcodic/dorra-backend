@@ -56,7 +56,7 @@ class Cart extends Model
                             $productPriceId=null, $subTotal=null, $cartable_id=null, $cartable_type=null,
                             $color=null): CartItem
     {
-        return $this->items()->create([
+        return $this->items()->updateOrCreate([
             'itemable_id' => $itemable->id,
             'itemable_type' => get_class($itemable),
             'cartable_id' => $cartable_id,
