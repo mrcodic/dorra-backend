@@ -154,6 +154,11 @@
     </div>
 </div>
 <script>
+    $('#productsSelect').select2({
+        placeholder: "Choose Categories",
+        allowClear: true
+    });
+    
     // After “Products With Categories (left)” changes we fetch its categories (right), then sync + refresh
     $('#categoriesSelect').on('change', function () {
         const selectedIds = $(this).val();
