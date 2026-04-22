@@ -114,9 +114,21 @@
                         <p class="mb-1 fs-16 text-dark">Order Placed on:</p>
                         <p class="fs-16 text-black">{{ $model->created_at->format('F d, Y') }}</p>
                     </div>
-                    <label class="form-label fw-bold mt-3 mb-1 fs-16 text-black">Payment Status</label>
-                    <p style="font-weight: 700; font-size: 16px;">{{ $model->payment_status->label() }}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-3 mb-1">
+                        <div>
+                            <label class="form-label fw-bold fs-16 text-black mb-0">Payment Status</label>
+                            <p class="fw-bold fs-16 mb-0">
+                                {{ $model->payment_status->label() }}
+                            </p>
+                        </div>
 
+                        <div class="text-end">
+                            <label class="form-label fw-bold fs-16 text-black mb-0">Payment Method</label>
+                            <p class="fw-bold fs-16 mb-0">
+                                {{ $model->paymentMethod?->name ?? 'Cash On Delivery' }}
+                            </p>
+                        </div>
+                    </div>
 
                     @foreach ($model->orderItems as $orderItem)
                         @php
