@@ -31,6 +31,8 @@ class DiscountCodeController extends DashboardController
                 ->where('is_has_category', 0)->
                 whereNull('parent_id')->get(['id', 'name']),
                 'products' => $this->productRepository->all(columns: ['id', 'name']),
+                'product_with_categories' => $this->categoryRepository->query()->where('is_has_category', 1)->has('products')->get(['id', 'name']),
+
             ],
         ];
     }

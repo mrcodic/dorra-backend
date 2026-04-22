@@ -105,12 +105,19 @@
                     </div>
 
                     <!-- Categories -->
-                    <div class="form-group mb-2 productsField" id="productsField">
-                        <label for="productsSelect" class="label-text mb-1">Categories</label>
+                    <div class="form-group mb-2 productsField">
+                        <label for="productsSelect" class="label-text mb-1">Products</label>
                         <select id="productsSelect" name="product_ids[]" class="form-select select2 productsSelect" multiple>
-                            @foreach($associatedData['products'] as $product)
+                            @foreach($associatedData['product_with_categories'] as $product)
                                 <option value="{{ $product->id }}">{{ $product->name }}</option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group mb-2 productsField" id="productsField">
+                        <label for="productsSelect" class="label-text mb-1">Categories</label>
+                        <select id="productsSelect" class="form-select select2" name="product_ids[]"
+                                multiple>
+
                         </select>
                     </div>
 
@@ -146,6 +153,49 @@
         </div>
     </div>
 </div>
+<script>
+    // After “Products With Categories (left)” changes we fetch its categories (right), then sync + refresh
+    $('#categoriesSelect').on('change', function () {
+        const selectedIds = $(this).val();
+        const $right = $('#productsSelect');
+        if (selectedIds && selectedIds.length > 0) {
+            $.ajax({
+                url: "{{ route('products.categories') }}",
+                type: "POST",
+                data: {_token: "{{ csrf_token() }}", category_ids: selectedIds},
+                success(response) {
+                    const saved = $right.val() || [];
+
+                    // Clear previous options if needed
+                    $right.empty();
+
+                    (response.data || []).forEach(cat => {
+                        const opt = new Option(cat.name, cat.id, false, true);
+                        $(opt).attr('data-has-mockup', cat.has_mockup ? '1' : '0');
+                        $right.append(opt);
+                    });
+
+                    // If you want to preserve previously selected values
+                    // $right.val(saved).trigger('change');
+
+                    $right.trigger('change'); // refresh select2
+                },
+                error(xhr) {
+                    console.error("Error fetching categories:", xhr.responseText);
+                }
+            });
+        } else {
+            $right.empty().trigger('change');
+            syncSelectedResourcesToHiddenInputs();
+        }
+    });
+
+
+
+
+
+
+</script>
 
 <script>
     $('#showForNewRegisteredUser').on('change', function () {
