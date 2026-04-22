@@ -243,7 +243,7 @@
 
             $.ajax({
                 url:  "{{ route('products.categories') }}",
-                type: 'get',
+                type: 'POST',
                 data: {
                     _token:      "{{ csrf_token() }}",
                     category_ids : categoryId,
@@ -287,7 +287,7 @@
 
             $.ajax({
                 url: "{{ route('products.categories') }}",
-                type: 'get',
+                type: 'POST',
                 data: { _token: "{{ csrf_token() }}", product_id: productId },
                 beforeSend: () => $categories.prop('disabled', true),
                 success(response) {
