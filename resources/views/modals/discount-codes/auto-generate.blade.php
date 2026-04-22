@@ -106,10 +106,9 @@
 
                         {{-- Filter: pick a category to narrow products --}}
                         <div class="form-group mb-1">
-                            <label for="productCategoryFilter" class="label-text mb-1">Filter by Category</label>
+                            <label for="productCategoryFilter" class="label-text mb-1">Products</label>
                             <select id="productCategoryFilter" class="form-select select2">
-                                <option value="">-- All Categories --</option>
-                                @foreach($associatedData['categories'] as $category)
+                                @foreach($associatedData['product_with_categories'] as $category)
                                     <option value="{{ $category->id }}">{{ $category->name }}</option>
                                 @endforeach
                             </select>
@@ -129,17 +128,6 @@
 
                     {{-- ── scope=1 CATEGORY ────────────────────────────────────── --}}
                     <div class="d-none categoriesField">
-
-                        {{-- Filter: pick a product to narrow categories --}}
-                        <div class="form-group mb-1">
-                            <label for="categoryProductFilter" class="label-text mb-1">Filter by Product</label>
-                            <select id="categoryProductFilter" class="form-select select2">
-                                <option value="">-- All Products --</option>
-                                @foreach($associatedData['products'] as $product)
-                                    <option value="{{ $product->id }}">{{ $product->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
 
                         {{-- Result: categories --}}
                         <div class="form-group mb-2">
