@@ -142,18 +142,7 @@
                                     ? ($orderItem->itemable->getFirstMediaUrl('front-mockup-designs') ?: $orderItem->itemable->getFirstMediaUrl('none-mockup-designs'))
                                     : $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($orderItem->itemable))));
 
-
-                            $designDownloadUrl = null;
-
-                            if ($isDesign) {
-                                $designDownloadUrl =
-                                    $orderItem->itemable->getFirstMediaUrl('designs')
-                                    ?: $orderItem->itemable->getFirstMediaUrl('back_designs');
-                            }else{
-                                 $designDownloadUrl =
-                                    $orderItem->itemable->getFirstMediaUrl('templates')
-                                    ?: $orderItem->itemable->getFirstMediaUrl('back_templates');
-                            }
+                            
                         @endphp
 
                         <div class="mb-1 border rounded p-1">
