@@ -3,10 +3,14 @@
 namespace App\Services;
 
 
+use App\Enums\DiscountCode\ScopeEnum;
 use App\Exports\DiscountCodesExport;
+use App\Models\Cart;
+use App\Models\DiscountCode;
 use App\Repositories\Interfaces\DiscountCodeRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -84,5 +88,55 @@ class DiscountCodeService extends BaseService
         });
     }
 
+    /**
+     * @throws ValidationException
+     */
+    public function validateCartItemAgainstDiscount(Cart $cart, string $cartableId, string $cartableType): void
+    {
+        if (!$cart->discount_code_id) return;
+
+        $discountCode = DiscountCode::find($cart->discount_code_id);
+
+        if (!$discountCode) return;
+
+        if ($discountCode->scope === ScopeEnum::GENERAL) return;
+
+        $isValid = match ($discountCode->scope) {
+            ScopeEnum::PRODUCT  => $this->isProductAttached($discountCode, $cartableId, $cartableType),
+            ScopeEnum::CATEGORY => $this->isCategoryAttached($discountCode, $cartableId, $cartableType),
+            default             => false,
+        };
+
+        if (!$isValid) {
+            throw ValidationException::withMessages([
+                'discount_code' => __(
+                    'The discount code ":code" is not valid for this :scope. Please remove the code or add an eligible item.',
+                    [
+                        'code'  => $discountCode->code,
+                        'scope' => strtolower($discountCode->scope->label()),
+                    ]
+                ),
+            ]);
+        }
+    }
+
+
+    private function isProductAttached(DiscountCode $discountCode, string $cartableId, string $cartableType): bool
+    {
+        if ($cartableType !== \App\Models\Product::class) return false;
+
+        return $discountCode->products()
+            ->where('discountables.discountable_id', $cartableId)
+            ->exists();
+    }
+
+    private function isCategoryAttached(DiscountCode $discountCode, string $cartableId, string $cartableType): bool
+    {
+        if ($cartableType !== \App\Models\Category::class) return false;
+
+        return $discountCode->categories()
+            ->where('discountables.discountable_id', $cartableId)
+            ->exists();
+    }
 
 }

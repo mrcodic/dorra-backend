@@ -74,6 +74,12 @@ class CartService extends BaseService
                         ];
                     })->toArray();
                 }
+                app(DiscountCodeService::class)->validateCartItemAgainstDiscount(
+                    $cart,
+                    $request->cartable_id,
+                    $request->cartable_type,
+                );
+
                 $product = $request->cartable_type === 'App\\Models\\Product'
                     ? $this->productRepository->query()->find($request->cartable_id)
                     : $this->categoryRepository->query()->find($request->cartable_id);
