@@ -158,7 +158,10 @@
         placeholder: "Choose Categories",
         allowClear: true
     });
-    
+    $('#categoriesSelect').select2({
+        placeholder: "Choose Products",
+        allowClear: true
+    });
     // After “Products With Categories (left)” changes we fetch its categories (right), then sync + refresh
     $('#categoriesSelect').on('change', function () {
         const selectedIds = $(this).val();
