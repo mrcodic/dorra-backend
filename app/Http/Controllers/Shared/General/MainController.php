@@ -55,6 +55,7 @@ use App\Services\FolderService;
 use App\Services\TagService;
 use App\Services\TeamService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
@@ -226,15 +227,41 @@ class MainController extends Controller
         return Response::api(data: ['id' => uniqid()]);
     }
 
+    /**
+     * @throws ValidationException
+     */
     public function contactUs(Request $request, MessageRepositoryInterface $messageRepository)
     {
         $validatedData = $request->validate([
-            'email' => 'required|email'
-            , 'message' => 'required'
-            , 'name' => 'required',
-            'phone' => 'required',
+            'email'            => 'required|email',
+            'message'          => 'required',
+            'name'             => 'required',
+            'phone'            => 'required',
+            'recaptcha_token'  => 'required|string',
         ]);
+
+        $recaptchaResponse = Http::post('https://www.google.com/recaptcha/api/siteverify', [
+            'secret'   => config('services.recaptcha.secret_key'),
+            'response' => $validatedData['recaptcha_token'],
+            'remoteip' => $request->ip(),
+        ]);
+
+        $recaptchaData = $recaptchaResponse->json();
+
+        if (
+            ! $recaptchaData['success']
+            || $recaptchaData['action'] !== 'USER_ACTION'
+            || $recaptchaData['score'] < 0.5
+        ) {
+          throw ValidationException::withMessages([
+               'recaptcha_token' => 'reCAPTCHA verification failed.'
+           ]);
+        }
+
+        unset($validatedData['recaptcha_token']);
+
         $messageRepository->create($validatedData);
+
         return Response::api();
     }
 
