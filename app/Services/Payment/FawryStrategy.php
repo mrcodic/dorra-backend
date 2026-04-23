@@ -202,7 +202,7 @@ use Illuminate\Support\Facades\Log;
                     'signature'      => $signature,
                 ]
             );
-            dd($response->body());
+            dd($response->body(),$referenceNumber,$this->merchantCode,$this->secureKey);
             return $response->json('paymentStatus') ?? 'UNKNOWN';
 
         } catch (\Exception $e) {
