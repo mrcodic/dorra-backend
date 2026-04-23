@@ -237,7 +237,8 @@
                         </select>
                     </div>
                     </div>
-                        <div class="row"></div>
+
+                        <div class="row">
                  <div class="form-group mb-2 col-md-3">
     <label for="fillRatio" class="label-text mb-1">Fill Ratio</label>
 
