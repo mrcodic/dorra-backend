@@ -70,10 +70,11 @@ class ImageService
 
     private function storePreview(Media $original, string $previewCollection): Media
     {
-        dd($original);
 
         $filePath = Storage::disk($original->disk)
             ->path("{$original->id}/{$original->file_name}");
+        dd($original,$filePath);
+
         $preview = new Imagick($filePath . '[0]');
 
         // Remove metadata only
