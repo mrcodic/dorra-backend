@@ -75,7 +75,6 @@ class ImageService
             ->path("{$original->id}/{$original->file_name}");
 
         $preview = new Imagick($filePath . '[0]');
-        dd($original,$filePath,$preview);
 
         // Remove metadata only
         $preview->stripImage();
@@ -104,6 +103,7 @@ class ImageService
 
         $preview->writeImage($tmpPath);
         clearstatcache(true, $tmpPath);
+        dd($original,$filePath,$preview);
 
         $previewMedia = handleMediaUploads(
             files: new UploadedFile(
