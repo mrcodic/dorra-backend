@@ -38,17 +38,17 @@ class SyncFawryOrderStatus implements ShouldQueue
             ->latest()
             ->first();
 
-        if (!$transaction?->reference_number) {
+        if (!$transaction?->kiosk_reference) {
             return;
         }
 
         try {
-            $fawryStatus = $fawry->getStatus($transaction->reference_number);
+            $fawryStatus = $fawry->getStatus($transaction->kiosk_reference);
 
             $mappedStatus = $this->mapStatus($fawryStatus);
 
             if ($mappedStatus === $transaction->payment_status) {
-                return; // no change needed
+                return;
             }
 
             $transaction->update(['payment_status' => $mappedStatus]);
