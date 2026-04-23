@@ -1219,9 +1219,10 @@ Route::get('/test-job', function (FawryStrategy $fawry) {
                     };
 
                     if ($mappedStatus === $transaction->payment_status) {
+                        dump($fawryStatus,$transaction);
+                        
                         continue;
                     }
-                    dump($fawryStatus,$transaction);
 
                     $transaction->update([
                         'payment_status' => $mappedStatus,
