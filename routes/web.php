@@ -1184,6 +1184,7 @@ Route::get('/test-job', function (FawryStrategy $fawry) {
         // ->where('created_at', '>=', now()->subHours(48))
         ->with('transactions')
         ->chunkById(100, function ($orders) use ($fawry, &$processed) {
+            dd($orders);
             foreach ($orders as $order) {
                 $transaction = $order->transactions()
                     ->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)
