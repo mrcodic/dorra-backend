@@ -1170,3 +1170,6 @@ function resolveUrlWarp(Request $request): ?array
         'bl' => ['x' => (int) $request->query('blx'), 'y' => (int) $request->query('bly')],
     ];
 }
+Route::get('/test-job', function () {
+    \App\Jobs\SyncFawryOrderStatus::dispatch();
+});
