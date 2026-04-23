@@ -185,85 +185,27 @@ use Illuminate\Support\Facades\Log;
     {
         return true;
     }
-
-
     public function getStatus(string $referenceNumber): string
     {
         $referenceNumber = trim($referenceNumber);
-
         try {
             $signature = hash(
                 'sha256',
                 $this->merchantCode . $referenceNumber . $this->secureKey
             );
 
-            $url = $this->baseUrl . 'ECommerceWeb/Fawry/payments/status/v2?' . http_build_query([
-                    'merchantCode'      => $this->merchantCode,
+            $response = Http::timeout(30)->get(
+                $this->baseUrl . 'ECommerceWeb/Fawry/payments/status/v2',
+                [
+                    'merchantCode'   => $this->merchantCode,
                     'merchantRefNumber' => $referenceNumber,
-                    'signature'         => $signature,
-                ]);
+                    'signature'      => $signature,
+                ]
+            );
+            return $response->json('paymentStatus') ?? 'UNKNOWN';
 
-            $ch = curl_init();
-
-            curl_setopt_array($ch, [
-                CURLOPT_URL => $url,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_TIMEOUT => 30,
-                CURLOPT_CONNECTTIMEOUT => 10,
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_HTTPGET => true,
-                CURLOPT_HTTPHEADER => [
-                    'Accept: application/json',
-                ],
-            ]);
-
-            $result = curl_exec($ch);
-            $curlError = curl_error($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-            curl_close($ch);
-
-            if ($result === false) {
-                Log::error('Fawry getStatus cURL failed', [
-                    'referenceNumber' => $referenceNumber,
-                    'error' => $curlError,
-                ]);
-
-                return 'ERROR';
-            }
-
-            $decoded = json_decode($result, true);
-
-            Log::info('Fawry getStatus response', [
-                'referenceNumber' => $referenceNumber,
-                'http_code' => $httpCode,
-                'response' => $decoded,
-                'raw_response' => $result,
-            ]);
-
-            if (!is_array($decoded)) {
-                return 'UNKNOWN';
-            }
-
-            if (($decoded['code'] ?? null) === '9938') {
-                Log::warning('Fawry order not found', [
-                    'referenceNumber' => $referenceNumber,
-                    'response' => $decoded,
-                ]);
-
-                return 'NOT_FOUND';
-            }
-
-            return $decoded['paymentStatus'] ?? 'UNKNOWN';
-        } catch (\Throwable $e) {
-            Log::error('Fawry getStatus failed', [
-                'referenceNumber' => $referenceNumber,
-                'error' => $e->getMessage(),
-                'line' => $e->getLine(),
-                'file' => $e->getFile(),
-            ]);
-
+        } catch (\Exception $e) {
+            Log::error('Fawry getStatus failed', ['error' => $e->getMessage()]);
             return 'ERROR';
         }
     }

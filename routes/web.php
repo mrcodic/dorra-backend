@@ -1179,7 +1179,7 @@ Route::get('/test-job', function (FawryStrategy $fawry) {
         ->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)
         ->latest()
         ->first();
-    $fawryStatus = $fawry->getStatus('781403651');
+    $fawryStatus = $fawry->getStatus(781403651);
     dd($fawryStatus);
     $processed = 0;
     Order::query()
