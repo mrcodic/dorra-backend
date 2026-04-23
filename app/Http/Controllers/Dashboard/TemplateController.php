@@ -178,25 +178,7 @@ class TemplateController extends DashboardController
     {
         $productId = request()->input('product_without_category_id');
         $templates = $this->templateService->getProductTemplates($productId);
-        if (request()->ajax()) {
-            if (!$productId) {
-                $cacheKey = getOrderStepCacheKey();
-                $stepData = Cache::get($cacheKey, []);
-                $productId = $stepData['product_id'] ?? null;
-            }
-//            if (!$productId) {
-//                return Response::api(HttpEnum::BAD_REQUEST, errors: ['error' => 'Product not selected.']);
-//            }
-            $templates = $this->templateRepository->query()->with(['products'])
-                ->when($productId, function ($query) use ($productId) {
-                    $query->whereHas('products', function ($q) use ($productId) {
-                        $q->where('products.id', $productId);
-                    });
-                })->live()->get();
-            return view('dashboard.orders.steps.step3', compact('templates'))->render();
-        }
-
-            $templateData = TemplateResource::collection($templates)
+        $templateData = TemplateResource::collection($templates)
                 ->additional([
                     'product' => [
                         'name' => $this->productRepositoryInterface->query()->whereKey($productId)?->value('name')
