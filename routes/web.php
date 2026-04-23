@@ -1179,12 +1179,14 @@ Route::get('/test-job', function (FawryStrategy $fawry) {
 dd(Order::query()
     ->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)
     ->whereHas('paymentMethod.paymentGateway', fn ($q) => $q->where('code', 'fawry'))
+    ->where('created_at', '>=', now()->subHours(48))
+    
     ->whereHas('transactions', fn ($q) => $q->where('payment_status', App\Enums\Payment\StatusEnum::PENDING))->get());
     Order::query()
         ->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)
         ->whereHas('paymentMethod.paymentGateway', fn ($q) => $q->where('code', 'fawry'))
         ->whereHas('transactions', fn ($q) => $q->where('payment_status', App\Enums\Payment\StatusEnum::PENDING))
-        // ->where('created_at', '>=', now()->subHours(48))
+         ->where('created_at', '>=', now()->subHours(48))
         ->with('transactions')
         ->chunkById(100, function ($orders) use ($fawry, &$processed) {
             dd($orders);
