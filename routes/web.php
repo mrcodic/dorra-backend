@@ -1175,12 +1175,10 @@ function resolveUrlWarp(Request $request): ?array
 }
 
 Route::get('/test-job', function (FawryStrategy $fawry) {
-    dd(  Order::query()
+    dd(   $transaction = Order::find(431)->transactions()
         ->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)
-        ->whereHas('paymentMethod.paymentGateway', fn ($q) => $q->where('code', 'fawry'))
-        ->whereHas('transactions', fn ($q) => $q->where('payment_status', App\Enums\Payment\StatusEnum::PENDING))
-        ->where('created_at', '>=', now()->subHours(48))
-        ->with('transactions')->get());
+        ->latest()
+        ->first());
     $processed = 0;
     Order::query()
         ->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)
