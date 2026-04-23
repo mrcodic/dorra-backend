@@ -248,7 +248,7 @@ class PaymentController extends Controller
         $merchantRef = data_get($requestedData, 'merchantRefNumber');
         $paymentMethod = data_get($requestedData, 'paymentMethod');
         $referenceNumber = data_get($requestedData, 'referenceNumber');
-
+Log::channel('fawry')->info("dd",$requestedData);
         $transaction = Transaction::where('transaction_id', $merchantRef)->first();
 
         if (!$transaction) {
@@ -367,7 +367,9 @@ class PaymentController extends Controller
 
         $paymentStatus = match ($status) {
             'PAID' => StatusEnum::PAID,
-            'EXPIRED', 'CANCELLED', 'FAILED' => StatusEnum::UNPAID,
+            'EXPIRED', 'FAILED' => StatusEnum::FAILED,
+            'REFUNDED', 'PARTIAL_REFUNDED' => StatusEnum::REFUNDED,
+            'CANCELLED' => StatusEnum::CANCELLED,
             default => StatusEnum::PENDING,
         };
 

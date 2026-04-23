@@ -1,0 +1,82 @@
+<?php
+
+namespace App\Jobs;
+
+use App\Enums\Payment\StatusEnum;
+use App\Models\Order;
+use App\Services\Payment\FawryStrategy;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+
+class SyncFawryOrderStatus implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public function handle(FawryStrategy $fawry): void
+    {
+        Order::query()
+            ->where('payment_status', StatusEnum::PENDING)
+            ->whereHas('paymentMethod', fn($q) => $q->where('code', 'fawry'))
+            ->whereHas('transactions', fn($q) => $q->where('payment_status', StatusEnum::PENDING))
+            ->where('created_at', '>=', now()->subHours(48))
+            ->with('transactions')
+            ->chunkById(100, function ($orders) use ($fawry) {
+                foreach ($orders as $order) {
+                    $this->syncOrder($order, $fawry);
+                }
+            });
+    }
+
+    private function syncOrder(Order $order, FawryStrategy $fawry): void
+    {
+        $transaction = $order->transactions()
+            ->where('payment_status', StatusEnum::PENDING)
+            ->latest()
+            ->first();
+
+        if (!$transaction?->reference_number) {
+            return;
+        }
+
+        try {
+            $fawryStatus = $fawry->getStatus($transaction->reference_number);
+
+            $mappedStatus = $this->mapStatus($fawryStatus);
+
+            if ($mappedStatus === $transaction->payment_status) {
+                return; // no change needed
+            }
+
+            $transaction->update(['payment_status' => $mappedStatus]);
+            $order->update(['payment_status'       => $mappedStatus]);
+
+            Log::info('Fawry status synced', [
+                'order_id'     => $order->id,
+                'order_number' => $order->order_number,
+                'fawry_status' => $fawryStatus,
+                'mapped'       => $mappedStatus,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Fawry sync failed', [
+                'order_id' => $order->id,
+                'error'    => $e->getMessage(),
+            ]);
+        }
+    }
+
+    private function mapStatus(string $fawryStatus): StatusEnum
+    {
+        return match ($fawryStatus) {
+            'PAID'              => StatusEnum::PAID,
+            'CANCELLED'         => StatusEnum::CANCELLED,
+            'REFUNDED', 'PARTIAL_REFUNDED' => StatusEnum::REFUNDED,
+            'EXPIRED'           => StatusEnum::FAILED,
+            default             => StatusEnum::PENDING,
+        };
+    }
+}
