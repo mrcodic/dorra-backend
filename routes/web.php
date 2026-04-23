@@ -1178,15 +1178,15 @@ Route::get('/test-job', function (FawryStrategy $fawry) {
     $processed = 0;
 
     Order::query()
-        ->where('payment_status', StatusEnum::PENDING)
+        ->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)
         ->whereHas('paymentMethod', fn ($q) => $q->where('code', 'fawry'))
-        ->whereHas('transactions', fn ($q) => $q->where('payment_status', StatusEnum::PENDING))
+        ->whereHas('transactions', fn ($q) => $q->where('payment_status', App\Enums\Payment\StatusEnum::PENDING))
         // ->where('created_at', '>=', now()->subHours(48))
         ->with('transactions')
         ->chunkById(100, function ($orders) use ($fawry, &$processed) {
             foreach ($orders as $order) {
                 $transaction = $order->transactions()
-                    ->where('payment_status', StatusEnum::PENDING)
+                    ->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)
                     ->latest()
                     ->first();
 
@@ -1210,11 +1210,11 @@ Route::get('/test-job', function (FawryStrategy $fawry) {
                     ]);
 
                     $mappedStatus = match ($fawryStatus) {
-                        'PAID' => StatusEnum::PAID,
-                        'CANCELLED' => StatusEnum::CANCELLED,
-                        'REFUNDED', 'PARTIAL_REFUNDED' => StatusEnum::REFUNDED,
-                        'EXPIRED' => StatusEnum::FAILED,
-                        default => StatusEnum::PENDING,
+                        'PAID' => App\Enums\Payment\StatusEnum::PAID,
+                        'CANCELLED' => App\Enums\Payment\StatusEnum::CANCELLED,
+                        'REFUNDED', 'PARTIAL_REFUNDED' => App\Enums\Payment\StatusEnum::REFUNDED,
+                        'EXPIRED' => App\Enums\Payment\StatusEnum::FAILED,
+                        default => App\Enums\Payment\StatusEnum::PENDING,
                     };
 
                     if ($mappedStatus === $transaction->payment_status) {
