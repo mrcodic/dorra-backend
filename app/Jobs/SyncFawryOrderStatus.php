@@ -20,9 +20,9 @@ class SyncFawryOrderStatus implements ShouldQueue
     {
         Order::query()
             ->where('payment_status', StatusEnum::PENDING)
-            ->whereHas('paymentMethod', fn($q) => $q->where('code', 'fawry'))
+            ->whereHas('paymentMethod.paymentGateway', fn ($q) => $q->where('code', 'fawry'))
             ->whereHas('transactions', fn($q) => $q->where('payment_status', StatusEnum::PENDING))
-//            ->where('created_at', '>=', now()->subHours(48))
+            ->where('created_at', '>=', now()->subHours(48))
             ->with('transactions')
             ->chunkById(100, function ($orders) use ($fawry) {
                 foreach ($orders as $order) {
@@ -37,13 +37,13 @@ class SyncFawryOrderStatus implements ShouldQueue
             ->where('payment_status', StatusEnum::PENDING)
             ->latest()
             ->first();
-Log::info("transaction", $transaction);
-        if (!$transaction?->kiosk_reference) {
+        Log::info("transaction", $transaction);
+        if (!$transaction?->transaction_id) {
             return;
         }
 
         try {
-            $fawryStatus = $fawry->getStatus($transaction->kiosk_reference);
+            $fawryStatus = $fawry->getStatus($transaction->transaction_id);
             Log::info("fawryStatus", $fawryStatus);
 
             $mappedStatus = $this->mapStatus($fawryStatus);

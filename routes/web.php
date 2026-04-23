@@ -38,6 +38,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
     TemplateController,
     UserController
 };
+use App\Jobs\SyncFawryOrderStatus;
 use App\Models\Order;
 use App\Models\Template;
 use App\Services\Mockup\MockupRenderConfigResolver;
@@ -1174,87 +1175,6 @@ function resolveUrlWarp(Request $request): ?array
     ];
 }
 
-Route::get('/test-job', function (FawryStrategy $fawry) {
-
-    $processed = 0;
-    Order::query()
-        ->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)
-        ->whereHas('paymentMethod.paymentGateway', fn ($q) => $q->where('code', 'fawry'))
-        ->whereHas('transactions', fn ($q) => $q->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)->
-        where('transaction_id','ORD-20260423-000433'))
-         ->where('created_at', '>=', now()->subHours(48))
-        ->with('transactions')
-        ->chunkById(100, function ($orders) use ($fawry, &$processed) {
-
-            foreach ($orders as $order) {
-                $transaction = $order->transactions()
-                    ->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)
-                    ->latest()
-                    ->first();
-
-                Log::info('Fawry transaction check', [
-                    'order_id' => $order->id,
-                    'transaction_id' => $transaction?->id,
-                    'kiosk_reference' => $transaction?->transaction_id,
-                ]);
-
-                if (!$transaction?->transaction_id) {
-                    continue;
-                }
-
-                try {
-                    $fawryStatus = $fawry->getStatus($transaction->transaction_id);
-                    Log::info('Fawry raw status', [
-                        'order_id' => $order->id,
-                        'transaction_id' => $transaction->id,
-                        'fawry_status' => $fawryStatus,
-                    ]);
-
-                    $mappedStatus = match ($fawryStatus) {
-                        'PAID' => App\Enums\Payment\StatusEnum::PAID,
-                        'CANCELLED' => App\Enums\Payment\StatusEnum::CANCELLED,
-                        'REFUNDED', 'PARTIAL_REFUNDED' => App\Enums\Payment\StatusEnum::REFUNDED,
-                        'EXPIRED' => App\Enums\Payment\StatusEnum::FAILED,
-                        default => App\Enums\Payment\StatusEnum::PENDING,
-                    };
-
-                    if ($mappedStatus === $transaction->payment_status) {
-                        dump($fawryStatus,$transaction);
-                        
-                        continue;
-                    }
-
-                    $transaction->update([
-                        'payment_status' => $mappedStatus,
-                    ]);
-
-                    $order->update([
-                        'payment_status' => $mappedStatus,
-                    ]);
-
-                    Log::info('Fawry status synced', [
-                        'order_id' => $order->id,
-                        'order_number' => $order->order_number,
-                        'transaction_id' => $transaction->id,
-                        'fawry_status' => $fawryStatus,
-                        'mapped_status' => $mappedStatus->value,
-                    ]);
-
-                    $processed++;
-                } catch (\Throwable $e) {
-                    Log::error('Fawry sync failed', [
-                        'order_id' => $order->id,
-                        'transaction_id' => $transaction->id ?? null,
-                        'error' => $e->getMessage(),
-                        'line' => $e->getLine(),
-                        'file' => $e->getFile(),
-                    ]);
-                }
-            }
-        });
-
-    return response()->json([
-        'message' => 'Fawry sync route executed successfully',
-        'processed' => $processed,
-    ]);
+Route::get('/test-job', function () {
+    SyncFawryOrderStatus::dispatch();
 });
