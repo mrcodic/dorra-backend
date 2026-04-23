@@ -233,7 +233,7 @@ class TemplateService extends BaseService
                         'collection_name' => 'template_model_image',
                     ]);
             }
-            dd($model);
+
             if (isset($validatedData['template_image_front_id']) || isset($validatedData['template_image_none_id'])) {
                 Media::where(function ($query) use ($validatedData) {
                     $query->whereKey($validatedData['template_image_front_id'])
@@ -247,6 +247,7 @@ class TemplateService extends BaseService
                 $this->imageService->processUploaded($validatedData['template_image_front_id'] ?? $validatedData['template_image_none_id']);
 
             }
+            dd($model);
             if (isset($validatedData['template_image_back_id'])) {
 
                 Media::whereKey($validatedData['template_image_back_id'])
