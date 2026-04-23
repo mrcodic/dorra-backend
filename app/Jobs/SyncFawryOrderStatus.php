@@ -43,7 +43,7 @@ class SyncFawryOrderStatus implements ShouldQueue
 
         try {
             $fawryStatus = $fawry->getStatus($transaction->transaction_id);
-            Log::info("fawryStatus", $fawryStatus);
+
 
             $mappedStatus = $this->mapStatus($fawryStatus);
 
@@ -54,18 +54,18 @@ class SyncFawryOrderStatus implements ShouldQueue
             $transaction->update(['payment_status' => $mappedStatus]);
             $order->update(['payment_status'       => $mappedStatus]);
 
-            Log::info('Fawry status synced', [
-                'order_id'     => $order->id,
-                'order_number' => $order->order_number,
-                'fawry_status' => $fawryStatus,
-                'mapped'       => $mappedStatus,
-            ]);
+//            Log::info('Fawry status synced', [
+//                'order_id'     => $order->id,
+//                'order_number' => $order->order_number,
+//                'fawry_status' => $fawryStatus,
+//                'mapped'       => $mappedStatus,
+//            ]);
 
         } catch (\Exception $e) {
-            Log::error('Fawry sync failed', [
-                'order_id' => $order->id,
-                'error'    => $e->getMessage(),
-            ]);
+//            Log::error('Fawry sync failed', [
+//                'order_id' => $order->id,
+//                'error'    => $e->getMessage(),
+//            ]);
         }
     }
 
