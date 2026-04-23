@@ -73,9 +73,9 @@ class ImageService
 
         $filePath = Storage::disk($original->disk)
             ->path("{$original->id}/{$original->file_name}");
-        dd($original,$filePath);
 
         $preview = new Imagick($filePath . '[0]');
+        dd($original,$filePath,$preview);
 
         // Remove metadata only
         $preview->stripImage();
