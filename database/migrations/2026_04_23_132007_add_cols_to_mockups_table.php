@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::table('mockups', function (Blueprint $table) {
             $table->after('fill_ratio',function (Blueprint $table) {
-                $table->unsignedInteger('light_strength');
-                $table->unsignedInteger('shadow_strength');
-                $table->unsignedInteger('displacement_scale');
+                $table->unsignedInteger('light_strength')->default(1);
+                $table->unsignedInteger('shadow_strength')->default(1);
+                $table->unsignedInteger('displacement_scale')->default(1);
             });
         });
     }
