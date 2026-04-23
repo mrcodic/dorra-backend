@@ -1175,12 +1175,7 @@ function resolveUrlWarp(Request $request): ?array
 }
 
 Route::get('/test-job', function (FawryStrategy $fawry) {
-    $transaction = Order::find(431)->transactions()
-        ->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)
-        ->latest()
-        ->first();
-    $fawryStatus = $fawry->getStatus('ORD-20260423-000432');
-    dd($fawryStatus);
+
     $processed = 0;
     Order::query()
         ->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)
@@ -1199,15 +1194,15 @@ Route::get('/test-job', function (FawryStrategy $fawry) {
                 Log::info('Fawry transaction check', [
                     'order_id' => $order->id,
                     'transaction_id' => $transaction?->id,
-                    'kiosk_reference' => $transaction?->kiosk_reference,
+                    'kiosk_reference' => $transaction?->transaction_id,
                 ]);
 
-                if (!$transaction?->kiosk_reference) {
+                if (!$transaction?->transaction_id) {
                     continue;
                 }
 
                 try {
-                    $fawryStatus = $fawry->getStatus($transaction->kiosk_reference);
+                    $fawryStatus = $fawry->getStatus($transaction->transaction_id);
 
                     Log::info('Fawry raw status', [
                         'order_id' => $order->id,
