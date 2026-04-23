@@ -202,8 +202,7 @@ use Illuminate\Support\Facades\Log;
                     'signature'      => $signature,
                 ]
             );
-            dd($response->json());
-            return $response->json('paymentStatus') ?? 'UNKNOWN';
+            return $response->json('orderStatus') ?? 'UNKNOWN';
 
         } catch (\Exception $e) {
             Log::error('Fawry getStatus failed', ['error' => $e->getMessage()]);
