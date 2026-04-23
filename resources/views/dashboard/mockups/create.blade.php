@@ -196,10 +196,10 @@
                                         Light Strength
                                     </label>
                                     <input type="number" id="light_strength" class="form-control" name="light_strength" placeholder="ex: 40">
-                                    <div class="mt-2 d-flex gap-1 flex-wrap">
-                                        <span class="badge bg-info-subtle text-dark border small-badge">t-shirt: 35</span>
-                                        <span class="badge bg-info-subtle text-dark border small-badge">scarf: 35-45</span>
-                                    </div>
+                                    <small class="form-text text-muted">
+                                        ex  t-shirt: 35 ,scarf: 35-45<
+                                    </small>
+                                    
                                 </div>
 
                                 <div class="form-group mb-2 col-md-3">
@@ -207,10 +207,10 @@
                                         Shadow Strength
                                     </label>
                                     <input type="number" id="shadow_strength" class="form-control" name="shadow_strength" placeholder="ex: 60">
-                                    <div class="mt-2 d-flex gap-1 flex-wrap">
-                                        <span class="badge bg-warning-subtle text-dark border small-badge">t-shirt: 45%</span>
-                                        <span class="badge bg-warning-subtle text-dark border small-badge">scarf: 55-65%</span>
-                                    </div>
+                                    <small class="form-text text-muted">
+                                      ex  t-shirt: 45% , scarf: 55-65%
+                                    </small>
+
                                 </div>
 
                                 <div class="form-group mb-2 col-md-3">
