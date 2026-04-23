@@ -38,6 +38,18 @@ class StoreMockupRequest extends BaseRequest
                 'required',
                 'integer',
                 'min:1',
+            ], 'light_strength' => [
+                'required',
+                'integer',
+                'min:1',
+            ], 'shadow_strength' => [
+                'required',
+                'integer',
+                'min:1',
+            ], 'displacement_scale' => [
+                'required',
+                'integer',
+                'min:1',
             ],
 //            'approach' => [
 //                'required',

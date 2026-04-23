@@ -96,7 +96,7 @@
         }
 
         /* لو الـ inner d-flex موجود داخل البلوك فهو هعرض Base | Mask جنب بعض */
-        .type-block>.d-flex {
+        .type-block > .d-flex {
             display: flex;
             gap: 1rem;
             align-items: flex-start;
@@ -153,114 +153,136 @@
                         <div class="row">
                             <div class="row">
 
-                            <div class="form-group mb-2 col-md-4">
-                                <label for="mockupName" class="label-text mb-1">Mockup Name</label>
-                                <input type="text" id="templateName" class="form-control" name="name"
-                                       placeholder="Mockup Name">
+                                <div class="form-group mb-2 col-md-6">
+                                    <label for="mockupName" class="label-text mb-1">Mockup Name</label>
+                                    <input type="text" id="templateName" class="form-control" name="name"
+                                           placeholder="Mockup Name">
+                                </div>
+
+                                <div class="form-group mb-2 col-6">
+                                    <label for="productsSelect" class="label-text mb-1">Product</label>
+                                    <select id="productsSelect" name="category_id" class="form-select">
+                                        <option value="" disabled selected>Choose product</option>
+                                        @foreach($associatedData['products'] as $product)
+                                            <option value="{{ $product->id }}">
+                                                {{ $product->getTranslation('name', app()->getLocale()) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
-                       
-                        <div class="form-group mb-2 col-4">
-                            <label for="productsSelect" class="label-text mb-1">Product</label>
-                            <select id="productsSelect" name="category_id" class="form-select">
-                                <option value="" disabled selected>Choose product</option>
-                                @foreach($associatedData['products'] as $product)
-                                    <option value="{{ $product->id }}">
-                                        {{ $product->getTranslation('name', app()->getLocale()) }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group mb-2 col-md-4">
-                            <label for="fillRatio" class="label-text mb-1">Fill Ratio</label>
-                            <input type="number" id="fillRatio" class="form-control" name="fill_ratio"
-                                   placeholder="ex: 70">
-                        </div>
-                        </div>
-                        <div class="form-group mb-2 col-md-12">
                             <div class="row">
-                                @foreach($associatedData['types'] as $type)
-                                    <div class="col-md-4 mb-1">
-                                        <label class="radio-box">
-                                            <input class="form-check-input type-checkbox" type="checkbox" name="types[]"
-                                                   value="{{ $type->value }}"
-                                                   data-type-name="{{ strtolower($type->value->name) }}">
-                                            <span>{{ $type->value->label() }}</span>
-                                        </label>
-                                    </div>
-                                @endforeach
+                                <div class="form-group mb-2 col-md-3">
+                                    <label for="fillRatio" class="label-text mb-1">Fill Ratio</label>
+                                    <input type="number" id="fillRatio" class="form-control" name="fill_ratio"
+                                           placeholder="ex: 70">
+                                </div>
+
+                                <div class="form-group mb-2 col-md-3">
+                                    <label for="light_strength" class="label-text mb-1">Light Strength</label>
+                                    <input type="number" id="light_strength" class="form-control" name="light_strength"
+                                           placeholder="ex: 15">
+                                </div>
+                                <div class="form-group mb-2 col-md-3">
+                                    <label for="shadow_strength" class="label-text mb-1">Shadow Strength</label>
+                                    <input type="number" id="shadow_strength" class="form-control"
+                                           name="shadow_strength"
+                                           placeholder="ex: 60">
+                                </div>
+                                <div class="form-group mb-2 col-md-3">
+                                    <label for="displacement_scale" class="label-text mb-1">Displacement Scale</label>
+                                    <input type="number" id="displacement_scale" class="form-control"
+                                           name="displacement_scale"
+                                           placeholder="ex: 40">
+                                </div>
+
                             </div>
-                        </div>
-                        {{-- mockup Canvas --}}
-                        <!-- العمود الشمال: يحتوي fixed-block + fileInputsContainer (البلوكات تتحط هنا) -->
-                        <div class="row">
-                            <div id="left-column" class="col-md-12">
-                                <!-- fixed-block يبقى مكان الإشارة لفانكشنك -->
-                                <div id="fixed-block"></div>
-
-                                <!-- الحاوية اللى بتضيف لها الفانكشن البلوكات (لو مش موجودة بالفعل) -->
-                                <div id="fileInputsContainer" class="row g-1"></div>
+                            <div class="form-group mb-2 col-md-12">
+                                <div class="row">
+                                    @foreach($associatedData['types'] as $type)
+                                        <div class="col-md-4 mb-1">
+                                            <label class="radio-box">
+                                                <input class="form-check-input type-checkbox" type="checkbox"
+                                                       name="types[]"
+                                                       value="{{ $type->value }}"
+                                                       data-type-name="{{ strtolower($type->value->name) }}">
+                                                <span>{{ $type->value->label() }}</span>
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
+                            {{-- mockup Canvas --}}
+                            <!-- العمود الشمال: يحتوي fixed-block + fileInputsContainer (البلوكات تتحط هنا) -->
+                            <div class="row">
+                                <div id="left-column" class="col-md-12">
+                                    <!-- fixed-block يبقى مكان الإشارة لفانكشنك -->
+                                    <div id="fixed-block"></div>
+
+                                    <!-- الحاوية اللى بتضيف لها الفانكشن البلوكات (لو مش موجودة بالفعل) -->
+                                    <div id="fileInputsContainer" class="row g-1"></div>
+                                </div>
+                            </div>
+                            <!-- العمود اليمين: الـ editor / preview -->
+                            {{--                        <div class="row">--}}
+                            {{--                            <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorFrontWrapper">--}}
+                            {{--                                <label class="label-text">Mockup Editor (Front)</label>--}}
+                            {{--                                <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="480"--}}
+                            {{--                                        width="480"></canvas>--}}
+                            {{--                            </div>--}}
+                            {{--                            <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorBackWrapper">--}}
+                            {{--                                <label class="label-text">Mockup Editor (Back)</label>--}}
+                            {{--                                <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="480"--}}
+                            {{--                                        width="480"></canvas>--}}
+                            {{--                            </div>--}}
+
+                            {{--                            <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorNoneWrapper">--}}
+                            {{--                                <label class="label-text">Mockup Editor (General)</label>--}}
+                            {{--                                <canvas id="mockupCanvasNone" class="w-100" height="480" width="480"--}}
+                            {{--                                        style="border:1px solid #ccc;"></canvas>--}}
+                            {{--                            </div>--}}
+                            {{--                        </div>--}}
+
+                            {{--                        @if(request('q') === 'without')--}}
+
+
+                            {{--                        <div class="form-group my-2 d-none" id="templatesCardsWrapper">--}}
+                            {{--                            <label class="form-label mb-2">Choose Template</label>--}}
+                            {{--                            <div id="templatesCardsContainer" class="row g-1 p-1 bg-white border rounded-3 shadow-sm">--}}
+                            {{--                            </div>--}}
+                            {{--                            <input type="hidden" name="template_id" id="selectedTemplateId" class="col-md-3">--}}
+                            {{--                            <div id="templatesHiddenContainer"></div>--}}
+                            {{--                        </div>--}}
+                            {{--                        @endif--}}
                         </div>
-                        <!-- العمود اليمين: الـ editor / preview -->
-{{--                        <div class="row">--}}
-{{--                            <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorFrontWrapper">--}}
-{{--                                <label class="label-text">Mockup Editor (Front)</label>--}}
-{{--                                <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="480"--}}
-{{--                                        width="480"></canvas>--}}
-{{--                            </div>--}}
-{{--                            <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorBackWrapper">--}}
-{{--                                <label class="label-text">Mockup Editor (Back)</label>--}}
-{{--                                <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="480"--}}
-{{--                                        width="480"></canvas>--}}
-{{--                            </div>--}}
 
-{{--                            <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorNoneWrapper">--}}
-{{--                                <label class="label-text">Mockup Editor (General)</label>--}}
-{{--                                <canvas id="mockupCanvasNone" class="w-100" height="480" width="480"--}}
-{{--                                        style="border:1px solid #ccc;"></canvas>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
+                        {{--                    @if(request('q') === 'with')--}}
+                        {{--                    <div class="mb-2">--}}
+                        {{--                        <label class="label-text mb-1 d-block">Colors</label>--}}
+                        {{--                        <div class="d-flex flex-wrap align-items-center gap-1">--}}
+                        {{--                            <button type="button" id="openColorPicker" class="gradient-picker-trigger border openColorPicker"></button>--}}
 
-                        {{--                        @if(request('q') === 'without')--}}
+                        {{--                            <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center selected-colors"></span>--}}
+                        {{--                        </div>--}}
+                        {{--                        <div id="colorsInputContainer"></div>--}}
+                        {{--                    </div>--}}
+                        {{--                    @endif--}}
 
-
-{{--                        <div class="form-group my-2 d-none" id="templatesCardsWrapper">--}}
-{{--                            <label class="form-label mb-2">Choose Template</label>--}}
-{{--                            <div id="templatesCardsContainer" class="row g-1 p-1 bg-white border rounded-3 shadow-sm">--}}
-{{--                            </div>--}}
-{{--                            <input type="hidden" name="template_id" id="selectedTemplateId" class="col-md-3">--}}
-{{--                            <div id="templatesHiddenContainer"></div>--}}
-{{--                        </div>--}}
-                        {{--                        @endif--}}
-                    </div>
-
-                    {{--                    @if(request('q') === 'with')--}}
-                    {{--                    <div class="mb-2">--}}
-                    {{--                        <label class="label-text mb-1 d-block">Colors</label>--}}
-                    {{--                        <div class="d-flex flex-wrap align-items-center gap-1">--}}
-                    {{--                            <button type="button" id="openColorPicker" class="gradient-picker-trigger border openColorPicker"></button>--}}
-
-                    {{--                            <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center selected-colors"></span>--}}
-                    {{--                        </div>--}}
-                    {{--                        <div id="colorsInputContainer"></div>--}}
-                    {{--                    </div>--}}
-                    {{--                    @endif--}}
-
-                    <div class="modal-footer border-top-0">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
-                            <span class="btn-text">Create</span>
-                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                                  aria-hidden="true"></span>
-                        </button>
-                    </div>
+                        <div class="modal-footer border-top-0">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
+                                <span class="btn-text">Create</span>
+                                <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
+                                      role="status"
+                                      aria-hidden="true"></span>
+                            </button>
+                        </div>
 
                 </form>
             </div>
 
         </div>
-
-
 
 
         @include("modals.templates.template-modal")
@@ -300,6 +322,7 @@
         window.templatePositions = window.templatePositions || {};
         var buildHiddenTemplateInputs;
         var calculateObjectPercents;
+
         function cacheCurrentTemplatePositions() {
             window.savedTemplatePositions = window.savedTemplatePositions || {};
 
@@ -323,21 +346,21 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            const $productSelect            = $('#productsSelect');
-            const $templatesWrapper         = $('#templatesCardsWrapper');
-            const $templatesCardsContainer  = $('#templatesCardsContainer');
-            const $selectedTemplateId       = $('#selectedTemplateId');
+            const $productSelect = $('#productsSelect');
+            const $templatesWrapper = $('#templatesCardsWrapper');
+            const $templatesCardsContainer = $('#templatesCardsContainer');
+            const $selectedTemplateId = $('#selectedTemplateId');
 
-            const $modal            = $('#templateModal');
-            const $modalContainer   = $('#templates-modal-container');
-            const $modalPagination  = $('#templates-modal-pagination');
+            const $modal = $('#templateModal');
+            const $modalContainer = $('#templates-modal-container');
+            const $modalPagination = $('#templates-modal-pagination');
 
             const locale = "{{ app()->getLocale() }}";
 
             // حالة التمبليتس
-            let firstPageTemplates   = [];
-            let nextPageUrl          = null;
-            let currentProductId     = null;
+            let firstPageTemplates = [];
+            let nextPageUrl = null;
+            let currentProductId = null;
 
             // =========================
             // Helpers
@@ -347,7 +370,7 @@
                 $templatesWrapper.addClass('d-none');
                 $selectedTemplateId.val('');
                 firstPageTemplates = [];
-                nextPageUrl        = null;
+                nextPageUrl = null;
 
                 $modalContainer.empty();
                 $modalPagination.empty();
@@ -435,6 +458,7 @@
         </div>
     `;
             }
+
             // =========================
             // Cards (أول 3 بس)
             // =========================
@@ -451,7 +475,7 @@
                 }
 
                 const maxInline = 3;
-                const visible   = templates.slice(0, maxInline);
+                const visible = templates.slice(0, maxInline);
 
                 visible.forEach(function (tpl, index) {
                     const cardHtml = `
@@ -522,7 +546,7 @@
             // Fetch templates (API)
             // =========================
             function getSelectedTypesForRequest() {
-                const typeMap = { front: 1, back: 2, none: 3 };
+                const typeMap = {front: 1, back: 2, none: 3};
 
                 return $('.type-checkbox:checked')
                     .map(function () {
@@ -562,12 +586,12 @@
                     },
 
                     success: function (response) {
-                        const data  = response.data ?? {};
+                        const data = response.data ?? {};
                         const items = data.data ?? [];
                         const links = data.links ?? {};
 
                         firstPageTemplates = items;
-                        nextPageUrl        = links.next || null;
+                        nextPageUrl = links.next || null;
 
                         renderTemplateCards(firstPageTemplates);
                     },
@@ -617,7 +641,7 @@
                     url: nextPageUrl,
                     method: "GET",
                     success: function (res) {
-                        const data  = res.data ?? {};
+                        const data = res.data ?? {};
                         const items = data.data ?? [];
                         const links = data.links ?? {};
 
@@ -671,11 +695,11 @@
 
                 // If clicked from the modal → swap with last card from main
                 if ($(this).closest('#templateModal').length) {
-                    const $mainContainer  = $('#templatesCardsContainer');
+                    const $mainContainer = $('#templatesCardsContainer');
                     const $modalContainer = $('#templates-modal-container');
 
                     const $modalCard = $(this).closest('.template-card');
-                    const $modalCol  = $modalCard.closest('[class*="col-"]');
+                    const $modalCol = $modalCard.closest('[class*="col-"]');
 
                     // placeholder مكان كارت المودال
                     const $ph = $('<div class="__swap_ph__"></div>');
@@ -686,7 +710,7 @@
                     if (!$mainCards.length) return;
 
                     const $lastMainCard = $mainCards.last();
-                    const $lastMainCol  = $lastMainCard.closest('[class*="col-"]');
+                    const $lastMainCol = $lastMainCard.closest('[class*="col-"]');
 
                     // 1) دخل آخر كارت برا إلى نفس مكان كارت المودال
                     $lastMainCol.detach()
@@ -784,12 +808,12 @@
 
             calculateObjectPercents = function (obj, meta) {
                 const center = obj.getCenterPoint();
-                const wReal  = (obj.width || 0) * (obj.scaleX || 1);
-                const hReal  = (obj.height || 0) * (obj.scaleY || 1);
+                const wReal = (obj.width || 0) * (obj.scaleX || 1);
+                const hReal = (obj.height || 0) * (obj.scaleY || 1);
 
                 return {
                     xPct: ((center.x - meta.offsetLeft) / meta.scaledWidth).toFixed(6),
-                    yPct: ((center.y - meta.offsetTop)  / meta.scaledHeight).toFixed(6),
+                    yPct: ((center.y - meta.offsetTop) / meta.scaledHeight).toFixed(6),
                     wPct: (wReal / meta.scaledWidth).toFixed(6),
                     hPct: (hReal / meta.scaledHeight).toFixed(6),
                     angle: obj.angle || 0
@@ -806,8 +830,8 @@
                 const id = String(templateId);
                 const canvases = {
                     front: window.canvasFront,
-                    back:  window.canvasBack,
-                    none:  window.canvasNone,
+                    back: window.canvasBack,
+                    none: window.canvasNone,
                 };
 
                 Object.entries(canvases).forEach(([type, canvas]) => {
@@ -855,40 +879,40 @@
         // CANVAS HELPER FUNCTIONS
         // =========================
         window.canvasFront = new fabric.Canvas('mockupCanvasFront');
-        window.canvasBack  = new fabric.Canvas('mockupCanvasBack');
-        window.canvasNone  = new fabric.Canvas('mockupCanvasNone');
+        window.canvasBack = new fabric.Canvas('mockupCanvasBack');
+        window.canvasNone = new fabric.Canvas('mockupCanvasNone');
 
         function loadBaseImage(canvas, baseUrl) {
             fabric.Image.fromURL(baseUrl, function (img) {
-                img.set({ selectable: false, evented: false });
+                img.set({selectable: false, evented: false});
 
                 const canvasW = canvas.getWidth();
                 const canvasH = canvas.getHeight();
 
-                const scale   = Math.min(canvasW / img.width, canvasH / img.height);
+                const scale = Math.min(canvasW / img.width, canvasH / img.height);
                 const scaledW = img.width * scale;
                 const scaledH = img.height * scale;
 
                 const left = (canvasW - scaledW) / 2;
-                const top  = (canvasH - scaledH) / 2;
+                const top = (canvasH - scaledH) / 2;
 
                 canvas.__mockupMeta = {
-                    originalWidth:  img.width,
+                    originalWidth: img.width,
                     originalHeight: img.height,
-                    scaledWidth:    scaledW,
-                    scaledHeight:   scaledH,
-                    offsetLeft:     left,
-                    offsetTop:      top
+                    scaledWidth: scaledW,
+                    scaledHeight: scaledH,
+                    offsetLeft: left,
+                    offsetTop: top
                 };
 
                 canvas.setBackgroundImage(
                     img,
                     canvas.renderAll.bind(canvas),
                     {
-                        scaleX:  scale,
-                        scaleY:  scale,
-                        left:    left,
-                        top:     top,
+                        scaleX: scale,
+                        scaleY: scale,
+                        left: left,
+                        top: top,
                         originX: 'left',
                         originY: 'top'
                     }
@@ -948,8 +972,8 @@
         // }
         function updateTemplatePositionsFromObject(obj, type) {
             const canvas = obj.canvas;
-            const meta   = canvas && canvas.__mockupMeta;
-            const tplId  = obj.templateId;
+            const meta = canvas && canvas.__mockupMeta;
+            const tplId = obj.templateId;
             if (!meta || !tplId) return;
 
             const pos = calculateObjectPercents(obj, meta);
@@ -965,11 +989,11 @@
             const wrapper = document.getElementById('templatesCardsWrapper');
             if (!wrapper) return;
 
-            const xInput      = wrapper.querySelector(`.template_x.${type}`);
-            const yInput      = wrapper.querySelector(`.template_y.${type}`);
-            const widthInput  = wrapper.querySelector(`.template_width.${type}`);
+            const xInput = wrapper.querySelector(`.template_x.${type}`);
+            const yInput = wrapper.querySelector(`.template_y.${type}`);
+            const widthInput = wrapper.querySelector(`.template_width.${type}`);
             const heightInput = wrapper.querySelector(`.template_height.${type}`);
-            const angleInput  = wrapper.querySelector(`.template_angle.${type}`);
+            const angleInput = wrapper.querySelector(`.template_angle.${type}`);
 
             [xInput, yInput, widthInput, heightInput, angleInput].forEach(inp => {
                 if (inp) inp.value = '';
@@ -1025,21 +1049,21 @@
 
             if (meta) {
                 const targetW = meta.scaledWidth * defaultWidthRatio;
-                const scale   = targetW / img.width;
+                const scale = targetW / img.width;
 
                 img.scaleX = img.scaleY = scale;
 
                 img.left = meta.offsetLeft + meta.scaledWidth / 2;
-                img.top  = meta.offsetTop + meta.scaledHeight * 0.35;
+                img.top = meta.offsetTop + meta.scaledHeight * 0.35;
             } else {
                 const canvasW = canvas.getWidth();
                 const canvasH = canvas.getHeight();
                 const targetW = canvasW * defaultWidthRatio;
-                const scale   = targetW / img.width;
+                const scale = targetW / img.width;
 
                 img.scaleX = img.scaleY = scale;
-                img.left   = canvasW / 2;
-                img.top    = canvasH / 2;
+                img.left = canvasW / 2;
+                img.top = canvasH / 2;
             }
         }
 
@@ -1055,23 +1079,23 @@
                 });
 
                 img.templateType = type;
-                img.templateId   = String(templateId);
+                img.templateId = String(templateId);
 
-                const meta   = canvas.__mockupMeta;
+                const meta = canvas.__mockupMeta;
                 const stored = (window.templatePositions[img.templateId] || {})[type];
 
                 if (meta && stored) {
                     // 🟢 استخدم الإحداثيات المحفوظة
-                    const targetW = meta.scaledWidth  * parseFloat(stored.wPct);
+                    const targetW = meta.scaledWidth * parseFloat(stored.wPct);
                     const targetH = meta.scaledHeight * parseFloat(stored.hPct);
-                    const centerX = meta.offsetLeft   + meta.scaledWidth  * parseFloat(stored.xPct);
-                    const centerY = meta.offsetTop    + meta.scaledHeight * parseFloat(stored.yPct);
+                    const centerX = meta.offsetLeft + meta.scaledWidth * parseFloat(stored.xPct);
+                    const centerY = meta.offsetTop + meta.scaledHeight * parseFloat(stored.yPct);
 
                     img.scaleX = targetW / img.width;
                     img.scaleY = targetH / img.height;
-                    img.left   = centerX;
-                    img.top    = centerY;
-                    img.angle  = parseFloat(stored.angle) || 0;
+                    img.left = centerX;
+                    img.top = centerY;
+                    img.angle = parseFloat(stored.angle) || 0;
                 } else {
                     // أول مرة لهذا الـ template → مركز التيشيرت بحجم افتراضي
                     applyDefaultPlacement(img, canvas, meta);
@@ -1137,8 +1161,9 @@
         // =========================
         // TYPE CHECKBOXES + UPLOAD AREAS
         // =========================
-        const checkboxes          = document.querySelectorAll('.type-checkbox');
+        const checkboxes = document.querySelectorAll('.type-checkbox');
         const fileInputsContainer = document.getElementById('fileInputsContainer');
+
         function removeCanvasByType(type) {
             let canvas = null;
             let wrapperId = "";
@@ -1195,17 +1220,18 @@
                 }
             }
         }
+
         function hideCanvasForType(type) {
             const wrapperIdMap = {
                 front: 'editorFrontWrapper',
-                back:  'editorBackWrapper',
-                none:  'editorNoneWrapper',
+                back: 'editorBackWrapper',
+                none: 'editorNoneWrapper',
             };
 
             const canvasMap = {
                 front: window.canvasFront,
-                back:  window.canvasBack,
-                none:  window.canvasNone,
+                back: window.canvasBack,
+                none: window.canvasNone,
             };
 
             // أخفي الـ wrapper
@@ -1235,16 +1261,16 @@
 
         function initWarpEditor(side, imageUrl) {
             const wrapper = document.getElementById(`warp-editor-${side}`);
-            const img     = document.getElementById(`warp-preview-${side}`);
-            const canvas  = document.getElementById(`warp-canvas-${side}`);
+            const img = document.getElementById(`warp-preview-${side}`);
+            const canvas = document.getElementById(`warp-canvas-${side}`);
             if (!wrapper || !img || !canvas) return;
 
             warpState[side] = {
                 points: [
-                    { x: 0.1, y: 0.1 },
-                    { x: 0.9, y: 0.1 },
-                    { x: 0.9, y: 0.9 },
-                    { x: 0.1, y: 0.9 },
+                    {x: 0.1, y: 0.1},
+                    {x: 0.9, y: 0.1},
+                    {x: 0.9, y: 0.9},
+                    {x: 0.1, y: 0.9},
                 ],
                 dragging: null,
             };
@@ -1253,10 +1279,10 @@
             wrapper.classList.remove('d-none');
 
             const LABELS = ['TL', 'TR', 'BR', 'BL'];
-            const RADIUS  = 10;
+            const RADIUS = 10;
 
             function pxOf(p) {
-                return { x: p.x * canvas.width, y: p.y * canvas.height };
+                return {x: p.x * canvas.width, y: p.y * canvas.height};
             }
 
             function draw() {
@@ -1268,14 +1294,17 @@
                 ctx.beginPath();
                 const f = pxOf(pts[0]);
                 ctx.moveTo(f.x, f.y);
-                pts.slice(1).forEach(p => { const px = pxOf(p); ctx.lineTo(px.x, px.y); });
+                pts.slice(1).forEach(p => {
+                    const px = pxOf(p);
+                    ctx.lineTo(px.x, px.y);
+                });
                 ctx.closePath();
                 ctx.fillStyle = 'rgba(36,176,148,0.08)';
                 ctx.fill();
 
                 // Outline
                 ctx.strokeStyle = 'rgba(36,176,148,0.85)';
-                ctx.lineWidth   = 1.5;
+                ctx.lineWidth = 1.5;
                 ctx.setLineDash([6, 4]);
                 ctx.stroke();
                 ctx.setLineDash([]);
@@ -1284,10 +1313,12 @@
                 ctx.beginPath();
                 const tl = pxOf(pts[0]), br = pxOf(pts[2]);
                 const tr = pxOf(pts[1]), bl = pxOf(pts[3]);
-                ctx.moveTo(tl.x, tl.y); ctx.lineTo(br.x, br.y);
-                ctx.moveTo(tr.x, tr.y); ctx.lineTo(bl.x, bl.y);
+                ctx.moveTo(tl.x, tl.y);
+                ctx.lineTo(br.x, br.y);
+                ctx.moveTo(tr.x, tr.y);
+                ctx.lineTo(bl.x, bl.y);
                 ctx.strokeStyle = 'rgba(36,176,148,0.25)';
-                ctx.lineWidth   = 0.8;
+                ctx.lineWidth = 0.8;
                 ctx.stroke();
 
                 // Handles
@@ -1295,21 +1326,21 @@
                     const px = pxOf(p);
                     ctx.beginPath();
                     ctx.arc(px.x, px.y, RADIUS, 0, Math.PI * 2);
-                    ctx.fillStyle   = '#24B094';
+                    ctx.fillStyle = '#24B094';
                     ctx.fill();
                     ctx.strokeStyle = '#fff';
-                    ctx.lineWidth   = 2;
+                    ctx.lineWidth = 2;
                     ctx.stroke();
-                    ctx.fillStyle    = '#fff';
-                    ctx.font         = 'bold 10px sans-serif';
-                    ctx.textAlign    = 'center';
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 10px sans-serif';
+                    ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(LABELS[i], px.x, px.y);
                 });
             }
 
             function resize() {
-                canvas.width  = img.clientWidth  || img.naturalWidth;
+                canvas.width = img.clientWidth || img.naturalWidth;
                 canvas.height = img.clientHeight || img.naturalHeight;
                 draw();
             }
@@ -1317,7 +1348,7 @@
             function nearestHandle(mx, my) {
                 const pts = warpState[side].points;
                 for (let i = 0; i < pts.length; i++) {
-                    const p  = pxOf(pts[i]);
+                    const p = pxOf(pts[i]);
                     if (Math.hypot(p.x - mx, p.y - my) < RADIUS + 5) return i;
                 }
                 return null;
@@ -1335,8 +1366,8 @@
                 if (warpState[side].dragging === null) return;
                 const rect = canvas.getBoundingClientRect();
                 warpState[side].points[warpState[side].dragging] = {
-                    x: Math.min(1, Math.max(0, (e.clientX - rect.left)  / canvas.width)),
-                    y: Math.min(1, Math.max(0, (e.clientY - rect.top)   / canvas.height)),
+                    x: Math.min(1, Math.max(0, (e.clientX - rect.left) / canvas.width)),
+                    y: Math.min(1, Math.max(0, (e.clientY - rect.top) / canvas.height)),
                 };
                 draw();
                 syncWarpInput(side);
@@ -1388,16 +1419,16 @@
         function resetWarp(side) {
             if (!warpState[side]) return;
             warpState[side].points = [
-                { x: 0.1, y: 0.1 },
-                { x: 0.9, y: 0.1 },
-                { x: 0.9, y: 0.9 },
-                { x: 0.1, y: 0.9 },
+                {x: 0.1, y: 0.1},
+                {x: 0.9, y: 0.1},
+                {x: 0.9, y: 0.9},
+                {x: 0.1, y: 0.9},
             ];
             // Re-init draw by triggering resize
             const img = document.getElementById(`warp-preview-${side}`);
             const canvas = document.getElementById(`warp-canvas-${side}`);
             if (canvas && img) {
-                canvas.width  = img.clientWidth  || img.naturalWidth;
+                canvas.width = img.clientWidth || img.naturalWidth;
                 canvas.height = img.clientHeight || img.naturalHeight;
                 const ctx = canvas.getContext('2d');
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1410,34 +1441,42 @@
 
         $(document).on('click', '.js-reset-warp', function () {
             resetWarp($(this).data('side'));
-            Toastify({ text: 'Reset to default corners', backgroundColor: '#6c757d', duration: 1200 }).showToast();
+            Toastify({text: 'Reset to default corners', backgroundColor: '#6c757d', duration: 1200}).showToast();
         });
 
         $(document).on('click', '.js-save-warp', function () {
-            const side     = $(this).data('side');
+            const side = $(this).data('side');
             const mockupId = "{{ $mockup->id ?? 'null' }}";
 
             syncWarpInput(side);
 
             if (!mockupId || mockupId === 'null') {
-                Toastify({ text: 'Warp points ready — will save with mockup', backgroundColor: '#17a2b8', duration: 2000 }).showToast();
+                Toastify({
+                    text: 'Warp points ready — will save with mockup',
+                    backgroundColor: '#17a2b8',
+                    duration: 2000
+                }).showToast();
                 return;
             }
 
             fetch(`/admin/mockups/${mockupId}/side-settings/${side}`, {
-                method:  'POST',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 },
-                body: JSON.stringify({ warp_points: warpState[side]?.points }),
+                body: JSON.stringify({warp_points: warpState[side]?.points}),
             })
                 .then(r => r.json())
                 .then(() => {
-                    Toastify({ text: `Warp points saved for ${side}`, backgroundColor: '#28a745', duration: 1500 }).showToast();
+                    Toastify({
+                        text: `Warp points saved for ${side}`,
+                        backgroundColor: '#28a745',
+                        duration: 1500
+                    }).showToast();
                 })
                 .catch(() => {
-                    Toastify({ text: 'Save failed', backgroundColor: '#dc3545', duration: 1500 }).showToast();
+                    Toastify({text: 'Save failed', backgroundColor: '#dc3545', duration: 1500}).showToast();
                 });
         });
         // Disable Dropzone auto-discovery
@@ -1577,9 +1616,9 @@
         }
 
         function initDropzone(type, part) {
-            const key       = `${type}-${part}`;
-            const elId      = `dz-${type}-${part}`;
-            const el        = document.getElementById(elId);
+            const key = `${type}-${part}`;
+            const elId = `dz-${type}-${part}`;
+            const el = document.getElementById(elId);
             const inputName = `${type}_${part}_image`;
 
             if (!el || dropzoneInstances[key]) return;
@@ -1588,8 +1627,8 @@
             let hiddenInput = document.querySelector(`input[name="${inputName}_id"]`);
             if (!hiddenInput) {
                 hiddenInput = document.createElement('input');
-                hiddenInput.type  = 'hidden';
-                hiddenInput.name  = `${inputName}_id`;
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = `${inputName}_id`;
                 document.getElementById('addMockupForm').appendChild(hiddenInput);
             }
 
@@ -1600,7 +1639,7 @@
                 maxFilesize: 12,
                 acceptedFiles: "image/png",
                 dictInvalidFileType: "Only PNG files are allowed.",
-                headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+                headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
                 addRemoveLinks: true,
                 dictRemoveFile: '✕ Remove',
                 dictDefaultMessage: '',
@@ -1622,12 +1661,20 @@
 
                     dzInstance.on('success', function (file, response) {
                         if (response.success && response.data) {
-                            file._mediaId     = response.data.id;
+                            file._mediaId = response.data.id;
                             hiddenInput.value = response.data.id;
 
                             if (part === 'base' && response.data.url) {
-                                const canvasMap  = { front: window.canvasFront, back: window.canvasBack, none: window.canvasNone };
-                                const wrapperMap = { front: 'editorFrontWrapper', back: 'editorBackWrapper', none: 'editorNoneWrapper' };
+                                const canvasMap = {
+                                    front: window.canvasFront,
+                                    back: window.canvasBack,
+                                    none: window.canvasNone
+                                };
+                                const wrapperMap = {
+                                    front: 'editorFrontWrapper',
+                                    back: 'editorBackWrapper',
+                                    none: 'editorNoneWrapper'
+                                };
 
                                 loadBaseImage(canvasMap[type], response.data.url);
                                 document.getElementById(wrapperMap[type])?.classList.remove('d-none');
@@ -1666,13 +1713,14 @@
 
             dropzoneInstances[key] = dz;
         }
+
         // Attach a File object to a hidden <input type="file"> so the form submission picks it up
         function attachFileToForm(inputName, file) {
             let input = document.querySelector(`input[name="${inputName}"]`);
             if (!input) {
                 input = document.createElement('input');
-                input.type   = 'file';
-                input.name   = inputName;
+                input.type = 'file';
+                input.name = inputName;
                 input.style.display = 'none';
                 document.getElementById('addMockupForm').appendChild(input);
             }
@@ -1704,7 +1752,7 @@
                 // هنحدّث templatePositions من الـ canvases
                 ['front', 'back', 'none'].forEach(type => {
                     const canvas = (type === 'front') ? window.canvasFront :
-                        (type === 'back')  ? window.canvasBack  :
+                        (type === 'back') ? window.canvasBack :
                             window.canvasNone;
 
                     if (!canvas || !canvas.__mockupMeta) return;
@@ -1730,12 +1778,12 @@
         });
 
         $(document).ready(function () {
-            let input          = $('#product-image-main');
-            let uploadArea     = $('#upload-area');
-            let progress       = $('#upload-progress');
-            let progressBar    = $('.progress-bar');
-            let uploadedImage  = $('#uploaded-image');
-            let removeButton   = $('#remove-image');
+            let input = $('#product-image-main');
+            let uploadArea = $('#upload-area');
+            let progress = $('#upload-progress');
+            let progressBar = $('.progress-bar');
+            let uploadedImage = $('#uploaded-image');
+            let removeButton = $('#remove-image');
 
             uploadArea.on('click', function () {
                 input.click();
@@ -1763,7 +1811,7 @@
 
             function handleMainImageFiles(files) {
                 if (files.length > 0) {
-                    let file         = files[0];
+                    let file = files[0];
                     let dataTransfer = new DataTransfer();
                     dataTransfer.items.add(file);
                     input[0].files = dataTransfer.files;
@@ -1816,8 +1864,8 @@
                 .filter(i => i.value.toLowerCase() === hex.toLowerCase())
                 .forEach(i => i.remove());
         };
-        let pickrInstance  = null;
-        let currentCard    = null; // card for current pickr session
+        let pickrInstance = null;
+        let currentCard = null; // card for current pickr session
 
         $(document).ready(function () {
 
@@ -1851,7 +1899,10 @@
                 if (!currentCard) {
                     const selectedColors = document.getElementById('selected-colors');
                     const inputContainer = document.getElementById('colorsInputContainer');
-                    if (!selectedColors || !inputContainer) { pickrInstance.hide(); return; }
+                    if (!selectedColors || !inputContainer) {
+                        pickrInstance.hide();
+                        return;
+                    }
 
                     // avoid duplicates
                     if ([...inputContainer.querySelectorAll('input')].some(i => i.value === hex)) {
@@ -1873,8 +1924,8 @@
 
                     // hidden input
                     const input = document.createElement('input');
-                    input.type  = 'hidden';
-                    input.name  = 'colors[]';
+                    input.type = 'hidden';
+                    input.name = 'colors[]';
                     input.value = hex;
                     inputContainer.appendChild(input);
 
@@ -1909,7 +1960,8 @@
                 renderSelectedColors(currentCard);
                 buildHiddenTemplateInputs();
                 pickrInstance.hide();
-            });        });
+            });
+        });
 
         // Open color picker
         // Open color picker
@@ -1930,7 +1982,7 @@
                         const rect = trigger.getBoundingClientRect();
                         pickerPanel.style.position = 'fixed';
                         pickerPanel.style.left = `${rect.left}px`;
-                        pickerPanel.style.top  = `${rect.bottom + 5}px`;
+                        pickerPanel.style.top = `${rect.bottom + 5}px`;
                         pickerPanel.style.zIndex = 9999;
                     }
                 }, 0);
@@ -1952,7 +2004,7 @@
                 if (pickerPanel) {
                     pickerPanel.style.position = 'absolute';
                     pickerPanel.style.left = `${rect.left + window.scrollX}px`;
-                    pickerPanel.style.top  = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
+                    pickerPanel.style.top = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
                     pickerPanel.style.zIndex = 9999;
                 }
             }, 0);
@@ -1996,12 +2048,13 @@
                 ul.appendChild(li);
 
                 const hiddenInput = document.createElement('input');
-                hiddenInput.type  = 'hidden';
-                hiddenInput.name  = 'colors[]';
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'colors[]';
                 hiddenInput.value = c;
                 container.appendChild(hiddenInput);
             });
         }
+
         function buildTemplateColorInputs(card, templateIndex) {
             const container = card.querySelector('.colorsInputContainer');
             if (!container) return;
@@ -2010,8 +2063,8 @@
 
             (card.selectedColors || []).forEach(color => {
                 const input = document.createElement('input');
-                input.type  = 'hidden';
-                input.name  = `templates[${templateIndex}][colors][]`;
+                input.type = 'hidden';
+                input.name = `templates[${templateIndex}][colors][]`;
                 input.value = color.toLowerCase(); // توحيد اللون
                 const inputColors = document.createElement('input');
                 inputColors.type = 'hidden';

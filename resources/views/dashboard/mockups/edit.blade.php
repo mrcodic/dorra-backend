@@ -210,13 +210,13 @@
                     </div>
                     <div class="row">
                     <div class="row">
-                        <div class="form-group mb-2 col-md-4">
+                        <div class="form-group mb-2 col-md-6">
                             <label for="mockupName" class="label-text mb-1">Mockup Name</label>
                             <input type="text" id="templateName" class="form-control" name="name"
                                 placeholder="Mockup Name" value="{{ $model->name }}">
                         </div>
 
-                    <div class="form-group mb-2 col-4">
+                    <div class="form-group mb-2 col-6">
                         <label for="productsSelect" class="label-text mb-1">Product</label>
                         <select id="productsSelect" name="category_id" class="form-select">
                             <option value="" disabled selected>Choose product</option>
@@ -227,11 +227,30 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group mb-2 col-md-4">
+                    </div>
+                        <div class="row"></div>
+                    <div class="form-group mb-2 col-md-3">
                         <label for="fillRatio" class="label-text mb-1">Fill Ratio</label>
                         <input type="number" id="fillRatio" class="form-control" name="fill_ratio"
                                placeholder="ex: 70" value="{{ $model->fill_ratio }}">
                     </div>
+                        <div class="form-group mb-2 col-md-3">
+                            <label for="light_strength" class="label-text mb-1">Light Strength</label>
+                            <input type="number" id="light_strength" class="form-control" name="light_strength"
+                                   placeholder="ex: 15" value="{{ $model->light_strength }}">
+                        </div>
+                        <div class="form-group mb-2 col-md-3">
+                            <label for="shadow_strength" class="label-text mb-1">Shadow Strength</label>
+                            <input type="number" id="shadow_strength" class="form-control"
+                                   name="shadow_strength"
+                                   placeholder="ex: 60" value="{{ $model->shadow_strength }}">
+                        </div>
+                        <div class="form-group mb-2 col-md-3">
+                            <label for="displacement_scale" class="label-text mb-1">Displacement Scale</label>
+                            <input type="number" id="displacement_scale" class="form-control"
+                                   name="displacement_scale"
+                                   placeholder="ex: 40" value="{{ $model->displacement_scale }}">
+                        </div>
                     </div>
                     <div class="form-group mb-2 col-md-12">
                         <div class="row">
