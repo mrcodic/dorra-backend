@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Log;
 #[AllowDynamicProperties] class FawryStrategy implements PaymentGatewayStrategy
 {
 
-    public function __construct(public PaymentGatewayRepositoryInterface $gatewayRepository, public $gatewayCode)
+    public function __construct(public PaymentGatewayRepositoryInterface $gatewayRepository, public $gatewayCode = 'fawry')
     {
         $this->baseUrl = config('services.fawry.base_url');
         $this->callback = config('services.fawry.redirection_url');
