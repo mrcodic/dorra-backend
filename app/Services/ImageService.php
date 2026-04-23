@@ -37,7 +37,6 @@ class ImageService
                 ]
             ),
         ]);
-        dd($original, $filePath,$imagick);
 
         $imagick->destroy();
 
@@ -49,6 +48,7 @@ class ImageService
                 ['preview_id' => $previewMedia->id]
             ),
         ]);
+        dd($original, $filePath,$imagick);
 
         return [
             'original_media_id' => $original->id,
