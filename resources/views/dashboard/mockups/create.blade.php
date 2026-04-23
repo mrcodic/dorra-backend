@@ -184,36 +184,40 @@
                                 <div class="form-group mb-2 col-md-3">
                                     <label for="fillRatio" class="label-text mb-1 d-flex align-items-center gap-2">
                                         Fill Ratio
-                                        <span class="badge bg-light text-dark border small-badge">ex: 70</span>
                                     </label>
                                     <input type="number" id="fillRatio" class="form-control" name="fill_ratio" placeholder="ex: 70">
+                                    <span class="badge bg-light text-dark border small-badge">ex: 70</span>
+
                                 </div>
 
                                 <div class="form-group mb-2 col-md-3">
                                     <label for="light_strength" class="label-text mb-1 d-flex align-items-center gap-2 flex-wrap">
                                         Light Strength
-                                        <span class="badge bg-info-subtle text-dark border small-badge">t-shirt: 35</span>
-                                        <span class="badge bg-info-subtle text-dark border small-badge">scarf: 35-45</span>
+
                                     </label>
                                     <input type="number" id="light_strength" class="form-control" name="light_strength" placeholder="ex: 40">
+                                    <span class="badge bg-info-subtle text-dark border small-badge">t-shirt: 35</span>
+                                    <span class="badge bg-info-subtle text-dark border small-badge">scarf: 35-45</span>
                                 </div>
 
                                 <div class="form-group mb-2 col-md-3">
                                     <label for="shadow_strength" class="label-text mb-1 d-flex align-items-center gap-2 flex-wrap">
                                         Shadow Strength
-                                        <span class="badge bg-warning-subtle text-dark border small-badge">t-shirt: 45%</span>
-                                        <span class="badge bg-warning-subtle text-dark border small-badge">scarf: 55-65%</span>
+
                                     </label>
                                     <input type="number" id="shadow_strength" class="form-control" name="shadow_strength" placeholder="ex: 60">
+                                    <span class="badge bg-warning-subtle text-dark border small-badge">t-shirt: 45%</span>
+                                    <span class="badge bg-warning-subtle text-dark border small-badge">scarf: 55-65%</span>
                                 </div>
 
                                 <div class="form-group mb-2 col-md-3">
                                     <label for="displacement_scale" class="label-text mb-1 d-flex align-items-center gap-2 flex-wrap">
                                         Displacement Scale
-                                        <span class="badge bg-secondary-subtle text-dark border small-badge">t-shirt: 8-10</span>
-                                        <span class="badge bg-secondary-subtle text-dark border small-badge">scarf: 12-18</span>
+
                                     </label>
                                     <input type="number" id="displacement_scale" class="form-control" name="displacement_scale" placeholder="ex: 15">
+                                    <span class="badge bg-secondary-subtle text-dark border small-badge">t-shirt: 8-10</span>
+                                    <span class="badge bg-secondary-subtle text-dark border small-badge">scarf: 12-18</span>
                                 </div>
 
                             </div>

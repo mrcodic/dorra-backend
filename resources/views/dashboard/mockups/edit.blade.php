@@ -240,9 +240,7 @@
                         <div class="row"></div>
                  <div class="form-group mb-2 col-md-3">
     <label for="fillRatio" class="label-text mb-1">Fill Ratio</label>
-    <div class="d-flex gap-1 flex-wrap mb-1">
-        <span class="badge bg-light text-dark border small-badge">ex: 70</span>
-    </div>
+
     <input
         type="number"
         id="fillRatio"
@@ -251,14 +249,14 @@
         placeholder="ex: 70"
         value="{{ old('fill_ratio', $model->fill_ratio) }}"
     >
+        <div class="d-flex gap-1 flex-wrap mb-1">
+        <span class="badge bg-light text-dark border small-badge">ex: 70</span>
+    </div>
 </div>
 
 <div class="form-group mb-2 col-md-3">
     <label for="light_strength" class="label-text mb-1">Light Strength</label>
-    <div class="d-flex gap-1 flex-wrap mb-1">
-        <span class="badge bg-info-subtle text-dark border small-badge">t-shirt: 35</span>
-        <span class="badge bg-info-subtle text-dark border small-badge">scarf: 35-45</span>
-    </div>
+
     <input
         type="number"
         id="light_strength"
@@ -267,14 +265,15 @@
         placeholder="ex: 40"
         value="{{ old('light_strength', $model->light_strength) }}"
     >
+     <div class="d-flex gap-1 flex-wrap mb-1">
+        <span class="badge bg-info-subtle text-dark border small-badge">t-shirt: 35</span>
+        <span class="badge bg-info-subtle text-dark border small-badge">scarf: 35-45</span>
+    </div>
 </div>
 
 <div class="form-group mb-2 col-md-3">
     <label for="shadow_strength" class="label-text mb-1">Shadow Strength</label>
-    <div class="d-flex gap-1 flex-wrap mb-1">
-        <span class="badge bg-warning-subtle text-dark border small-badge">t-shirt: 45%</span>
-        <span class="badge bg-warning-subtle text-dark border small-badge">scarf: 55-65%</span>
-    </div>
+
     <input
         type="number"
         id="shadow_strength"
@@ -283,14 +282,15 @@
         placeholder="ex: 60"
         value="{{ old('shadow_strength', $model->shadow_strength) }}"
     >
+        <div class="d-flex gap-1 flex-wrap mb-1">
+        <span class="badge bg-warning-subtle text-dark border small-badge">t-shirt: 45%</span>
+        <span class="badge bg-warning-subtle text-dark border small-badge">scarf: 55-65%</span>
+    </div>
 </div>
 
 <div class="form-group mb-2 col-md-3">
     <label for="displacement_scale" class="label-text mb-1">Displacement Scale</label>
-    <div class="d-flex gap-1 flex-wrap mb-1">
-        <span class="badge bg-secondary-subtle text-dark border small-badge">t-shirt: 8-10</span>
-        <span class="badge bg-secondary-subtle text-dark border small-badge">scarf: 12-18</span>
-    </div>
+
     <input
         type="number"
         id="displacement_scale"
@@ -299,6 +299,10 @@
         placeholder="ex: 15"
         value="{{ old('displacement_scale', $model->displacement_scale) }}"
     >
+       <div class="d-flex gap-1 flex-wrap mb-1">
+        <span class="badge bg-secondary-subtle text-dark border small-badge">t-shirt: 8-10</span>
+        <span class="badge bg-secondary-subtle text-dark border small-badge">scarf: 12-18</span>
+    </div>
 </div>
                     </div>
                     <div class="form-group mb-2 col-md-12">
