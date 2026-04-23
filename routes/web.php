@@ -38,13 +38,16 @@ use App\Http\Controllers\Dashboard\{AdminController,
     TemplateController,
     UserController
 };
+use App\Models\Order;
 use App\Models\Template;
 use App\Services\Mockup\MockupRenderConfigResolver;
 use App\Services\Mockup\MockupRenderModeResolver;
+use App\Services\Payment\FawryStrategy;
 use App\Http\Controllers\Shared\{CommentController, LibraryAssetController};
 use App\Http\Controllers\Shared\General\MainController;
 use App\Http\Middleware\AutoCheckPermission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use App\Models\Mockup;
 use App\Services\Mockup\MockupRenderer;
@@ -1170,6 +1173,85 @@ function resolveUrlWarp(Request $request): ?array
         'bl' => ['x' => (int) $request->query('blx'), 'y' => (int) $request->query('bly')],
     ];
 }
-Route::get('/test-job', function () {
-    \App\Jobs\SyncFawryOrderStatus::dispatch();
+
+Route::get('/test-job', function (FawryStrategy $fawry) {
+    $processed = 0;
+
+    Order::query()
+        ->where('payment_status', StatusEnum::PENDING)
+        ->whereHas('paymentMethod', fn ($q) => $q->where('code', 'fawry'))
+        ->whereHas('transactions', fn ($q) => $q->where('payment_status', StatusEnum::PENDING))
+        // ->where('created_at', '>=', now()->subHours(48))
+        ->with('transactions')
+        ->chunkById(100, function ($orders) use ($fawry, &$processed) {
+            foreach ($orders as $order) {
+                $transaction = $order->transactions()
+                    ->where('payment_status', StatusEnum::PENDING)
+                    ->latest()
+                    ->first();
+
+                Log::info('Fawry transaction check', [
+                    'order_id' => $order->id,
+                    'transaction_id' => $transaction?->id,
+                    'kiosk_reference' => $transaction?->kiosk_reference,
+                ]);
+
+                if (!$transaction?->kiosk_reference) {
+                    continue;
+                }
+
+                try {
+                    $fawryStatus = $fawry->getStatus($transaction->kiosk_reference);
+
+                    Log::info('Fawry raw status', [
+                        'order_id' => $order->id,
+                        'transaction_id' => $transaction->id,
+                        'fawry_status' => $fawryStatus,
+                    ]);
+
+                    $mappedStatus = match ($fawryStatus) {
+                        'PAID' => StatusEnum::PAID,
+                        'CANCELLED' => StatusEnum::CANCELLED,
+                        'REFUNDED', 'PARTIAL_REFUNDED' => StatusEnum::REFUNDED,
+                        'EXPIRED' => StatusEnum::FAILED,
+                        default => StatusEnum::PENDING,
+                    };
+
+                    if ($mappedStatus === $transaction->payment_status) {
+                        continue;
+                    }
+
+                    $transaction->update([
+                        'payment_status' => $mappedStatus,
+                    ]);
+
+                    $order->update([
+                        'payment_status' => $mappedStatus,
+                    ]);
+
+                    Log::info('Fawry status synced', [
+                        'order_id' => $order->id,
+                        'order_number' => $order->order_number,
+                        'transaction_id' => $transaction->id,
+                        'fawry_status' => $fawryStatus,
+                        'mapped_status' => $mappedStatus->value,
+                    ]);
+
+                    $processed++;
+                } catch (\Throwable $e) {
+                    Log::error('Fawry sync failed', [
+                        'order_id' => $order->id,
+                        'transaction_id' => $transaction->id ?? null,
+                        'error' => $e->getMessage(),
+                        'line' => $e->getLine(),
+                        'file' => $e->getFile(),
+                    ]);
+                }
+            }
+        });
+
+    return response()->json([
+        'message' => 'Fawry sync route executed successfully',
+        'processed' => $processed,
+    ]);
 });
