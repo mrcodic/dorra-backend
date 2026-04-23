@@ -226,7 +226,11 @@
                             @endforeach
                         </select>
                     </div>
-
+                    <div class="form-group mb-2 col-md-12">
+                        <label for="fillRatio" class="label-text mb-1">Fill Ratio</label>
+                        <input type="number" id="fillRatio" class="form-control" name="fill_ratio"
+                               placeholder="ex: 70" value="{{ $model->fill_ratio }}">
+                    </div>
                     <div class="form-group mb-2 col-md-12">
                         <div class="row">
                             @foreach($associatedData['types'] as $type)

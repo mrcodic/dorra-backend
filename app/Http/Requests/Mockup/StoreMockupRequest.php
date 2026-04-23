@@ -34,6 +34,11 @@ class StoreMockupRequest extends BaseRequest
                 'string',
                 'max:255',
             ],
+            'fill_ratio' => [
+                'required',
+                'integer',
+                'min:1',
+            ],
 //            'approach' => [
 //                'required',
 //                'string',
