@@ -235,32 +235,29 @@ class TemplateService extends BaseService
             }
 
             if (isset($validatedData['template_image_front_id']) || isset($validatedData['template_image_none_id'])) {
-                $frontId = $validatedData['template_image_front_id'] ?? null;
-                $noneId  = $validatedData['template_image_none_id'] ?? null;
+               $media = Media::where(function ($query) use ($validatedData) {
+                    $query->whereKey($validatedData['template_image_front_id'])
+                        ->orWhere('id', $validatedData['template_image_none_id']);
+                })
+                    ->update([
+                        'model_type' => get_class($model),
+                        'model_id' => $model->id,
+                        'collection_name' => 'templates',
+                    ]);
 
+                $this->imageService->processUploaded($validatedData['template_image_front_id'] ?? $validatedData['template_image_none_id']);
 
-                $mediaIds = array_filter([$frontId, $noneId]);
-
-                Media::whereIn('id', $mediaIds)->update([
-                    'model_type'      => get_class($model),
-                    'model_id'        => $model->id,
-                    'collection_name' => 'templates',
-                ]);
-
-                foreach ($mediaIds as $mediaId) {
-                    $this->imageService->processUploaded($mediaId, 'templates');
-                }
             }
             if (isset($validatedData['template_image_back_id'])) {
-                $backId = $validatedData['template_image_back_id'];
 
-                Media::whereKey($backId)->update([
-                    'model_type'      => get_class($model),
-                    'model_id'        => $model->id,
-                    'collection_name' => 'back_templates',
-                ]);
-                
-                $this->imageService->processUploaded($backId, 'back-templates');
+                Media::whereKey($validatedData['template_image_back_id'])
+                    ->update([
+                        'model_type' => get_class($model),
+                        'model_id' => $model->id,
+                        'collection_name' => 'back_templates',
+                    ]);
+                $this->imageService->processUploaded($validatedData['template_image_back_id'], 'back-templates');
+
             }
             $mockupIds = $validatedData['mockup_ids'] ?? [];
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
