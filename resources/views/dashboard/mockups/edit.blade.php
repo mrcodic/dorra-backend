@@ -215,7 +215,7 @@
                             <input type="text" id="templateName" class="form-control" name="name"
                                 placeholder="Mockup Name" value="{{ $model->name }}">
                         </div>
-                    </div>
+                    
                     <div class="form-group mb-2 col-4">
                         <label for="productsSelect" class="label-text mb-1">Product</label>
                         <select id="productsSelect" name="category_id" class="form-select">
