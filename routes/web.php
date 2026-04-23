@@ -1175,23 +1175,10 @@ function resolveUrlWarp(Request $request): ?array
 }
 
 Route::get('/test-job', function (FawryStrategy $fawry) {
-    $fawryStatus = $fawry->getStatus("ORD-20260423-000433");
-    $mappedStatus = match ($fawryStatus) {
-        'PAID' => App\Enums\Payment\StatusEnum::PAID,
-        'CANCELLED' => App\Enums\Payment\StatusEnum::CANCELLED,
-        'REFUNDED', 'PARTIAL_REFUNDED' => App\Enums\Payment\StatusEnum::REFUNDED,
-        'EXPIRED' => App\Enums\Payment\StatusEnum::FAILED,
-        default => App\Enums\Payment\StatusEnum::PENDING,
-    };
 
-    if ($mappedStatus === \App\Enums\Payment\StatusEnum::PENDING) {
-       dd("DS");
-    }
-
-
-dd($fawryStatus);
     $processed = 0;
-    Order::query()
+    Order::query()->
+        where('transaction_id','ORD-20260423-000433')
         ->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)
         ->whereHas('paymentMethod.paymentGateway', fn ($q) => $q->where('code', 'fawry'))
         ->whereHas('transactions', fn ($q) => $q->where('payment_status', App\Enums\Payment\StatusEnum::PENDING))
@@ -1217,7 +1204,7 @@ dd($fawryStatus);
 
                 try {
                     $fawryStatus = $fawry->getStatus($transaction->transaction_id);
-
+dump($fawryStatus);
                     Log::info('Fawry raw status', [
                         'order_id' => $order->id,
                         'transaction_id' => $transaction->id,
