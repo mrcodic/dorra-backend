@@ -248,12 +248,14 @@ class PaymentController extends Controller
         $merchantRef = data_get($requestedData, 'merchantRefNumber');
         $paymentMethod = data_get($requestedData, 'paymentMethod');
         $referenceNumber = data_get($requestedData, 'referenceNumber');
-Log::channel('fawry')->info("dd",$requestedData);
         $transaction = Transaction::where('transaction_id', $merchantRef)->first();
 
         if (!$transaction) {
             return redirect()->back();
         }
+        $transaction->update([
+            'kiosk_reference' => $referenceNumber
+        ]);
         if ($orderStatus == 'PAID' && $statusCode == 200) {
             if ($paymentMethod == 'MWALLET') {
                 $transaction->update([
