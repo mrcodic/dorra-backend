@@ -37,7 +37,6 @@ class SyncFawryOrderStatus implements ShouldQueue
             ->where('payment_status', StatusEnum::PENDING)
             ->latest()
             ->first();
-        Log::info("transaction", $transaction);
         if (!$transaction?->transaction_id) {
             return;
         }
