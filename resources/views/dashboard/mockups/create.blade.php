@@ -151,13 +151,15 @@
                         </span>
                         </div>
                         <div class="row">
-                            <div class="form-group mb-2 col-md-12">
+                            <div class="row">
+
+                            <div class="form-group mb-2 col-md-6">
                                 <label for="mockupName" class="label-text mb-1">Mockup Name</label>
                                 <input type="text" id="templateName" class="form-control" name="name"
                                        placeholder="Mockup Name">
                             </div>
                         </div>
-                        <div class="form-group mb-2 col-12">
+                        <div class="form-group mb-2 col-6">
                             <label for="productsSelect" class="label-text mb-1">Product</label>
                             <select id="productsSelect" name="category_id" class="form-select">
                                 <option value="" disabled selected>Choose product</option>
@@ -168,10 +170,11 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="form-group mb-2 col-md-12">
+                        <div class="form-group mb-2 col-md-6">
                             <label for="fillRatio" class="label-text mb-1">Fill Ratio</label>
                             <input type="number" id="fillRatio" class="form-control" name="fill_ratio"
                                    placeholder="ex: 70">
+                        </div>
                         </div>
                         <div class="form-group mb-2 col-md-12">
                             <div class="row">
