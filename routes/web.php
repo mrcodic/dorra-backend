@@ -1176,6 +1176,18 @@ function resolveUrlWarp(Request $request): ?array
 
 Route::get('/test-job', function (FawryStrategy $fawry) {
     $fawryStatus = $fawry->getStatus("ORD-20260423-000433");
+    $mappedStatus = match ($fawryStatus) {
+        'PAID' => App\Enums\Payment\StatusEnum::PAID,
+        'CANCELLED' => App\Enums\Payment\StatusEnum::CANCELLED,
+        'REFUNDED', 'PARTIAL_REFUNDED' => App\Enums\Payment\StatusEnum::REFUNDED,
+        'EXPIRED' => App\Enums\Payment\StatusEnum::FAILED,
+        default => App\Enums\Payment\StatusEnum::PENDING,
+    };
+
+    if ($mappedStatus === \App\Enums\Payment\StatusEnum::PENDING) {
+       dd("DS");
+    }
+
 
 dd($fawryStatus);
     $processed = 0;

@@ -202,7 +202,6 @@ use Illuminate\Support\Facades\Log;
                     'signature'      => $signature,
                 ]
             );
-            dd($response->json('orderStatus'));
             return $response->json('orderStatus') ?? 'UNKNOWN';
 
         } catch (\Exception $e) {
