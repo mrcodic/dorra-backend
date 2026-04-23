@@ -187,7 +187,7 @@ use Illuminate\Support\Facades\Log;
     }
     public function getStatus(string $referenceNumber): string
     {
-        $referenceNumber = trim($referenceNumber);
+//        $referenceNumber = trim($referenceNumber);
         try {
             $signature = hash(
                 'sha256',
