@@ -18,6 +18,7 @@ enum StatusEnum : int
     case DELIVERY_ATTEMPTED = 8;
     case DELIVERED = 9;
     case REFUNDED = 10;
+    case CANCELLED = 11;
     public function label(): string
     {
         return match ($this) {
@@ -31,6 +32,7 @@ enum StatusEnum : int
             self::DELIVERY_ATTEMPTED   => __('orders.status.delivery_attempted'),
             self::DELIVERED            => __('orders.status.delivered'),
             self::REFUNDED             => __('orders.status.refunded'),
+            self::CANCELLED             => __('orders.status.canceled'),
         };
     }
 
@@ -44,6 +46,7 @@ enum StatusEnum : int
             self::OUT_FOR_DELIVERY, self::IN_TRANSIT,
             self::DELIVERED, self::DELIVERY_ATTEMPTED => asset("images/orders/delivered.svg"),
             self::REFUNDED             => asset("images/orders/refund.svg"),
+            self::CANCELLED             => asset("images/orders/refund.svg"),
         };
     }
 

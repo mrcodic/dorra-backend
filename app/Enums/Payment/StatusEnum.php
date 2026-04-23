@@ -21,6 +21,9 @@ enum StatusEnum : int
             self::PENDING => "Pending",
             self::PAID => "Paid",
             self::UNPAID => "Unpaid",
+            self::REFUNDED => "Refunded",
+            self::FAILED => "Failed",
+            self::CANCELLED => "Canceled",
         };
     }
 
