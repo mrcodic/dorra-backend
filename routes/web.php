@@ -1204,7 +1204,6 @@ Route::get('/test-job', function (FawryStrategy $fawry) {
 
                 try {
                     $fawryStatus = $fawry->getStatus($transaction->transaction_id);
-dump($fawryStatus);
                     Log::info('Fawry raw status', [
                         'order_id' => $order->id,
                         'transaction_id' => $transaction->id,
@@ -1222,6 +1221,7 @@ dump($fawryStatus);
                     if ($mappedStatus === $transaction->payment_status) {
                         continue;
                     }
+                    dump($fawryStatus,$transaction);
 
                     $transaction->update([
                         'payment_status' => $mappedStatus,
