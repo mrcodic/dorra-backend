@@ -16,7 +16,6 @@ class ImageService
 
         $filePath = Storage::disk($original->disk)
             ->path("{$original->id}/{$original->file_name}");
-dd($original, $filePath);
         if (!file_exists($filePath)) {
             throw new \Exception("Media file not found: {$filePath}");
         }
@@ -38,6 +37,7 @@ dd($original, $filePath);
                 ]
             ),
         ]);
+        dd($original, $filePath,$imagick);
 
         $imagick->destroy();
 
