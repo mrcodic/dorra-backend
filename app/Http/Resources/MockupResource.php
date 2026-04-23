@@ -59,6 +59,7 @@ class MockupResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'fill_ratio' => $this->fill_ratio,
             'types' => TypeResource::collection($this->whenLoaded('types')),
             'product' => CategoryResource::make($this->whenLoaded('category')),
             'colors' => $this->templateColors ?: $this->colors,
