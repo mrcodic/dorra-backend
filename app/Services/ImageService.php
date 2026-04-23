@@ -14,6 +14,13 @@ class ImageService
     {
         $original = Media::findOrFail($mediaId);
 
+        if (isset($original->custom_properties['preview_id'])) {
+            return [
+                'original_media_id' => $original->id,
+                'preview_media_id'  => $original->custom_properties['preview_id'],
+            ];
+        }
+
         $filePath = Storage::disk($original->disk)
             ->path("{$original->id}/{$original->file_name}");
 
