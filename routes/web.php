@@ -1175,7 +1175,9 @@ function resolveUrlWarp(Request $request): ?array
 }
 
 Route::get('/test-job', function (FawryStrategy $fawry) {
+    $fawryStatus = $fawry->getStatus("ORD-20260423-000433");
 
+dd($fawryStatus);
     $processed = 0;
     Order::query()
         ->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)
