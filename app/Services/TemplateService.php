@@ -235,7 +235,7 @@ class TemplateService extends BaseService
             }
 
             if (isset($validatedData['template_image_front_id']) || isset($validatedData['template_image_none_id'])) {
-               $media = Media::where(function ($query) use ($validatedData) {
+            Media::where(function ($query) use ($validatedData) {
                     $query->whereKey($validatedData['template_image_front_id'])
                         ->orWhere('id', $validatedData['template_image_none_id']);
                 })

@@ -112,7 +112,7 @@ class PaymentRequestData
             'customerEmail' => $this->requestData?->email ?? $this->user?->email ?? 'customer@example.com',
             'customerName' => $customerName,
             'customerProfileId' => $profileId,
-            'paymentExpiry' => now()->addDays(2)->valueOf(),
+            'paymentExpiry' => now()->addHour(1)->valueOf(),
             'language' => $language,
             'chargeItems' => $items,
             'paymentMethod' => (string) $this->method,
