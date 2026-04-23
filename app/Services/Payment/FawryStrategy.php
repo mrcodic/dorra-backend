@@ -195,7 +195,7 @@ use Illuminate\Support\Facades\Log;
             );
 
             $response = Http::timeout(30)->get(
-                $this->baseUrl . '/ECommerceWeb/Fawry/payments/status/v2',
+                $this->baseUrl . 'ECommerceWeb/Fawry/payments/status/v2',
                 [
                     'merchantCode'   => $this->merchantCode,
                     'merchantRefNumber' => $referenceNumber,
