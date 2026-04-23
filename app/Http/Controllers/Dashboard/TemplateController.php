@@ -184,9 +184,9 @@ class TemplateController extends DashboardController
                 $stepData = Cache::get($cacheKey, []);
                 $productId = $stepData['product_id'] ?? null;
             }
-            if (!$productId) {
-                return Response::api(HttpEnum::BAD_REQUEST, errors: ['error' => 'Product not selected.']);
-            }
+//            if (!$productId) {
+//                return Response::api(HttpEnum::BAD_REQUEST, errors: ['error' => 'Product not selected.']);
+//            }
             $templates = $this->templateRepository->query()->with(['products'])
                 ->when($productId, function ($query) use ($productId) {
                     $query->whereHas('products', function ($q) use ($productId) {
