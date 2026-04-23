@@ -81,66 +81,81 @@ class UpdateMockupRequest extends BaseRequest
 
             // FRONT
             'front_base_image_id' => [
+                'nullable',
                 Rule::requiredIf(in_array(1, $types)),
                 'exists:media,id',
             ],
             'front_mask_image_id' => [
+                'nullable',
                 Rule::requiredIf(in_array(1, $types)),
                 'exists:media,id',
             ],
             'front_shadow_image_id' => [
+                'nullable',
                 Rule::requiredIf(in_array(1, $types)),
                 'exists:media,id',
             ],
             'front_displacement_image_id' => [
+                'nullable',
                 Rule::requiredIf(in_array(1, $types)),
                 'exists:media,id',
             ],
             'front_light_image_id' => [
+                'nullable',
                 Rule::requiredIf(in_array(1, $types)),
                 'exists:media,id',
             ],
 
             // BACK
             'back_base_image_id' => [
+                'nullable',
                 Rule::requiredIf(in_array(2, $types)),
                 'exists:media,id',
             ],
             'back_mask_image_id' => [
+                'nullable',
                 Rule::requiredIf(in_array(2, $types)),
                 'exists:media,id',
             ],
             'back_shadow_image_id' => [
+                'nullable',
                 Rule::requiredIf(in_array(2, $types)),
                 'exists:media,id',
             ],
             'back_displacement_image_id' => [
+                'nullable',
                 Rule::requiredIf(in_array(2, $types)),
                 'exists:media,id',
             ],
             'back_light_image_id' => [
+                'nullable',
                 Rule::requiredIf(in_array(2, $types)),
                 'exists:media,id',
             ],
 
             // NONE / GENERAL
             'none_base_image_id' => [
+                'nullable',
                 Rule::requiredIf(in_array(3, $types)),
                 'exists:media,id',
             ],
             'none_mask_image_id' => [
+                'nullable',
                 Rule::requiredIf(in_array(3, $types)),
                 'exists:media,id',
             ],
             'none_shadow_image_id' => [
+                'nullable',
                 Rule::requiredIf(in_array(3, $types)),
                 'exists:media,id',
             ],
             'none_displacement_image_id' => [
+                'nullable',
                 Rule::requiredIf(in_array(3, $types)),
                 'exists:media,id',
             ],
             'none_light_image_id' => [
+                'nullable',
                 Rule::requiredIf(in_array(3, $types)),
                 'exists:media,id',
             ],
