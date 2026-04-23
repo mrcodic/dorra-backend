@@ -1177,11 +1177,11 @@ function resolveUrlWarp(Request $request): ?array
 Route::get('/test-job', function (FawryStrategy $fawry) {
 
     $processed = 0;
-    Order::query()->
-        where('transaction_id','ORD-20260423-000433')
+    Order::query()
         ->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)
         ->whereHas('paymentMethod.paymentGateway', fn ($q) => $q->where('code', 'fawry'))
-        ->whereHas('transactions', fn ($q) => $q->where('payment_status', App\Enums\Payment\StatusEnum::PENDING))
+        ->whereHas('transactions', fn ($q) => $q->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)->
+        where('transaction_id','ORD-20260423-000433'))
          ->where('created_at', '>=', now()->subHours(48))
         ->with('transactions')
         ->chunkById(100, function ($orders) use ($fawry, &$processed) {
