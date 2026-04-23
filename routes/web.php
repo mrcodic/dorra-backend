@@ -1178,11 +1178,11 @@ Route::get('/test-job', function (FawryStrategy $fawry) {
     $processed = 0;
 dd(Order::query()
     ->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)
-//    ->whereHas('paymentMethod', fn ($q) => $q->where('code', 'fawry'))
+    ->whereHas('paymentMethod.paymentGateway', fn ($q) => $q->where('code', 'fawry'))
     ->whereHas('transactions', fn ($q) => $q->where('payment_status', App\Enums\Payment\StatusEnum::PENDING))->get());
     Order::query()
         ->where('payment_status', App\Enums\Payment\StatusEnum::PENDING)
-        ->whereHas('paymentMethod', fn ($q) => $q->where('code', 'fawry'))
+        ->whereHas('paymentMethod.paymentGateway', fn ($q) => $q->where('code', 'fawry'))
         ->whereHas('transactions', fn ($q) => $q->where('payment_status', App\Enums\Payment\StatusEnum::PENDING))
         // ->where('created_at', '>=', now()->subHours(48))
         ->with('transactions')
