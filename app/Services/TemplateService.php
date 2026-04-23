@@ -235,7 +235,7 @@ class TemplateService extends BaseService
             }
 
             if (isset($validatedData['template_image_front_id']) || isset($validatedData['template_image_none_id'])) {
-                Media::where(function ($query) use ($validatedData) {
+               $media = Media::where(function ($query) use ($validatedData) {
                     $query->whereKey($validatedData['template_image_front_id'])
                         ->orWhere('id', $validatedData['template_image_none_id']);
                 })
@@ -244,10 +244,11 @@ class TemplateService extends BaseService
                         'model_id' => $model->id,
                         'collection_name' => 'templates',
                     ]);
+                dd($model,$media);
+
                 $this->imageService->processUploaded($validatedData['template_image_front_id'] ?? $validatedData['template_image_none_id']);
 
             }
-            dd($model);
             if (isset($validatedData['template_image_back_id'])) {
 
                 Media::whereKey($validatedData['template_image_back_id'])
