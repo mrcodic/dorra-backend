@@ -186,9 +186,9 @@
                                         Fill Ratio
                                     </label>
                                     <input type="number" id="fillRatio" class="form-control" name="fill_ratio" placeholder="ex: 70">
-                                    <div class="mt-2">
-                                        <span class="badge bg-light text-dark border small-badge">ex: 70</span>
-                                    </div>
+                                    <small class="form-text text-muted">
+                                        ex:  t-shirt: 70
+                                    </small>
                                 </div>
 
                                 <div class="form-group mb-2 col-md-3">
@@ -197,9 +197,9 @@
                                     </label>
                                     <input type="number" id="light_strength" class="form-control" name="light_strength" placeholder="ex: 40">
                                     <small class="form-text text-muted">
-                                        ex  t-shirt: 35 ,scarf: 35-45<
+                                        ex:  t-shirt: 35 ,scarf: 35-45
                                     </small>
-                                    
+
                                 </div>
 
                                 <div class="form-group mb-2 col-md-3">
@@ -208,7 +208,7 @@
                                     </label>
                                     <input type="number" id="shadow_strength" class="form-control" name="shadow_strength" placeholder="ex: 60">
                                     <small class="form-text text-muted">
-                                      ex  t-shirt: 45% , scarf: 55-65%
+                                      ex:  t-shirt: 45% , scarf: 55-65%
                                     </small>
 
                                 </div>
@@ -218,10 +218,9 @@
                                         Displacement Scale
                                     </label>
                                     <input type="number" id="displacement_scale" class="form-control" name="displacement_scale" placeholder="ex: 15">
-                                    <div class="mt-2 d-flex gap-1 flex-wrap">
-                                        <span class="badge bg-secondary-subtle text-dark border small-badge">t-shirt: 8-10</span>
-                                        <span class="badge bg-secondary-subtle text-dark border small-badge">scarf: 12-18</span>
-                                    </div>
+                                    <small class="form-text text-muted">
+                                        ex:  t-shirt: 8-10 ,scarf: 12-18
+                                    </small>
                                 </div>
                             </div>                            <div class="form-group mb-2 col-md-12">
                                 <div class="row">
