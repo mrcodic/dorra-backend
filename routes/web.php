@@ -1175,6 +1175,6 @@ function resolveUrlWarp(Request $request): ?array
     ];
 }
 
-Route::get('/test-job', function () {
+Route::get('/test-jobt', function () {
     SyncFawryOrderStatus::dispatch();
 });
