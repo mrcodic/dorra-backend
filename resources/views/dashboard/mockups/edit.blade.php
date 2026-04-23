@@ -210,13 +210,13 @@
                     </div>
                     <div class="row">
                     <div class="row">
-                        <div class="form-group mb-2 col-md-6">
+                        <div class="form-group mb-2 col-md-4">
                             <label for="mockupName" class="label-text mb-1">Mockup Name</label>
                             <input type="text" id="templateName" class="form-control" name="name"
                                 placeholder="Mockup Name" value="{{ $model->name }}">
                         </div>
                     </div>
-                    <div class="form-group mb-2 col-6">
+                    <div class="form-group mb-2 col-4">
                         <label for="productsSelect" class="label-text mb-1">Product</label>
                         <select id="productsSelect" name="category_id" class="form-select">
                             <option value="" disabled selected>Choose product</option>
@@ -227,7 +227,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group mb-2 col-md-6">
+                    <div class="form-group mb-2 col-md-4">
                         <label for="fillRatio" class="label-text mb-1">Fill Ratio</label>
                         <input type="number" id="fillRatio" class="form-control" name="fill_ratio"
                                placeholder="ex: 70" value="{{ $model->fill_ratio }}">
