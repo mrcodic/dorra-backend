@@ -217,40 +217,13 @@ class AuthService
     {
         $user = $request->user();
         $user->currentAccessToken()->delete();
-
-        $guest = $this->guestRepository->query()
-            ->whereHas('carts', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })
-            ->orWhereHas('designs', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })
-            ->orWhereHas('addresses', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })
-            ->first();
-
-        if ($guest) {
-            $this->designRepository->query()
-                ->where('user_id', $user->id)
-                ->update(['guest_id' => null]);
-
-            $this->shippingAddressRepository->query()
-                ->where('user_id', $user->id)
-                ->update(['guest_id' => null]);
-
-            $this->cartRepository->query()
-                ->where('user_id', $user->id)
-                ->update(['guest_id' => null]);
-
-            $guest->delete();
-        }
+        // ✅ No guest cleanup — items stay linked to user
     }
 
 
     private function migrateGuestDataToUser(User $user, $cookieGoogle = null): void
     {
-        $cookieValue = request()->cookie('cookie_id') ?: $cookieGoogle;
+        $cookieValue = request()->cookie('dorra_auth_cookie_id') ?: $cookieGoogle;
 
         $guest = $this->guestRepository->query()
             ->where('cookie_value', $cookieValue)
@@ -266,10 +239,11 @@ class AuthService
                 ->where('model_id', $guest->id)
                 ->where('collection_name', 'guest_assets')
                 ->update([
-                    'model_type' => get_class($user),
-                    'model_id'   => $user->id,
+                    'model_type'      => get_class($user),
+                    'model_id'        => $user->id,
                     'collection_name' => 'sanctum_assets',
                 ]);
+
             $guestCart      = $guest->cart()->first();
             $guestCartItems = $guestCart
                 ? $guestCart->items()->with(['specs'])->get()
@@ -278,41 +252,39 @@ class AuthService
             if ($user->cart) {
                 $userCart = $user->cart;
                 collect($guestCartItems)->each(function ($gItem) use ($userCart) {
-                    $newItem = $gItem->replicate();
+                    $newItem          = $gItem->replicate();
                     $newItem->cart_id = $userCart->id;
                     $newItem->save();
 
                     collect($gItem->specs)->each(function ($spec) use ($newItem) {
-                        $newSpec = $spec->replicate();
+                        $newSpec               = $spec->replicate();
                         $newSpec->cart_item_id = $newItem->id;
                         $newSpec->save();
                     });
                 });
-
 
                 if ($guestCart) {
                     $guestCart->items()->delete();
                     $guestCart->delete();
                 }
             } else {
-
                 $this->cartRepository->query()
                     ->whereNull('user_id')
                     ->where('guest_id', $guest->id)
-                    ->update(['user_id' => $user->id]);
+                    ->update(['user_id' => $user->id]); // ✅ user_id set, guest_id stays
             }
-
 
             $this->designRepository->query()
                 ->whereNull('user_id')
                 ->where('guest_id', $guest->id)
-                ->update(['user_id' => $user->id]);
-
+                ->update(['user_id' => $user->id]); // ✅ same — guest_id stays
 
             $this->shippingAddressRepository->query()
                 ->whereNull('user_id')
                 ->where('guest_id', $guest->id)
-                ->update(['user_id' => $user->id]);
+                ->update(['user_id' => $user->id]); // ✅ same
+
+            // ✅ Don't delete the guest — next login with same cookie re-uses it
         });
     }
 }

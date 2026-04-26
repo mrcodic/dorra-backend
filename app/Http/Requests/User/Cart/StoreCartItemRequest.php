@@ -127,6 +127,7 @@ class StoreCartItemRequest extends BaseRequest
                 'exists:product_specification_options,id',
             ],
             'color' => ['nullable', 'string'],
+
         ];
     }
 
