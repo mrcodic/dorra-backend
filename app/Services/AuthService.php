@@ -147,7 +147,7 @@ class AuthService
                 $this->migrateGuestDataToUser($user, $cookieValue);
             }
 
-//            session()->forget('oauth_nonce');
+            session()->forget('oauth_nonce');
 
             return [
                 'user' => $user,
@@ -235,7 +235,7 @@ class AuthService
 
     private function migrateGuestDataToUser(User $user, $cookieGoogle = null): void
     {
-        $cookieValue = request()->cookie('cookie_id') ?: $cookieGoogle;
+        $cookieValue =  $cookieGoogle;
 
         $guest = $this->guestRepository->query()
             ->where('cookie_value', $cookieValue)
