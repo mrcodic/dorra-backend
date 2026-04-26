@@ -91,8 +91,6 @@ class AuthService
             ->redirect();
     }
 
-
-
     public function handleGoogleCallback(): array|false
     {
         try {
@@ -235,7 +233,7 @@ class AuthService
 
     private function migrateGuestDataToUser(User $user, $cookieGoogle = null): void
     {
-        $cookieValue =  $cookieGoogle;
+        $cookieValue = request()->cookie('cookie_id') ?? ($cookieGoogle ?? null);
 
         $guest = $this->guestRepository->query()
             ->where('cookie_value', $cookieValue)
