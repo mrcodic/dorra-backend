@@ -75,7 +75,7 @@ class AuthService
             value: $cookieId,
             minutes: 60 * 24 * 30,
             path: '/',
-            domain: "dorraprint.com",
+            domain: config('session.domain'),
             secure: true,
             httpOnly: false,
             sameSite: 'None'
@@ -237,6 +237,11 @@ class AuthService
                 $guest->delete();
             }
         }
+        Cookie::queue(Cookie::forget(
+            name:   'dorra_auth_cookie_id',
+            path:   '/',
+            domain: config('session.domain'),   
+        ));
     }
 
 
