@@ -223,7 +223,7 @@ class AuthService
 
     private function migrateGuestDataToUser(User $user, $cookieGoogle = null): void
     {
-        $cookieValue = request()->cookie('dorra_auth_cookie_id') ?: $cookieGoogle;
+        $cookieValue = request()->cookie('cookie_id') ?: request()->cookie('dorra_auth_cookie_id') ?: $cookieGoogle;
 
         $guest = $this->guestRepository->query()
             ->where('cookie_value', $cookieValue)
