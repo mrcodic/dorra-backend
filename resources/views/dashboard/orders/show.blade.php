@@ -1,4 +1,3 @@
-@php use Illuminate\Support\Str; @endphp
 @extends('layouts/contentLayoutMaster')
 @section('title', 'Show Order')
 @section('main-page', 'Orders')
@@ -133,7 +132,9 @@
 
                     @foreach ($model->orderItems as $orderItem)
                         @php
-                            $isDesign    = $orderItem->itemable && get_class($orderItem->itemable) === \App\Models\Design::class;
+                            $product = $orderItem->itemable;
+
+                                 $isDesign    = $orderItem->itemable && get_class($orderItem->itemable) === \App\Models\Design::class;
                        $isTemplate  = $orderItem->itemable && get_class($orderItem->itemable) === \App\Models\Template::class;
                        $isDownload  = $orderItem->type === \App\Enums\Item\TypeEnum::DOWNLOAD;
 
@@ -151,8 +152,6 @@
                                    Str::plural(Str::lower(class_basename($orderItem->itemable)))
                                ),
                        };
-
-
                         @endphp
 
                         <div class="mb-1 border rounded p-1">
