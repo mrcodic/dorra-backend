@@ -233,7 +233,7 @@ class AuthService
 
     private function migrateGuestDataToUser(User $user, $cookieGoogle = null): void
     {
-        dd($cookieGoogle);
+        dd($cookieGoogle,request()->cookie('cookie_id'));
         $cookieValue = request()->cookie('cookie_id') ?? ($cookieGoogle ?? null);
 
         $guest = $this->guestRepository->query()
