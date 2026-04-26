@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\Notifications\UserRegistered;
 use App\Repositories\Implementations\SocialAccountRepository;
 use App\Repositories\Interfaces\AdminRepositoryInterface;
 use App\Repositories\Interfaces\CartRepositoryInterface;
@@ -19,9 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -68,7 +65,7 @@ class AuthService
 
     public function redirectToGoogle(Request $request)
     {
-        $cookieId = $request->cookie('dorra_auth_cookie_id');
+        $cookieId = $request->cookie('dorra_auth_cookie_id') ?? (string) Str::uuid();
 
         Cookie::queue(cookie(
             name: 'dorra_auth_cookie_id',
@@ -80,6 +77,8 @@ class AuthService
             httpOnly: false,
             sameSite: 'None'
         ));
+
+
         $url = $request->query('url', 'Home');
         $nonce = Str::random(32);
         session(['oauth_nonce' => $nonce]);
@@ -101,6 +100,8 @@ class AuthService
             ->with(['state' => $state])
             ->redirect();
     }
+
+
 
     public function handleGoogleCallback(): array|false
     {
@@ -143,6 +144,7 @@ class AuthService
 
             $state = $this->decodeState(request('state'));
 
+
             $expectedNonce = session('oauth_nonce');
             if ($state && !empty($state['nonce']) && $expectedNonce && $state['nonce'] !== $expectedNonce) {
                 throw new \RuntimeException('Invalid oauth state nonce');
@@ -150,7 +152,8 @@ class AuthService
 
 
             $redirectUrl = $state['url'] == 'Home' ? config('services.site_url').$state['url'] : $state['url'];
-            $cookieValue = request()->cookie('dorra_auth_cookie_id') ?? ($state['cid'] ?? null);
+            $cookieValue = request()->cookie('cookie_id') ?? ($state['cid'] ?? null);
+
             if ($cookieValue) {
                 $this->migrateGuestDataToUser($user, $cookieValue);
             }
@@ -213,11 +216,7 @@ class AuthService
     public function logout($request)
     {
         $user = $request->user();
-        $cookieValue = request()->cookie('cookie_id') ?: request()->cookie('dorra_auth_cookie_id');
-        Log::info("cookie", [
-            "user_id" => $user->id,
-            "cookie_value" => $cookieValue,
-        ]);
+        $cookieValue = request()->cookie('cookie_id');
         $user->currentAccessToken()->delete();
 
         if ($cookieValue) {
@@ -241,22 +240,18 @@ class AuthService
                 $guest->delete();
             }
         }
-        Cookie::queue(Cookie::forget(
-            name:   'dorra_auth_cookie_id',
-            path:   '/',
-            domain: config('session.domain'),
-        ));
     }
 
 
 
     private function migrateGuestDataToUser(User $user, $cookieGoogle = null): void
     {
-        $cookieValue = request()->cookie('cookie_id') ?: request()->cookie('dorra_auth_cookie_id') ?: ($cookieGoogle ?? null);
+        $cookieValue = request()->cookie('cookie_id') ?: $cookieGoogle;
 
         $guest = $this->guestRepository->query()
             ->where('cookie_value', $cookieValue)
             ->first();
+
         if (!$guest) {
             return;
         }
