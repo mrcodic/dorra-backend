@@ -291,10 +291,7 @@ class AuthService
                 });
 
 
-                if ($guestCart) {
-                    $guestCart->items()->delete();
-                    $guestCart->delete();
-                }
+
             } else {
 
                 $this->cartRepository->query()
@@ -303,7 +300,10 @@ class AuthService
                     ->update(['user_id' => $user->id]);
             }
 
-
+            if ($guestCart) {
+                $guestCart->items()->delete();
+                $guestCart->delete();
+            }
             $this->designRepository->query()
                 ->whereNull('user_id')
                 ->where('guest_id', $guest->id)
