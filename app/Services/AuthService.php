@@ -66,7 +66,7 @@ class AuthService
     public function redirectToGoogle(Request $request)
     {
         $cookieId = $request->cookie('cookie_id') ?: $request->cookie('dorra_auth_cookie_id') ?: (string) Str::uuid();
-        dd($cookieId);
+        dd($request->cookie('cookie_id'),$request->cookie('dorra_auth_cookie_id'));
 
         Cookie::queue(cookie(
             name: 'dorra_auth_cookie_id',
