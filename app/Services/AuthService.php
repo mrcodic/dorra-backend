@@ -150,7 +150,7 @@ class AuthService
 
 
             $redirectUrl = $state['url'] == 'Home' ? config('services.site_url').$state['url'] : $state['url'];
-            $cookieValue = request()->cookie('cookie_id') ?? ($state['cid'] ?? null);
+            $cookieValue = request()->cookie('cookie_id') ?: ($state['cid'] ?? null);
             if ($cookieValue) {
                 $this->migrateGuestDataToUser($user, $cookieValue);
             }
@@ -213,7 +213,7 @@ class AuthService
     public function logout($request)
     {
         $user = $request->user();
-        $cookieValue = request()->cookie('cookie_id');
+        $cookieValue = request()->cookie('cookie_id') ?: request()->cookie('dorra_auth_cookie_id');
         $user->currentAccessToken()->delete();
 
         if ($cookieValue) {
