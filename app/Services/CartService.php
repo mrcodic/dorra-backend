@@ -46,6 +46,7 @@ class CartService extends BaseService
     {
         return $this->handleTransaction(function () use ($request, $relationsToStore, $relationsToLoad) {
             $validatedData = $request->validated();
+            dd($validatedData);
             $userId = getAuthOrGuest() instanceof User ? getAuthOrGuest()->id : null;
             $guestId = getAuthOrGuest() instanceof Guest ? getAuthOrGuest()->id : null;
 
