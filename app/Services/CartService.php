@@ -46,7 +46,6 @@ class CartService extends BaseService
     {
         return $this->handleTransaction(function () use ($request, $relationsToStore, $relationsToLoad) {
             $validatedData = $request->validated();
-            dd($validatedData);
             $userId = getAuthOrGuest() instanceof User ? getAuthOrGuest()->id : null;
             $guestId = getAuthOrGuest() instanceof Guest ? getAuthOrGuest()->id : null;
 
@@ -107,12 +106,11 @@ class CartService extends BaseService
                     $design ?? $template,
                     subTotal: $design?->price ?? $template?->price,
                     type: \App\Enums\Item\TypeEnum::tryFrom($request->type),
-                    color: $request->color,
+                    color: $validatedData['color'] ?? null,
                 );
 
             }
             if ($template) {
-                dd($request->color);
                 $categoryId = $product->category_id ?? $product->id;
                 $media = Media::query()
                     ->where('model_type', Mockup::class)
