@@ -131,7 +131,7 @@ class AuthService
             $user->token = $plainTextToken;
 
             $state = $this->decodeState(request('state'));
-
+dd($state);
 
             $expectedNonce = session('oauth_nonce');
             if ($state && !empty($state['nonce']) && $expectedNonce && $state['nonce'] !== $expectedNonce) {
@@ -233,7 +233,6 @@ class AuthService
 
     private function migrateGuestDataToUser(User $user, $cookieGoogle = null): void
     {
-        dd($cookieGoogle,request()->cookie('cookie_id'));
         $cookieValue = request()->cookie('cookie_id') ?? ($cookieGoogle ?? null);
 
         $guest = $this->guestRepository->query()
