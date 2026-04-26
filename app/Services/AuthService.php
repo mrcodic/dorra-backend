@@ -216,32 +216,36 @@ class AuthService
     public function logout($request)
     {
         $user = $request->user();
-        $cookieValue = request()->cookie('cookie_id');
         $user->currentAccessToken()->delete();
 
-        if ($cookieValue) {
-            $guest = $this->guestRepository->query()
-                ->where('cookie_value', $cookieValue)
-                ->first();
+        $guest = $this->guestRepository->query()
+            ->whereHas('carts', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->orWhereHas('designs', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->orWhereHas('shippingAddresses', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->first();
 
-            if ($guest) {
-                $this->designRepository->query()
-                    ->where('user_id', $user->id)
-                    ->update(['guest_id' => null]);
+        if ($guest) {
+            $this->designRepository->query()
+                ->where('user_id', $user->id)
+                ->update(['guest_id' => null]);
 
-                $this->shippingAddressRepository->query()
-                    ->where('user_id', $user->id)
-                    ->update(['guest_id' => null]);
+            $this->shippingAddressRepository->query()
+                ->where('user_id', $user->id)
+                ->update(['guest_id' => null]);
 
-                $this->cartRepository->query()
-                    ->where('user_id', $user->id)
-                    ->update(['guest_id' => null]);
+            $this->cartRepository->query()
+                ->where('user_id', $user->id)
+                ->update(['guest_id' => null]);
 
-                $guest->delete();
-            }
+            $guest->delete();
         }
     }
-
 
 
     private function migrateGuestDataToUser(User $user, $cookieGoogle = null): void
