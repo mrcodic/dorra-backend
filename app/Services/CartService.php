@@ -111,6 +111,7 @@ class CartService extends BaseService
 
             }
             if ($template) {
+                dd($request->color);
                 $categoryId = $product->category_id ?? $product->id;
                 $media = Media::query()
                     ->where('model_type', Mockup::class)
