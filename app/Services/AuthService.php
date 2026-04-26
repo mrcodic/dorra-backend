@@ -214,6 +214,7 @@ class AuthService
     {
         $user = $request->user();
         $cookieValue = request()->cookie('cookie_id') ?: request()->cookie('dorra_auth_cookie_id');
+        Log::info("cookie", $cookieValue);
         $user->currentAccessToken()->delete();
 
         if ($cookieValue) {
@@ -240,7 +241,7 @@ class AuthService
         Cookie::queue(Cookie::forget(
             name:   'dorra_auth_cookie_id',
             path:   '/',
-            domain: config('session.domain'),   
+            domain: config('session.domain'),
         ));
     }
 
