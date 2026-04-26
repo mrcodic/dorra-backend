@@ -725,7 +725,7 @@ class OrderService extends BaseService
 
     private function copyMockupMediaToOrderItems($cart, $order): void
     {
-        foreach ($order->items as $orderItem) {
+        foreach ($order->orderItems as $orderItem) {
 
             $media = Media::query()
                 ->where('model_type', Mockup::class)
