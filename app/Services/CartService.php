@@ -16,7 +16,7 @@ use App\Repositories\Interfaces\{CartItemRepositoryInterface,
     ProductSpecificationRepositoryInterface
 };
 use App\Rules\ValidDiscountCode;
-use Illuminate\Support\{Facades\Response, Arr};
+use Illuminate\Support\{Facades\Log, Facades\Response, Arr};
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -117,7 +117,7 @@ class CartService extends BaseService
                     ->where('custom_properties->template_id', (string) $template->id)
                     ->where('custom_properties->category_id', (int) $categoryId)
                     ->first();
-
+Log::info("media",["media"=> $media->id,"category"=> $categoryId,'template'=> $template->id]);
                 if ($media) {
                     $media->setCustomProperty('cart_item_id', $cartItem->id);
                     $media->setCustomProperty('cart_id', $cart->id);
