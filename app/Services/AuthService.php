@@ -151,7 +151,7 @@ class AuthService
 
 
             $redirectUrl = $state['url'] == 'Home' ? config('services.site_url').$state['url'] : $state['url'];
-            dd(request()->cookie('cookie_id'));
+//            dd(request()->cookie('cookie_id'));
             $cookieValue = request()->cookie('cookie_id') ?? ($state['cid'] ?? null);
 
             if ($cookieValue) {
