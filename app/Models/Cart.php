@@ -56,7 +56,6 @@ class Cart extends Model
                             $productPriceId=null, $subTotal=null, $cartable_id=null, $cartable_type=null,
                             $color=null): CartItem
     {
-        dd($color);
         return $this->items()->updateOrCreate([
             'itemable_id' => $itemable->id,
             'itemable_type' => get_class($itemable),
@@ -67,7 +66,7 @@ class Cart extends Model
             'specs_price' => $specsSum ?? 0,
             'product_price' => $productPrice ??0,
             'quantity' => $quantity ?? 1,
-            'color' => $color,
+            'color' => $color ?? request()->color,
             'type' => $type,
         ]);
     }
