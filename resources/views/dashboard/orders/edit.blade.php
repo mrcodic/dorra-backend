@@ -186,28 +186,36 @@
                     <h5 class="fw-bold mt-3 mb-1 fs-16 text-black">Items</h5>
                     @foreach ($model->orderItems as $orderItem)
                         @php
-                            $product = $orderItem->itemable;
+                            $isDesign    = $orderItem->itemable && get_class($orderItem->itemable) === \App\Models\Design::class;
+                        $isTemplate  = $orderItem->itemable && get_class($orderItem->itemable) === \App\Models\Template::class;
+                        $isDownload  = $orderItem->type === \App\Enums\Item\TypeEnum::DOWNLOAD;
 
-                            $isDesign = $orderItem->itemable && get_class($orderItem->itemable) == \App\Models\Design::class;
-                            $isDownload = $orderItem->type == \App\Enums\Item\TypeEnum::DOWNLOAD;
+                        $previewImage = match(true) {
+                        $isDesign && $orderItem->itemable->linked_to_mockup =>
+                           $orderItem->itemable->getFirstMediaUrl('front-mockup-designs')
+                           ?: $orderItem->itemable->getFirstMediaUrl('none-mockup-designs'),
 
-                            $previewImage =
-                                $isDesign && $orderItem->itemable->linked_to_mockup
-                                    ? ($orderItem->itemable->getFirstMediaUrl('front-mockup-designs') ?: $orderItem->itemable->getFirstMediaUrl('none-mockup-designs'))
-                                    : $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($orderItem->itemable))));
+                        $isTemplate =>
+                           $orderItem->getFirstMediaUrl('order_item_mockups')
+                           ?: $orderItem->itemable?->getFirstMediaUrl('templates-preview'),
 
+                        default =>
+                           $orderItem->itemable?->getFirstMediaUrl(
+                               Str::plural(Str::lower(class_basename($orderItem->itemable)))
+                           ),
+                        };
 
-                            $designDownloadUrl = null;
+                    $designDownloadUrl = null;
 
-                            if ($isDesign) {
-                                $designDownloadUrl =
-                                    $orderItem->itemable->getFirstMediaUrl('designs')
-                                    ?: $orderItem->itemable->getFirstMediaUrl('back_designs');
-                            }else{
-                                 $designDownloadUrl =
-                                    $orderItem->itemable->getFirstMediaUrl('templates')
-                                    ?: $orderItem->itemable->getFirstMediaUrl('back_templates');
-                            }
+                    if ($isDesign) {
+                        $designDownloadUrl =
+                            $orderItem->itemable->getFirstMediaUrl('designs')
+                            ?: $orderItem->itemable->getFirstMediaUrl('back_designs');
+                    }else{
+                         $designDownloadUrl =
+                            $orderItem->itemable->getFirstMediaUrl('templates')
+                            ?: $orderItem->itemable->getFirstMediaUrl('back_templates');
+                    }
                         @endphp
 
                         <div class="mb-1 border rounded p-1">

@@ -1,3 +1,4 @@
+@php use Illuminate\Support\Str; @endphp
 @extends('layouts/contentLayoutMaster')
 @section('title', 'Show Order')
 @section('main-page', 'Orders')
@@ -132,17 +133,26 @@
 
                     @foreach ($model->orderItems as $orderItem)
                         @php
-                            $product = $orderItem->itemable;
+                            $isDesign    = $orderItem->itemable && get_class($orderItem->itemable) === \App\Models\Design::class;
+                       $isTemplate  = $orderItem->itemable && get_class($orderItem->itemable) === \App\Models\Template::class;
+                       $isDownload  = $orderItem->type === \App\Enums\Item\TypeEnum::DOWNLOAD;
 
-                            $isDesign = $orderItem->itemable && get_class($orderItem->itemable) == \App\Models\Design::class;
-                            $isDownload = $orderItem->type == \App\Enums\Item\TypeEnum::DOWNLOAD;
+                       $previewImage = match(true) {
+                           $isDesign && $orderItem->itemable->linked_to_mockup =>
+                               $orderItem->itemable->getFirstMediaUrl('front-mockup-designs')
+                               ?: $orderItem->itemable->getFirstMediaUrl('none-mockup-designs'),
 
-                            $previewImage =
-                                $isDesign && $orderItem->itemable->linked_to_mockup
-                                    ? ($orderItem->itemable->getFirstMediaUrl('front-mockup-designs') ?: $orderItem->itemable->getFirstMediaUrl('none-mockup-designs'))
-                                    : $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($orderItem->itemable))));
+                           $isTemplate =>
+                               $orderItem->getFirstMediaUrl('order_item_mockups')
+                               ?: $orderItem->itemable?->getFirstMediaUrl('templates-preview'),
 
-                            
+                           default =>
+                               $orderItem->itemable?->getFirstMediaUrl(
+                                   Str::plural(Str::lower(class_basename($orderItem->itemable)))
+                               ),
+                       };
+
+
                         @endphp
 
                         <div class="mb-1 border rounded p-1">
