@@ -106,6 +106,7 @@ class CartService extends BaseService
                     $design ?? $template,
                     subTotal: $design?->price ?? $template?->price,
                     type: \App\Enums\Item\TypeEnum::tryFrom($request->type),
+                    color: $request->color,
                 );
 
             }
@@ -113,11 +114,11 @@ class CartService extends BaseService
                 $categoryId = $product->category_id ?? $product->id;
                 $media = Media::query()
                     ->where('model_type', Mockup::class)
+                    ->where('model_id', $request->mockup_id)
                     ->where('collection_name', 'generated_mockups')
                     ->where('custom_properties->template_id', (string) $template->id)
                     ->where('custom_properties->category_id', (int) $categoryId)
                     ->first();
-Log::info("media",["media"=> $media->id,"category"=> $categoryId,'template'=> $template->id]);
                 if ($media) {
                     $media->setCustomProperty('cart_item_id', $cartItem->id);
                     $media->setCustomProperty('cart_id', $cart->id);
