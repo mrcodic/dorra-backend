@@ -301,10 +301,6 @@ class AuthService
                     ->whereNull('user_id')
                     ->where('guest_id', $guest->id)
                     ->update(['user_id' => $user->id]);
-                if ($guestCart) {
-                    $guestCart->items()->delete();
-                    $guestCart->delete();
-                }
             }
 
 
