@@ -68,7 +68,18 @@ class AuthService
 
     public function redirectToGoogle(Request $request)
     {
-        $cookieId = $request->cookie('dorra_auth_cookie_id') ;
+        $cookieId = $request->cookie('cookie_id') ;
+        dd($cookieId);
+        Cookie::queue(cookie(
+            name: 'dorra_auth_cookie_id',
+            value: $cookieId,
+            minutes: 60 * 24 * 30,
+            path: '/',
+            domain: config('session.domain'),
+            secure: true,
+            httpOnly: false,
+            sameSite: 'None'
+        ));
         $url = $request->query('url', 'Home');
         $nonce = Str::random(32);
         session(['oauth_nonce' => $nonce]);
