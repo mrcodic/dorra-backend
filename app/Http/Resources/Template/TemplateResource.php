@@ -77,15 +77,15 @@ class TemplateResource extends JsonResource
                 ->where('custom_properties->category_id', (int)(request('product_without_category_id') ?? $categoryId))
                 ->first()
                 ?->getUrl() ?: $this->getFirstMediaUrl('template_model_image'),
-//            'mockup_template_image' =>
-//                \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
-//                    ->where('model_type', \App\Models\Mockup::class)
-//                    ->where('collection_name', 'generated_mockups')
-//                    ->where('custom_properties->template_id', (string) $this->id)
-//                    ->where('custom_properties->cart_item_id', $this->additional['cart_item_id'] ?? null)
-//                    ->where('custom_properties->category_id', (int)$this->additional['category_id']?? null)
-//                    ->first()
-//                    ?->getUrl(),
+            'mockup_template_image' =>
+                \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
+                    ->where('model_type', \App\Models\Mockup::class)
+                    ->where('collection_name', 'generated_mockups')
+                    ->where('custom_properties->template_id', (string) $this->id)
+                    ->where('custom_properties->cart_item_id', $this->additional['cart_item_id'] ?? null)
+                    ->where('custom_properties->category_id', (int)$this->additional['category_id']?? null)
+                    ->first()
+                    ?->getUrl(),
             'orientation' => [
                 'value' => $this->orientation?->value,
                 'label' => $this->orientation?->label(),
