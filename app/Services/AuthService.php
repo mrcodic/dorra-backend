@@ -225,7 +225,7 @@ class AuthService
             ->orWhereHas('designs', function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             })
-            ->orWhereHas('shippingAddresses', function ($q) use ($user) {
+            ->orWhereHas('addresses', function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             })
             ->first();
