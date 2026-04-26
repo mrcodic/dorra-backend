@@ -83,7 +83,7 @@ class TemplateResource extends JsonResource
                     ->where('collection_name', 'generated_mockups')
                     ->where('custom_properties->template_id', (string) $this->id)
                     ->where('custom_properties->cart_item_id', $this->additional['cart_item_id'] ?? null)
-                    ->where('custom_properties->category_id', (int)(request('product_without_category_id') ?? $categoryId))
+                    ->where('custom_properties->category_id', (int)$this->additional['category_id'])
                     ->first()
                     ?->getUrl(),
             'orientation' => [
