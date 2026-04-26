@@ -131,7 +131,6 @@ class AuthService
             $user->token = $plainTextToken;
 
             $state = $this->decodeState(request('state'));
-dd($state);
 
             $expectedNonce = session('oauth_nonce');
             if ($state && !empty($state['nonce']) && $expectedNonce && $state['nonce'] !== $expectedNonce) {
