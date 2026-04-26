@@ -214,7 +214,10 @@ class AuthService
     {
         $user = $request->user();
         $cookieValue = request()->cookie('cookie_id') ?: request()->cookie('dorra_auth_cookie_id');
-        Log::info("cookie", "$cookieValue");
+        Log::info("cookie", [
+            "user_id" => $user->id,
+            "cookie_value" => $cookieValue,
+        ]);
         $user->currentAccessToken()->delete();
 
         if ($cookieValue) {
