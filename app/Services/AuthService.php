@@ -69,7 +69,7 @@ class AuthService
     public function redirectToGoogle(Request $request)
     {
 
-        $cookieId = $request->cookie('cookie_id') ?? (string) Str::uuid();
+        $cookieId = $request->cookie('cookie_id') ?? $request->cookie('dorra_auth_cookie_id') ?? (string) Str::uuid();
         $url = $request->query('url', 'Home');
         $nonce = Str::random(32);
         session(['oauth_nonce' => $nonce]);
@@ -143,7 +143,9 @@ class AuthService
 
 
             $redirectUrl = $state['url'] == 'Home' ? config('services.site_url').$state['url'] : $state['url'];
-            $cookieValue = request()->cookie('cookie_id') ?? ($state['cid'] ?? null);
+            $cookieValue = request()->cookie('cookie_id') ??
+                 request()->cookie('dorra_auth_cookie_id') ??
+                ($state['cid'] ?? null);
             if ($cookieValue) {
                 $this->migrateGuestDataToUser($user, $cookieValue);
             }
@@ -236,7 +238,6 @@ class AuthService
 
     private function migrateGuestDataToUser(User $user, $cookieGoogle = null): void
     {
-        dd(request()->cookie('cookie_id'),request()->cookie('dorra_auth_cookie_id'));
         $cookieValue = request()->cookie('cookie_id') ?: $cookieGoogle;
 
         $guest = $this->guestRepository->query()
