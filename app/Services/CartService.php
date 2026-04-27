@@ -85,7 +85,7 @@ class CartService extends BaseService
                 );
 
 
-                $priceDetails = $this->calculatePriceDetails($validatedData, $product, $design,$product->base_price);
+                $priceDetails = $this->calculatePriceDetails($validatedData, $product, $design, price: $product->base_price);
 
                 $cartItem = $cart->addItem(
                     $design ?? $template,
@@ -140,8 +140,7 @@ class CartService extends BaseService
             ->map(function ($spec) {
                 return $this->optionRepository->query()->find($spec['option'])?->price ?? 0;
             })->sum();
-        $basePrice = $product->base_price ?? $productPriceValue;
-
+        $basePrice = $productPriceValue ?? $product->base_price;
         $subTotal = $basePrice + $specsSum;
         $calculatePrices = [
             'product_price' => $basePrice,
