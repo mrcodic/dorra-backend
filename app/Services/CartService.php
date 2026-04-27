@@ -140,7 +140,8 @@ class CartService extends BaseService
             ->map(function ($spec) {
                 return $this->optionRepository->query()->find($spec['option'])?->price ?? 0;
             })->sum();
-        $basePrice = $productPriceValue ?? $product->base_price;
+        $basePrice = $product->base_price ?? $productPriceValue;
+
         $subTotal = $basePrice + $specsSum;
         $calculatePrices = [
             'product_price' => $basePrice,
