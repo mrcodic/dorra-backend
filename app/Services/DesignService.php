@@ -108,7 +108,7 @@ class DesignService extends BaseService
         $productPrice = $this->productPriceRepository->query()
             ->find(Arr::get($validatedData, 'product_price_id'));
 
-        if (is_null($productPrice)) {
+        if (is_null($productPrice) || is_null($productPrice->price)) {
             $productId = Arr::get($validatedData, 'product_id');
 
             $product = $validatedData['designable_type'] === 'App\\Models\\Product'
@@ -119,7 +119,7 @@ class DesignService extends BaseService
         $price = $productPrice?->price ?? $product?->base_price;
 
         if (is_null($price)) {
-            throw new \RuntimeException('Could not resolve price: product price and base price are both missing.');
+            throw new \RuntimeException('Cannot resolve price for design.');
         }
 
         $totalPrice += $price;
