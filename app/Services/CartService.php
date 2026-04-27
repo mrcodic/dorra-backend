@@ -85,7 +85,7 @@ class CartService extends BaseService
                 );
 
 
-                $priceDetails = $this->calculatePriceDetails($validatedData, $product, $design, price: $product->base_price);
+                $priceDetails = $this->calculatePriceDetails($validatedData, $product, $design, price: $product?->base_price??$design?->price);
 
                 $cartItem = $cart->addItem(
                     $design ?? $template,
