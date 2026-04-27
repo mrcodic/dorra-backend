@@ -178,25 +178,7 @@ class TemplateController extends DashboardController
     {
         $productId = request()->input('product_without_category_id');
         $templates = $this->templateService->getProductTemplates($productId);
-        if (request()->ajax()) {
-            if (!$productId) {
-                $cacheKey = getOrderStepCacheKey();
-                $stepData = Cache::get($cacheKey, []);
-                $productId = $stepData['product_id'] ?? null;
-            }
-            if (!$productId) {
-                return Response::api(HttpEnum::BAD_REQUEST, errors: ['error' => 'Product not selected.']);
-            }
-            $templates = $this->templateRepository->query()->with(['products'])
-                ->when($productId, function ($query) use ($productId) {
-                    $query->whereHas('products', function ($q) use ($productId) {
-                        $q->where('products.id', $productId);
-                    });
-                })->live()->get();
-            return view('dashboard.orders.steps.step3', compact('templates'))->render();
-        }
-
-            $templateData = TemplateResource::collection($templates)
+        $templateData = TemplateResource::collection($templates)
                 ->additional([
                     'product' => [
                         'name' => $this->productRepositoryInterface->query()->whereKey($productId)?->value('name')
@@ -365,14 +347,14 @@ class TemplateController extends DashboardController
             'positions.*.name' => ['required', 'string', 'max:100',
                 Rule::in($mockup->types->map(fn($type) => $type->value->key())->toArray()),
             ],
-            'positions.*.p1x' => ['required', 'numeric', 'min:0', 'max:100'],
-            'positions.*.p1y' => ['required', 'numeric', 'min:0', 'max:100'],
-            'positions.*.p2x' => ['required', 'numeric', 'min:0', 'max:100'],
-            'positions.*.p2y' => ['required', 'numeric', 'min:0', 'max:100'],
-            'positions.*.p3x' => ['required', 'numeric', 'min:0', 'max:100'],
-            'positions.*.p3y' => ['required', 'numeric', 'min:0', 'max:100'],
-            'positions.*.p4x' => ['required', 'numeric', 'min:0', 'max:100'],
-            'positions.*.p4y' => ['required', 'numeric', 'min:0', 'max:100'],
+            'positions.*.p1x' => ['required', 'numeric'],
+            'positions.*.p1y' => ['required', 'numeric'],
+            'positions.*.p2x' => ['required', 'numeric'],
+            'positions.*.p2y' => ['required', 'numeric'],
+            'positions.*.p3x' => ['required', 'numeric'],
+            'positions.*.p3y' => ['required', 'numeric'],
+            'positions.*.p4x' => ['required', 'numeric'],
+            'positions.*.p4y' => ['required', 'numeric'],
             'colors' => ['required', 'array'],
             'files' => ['required', 'array'],
             'files.*.side' => [

@@ -95,13 +95,25 @@
                     @php
                         $orderItem = $model->orderItem;
                         $itemable = $orderItem?->itemable;
+                        $isDesign    = $itemable && get_class($itemable) === \App\Models\Design::class;
+                $isTemplate  = $itemable && get_class($itemable) === \App\Models\Template::class;
+                $isDownload  = $orderItem->type === \App\Enums\Item\TypeEnum::DOWNLOAD;
 
-                        $isDesign = $itemable && get_class($itemable) === \App\Models\Design::class;
+                $previewImage = match(true) {
+                $isDesign && $itemable->linked_to_mockup =>
+                   $itemable->getFirstMediaUrl('front-mockup-designs')
+                   ?: $itemable->getFirstMediaUrl('none-mockup-designs'),
 
-                        $previewImage =
-                            $isDesign && $itemable->linked_to_mockup
-                                ? ($itemable->getFirstMediaUrl('front-mockup-designs') ?: $itemable->getFirstMediaUrl('none-mockup-designs'))
-                                : $orderItem->orderable?->getMainImageUrl();
+                $isTemplate =>
+                   $orderItem->getFirstMediaUrl('order_item_mockups')
+                   ?: $itemable?->getFirstMediaUrl('templates-preview'),
+
+                default =>
+                   $itemable?->getFirstMediaUrl(
+                       Str::plural(Str::lower(class_basename($itemable)))
+                   ),
+                };
+
                     @endphp
 
                     <img
@@ -218,13 +230,13 @@
                                                 alt="{{ $label }} item photo"
                                             >
 
-                                          <a  href="{{ $downloadUrl }}"
-                                            download
-                                            target="_blank"
-                                            class="btn btn-sm btn-primary mt-2 mb-2"
+                                            <a href="{{ $downloadUrl }}"
+                                               download
+                                               target="_blank"
+                                               class="btn btn-sm btn-primary mt-2 mb-2"
                                             >
-                                            <i data-feather="download" class="me-25"></i>
-                                            Download Design
+                                                <i data-feather="download" class="me-25"></i>
+                                                Download Design
                                             </a>
                                         </div>
                                     @endforeach
@@ -259,7 +271,7 @@
                             <div class="d-flex gap-2 gap-md-4">
                                 <div class="d-flex gap-1 align-items-center">
                                     <p style="color: #424746; margin:0">Priority:</p>
-                                    <span class="rounded-3" @php use App\Enums\JobTicket\PriorityEnum; $bg=match
+                                    <span class="rounded-3" @php use App\Enums\JobTicket\PriorityEnum;use Illuminate\Support\Str; $bg=match
                                     ($model->priority) {
                                     PriorityEnum::STANDARD => '#F8AB1B',
                                     PriorityEnum::RUSH => '#E74943',

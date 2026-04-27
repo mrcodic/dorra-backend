@@ -73,8 +73,28 @@ class Template extends Model implements HasMedia
 
     public function getImageAttribute(): string
     {
-        return $this->approach == 'without_editor' ? $this->getFirstMediaUrl('templates-preview') ?: "" :$this->getFirstMediaUrl('templates');
+        return $this->approach == 'without_editor' ?
+            $this->getFirstMediaUrl('templates-preview') ?:
+                "" :
+            $this->getFirstMediaUrl('templates');
 
+    }
+    public function getPreviewImageUrlForType(string $type): string
+    {
+        $type = strtolower($type);
+        $isWithoutEditor = $this->approach === 'without_editor';
+
+        return match ($type) {
+            'front' => $isWithoutEditor ? $this->getFirstMediaUrl('templates-preview') ?: "" : ($this->getFirstMediaUrl('templates') ?: ""),
+
+            'back' => $this->use_front_as_back
+                ? $this->getImageUrlForType('front')  // reuse front logic
+                : ($isWithoutEditor ? $this->getFirstMediaUrl('back-templates-preview') ?: "" : ($this->getFirstMediaUrl('back_templates') ?: "")),
+
+            'none' => $isWithoutEditor ? $this->getFirstMediaUrl('templates-preview') ?: "" : ($this->getFirstMediaUrl('templates') ?: ""),
+
+            default => ""
+        };
     }
 
     public function scopeLive(Builder $builder): Builder

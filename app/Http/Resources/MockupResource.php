@@ -59,6 +59,10 @@ class MockupResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'fill_ratio' => $this->fill_ratio,
+            'light_strength' => $this->light_strength,
+            'shadow_strength' => $this->shadow_strength,
+            'displacement_scale' => $this->displacement_scale,
             'types' => TypeResource::collection($this->whenLoaded('types')),
             'product' => CategoryResource::make($this->whenLoaded('category')),
             'colors' => $this->templateColors ?: $this->colors,

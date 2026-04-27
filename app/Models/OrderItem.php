@@ -8,9 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class OrderItem extends Model
+class OrderItem extends Model implements HasMedia
 {
+    use InteractsWithMedia;
 
     protected $fillable = [
         'itemable_id',
@@ -29,6 +32,7 @@ class OrderItem extends Model
     protected $casts = [
         'type' => TypeEnum::class
     ];
+
     public function totalPrice(): Attribute
     {
         return Attribute::get(function ($value) {
@@ -41,10 +45,12 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Order::class);
     }
+
     public function jobTickets(): HasMany
     {
         return $this->hasMany(JobTicket::class);
     }
+
     public function orderable(): MorphTo
     {
         return $this->morphTo();
@@ -54,6 +60,7 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
     public function productPrice(): BelongsTo
     {
         return $this->belongsTo(ProductPrice::class);
@@ -66,6 +73,6 @@ class OrderItem extends Model
 
     public function specs(): HasMany
     {
-        return $this->hasMany(OrderItemSpec::class,'order_item_id');
+        return $this->hasMany(OrderItemSpec::class, 'order_item_id');
     }
 }

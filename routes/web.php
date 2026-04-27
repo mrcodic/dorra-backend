@@ -38,13 +38,17 @@ use App\Http\Controllers\Dashboard\{AdminController,
     TemplateController,
     UserController
 };
+use App\Jobs\SyncFawryOrderStatus;
+use App\Models\Order;
 use App\Models\Template;
 use App\Services\Mockup\MockupRenderConfigResolver;
 use App\Services\Mockup\MockupRenderModeResolver;
+use App\Services\Payment\FawryStrategy;
 use App\Http\Controllers\Shared\{CommentController, LibraryAssetController};
 use App\Http\Controllers\Shared\General\MainController;
 use App\Http\Middleware\AutoCheckPermission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use App\Models\Mockup;
 use App\Services\Mockup\MockupRenderer;
@@ -1170,3 +1174,7 @@ function resolveUrlWarp(Request $request): ?array
         'bl' => ['x' => (int) $request->query('blx'), 'y' => (int) $request->query('bly')],
     ];
 }
+
+Route::get('/test-jobt', function () {
+    SyncFawryOrderStatus::dispatch();
+});

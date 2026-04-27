@@ -66,7 +66,7 @@ class Cart extends Model
             'specs_price' => $specsSum ?? 0,
             'product_price' => $productPrice ??0,
             'quantity' => $quantity ?? 1,
-            'color' => $color,
+            'color' => $color ?? request()->color,
             'type' => $type,
         ]);
     }

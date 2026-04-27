@@ -1881,31 +1881,42 @@
         // Listen for change on "Products With Categories"
         // Left: Products With Categories → updates right list, then refresh
         $('#categoriesSelect').on('change', function () {
-            syncSelectedResourcesToHiddenInputs();
             const selectedIds = $(this).val();
-            const prev = $('#productsSelect').val() || [];
-
-            if (selectedIds && selectedIds.length) {
+            const $right = $('#productsSelect');
+            if (selectedIds && selectedIds.length > 0) {
                 $.ajax({
                     url: "{{ route('products.categories') }}",
                     type: "POST",
                     data: {_token: "{{ csrf_token() }}", category_ids: selectedIds},
                     success(response) {
-                        const $right = $('#productsSelect').empty();
-                        (response.data || []).forEach(p => $right.append(new Option(p.name, p.id, false, false)));
-                        $right.val(prev).trigger('change');
-                        refreshSizes(); // 🔔 fetch sizes
+                        const saved = $right.val() || [];
+
+                        // Clear previous options if needed
+                        $right.empty();
+
+                        (response.data || []).forEach(cat => {
+                            const opt = new Option(cat.name, cat.id, false, true);
+                            $(opt).attr('data-has-mockup', cat.has_mockup ? '1' : '0');
+                            $right.append(opt);
+                        });
+
+                        // If you want to preserve previously selected values
+                        // $right.val(saved).trigger('change');
+
+                        $right.trigger('change'); // refresh select2
+                        syncSelectedResourcesToHiddenInputs();
                     },
                     error(xhr) {
                         console.error("Error fetching categories:", xhr.responseText);
-                        // refreshSizes();
+                        syncSelectedResourcesToHiddenInputs();
                     }
                 });
             } else {
-                $('#productsSelect').empty().trigger('change');
-                // refreshSizes();
+                $right.empty().trigger('change');
+                syncSelectedResourcesToHiddenInputs();
             }
         });
+
 
         // Right: categories changed → refresh sizes
         $('#productsSelect').on('change', function () {

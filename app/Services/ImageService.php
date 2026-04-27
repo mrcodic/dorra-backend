@@ -16,7 +16,6 @@ class ImageService
 
         $filePath = Storage::disk($original->disk)
             ->path("{$original->id}/{$original->file_name}");
-
         if (!file_exists($filePath)) {
             throw new \Exception("Media file not found: {$filePath}");
         }
@@ -70,6 +69,7 @@ class ImageService
 
     private function storePreview(Media $original, string $previewCollection): Media
     {
+
         $filePath = Storage::disk($original->disk)
             ->path("{$original->id}/{$original->file_name}");
 
@@ -77,7 +77,19 @@ class ImageService
 
         // Remove metadata only
         $preview->stripImage();
+        $maxDimension = 4000;
+        $width  = $preview->getImageWidth();
+        $height = $preview->getImageHeight();
 
+        if ($width > $maxDimension || $height > $maxDimension) {
+            $preview->resizeImage(
+                $maxDimension,
+                $maxDimension,
+                Imagick::FILTER_LANCZOS,
+                1,
+                true  // fit within box, keep aspect ratio
+            );
+        }
         // ✅ Keep original format — no conversion to JPEG
         $originalFormat = strtolower($preview->getImageFormat()); // e.g. 'png', 'webp'
         $originalMime   = $this->getMimeType($originalFormat);
@@ -143,7 +155,6 @@ class ImageService
         $minQuality = 20;
         $step       = 5;
 
-        // Only set quality-based compression for formats that support it
         $supportsQuality = in_array($format, ['webp', 'jpeg', 'jpg']);
 
         if ($supportsQuality) {
@@ -160,8 +171,32 @@ class ImageService
             }
         }
 
-        // Resize gradually if still too large (works for all formats)
-        while (strlen($imagick->getImageBlob()) > $maxBytes) {
+        // ✅ Smart initial downscale — jump close to target in ONE step
+        $currentBytes = strlen($imagick->getImageBlob());
+
+        if ($currentBytes > $maxBytes) {
+            $scaleFactor = sqrt($maxBytes / $currentBytes); // area-based ratio
+            $scaleFactor = max($scaleFactor, 0.05);         // never below 5% of original
+
+            $newWidth  = (int) round($imagick->getImageWidth()  * $scaleFactor);
+            $newHeight = (int) round($imagick->getImageHeight() * $scaleFactor);
+
+            // Enforce minimum dimensions
+            $newWidth  = max($newWidth,  300);
+            $newHeight = max($newHeight, 300);
+
+            $imagick->resizeImage($newWidth, $newHeight, Imagick::FILTER_LANCZOS, 1, false);
+
+            if ($format === 'png') {
+                $imagick->setImageCompressionQuality(9);
+            }
+        }
+
+        // Fine-tune loop — now only a few iterations needed
+        $maxIterations = 10;
+        $i = 0;
+
+        while (strlen($imagick->getImageBlob()) > $maxBytes && $i++ < $maxIterations) {
             $currentWidth  = $imagick->getImageWidth();
             $currentHeight = $imagick->getImageHeight();
 
@@ -169,14 +204,13 @@ class ImageService
                 break;
             }
 
-            $newWidth  = (int) round($currentWidth * 0.9);
-            $newHeight = (int) round($currentHeight * 0.9);
+            $newWidth  = (int) round($currentWidth  * 0.85);
+            $newHeight = (int) round($currentHeight * 0.85);
 
-            $imagick->resizeImage($newWidth, $newHeight, Imagick::FILTER_LANCZOS, 1, true);
+            $imagick->resizeImage($newWidth, $newHeight, Imagick::FILTER_LANCZOS, 1, false);
 
-            // For PNG reduce compression level instead of quality
             if ($format === 'png') {
-                $imagick->setImageCompressionQuality(9); // max PNG compression
+                $imagick->setImageCompressionQuality(9);
             }
         }
     }

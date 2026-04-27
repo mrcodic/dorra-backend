@@ -16,10 +16,12 @@ use Illuminate\Support\Facades\Log;
 #[AllowDynamicProperties] class FawryStrategy implements PaymentGatewayStrategy
 {
 
-    public function __construct(public PaymentGatewayRepositoryInterface $gatewayRepository, public $gatewayCode)
+    public function __construct(public PaymentGatewayRepositoryInterface $gatewayRepository, public $gatewayCode = 'fawry')
     {
         $this->baseUrl = config('services.fawry.base_url');
         $this->callback = config('services.fawry.redirection_url');
+        $this->merchantCode = config('services.fawry.merchant_code');
+        $this->secureKey = config('services.fawry.secret_key');
         $gateway = $this->gatewayRepository->query()
             ->whereCode($this->gatewayCode)
             ->active()
@@ -182,5 +184,29 @@ use Illuminate\Support\Facades\Log;
     public function refund(string $transactionId): bool
     {
         return true;
+    }
+    public function getStatus(string $referenceNumber): string
+    {
+        $referenceNumber = trim($referenceNumber);
+        try {
+            $signature = hash(
+                'sha256',
+                $this->merchantCode . $referenceNumber . $this->secureKey
+            );
+
+            $response = Http::timeout(30)->get(
+                $this->baseUrl . 'ECommerceWeb/Fawry/payments/status/v2',
+                [
+                    'merchantCode'   => $this->merchantCode,
+                    'merchantRefNumber' => $referenceNumber,
+                    'signature'      => $signature,
+                ]
+            );
+            return $response->json('orderStatus') ?? 'UNKNOWN';
+
+        } catch (\Exception $e) {
+            Log::error('Fawry getStatus failed', ['error' => $e->getMessage()]);
+            return 'ERROR';
+        }
     }
 }

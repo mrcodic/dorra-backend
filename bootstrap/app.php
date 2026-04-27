@@ -2,6 +2,7 @@
 
 use App\Enums\HttpEnum;
 
+use App\Jobs\SyncFawryOrderStatus;
 use App\Models\Cart;
 
 use Illuminate\Auth\Access\AuthorizationException;
@@ -117,7 +118,7 @@ return Application::configure(basePath: dirname(__DIR__))
             ->withoutOverlapping()
             ->appendOutputTo(storage_path('logs/shipping-sync-shipblu.log'));
 
-
+        $schedule->job(SyncFawryOrderStatus::class)->everyFourHours();
         $schedule->call(function () {
             Cart::query()
                 ->where('expires_at', '<', now())

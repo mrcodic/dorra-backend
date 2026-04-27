@@ -9,7 +9,7 @@ use App\Services\BarcodeService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOne};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOne, MorphMany};
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -140,9 +140,9 @@ class Order extends Model
         return $this->hasOne(Invoice::class);
     }
 
-    public function transactions(): HasMany
+    public function transactions(): MorphMany
     {
-        return $this->hasMany(Transaction::class);
+        return $this->morphMany(Transaction::class,'payable');
     }
 
 }

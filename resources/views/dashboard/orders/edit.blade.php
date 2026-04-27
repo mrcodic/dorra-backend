@@ -188,26 +188,36 @@
                         @php
                             $product = $orderItem->itemable;
 
-                            $isDesign = $orderItem->itemable && get_class($orderItem->itemable) == \App\Models\Design::class;
-                            $isDownload = $orderItem->type == \App\Enums\Item\TypeEnum::DOWNLOAD;
+                    $isDesign    = $orderItem->itemable && get_class($orderItem->itemable) === \App\Models\Design::class;
+                $isTemplate  = $orderItem->itemable && get_class($orderItem->itemable) === \App\Models\Template::class;
+                $isDownload  = $orderItem->type === \App\Enums\Item\TypeEnum::DOWNLOAD;
 
-                            $previewImage =
-                                $isDesign && $orderItem->itemable->linked_to_mockup
-                                    ? ($orderItem->itemable->getFirstMediaUrl('front-mockup-designs') ?: $orderItem->itemable->getFirstMediaUrl('none-mockup-designs'))
-                                    : $orderItem->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($orderItem->itemable))));
+                $previewImage = match(true) {
+                $isDesign && $orderItem->itemable->linked_to_mockup =>
+                   $orderItem->itemable->getFirstMediaUrl('front-mockup-designs')
+                   ?: $orderItem->itemable->getFirstMediaUrl('none-mockup-designs'),
 
+                $isTemplate =>
+                   $orderItem->getFirstMediaUrl('order_item_mockups')
+                   ?: $orderItem->itemable?->getFirstMediaUrl('templates-preview'),
 
-                            $designDownloadUrl = null;
+                default =>
+                   $orderItem->itemable?->getFirstMediaUrl(
+                       Str::plural(Str::lower(class_basename($orderItem->itemable)))
+                   ),
+                };
 
-                            if ($isDesign) {
-                                $designDownloadUrl =
-                                    $orderItem->itemable->getFirstMediaUrl('designs')
-                                    ?: $orderItem->itemable->getFirstMediaUrl('back_designs');
-                            }else{
-                                 $designDownloadUrl =
-                                    $orderItem->itemable->getFirstMediaUrl('templates')
-                                    ?: $orderItem->itemable->getFirstMediaUrl('back_templates');
-                            }
+                $designDownloadUrl = null;
+
+                if ($isDesign) {
+                $designDownloadUrl =
+                    $orderItem->itemable->getFirstMediaUrl('designs')
+                    ?: $orderItem->itemable->getFirstMediaUrl('back_designs');
+                }else{
+                 $designDownloadUrl =
+                    $orderItem->itemable->getFirstMediaUrl('templates')
+                    ?: $orderItem->itemable->getFirstMediaUrl('back_templates');
+                }
                         @endphp
 
                         <div class="mb-1 border rounded p-1">

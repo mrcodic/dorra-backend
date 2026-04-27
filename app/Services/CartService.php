@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Enums\DiscountCode\TypeEnum;
-use App\Models\{CartItem, Category, Design, Guest, Product, Template, User};
+use App\Models\{CartItem, Category, Design, Guest, Mockup, Product, Template, User};
 use App\Repositories\Interfaces\{CartItemRepositoryInterface,
     CategoryRepositoryInterface,
     DiscountCodeRepositoryInterface,
@@ -16,10 +16,11 @@ use App\Repositories\Interfaces\{CartItemRepositoryInterface,
     ProductSpecificationRepositoryInterface
 };
 use App\Rules\ValidDiscountCode;
-use Illuminate\Support\{Facades\Response, Arr};
+use Illuminate\Support\{Facades\Log, Facades\Response, Arr};
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 
 class CartService extends BaseService
@@ -62,6 +63,9 @@ class CartService extends BaseService
             }
             $design = $request->getDesign();
             $template = $request->getTemplate();
+            $product = $request->cartable_type === 'App\\Models\\Product'
+                ? $this->productRepository->query()->find($request->cartable_id)
+                : $this->categoryRepository->query()->find($request->cartable_id);
 
             if ($request->type == \App\Enums\Item\TypeEnum::PRINT->value) {
                 if ($request->design_id) {
@@ -69,7 +73,7 @@ class CartService extends BaseService
                     $request->cartable_type = $design->designable_type;
                     $designSpecs = $design->specifications->map(function ($specification) {
                         return [
-                            'id'     => $specification->id,
+                            'id' => $specification->id,
                             'option' => $specification->pivot->option_id,
                         ];
                     })->toArray();
@@ -79,10 +83,6 @@ class CartService extends BaseService
                     $request->cartable_id,
                     $request->cartable_type,
                 );
-
-                $product = $request->cartable_type === 'App\\Models\\Product'
-                    ? $this->productRepository->query()->find($request->cartable_id)
-                    : $this->categoryRepository->query()->find($request->cartable_id);
 
 
                 $priceDetails = $this->calculatePriceDetails($validatedData, $product, $design);
@@ -102,14 +102,30 @@ class CartService extends BaseService
                 $specs = Arr::get($validatedData, 'specs', []);
                 $this->handleSpecs($specs ?: $designSpecs, $cartItem);
             } else {
-                $cart->addItem(
+                $cartItem =  $cart->addItem(
                     $design ?? $template,
                     subTotal: $design?->price ?? $template?->price,
                     type: \App\Enums\Item\TypeEnum::tryFrom($request->type),
+                    color: $validatedData['color'] ?? null,
                 );
 
             }
-
+            if ($template) {
+                $categoryId = $product->category_id ?? $product->id;
+                $media = Media::query()
+                    ->where('model_type', Mockup::class)
+                    ->where('model_id', $request->mockup_id)
+                    ->where('collection_name', 'generated_mockups')
+                    ->where('custom_properties->hex', trim($validatedData['color'],'#'))
+                    ->where('custom_properties->template_id', (string) $template->id)
+                    ->where('custom_properties->category_id', (int) $categoryId)
+                    ->first();
+                if ($media) {
+                    $media->setCustomProperty('cart_item_id', $cartItem->id);
+                    $media->setCustomProperty('cart_id', $cart->id);
+                    $media->save();
+                }
+            }
 
             return $cart;
         });
@@ -280,9 +296,9 @@ class CartService extends BaseService
         }
         $cartables = $items->pluck('cartable.id')->filter()->unique();
         $allSameCartable = $cartables->count() === 1;
-        $cartable = $allSameCartable ? $items->first()->cartable: null;
+        $cartable = $allSameCartable ? $items->first()->cartable : null;
         $request->validate([
-            'code' => ['required', new ValidDiscountCode($cartable,  $cart)],
+            'code' => ['required', new ValidDiscountCode($cartable, $cart)],
         ]);
         $discountCode = $this->discountCodeRepository->query()
             ->whereCode($request->code)
