@@ -104,17 +104,25 @@ class DesignService extends BaseService
                 $this->userRepository->find($validatedData['user_id'])
             );
         }
-        $product =null;
-        $productPrice = $this->productPriceRepository->query()->find(Arr::get($validatedData, 'product_price_id'));
+        $product = null;
+        $productPrice = $this->productPriceRepository->query()
+            ->find(Arr::get($validatedData, 'product_price_id'));
+
         if (is_null($productPrice)) {
             $productId = Arr::get($validatedData, 'product_id');
-            if ($validatedData['designable_type'] == 'App\\Models\\Product') {
-                $product = $this->productRepository->find($productId);
-            } else {
-                $product = $this->categoryRepository->find($productId);
-            }
+
+            $product = $validatedData['designable_type'] === 'App\\Models\\Product'
+                ? $this->productRepository->find($productId)
+                : $this->categoryRepository->find($productId);
         }
-        $totalPrice += $productPrice->price ?? $product?->base_price;
+
+        $price = $productPrice?->price ?? $product?->base_price;
+
+        if (is_null($price)) {
+            throw new \RuntimeException('Could not resolve price: product price and base price are both missing.');
+        }
+
+        $totalPrice += $price;
         if (isset($validatedData['specs'])) {
             $productSpecificationOptionRepository = $this->productSpecificationOptionRepository;
             collect($validatedData['specs'])->each(function ($spec) use ($design, &$totalPrice, $productSpecificationOptionRepository) {
