@@ -85,7 +85,7 @@ class CartService extends BaseService
                 );
 
 
-                $priceDetails = $this->calculatePriceDetails($validatedData, $product, $design, price: $product?->base_price??$design?->price);
+                $priceDetails = $this->calculatePriceDetails($validatedData, $product, $design);
 
                 $cartItem = $cart->addItem(
                     $design ?? $template,
@@ -144,7 +144,7 @@ class CartService extends BaseService
 
         $subTotal = $basePrice + $specsSum;
         $calculatePrices = [
-            'product_price' => $basePrice,
+            'product_price' => $basePrice ?? $design?->price,
             'specs_sum' => $specsSum,
             'sub_total' => $subTotal,
             'product_price_id' => $productPrice?->id,
