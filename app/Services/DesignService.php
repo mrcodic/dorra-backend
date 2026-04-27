@@ -104,16 +104,17 @@ class DesignService extends BaseService
                 $this->userRepository->find($validatedData['user_id'])
             );
         }
+        $product =null;
         $productPrice = $this->productPriceRepository->query()->find(Arr::get($validatedData, 'product_price_id'));
         if (is_null($productPrice)) {
             $productId = Arr::get($validatedData, 'product_id');
             if ($validatedData['designable_type'] == 'App\\Models\\Product') {
-                $productPrice = $this->productRepository->find($productId);
+                $product = $this->productRepository->find($productId);
             } else {
-                $productPrice = $this->categoryRepository->find($productId);
+                $product = $this->categoryRepository->find($productId);
             }
         }
-        $totalPrice += $productPrice->price ?? $productPrice->base_price;
+        $totalPrice += $productPrice->price ?? $product?->base_price;
         if (isset($validatedData['specs'])) {
             $productSpecificationOptionRepository = $this->productSpecificationOptionRepository;
             collect($validatedData['specs'])->each(function ($spec) use ($design, &$totalPrice, $productSpecificationOptionRepository) {
