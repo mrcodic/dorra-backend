@@ -237,6 +237,7 @@ class AuthService
 
     private function migrateGuestDataToUser(User $user, $cookieGoogle = null): void
     {
+        dd(request()->cookie('cookie_id'),request()->cookie('dorra_auth_cookie_id'));
         $cookieValue = request()->cookie('cookie_id') ?: $cookieGoogle;
 
         $guest = $this->guestRepository->query()
