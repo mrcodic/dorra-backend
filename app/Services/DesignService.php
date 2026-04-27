@@ -135,7 +135,7 @@ class DesignService extends BaseService
             });
         }
 
-        $design->update(['total_price' => $totalPrice]);
+        $design->update(['price' =>$price,'total_price' => $totalPrice]);
 
         return $design->load([
             'media',
