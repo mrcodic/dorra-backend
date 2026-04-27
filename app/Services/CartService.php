@@ -135,17 +135,22 @@ class CartService extends BaseService
     {
         $productPrice = $this->productPriceRepository->query()
             ->find(Arr::get($validatedData, 'product_price_id') ?? $design?->productPrice?->id);
-        $productPriceValue = $productPrice?->price ?? $price;
-        $specsSum = collect(Arr::get($validatedData, 'specs') ?? $design?->specifications)
-            ->map(function ($spec) {
-                return $this->optionRepository->query()->find($spec['option'])?->price ?? 0;
+        $productPriceValue = $productPrice?->price ?? $price ?? $design?->price;
+        $rawSpecs = Arr::get($validatedData, 'specs');
+        $specsSum = collect($rawSpecs ?? $design?->specifications)
+            ->map(function ($spec) use ($rawSpecs){
+                $optionId = $rawSpecs !== null
+                    ? $spec['option']
+                    : $spec->pivot->option_id;
+
+                return $this->optionRepository->query()->find($optionId)?->price ?? 0;
             })->sum();
-        $basePrice = $product->base_price ?? $productPriceValue;
+        $basePrice = $product->base_price ?? $productPriceValue ?? $design?->price;
 
         $subTotal = $basePrice + $specsSum;
         $calculatePrices = [
-            'product_price' => $basePrice ?? $design?->price,
-            'specs_sum' => $specsSum,
+            'product_price' => $basePrice ,
+            'specs_sum' => $specsSum ,
             'sub_total' => $subTotal,
             'product_price_id' => $productPrice?->id,
         ];
