@@ -179,17 +179,17 @@ class TemplateController extends DashboardController
         $productId = request()->input('product_without_category_id');
         $templates = $this->templateService->getProductTemplates($productId);
         $templateData = TemplateResource::collection($templates)
-                ->additional([
-                    'product' => [
-                        'name' => $this->productRepositoryInterface->query()->whereKey($productId)?->value('name')
-                    ]
-                ])
-                ->response()
-                ->getData(true);
+            ->additional([
+                'product' => [
+                    'name' => $this->productRepositoryInterface->query()->whereKey($productId)?->value('name')
+                ]
+            ])
+            ->response()
+            ->getData(true);
 
-            return Response::api(
-                data: $templateData
-            );
+        return Response::api(
+            data: $templateData
+        );
 
 
     }
@@ -412,21 +412,13 @@ class TemplateController extends DashboardController
 
         $removedColors = array_values(array_diff($oldColors, $newColors));
 
-        // ✅ Detect colors that exist in both but changed position
-        $repositionedColors = array_values(
-            array_filter($newColors, function ($color, $newIndex) use ($oldColors) {
-                $oldIndex = array_search($color, $oldColors);
-                return $oldIndex !== false && $oldIndex !== $newIndex; // same color, different index
-            }, ARRAY_FILTER_USE_BOTH)
-        );
-
         $modelColor = $pivotMockup?->pivot?->model_color
             ? $this->normalizeHex($pivotMockup->pivot->model_color)
             : null;
 
         /*
         |--------------------------------------------------------------------------
-        | 1) Delete media for removed colors
+        | 1) Delete media for removed colors (including their model images)
         |--------------------------------------------------------------------------
         */
         if (!empty($removedColors)) {
@@ -441,49 +433,7 @@ class TemplateController extends DashboardController
 
         /*
         |--------------------------------------------------------------------------
-        | 2) Delete & re-upload media for repositioned colors
-        |--------------------------------------------------------------------------
-        */
-        if (!empty($repositionedColors)) {
-            // Fetch existing media for repositioned colors to clone them
-            $existingMedia = $mockup->media()
-                ->where('collection_name', 'generated_mockups')
-                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$template->id])
-                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(string)$mockup->category_id])
-                ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) IN (" . implode(',', array_fill(0, count($repositionedColors), '?')) . ")", $repositionedColors)
-                ->get();
-
-            foreach ($existingMedia as $media) {
-                $hex  = $this->normalizeHex($media->getCustomProperty('hex'));
-                $side = $media->getCustomProperty('side');
-
-                $customProperties = [
-                    'side'        => $side,
-                    'template_id' => (string)$template->id,
-                    'hex'         => $hex,
-                    'category_id' => (int)$mockup->category_id,
-                    'model_image' => ($modelColor && $hex === $modelColor) ? 1 : 0,
-                    'position'    => array_search($hex, $newColors), // ✅ updated position
-                ];
-
-                // Copy the file and re-add with updated properties
-                $filePath = $media->getPath();
-
-                $media->delete(); // remove old
-
-                if (file_exists($filePath)) {
-                    $mockup->addMedia($filePath)
-                        ->preservingOriginal() // don't delete the temp copy
-                        ->usingFileName("mockup_{$side}_tpl{$template->id}_{$hex}.png")
-                        ->withCustomProperties($customProperties)
-                        ->toMediaCollection('generated_mockups');
-                }
-            }
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | 3) If model color changed, delete old model image
+        | 2) If model color changed, delete old model image
         |--------------------------------------------------------------------------
         */
         $mockup->media()
@@ -491,6 +441,7 @@ class TemplateController extends DashboardController
             ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$template->id])
             ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])
             ->when($modelColor, fn($q) =>
+                // keep only if hex matches current model color, delete the rest
             $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) != ?", [$modelColor])
             )
             ->cursor()
@@ -498,7 +449,7 @@ class TemplateController extends DashboardController
 
         /*
         |--------------------------------------------------------------------------
-        | 4) Replace uploaded files for exact same side + color
+        | 3) Replace uploaded files for exact same side + color
         |--------------------------------------------------------------------------
         */
         foreach ($request->input('files', []) as $index => $fileData) {
@@ -509,6 +460,7 @@ class TemplateController extends DashboardController
             $side = $fileData['side'] ?? 'front';
             $hex  = $this->normalizeHex($fileData['color'] ?? '#000000');
 
+            // Delete existing media for this exact side + hex (including model image — will be re-uploaded)
             $mockup->media()
                 ->where('collection_name', 'generated_mockups')
                 ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$template->id])
@@ -524,7 +476,6 @@ class TemplateController extends DashboardController
                 'hex'         => $hex,
                 'category_id' => (int)$mockup->category_id,
                 'model_image' => ($modelColor && $hex === $modelColor) ? 1 : 0,
-                'position'    => array_search($hex, $newColors), // ✅ store new position
             ];
 
             $mockup->addMedia($request->file("files.{$index}.file"))
@@ -533,6 +484,7 @@ class TemplateController extends DashboardController
                 ->toMediaCollection('generated_mockups');
         }
     }
+
     private function normalizeHex(?string $hex): string
     {
         return strtolower(ltrim(trim((string) $hex), '#'));
