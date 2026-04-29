@@ -117,7 +117,7 @@ class RenderMockupJob implements ShouldQueue
         } catch (Throwable $e) {
             $this->item->update([
                 'status'        => 'failed',
-                'error_message' => $e->getMessage(),
+                'error_message' => $config,
             ]);
 
             $this->bulkJob->increment('failed_count');
