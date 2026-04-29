@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\MockupGenerationJob;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,8 +12,8 @@ return new class extends Migration
         Schema::create('bulk_job_items', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('bulk_job_id')
-                ->constrained('bulk_jobs')
+            $table->foreignIdFor(MockupGenerationJob::class)
+                ->constrained()
                 ->cascadeOnDelete();
 
             $table->foreignId('template_id')
