@@ -65,7 +65,7 @@ class RenderMockupJob implements ShouldQueue
             ];
 
             $response = Http::timeout(30)->post(
-                config('services.node_render_url') . '/render',
+                config('services.node_render_url') . '/api/render',
                 $config
             );
 
