@@ -88,6 +88,7 @@ return [
     ],
 
     'editor_url' => env('FRONT_END_EDITOR_URL'),
+    'node_render_url' => env('NODE_RENDER_URL'),
     'site_url' => env('FRONT_END_URL'),
     'recaptcha' => [
         'secret_key' => env('RECAPTCHA_SECRET_KEY')
