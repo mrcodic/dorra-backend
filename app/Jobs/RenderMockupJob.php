@@ -82,7 +82,7 @@ class RenderMockupJob implements ShouldQueue
             file_put_contents($tempPath, $response->body());
 
             try {
-                $media=  $this->mockup
+                $this->mockup
                     ->addMedia($tempPath)
                     ->usingFileName("mockup_{$side}_tpl{$template->id}_{$hex}.png")
                     ->withCustomProperties([
@@ -101,10 +101,17 @@ class RenderMockupJob implements ShouldQueue
             }
 
 
+            $media = $this->mockup->media()
+                ->where('collection_name', 'generated_mockups')
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $template->id])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$side])
+                ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
+                ->latest()
+                ->first();
 
             $this->item->update([
                 'status'      => 'completed',
-                'output_path' =>  $response->body(),
+                'output_path' => $response->body(),
             ]);
 
         } catch (Throwable $e) {
