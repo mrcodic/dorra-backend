@@ -59,7 +59,7 @@ class RenderMockupJob implements ShouldQueue
                     'vertices'         => $this->item->points,
                     'pixiBundleUrl'    => config('services.editor_url').'/pixi-render-bundle.js',
                 ],
-                'designUrl' => $this->item->getImageUrlForType($this->item->side),
+                'designUrl' => $this->item->template->getImageUrlForType($this->item->side),
                 'color'    => $this->item->color,
                 'side'     => $this->item->side,
             ];
