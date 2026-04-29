@@ -16,6 +16,7 @@ class BulkJobItem extends Model
         'bulk_job_id',
         'template_id',
         'color',
+        'points',
         'side',
         'status',
         'output_path',

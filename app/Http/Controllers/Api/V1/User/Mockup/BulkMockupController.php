@@ -38,7 +38,7 @@ class BulkMockupController extends Controller
         $templateIds = $request->input('template_ids');
 
         $colors = collect($request->input('colors'))
-            ->map(fn($c) => $this->normalizeHex($c))
+            ->map(fn($c) => $c)
             ->filter()
             ->unique()
             ->values()
@@ -89,7 +89,7 @@ class BulkMockupController extends Controller
                         'template_id' => $templateId,
                         'color'       => $color,
                         'side'        => $side,
-                        'points'      => json_encode($positions[$side]),
+                        'points'      => $positions[$side],
                         'status'      => 'pending',
                     ]);
 
@@ -146,8 +146,8 @@ class BulkMockupController extends Controller
         ]);
     }
 
-    private function normalizeHex(string $hex): string
-    {
-        return strtolower(ltrim(trim($hex), '#'));
-    }
+//    private function normalizeHex(string $hex): string
+//    {
+//        return strtolower(ltrim(trim($hex), '#'));
+//    }
 }

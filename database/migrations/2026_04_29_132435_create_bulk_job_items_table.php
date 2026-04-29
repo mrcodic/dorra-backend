@@ -30,6 +30,7 @@ return new class extends Migration
 
             $table->string('output_path', 500)->nullable();
             $table->text('error_message')->nullable();
+            $table->json('points')->nullable();
             $table->unsignedInteger('attempts')->default(0);
 
             $table->timestamps();
