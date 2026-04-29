@@ -2,6 +2,7 @@
 
 use App\Console\Commands\SyncCanvasAssets;
 use App\Enums\Template\StatusEnum;
+use App\Http\Controllers\Api\V1\User\Mockup\BulkMockupController;
 use App\Http\Controllers\Api\V1\User\ShippingAddress\ShippingController;
 use App\Http\Controllers\Dashboard\{AdminController,
     BoardController,
@@ -396,6 +397,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
         Route::post('social-links', [SettingController::class, 'socialLinks'])->name('social-links');
     });
+    Route::post('mockups/{mockup}/bulk-jobs', [BulkMockupController::class, 'generateBulk']);
 
 });
 Route::view('test', 'dashboard.test');

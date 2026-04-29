@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Http\Controllers\Api\V1\User\Mockup\BulkMockupController;
 use App\Http\Controllers\Dashboard\FontController;
 use App\Http\Controllers\Dashboard\MockupController;
 use App\Http\Controllers\Dashboard\OrderController;
@@ -30,6 +31,7 @@ Route::post("convert-fabric-json", [MainController::class, 'convertFabricJson'])
 Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
 Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'])->name("store.templates.assets");
 Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
+Route::post('mockups/{mockup}/bulk-jobs', [BulkMockupController::class, 'generateBulk']);
 
 Route::get('mockups', [MockupController::class, 'index']);
 Route::get('mockup-types', [MockupController::class, 'mockupTypes']);

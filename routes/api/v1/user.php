@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\V1\User\{Ai\AiAssetController,
     Folder\FolderController,
     Industry\IndustryController,
     Invitation\InvitationController,
+    Mockup\BulkMockupController,
     Mockup\MockupController,
     Order\OrderController,
     Payment\PaymentController,
@@ -241,7 +242,6 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::get('mockups/{mockup}/designs/{design}/positions', [MockupController::class, 'positions']);
     Route::resource('editor-mockups', MockupController::class)->only(['index', 'show']);
     Route::get('variants', [VariantController::class, 'index'])->name('variants');
-
 });
 
 
