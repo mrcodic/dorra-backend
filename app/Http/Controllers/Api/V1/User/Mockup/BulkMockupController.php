@@ -63,7 +63,7 @@ class BulkMockupController extends Controller
         foreach ($templateIds as $templateId) {
             $syncData[$templateId] = [
                 'colors'    => $colors,
-                'positions' => [$positions],
+                'positions' => $request->input('positions'),
             ];
         }
         $mockup->templates()->syncWithoutDetaching($syncData);
