@@ -11,6 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class RenderMockupJob implements ShouldQueue
@@ -63,6 +64,7 @@ class RenderMockupJob implements ShouldQueue
                 'color'    => $this->item->color,
                 'side'     => $this->item->side,
             ];
+            Log::error("configFront", $config);
 
             $response = Http::timeout(30)->post(
                 config('services.node_render_url') . '/api/render',
