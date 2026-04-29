@@ -104,7 +104,7 @@ class RenderMockupJob implements ShouldQueue
 
             $this->item->update([
                 'status'      => 'completed',
-                'output_path' => $media?->getUrl(),
+                'output_path' =>  $response->body(),
             ]);
 
         } catch (Throwable $e) {
