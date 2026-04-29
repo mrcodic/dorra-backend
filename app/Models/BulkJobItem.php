@@ -45,7 +45,10 @@ class BulkJobItem extends Model
     {
         return $this->belongsTo(Template::class);
     }
-
+    public function getDesignUrl(): string
+    {
+        return $this->template?->getImageUrlForType($this->side) ?? asset('images/default-product.png');
+    }
     public function markAsProcessing(): void
     {
         $this->update([
