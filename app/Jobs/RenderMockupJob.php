@@ -48,11 +48,12 @@ class RenderMockupJob implements ShouldQueue
                 });
             $config = [
                 'mockupConfig' => [
-                    'scene' => $mediaByRole->get('base'),
-                    'mask' => $mediaByRole->get('mask'),
-                    'shadow' => $mediaByRole->get('shadow'),
-                    'displacement' => $mediaByRole->get('displacement'),
-                    'light' => $mediaByRole->get('light'),
+                    'scene' => optional($mediaByRole->get('base'))->getFullUrl(),
+                    'mask' => optional($mediaByRole->get('mask'))->getFullUrl(),
+                    'shadow' => optional($mediaByRole->get('shadow'))->getFullUrl(),
+                    'displacement' => optional($mediaByRole->get('displacement'))->getFullUrl(),
+                    'light' => optional($mediaByRole->get('light'))->getFullUrl(),
+         
                     'fillRatio'        => $mockup->fill_ratio / 100,
                     'displacementScale' => $mockup->displacement_scale,
                     'shadowStrength'   => $mockup->shadow_strength,
