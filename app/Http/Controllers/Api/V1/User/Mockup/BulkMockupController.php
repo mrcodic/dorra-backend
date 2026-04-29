@@ -18,7 +18,7 @@ class BulkMockupController extends Controller
     {
         $request->validate([
             'template_ids'     => 'required|array|min:1',
-            'template_ids.*'   => 'integer|exists:templates,id',
+            'template_ids.*'   => 'string|exists:templates,id',
             'colors'           => 'required|array|min:1',
             'colors.*'         => 'string',
             'positions'        => ['required', 'array'],
