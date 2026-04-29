@@ -15,8 +15,7 @@ return new class extends Migration
                 ->constrained('mockup_generation_jobs')
                 ->cascadeOnDelete();
 
-            $table->foreignId('template_id')
-                ->constrained('templates')
+            $table->foreignIdFor(\App\Models\Template::class)->constrained()
                 ->cascadeOnDelete();
 
             $table->string('color', 7);
