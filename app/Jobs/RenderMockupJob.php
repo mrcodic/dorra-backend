@@ -59,7 +59,7 @@ class RenderMockupJob implements ShouldQueue
                     'vertices'         => $this->item->points,
                     'pixiBundleUrl'    => config('services.editor_url').'/pixi-render-bundle.js',
                 ],
-                'designUrl' => $this->item->getDesignUrl(),
+                'designUrl' =>'https://dev.dorraprint.com//storage/22455/preview_69ef3b50124a7.png',
                 'color'    => $this->item->color,
                 'side'     => $this->item->side,
             ];
