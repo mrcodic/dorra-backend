@@ -75,7 +75,7 @@ class RenderMockupJob implements ShouldQueue
 
 
             $hex       = strtolower(ltrim(trim($this->item->color), '#'));
-            $template= $this->item;
+            $template= $this->item->template;
             $tempPath  = sys_get_temp_dir() . "/mockup_{$this->mockup->id}_{$template->id}_{$side}_{$hex}.png";
             file_put_contents($tempPath, $response->body());
 
