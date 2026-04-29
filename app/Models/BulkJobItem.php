@@ -26,6 +26,7 @@ class BulkJobItem extends Model
 
     protected $casts = [
         'attempts' => 'integer',
+        'points' => 'arary',
     ];
 
     public const STATUS_PENDING = 'pending';
