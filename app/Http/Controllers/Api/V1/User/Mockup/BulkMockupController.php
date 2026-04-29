@@ -82,10 +82,6 @@ class BulkMockupController extends Controller
         ]);
 
         foreach ($templateIds as $templateId) {
-            $pivotMockup = $mockup->templates()->where('template_id', $templateId)->first();
-
-
-
             foreach ($colors as $color) {
                 foreach ($sides as $side) {
                     $item = BulkJobItem::create([
