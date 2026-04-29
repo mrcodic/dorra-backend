@@ -53,7 +53,6 @@ class RenderMockupJob implements ShouldQueue
                     'shadow' => optional($mediaByRole->get('shadow'))->getFullUrl(),
                     'displacement' => optional($mediaByRole->get('displacement'))->getFullUrl(),
                     'light' => optional($mediaByRole->get('light'))->getFullUrl(),
-         
                     'fillRatio'        => $mockup->fill_ratio / 100,
                     'displacementScale' => $mockup->displacement_scale,
                     'shadowStrength'   => $mockup->shadow_strength,
@@ -61,7 +60,7 @@ class RenderMockupJob implements ShouldQueue
                     'vertices'         => $this->item->points,
                     'pixiBundleUrl'    => config('services.editor_url').'/pixi-render-bundle.js',
                 ],
-                'designUrl' =>'https://dev.dorraprint.com//storage/22455/preview_69ef3b50124a7.png',
+                'designUrl' => $this->item->getDesignUrl(),
                 'color'    => $this->item->color,
                 'side'     => $this->item->side,
             ];
@@ -118,7 +117,7 @@ class RenderMockupJob implements ShouldQueue
         } catch (Throwable $e) {
             $this->item->update([
                 'status'        => 'failed',
-                'error_message' => $config,
+                'error_message' => $e->getMessage(),
             ]);
 
             $this->bulkJob->increment('failed_count');
