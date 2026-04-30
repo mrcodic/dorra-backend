@@ -7,9 +7,8 @@ use App\Jobs\RenderMockupJob;
 use App\Models\BulkJobItem;
 use App\Models\Mockup;
 use App\Models\MockupGenerationJob;
-use App\Models\Template;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Rule;
 
 class BulkMockupController extends Controller
@@ -103,7 +102,7 @@ class BulkMockupController extends Controller
             'started_at' => now(),
         ]);
 
-        return response()->json([
+        return Response::api(data:[
             'success'     => true,
             'bulk_job_id' => $bulkJob->id,
             'total_count' => $totalCount,
@@ -119,7 +118,7 @@ class BulkMockupController extends Controller
         $rate    = $job->completed_count / max($elapsed, 1);
         $remaining = ($job->total_count - $job->completed_count) / max($rate, 0.01);
 
-        return response()->json([
+        return Response::api(data:[
             'id'                          => $job->id,
             'status'                      => $job->status,
             'total_count'                 => $job->total_count,
@@ -136,18 +135,43 @@ class BulkMockupController extends Controller
         $job = MockupGenerationJob::findOrFail($id);
         $job->update(['status' => 'cancelled']);
 
+
         BulkJobItem::where('bulk_job_id', $id)
             ->where('status', 'pending')
             ->update(['status' => 'cancelled']);
 
-        return response()->json([
+
+        $mockup = Mockup::findOrFail($job->mockup_id);
+
+        $items = BulkJobItem::where('bulk_job_id', $id)
+            ->where('status', 'completed')
+            ->get();
+
+        foreach ($items as $item) {
+            $hex = strtolower(ltrim(trim($item->color), '#'));
+
+            $mockup->media()
+                ->where('collection_name', 'generated_mockups')
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $item->template_id])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$item->side])
+                ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
+                ->get()
+                ->each(fn($media) => $media->delete());
+        }
+
+
+        $templateIds = BulkJobItem::where('bulk_job_id', $id)
+            ->pluck('template_id')
+            ->unique()
+            ->all();
+
+        $mockup->templates()->detach($templateIds);
+
+        return Response::api(data: [
             'success' => true,
-            'message' => "Cancelled. {$job->completed_count} images kept.",
+            'message' => "Cancelled and rolled back {$job->completed_count} generated images.",
         ]);
     }
 
-//    private function normalizeHex(string $hex): string
-//    {
-//        return strtolower(ltrim(trim($hex), '#'));
-//    }
+
 }
