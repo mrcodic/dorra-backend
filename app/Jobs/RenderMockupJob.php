@@ -158,7 +158,7 @@ class RenderMockupJob implements ShouldQueue
         if ($counts->pending > 0) {
             return;
         }
-        
+
         $job->update([
             'completed_count' => $counts->completed,
             'failed_count'    => $counts->failed,

@@ -35,6 +35,7 @@ Route::apiResource('library-assets', LibraryAssetController::class)->only(['stor
 Route::post('mockups/{mockup}/bulk-jobs', [BulkMockupController::class, 'generateBulk']);
 Route::get('bulk-jobs/{bulkJob}', [BulkMockupController::class, 'status']);
 Route::post('bulk-jobs/{bulkJob}/cancel', [BulkMockupController::class, 'cancel']);
+Route::post('mockups/{mockup}/bulk-jobs/{bulkJob}/retry', [BulkMockupController::class, 'retry']);
 
 Route::get('mockups', [MockupController::class, 'index']);
 Route::get('mockup-types', [MockupController::class, 'mockupTypes']);

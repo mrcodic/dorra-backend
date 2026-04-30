@@ -172,6 +172,49 @@ class BulkMockupController extends Controller
             'message' => "Cancelled and rolled back {$job->completed_count} generated images.",
         ]);
     }
+    public function retry(Mockup $mockup, MockupGenerationJob $bulkJob)
+    {
+        if (!in_array($bulkJob->status, ['failed', 'completed_with_errors'])) {
+            return Response::api(
+                message: 'Only failed or completed_with_errors jobs can be retried.',
+                status: 422
+            );
+        }
 
+        $failedItems = BulkJobItem::where('bulk_job_id', $bulkJob->id)
+            ->where('status', 'failed')
+            ->get();
+
+        if ($failedItems->isEmpty()) {
+            return Response::api(
+                message: 'No failed items to retry.',
+                status: 422
+            );
+        }
+
+        $bulkJob->update([
+            'status'          => 'processing',
+            'failed_count'    => 0,
+            'total_count'     => $bulkJob->completed_count + $failedItems->count(), // keep completed + retry failed
+            'completed_at'    => null,
+            'started_at'      => now(),
+        ]);
+
+        foreach ($failedItems as $item) {
+            $item->update([
+                'status'        => 'pending',
+                'error_message' => null,
+                'output_path'   => null,
+            ]);
+
+            RenderMockupJob::dispatch($bulkJob, $item, $mockup);
+        }
+
+        return Response::api(data: [
+            'success'      => true,
+            'retried'      => $failedItems->count(),
+            'bulk_job_id'  => $bulkJob->id,
+        ]);
+    }
 
 }

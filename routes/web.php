@@ -400,6 +400,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
     Route::post('mockups/{mockup}/bulk-jobs', [BulkMockupController::class, 'generateBulk']);
     Route::get('bulk-jobs/{bulkJob}', [BulkMockupController::class, 'status']);
     Route::post('bulk-jobs/{bulkJob}/cancel', [BulkMockupController::class, 'cancel']);
+    Route::post('bulk-jobs/{bulkJob}/retry', [BulkMockupController::class, 'retry']);
+
 });
 Route::view('test', 'dashboard.test');
 Route::get('test-canvas/{id}', function ($id){
