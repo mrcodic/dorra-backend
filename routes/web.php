@@ -398,8 +398,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::post('social-links', [SettingController::class, 'socialLinks'])->name('social-links');
     });
     Route::post('mockups/{mockup}/bulk-jobs', [BulkMockupController::class, 'generateBulk']);
-    Route::get('mockups/{mockup}/bulk-jobs/{bulkJob}', [BulkMockupController::class, 'status']);
-    Route::post('mockups/{mockup}/bulk-jobs/{bulkJob}/cancel', [BulkMockupController::class, 'cancel']);
+    Route::get('bulk-jobs/{bulkJob}', [BulkMockupController::class, 'status']);
+    Route::post('bulk-jobs/{bulkJob}/cancel', [BulkMockupController::class, 'cancel']);
 });
 Route::view('test', 'dashboard.test');
 Route::get('test-canvas/{id}', function ($id){

@@ -33,8 +33,8 @@ Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'
 Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
 
 Route::post('mockups/{mockup}/bulk-jobs', [BulkMockupController::class, 'generateBulk']);
-Route::get('mockups/{mockup}/bulk-jobs/{bulkJob}', [BulkMockupController::class, 'status']);
-Route::post('mockups/{mockup}/bulk-jobs/{bulkJob}', [BulkMockupController::class, 'cancel']);
+Route::get('bulk-jobs/{bulkJob}', [BulkMockupController::class, 'status']);
+Route::post('bulk-jobs/{bulkJob}/cancel', [BulkMockupController::class, 'cancel']);
 
 Route::get('mockups', [MockupController::class, 'index']);
 Route::get('mockup-types', [MockupController::class, 'mockupTypes']);
