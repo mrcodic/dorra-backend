@@ -120,7 +120,8 @@ class RenderMockupJob implements ShouldQueue
                 'status'      => 'completed',
                 'output_path' => $media?->getUrl(),
             ]);
-
+            $this->bulkJob->increment('completed_count');
+            $this->checkCompletion();
         } catch (Throwable $e) {
             $this->item->update([
                 'status'        => 'failed',
