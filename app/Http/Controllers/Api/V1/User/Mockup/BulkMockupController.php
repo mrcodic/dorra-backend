@@ -178,12 +178,14 @@ class BulkMockupController extends Controller
         if (!$mockup) {
             return Response::api(
                 message: 'Mockup not found.',
+                errors:[],
                 statusCode: 422
             );
         }
         if (!in_array($bulkJob->status, ['failed', 'completed_with_errors'])) {
             return Response::api(
                 message: 'Only failed or completed_with_errors jobs can be retried.',
+                errors:[],
                 statusCode: 422
             );
         }
@@ -195,6 +197,7 @@ class BulkMockupController extends Controller
         if ($failedItems->isEmpty()) {
             return Response::api(
                 message: 'No failed items to retry.',
+                errors:[],
                 statusCode: 422
             );
         }
