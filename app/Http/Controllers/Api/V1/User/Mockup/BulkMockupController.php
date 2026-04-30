@@ -172,8 +172,9 @@ class BulkMockupController extends Controller
             'message' => "Cancelled and rolled back {$job->completed_count} generated images.",
         ]);
     }
-    public function retry(Mockup $mockup, MockupGenerationJob $bulkJob)
+    public function retry(MockupGenerationJob $bulkJob)
     {
+        $mockup = $bulkJob->mockup;
         if (!in_array($bulkJob->status, ['failed', 'completed_with_errors'])) {
             return Response::api(
                 message: 'Only failed or completed_with_errors jobs can be retried.',
@@ -195,7 +196,7 @@ class BulkMockupController extends Controller
         $bulkJob->update([
             'status'          => 'processing',
             'failed_count'    => 0,
-            'total_count'     => $bulkJob->completed_count + $failedItems->count(), // keep completed + retry failed
+            'total_count'     => $bulkJob->completed_count + $failedItems->count(),
             'completed_at'    => null,
             'started_at'      => now(),
         ]);
