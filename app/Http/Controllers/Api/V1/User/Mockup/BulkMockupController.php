@@ -10,6 +10,7 @@ use App\Models\MockupGenerationJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class BulkMockupController extends Controller
 {
@@ -172,22 +173,21 @@ class BulkMockupController extends Controller
             'message' => "Cancelled and rolled back {$job->completed_count} generated images.",
         ]);
     }
+
     public function retry(MockupGenerationJob $bulkJob)
     {
         $mockup = $bulkJob->mockup;
+
         if (!$mockup) {
-            return Response::api(
-                message: 'Mockup not found.',
-                errors:[],
-                statusCode: 422
-            );
+            throw ValidationException::withMessages([
+                'mockup' => ['Mockup not found.'],
+            ]);
         }
+
         if (!in_array($bulkJob->status, ['failed', 'completed_with_errors'])) {
-            return Response::api(
-                message: 'Only failed or completed_with_errors jobs can be retried.',
-                errors:[],
-                statusCode: 422
-            );
+            throw ValidationException::withMessages([
+                'status' => ['Only failed or completed_with_errors jobs can be retried.'],
+            ]);
         }
 
         $failedItems = BulkJobItem::where('bulk_job_id', $bulkJob->id)
@@ -195,19 +195,17 @@ class BulkMockupController extends Controller
             ->get();
 
         if ($failedItems->isEmpty()) {
-            return Response::api(
-                message: 'No failed items to retry.',
-                errors:[],
-                statusCode: 422
-            );
+            throw ValidationException::withMessages([
+                'items' => ['No failed items to retry.'],
+            ]);
         }
 
         $bulkJob->update([
-            'status'          => 'processing',
-            'failed_count'    => 0,
-            'total_count'     => $bulkJob->completed_count + $failedItems->count(),
-            'completed_at'    => null,
-            'started_at'      => now(),
+            'status'       => 'processing',
+            'failed_count' => 0,
+            'total_count'  => $bulkJob->completed_count + $failedItems->count(),
+            'completed_at' => null,
+            'started_at'   => now(),
         ]);
 
         foreach ($failedItems as $item) {
@@ -221,10 +219,9 @@ class BulkMockupController extends Controller
         }
 
         return Response::api(data: [
-            'success'      => true,
-            'retried'      => $failedItems->count(),
-            'bulk_job_id'  => $bulkJob->id,
+            'success'     => true,
+            'retried'     => $failedItems->count(),
+            'bulk_job_id' => $bulkJob->id,
         ]);
     }
-
 }
