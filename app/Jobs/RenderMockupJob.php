@@ -140,14 +140,35 @@ class RenderMockupJob implements ShouldQueue
     {
         $job = $this->bulkJob->fresh();
 
-        if (($job->completed_count + $job->failed_count) >= $job->total_count) {
-            $job->update([
-                'status'       => $job->failed_count > 0 && $job->completed_count === 0
-                    ? 'failed'
-                    : ($job->failed_count > 0 ? 'completed_with_errors' : 'completed'),
-                'completed_at' => now(),
-            ]);
+
+        if (in_array($job->status, ['completed', 'completed_with_errors', 'failed', 'cancelled'])) {
+            return;
         }
+
+        $counts = BulkJobItem::where('bulk_job_id', $job->id)
+            ->selectRaw("
+            COUNT(*) as total,
+            SUM(status = 'completed') as completed,
+            SUM(status = 'failed') as failed,
+            SUM(status IN ('pending', 'processing')) as pending
+        ")
+            ->first();
+
+
+        if ($counts->pending > 0) {
+            return;
+        }
+        
+        $job->update([
+            'completed_count' => $counts->completed,
+            'failed_count'    => $counts->failed,
+            'status'          => match(true) {
+                $counts->completed === 0              => 'failed',
+                $counts->failed > 0                   => 'completed_with_errors',
+                default                               => 'completed',
+            },
+            'completed_at'    => now(),
+        ]);
     }
 
 
