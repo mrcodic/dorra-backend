@@ -175,6 +175,12 @@ class BulkMockupController extends Controller
     public function retry(MockupGenerationJob $bulkJob)
     {
         $mockup = $bulkJob->mockup;
+        if (!$mockup) {
+            return Response::api(
+                message: 'Mockup not found.',
+                status: 422
+            );
+        }
         if (!in_array($bulkJob->status, ['failed', 'completed_with_errors'])) {
             return Response::api(
                 message: 'Only failed or completed_with_errors jobs can be retried.',
