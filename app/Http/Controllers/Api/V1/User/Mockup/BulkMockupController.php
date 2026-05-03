@@ -184,7 +184,7 @@ class BulkMockupController extends Controller
             ]);
         }
 
-        if (!in_array($bulkJob->status, ['failed', 'completed_with_errors'])) {
+        if (!in_array($bulkJob->status, ['failed', 'completed_with_errors','cancelled'])) {
             throw ValidationException::withMessages([
                 'status' => ['Only failed or completed_with_errors jobs can be retried.'],
             ]);
