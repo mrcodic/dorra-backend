@@ -818,6 +818,7 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
             function fetchMockups() {
                 const idsWithCat    = $('#categoriesSelect').val() || [];
                 const idsWithoutCat = $('#productsWithoutCategoriesSelect').val() || [];
+                const idsProds = $('#productsSelect').val() || [];
                 const allProductIds = [...idsWithCat, ...idsWithoutCat];
 
                 if (!allProductIds.length) {
@@ -831,13 +832,14 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                 const selectedTypes = $('.type-checkbox:checked').map(function () {
                     return $(this).val();
                 }).get();
-
+                console.log("fdsfs",idsWithCat)
                 $.ajax({
                     url: "{{ route('mockups.index') }}",
                     type: "GET",
                     traditional: false,
                     data: {
                         'product_ids[]': allProductIds,
+                        'category_ids[]': idsProds,
                         'types[]': selectedTypes,
                     },
                     success(response) {

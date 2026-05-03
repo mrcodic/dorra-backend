@@ -200,6 +200,9 @@ class MockupService extends BaseService
                     })
             )
             ->when(request()->filled('product_ids'), fn($q) => $q->whereIn('category_id', request()->array('product_ids')))
+            ->when(request()->filled('category_ids'), fn($q) => $q->whereHas('products',function ($query) {
+                $query->whereIn('products.id', request()->array('category_ids'));
+            }))
             ->when(request()->filled('type'), fn($q) => $q->whereHas('types', fn($q) => $q->where('types.value', (int)request('type'))
             )
             )
