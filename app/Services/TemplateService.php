@@ -639,11 +639,11 @@ class TemplateService extends BaseService
             })->when($productIds, function ($query) use ($productIds,$productType) {
                 if ($productType == 'product') {
                     $query->whereHas('products', function ($sub) use ($productIds) {
-                        $sub->whereIn('id', $productIds);
+                        $sub->whereIn('products.id', $productIds);
                     });
                 }else{
                     $query->whereHas('categories', function ($sub) use ($productIds) {
-                        $sub->whereIn('id', $productIds);
+                        $sub->whereIn('categories.id', $productIds);
                     });
                 }
 
