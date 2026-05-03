@@ -165,7 +165,7 @@ class RenderMockupJob implements ShouldQueue
             'failed_count'    => $counts->failed,
             'status'          => match(true) {
                 $counts->completed === 0              => 'failed',
-                $counts->failed > 0                   => 'completed_with_errors',
+                $this->tries === 3                   => 'failed',
                 default                               => 'completed',
             },
             'completed_at'    => now(),
