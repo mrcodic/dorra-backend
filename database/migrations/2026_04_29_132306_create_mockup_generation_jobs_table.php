@@ -19,7 +19,7 @@ return new class extends Migration
                 'pending',
                 'processing',
                 'completed',
-                'mockup_generation_jobs',
+                'completed_with_errors',
                 'failed',
                 'cancelled',
             ])->default('pending')->index();

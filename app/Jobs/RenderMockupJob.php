@@ -134,7 +134,7 @@ Log::error("node_render_url", [config('services.node_render_url') . '/api/render
                 $this->checkCompletion();
             }
 
-            throw $e;
+//            throw $e;
         }
     }
 
