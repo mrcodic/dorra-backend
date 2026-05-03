@@ -117,27 +117,25 @@ class RenderMockupJob implements ShouldQueue
 
             $this->item->update([
                 'status'      => 'completed',
-                'output_path' => $media?->getUrl(),
+                'output_path' => $media ? parse_url($media->getUrl(), PHP_URL_PATH) : null,
             ]);
             $this->bulkJob->increment('completed_count');
             $this->checkCompletion();
         }  catch (Throwable $e) {
-            $isLastAttempt = $this->attempts() >= $this->tries;
-
-            $this->item->update([
-                'status'        => $isLastAttempt ? 'failed' : 'processing',
-                'error_message' => $e->getMessage(),
-            ]);
-
-            if ($isLastAttempt) {
-                $this->bulkJob->increment('failed_count');
-                $this->checkCompletion();
-            }
-
+            $this->item->update(['error_message' => $e->getMessage()]);
             throw $e;
         }
     }
+    public function failed(Throwable $e): void
+    {
+        $this->item->update([
+            'status'        => 'failed',
+            'error_message' => $e->getMessage(),
+        ]);
 
+        $this->bulkJob->increment('failed_count');
+        $this->checkCompletion();
+    }
 
     private function checkCompletion(): void
     {
