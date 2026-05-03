@@ -574,6 +574,7 @@ class TemplateService extends BaseService
         $search = trim((string) request()->input('search', ''));
         $tags   = array_filter((array) request()->input('tags'));
         $types  = array_filter((array) request()->input('types'));
+        $productIds  = array_filter((array) request()->input('product_ids'));
         $recent = request()->boolean('recent');
         $templateOrderId = request()->input('template_order_id');
 
@@ -613,7 +614,7 @@ class TemplateService extends BaseService
                 $query->whereDoesntHave('types', function ($q) use ($types) {
                     $q->whereNotIn('types.value', $types);
                 });
-            }) ->when($categoryId, function ($query) use ($categoryId) {
+            })->when($categoryId, function ($query) use ($categoryId) {
                 $query->where(function ($q) use ($categoryId) {
                     $q->whereHas('categories', function ($sub) use ($categoryId) {
                         $sub->where('categories.id', $categoryId);
@@ -633,6 +634,10 @@ class TemplateService extends BaseService
 //                        ->orWhereHas('mockups', function ($sub) use ($categoryId) {
 //                            $sub->where('mockups.category_id', $categoryId);
 //                        });
+                });
+            })->when($productIds, function ($query) use ($productIds) {
+                $query->whereHas('products', function ($sub) use ($productIds) {
+                    $sub->whereIn('id', $productIds);
                 });
             })
             ->orderByDesc('is_best_seller')
