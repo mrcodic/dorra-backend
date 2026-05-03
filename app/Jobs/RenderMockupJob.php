@@ -65,7 +65,6 @@ class RenderMockupJob implements ShouldQueue
                 'side'     => $this->item->side,
             ];
             Log::error("configFront", $config);
-Log::error("node_render_url", [config('services.node_render_url') . '/api/render',]);
             $response = Http::timeout(30)->post(
                 config('services.node_render_url') . '/api/render',
                 $config
@@ -122,14 +121,15 @@ Log::error("node_render_url", [config('services.node_render_url') . '/api/render
             ]);
             $this->bulkJob->increment('completed_count');
             $this->checkCompletion();
-        } catch (Throwable $e) {
+        }  catch (Throwable $e) {
+            $isLastAttempt = $this->attempts() >= $this->tries;
+
             $this->item->update([
-                'status'        => 'failed',
+                'status'        => $isLastAttempt ? 'failed' : 'processing',
                 'error_message' => $e->getMessage(),
             ]);
 
-            // ✅ Only finalize the bulk job on the last attempt
-            if ($this->attempts() >= $this->tries) {
+            if ($isLastAttempt) {
                 $this->bulkJob->increment('failed_count');
                 $this->checkCompletion();
             }
