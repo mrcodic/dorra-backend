@@ -240,7 +240,7 @@ class MainController extends Controller
             'recaptcha_token'  => 'required|string',
         ]);
 
-        $recaptchaResponse = Http::post('https://www.google.com/recaptcha/api/siteverify', [
+        $recaptchaResponse = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
             'secret'   => config('services.recaptcha.secret_key'),
             'response' => $validatedData['recaptcha_token'],
             'remoteip' => $request->ip(),
@@ -249,13 +249,13 @@ class MainController extends Controller
         $recaptchaData = $recaptchaResponse->json();
 
         if (
-            ! $recaptchaData['success']
-            || $recaptchaData['action'] !== 'USER_ACTION'
-            || $recaptchaData['score'] < 0.5
+            ! data_get($recaptchaData, 'success')
+            || data_get($recaptchaData, 'action') !== 'contact_us'
+            || data_get($recaptchaData, 'score', 0) < 0.5
         ) {
-          throw ValidationException::withMessages([
-               'recaptcha_token' => 'reCAPTCHA verification failed.'
-           ]);
+            throw ValidationException::withMessages([
+                'recaptcha_token' => 'reCAPTCHA verification failed.'
+            ]);
         }
 
         unset($validatedData['recaptcha_token']);
