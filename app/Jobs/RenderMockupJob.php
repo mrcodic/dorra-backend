@@ -128,8 +128,11 @@ Log::error("node_render_url", [config('services.node_render_url') . '/api/render
                 'error_message' => $e->getMessage(),
             ]);
 
-            $this->bulkJob->increment('failed_count');
-            $this->checkCompletion();
+            // ✅ Only finalize the bulk job on the last attempt
+            if ($this->attempts() >= $this->tries) {
+                $this->bulkJob->increment('failed_count');
+                $this->checkCompletion();
+            }
 
             throw $e;
         }
