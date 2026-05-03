@@ -219,24 +219,32 @@
                     </div>
                     <div class="row">
                     <div class="row">
-                        <div class="form-group mb-2 col-md-6">
+                        <div class="form-group mb-2 col-md-12">
                             <label for="mockupName" class="label-text mb-1">Mockup Name</label>
                             <input type="text" id="templateName" class="form-control" name="name"
                                 placeholder="Mockup Name" value="{{ $model->name }}">
                         </div>
+                    </div>
+                        <div class="row">
 
-                    <div class="form-group mb-2 col-6">
-                        <label for="productsSelect" class="label-text mb-1">Product</label>
-                        <select id="productsSelect" name="category_id" class="form-select">
-                            <option value="" disabled selected>Choose product</option>
-                            @foreach($associatedData['products'] as $product)
-                            <option value="{{ $product->id }}" @selected($product->id == $model->category_id)>
-                                {{ $product->getTranslation('name', app()->getLocale()) }}
-                            </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    </div>
+                            <div class="form-group mb-2 col-6">
+                                <label for="productsSelect" class="label-text mb-1">Product</label>
+                                <select id="productsSelect" name="category_id" class="form-select">
+                                    <option value="" disabled selected>Choose product</option>
+                                    @foreach($associatedData['products'] as $product)
+                                        <option value="{{ $product->id }}" @selected($product->id == $model->category_id)>
+                                            {{ $product->getTranslation('name', app()->getLocale()) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group mb-2 col-6">
+                                <label for="categoriesSelect" class="label-text mb-1">Categories</label>
+                                <select id="categoriesSelect" name="product_ids[]" class="form-select" multiple>
+                                    <option value="" disabled selected>Choose category</option>
+                                </select>
+                            </div>
+                        </div>
 
                         <div class="row">
                  <div class="form-group mb-2 col-md-3">
@@ -448,6 +456,75 @@
             placeholder: 'Choose product',
             allowClear: true,
             width: '100%',
+        });
+
+        $('#categoriesSelect').select2({
+            placeholder: 'Choose category',
+            allowClear: true,
+            width: '100%',
+        });
+
+        const selectedCategoryIdsOnLoad = @json(
+        old('product_ids', isset($model) && method_exists($model, 'products')
+            ? $model->products->pluck('id')->map(fn($id) => (string) $id)->values()
+            : []
+        )
+    );
+
+        function loadCategoriesBySelectedProducts(preselectedIds = []) {
+            const selectedIds = $('#productsSelect').val();
+
+            const ids = Array.isArray(selectedIds)
+                ? selectedIds
+                : (selectedIds ? [selectedIds] : []);
+
+            const $right = $('#categoriesSelect');
+
+            if (!ids.length) {
+                $right.empty().trigger('change');
+                return;
+            }
+
+            $.ajax({
+                url: "{{ route('products.categories') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    category_ids: ids
+                },
+                success(response) {
+                    $right.empty();
+
+                    (response.data || []).forEach(cat => {
+                        const catId = String(cat.id);
+
+                        const isSelected = preselectedIds
+                            .map(String)
+                            .includes(catId);
+
+                        const opt = new Option(cat.name, cat.id, isSelected, isSelected);
+
+                        $(opt).attr('data-has-mockup', cat.has_mockup ? '1' : '0');
+
+                        $right.append(opt);
+                    });
+
+                    $right.trigger('change');
+                },
+                error(xhr) {
+                    console.error("Error fetching categories:", xhr.responseText);
+                }
+            });
+        }
+
+        $('#productsSelect').on('change', function () {
+            loadCategoriesBySelectedProducts([]);
+        });
+
+        $(document).ready(function () {
+            if ($('#productsSelect').val()) {
+                loadCategoriesBySelectedProducts(selectedCategoryIdsOnLoad);
+            }
         });
         // =========================
         // PRELOAD EXISTING COLORS (with_editor approach)
@@ -1990,10 +2067,10 @@
 
             renderFileInputs();
             if (window.jQuery) {
-                const $prod = $('#productsSelect');
-                if ($prod.length && $prod.val()) {
-                    $prod.trigger('change');
-                }
+                // const $prod = $('#productsSelect');
+                // if ($prod.length && $prod.val()) {
+                //     $prod.trigger('change');
+                // }
             }
         }
 

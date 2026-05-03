@@ -239,6 +239,9 @@ class MockupService extends BaseService
     {
         $model = $this->handleTransaction(function () use ($validatedData) {
             $model = $this->repository->create($validatedData);
+            if ($model->category->is_has_category) {
+                $model->products()->sync($validatedData['product_ids'] ?? $model->category->products->pluck('id'));
+            }
 //            if (!empty($warpPoints = $validatedData['warp_points'])) {
 //                foreach ($warpPoints as $side => $points) {
 //                    $model->sideSettings()->updateOrCreate(
@@ -313,6 +316,9 @@ class MockupService extends BaseService
             $before = $this->repository->find($id);
             $oldCategoryId = $before->category_id;
             $model = $this->repository->update($validatedData, $id);
+            if ($model->category->is_has_category) {
+                $model->products()->sync($validatedData['product_ids'] ?? $model->category->products->pluck('id'));
+            }
 //            if (!empty($warpPoints = $validatedData['warp_points'])) {
 //                foreach ($warpPoints as $side => $points) {
 //                    $model->sideSettings()->updateOrCreate(

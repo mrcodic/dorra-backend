@@ -162,11 +162,14 @@
                         <div class="row">
                             <div class="row">
 
-                                <div class="form-group mb-2 col-md-6">
+                                <div class="form-group mb-2 col-md-12">
                                     <label for="mockupName" class="label-text mb-1">Mockup Name</label>
                                     <input type="text" id="templateName" class="form-control" name="name"
                                            placeholder="Mockup Name">
                                 </div>
+
+                            </div>
+                            <div class="row">
 
                                 <div class="form-group mb-2 col-6">
                                     <label for="productsSelect" class="label-text mb-1">Product</label>
@@ -177,6 +180,12 @@
                                                 {{ $product->getTranslation('name', app()->getLocale()) }}
                                             </option>
                                         @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group mb-2 col-6">
+                                    <label for="categoriesSelect" class="label-text mb-1">Categories</label>
+                                    <select id="categoriesSelect" name="product_ids[]" class="form-select" multiple>
+                                        <option value="" disabled selected>Choose category</option>
                                     </select>
                                 </div>
                             </div>
@@ -344,6 +353,51 @@
             allowClear: true,
             width: '100%',
         });
+        $('#categoriesSelect').select2({
+            placeholder: 'Choose category',
+            allowClear: true,
+            width: '100%',
+        });
+
+        $('#productsSelect').on('change', function () {
+            const selectedIds = $(this).val();
+
+            const ids = Array.isArray(selectedIds)
+                ? selectedIds
+                : (selectedIds ? [selectedIds] : []);
+
+            const $right = $('#categoriesSelect');
+
+            if (ids.length > 0) {
+                $.ajax({
+                    url: "{{ route('products.categories') }}",
+                    type: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        category_ids: ids
+                    },
+                    success(response) {
+                        $right.empty();
+
+                        (response.data || []).forEach(cat => {
+                            const opt = new Option(cat.name, cat.id, false, true);
+                            $(opt).attr('data-has-mockup', cat.has_mockup ? '1' : '0');
+                            $right.append(opt);
+                        });
+
+                        $right.trigger('change');
+                    },
+                    error(xhr) {
+                        console.error("Error fetching categories:", xhr.responseText);
+                    }
+                });
+            } else {
+                $right.empty().trigger('change');
+            }
+        });
+
+
+
         window.templatePositions = window.templatePositions || {};
         var buildHiddenTemplateInputs;
         var calculateObjectPercents;
@@ -581,59 +635,59 @@
                     .get(); // → [1, 2] مثلاً
             }
 
-            function fetchTemplatesForProduct(productId) {
-                if (!productId) {
-                    resetTemplatesUI();
-                    return;
-                }
+            {{--function fetchTemplatesForProduct(productId) {--}}
+            {{--    if (!productId) {--}}
+            {{--        resetTemplatesUI();--}}
+            {{--        return;--}}
+            {{--    }--}}
 
-                resetTemplatesUI();
-                currentProductId = productId;
+            {{--    resetTemplatesUI();--}}
+            {{--    currentProductId = productId;--}}
 
-                $templatesCardsContainer.html(`
-                <div class="col-12 text-center py-2">
-                    Loading templates...
-                </div>
-            `);
-                $templatesWrapper.removeClass('d-none');
+            {{--    $templatesCardsContainer.html(`--}}
+            {{--    <div class="col-12 text-center py-2">--}}
+            {{--        Loading templates...--}}
+            {{--    </div>--}}
+            {{--`);--}}
+            {{--    $templatesWrapper.removeClass('d-none');--}}
 
-                $.ajax({
-                    url: "{{ route('product-templates.index') }}",
-                    method: "GET",
-                    data: {
-                        product_without_category_id: productId,
-                        request_type: "api",
-                        // approach: "without_editor",
-                        paginate: true,
-                        // has_not_mockups: true,
-                        per_page: 12,
-                        types: getSelectedTypesForRequest(),
-                    },
+            {{--    $.ajax({--}}
+            {{--        url: "{{ route('product-templates.index') }}",--}}
+            {{--        method: "GET",--}}
+            {{--        data: {--}}
+            {{--            product_without_category_id: productId,--}}
+            {{--            request_type: "api",--}}
+            {{--            // approach: "without_editor",--}}
+            {{--            paginate: true,--}}
+            {{--            // has_not_mockups: true,--}}
+            {{--            per_page: 12,--}}
+            {{--            types: getSelectedTypesForRequest(),--}}
+            {{--        },--}}
 
-                    success: function (response) {
-                        const data = response.data ?? {};
-                        const items = data.data ?? [];
-                        const links = data.links ?? {};
+            {{--        success: function (response) {--}}
+            {{--            const data = response.data ?? {};--}}
+            {{--            const items = data.data ?? [];--}}
+            {{--            const links = data.links ?? {};--}}
 
-                        firstPageTemplates = items;
-                        nextPageUrl = links.next || null;
+            {{--            firstPageTemplates = items;--}}
+            {{--            nextPageUrl = links.next || null;--}}
 
-                        renderTemplateCards(firstPageTemplates);
-                    },
-                    error: function (xhr) {
-                        console.error("Error loading templates", xhr);
-                        resetTemplatesUI();
-                    }
-                });
-            }
+            {{--            renderTemplateCards(firstPageTemplates);--}}
+            {{--        },--}}
+            {{--        error: function (xhr) {--}}
+            {{--            console.error("Error loading templates", xhr);--}}
+            {{--            resetTemplatesUI();--}}
+            {{--        }--}}
+            {{--    });--}}
+            {{--}--}}
 
             // =========================
             // Events: Product change
             // =========================
-            $productSelect.on('change', function () {
-                const productId = $(this).val();
-                fetchTemplatesForProduct(productId);
-            });
+            // $productSelect.on('change', function () {
+            //     const productId = $(this).val();
+            //     fetchTemplatesForProduct(productId);
+            // });
 
             // حالة edit: لو فيه value جاهزة
             if ($productSelect.val()) {
@@ -1239,10 +1293,10 @@
 
             renderFileInputs();
             if (window.jQuery) {
-                const $prod = $('#productsSelect');
-                if ($prod.length && $prod.val()) {
-                    $prod.trigger('change');
-                }
+                // const $prod = $('#productsSelect');
+                // if ($prod.length && $prod.val()) {
+                //     $prod.trigger('change');
+                // }
             }
         }
 

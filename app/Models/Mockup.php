@@ -14,7 +14,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Mockup extends Model implements HasMedia
 {
-    use InteractsWithMedia,SoftDeletes;
+    use InteractsWithMedia, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -55,6 +55,82 @@ class Mockup extends Model implements HasMedia
         'colors' => '["#000000","#ffffff"]',
     ];
 
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class)->withTimestamps();
+    }
+
+    public function getFrontBaseImageUrlAttribute(): ?string
+    {
+        return $this->getSideMediaUrl('front', 'base');
+    }
+
+    protected function getSideMediaUrl(string $side, string $role)
+    {
+        $media = $this->getMedia('mockups')->first(function ($media) use ($side, $role) {
+            return $media->getCustomProperty('side') === $side
+                && $media->getCustomProperty('role') === $role;
+        });
+
+        return $media?->getFullUrl();
+    }
+
+    public function getFrontMaskImageUrlAttribute(): ?string
+    {
+        return $this->getSideMediaUrl('front', 'mask');
+    }
+
+    public function getFrontShadowImageUrlAttribute(): ?string
+    {
+        return $this->getSideMediaUrl('front', 'shadow');
+    }
+
+    public function getBackBaseImageUrlAttribute(): ?string
+    {
+        return $this->getSideMediaUrl('back', 'base');
+    }
+
+    public function getBackMaskImageUrlAttribute(): ?string
+    {
+        return $this->getSideMediaUrl('back', 'mask');
+    }
+
+    public function getBackShadowImageUrlAttribute(): ?string
+    {
+        return $this->getSideMediaUrl('back', 'shadow');
+    }
+
+    public function getNoneBaseImageUrlAttribute(): ?string
+    {
+        return $this->getSideMediaUrl('none', 'base');
+    }
+
+    public function getNoneMaskImageUrlAttribute(): ?string
+    {
+        return $this->getSideMediaUrl('none', 'mask');
+    }
+
+    public function getNoneShadowImageUrlAttribute(): ?string
+    {
+        return $this->getSideMediaUrl('none', 'shadow');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function types()
+    {
+        return $this->morphToMany(Type::class, 'typeable')
+            ->using(Typeable::class)
+            ->withTimestamps();
+    }
+
+    public function sideSettings(): HasMany
+    {
+        return $this->hasMany(MockupSideSetting::class);
+    }
 
     protected function templateColors(): Attribute
     {
@@ -66,7 +142,7 @@ class Mockup extends Model implements HasMedia
                 : $this->templates()->withPivot(['colors', 'positions'])->get();
 
             if ($templateId) {
-                $templates = $templates->where('id', (int) $templateId);
+                $templates = $templates->where('id', (int)$templateId);
             }
 
             return $templates
@@ -82,15 +158,29 @@ class Mockup extends Model implements HasMedia
                     }
 
                     return collect($colors)
-                        ->filter(fn ($c) => is_string($c))
-                        ->map(fn ($c) => strtoupper(trim($c)))
-                        ->filter(fn ($c) => preg_match('/^#([A-F0-9]{3}|[A-F0-9]{6})$/', $c));
+                        ->filter(fn($c) => is_string($c))
+                        ->map(fn($c) => strtoupper(trim($c)))
+                        ->filter(fn($c) => preg_match('/^#([A-F0-9]{3}|[A-F0-9]{6})$/', $c));
                 })
                 ->unique()
                 ->values()
                 ->all();
         });
     }
+
+    public function templates()
+    {
+        return $this->belongsToMany(
+            Template::class,
+            'mockup_template',
+            'mockup_id',
+            'template_id'
+        )
+            ->using(MockupTemplate::class)
+            ->withPivot(['id', 'positions', 'colors', 'model_color'])
+            ->withTimestamps();
+    }
+
     protected function baseImageUrl(): Attribute
     {
         return Attribute::make(
@@ -116,86 +206,5 @@ class Mockup extends Model implements HasMedia
                 return null;
             }
         );
-    }
-    protected function getSideMediaUrl(string $side, string $role)
-    {
-        $media = $this->getMedia('mockups')->first(function ($media) use ($side, $role) {
-            return $media->getCustomProperty('side') === $side
-                && $media->getCustomProperty('role') === $role;
-        });
-
-        return $media?->getFullUrl();
-    }
-
-    public function getFrontBaseImageUrlAttribute(): ?string
-    {
-        return $this->getSideMediaUrl('front', 'base');
-    }
-
-    public function getFrontMaskImageUrlAttribute(): ?string
-    {
-        return $this->getSideMediaUrl('front', 'mask');
-    }
-    public function getFrontShadowImageUrlAttribute(): ?string
-    {
-        return $this->getSideMediaUrl('front', 'shadow');
-    }
-
-    public function getBackBaseImageUrlAttribute(): ?string
-    {
-        return $this->getSideMediaUrl('back', 'base');
-    }
-
-    public function getBackMaskImageUrlAttribute(): ?string
-    {
-        return $this->getSideMediaUrl('back', 'mask');
-    }
-    public function getBackShadowImageUrlAttribute(): ?string
-    {
-        return $this->getSideMediaUrl('back', 'shadow');
-    }
-
-    public function getNoneBaseImageUrlAttribute(): ?string
-    {
-        return $this->getSideMediaUrl('none', 'base');
-    }
-
-    public function getNoneMaskImageUrlAttribute(): ?string
-    {
-        return $this->getSideMediaUrl('none', 'mask');
-    }
-    public function getNoneShadowImageUrlAttribute(): ?string
-    {
-        return $this->getSideMediaUrl('none', 'shadow');
-    }
-
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class);
-    }
-
-    public function types()
-    {
-        return $this->morphToMany(Type::class, 'typeable')
-            ->using(Typeable::class)
-            ->withTimestamps();
-    }
-
-    public function templates()
-    {
-        return $this->belongsToMany(
-            Template::class,
-            'mockup_template',
-            'mockup_id',
-            'template_id'
-        )
-            ->using(MockupTemplate::class)
-            ->withPivot(['id','positions','colors','model_color'])
-            ->withTimestamps();
-    }
-
-    public function sideSettings(): HasMany
-    {
-        return $this->hasMany(MockupSideSetting::class);
     }
 }

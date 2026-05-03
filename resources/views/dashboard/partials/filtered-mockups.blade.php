@@ -70,7 +70,21 @@ $side => [
 {{--                </a>--}}
 {{--                @endcan--}}
                     @can('mockups_show')
-                        <a href="{{ config('services.editor_url') . 'mokup/' . $mockup->id . '?is_has_category=0&product_id=' . $mockup->category?->id }}"
+                    @php
+                        $productIds = $mockup->products
+                            ? $mockup->products->pluck('id')->values()->all()
+                            : [];
+
+                        $query = http_build_query([
+                            'is_has_category' => $mockup->category?->is_has_category,
+                            'product_id' => $mockup->category?->id
+                        ]);
+                     foreach ($productIds as $productId) {
+                            $query .= '&product_ids[]=' . urlencode($productId);
+                        }
+
+                    @endphp
+                        <a href="{{ rtrim(config('services.editor_url'), '/') . '/mokup/' . $mockup->id . '?' . $query }}"
                            target="_blank"
                            class="btn btn-outline-secondary flex-fill">
                             Show
