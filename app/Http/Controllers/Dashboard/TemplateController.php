@@ -476,7 +476,7 @@ class TemplateController extends DashboardController
                 'template_id' => (string)$template->id,
                 'hex'         => $hex,
                 'category_id' => (int)$mockup->category_id,
-                'product_ids' => (int)$mockup->products->pluck('id')->toArray(),
+                'product_ids' => (array) $mockup->products->pluck('id')->toArray(),
                 'model_image' => ($modelColor && $hex === $modelColor) ? 1 : 0,
             ];
 
