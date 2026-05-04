@@ -106,7 +106,23 @@ class TemplateResource extends JsonResource
             'has_cut_margin' => (bool)$this->cut_margin,
             'cut_margin' => $this->cut_margin,
             'approach' => $this->approach,
-            'colors' => $this->colors,
+            'colors' => $this->when(request()->has('mockup_id'), function () {
+                $mockupId = request('mockup_id');
+                if (!$mockupId) {
+                    return [];
+                }
+                $mockup = $this->mockups()
+                    ->where('mockups.id', $mockupId)
+                    ->first();
+
+                if (!$mockup || !$mockup->pivot) {
+                    return [];
+                }
+                $colors = $mockup->pivot->colors ?? [];
+                return is_array($colors)
+                    ? $colors
+                    : json_decode($colors ?: '[]', true);
+            }),
             'color_templates_media' => $this->when($this->approach == 'without_editor',function(){
                return MediaResource::collection( $this->getMedia('color_templates'));
             }),
