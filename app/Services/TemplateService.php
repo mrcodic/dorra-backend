@@ -574,7 +574,7 @@ class TemplateService extends BaseService
         $search = trim((string) request()->input('search', ''));
         $tags   = array_filter((array) request()->input('tags'));
         $types  = array_filter((array) request()->input('types'));
-        $productType  = array_filter((array) request()->input('product_type'));
+        $productType  = request()->input('product_type'));
         $productIds  = array_filter((array) request()->input('product_ids'));
 
         $recent = request()->boolean('recent');
@@ -638,11 +638,8 @@ class TemplateService extends BaseService
 //                        });
                 });
             })->when(!empty($productIds), function ($query) use ($productIds,$productType) {
-dd($productType);
                 if ($productType == 'product') {
-                    dd($productIds);
                     $query->whereHas('products', function ($sub) use ($productIds) {
-                        dd($sub->whereIn('products.id', $productIds)->get());
                         $sub->whereIn('products.id', $productIds);
                     });
                 }else{
