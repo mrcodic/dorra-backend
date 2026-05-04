@@ -576,7 +576,7 @@ class TemplateService extends BaseService
         $types  = array_filter((array) request()->input('types'));
         $productType  = array_filter((array) request()->input('product_type'));
         $productIds  = array_filter((array) request()->input('product_ids'));
-        dd($productIds);
+
         $recent = request()->boolean('recent');
         $templateOrderId = request()->input('template_order_id');
 
@@ -637,7 +637,7 @@ class TemplateService extends BaseService
 //                            $sub->where('mockups.category_id', $categoryId);
 //                        });
                 });
-            })->when($productIds, function ($query) use ($productIds,$productType) {
+            })->when(!empty($productIds), function ($query) use ($productIds,$productType) {
                 if ($productType == 'product') {
                     $query->whereHas('products', function ($sub) use ($productIds) {
                         dd($sub->whereIn('products.id', $productIds)->get());
