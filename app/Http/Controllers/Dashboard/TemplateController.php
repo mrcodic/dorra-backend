@@ -500,52 +500,67 @@ class TemplateController extends DashboardController
 
         $normalizedColor = $this->normalizeHex($request->model_color);
 
-        $attachedMockupIds = $template->mockups()->pluck('mockups.id')->toArray();
+        /*
+        |--------------------------------------------------------------------------
+        | Attach / update only current mockup pivot
+        |--------------------------------------------------------------------------
+        | Important:
+        | Do NOT set model_color = null for other mockups.
+        */
+        $alreadyAttached = $template->mockups()
+            ->where('mockups.id', $mockup->id)
+            ->exists();
 
-        foreach ($attachedMockupIds as $attachedMockupId) {
-            $template->mockups()->updateExistingPivot($attachedMockupId, [
-                'model_color' => ((int) $attachedMockupId === (int) $mockup->id)
-                    ? $request->model_color
-                    : null,
+        if ($alreadyAttached) {
+            $template->mockups()->updateExistingPivot($mockup->id, [
+                'model_color' => $request->model_color,
             ]);
-        }
-
-        if (!in_array((int) $mockup->id, array_map('intval', $attachedMockupIds), true)) {
+        } else {
             $template->mockups()->attach($mockup->id, [
                 'model_color' => $request->model_color,
             ]);
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Reset primary image only for this mockup + this template
+        |--------------------------------------------------------------------------
+        | Important:
+        | Do NOT reset generated_mockups for other mockups.
+        */
         Media::query()
             ->where('model_type', Mockup::class)
             ->where('model_id', $mockup->id)
             ->where('collection_name', 'generated_mockups')
             ->where('custom_properties->template_id', (string) $template->id)
-            ->where(function ($query) use ($mockup) {
-                $productIds = $mockup->products->pluck('id')->toArray();
-
-                $query->where('custom_properties->category_id', (int) $mockup->category_id);
-
-                foreach ($productIds as $productId) {
-                    $query->orWhereJsonContains('custom_properties->product_ids', (int) $productId);
-                }
-            })
             ->get()
             ->each(function (Media $media) {
                 $media->setCustomProperty('model_image', 0);
                 $media->save();
             });
-        $query = Media::query()
+
+        /*
+        |--------------------------------------------------------------------------
+        | Find selected generated mockup media
+        |--------------------------------------------------------------------------
+        */
+        $matchedMedia = Media::query()
             ->where('model_type', Mockup::class)
             ->where('model_id', $mockup->id)
             ->where('collection_name', 'generated_mockups')
             ->where('custom_properties->template_id', (string) $template->id)
-            ->where('custom_properties->hex', $normalizedColor);
+            ->where('custom_properties->hex', $normalizedColor)
+            ->where('custom_properties->side', $request->side)
+            ->get();
 
-
-        $matchedMedia = $query->get();
-
-        if ($matchedMedia->isEmpty() && $request->side !== 'none') {
+        /*
+        |--------------------------------------------------------------------------
+        | Fallback
+        |--------------------------------------------------------------------------
+        | If selected side does not exist, select any media with same color
+        | for this mockup/template only.
+        */
+        if ($matchedMedia->isEmpty()) {
             $matchedMedia = Media::query()
                 ->where('model_type', Mockup::class)
                 ->where('model_id', $mockup->id)
