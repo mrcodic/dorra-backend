@@ -171,7 +171,6 @@ class MockupService extends BaseService
                 $productIds = request('product_ids');
 
                 if ($type === 'category') {
-                    dd($productIds,$q->whereIn('category_id',$productIds)->get());
                     $q->whereIn('category_id',$productIds);
 //                    $q->whereCategoryId($productId);
                 }
@@ -203,42 +202,6 @@ class MockupService extends BaseService
                             ->where('templates.id', request('template_id'))
                             ->whereJsonContains('mockup_template.colors', request('color'));
                     })
-            )
-            ->when(
-                request()->filled('product_ids') || request()->filled('category_ids'),
-                function ($q) {
-                    $productIds = collect(request()->input('product_ids', []))
-                        ->flatten()
-                        ->filter(fn ($id) => is_numeric($id))
-                        ->map(fn ($id) => (int) $id)
-                        ->filter()
-                        ->unique()
-                        ->values()
-                        ->all();
-
-                    $categoryIds = collect(request()->input('category_ids', []))
-                        ->flatten()
-                        ->filter(fn ($id) => is_numeric($id))
-                        ->map(fn ($id) => (int) $id)
-                        ->filter()
-                        ->unique()
-                        ->values()
-                        ->all();
-
-                    $q->where(function ($query) use ($productIds, $categoryIds) {
-                        if (!empty($productIds)) {
-                            $query->whereHas('products', function ($sub) use ($productIds) {
-                                $sub->whereIn('products.id', $productIds);
-                            });
-
-                        }
-                        if (!empty($categoryIds)) {
-                            $method = !empty($productIds) ? 'orWhereIn' : 'whereIn';
-                            $query->{$method}('category_id', $categoryIds);
-
-                        }
-                    });
-                }
             )
             ->when(request()->filled('type'), fn($q) => $q->whereHas('types', fn($q) => $q->where('types.value', (int)request('type'))
             )
