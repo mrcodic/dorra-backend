@@ -520,13 +520,15 @@ class TemplateController extends DashboardController
             ->where('model_type', Mockup::class)
             ->where('collection_name', 'generated_mockups')
             ->where('custom_properties->template_id', (string) $template->id)
-            ->where('custom_properties->category_id', (int) $mockup->category->id)
+            ->where(function ($query) use ($mockup) {
+                $query->where('custom_properties->category_id', (int) $mockup->category_id)
+                    ->orWhereJsonContains('custom_properties->product_ids', (array) $mockup->products->pluck('id')->toArray());
+            })
             ->get()
             ->each(function (Media $media) {
                 $media->setCustomProperty('model_image', 0);
                 $media->save();
             });
-
         $query = Media::query()
             ->where('model_type', Mockup::class)
             ->where('model_id', $mockup->id)
