@@ -35,16 +35,13 @@ class MockupService extends BaseService
         $templateId = request('template_id');
         $color = request('color');
 
-        $categoryId = $productType === 'category'
-            ? $categoryId
-            : $this->productRepository
-                ->query()
-                ->whereId($categoryId)
-                ->value('category_id');
 
         $mockups = $this->repository
             ->query()
-            ->when($categoryId, fn($q) => $q->whereCategoryId($categoryId))
+            ->when($productType === 'category', fn($q) => $q->whereCategoryId($categoryId))
+            ->when($productType === 'product', fn($q) => $q->whereHas('products',function ($q) use ($categoryId) {
+                $q->where('products.id', $categoryId);
+            }))
             ->when($templateId, fn($q) => $q->whereHas('templates', fn($qq) => $qq->where('templates.id', $templateId)))
             ->with([
                 'templates:id',
