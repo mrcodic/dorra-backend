@@ -163,9 +163,10 @@ class RenderMockupJob implements ShouldQueue
         $job->update([
             'completed_count' => $counts->completed,
             'failed_count'    => $counts->failed,
-            'status'          => match(true) {
-                $counts->completed === 0               => 'failed',
-                default            => 'completed',
+            'status' => match(true) {
+                $counts->failed > 0    => 'failed',
+                $counts->completed > 0 => 'completed',
+                default                => 'failed',
             },
             'completed_at'    => now(),
         ]);
