@@ -102,11 +102,18 @@ class MockupService extends BaseService
                 $colors = $mockup->templates
                     ->filter(fn($tpl) => $tpl->id == $templateId)
                     ->flatMap(function ($tpl) {
-                        $c = $tpl->pivot->colors ?? [];
-                        if (is_string($c)) {
-                            $c = json_decode($c, true) ?: [];
+                        $colors = $tpl->pivot->colors ?? [];
+                        if (is_string($colors)) {
+                            $colors = json_decode($c, true) ?: [];
                         }
-                        return is_array($c) ? $c : [];
+                        $modelColor = $tpl->pivot->model_color ?? null;
+                        if ($modelColor && in_array($modelColor, $colors)) {
+                            $colors = array_merge(
+                                [$modelColor],
+                                array_values(array_filter($colors, fn($color) => $color !== $modelColor))
+                            );
+                        }
+                        return is_array($colors) ? $colors : [];
                     })
                     ->filter()
                     ->unique()
