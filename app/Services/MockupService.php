@@ -171,7 +171,7 @@ class MockupService extends BaseService
                 $productIds = request('product_ids');
 
                 if ($type === 'category') {
-                    dd($productIds);
+                    dd($productIds,$q->whereIn('category_id',$productIds)->get());
                     $q->whereIn('category_id',$productIds);
 //                    $q->whereCategoryId($productId);
                 }
