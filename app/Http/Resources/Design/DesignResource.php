@@ -122,6 +122,7 @@ class DesignResource extends JsonResource
 
                 if ($this->template)
                 {
+                    
                     $mockup = $this->template?->mockups()
                         ->where('mockups.id', $mockupId)
                         ->first();
