@@ -638,6 +638,7 @@ class TemplateService extends BaseService
 //                        });
                 });
             })->when(!empty($productIds), function ($query) use ($productIds,$productType) {
+                dd("sdfsdf");
                 if ($productType == 'product') {
                     $query->whereHas('products', function ($sub) use ($productIds) {
                         dd($sub->whereIn('products.id', $productIds)->get());
