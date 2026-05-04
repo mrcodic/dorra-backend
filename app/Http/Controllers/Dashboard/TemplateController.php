@@ -521,8 +521,13 @@ class TemplateController extends DashboardController
             ->where('collection_name', 'generated_mockups')
             ->where('custom_properties->template_id', (string) $template->id)
             ->where(function ($query) use ($mockup) {
-                $query->where('custom_properties->category_id', (int) $mockup->category_id)
-                    ->orWhereJsonContains('custom_properties->product_ids', (array) $mockup->products->pluck('id')->toArray());
+                $productIds = $mockup->products->pluck('id')->toArray();
+
+                $query->where('custom_properties->category_id', (int) $mockup->category_id);
+
+                foreach ($productIds as $productId) {
+                    $query->orWhereJsonContains('custom_properties->product_ids', (int) $productId);
+                }
             })
             ->get()
             ->each(function (Media $media) {
