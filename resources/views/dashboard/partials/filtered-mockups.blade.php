@@ -76,20 +76,19 @@
                                 ? $mockup->products->pluck('id')->values()->all()
                                 : [];
 
+                            $isHasCategory = (int) ($mockup->category?->is_has_category ?? 0);
+
                             $query = http_build_query([
-                                'is_has_category' => $mockup->category?->is_has_category
+                                'is_has_category' => $isHasCategory,
                             ]);
 
-                                if ($mockup->category?->is_has_category == 0){
-                                     $query .= '&product_ids[]=' . urlencode($mockup->category_id);
+                            if ($isHasCategory == 0) {
+                                $query .= '&product_ids[]=' . urlencode($mockup->category_id);
+                            } else {
+                                foreach ($productIds as $productId) {
+                                    $query .= '&product_ids[]=' . urlencode($productId);
                                 }
-                                else{
-                                    foreach ($productIds as $productId) {
-                                $query .= '&product_ids[]=' . urlencode($productId);
                             }
-                                }
-
-
                         @endphp
                         <a href="{{ rtrim(config('services.editor_url'), '/') . '/mokup/' . $mockup->id . '?' . $query }}"
                            target="_blank"
