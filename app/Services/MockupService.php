@@ -165,7 +165,7 @@ class MockupService extends BaseService
             })->when(request()->filled('approach'), function ($query) {
                 $query->whereApproach(request('approach'));
             })
-            ->when(request()->filled('product_id'), function ($q) {
+            ->when(request()->filled('product_id') ||request()->filled('product_ids') , function ($q) {
 
                 $type = request('product_type');
                 $productId = request('product_id');

@@ -65,7 +65,7 @@ class MockupResource extends JsonResource
             'displacement_scale' => $this->displacement_scale,
             'types' => TypeResource::collection($this->whenLoaded('types')),
             'product' => CategoryResource::make($this->whenLoaded('category')),
-            'colors' => $this->templateColors ?: $this->colors,
+            'colors' => $this->colors ?: $this->templateColors,
             'base_image_url' => $this->base_image_url,
             'area_top' => $this->area_top,
             'area_left' => $this->area_left,
