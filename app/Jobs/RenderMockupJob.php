@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -139,37 +140,37 @@ class RenderMockupJob implements ShouldQueue
 
     private function checkCompletion(): void
     {
-        $job = $this->bulkJob->fresh();
+        DB::transaction(function () {
+            $job = MockupGenerationJob::lockForUpdate()->find($this->bulkJob->id);
 
+            if (!$job || in_array($job->status, ['completed', 'completed_with_errors', 'failed', 'cancelled'])) {
+                return;
+            }
 
-        if (in_array($job->status, ['completed', 'completed_with_errors', 'failed', 'cancelled'])) {
-            return;
-        }
+            $counts = BulkJobItem::where('bulk_job_id', $job->id)
+                ->selectRaw("
+                COUNT(*) as total,
+                SUM(status = 'completed') as completed,
+                SUM(status = 'failed') as failed,
+                SUM(status IN ('pending', 'processing')) as pending
+            ")
+                ->first();
 
-        $counts = BulkJobItem::where('bulk_job_id', $job->id)
-            ->selectRaw("
-            COUNT(*) as total,
-            SUM(status = 'completed') as completed,
-            SUM(status = 'failed') as failed,
-            SUM(status IN ('pending', 'processing')) as pending
-        ")
-            ->first();
+            if ((int) $counts->pending > 0) {
+                return;
+            }
 
-
-        if ($counts->pending > 0) {
-            return;
-        }
-
-        $job->update([
-            'completed_count' => $counts->completed,
-            'failed_count'    => $counts->failed,
-            'status' => match(true) {
-                $counts->failed > 0    => 'failed',
-                $counts->completed > 0 &&  $counts->failed == 0 => 'completed',
-                default                => 'failed',
-            },
-            'completed_at'    => now(),
-        ]);
+            $job->update([
+                'completed_count' => (int) $counts->completed,
+                'failed_count'    => (int) $counts->failed,
+                'status'          => match(true) {
+                    (int) $counts->failed > 0  => 'failed',
+                    (int) $counts->completed > 0 => 'completed',
+                    default                    => 'failed',
+                },
+                'completed_at' => now(),
+            ]);
+        });
     }
 
 
