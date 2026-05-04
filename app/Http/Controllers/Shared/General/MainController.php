@@ -227,6 +227,73 @@ class MainController extends Controller
         return Response::api(data: ['id' => uniqid()]);
     }
 
+
+    private function verifyRecaptchaEnterprise(
+        Request $request,
+        string $token,
+        string $expectedAction = 'contact_us'
+    ): void {
+        $projectId = config('services.recaptcha_enterprise.project_id');
+        $siteKey = config('services.recaptcha_enterprise.site_key');
+        $apiKey = config('services.recaptcha_enterprise.api_key');
+        $minScore = (float) config('services.recaptcha_enterprise.min_score', 0.5);
+
+        if (!$projectId || !$siteKey || !$apiKey) {
+            throw ValidationException::withMessages([
+                'recaptcha_token' => ['reCAPTCHA Enterprise is not configured.'],
+            ]);
+        }
+
+        $url = "https://recaptchaenterprise.googleapis.com/v1/projects/{$projectId}/assessments?key={$apiKey}";
+
+        $response = Http::post($url, [
+            'event' => [
+                'token' => $token,
+                'siteKey' => $siteKey,
+                'expectedAction' => $expectedAction,
+                'userAgent' => $request->userAgent(),
+                'userIpAddress' => $request->ip(),
+            ],
+        ]);
+
+        $data = $response->json();
+
+        Log::info('recaptcha enterprise assessment', [
+            'status' => $response->status(),
+            'response' => $data,
+        ]);
+
+        $valid = (bool) data_get($data, 'tokenProperties.valid', false);
+        $invalidReason = data_get($data, 'tokenProperties.invalidReason');
+        $action = data_get($data, 'tokenProperties.action');
+        $score = (float) data_get($data, 'riskAnalysis.score', 0);
+
+        if (!$response->successful()) {
+            throw ValidationException::withMessages([
+                'recaptcha_token' => ['reCAPTCHA Enterprise request failed.'],
+            ]);
+        }
+
+        if (!$valid) {
+            throw ValidationException::withMessages([
+                'recaptcha_token' => [
+                    'reCAPTCHA verification failed: ' . ($invalidReason ?: 'invalid token'),
+                ],
+            ]);
+        }
+
+        if ($action !== $expectedAction) {
+            throw ValidationException::withMessages([
+                'recaptcha_token' => ['reCAPTCHA action mismatch.'],
+            ]);
+        }
+
+        if ($score < $minScore) {
+            throw ValidationException::withMessages([
+                'recaptcha_token' => ['reCAPTCHA score is too low.'],
+            ]);
+        }
+    }
     /**
      * @throws ValidationException
      */
@@ -240,25 +307,10 @@ class MainController extends Controller
             'recaptcha_token'  => 'required|string',
         ]);
 
-        $recaptchaResponse = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-            'secret'   => config('services.recaptcha.secret_key'),
-            'response' => $validatedData['recaptcha_token'],
-            'remoteip' => $request->ip(),
-        ]);
-
-        $recaptchaData = $recaptchaResponse->json();
-
-        if (
-            ! data_get($recaptchaData, 'success')
-            || data_get($recaptchaData, 'action') !== 'contact_us'
-            || data_get($recaptchaData, 'score', 0) < 0.5
-        ) {
-            throw ValidationException::withMessages([
-                'recaptcha_token' => 'reCAPTCHA verification failed.'
-            ]);
-        }
-
-        unset($validatedData['recaptcha_token']);
+        $this->verifyRecaptchaEnterprise(
+            $request,
+            $validatedData['recaptcha_token'],
+        );
 
         $messageRepository->create($validatedData);
 

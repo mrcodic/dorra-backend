@@ -90,8 +90,11 @@ return [
     'editor_url' => env('FRONT_END_EDITOR_URL'),
     'node_render_url' => env('NODE_RENDER_URL'),
     'site_url' => env('FRONT_END_URL'),
-    'recaptcha' => [
-        'secret_key' => env('RECAPTCHA_SECRET_KEY')
+    'recaptcha_enterprise' => [
+        'site_key' => env('RECAPTCHA_SITE_KEY'),
+        'api_key' => env('RECAPTCHA_API_KEY'),
+        'project_id' => env('RECAPTCHA_PROJECT_ID'),
+        'min_score' => env('RECAPTCHA_MIN_SCORE'),
     ]
 
 ];
