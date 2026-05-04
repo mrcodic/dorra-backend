@@ -184,7 +184,7 @@ class BulkMockupController extends Controller
             ]);
         }
 
-        if (!in_array($bulkJob->status, ['failed', 'completed_with_errors','cancelled'])) {
+        if (!in_array($bulkJob->status, ['failed', 'completed_with_errors', 'cancelled'])) {
             throw ValidationException::withMessages([
                 'status' => ['Only failed or completed_with_errors jobs can be retried.'],
             ]);
@@ -200,6 +200,14 @@ class BulkMockupController extends Controller
             ]);
         }
 
+        BulkJobItem::where('bulk_job_id', $bulkJob->id)
+            ->where('status', 'failed')
+            ->update([
+                'status'        => 'pending',
+                'error_message' => null,
+                'output_path'   => null,
+            ]);
+
         $bulkJob->update([
             'status'       => 'processing',
             'failed_count' => 0,
@@ -208,14 +216,9 @@ class BulkMockupController extends Controller
             'started_at'   => now(),
         ]);
 
+        // ✅ Dispatch only after all rows are already 'pending' in the DB
         foreach ($failedItems as $item) {
-            $item->update([
-                'status'        => 'pending',
-                'error_message' => null,
-                'output_path'   => null,
-            ]);
-
-            RenderMockupJob::dispatch($bulkJob, $item, $mockup);
+            RenderMockupJob::dispatch($bulkJob, $item->fresh(), $mockup);
         }
 
         return Response::api(data: [
