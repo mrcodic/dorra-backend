@@ -78,7 +78,17 @@ class MockupService extends BaseService
                     if (is_string($c)) {
                         $c = json_decode($c, true) ?: [];
                     }
-                    return is_array($c) ? $c : [];
+                    $colors = is_array($c) ? $c : [];
+
+                    $modelColor = $tpl->pivot->model_color ?? null;
+                    if ($modelColor && in_array($modelColor, $colors)) {
+                        $colors = array_merge(
+                            [$modelColor],
+                            array_values(array_filter($colors, fn($color) => $color !== $modelColor))
+                        );
+                    }
+
+                    return $colors;
                 })
             )
             ->filter()

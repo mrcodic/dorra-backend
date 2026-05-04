@@ -500,13 +500,6 @@ class TemplateController extends DashboardController
 
         $normalizedColor = $this->normalizeHex($request->model_color);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Attach / update only current mockup pivot
-        |--------------------------------------------------------------------------
-        | Important:
-        | Do NOT set model_color = null for other mockups.
-        */
         $alreadyAttached = $template->mockups()
             ->where('mockups.id', $mockup->id)
             ->exists();
@@ -521,13 +514,6 @@ class TemplateController extends DashboardController
             ]);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Reset primary image only for this mockup + this template
-        |--------------------------------------------------------------------------
-        | Important:
-        | Do NOT reset generated_mockups for other mockups.
-        */
         Media::query()
             ->where('model_type', Mockup::class)
             ->where('model_id', $mockup->id)
@@ -539,11 +525,6 @@ class TemplateController extends DashboardController
                 $media->save();
             });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Find selected generated mockup media
-        |--------------------------------------------------------------------------
-        */
         $matchedMedia = Media::query()
             ->where('model_type', Mockup::class)
             ->where('model_id', $mockup->id)
@@ -553,13 +534,7 @@ class TemplateController extends DashboardController
             ->where('custom_properties->side', $request->side)
             ->get();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Fallback
-        |--------------------------------------------------------------------------
-        | If selected side does not exist, select any media with same color
-        | for this mockup/template only.
-        */
+
         if ($matchedMedia->isEmpty()) {
             $matchedMedia = Media::query()
                 ->where('model_type', Mockup::class)
