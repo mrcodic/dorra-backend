@@ -38,8 +38,9 @@ class MockupService extends BaseService
 
         $mockups = $this->repository
             ->query()
-            ->when($productType === 'category', fn($q) => $q->whereCategoryId($categoryId))
-            ->when($productType === 'product', fn($q) => $q->whereHas('products',function ($q) use ($categoryId) {
+            ->when($productType == 'category', fn($q) => $q->whereCategoryId($categoryId))
+            ->when($productType == 'product', fn($q) => $q->whereHas('products',function ($q) use ($categoryId) {
+                dd("Fsdfsd");
                 $q->where('products.id', $categoryId);
             }))
             ->when($templateId, fn($q) => $q->whereHas('templates', fn($qq) => $qq->where('templates.id', $templateId)))
