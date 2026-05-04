@@ -576,6 +576,7 @@ class TemplateService extends BaseService
         $types  = array_filter((array) request()->input('types'));
         $productType  = array_filter((array) request()->input('product_type'));
         $productIds  = array_filter((array) request()->input('product_ids'));
+        dd($productIds);
         $recent = request()->boolean('recent');
         $templateOrderId = request()->input('template_order_id');
 
