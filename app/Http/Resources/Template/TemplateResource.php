@@ -134,6 +134,18 @@ class TemplateResource extends JsonResource
             ),
             'price' => $this->price,
             'visible_download_btn' => $this->when($this->price,true),
+            'attached_with_mockup' => $this->when(request()->has('mockup_id'), function () {
+                $mockupId = request('mockup_id');
+                if (!$mockupId) {
+                    return false;
+                }
+                if ($this->relationLoaded('mockups')) {
+                    return $this->mockups->contains('id', (int) $mockupId);
+                }
+                return $this->mockups()
+                    ->where('mockups.id', $mockupId)
+                    ->exists();
+            }),
         ];
     }
 
