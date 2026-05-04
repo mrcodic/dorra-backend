@@ -171,18 +171,27 @@ class MockupService extends BaseService
                 $productIds = request('product_ids');
 
                 if ($type === 'category') {
-                    $q->whereIn('category_id',$productIds);
-                    $q->whereCategoryId($productId);
+                    if ($productIds){
+                        $q->whereIn('category_id',$productIds);
+                    }else{
+                        $q->whereCategoryId($productId);
+
+                    }
                 }
                 if ($type === 'product') {
-                    $q->whereHas('products', function ($q) use ($productId) {
-                        $q->where('products.id', $productId);
-                    });
-                    $product = Product::find($productId);
-
-                    if ($product) {
-                        $q->whereCategoryId($product->category_id);
+                    if ($productIds){
+                        $q->whereHas('products', function ($q) use ($productIds) {
+                            $q->whereIn('products.id', $productIds);
+                        });
                     }
+                   else{
+                       $product = Product::find($productId);
+
+                       if ($product) {
+                           $q->whereCategoryId($product->category_id);
+                       }
+                   }
+
                 }
             })
             ->when(request()->filled('template_id'), fn($q) => $q->whereHas('templates', function ($query) {
