@@ -113,6 +113,33 @@ class DesignResource extends JsonResource
                 })
             ),
             'is_added_to_cart' => $this->isAddedToCart(),
+            'colors' => $this->when(request()->has('mockup_id'), function () {
+                $mockupId = request('mockup_id');
+                if (!$mockupId) {
+                    return [];
+                }
+                $mockup = $this->template->mockups()
+                    ->where('mockups.id', $mockupId)
+                    ->first();
+                if ($this->template)
+                {
+
+                    if (!$mockup || !$mockup->pivot) {
+                    return [];
+                      }
+                    $colors = $mockup->pivot->colors ?? [];
+                }else{
+                    $colors = $mockup->colors;
+
+                }
+
+
+
+                return is_array($colors)
+                    ? $colors
+                    : json_decode($colors ?: '[]', true);
+            }),
+
         ];
     }
 }
