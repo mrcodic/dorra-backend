@@ -14,6 +14,7 @@ use App\Http\Resources\Template\TemplateResource;
 use App\Http\Resources\Template\TypeResource;
 use App\Http\Resources\UserResource;
 use App\Models\Category;
+use App\Models\Mockup;
 use App\Models\Product;
 use App\Models\ProductSpecification;
 use Illuminate\Http\Request;
@@ -118,17 +119,18 @@ class DesignResource extends JsonResource
                 if (!$mockupId) {
                     return [];
                 }
-                $mockup = $this->template->mockups()
-                    ->where('mockups.id', $mockupId)
-                    ->first();
+
                 if ($this->template)
                 {
-
+                    $mockup = $this->template?->mockups()
+                        ->where('mockups.id', $mockupId)
+                        ->first();
                     if (!$mockup || !$mockup->pivot) {
                     return [];
                       }
                     $colors = $mockup->pivot->colors ?? [];
                 }else{
+                    $mockup = Mockup::find($mockupId);
                     $colors = $mockup->colors;
 
                 }
