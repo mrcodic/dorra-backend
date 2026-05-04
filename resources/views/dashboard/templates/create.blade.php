@@ -713,21 +713,48 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
         $(function () {
             const q = "{{ request()->query('q') }}";
             const isWithoutEditor = (q === 'without' || q === 'without_editor');
-            const $cardsWrap    = $('#mockupsCards');
-            const $mockupWrap   = $('.mockupWrapper');
-            const $hiddenWrap   = $('#mockupsHiddenInputs');
 
-            // ── Single source of truth ──────────────────────────────────────────
+            const $cardsWrap  = $('#mockupsCards');
+            const $mockupWrap = $('.mockupWrapper');
+            const $hiddenWrap = $('#mockupsHiddenInputs');
+
             const selected = new Set();
+
+            function getSelectValues(selector) {
+                const value = $(selector).val();
+
+                if (Array.isArray(value)) {
+                    return value.map(String).filter(Boolean);
+                }
+
+                return value ? [String(value)] : [];
+            }
 
             function syncHiddenInputs() {
                 $hiddenWrap.empty();
+
                 [...selected].forEach(id => {
                     $hiddenWrap.append(`<input type="hidden" name="mockup_ids[]" value="${id}">`);
                 });
             }
+            function checkAllSelectedHaveMockup() {
+                const allSelected = [
+                    ...$('#categoriesSelect').find('option:selected'),
+                    ...$('#productsSelect').find('option:selected'),
+                    ...$('#productsWithoutCategoriesSelect').find('option:selected')
+                ];
 
-            // ── Card rendering ──────────────────────────────────────────────────
+                if (!allSelected.length) {
+                    $mockupWrap.addClass('d-none');
+                } else {
+                    $mockupWrap.removeClass('d-none');
+                }
+            }
+
+            window.checkAllSelectedHaveMockup = checkAllSelectedHaveMockup;
+
+            window.checkAllSelectedHaveMockup = checkAllSelectedHaveMockup;
+
             function renderMockupCards(items) {
                 $mockupWrap.removeClass('d-none');
                 $cardsWrap.empty();
@@ -737,91 +764,173 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                     syncHiddenInputs();
                     return;
                 }
+
                 const urlParams = new URLSearchParams(window.location.search);
                 const isWithEditor = urlParams.get('q') === 'with';
+
                 items.forEach(mockup => {
-                    const id      = String(mockup.id);
-                    const name    = mockup.name ?? ('Mockup #' + id);
-                    const images  = mockup?.images || {};
+                    const id = String(mockup.id);
+                    const name = mockup.name ?? ('Mockup #' + id);
+                    const images = mockup?.images || {};
                     const firstKey = Object.keys(images)[0];
-                    const img     = (firstKey && images[firstKey]?.base_url)
+
+                    const img = (firstKey && images[firstKey]?.base_url)
                         || "{{ asset('images/placeholder.svg') }}";
 
                     const isSelected = selected.has(id);
 
                     $cardsWrap.append(`
-              <div class="col-12 col-md-4 col-lg-2">
-                <div class="mockup-card${isSelected ? ' selected' : ''}" data-id="${id}">
-                  <div class="card rounded-3 shadow-sm" style="border:1px solid #24B094;">
+                    <div class="col-12 col-md-4 col-lg-2">
+                        <div class="mockup-card${isSelected ? ' selected' : ''}" data-id="${id}">
+                            <div class="card rounded-3 shadow-sm" style="border:1px solid #24B094; position:relative;">
 
-                    <!-- checkbox — NO name attribute, purely visual -->
-                    <div class="position-absolute" style="top:10px;left:10px;z-index:20;">
-                      <input
-                        class="form-check-input js-mockup-checkbox"
-                        type="checkbox"
-                        value="${id}"
-                        ${isSelected ? 'checked' : ''}
-                      />
+                                <div class="position-absolute" style="top:10px;left:10px;z-index:20;">
+                                    <input
+                                        class="form-check-input js-mockup-checkbox"
+                                        type="checkbox"
+                                        value="${id}"
+                                        ${isSelected ? 'checked' : ''}
+                                    />
+                                </div>
+
+                                <div class="d-flex justify-content-center align-items-center"
+                                     style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">
+                                    <img src="${img}" class="mx-auto d-block"
+                                         style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:8px;"
+                                         alt="${name}">
+                                </div>
+
+                                <div class="card-body py-2">
+                                    <h6 class="card-title mb-2 text-truncate">${name}</h6>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="d-flex justify-content-center align-items-center"
-                         style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">
-                      <img src="${img}" class="mx-auto d-block"
-                           style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:8px;"
-                           alt="${name}">
-                    </div>
-
-                    <div class="card-body py-2">
-                      <h6 class="card-title mb-2 text-truncate">${name}</h6>
-
-
-                    </div>
-                  </div>
-                </div>
-              </div>
-            `);
+                `);
                 });
 
                 syncHiddenInputs();
             }
 
-            // ── Toggle selection (card click OR checkbox click — same handler) ──
             function toggleMockup(id) {
                 id = String(id);
+
                 if (selected.has(id)) {
                     selected.delete(id);
                 } else {
                     selected.add(id);
                 }
 
-                // Keep card border + checkbox in sync
                 const $card = $(`.mockup-card[data-id="${id}"]`);
+
                 $card.toggleClass('selected', selected.has(id));
                 $card.find('.js-mockup-checkbox').prop('checked', selected.has(id));
 
                 syncHiddenInputs();
             }
 
-            // Card body click (excluding button clicks)
             $(document).on('click', '.mockup-card', function (e) {
-                if ($(e.target).closest('button').length) return; // ignore button clicks
+                if ($(e.target).closest('button, a, input').length) {
+                    return;
+                }
+
                 toggleMockup($(this).data('id'));
             });
 
-            // Checkbox click (stop propagation so card handler doesn't also fire)
             $(document).on('click', '.js-mockup-checkbox', function (e) {
                 e.stopPropagation();
                 toggleMockup($(this).val());
             });
 
-            // ── Fetch mockups ───────────────────────────────────────────────────
-            function fetchMockups() {
-                const idsWithCat    = $('#categoriesSelect').val() || [];
-                const idsWithoutCat = $('#productsWithoutCategoriesSelect').val() || [];
-                const idsProds = $('#productsSelect').val() || [];
-                const allProductIds = [...idsWithCat, ...idsWithoutCat];
+            function loadCategoriesForSelectedProducts(callback = null) {
+                const selectedProductIds = getSelectValues('#categoriesSelect');
+                const $categories = $('#productsSelect');
 
-                if (!allProductIds.length) {
+                if (!selectedProductIds.length) {
+                    $categories.empty().trigger('change.select2');
+
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+
+                    return;
+                }
+
+                $.ajax({
+                    url: "{{ route('products.categories') }}",
+                    type: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        category_ids: selectedProductIds
+                    },
+                    success(response) {
+                        const oldSelected = getSelectValues('#productsSelect');
+
+                        $categories.empty();
+
+                        (response.data || []).forEach(cat => {
+                            const catId = String(cat.id);
+
+                            /*
+                             * Important:
+                             * Select returned categories automatically.
+                             * This is why $('#productsSelect').val() will not be [] after reload.
+                             */
+                            const isSelected = oldSelected.length
+                                ? oldSelected.includes(catId)
+                                : true;
+
+                            const option = new Option(
+                                cat.name,
+                                cat.id,
+                                isSelected,
+                                isSelected
+                            );
+
+                            $(option).attr('data-has-mockup', cat.has_mockup ? '1' : '0');
+
+                            $categories.append(option);
+                        });
+
+                        $categories.trigger('change.select2');
+
+                        if (typeof callback === 'function') {
+                            callback();
+                        }
+                    },
+                    error(xhr) {
+                        console.error("Error loading categories:", xhr.responseText);
+
+                        $categories.empty().trigger('change.select2');
+
+                        if (typeof callback === 'function') {
+                            callback();
+                        }
+                    }
+                });
+            }
+
+            function fetchMockups() {
+                const productIdsWithCategory = getSelectValues('#categoriesSelect');
+                const productIdsWithoutCategory = getSelectValues('#productsWithoutCategoriesSelect');
+
+                // Categories loaded from selected products with categories
+                const categoryIds = getSelectValues('#productsSelect');
+
+                /*
+                 * IMPORTANT:
+                 * - Products With Categories => send ONLY category_ids
+                 * - Products Without Categories => send ONLY product_ids
+                 */
+                const productIdsToSend = productIdsWithoutCategory;
+                const categoryIdsToSend = productIdsWithCategory.length > 0 ? categoryIds : [];
+
+                console.log('productIdsWithCategory', productIdsWithCategory);
+                console.log('productIdsWithoutCategory', productIdsWithoutCategory);
+                console.log('categoryIdsToSend', categoryIdsToSend);
+                console.log('productIdsToSend', productIdsToSend);
+
+                if (!productIdsToSend.length && !categoryIdsToSend.length) {
                     $cardsWrap.empty();
                     $hiddenWrap.empty();
                     selected.clear();
@@ -832,23 +941,25 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                 const selectedTypes = $('.type-checkbox:checked').map(function () {
                     return $(this).val();
                 }).get();
-                console.log("fdsfs",idsWithCat)
+
                 $.ajax({
                     url: "{{ route('mockups.index') }}",
                     type: "GET",
                     traditional: false,
                     data: {
-                        'product_ids[]': allProductIds,
-                        'category_ids[]': idsProds,
-                        'types[]': selectedTypes,
+                        product_ids: productIdsToSend,
+                        category_ids: categoryIdsToSend,
+                        types: selectedTypes
                     },
                     success(response) {
                         const items = response?.data?.data || response?.data || response || [];
 
-                        // Drop any selected IDs that are no longer in the results
                         const validIds = new Set(items.map(x => String(x.id)));
+
                         [...selected].forEach(id => {
-                            if (!validIds.has(id)) selected.delete(id);
+                            if (!validIds.has(id)) {
+                                selected.delete(id);
+                            }
                         });
 
                         renderMockupCards(items);
@@ -856,45 +967,55 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                     },
                     error(xhr) {
                         console.error("Error fetching mockups:", xhr.responseText);
+
                         $cardsWrap.empty().append(
                             `<div class="col-12 text-danger py-2">Failed to load mockups</div>`
                         );
                     }
                 });
             }
+            $('#categoriesSelect').on('change', function () {
+                loadCategoriesForSelectedProducts(function () {
+                    fetchMockups();
+                });
+            });
 
-        // ── Mockup wrapper visibility ────────────────────────────────────────
-        window.checkAllSelectedHaveMockup = function () {
-            const allSelected = [
-                ...$('#productsSelect').find('option:selected'),
-                ...$('#productsWithoutCategoriesSelect').find('option:selected')
-            ];
-            if (!allSelected.length) {
-                $mockupWrap.addClass('d-none');
+            $('#productsSelect').on('change', function () {
+                fetchMockups();
+            });
+
+            $('#productsWithoutCategoriesSelect').on('change', function () {
+                fetchMockups();
+            });
+
+            $('.type-checkbox').on('change', function () {
+                fetchMockups();
+            });
+
+            $(document).on('click', '.js-show-on-mockup', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const id = String($(this).data('id'));
+
+                $('#selectedMockupId').val(id);
+                $('#addTemplateForm').submit();
+            });
+
+            /*
+             * Initial load after page reload.
+             * If Products With Categories has selected values,
+             * load categories into #productsSelect first, then fetch mockups.
+             */
+            if (getSelectValues('#categoriesSelect').length) {
+                loadCategoriesForSelectedProducts(function () {
+                    fetchMockups();
+                });
             } else {
-                $mockupWrap.removeClass('d-none');
+                fetchMockups();
             }
-        };
-
-        // ── "Show on Mockup" button ─────────────────────────────────────────
-        $(document).on('click', '.js-show-on-mockup', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            const id = String($(this).data('id'));
-            $('#selectedMockupId').val(id);
-            $('#addTemplateForm').submit();
-        });
-
-        // ── Wire up external change triggers ────────────────────────────────
-        $('#categoriesSelect').on('change', fetchMockups);
-        $('#productsWithoutCategoriesSelect').on('change', fetchMockups);
-        $(document).on('change', '.type-checkbox', fetchMockups);
-
-        // Initial load
-        fetchMockups();
         });
     </script>
-
     <script>
         function updateTemplateTypeDropzones() {
             const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox'))

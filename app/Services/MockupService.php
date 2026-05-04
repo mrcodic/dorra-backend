@@ -169,12 +169,17 @@ class MockupService extends BaseService
 
                 $type = request('product_type');
                 $productId = request('product_id');
+                $productIds = request('product_ids');
 
                 if ($type === 'category') {
+                    $q->whereIn('category_id',$productIds);
                     $q->whereCategoryId($productId);
                 }
 
                 if ($type === 'product') {
+                    $q->whereHas('products', function ($q) use ($productId) {
+                        $q->where('products.id', $productId);
+                    });
                     $product = Product::find($productId);
 
                     if ($product) {
@@ -199,10 +204,42 @@ class MockupService extends BaseService
                             ->whereJsonContains('mockup_template.colors', request('color'));
                     })
             )
-            ->when(request()->filled('product_ids'), fn($q) => $q->whereIn('category_id', request()->array('product_ids')))
-            ->when(request()->filled('category_ids'), fn($q) => $q->whereHas('products',function ($query) {
-                $query->whereIn('products.id', request()->array('category_ids'));
-            }))
+            ->when(
+                request()->filled('product_ids') || request()->filled('category_ids'),
+                function ($q) {
+                    $productIds = collect(request()->input('product_ids', []))
+                        ->flatten()
+                        ->filter(fn ($id) => is_numeric($id))
+                        ->map(fn ($id) => (int) $id)
+                        ->filter()
+                        ->unique()
+                        ->values()
+                        ->all();
+
+                    $categoryIds = collect(request()->input('category_ids', []))
+                        ->flatten()
+                        ->filter(fn ($id) => is_numeric($id))
+                        ->map(fn ($id) => (int) $id)
+                        ->filter()
+                        ->unique()
+                        ->values()
+                        ->all();
+
+                    $q->where(function ($query) use ($productIds, $categoryIds) {
+                        if (!empty($productIds)) {
+                            $query->whereHas('products', function ($sub) use ($productIds) {
+                                $sub->whereIn('products.id', $productIds);
+                            });
+
+                        }
+                        if (!empty($categoryIds)) {
+                            $method = !empty($productIds) ? 'orWhereIn' : 'whereIn';
+                            $query->{$method}('category_id', $categoryIds);
+
+                        }
+                    });
+                }
+            )
             ->when(request()->filled('type'), fn($q) => $q->whereHas('types', fn($q) => $q->where('types.value', (int)request('type'))
             )
             )
