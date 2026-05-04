@@ -166,14 +166,13 @@ class MockupService extends BaseService
                 $query->whereApproach(request('approach'));
             })
             ->when(request()->filled('product_id') || request()->filled('product_ids') , function ($q) {
-dd("jghjg");
                 $type = request('product_type');
                 $productId = request('product_id');
                 $productIds = request('product_ids');
 
                 if ($type === 'category') {
                     $q->whereIn('category_id',$productIds);
-                    $q->whereCategoryId($productId);
+//                    $q->whereCategoryId($productId);
                 }
 
                 if ($type === 'product') {
