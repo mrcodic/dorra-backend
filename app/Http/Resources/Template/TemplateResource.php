@@ -74,7 +74,11 @@ class TemplateResource extends JsonResource
                 ->where('collection_name', 'generated_mockups')
                 ->where('custom_properties->template_id', (string) $this->id)
                 ->where('custom_properties->model_image', 1)
-                ->where('custom_properties->category_id', (int)(request('product_without_category_id') ?? $categoryId))
+                ->where(function ($query) {
+                    $id = (int)(request('product_without_category_id') ?? request('product_id'));
+                    $query->where('custom_properties->category_id', $id)
+                        ->orWhereJsonContains('custom_properties->product_ids', $id);
+                })
                 ->first()
                 ?->getUrl() ?: $this->getFirstMediaUrl('template_model_image'),
             'mockup_template_image' => (function () use ($categoryId) {

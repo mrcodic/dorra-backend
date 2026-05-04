@@ -396,6 +396,7 @@ class TemplateController extends DashboardController
 
         $this->uploadMockupFiles($template, $mockup, $request, $oldColors);
         return Response::api();
+
     }
 
     private function uploadMockupFiles(Template $template, Mockup $mockup, Request $request, array $oldColors): void
@@ -475,6 +476,7 @@ class TemplateController extends DashboardController
                 'template_id' => (string)$template->id,
                 'hex'         => $hex,
                 'category_id' => (int)$mockup->category_id,
+                'product_ids' => (int)$mockup->products->pluck('id')->toArray(),
                 'model_image' => ($modelColor && $hex === $modelColor) ? 1 : 0,
             ];
 
