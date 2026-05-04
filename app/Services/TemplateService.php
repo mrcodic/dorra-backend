@@ -639,6 +639,7 @@ class TemplateService extends BaseService
             })->when($productIds, function ($query) use ($productIds,$productType) {
                 if ($productType == 'product') {
                     $query->whereHas('products', function ($sub) use ($productIds) {
+                        dd($sub->whereIn('products.id', $productIds)->get());
                         $sub->whereIn('products.id', $productIds);
                     });
                 }else{

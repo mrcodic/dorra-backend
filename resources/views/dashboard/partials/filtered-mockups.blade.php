@@ -1,120 +1,128 @@
 @forelse ($data as $mockup)
-@php
-$images = collect($mockup->getMedia('mockups'))
-->groupBy(fn($media) => strtolower($media->getCustomProperty('side')))
-->mapWithKeys(function ($group, $side) {
-$base = $group->first(fn($m) => $m->getCustomProperty('role') === 'base');
-return [
-$side => [
-'base_url' => $base?->getFullUrl(),
-],
-];
-});
-@endphp
+    @php
+        $images = collect($mockup->getMedia('mockups'))
+        ->groupBy(fn($media) => strtolower($media->getCustomProperty('side')))
+        ->mapWithKeys(function ($group, $side) {
+        $base = $group->first(fn($m) => $m->getCustomProperty('role') === 'base');
+        return [
+        $side => [
+        'base_url' => $base?->getFullUrl(),
+        ],
+        ];
+        });
+    @endphp
 
-<div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row" data-template-id="{{ $mockup->id }}">
-    <div class="position-relative border rounded-3" style="box-shadow: 0px 4px 6px 0px #4247460F;">
-        @can('mockups_delete')
-        <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox"
-            value="{{ $mockup->id }}" name="selected_mockups[]">
-        @endcan
+    <div class="col-md-6 col-lg-4 col-xxl-4 custom-4-per-row" data-template-id="{{ $mockup->id }}">
+        <div class="position-relative border rounded-3" style="box-shadow: 0px 4px 6px 0px #4247460F;">
+            @can('mockups_delete')
+                <input type="checkbox" class="form-check-input position-absolute top-0 start-0 m-1 category-checkbox"
+                       value="{{ $mockup->id }}" name="selected_mockups[]">
+            @endcan
 
-        <div style="background-color: #F4F6F6;height:200px">
-            <img src="{{ $mockup->base_image_url
+            <div style="background-color: #F4F6F6;height:200px">
+                <img src="{{ $mockup->base_image_url
             ?: asset('images/default-photo.png') }}" class="mx-auto d-block rounded-top"
-                style="height:100%; width:auto; max-width:100%;" alt="Template Image">
-        </div>
-
-        <div class="card-body text-start p-2">
-            <div>
-                <h6 class="fw-bold mb-1 text-black fs-3"
-                    style="display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; max-width:300px; height:54px;">
-                    {{ $mockup->name }}
-                </h6>
-
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <div
-                        style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:300px; height:29px">
-                        {{ $mockup->product?->name }}
-                    </div>
-
-                    <div>
-                        @foreach($mockup->types as $type)
-                        <span class="badge text-light p-75 template-status-label" style="background-color:#222245">
-                            {{ $type->value->label() }}
-                        </span>
-                        @endforeach
-                    </div>
-                </div>
-                <div class="mb-1 d-flex flex-wrap gap-1">
-                    <p style="display: inline">Created at: {{ $mockup->created_at->format('d/m/Y') }}</p>
-                    <p style="display: inline">Last update: {{ $mockup->updated_at->format('d/m/Y') }}</p>
-                </div>
+                     style="height:100%; width:auto; max-width:100%;" alt="Template Image">
             </div>
 
-            <div class="d-flex flex-wrap w-100 mt-1" style="gap:5px">
-{{--                @can('mockups_show')--}}
-{{--                <a type="button" class="btn btn-outline-secondary flex-fill"--}}
-{{--                <button type="button" class="btn btn-outline-secondary flex-fill show-mockup-btn"--}}
-{{--                    data-images='@json($images)' data-colors='@json($mockup->templates->pluck('pivot.colors')->flatten()--}}
-{{--    ->filter()--}}
-{{--    ->values()--}}
-{{--    ->all() ?? [])'--}}
-{{--                        data-bs-toggle="modal"--}}
-{{--                    data-bs-target="#showMockupModal"--}}
-{{--                    href ="{{config('services.editor_url'). '/mokup/'.$mockup->id.--}}
-{{--            "?templateId=&&is_has_category=0&&product_id=$mockup->category->id"}}"--}}
-{{--                        target="_blank"--}}
-{{--                >--}}
-{{--                    Show--}}
-{{--                </a>--}}
-{{--                @endcan--}}
+            <div class="card-body text-start p-2">
+                <div>
+                    <h6 class="fw-bold mb-1 text-black fs-3"
+                        style="display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; max-width:300px; height:54px;">
+                        {{ $mockup->name }}
+                    </h6>
+
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div
+                            style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:300px; height:29px">
+                            {{ $mockup->product?->name }}
+                        </div>
+
+                        <div>
+                            @foreach($mockup->types as $type)
+                                <span class="badge text-light p-75 template-status-label"
+                                      style="background-color:#222245">
+                            {{ $type->value->label() }}
+                        </span>
+                            @endforeach
+                        </div>
+                    </div>
+                    <div class="mb-1 d-flex flex-wrap gap-1">
+                        <p style="display: inline">Created at: {{ $mockup->created_at->format('d/m/Y') }}</p>
+                        <p style="display: inline">Last update: {{ $mockup->updated_at->format('d/m/Y') }}</p>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap w-100 mt-1" style="gap:5px">
+                    {{--                @can('mockups_show')--}}
+                    {{--                <a type="button" class="btn btn-outline-secondary flex-fill"--}}
+                    {{--                <button type="button" class="btn btn-outline-secondary flex-fill show-mockup-btn"--}}
+                    {{--                    data-images='@json($images)' data-colors='@json($mockup->templates->pluck('pivot.colors')->flatten()--}}
+                    {{--    ->filter()--}}
+                    {{--    ->values()--}}
+                    {{--    ->all() ?? [])'--}}
+                    {{--                        data-bs-toggle="modal"--}}
+                    {{--                    data-bs-target="#showMockupModal"--}}
+                    {{--                    href ="{{config('services.editor_url'). '/mokup/'.$mockup->id.--}}
+                    {{--            "?templateId=&&is_has_category=0&&product_id=$mockup->category->id"}}"--}}
+                    {{--                        target="_blank"--}}
+                    {{--                >--}}
+                    {{--                    Show--}}
+                    {{--                </a>--}}
+                    {{--                @endcan--}}
                     @can('mockups_show')
-                    @php
-                        $productIds = $mockup->products
-                            ? $mockup->products->pluck('id')->values()->all()
-                            : [];
+                        @php
+                            $productIds = $mockup->products
+                                ? $mockup->products->pluck('id')->values()->all()
+                                : [];
 
-                        $query = http_build_query([
-                            'is_has_category' => $mockup->category?->is_has_category,
-                            'product_id' => $mockup->category?->id
-                        ]);
-                     foreach ($productIds as $productId) {
-                            $query .= '&product_ids[]=' . urlencode($productId);
-                        }
+                            $query = http_build_query([
+                                'is_has_category' => $mockup->category?->is_has_category
+                            ]);
 
-                    @endphp
+                                if ($mockup->category?->is_has_category == 0){
+                                     $query .= '&product_ids[]=' . urlencode($mockup->category_id);
+                                }
+                                else{
+                                    foreach ($productIds as $productId) {
+                                $query .= '&product_ids[]=' . urlencode($productId);
+                            }
+                                }
+
+
+                        @endphp
                         <a href="{{ rtrim(config('services.editor_url'), '/') . '/mokup/' . $mockup->id . '?' . $query }}"
                            target="_blank"
                            class="btn btn-outline-secondary flex-fill">
                             Show
                         </a>
                     @endcan
-                @can('mockups_update')
-                <a href="{{ route('mockups.edit',$mockup->id) }}"
-                    class="btn btn-outline-secondary flex-fill edit-mockup-btn">
-                    Edit
-                </a>
-                @endcan
+                    @can('mockups_update')
+                        <a href="{{ route('mockups.edit',$mockup->id) }}"
+                           class="btn btn-outline-secondary flex-fill edit-mockup-btn">
+                            Edit
+                        </a>
+                    @endcan
 
-                @can('mockups_delete')
-                <button class="btn btn-outline-danger flex-fill open-delete-mockup-modal" data-id="{{ $mockup->id }}"
-                    data-bs-toggle="modal" data-bs-target="#deleteMockupModal">
-                    <i data-feather="trash-2"></i> Delete
-                </button>
-                @endcan
+                    @can('mockups_delete')
+                        <button class="btn btn-outline-danger flex-fill open-delete-mockup-modal"
+                                data-id="{{ $mockup->id }}"
+                                data-bs-toggle="modal" data-bs-target="#deleteMockupModal">
+                            <i data-feather="trash-2"></i> Delete
+                        </button>
+                    @endcan
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-@include('modals.mockups.edit-mockup', ['mockup' => $mockup, 'associatedData' => $associatedData])
+    @include('modals.mockups.edit-mockup', ['mockup' => $mockup, 'associatedData' => $associatedData])
 @empty
-<div class="d-flex flex-column justify-content-center align-items-center text-center py-5 w-100"
-    style="min-height:65vh;">
-    <img src="{{ asset('images/Empty.png') }}" alt="No Templates" style="max-width:200px;" class="mb-2">
-    <p class="mb-2 text-secondary">Nothing to show yet.</p>
-</div>
+    <div class="d-flex flex-column justify-content-center align-items-center text-center py-5 w-100"
+         style="min-height:65vh;">
+        <img src="{{ asset('images/Empty.png') }}" alt="No Templates" style="max-width:200px;" class="mb-2">
+        <p class="mb-2 text-secondary">Nothing to show yet.</p>
+    </div>
 @endforelse
 
 <script !src="">
