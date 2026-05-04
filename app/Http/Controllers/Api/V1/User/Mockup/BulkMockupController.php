@@ -67,7 +67,7 @@ class BulkMockupController extends Controller
             ];
         }
         $mockup->templates()->syncWithoutDetaching($syncData);
-
+        $mockup->update(['colors' => $colors]);
         // -----------------------------------------------------------------------
         // Dispatch bulk job
         // -----------------------------------------------------------------------

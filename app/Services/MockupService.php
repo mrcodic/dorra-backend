@@ -172,9 +172,8 @@ class MockupService extends BaseService
 
                 if ($type === 'category') {
                     $q->whereIn('category_id',$productIds);
-//                    $q->whereCategoryId($productId);
+                    $q->whereCategoryId($productId);
                 }
-
                 if ($type === 'product') {
                     $q->whereHas('products', function ($q) use ($productId) {
                         $q->where('products.id', $productId);
