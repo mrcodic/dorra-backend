@@ -185,6 +185,11 @@ class MockupService extends BaseService
                 $query->whereApproach('with_editor');
             })->when(request()->filled('approach'), function ($query) {
                 $query->whereApproach(request('approach'));
+            })->when(request()->filled('category_ids'), function ($q) {
+                $categoryIds = request('category_ids');
+                $q->whereHas('products', function ($q) use ($categoryIds) {
+                    $q->whereIn('products.id', $categoryIds);
+                });
             })
             ->when(request()->filled('product_id') || request()->filled('product_ids') , function ($q) {
                 $type = request('product_type');
@@ -214,11 +219,6 @@ class MockupService extends BaseService
                    }
 
                 }
-            })->when(request()->filled('category_ids'), function ($q) {
-                $categoryIds = request('category_ids');
-                $q->whereHas('products', function ($q) use ($categoryIds) {
-                    $q->whereIn('products.id', $categoryIds);
-                });
             })
             ->when(request()->filled('template_id'), fn($q) => $q->whereHas('templates', function ($query) {
                 $query->where('templates.id', request('template_id'));
