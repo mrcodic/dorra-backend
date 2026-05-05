@@ -948,7 +948,7 @@
             }
 
             function fetchMockups() {
-                const productIdsWithCategory    = getSelectValues('#productsSelect');
+                const productIdsWithCategory    = getSelectValues('#categoriesSelect');
                 const productIdsWithoutCategory = getSelectValues('#productsWithoutCategoriesSelect');
 
                 // Categories loaded from selected products with categories
@@ -1010,12 +1010,74 @@
             }
 
             // ── Wire up external change triggers ────────────────────────────────
-            $withCat.on('change', fetchMockups);
+            // ── Wire up external change triggers ────────────────────────────────
+            $withCat.on('change', function () {
+                const selectedIds = $(this).val();
+                const $right = $('#productsSelect');
+
+                if (selectedIds && selectedIds.length > 0) {
+                    $.ajax({
+                        url: "{{ route('products.categories') }}",
+                        type: "POST",
+                        data: { _token: "{{ csrf_token() }}", category_ids: selectedIds },
+                        success(response) {
+                            $right.empty();
+                            (response.data || []).forEach(cat => {
+                                const opt = new Option(cat.name, cat.id, false, true);
+                                $(opt).attr('data-has-mockup', cat.has_mockup ? '1' : '0');
+                                $right.append(opt);
+                            });
+                            $right.trigger('change.select2');
+                            fetchMockups(); // ✅ called AFTER #productsSelect is populated
+                        },
+                        error(xhr) {
+                            console.error("Error fetching categories:", xhr.responseText);
+                            fetchMockups();
+                        }
+                    });
+                } else {
+                    $right.empty().trigger('change.select2');
+                    fetchMockups();
+                }
+            });
+
             $withoutCat.on('change', fetchMockups);
             $(document).on('change', '.type-checkbox', fetchMockups);
 
-            // Initial load
-            fetchMockups();
+// Initial load — also need to pre-populate #productsSelect first
+            (function initialLoad() {
+                const selectedIds = $withCat.val();
+                const $right = $('#productsSelect');
+
+                if (selectedIds && selectedIds.length > 0) {
+                    $.ajax({
+                        url: "{{ route('products.categories') }}",
+                        type: "POST",
+                        data: { _token: "{{ csrf_token() }}", category_ids: selectedIds },
+                        success(response) {
+                            // preserve already-selected options (server-rendered)
+                            const alreadySelected = $right.find('option:selected').map(function() {
+                                return String($(this).val());
+                            }).get();
+
+                            $right.empty();
+                            (response.data || []).forEach(cat => {
+                                const isSelected = alreadySelected.includes(String(cat.id));
+                                const opt = new Option(cat.name, cat.id, isSelected, isSelected);
+                                $(opt).attr('data-has-mockup', cat.has_mockup ? '1' : '0');
+                                $right.append(opt);
+                            });
+                            $right.trigger('change.select2');
+                            fetchMockups(); // ✅ called AFTER #productsSelect is populated
+                        },
+                        error() {
+                            fetchMockups();
+                        }
+                    });
+                } else {
+                    fetchMockups();
+                }
+            })();
         });
     </script>
 
