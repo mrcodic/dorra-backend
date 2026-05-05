@@ -940,8 +940,15 @@
                 $('#editTemplateForm').submit();
             });
             // ── Fetch available mockups from server ──────────────────────────────
+            // ── Fetch available mockups from server ──────────────────────────────
+            function getSelectValues(selector) {
+                const value = $(selector).val();
+                if (Array.isArray(value)) return value.map(String).filter(Boolean);
+                return value ? [String(value)] : [];
+            }
+
             function fetchMockups() {
-                const productIdsWithCategory = getSelectValues('#categoriesSelect');
+                const productIdsWithCategory    = getSelectValues('#categoriesSelect');
                 const productIdsWithoutCategory = getSelectValues('#productsWithoutCategoriesSelect');
 
                 // Categories loaded from selected products with categories
@@ -952,9 +959,21 @@
                  * - Products With Categories => send ONLY category_ids
                  * - Products Without Categories => send ONLY product_ids
                  */
-                const productIdsToSend = productIdsWithoutCategory;
+                const productIdsToSend  = productIdsWithoutCategory;
                 const categoryIdsToSend = productIdsWithCategory.length > 0 ? categoryIds : [];
-              
+
+                console.log('productIdsWithCategory',    productIdsWithCategory);
+                console.log('productIdsWithoutCategory', productIdsWithoutCategory);
+                console.log('categoryIdsToSend',         categoryIdsToSend);
+                console.log('productIdsToSend',          productIdsToSend);
+
+                if (!productIdsToSend.length && !categoryIdsToSend.length) {
+                    $cardsWrap.empty();
+                    $hiddenWrap.empty();
+                    // Don't clear selected — preserve already-attached mockup IDs
+                    syncHiddenInputs();
+                    return;
+                }
 
                 const selectedTypes = $('.type-checkbox:checked').map(function () {
                     return $(this).val();
@@ -965,10 +984,10 @@
                     type: "GET",
                     traditional: false,
                     data: {
-                        product_ids: productIdsToSend,
+                        product_ids:  productIdsToSend,
                         category_ids: categoryIdsToSend,
-                        types: selectedTypes,
-                        filter: 'both'
+                        types:        selectedTypes,
+                        filter:       'both'
                     },
                     success(response) {
                         const items = response?.data?.data || response?.data || response || [];
