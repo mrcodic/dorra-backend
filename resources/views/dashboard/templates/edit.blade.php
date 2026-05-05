@@ -965,7 +965,7 @@
                 const productIdsToSend = productIdsWithoutCategory;
                 const categoryIdsToSend = productIdsWithCategory.length > 0 ? categoryIds : [];
 
-                if (!allProductIds.length) {
+                if (!productIdsToSend.length ||!categoryIdsToSend.length ) {
                     $cardsWrap.empty().append(`<div class="col-12 text-muted py-2">No products selected</div>`);
                     // Don't clear selected — preserve already-attached mockup IDs
                     syncHiddenInputs();
