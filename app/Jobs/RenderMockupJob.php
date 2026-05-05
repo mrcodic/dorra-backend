@@ -59,7 +59,7 @@ class RenderMockupJob implements ShouldQueue
                     'shadowStrength'   => $mockup->shadow_strength,
                     'lightStrength'    => $mockup->light_strength,
                     'vertices'         => $this->item->points,
-                    'pixiBundleUrl'    => config('services.editor_url').'/pixi-render-bundle.js',
+                    'pixiBundleUrl'    => config('services.node_render_url').'/pixi-render-bundle.js',
                 ],
                 'designUrl' => $this->item->getDesignUrl(),
                 'color'    => $this->item->color,
