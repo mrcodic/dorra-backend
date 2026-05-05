@@ -854,7 +854,7 @@
                     let productIdsQuery = '';
                     if (isHasCategory === 0) {
                         // send single category_id
-                        const categoryId = mockup.category_id ?? '';
+                        const categoryId = mockup.product.id ?? '';
                         productIdsQuery = `&product_ids[]=${encodeURIComponent(categoryId)}`;
                     } else {
                         // send all product IDs
