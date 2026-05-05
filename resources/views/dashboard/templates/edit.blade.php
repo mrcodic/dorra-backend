@@ -948,7 +948,7 @@
             }
 
             function fetchMockups() {
-                const productIdsWithCategory    = getSelectValues('#categoriesSelect');
+                const productIdsWithCategory    = getSelectValues('#productsSelect');
                 const productIdsWithoutCategory = getSelectValues('#productsWithoutCategoriesSelect');
 
                 // Categories loaded from selected products with categories
