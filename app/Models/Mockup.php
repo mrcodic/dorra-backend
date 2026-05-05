@@ -52,7 +52,6 @@ class Mockup extends Model implements HasMedia
         'area_left' => 233,
         'area_top' => 233,
         'area_height' => 370,
-        'colors' => '["#000000","#ffffff"]',
     ];
 
     public function products(): BelongsToMany
