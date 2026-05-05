@@ -939,19 +939,9 @@
 
                 $('#editTemplateForm').submit();
             });
-            function getSelectValues(selector) {
-                const value = $(selector).val();
-
-                if (Array.isArray(value)) {
-                    return value.map(String).filter(Boolean);
-                }
-
-                return value ? [String(value)] : [];
-            }
-
             // ── Fetch available mockups from server ──────────────────────────────
             function fetchMockups() {
-                const productIdsWithCategory = getSelectValues('#categoriesSelect');
+                const productIdsWithCategory    = getSelectValues('#categoriesSelect');
                 const productIdsWithoutCategory = getSelectValues('#productsWithoutCategoriesSelect');
 
                 // Categories loaded from selected products with categories
@@ -962,13 +952,19 @@
                  * - Products With Categories => send ONLY category_ids
                  * - Products Without Categories => send ONLY product_ids
                  */
-                const productIdsToSend = productIdsWithoutCategory;
+                const productIdsToSend  = productIdsWithoutCategory;
                 const categoryIdsToSend = productIdsWithCategory.length > 0 ? categoryIds : [];
 
-                if (!productIdsToSend.length ||!categoryIdsToSend.length ) {
-                    $cardsWrap.empty().append(`<div class="col-12 text-muted py-2">No products selected</div>`);
-                    // Don't clear selected — preserve already-attached mockup IDs
-                    syncHiddenInputs();
+                console.log('productIdsWithCategory',    productIdsWithCategory);
+                console.log('productIdsWithoutCategory', productIdsWithoutCategory);
+                console.log('categoryIdsToSend',         categoryIdsToSend);
+                console.log('productIdsToSend',          productIdsToSend);
+
+                if (!productIdsToSend.length && !categoryIdsToSend.length) {
+                    $cardsWrap.empty();
+                    $hiddenWrap.empty();
+                    selected.clear();
+                    checkAllSelectedHaveMockup();
                     return;
                 }
 
@@ -981,31 +977,34 @@
                     type: "GET",
                     traditional: false,
                     data: {
-                        product_ids: productIdsToSend,
+                        product_ids:  productIdsToSend,
                         category_ids: categoryIdsToSend,
-                        types: selectedTypes,
-                        filter: 'both'
+                        types:        selectedTypes,
+                        filter:       'both'
                     },
                     success(response) {
                         const items = response?.data?.data || response?.data || response || [];
 
-                        // Remove from selected any IDs no longer in the result set
                         const validIds = new Set(items.map(x => String(x.id)));
+
                         [...selected].forEach(id => {
-                            if (!validIds.has(id)) selected.delete(id);
+                            if (!validIds.has(id)) {
+                                selected.delete(id);
+                            }
                         });
 
                         renderMockupCards(items);
+                        checkAllSelectedHaveMockup();
                     },
                     error(xhr) {
                         console.error("Error fetching mockups:", xhr.responseText);
+
                         $cardsWrap.empty().append(
                             `<div class="col-12 text-danger py-2">Failed to load mockups</div>`
                         );
                     }
                 });
             }
-
             // ── Wire up external change triggers ────────────────────────────────
             $withCat.on('change', fetchMockups);
             $withoutCat.on('change', fetchMockups);
