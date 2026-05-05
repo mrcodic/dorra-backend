@@ -939,6 +939,16 @@
 
                 $('#editTemplateForm').submit();
             });
+            function getSelectValues(selector) {
+                const value = $(selector).val();
+
+                if (Array.isArray(value)) {
+                    return value.map(String).filter(Boolean);
+                }
+
+                return value ? [String(value)] : [];
+            }
+
             // ── Fetch available mockups from server ──────────────────────────────
             function fetchMockups() {
                 const productIdsWithCategory = getSelectValues('#categoriesSelect');
@@ -954,17 +964,12 @@
                  */
                 const productIdsToSend = productIdsWithoutCategory;
                 const categoryIdsToSend = productIdsWithCategory.length > 0 ? categoryIds : [];
+                const allProductIds = [...idsWithCat, ...idsWithoutCat];
 
-                console.log('productIdsWithCategory', productIdsWithCategory);
-                console.log('productIdsWithoutCategory', productIdsWithoutCategory);
-                console.log('categoryIdsToSend', categoryIdsToSend);
-                console.log('productIdsToSend', productIdsToSend);
-
-                if (!productIdsToSend.length && !categoryIdsToSend.length) {
-                    $cardsWrap.empty();
-                    $hiddenWrap.empty();
-                    selected.clear();
-                    checkAllSelectedHaveMockup();
+                if (!allProductIds.length) {
+                    $cardsWrap.empty().append(`<div class="col-12 text-muted py-2">No products selected</div>`);
+                    // Don't clear selected — preserve already-attached mockup IDs
+                    syncHiddenInputs();
                     return;
                 }
 
@@ -985,27 +990,22 @@
                     success(response) {
                         const items = response?.data?.data || response?.data || response || [];
 
+                        // Remove from selected any IDs no longer in the result set
                         const validIds = new Set(items.map(x => String(x.id)));
-
                         [...selected].forEach(id => {
-                            if (!validIds.has(id)) {
-                                selected.delete(id);
-                            }
+                            if (!validIds.has(id)) selected.delete(id);
                         });
 
                         renderMockupCards(items);
-                        checkAllSelectedHaveMockup();
                     },
                     error(xhr) {
                         console.error("Error fetching mockups:", xhr.responseText);
-
                         $cardsWrap.empty().append(
                             `<div class="col-12 text-danger py-2">Failed to load mockups</div>`
                         );
                     }
                 });
             }
-
 
             // ── Wire up external change triggers ────────────────────────────────
             $withCat.on('change', fetchMockups);
