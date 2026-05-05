@@ -949,7 +949,8 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                     data: {
                         product_ids: productIdsToSend,
                         category_ids: categoryIdsToSend,
-                        types: selectedTypes
+                        types: selectedTypes,
+                        filter: 'both'
                     },
                     success(response) {
                         const items = response?.data?.data || response?.data || response || [];

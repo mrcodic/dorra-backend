@@ -185,16 +185,22 @@ class MockupService extends BaseService
                 $query->whereApproach('with_editor');
             })->when(request()->filled('approach'), function ($query) {
                 $query->whereApproach(request('approach'));
-            })->when(request()->filled('category_ids'), function ($q) {
-                $categoryIds = request('category_ids');
-                $q->whereHas('products', function ($q) use ($categoryIds) {
-                    $q->whereIn('products.id', $categoryIds);
-                });
             })
-            ->when(request()->filled('product_id') || request()->filled('product_ids') , function ($q) {
+            ->when(request()->filled('product_id') || request()->filled('product_ids') ||request()->filled('category_ids') , function ($q) {
                 $type = request('product_type');
                 $productId = request('product_id');
                 $productIds = request('product_ids');
+                $categoryIds = request('category_ids');
+                if (request('filter') == 'both'){
+                    if ($categoryIds){
+                        $q->whereHas('products', function ($q) use ($categoryIds) {
+                            $q->whereIn('products.id', $categoryIds);
+                        });
+                    }
+                    if ($productIds){
+                        $q->orWhereIn('category_id',$productIds);
+                    }
+                }
 
                 if ($type === 'category') {
                     if ($productIds){
