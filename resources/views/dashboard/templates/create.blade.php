@@ -911,29 +911,68 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
             }
 
             function fetchMockups() {
-                
+                const productIdsWithCategory = getSelectValues('#categoriesSelect');
+                const productIdsWithoutCategory = getSelectValues('#productsWithoutCategoriesSelect');
+
+                // Categories loaded from selected products with categories
+                const categoryIds = getSelectValues('#productsSelect');
+
                 /*
                  * IMPORTANT:
                  * - Products With Categories => send ONLY category_ids
                  * - Products Without Categories => send ONLY product_ids
                  */
-                const productIdsWithCategory    = getSelectValues('#categoriesSelect');     // product IDs
-                const productIdsWithoutCategory = getSelectValues('#productsWithoutCategoriesSelect'); // category IDs
-                const categoryIds               = getSelectValues('#productsSelect');        // sub-category IDs
-
-                // "With Categories" path → send product_ids (the selected products)
-                // "Without Categories" path → send category_ids directly
-                const productIdsToSend  = productIdsWithoutCategory;
+                const productIdsToSend = productIdsWithoutCategory;
                 const categoryIdsToSend = productIdsWithCategory.length > 0 ? categoryIds : [];
+
+                console.log('productIdsWithCategory', productIdsWithCategory);
+                console.log('productIdsWithoutCategory', productIdsWithoutCategory);
+                console.log('categoryIdsToSend', categoryIdsToSend);
+                console.log('productIdsToSend', productIdsToSend);
+
+                if (!productIdsToSend.length && !categoryIdsToSend.length) {
+                    $cardsWrap.empty();
+                    $hiddenWrap.empty();
+                    selected.clear();
+                    checkAllSelectedHaveMockup();
+                    return;
+                }
+
+                const selectedTypes = $('.type-checkbox:checked').map(function () {
+                    return $(this).val();
+                }).get();
 
                 $.ajax({
                     url: "{{ route('mockups.index') }}",
                     type: "GET",
+                    traditional: false,
                     data: {
-                        product_ids:  productIdsToSend,   // → whereHas products
-                        category_ids: categoryIdsToSend,  // → whereIn category_id
+                        product_ids: productIdsToSend,
+                        category_ids: categoryIdsToSend,
                         types: selectedTypes
                     },
+                    success(response) {
+                        const items = response?.data?.data || response?.data || response || [];
+
+                        const validIds = new Set(items.map(x => String(x.id)));
+
+                        [...selected].forEach(id => {
+                            if (!validIds.has(id)) {
+                                selected.delete(id);
+                            }
+                        });
+
+                        renderMockupCards(items);
+                        checkAllSelectedHaveMockup();
+                    },
+                    error(xhr) {
+                        console.error("Error fetching mockups:", xhr.responseText);
+
+                        $cardsWrap.empty().append(
+                            `<div class="col-12 text-danger py-2">Failed to load mockups</div>`
+                        );
+                    }
+                });
             }
             $('#categoriesSelect').on('change', function () {
                 loadCategoriesForSelectedProducts(function () {
