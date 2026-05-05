@@ -120,7 +120,6 @@ class RenderMockupJob implements ShouldQueue
                 'status'      => 'completed',
                 'output_path' => $media ? parse_url($media->getUrl(), PHP_URL_PATH) : null,
             ]);
-            $this->bulkJob->increment('completed_count');
             $this->checkCompletion();
         }  catch (Throwable $e) {
             $this->item->update(['error_message' => $e->getMessage()]);
@@ -156,19 +155,24 @@ class RenderMockupJob implements ShouldQueue
             ")
                 ->first();
 
+            // Don't mark complete until ALL items are done
             if ((int) $counts->pending > 0) {
                 return;
             }
 
+            $completed = (int) $counts->completed;
+            $failed    = (int) $counts->failed;
+            $total     = (int) $counts->total;
+
             $job->update([
-                'completed_count' => (int) $counts->completed,
-                'failed_count'    => (int) $counts->failed,
+                'completed_count' => $completed,
+                'failed_count'    => $failed,
                 'status'          => match(true) {
-                    (int) $counts->failed > 0  => 'failed',
-                    (int) $counts->completed > 0 => 'completed',
-                    default                    => 'failed',
+                    $failed === 0              => 'completed',
+                    $completed === 0           => 'failed',
+                    default                    => 'completed_with_errors', // some passed, some failed
                 },
-                'completed_at' => now(),
+                'completed_at'    => now(),
             ]);
         });
     }
