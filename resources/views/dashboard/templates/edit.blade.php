@@ -964,7 +964,6 @@
                  */
                 const productIdsToSend = productIdsWithoutCategory;
                 const categoryIdsToSend = productIdsWithCategory.length > 0 ? categoryIds : [];
-                const allProductIds = [...idsWithCat, ...idsWithoutCat];
 
                 if (!allProductIds.length) {
                     $cardsWrap.empty().append(`<div class="col-12 text-muted py-2">No products selected</div>`);
