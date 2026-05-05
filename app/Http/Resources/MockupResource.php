@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\Template\TypeResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -66,7 +67,7 @@ class MockupResource extends JsonResource
             'displacement_scale' => $this->displacement_scale,
             'types' => TypeResource::collection($this->whenLoaded('types')),
             'product' => CategoryResource::make($this->whenLoaded('category')),
-            'products' => Product::collection($this->whenLoaded('products')),
+            'products' => ProductResource::collection($this->whenLoaded('products')),
             'colors' => $this->colors ?: $this->templateColors,
             'base_image_url' => $this->base_image_url,
             'area_top' => $this->area_top,
