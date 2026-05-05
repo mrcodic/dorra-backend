@@ -216,7 +216,9 @@ class MockupService extends BaseService
                 }
             })->when(request()->filled('category_ids'), function ($q) {
                 $categoryIds = request('category_ids');
-                $q->whereIn('category_id', $categoryIds);
+                $q->whereHas('products', function ($q) use ($categoryIds) {
+                    $q->whereIn('products.id', $categoryIds);
+                });
             })
             ->when(request()->filled('template_id'), fn($q) => $q->whereHas('templates', function ($query) {
                 $query->where('templates.id', request('template_id'));
