@@ -941,16 +941,20 @@
             });
             // ── Fetch available mockups from server ──────────────────────────────
             function fetchMockups() {
-                const idsWithCat = $withCat.val() || [];
-                const idsWithoutCat = $withoutCat.val() || [];
-                const allProductIds = [...idsWithCat, ...idsWithoutCat];
+                const productIdsWithCategory = getSelectValues('#categoriesSelect');
+                const productIdsWithoutCategory = getSelectValues('#productsWithoutCategoriesSelect');
 
-                if (!allProductIds.length) {
-                    $cardsWrap.empty().append(`<div class="col-12 text-muted py-2">No products selected</div>`);
-                    // Don't clear selected — preserve already-attached mockup IDs
-                    syncHiddenInputs();
-                    return;
-                }
+                // Categories loaded from selected products with categories
+                const categoryIds = getSelectValues('#productsSelect');
+
+                /*
+                 * IMPORTANT:
+                 * - Products With Categories => send ONLY category_ids
+                 * - Products Without Categories => send ONLY product_ids
+                 */
+                const productIdsToSend = productIdsWithoutCategory;
+                const categoryIdsToSend = productIdsWithCategory.length > 0 ? categoryIds : [];
+              
 
                 const selectedTypes = $('.type-checkbox:checked').map(function () {
                     return $(this).val();
@@ -961,8 +965,10 @@
                     type: "GET",
                     traditional: false,
                     data: {
-                        'product_ids[]': allProductIds,
-                        'types[]': selectedTypes,
+                        product_ids: productIdsToSend,
+                        category_ids: categoryIdsToSend,
+                        types: selectedTypes,
+                        filter: 'both'
                     },
                     success(response) {
                         const items = response?.data?.data || response?.data || response || [];
