@@ -839,9 +839,9 @@
                 }
 
                 items.forEach(mockup => {
-                    const id       = String(mockup.id);
-                    const name     = mockup.name ?? ('Mockup #' + id);
-                    const categoryId = mockup.product?.id ?? '';
+                    const id           = String(mockup.id);
+                    const name         = mockup.name ?? ('Mockup #' + id);
+                    const isHasCategory = parseInt(mockup.category?.is_has_category ?? 0);
 
                     const images   = mockup?.images || {};
                     const firstKey = Object.keys(images)[0];
@@ -850,44 +850,55 @@
 
                     const isSelected = selected.has(id);
 
-                    // Build URL per mockup
-                    const href = editUrlTemplate
-                        .replace('{id}', id)
-                        .replace('{categoryId}', categoryId);
+                    // ── Build product_ids[] query string — mirrors your PHP logic ──
+                    let productIdsQuery = '';
+                    if (isHasCategory === 0) {
+                        // send single category_id
+                        const categoryId = mockup.category_id ?? '';
+                        productIdsQuery = `&product_ids[]=${encodeURIComponent(categoryId)}`;
+                    } else {
+                        // send all product IDs
+                        const productIds = mockup.products?.map(p => p.id) ?? [];
+                        productIdsQuery = productIds
+                            .map(pid => `&product_ids[]=${encodeURIComponent(pid)}`)
+                            .join('');
+                    }
+
+                    const href = `{{ config('services.editor_url') }}mokup/${id}?templateId={{ $model->id }}&is_has_category=${isHasCategory}${productIdsQuery}`;
 
                     $cardsWrap.append(`
-          <div class="col-12 col-md-4 col-lg-2">
-            <div class="mockup-card${isSelected ? ' selected' : ''}" data-id="${id}">
-              <div class="card rounded-3 shadow-sm position-relative" style="border:1px solid #24B094;">
+            <div class="col-12 col-md-4 col-lg-2">
+                <div class="mockup-card${isSelected ? ' selected' : ''}" data-id="${id}">
+                    <div class="card rounded-3 shadow-sm position-relative" style="border:1px solid #24B094;">
 
-                <div class="position-absolute" style="top:10px;left:10px;z-index:20;">
-                  <input
-                    class="form-check-input js-mockup-checkbox"
-                    type="checkbox"
-                    value="${id}"
-                    ${isSelected ? 'checked' : ''}
-                  />
-                </div>
+                        <div class="position-absolute" style="top:10px;left:10px;z-index:20;">
+                            <input
+                                class="form-check-input js-mockup-checkbox"
+                                type="checkbox"
+                                value="${id}"
+                                ${isSelected ? 'checked' : ''}
+                            />
+                        </div>
 
-                <div class="d-flex justify-content-center align-items-center"
-                     style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">
-                  <img src="${img}" class="mx-auto d-block"
-                       style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:8px;"
-                       alt="${name}">
-                </div>
+                        <div class="d-flex justify-content-center align-items-center"
+                             style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">
+                            <img src="${img}" class="mx-auto d-block"
+                                 style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:8px;"
+                                 alt="${name}">
+                        </div>
 
-                <div class="card-body py-2">
-                  <h6 class="card-title mb-2 text-truncate">${name}</h6>
-                  <button type="button"
-                          class="btn btn-sm btn-primary w-100 js-show-on-mockup"
-                          data-id="${id}"
-                          data-href="${href}">
-                    Show on Mockup
-                  </button>
+                        <div class="card-body py-2">
+                            <h6 class="card-title mb-2 text-truncate">${name}</h6>
+                            <button type="button"
+                                    class="btn btn-sm btn-primary w-100 js-show-on-mockup"
+                                    data-id="${id}"
+                                    data-href="${href}">
+                                Show on Mockup
+                            </button>
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
         `);
                 });
 
