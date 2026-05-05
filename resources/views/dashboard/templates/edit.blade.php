@@ -841,7 +841,7 @@
                 items.forEach(mockup => {
                     const id           = String(mockup.id);
                     const name         = mockup.name ?? ('Mockup #' + id);
-                    const isHasCategory = parseInt(mockup.category?.is_has_category ?? 0);
+                    const isHasCategory = parseInt(mockup.product?.is_has_category ?? 0);
 
                     const images   = mockup?.images || {};
                     const firstKey = Object.keys(images)[0];
