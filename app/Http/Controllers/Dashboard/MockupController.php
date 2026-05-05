@@ -43,7 +43,7 @@ class MockupController extends DashboardController
 
         ];
         $this->methodRelations = [
-            'index' => [ 'types','products'],
+            'index' => ['types','products'],
         ];
         $this->resourceClass = MockupResource::class;
     }
