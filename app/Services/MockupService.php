@@ -104,7 +104,7 @@ class MockupService extends BaseService
                     ->flatMap(function ($tpl) {
                         $colors = $tpl->pivot->colors ?? [];
                         if (is_string($colors)) {
-                            $colors = json_decode($c, true) ?: [];
+                            $colors = json_decode($colors, true) ?: [];
                         }
                         $modelColor = $tpl->pivot->model_color ?? null;
                         if ($modelColor && in_array($modelColor, $colors)) {
@@ -214,6 +214,9 @@ class MockupService extends BaseService
                    }
 
                 }
+            })->when(request()->filled('category_ids'), function ($q) {
+                $categoryIds = request('category_ids');
+                $q->whereIn('category_id', $categoryIds);
             })
             ->when(request()->filled('template_id'), fn($q) => $q->whereHas('templates', function ($query) {
                 $query->where('templates.id', request('template_id'));
