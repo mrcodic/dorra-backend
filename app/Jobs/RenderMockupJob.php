@@ -97,6 +97,7 @@ class RenderMockupJob implements ShouldQueue
                         'template_id' => (string) $template->id,
                         'hex'         => $hex,
                         'category_id' => (int) $this->mockup->category_id,
+                        'product_ids' => (array) $this->mockup->products->pluck('id')->toArray(),
                     ])
                     ->toMediaCollection('generated_mockups');
 
