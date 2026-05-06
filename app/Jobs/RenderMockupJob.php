@@ -88,7 +88,9 @@ class RenderMockupJob implements ShouldQueue
                 ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(string) $this->mockup->category_id])
                 ->get()
                 ->each(fn ($media) => $media->delete());
-            try {
+            $this->mockup->templates()->updateExistingPivot($template->id, [
+                'model_color' => null,
+            ]);            try {
                 $this->mockup
                     ->addMedia($tempPath)
                     ->usingFileName("mockup_{$side}_tpl{$template->id}_{$hex}.png")
@@ -97,7 +99,8 @@ class RenderMockupJob implements ShouldQueue
                         'template_id' => (string) $template->id,
                         'hex'         => $hex,
                         'category_id' => (int) $this->mockup->category_id,
-                        'product_ids' => (array) $this->mockup->products->pluck('id')->toArray(),
+                        'product_ids' => (array) $mockup->products->pluck('id')->toArray(),
+
                     ])
                     ->toMediaCollection('generated_mockups');
 
