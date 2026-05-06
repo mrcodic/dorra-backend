@@ -318,6 +318,10 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
     });
 
     Route::prefix('api/v1/')->group(function () {
+        Route::post('mockups/{mockup}/bulk-jobs', [BulkMockupController::class, 'generateBulk']);
+        Route::get('bulk-jobs/{bulkJob}', [BulkMockupController::class, 'status']);
+        Route::post('bulk-jobs/{bulkJob}/cancel', [BulkMockupController::class, 'cancel']);
+        Route::post('bulk-jobs/{bulkJob}/retry', [BulkMockupController::class, 'retry']);
         Route::delete('fixed-specs/{product_specification}', [FixedSpecController::class, 'destroy'])
             ->name('fixed-specs.destroy');
         Route::controller(ReviewController::class)->group(function () {
@@ -397,10 +401,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
         Route::post('social-links', [SettingController::class, 'socialLinks'])->name('social-links');
     });
-    Route::post('mockups/{mockup}/bulk-jobs', [BulkMockupController::class, 'generateBulk']);
-    Route::get('bulk-jobs/{bulkJob}', [BulkMockupController::class, 'status']);
-    Route::post('bulk-jobs/{bulkJob}/cancel', [BulkMockupController::class, 'cancel']);
-    Route::post('bulk-jobs/{bulkJob}/retry', [BulkMockupController::class, 'retry']);
+
 
 });
 Route::view('test', 'dashboard.test');
