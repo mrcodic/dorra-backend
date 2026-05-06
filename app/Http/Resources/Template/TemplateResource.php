@@ -75,7 +75,7 @@ class TemplateResource extends JsonResource
                 ->where('custom_properties->template_id', (string) $this->id)
                 ->where('custom_properties->model_image', 1)
                 ->where(function ($query) {
-                    $id = (int)(request('product_without_category_id') ?? request('product_id'));
+                    $id = (int)(request('product_without_category_id') ?? $categoryId??request('product_id'));
                     $query->where('custom_properties->category_id', $id)
                         ->orWhereJsonContains('custom_properties->product_ids', $id);
                 })
