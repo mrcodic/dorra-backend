@@ -311,7 +311,7 @@ class CartService extends BaseService
                 'discount_amount' => getDiscountAmount($discountCode, $cart->price),
             ]);
 
-        } elseif ($discountCode->scope == ScopeEnum::CATEGORY) {
+        } elseif ($discountCode->scope == ScopeEnum::PRODUCT) {
 
             $discountProductIds = $discountCode->products()->pluck('products.id');
 
@@ -336,12 +336,13 @@ class CartService extends BaseService
                 ]);
             });
 
-        } elseif ($discountCode->scope == ScopeEnum::PRODUCT) {
+        } elseif ($discountCode->scope == ScopeEnum::CATEGORY) {
 
             $discountCategoryIds = $discountCode->categories()->pluck('categories.id');
 
             $matchingItems = $items->filter(function ($item) use ($discountCategoryIds) {
-                return $discountCategoryIds->contains($item->cartable?->category_id);
+                return $discountCategoryIds->contains($item->cartable_id)
+                    && $item->cartable_type === (new Category())->getMorphClass();
             });
 
             if ($matchingItems->isEmpty()) {
