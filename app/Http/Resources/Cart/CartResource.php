@@ -31,12 +31,8 @@ class CartResource extends JsonResource
 
         $isDownload = $this->items->every(fn($item) => $item->type == \App\Enums\Item\TypeEnum::DOWNLOAD);
 
-        // For GENERAL scope discount code → apply on subAfterDiscount
-        $generalDiscount = $this->discountCode && $this->discountCode->scope == \App\Enums\DiscountCode\ScopeEnum::GENERAL
-            ? getDiscountAmount($this->discountCode, $subAfterDiscount)
-            : 0;
 
-        $totalDiscount = $itemsDiscount + $generalDiscount;
+        $totalDiscount = $subAfterDiscount;
 
         $subTotal = round($subAfterOffer - $totalDiscount, 2);
 
