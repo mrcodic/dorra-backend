@@ -15,42 +15,56 @@ class CartResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $subAfter = round(
+        $subAfterOffer = round(
             $this->items->sum(fn($item) => $item->sub_total_after_offer ?? $item->sub_total),
             2
         );
-        $isDownload = $this->items->every(fn($item) => $item->type == \App\Enums\Item\TypeEnum::DOWNLOAD);
-        return [
-            "id" => $this->id,
-            "items" => CartItemResource::collection($this->whenLoaded('items')),
-            "all_items_are_download" => $isDownload,
-            'sub_total' => $subAfter,
-            'total' => round(getTotalPrice($this->discountCode ?? 0, $subAfter, $this->delivery_amount, $isDownload), 2),
-            'tax' => [
-                'ratio' => !$isDownload ? setting('tax') * 100 : 0 . "%",
-                'value' => !$isDownload ? getPriceAfterTax(setting('tax'), $subAfter) : 0,
-            ],
-            'delivery' => $this->delivery_amount,
-            'discount' => [
-                'id' => $this->discountCode?->id,
-                'code' => $this->discountCode?->code,
-                'ratio' => $this->price
-                    ? (
-                        ($this->discountCode?->type === TypeEnum::PERCENTAGE
-                            ? (intval($this->discountCode?->value * 100) == $this->discountCode?->value * 100
-                                ? intval($this->discountCode?->value * 100)
-                                : number_format($this->discountCode?->value * 100, 2, '.', '')
-                            )
-                            : (intval(($this->discountCode?->value / $this->price) * 100) == ($this->discountCode?->value / $this->price) * 100
-                                ? intval(($this->discountCode?->value / $this->price) * 100)
-                                : number_format(($this->discountCode?->value / $this->price) * 100, 2, '.', '')
-                            )
-                        ) . '%'
-                    )
-                    : '0%',
-                'value' => getDiscountAmount($this->discountCode, $this->price) ?? 0,
-            ],
 
+        // Total discount from item-level codes (PRODUCT/CATEGORY scope)
+        $itemsDiscount = $this->items->sum(function ($item) {
+            // Items with offer → no discount code applied
+            return $item->sub_total_after_offer ? 0 : ($item->discount_amount ?? 0);
+        });
+
+        // Final sub_total after offer + item discount codes
+        $subAfterDiscount = round(max(0, $subAfterOffer - $itemsDiscount), 2);
+
+        $isDownload = $this->items->every(fn($item) => $item->type == \App\Enums\Item\TypeEnum::DOWNLOAD);
+
+        // For GENERAL scope discount code → apply on subAfterDiscount
+        $generalDiscount = $this->discountCode && $this->discountCode->scope == \App\Enums\DiscountCode\ScopeEnum::GENERAL
+            ? getDiscountAmount($this->discountCode, $subAfterDiscount)
+            : 0;
+
+        $totalDiscount = $itemsDiscount + $generalDiscount;
+
+        $subTotal = round($subAfterOffer - $totalDiscount, 2);
+
+        return [
+            'id'                    => $this->id,
+            'items'                 => CartItemResource::collection($this->whenLoaded('items')),
+            'all_items_are_download'=> $isDownload,
+            'sub_total'             => $subTotal,
+            'total'                 => round(getTotalPrice($this->discountCode ?? 0, $subTotal, $this->delivery_amount, $isDownload), 2),
+            'tax'                   => [
+                'ratio' => !$isDownload ? setting('tax') * 100 . '%' : '0%',
+                'value' => !$isDownload ? getPriceAfterTax(setting('tax'), $subTotal) : 0,
+            ],
+            'delivery'              => $this->delivery_amount,
+            'discount'              => [
+                'id'    => $this->discountCode?->id,
+                'code'  => $this->discountCode?->code,
+                'ratio' => $subAfterOffer > 0
+                    ? (function () use ($totalDiscount, $subAfterOffer) {
+                        $ratio = ($totalDiscount / $subAfterOffer) * 100;
+                        return (intval($ratio) == $ratio
+                                ? intval($ratio)
+                                : number_format($ratio, 2, '.', '')
+                            ) . '%';
+                    })()
+                    : '0%',
+                'value' => round($totalDiscount, 2),
+            ],
         ];
     }
 }
