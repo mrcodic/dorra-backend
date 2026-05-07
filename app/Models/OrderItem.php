@@ -28,6 +28,8 @@ class OrderItem extends Model implements HasMedia
         'quantity',
         'color',
         'type',
+        'discount_code_id',
+        'discount_amount',
     ];
     protected $casts = [
         'type' => TypeEnum::class
@@ -74,5 +76,9 @@ class OrderItem extends Model implements HasMedia
     public function specs(): HasMany
     {
         return $this->hasMany(OrderItemSpec::class, 'order_item_id');
+    }
+    public function discountCode(): BelongsTo
+    {
+        return $this->belongsTo(DiscountCode::class);
     }
 }

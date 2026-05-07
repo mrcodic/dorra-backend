@@ -25,7 +25,9 @@ class CartItem extends Model
         'product_price_id',
         'quantity',
         'color',
-        'type'
+        'type',
+        'discount_code_id',
+        'discount_amount'
     ];
     protected $table = 'cart_items';
     protected $appends = ['sub_total_after_offer', 'offer_amount'];
@@ -75,5 +77,8 @@ class CartItem extends Model
     {
         return $this->hasMany(CartItemSpec::class, 'cart_item_id');
     }
-
+    public function discountCode(): BelongsTo
+    {
+        return $this->belongsTo(DiscountCode::class);
+    }
 }
