@@ -306,12 +306,6 @@ class CartService extends BaseService
 
         if ($discountCode->scope == ScopeEnum::GENERAL) {
 
-            // Clear any item-level discounts first
-            $items->each(fn($item) => $item->update([
-                'discount_code_id' => null,
-                'discount_amount'  => 0,
-            ]));
-
             $cart->update([
                 'discount_code_id' => $discountCode->id,
                 'discount_amount'  => getDiscountAmount($discountCode, $cart->price),
@@ -335,10 +329,19 @@ class CartService extends BaseService
                 'discount_amount'  => 0,
             ]));
 
-            $matchingItems->each(fn($item) => $item->update([
+            $matchingItems->each(function ($item) use ($discountCode) {
+                $item->update([
+                    'discount_code_id' => $discountCode->id,
+                    'discount_amount'  => getDiscountAmount($discountCode, $item->sub_total),
+                ]);
+            });
+
+            $totalDiscountValue = $items->fresh()->sum('discount_amount');
+
+            $cart->update([
                 'discount_code_id' => $discountCode->id,
-                'discount_amount'  => getDiscountAmount($discountCode, $item->sub_total),
-            ]));
+                'discount_amount'  => $totalDiscountValue,
+            ]);
 
         } elseif ($discountCode->scope == ScopeEnum::CATEGORY) {
 
@@ -358,21 +361,20 @@ class CartService extends BaseService
                 'discount_amount'  => 0,
             ]));
 
-            $matchingItems->each(fn($item) => $item->update([
+            $matchingItems->each(function ($item) use ($discountCode) {
+                $item->update([
+                    'discount_code_id' => $discountCode->id,
+                    'discount_amount'  => getDiscountAmount($discountCode, $item->sub_total),
+                ]);
+            });
+
+            $totalDiscountValue = $items->fresh()->sum('discount_amount');
+
+            $cart->update([
                 'discount_code_id' => $discountCode->id,
-                'discount_amount'  => getDiscountAmount($discountCode, $item->sub_total),
-            ]));
+                'discount_amount'  => $totalDiscountValue,
+            ]);
         }
-
-
-        $totalItemsDiscount = $cart->items()->sum('discount_amount');
-
-        $cart->update([
-            'discount_code_id' => $discountCode->id,
-            'discount_amount'  => $totalItemsDiscount > 0
-                ? $totalItemsDiscount
-                : getDiscountAmount($discountCode, $cart->price),
-        ]);
 
         $cart->refresh();
 
