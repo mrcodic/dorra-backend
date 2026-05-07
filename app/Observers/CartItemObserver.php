@@ -45,7 +45,7 @@ class CartItemObserver
     {
         $cart = $cartItem->cart;
         $cart->delivery_amount = 0;
-        $cart->price = $cart->items()->sum('sub_total');
+        $cart->price = $cart->items()->selectRaw('SUM(sub_total) - SUM(discount_amount) as net')->value('net');
         $cart->saveQuietly();
     }
 
