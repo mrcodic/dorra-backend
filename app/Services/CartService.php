@@ -305,10 +305,10 @@ class CartService extends BaseService
             ->firstOrFail();
 
         if ($discountCode->scope == ScopeEnum::GENERAL) {
-            // Apply discount to the whole cart
+
             $cart->update([
                 'discount_code_id' => $discountCode->id,
-                'discount_amount' => getDiscountAmount($discountCode, $cart->price),
+                'discount_amount'  => getDiscountAmount($discountCode, $cart->price),
             ]);
 
         } elseif ($discountCode->scope == ScopeEnum::PRODUCT) {
@@ -326,15 +326,22 @@ class CartService extends BaseService
 
             $items->each(fn($item) => $item->update([
                 'discount_code_id' => null,
-                'discount_amount' => 0,
+                'discount_amount'  => 0,
             ]));
 
             $matchingItems->each(function ($item) use ($discountCode) {
                 $item->update([
                     'discount_code_id' => $discountCode->id,
-                    'discount_amount' => getDiscountAmount($discountCode, $item->sub_total),
+                    'discount_amount'  => getDiscountAmount($discountCode, $item->sub_total),
                 ]);
             });
+
+            $totalDiscountValue = $items->fresh()->sum('discount_amount');
+
+            $cart->update([
+                'discount_code_id' => $discountCode->id,
+                'discount_amount'  => $totalDiscountValue,
+            ]);
 
         } elseif ($discountCode->scope == ScopeEnum::CATEGORY) {
 
@@ -351,24 +358,30 @@ class CartService extends BaseService
 
             $items->each(fn($item) => $item->update([
                 'discount_code_id' => null,
-                'discount_amount' => 0,
+                'discount_amount'  => 0,
             ]));
 
             $matchingItems->each(function ($item) use ($discountCode) {
                 $item->update([
                     'discount_code_id' => $discountCode->id,
-                    'discount_amount' => getDiscountAmount($discountCode, $item->sub_total),
+                    'discount_amount'  => getDiscountAmount($discountCode, $item->sub_total),
                 ]);
             });
+
+            $totalDiscountValue = $items->fresh()->sum('discount_amount');
+
+            $cart->update([
+                'discount_code_id' => $discountCode->id,
+                'discount_amount'  => $totalDiscountValue,
+            ]);
         }
 
-        // Calculate total discount value across all items (for product/category scope)
-        $totalDiscountValue = in_array($discountCode->scope, [ScopeEnum::PRODUCT, ScopeEnum::CATEGORY])
-            ? $items->fresh()->sum('discount_amount')
-            : getDiscountAmount($discountCode, $cart->price);
+        $cart->refresh();
+
+        $totalDiscountValue = $cart->discount_amount;
 
         return [
-            'code' => $discountCode->code,
+            'code'  => $discountCode->code,
             'ratio' => $cart->price
                 ? (
                     ($discountCode->type === TypeEnum::PERCENTAGE
