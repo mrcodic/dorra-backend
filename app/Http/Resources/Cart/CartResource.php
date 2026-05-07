@@ -16,7 +16,7 @@ class CartResource extends JsonResource
     public function toArray(Request $request): array
     {
         $subAfter = round(
-            $this->items->sum(fn($item) => $item->sub_total_after_offer ?? $item->sub_total),
+            $this->items->sum(fn($item) => $item->sub_total_after_offer ?? ($item->sub_total - $item->discount_amount??0)),
             2
         );
         $isDownload = $this->items->every(fn($item) => $item->type == \App\Enums\Item\TypeEnum::DOWNLOAD);
