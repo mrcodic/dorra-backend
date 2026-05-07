@@ -3,6 +3,7 @@
 namespace App\Rules;
 
 use App\Enums\DiscountCode\ScopeEnum;
+use App\Enums\DiscountCode\TypeEnum;
 use App\Models\Cart;
 use App\Models\Category;
 use App\Models\DiscountCode;
@@ -25,8 +26,10 @@ class ValidDiscountCode implements ValidationRule
             $fail('Discount code does not exist.');
             return;
         }
-        if ($this->cart?->price < $code?->value) {
-            $fail('Discount code is not valid for this product.');
+        if ($code->type === TypeEnum::FIXED) {
+            if ($this->cart?->price < $code->getRawOriginal('value')) {
+                $fail('Cart total is less than the discount value.');
+            }
         }
 
         if ($code?->expired_at && $code?->expired_at <= now()) {

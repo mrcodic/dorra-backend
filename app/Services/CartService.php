@@ -361,7 +361,7 @@ class CartService extends BaseService
                 'discount_amount'  => getDiscountAmount($discountCode, $item->sub_total),
             ]));
         }
-        
+
         $cart->refresh();
 
         $totalDiscountValue = $cart->discount_amount;
