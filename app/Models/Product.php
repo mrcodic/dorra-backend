@@ -211,7 +211,7 @@ class Product extends Model implements HasMedia
                     $qq->whereNull("$offers.end_at")
                         ->orWhere("$offers.end_at", '>=', now());
                 })
-
+                ->where("$offers.start_at", '>=', now())
                 ->orderByDesc("$offerables.id")
                 ->limit(1),
         ]);
