@@ -65,7 +65,8 @@ class CartItemObserver
                 ) * $cartItem->quantity;
         }
 
-        $cartItem->sub_total = $subTotal;
+        $cartItem->sub_total    = $subTotal;
+        $cartItem->discount_amount = min($cartItem->discount_amount ?? 0, $subTotal);
         $cartItem->saveQuietly();
     }
 }
