@@ -39,7 +39,7 @@ class CartItemResource extends JsonResource
             }),
             'price' =>$this->sub_total &&  $cartable? $this->sub_total : $item?->price,
             'product_price' => $this->product_price,
-            'price_after_offer' => is_null($after) ? null : sprintf('%.2f', round($after, 2)) ?? $priceAfterDiscountCode,
+            'price_after_offer' => sprintf('%.2f', round($after, 2)) ?? $priceAfterDiscountCode,
             'quantity' => $this->quantity,
             'color' => $this->color,
             'item_type' => [
