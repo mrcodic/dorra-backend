@@ -306,6 +306,12 @@ class CartService extends BaseService
 
         if ($discountCode->scope == ScopeEnum::GENERAL) {
 
+            // Clear any item-level discounts first
+            $items->each(fn($item) => $item->update([
+                'discount_code_id' => null,
+                'discount_amount'  => 0,
+            ]));
+
             $cart->update([
                 'discount_code_id' => $discountCode->id,
                 'discount_amount'  => getDiscountAmount($discountCode, $cart->price),
@@ -329,19 +335,10 @@ class CartService extends BaseService
                 'discount_amount'  => 0,
             ]));
 
-            $matchingItems->each(function ($item) use ($discountCode) {
-                $item->update([
-                    'discount_code_id' => $discountCode->id,
-                    'discount_amount'  => getDiscountAmount($discountCode, $item->sub_total),
-                ]);
-            });
-
-            $totalDiscountValue = $items->fresh()->sum('discount_amount');
-
-            $cart->update([
+            $matchingItems->each(fn($item) => $item->update([
                 'discount_code_id' => $discountCode->id,
-                'discount_amount'  => $totalDiscountValue,
-            ]);
+                'discount_amount'  => getDiscountAmount($discountCode, $item->sub_total),
+            ]));
 
         } elseif ($discountCode->scope == ScopeEnum::CATEGORY) {
 
@@ -361,20 +358,21 @@ class CartService extends BaseService
                 'discount_amount'  => 0,
             ]));
 
-            $matchingItems->each(function ($item) use ($discountCode) {
-                $item->update([
-                    'discount_code_id' => $discountCode->id,
-                    'discount_amount'  => getDiscountAmount($discountCode, $item->sub_total),
-                ]);
-            });
-
-            $totalDiscountValue = $items->fresh()->sum('discount_amount');
-
-            $cart->update([
+            $matchingItems->each(fn($item) => $item->update([
                 'discount_code_id' => $discountCode->id,
-                'discount_amount'  => $totalDiscountValue,
-            ]);
+                'discount_amount'  => getDiscountAmount($discountCode, $item->sub_total),
+            ]));
         }
+
+
+        $totalItemsDiscount = $cart->items()->sum('discount_amount');
+
+        $cart->update([
+            'discount_code_id' => $discountCode->id,
+            'discount_amount'  => $totalItemsDiscount > 0
+                ? $totalItemsDiscount
+                : getDiscountAmount($discountCode, $cart->price),
+        ]);
 
         $cart->refresh();
 
@@ -394,18 +392,24 @@ class CartService extends BaseService
         ];
     }
 
+
     public function removeDiscount(): void
     {
         $cart = $this->resolveUserCart();
         if (!$cart) {
             throw ValidationException::withMessages(['cart' => ['Cart not found for this user.']]);
         }
+
+        $cart->items()->update([
+            'discount_code_id' => null,
+            'discount_amount'  => 0,
+        ]);
+
         $cart->update([
             'discount_code_id' => null,
-            'discount_amount' => 0,
+            'discount_amount'  => 0,
         ]);
     }
-
     public function cartInfo(): array
     {
         $cart = $this->resolveUserCart();
