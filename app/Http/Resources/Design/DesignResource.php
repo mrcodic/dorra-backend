@@ -122,7 +122,7 @@ class DesignResource extends JsonResource
 
                 if ($this->template)
                 {
-                    
+
                     $mockup = $this->template?->mockups()
                         ->where('mockups.id', $mockupId)
                         ->first();
@@ -132,7 +132,7 @@ class DesignResource extends JsonResource
                     $colors = $mockup->pivot->colors ?? [];
                 }else{
                     $mockup = Mockup::find($mockupId);
-                    $colors = $mockup->colors;
+                    $colors = $mockup->templateColors ?: $mockup->colors;
 
                 }
 

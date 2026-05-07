@@ -387,7 +387,6 @@ class TemplateController extends DashboardController
             ->values()
             ->all();
 
-        $mockup->update(['colors' => $merged]);
         if ($template->mockups()->where('mockup_id', $mockup->id)->exists()) {
             $template->mockups()->updateExistingPivot($mockup->id, [
                 'positions' => $request->input('positions'),
