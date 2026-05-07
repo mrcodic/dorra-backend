@@ -311,7 +311,7 @@ class CartService extends BaseService
                 'discount_amount' => getDiscountAmount($discountCode, $cart->price),
             ]);
 
-        } elseif ($discountCode->scope == ScopeEnum::PRODUCT) {
+        } elseif ($discountCode->scope == ScopeEnum::CATEGORY) {
 
             $discountProductIds = $discountCode->products()->pluck('products.id');
 
@@ -336,7 +336,7 @@ class CartService extends BaseService
                 ]);
             });
 
-        } elseif ($discountCode->scope == ScopeEnum::CATEGORY) {
+        } elseif ($discountCode->scope == ScopeEnum::PRODUCT) {
 
             $discountCategoryIds = $discountCode->categories()->pluck('categories.id');
 
