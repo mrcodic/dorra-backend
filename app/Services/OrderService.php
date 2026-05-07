@@ -677,7 +677,12 @@ class OrderService extends BaseService
                 'discountCode' => ['This discount code is not valid.'],
             ]);
         }
-        $subTotal = $cart->items->sum(fn($item) => $item->sub_total_after_offer ?? $item->sub_total);
+        $subTotal = $cart->items->sum(function ($item) {
+            if ($item->sub_total_after_offer) {
+                return $item->sub_total_after_offer;
+            }
+            return max(0, $item->sub_total - ($item->discount_amount ?? 0));
+        });
 
         // create order + items + address inside transaction
         $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request, $idempotencyKey, $allDownload) {
@@ -770,17 +775,20 @@ class OrderService extends BaseService
         // order items
         $orderItems = $order->orderItems()->createMany(
             $cart->items->map(fn($item) => [
-                'orderable_id' => $item->cartable_id,
-                'orderable_type' => $item->cartable_type,
-                'quantity' => $item->quantity,
-                'product_price' => $item->product_price,
-                'itemable_id' => $item->itemable_id,
-                'itemable_type' => $item->itemable_type,
-                'specs_price' => $item->specs_price,
-                'sub_total' => $item->sub_total_after_offer ?: $item->sub_total,
+                'orderable_id'     => $item->cartable_id,
+                'orderable_type'   => $item->cartable_type,
+                'quantity'         => $item->quantity,
+                'product_price'    => $item->product_price,
+                'itemable_id'      => $item->itemable_id,
+                'itemable_type'    => $item->itemable_type,
+                'specs_price'      => $item->specs_price,
+                'sub_total'        => $item->sub_total_after_offer
+                    ?: max(0, $item->sub_total - ($item->discount_amount ?? 0)),
+                'discount_code_id' => $item->discount_code_id,
+                'discount_amount'  => $item->sub_total_after_offer ? 0 : ($item->discount_amount ?? 0),
                 'product_price_id' => $item->product_price_id,
-                'color' => $item->color,
-                'type' => $item->type,
+                'color'            => $item->color,
+                'type'             => $item->type,
             ])->toArray()
         );
 

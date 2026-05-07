@@ -305,8 +305,6 @@ class CartService extends BaseService
             ->firstOrFail();
 
         if ($discountCode->scope == ScopeEnum::GENERAL) {
-
-            // Clear any item-level discounts first
             $items->each(fn($item) => $item->update([
                 'discount_code_id' => null,
                 'discount_amount'  => 0,
