@@ -640,8 +640,6 @@ class OrderService extends BaseService
                 paymentMethod: $selectedPaymentMethod,
                 request: $request,
                 user: $user,
-                cart: null,
-                discountCode: null,
             );
 
             return [
@@ -677,29 +675,54 @@ class OrderService extends BaseService
                 'discountCode' => ['This discount code is not valid.'],
             ]);
         }
-        $subTotal = $cart->items->sum(function ($item) {
-            if ($item->sub_total_after_offer) {
-                return $item->sub_total_after_offer;
-            }
-            return max(0, $item->sub_total - ($item->discount_amount ?? 0));
-        });
-
-        // create order + items + address inside transaction
-        $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request, $idempotencyKey, $allDownload) {
-            return $this->createOrderFromCart(
-                cart: $cart,
-                discountCode: $discountCode,
-                subTotal: $subTotal,
-                request: $request,
-                idempotencyKey: $idempotencyKey,
-                allDownload: $allDownload
+        $invalidItemDiscount = $cart->items
+            ->filter(fn($item) => $item->discount_code_id !== null)
+            ->first(
+                fn($item) => $item->discountCode()->isNotValid()->exists()
             );
-        });
+
+        if ($invalidItemDiscount) {
+            throw ValidationException::withMessages([
+                'discountCode' => ['One or more items have an invalid or expired discount code. Please remove it and try again.'],
+            ]);
+        }
+        $subTotal = round(
+            $cart->items->sum(function ($item) {
+                $hasOffer = (float) optional($item->cartable?->lastOffer)->getRawOriginal('value') > 0;
+
+                if ($hasOffer) {
+                    return (float) $item->sub_total_after_offer;
+                }
+
+                return max(0, (float) $item->sub_total - (float) ($item->discount_amount ?? 0));
+            }),
+            2
+        );
+        $isGeneralDiscount = $discountCode?->scope === \App\Enums\DiscountCode\ScopeEnum::GENERAL;
+
+        $orderLevelDiscountCode   = $isGeneralDiscount ? $discountCode : null;
+        // create order + items + address inside transaction
+        $order = $this->handleTransaction(
+            function () use (
+                $cart, $orderLevelDiscountCode ,
+                $subTotal, $request, $idempotencyKey, $allDownload
+            ) {
+                return $this->createOrderFromCart(
+                    cart: $cart,
+                    discountCode: $orderLevelDiscountCode,
+                    subTotal: $subTotal,
+                    request: $request,
+                    idempotencyKey: $idempotencyKey,
+                    allDownload: $allDownload,
+                );
+            }
+        );
         $this->copyMockupMediaToOrderItems($cart, $order);
-        $this->clearCartAfterCashOnDelivery($cart);
 
         // 3) Cash on delivery → no online payment
         if ($selectedPaymentMethod->code === 'cash_on_delivery') {
+            $this->clearCartAfterCashOnDelivery($cart);
+
             return [
                 'order' => [
                     'id' => $order->id,
@@ -763,15 +786,15 @@ class OrderService extends BaseService
     /**
      * Creates order + items + specs + address/pickup from the cart.
      */
-    protected function createOrderFromCart($cart, $discountCode, $subTotal, $request, string $idempotencyKey, $allDownload)
-    {
+    protected function createOrderFromCart(
+        $cart, $discountCode, $subTotal, $request, string $idempotencyKey, $allDownload
+    ) {
         $order = $this->repository->query()->create(
             array_merge(
                 OrderData::fromCart($subTotal, $discountCode, $cart),
-                ['idempotency_key' => $idempotencyKey,'all_items_are_download' => $allDownload]
+                ['idempotency_key' => $idempotencyKey, 'all_items_are_download' => $allDownload]
             )
         );
-
         // order items
         $orderItems = $order->orderItems()->createMany(
             $cart->items->map(fn($item) => [

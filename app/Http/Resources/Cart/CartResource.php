@@ -31,7 +31,7 @@ class CartResource extends JsonResource
             }),
             2
         );
-        
+
         $cartLevelDiscountCode = $this->discountCode?->scope === \App\Enums\DiscountCode\ScopeEnum::GENERAL
             ? $this->discountCode
             : null;
