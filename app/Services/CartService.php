@@ -218,7 +218,8 @@ class CartService extends BaseService
                         Template::class => fn($q) => $q->select(['id', 'name', 'price'])->with('products'),
                     ]);
                 },
-                'items.product.category'
+                'items.product.category',
+                'discountCode'
             ])
             ->first();
         if ($cart && $cart->expires_at?->isPast()) {
