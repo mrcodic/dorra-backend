@@ -40,7 +40,10 @@ class CartItem extends Model
         $val = (float)optional($this->cartable?->lastOffer)->getRawOriginal('value');
         return $val > 0 ? $sub * (1 - ($val / 100)) : $sub;
     }
-
+    public function hasActiveOffer(): bool
+    {
+        return (float) optional($this->cartable?->lastOffer)->getRawOriginal('value') > 0;
+    }
     public function getOfferAmountAttribute(): float
     {
         $sub = (float)$this->sub_total;

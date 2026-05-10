@@ -797,22 +797,42 @@ class OrderService extends BaseService
         );
         // order items
         $orderItems = $order->orderItems()->createMany(
-            $cart->items->map(fn($item) => [
-                'orderable_id'     => $item->cartable_id,
-                'orderable_type'   => $item->cartable_type,
-                'quantity'         => $item->quantity,
-                'product_price'    => $item->product_price,
-                'itemable_id'      => $item->itemable_id,
-                'itemable_type'    => $item->itemable_type,
-                'specs_price'      => $item->specs_price,
-                'sub_total'        => $item->sub_total_after_offer
-                    ?: max(0, $item->sub_total - ($item->discount_amount ?? 0)),
-                'discount_code_id' => $item->discount_code_id,
-                'discount_amount'  => $item->sub_total_after_offer ? 0 : ($item->discount_amount ?? 0),
-                'product_price_id' => $item->product_price_id,
-                'color'            => $item->color,
-                'type'             => $item->type,
-            ])->toArray()
+            $cart->items->map(function ($item) {
+                $hasOffer   = $item->hasActiveOffer();
+                $hasDiscount = !$hasOffer && $item->discount_code_id !== null;
+
+                if ($hasOffer) {
+                    $subTotal       = (float) $item->sub_total_after_offer;
+                    $discountCodeId = null;
+                    $discountAmount = 0;
+
+                } elseif ($hasDiscount) {
+                    $subTotal       = max(0, (float) $item->sub_total - (float) ($item->discount_amount ?? 0));
+                    $discountCodeId = $item->discount_code_id;
+                    $discountAmount = (float) ($item->discount_amount ?? 0);
+
+                } else {
+                    $subTotal       = (float) $item->sub_total;
+                    $discountCodeId = null;
+                    $discountAmount = 0;
+                }
+
+                return [
+                    'orderable_id'     => $item->cartable_id,
+                    'orderable_type'   => $item->cartable_type,
+                    'quantity'         => $item->quantity,
+                    'product_price'    => $item->product_price,
+                    'itemable_id'      => $item->itemable_id,
+                    'itemable_type'    => $item->itemable_type,
+                    'specs_price'      => $item->specs_price,
+                    'sub_total'        => $subTotal,
+                    'discount_code_id' => $discountCodeId,
+                    'discount_amount'  => $discountAmount,
+                    'product_price_id' => $item->product_price_id,
+                    'color'            => $item->color,
+                    'type'             => $item->type,
+                ];
+            })->toArray()
         );
 
         // specs
