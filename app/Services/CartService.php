@@ -128,7 +128,7 @@ class CartService extends BaseService
     }
     private function applyExistingItemDiscount($cart, $cartItem): void
     {
-        
+
         if ($cart->discount_code_id) {
             return;
         }

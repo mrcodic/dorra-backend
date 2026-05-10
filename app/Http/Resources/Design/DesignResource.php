@@ -115,7 +115,7 @@ class DesignResource extends JsonResource
             ),
             'is_added_to_cart' => $this->isAddedToCart(),
             'colors' => $this->when(request()->has('mockup_id'), function () {
-                $mockupId = request('mockup_id');
+                $mockupId = request()->integer('mockup_id');
                 if (!$mockupId) {
                     return [];
                 }
