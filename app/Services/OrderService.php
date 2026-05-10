@@ -718,10 +718,10 @@ class OrderService extends BaseService
             }
         );
         $this->copyMockupMediaToOrderItems($cart, $order);
+        $this->clearCartAfterCashOnDelivery($cart);
 
         // 3) Cash on delivery → no online payment
         if ($selectedPaymentMethod->code === 'cash_on_delivery') {
-            $this->clearCartAfterCashOnDelivery($cart);
 
             return [
                 'order' => [
