@@ -95,6 +95,7 @@ class CartService extends BaseService
                 );
                 $specs = Arr::get($validatedData, 'specs', []);
                 $this->handleSpecs($specs ?: $designSpecs, $cartItem);
+                $this->applyExistingItemDiscount($cart, $cartItem);
             } else {
                 $cartItem = $cart->addItem(
                     $design ?? $template,
@@ -102,6 +103,7 @@ class CartService extends BaseService
                     type: \App\Enums\Item\TypeEnum::tryFrom($request->type),
                     color: $validatedData['color'] ?? null,
                 );
+                $this->applyExistingItemDiscount($cart, $cartItem);
 
             }
             if ($template) {
@@ -124,7 +126,45 @@ class CartService extends BaseService
             return $cart;
         });
     }
+    private function applyExistingItemDiscount($cart, $cartItem): void
+    {
+        
+        if ($cart->discount_code_id) {
+            return;
+        }
 
+        $existingDiscountCode = $cart->items()
+            ->whereNotNull('discount_code_id')
+            ->where('id', '!=', $cartItem->id)
+            ->with('discountCode.products', 'discountCode.categories')
+            ->first()
+            ?->discountCode;
+
+        if (!$existingDiscountCode) {
+            return;
+        }
+
+        $appliesToNewItem = match ($existingDiscountCode->scope) {
+            ScopeEnum::PRODUCT => $existingDiscountCode->products
+                ->contains(fn($p) =>
+                    $p->id == $cartItem->cartable_id &&
+                    $cartItem->cartable_type === (new \App\Models\Product())->getMorphClass()
+                ),
+            ScopeEnum::CATEGORY => $existingDiscountCode->categories
+                ->contains(fn($c) =>
+                    $c->id == $cartItem->cartable_id &&
+                    $cartItem->cartable_type === (new \App\Models\Category())->getMorphClass()
+                ),
+            default => false,
+        };
+
+        if ($appliesToNewItem) {
+            $cartItem->update([
+                'discount_code_id' => $existingDiscountCode->id,
+                'discount_amount'  => getDiscountAmount($existingDiscountCode, $cartItem->sub_total),
+            ]);
+        }
+    }
     private function calculatePriceDetails(array $validatedData, $product, $design = null, $price = null): array
     {
         $productPrice = $this->productPriceRepository->query()
@@ -289,12 +329,14 @@ class CartService extends BaseService
 
         $items = $cart->items;
 
-        $hasOffer = $items->contains(function ($item) {
-            return (float)$item->cartable?->lastOffer?->getRawOriginal('value') > 0;
-        });
+        $hasOffer = $items->contains(
+            fn($item) => (float) $item->cartable?->lastOffer?->getRawOriginal('value') > 0
+        );
 
         if ($hasOffer) {
-            throw ValidationException::withMessages(['offer' => ["You can't apply discount when at least one item is offered."]]);
+            throw ValidationException::withMessages([
+                'offer' => ["You can't apply discount when at least one item is offered."],
+            ]);
         }
 
         $request->validate([
@@ -305,7 +347,43 @@ class CartService extends BaseService
             ->whereCode($request->code)
             ->firstOrFail();
 
-        if ($discountCode->scope == ScopeEnum::GENERAL) {
+
+        if ($cart->discount_code_id && $cart->discount_code_id !== $discountCode->id) {
+            throw ValidationException::withMessages([
+                'code' => ['A discount code is already applied to your cart. Remove it first.'],
+            ]);
+        }
+
+
+        $itemsWithDiscount = $items->filter(fn($item) => $item->discount_code_id !== null);
+
+        if ($discountCode->scope === ScopeEnum::GENERAL && $itemsWithDiscount->isNotEmpty()) {
+            throw ValidationException::withMessages([
+                'code' => ['An item-level discount is already applied. Remove it first before applying a cart-wide discount.'],
+            ]);
+        }
+
+
+        if (in_array($discountCode->scope, [ScopeEnum::PRODUCT, ScopeEnum::CATEGORY]) && $cart->discount_code_id) {
+            throw ValidationException::withMessages([
+                'code' => ['A cart-wide discount is already applied. Remove it first before applying an item discount.'],
+            ]);
+        }
+
+        $conflictingItem = $itemsWithDiscount->first(
+            fn($item) => $item->discount_code_id !== $discountCode->id
+        );
+
+        if ($conflictingItem) {
+            throw ValidationException::withMessages([
+                'code' => ['Another discount code is already applied to one or more items. Remove it first.'],
+            ]);
+        }
+
+
+        if ($discountCode->scope === ScopeEnum::GENERAL) {
+
+
             $items->each(fn($item) => $item->update([
                 'discount_code_id' => null,
                 'discount_amount'  => 0,
@@ -316,19 +394,22 @@ class CartService extends BaseService
                 'discount_amount'  => getDiscountAmount($discountCode, $cart->price),
             ]);
 
-        } elseif ($discountCode->scope == ScopeEnum::PRODUCT) {
+        } elseif ($discountCode->scope === ScopeEnum::PRODUCT) {
 
             $discountProductIds = $discountCode->products()->pluck('products.id');
 
-            $matchingItems = $items->filter(function ($item) use ($discountProductIds) {
-                return $discountProductIds->contains($item->cartable_id)
-                    && $item->cartable_type === (new Product())->getMorphClass();
-            });
+            $matchingItems = $items->filter(
+                fn($item) => $discountProductIds->contains($item->cartable_id)
+                    && $item->cartable_type === (new Product())->getMorphClass()
+            );
 
             if ($matchingItems->isEmpty()) {
-                throw ValidationException::withMessages(['code' => ['No items in your cart match this discount code.']]);
+                throw ValidationException::withMessages([
+                    'code' => ['No items in your cart match this discount code.'],
+                ]);
             }
 
+            $cart->update(['discount_code_id' => null, 'discount_amount' => 0]);
             $items->each(fn($item) => $item->update([
                 'discount_code_id' => null,
                 'discount_amount'  => 0,
@@ -339,19 +420,23 @@ class CartService extends BaseService
                 'discount_amount'  => getDiscountAmount($discountCode, $item->sub_total),
             ]));
 
-        } elseif ($discountCode->scope == ScopeEnum::CATEGORY) {
+        } elseif ($discountCode->scope === ScopeEnum::CATEGORY) {
 
             $discountCategoryIds = $discountCode->categories()->pluck('categories.id');
 
-            $matchingItems = $items->filter(function ($item) use ($discountCategoryIds) {
-                return $discountCategoryIds->contains($item->cartable_id)
-                    && $item->cartable_type === (new Category())->getMorphClass();
-            });
+            $matchingItems = $items->filter(
+                fn($item) => $discountCategoryIds->contains($item->cartable_id)
+                    && $item->cartable_type === (new Category())->getMorphClass()
+            );
 
             if ($matchingItems->isEmpty()) {
-                throw ValidationException::withMessages(['code' => ['No items in your cart belong to this discount\'s category.']]);
+                throw ValidationException::withMessages([
+                    'code' => ['No items in your cart belong to this discount\'s category.'],
+                ]);
             }
 
+
+            $cart->update(['discount_code_id' => null, 'discount_amount' => 0]);
             $items->each(fn($item) => $item->update([
                 'discount_code_id' => null,
                 'discount_amount'  => 0,
@@ -365,22 +450,27 @@ class CartService extends BaseService
 
         $cart->refresh();
 
-        $totalDiscountValue = $cart->discount_amount;
+
+        $totalDiscountValue = $discountCode->scope === ScopeEnum::GENERAL
+            ? (float) $cart->discount_amount
+            : (float) $cart->items->sum('discount_amount');
+
+        $basePrice = (float) $cart->price;
+
+        $ratio = $basePrice > 0
+            ? (
+            $discountCode->type === TypeEnum::PERCENTAGE
+                ? $discountCode->value * 100
+                : ($totalDiscountValue / $basePrice) * 100
+            ) . '%'
+            : '0%';
 
         return [
             'code'  => $discountCode->code,
-            'ratio' => $cart->price
-                ? (
-                    ($discountCode->type === TypeEnum::PERCENTAGE
-                        ? $discountCode->value * 100
-                        : ($totalDiscountValue / $cart->price) * 100
-                    ) . '%'
-                )
-                : '0%',
-            'value' => $totalDiscountValue ?? 0,
+            'ratio' => $ratio,
+            'value' => $totalDiscountValue,
         ];
     }
-
 
     public function removeDiscount(?int $itemId = null): void
     {
