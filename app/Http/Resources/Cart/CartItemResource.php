@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Cart;
 
+use App\Enums\DiscountCode\TypeEnum;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\Design\DesignResource;
 use App\Http\Resources\Product\ProductResource;
@@ -47,6 +48,25 @@ class CartItemResource extends JsonResource
             'item_type' => [
                 'value' => $this->type?->value,
                 'label' => $this->type?->label(),
+            ],
+            'discount' => [
+                'id'    => $this->discountCode?->id,
+                'code'  => $this->discountCode?->code,
+                'ratio' => $this->sub_total
+                    ? (
+                        ($this->discountCode?->type === TypeEnum::PERCENTAGE
+                            ? (intval($this->discountCode?->value * 100) == $this->discountCode?->value * 100
+                                ? intval($this->discountCode?->value * 100)
+                                : number_format($this->discountCode?->value * 100, 2, '.', '')
+                            )
+                            : (intval(($this->discountCode?->value / $this->sub_total) * 100) == ($this->discountCode?->value / $this->sub_total) * 100
+                                ? intval(($this->discountCode?->value / $this->sub_total) * 100)
+                                : number_format(($this->discountCode?->value / $this->sub_total) * 100, 2, '.', '')
+                            )
+                        ) . '%'
+                    )
+                    : '0%',
+                'value' => getDiscountAmount($this->discountCode, $this->price) ?? 0,
             ],
         ];
     }
