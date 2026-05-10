@@ -382,19 +382,28 @@ class CartService extends BaseService
     }
 
 
-    public function removeDiscount(): void
+    public function removeDiscount(?int $itemId = null): void
     {
         $cart = $this->resolveUserCart();
         if (!$cart) {
             throw ValidationException::withMessages(['cart' => ['Cart not found for this user.']]);
         }
 
-        $cart->items()->update([
-            'discount_code_id' => null,
-            'discount_amount'  => 0,
-        ]);
+        if ($itemId === null) {
+            $cart->update([
+                'discount_code_id' => null,
+                'discount_amount'  => 0,
+            ]);
 
-        $cart->update([
+            return;
+        }
+        $item = $cart->items()->find($itemId);
+
+        if (!$item) {
+            throw ValidationException::withMessages(['item' => ['Item not found in your cart.']]);
+        }
+
+        $item->update([
             'discount_code_id' => null,
             'discount_amount'  => 0,
         ]);
