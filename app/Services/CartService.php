@@ -312,7 +312,7 @@ class CartService extends BaseService
 
             $cart->update([
                 'discount_code_id' => $discountCode->id,
-                'discount_amount'  => $cart->price - getDiscountAmount($discountCode, $cart->price),
+                'discount_amount'  => getDiscountAmount($discountCode, $cart->price),
             ]);
 
         } elseif ($discountCode->scope == ScopeEnum::PRODUCT) {
@@ -335,7 +335,7 @@ class CartService extends BaseService
 
             $matchingItems->each(fn($item) => $item->update([
                 'discount_code_id' => $discountCode->id,
-                'discount_amount'  => $item->sub_total - getDiscountAmount($discountCode, $item->sub_total),
+                'discount_amount'  => getDiscountAmount($discountCode, $item->sub_total),
             ]));
 
         } elseif ($discountCode->scope == ScopeEnum::CATEGORY) {
@@ -358,7 +358,7 @@ class CartService extends BaseService
 
             $matchingItems->each(fn($item) => $item->update([
                 'discount_code_id' => $discountCode->id,
-                'discount_amount'  => $item->sub_total - getDiscountAmount($discountCode, $item->sub_total),
+                'discount_amount'  => getDiscountAmount($discountCode, $item->sub_total),
             ]));
         }
 
