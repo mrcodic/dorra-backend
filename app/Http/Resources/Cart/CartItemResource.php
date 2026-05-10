@@ -66,7 +66,7 @@ class CartItemResource extends JsonResource
                         ) . '%'
                     )
                     : '0%',
-                'value' => getDiscountAmount($this->discountCode, $this->price) ?? 0,
+                'value' => getDiscountAmount($this->discountCode, $this->sub_total) ?? 0,
             ],
         ];
     }
