@@ -17,6 +17,7 @@ class DimensionResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'name' => $this->name,
             'width' => $this->when(isset($this->width_cm), $this->width_cm),
             'height' => $this->when(isset($this->height_cm), $this->height_cm),
             'dpi' => 300,
