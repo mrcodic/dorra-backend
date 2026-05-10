@@ -22,7 +22,7 @@ class DimensionResource extends JsonResource
             'dpi' => 300,
             'unit' => [
                 'value' =>UnitEnum::CM?->value,
-                'label' =>$this ->name,
+                'label' =>UnitEnum::CM?->label(),
             ],
         ];
     }
