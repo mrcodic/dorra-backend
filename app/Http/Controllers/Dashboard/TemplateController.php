@@ -505,7 +505,6 @@ class TemplateController extends DashboardController
 
         $normalizedColor = $this->normalizeHex($request->model_color);
 
-        // ── Sync pivot ────────────────────────────────────────────────────────────
         $alreadyAttached = $template->mockups()
             ->where('mockups.id', $mockup->id)
             ->exists();
@@ -520,43 +519,40 @@ class TemplateController extends DashboardController
             ]);
         }
 
-        // ── Base query builder ────────────────────────────────────────────────────
-        $baseQuery = fn() => Media::query()
+        Media::query()
             ->where('model_type', Mockup::class)
             ->where('model_id', $mockup->id)
             ->where('collection_name', 'generated_mockups')
-            ->where('custom_properties->template_id', (string) $template->id);
-
-        DB::transaction(function () use ($baseQuery, $normalizedColor, $request) {
-
-            // 1. Reset all media for this template → no model image
-            $baseQuery()->get()->each(function (Media $media) {
+            ->where('custom_properties->template_id', (string) $template->id)
+            ->get()
+            ->each(function (Media $media) {
                 $media->setCustomProperty('model_image', 0);
                 $media->save();
             });
 
-            // 2. Try exact match: hex + side
-            $matched = $baseQuery()
+        $matchedMedia = Media::query()
+            ->where('model_type', Mockup::class)
+            ->where('model_id', $mockup->id)
+            ->where('collection_name', 'generated_mockups')
+            ->where('custom_properties->template_id', (string) $template->id)
+            ->where('custom_properties->hex', $normalizedColor)
+            ->where('custom_properties->side', $request->side)
+            ->get();
+
+
+        if ($matchedMedia->isEmpty()) {
+            $matchedMedia = Media::query()
+                ->where('model_type', Mockup::class)
+                ->where('model_id', $mockup->id)
+                ->where('collection_name', 'generated_mockups')
+                ->where('custom_properties->template_id', (string) $template->id)
                 ->where('custom_properties->hex', $normalizedColor)
-                ->where('custom_properties->side', $request->side)
                 ->get();
+        }
 
-            // 3. Fallback: hex only, but prefer the requested side if multiple exist
-            if ($matched->isEmpty()) {
-                $matched = $baseQuery()
-                    ->where('custom_properties->hex', $normalizedColor)
-                    ->get()
-                    ->sortByDesc(function (Media $media) use ($request) {
-                        return $media->getCustomProperty('side') === $request->side ? 1 : 0;
-                    })
-                    ->take(1);
-            }
-
-            // 4. Mark selected media as model image
-            $matched->each(function (Media $media) {
-                $media->setCustomProperty('model_image', 1);
-                $media->save();
-            });
+        $matchedMedia->each(function (Media $media) {
+            $media->setCustomProperty('model_image', 1);
+            $media->save();
         });
 
         return Response::api();
