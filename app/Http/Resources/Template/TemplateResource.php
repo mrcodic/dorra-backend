@@ -22,6 +22,17 @@ class TemplateResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
+            ->where('model_type', \App\Models\Mockup::class)
+            ->where('collection_name', 'generated_mockups')
+            ->where('custom_properties->template_id', (string) $this->id)
+            ->where('custom_properties->model_image', 1)
+            ->where(function ($query) {
+                $id = (int)(request('product_without_category_id') ?? request('product_id'));
+                $query->where('custom_properties->category_id', $id)
+                    ->orWhereJsonContains('custom_properties->product_ids', $id);
+            })
+            ->first();
         $categoryId = Product::find(request('product_id'))?->category?->id;
         return [
             'id' => $this->when(isset($this->id), $this->id),
@@ -61,6 +72,7 @@ class TemplateResource extends JsonResource
                 ];
             })->values()->all()
             ),
+            'show_back' => $media?->getCustomProperty('side') == 'back',
             'source_design_svg' => $this->when(isset($this->image), $this->image),
             'back_base64_preview_image' => $this->use_front_as_back
                 ? $this->getFirstMediaUrl('templates-preview')
@@ -69,17 +81,7 @@ class TemplateResource extends JsonResource
                     : $this->getFirstMediaUrl('back_templates')),
             'has_mockup' => (boolean)$this->products->contains('has_mockup', true),
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
-            'template_model_image' => \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
-                ->where('model_type', \App\Models\Mockup::class)
-                ->where('collection_name', 'generated_mockups')
-                ->where('custom_properties->template_id', (string) $this->id)
-                ->where('custom_properties->model_image', 1)
-                ->where(function ($query) {
-                    $id = (int)(request('product_without_category_id') ?? request('product_id'));
-                    $query->where('custom_properties->category_id', $id)
-                        ->orWhereJsonContains('custom_properties->product_ids', $id);
-                })
-                ->first()
+            'template_model_image' => $media
                 ?->getUrl() ?: $this->getFirstMediaUrl('template_model_image'),
             'mockup_template_image' => (function () use ($categoryId) {
                 $cartItemId = $this->additional['cart_item_id'] ?? null;
