@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BulkJobItem extends Model
 {
-    use HasFactory;
 
     protected $table = 'bulk_job_items';
 
