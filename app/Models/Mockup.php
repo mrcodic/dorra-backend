@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\Mockup\TypeEnum;
+use App\Observers\MockupObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -11,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
-
+#[ObservedBy(MockupObserver::class)]
 class Mockup extends Model implements HasMedia
 {
     use InteractsWithMedia, SoftDeletes;
