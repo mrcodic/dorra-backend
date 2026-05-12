@@ -49,7 +49,7 @@ class BulkJobItem extends Model
     }
     public function getDesignUrl(): string
     {
-        return $this->template?->getImageUrlForType($this->side) ?? asset('images/default-product.png');
+        return $this->template?->getPreviewImageUrlForType($this->side) ?? asset('images/default-product.png');
     }
     public function markAsProcessing(): void
     {
