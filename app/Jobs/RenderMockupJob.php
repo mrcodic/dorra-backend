@@ -72,7 +72,7 @@ class RenderMockupJob implements ShouldQueue
             );
 
             if (!$response->successful()) {
-                throw new \Exception("Render service returned: " . $response->status());
+                throw new \Exception("Render service returned: " . $response->body());
             }
 
 
