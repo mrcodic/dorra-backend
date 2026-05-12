@@ -227,7 +227,9 @@ class MockupService extends BaseService
                 }
             })
             ->when(request()->filled('template_id'), fn($q) => $q->whereHas('templates', function ($query) {
-                $query->where('templates.id', request('template_id'));
+                $query->whereHas('templates', function ($query) {
+                    $query->where('templates.id', request('template_id'));
+                });
             }))
             ->when(
                 request()->filled('template_id') &&
