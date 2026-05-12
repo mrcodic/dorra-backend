@@ -2,17 +2,21 @@
 
 namespace App\Observers;
 
+use App\Models\Design;
 use App\Models\Mockup;
 
 class MockupObserver
 {
     public function deleted(Mockup $mockup)
     {
-
-        $mockup->designs->each(function ($design) {
-            $design->clearMediaCollections();
-            $design->delete();
-        });
+        $templateIds = $mockup->templates->pluck('id');
+        Design::whereIn('template_id', $templateIds)
+            ->get()
+            ->each(function ($design) {
+                $design->clearMediaCollections();
+                $design->delete();
+            });
         $mockup->clearMediaCollections();
     }
+
 }
