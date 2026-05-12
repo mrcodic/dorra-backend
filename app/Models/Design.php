@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use App\Enums\Item\TypeEnum;
 use App\Enums\OrientationEnum;
 use App\Observers\DesignObserver;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -187,13 +188,16 @@ class Design extends Model implements HasMedia
         return $this->morphedByMany(Invoice::class, 'designable', 'designables')->withTimestamps();
     }
 
-    public function isAddedToCart(): bool
+    public function isAddedToCart(?TypeEnum $typeEnum = null): bool
     {
         $userId = auth('sanctum')->id();
         $cookieId = request()->cookie('cookie_id');
         $guestId = \App\Models\Guest::where('cookie_value', $cookieId)->value('id');
 
         return $this->cartItems()
+            ->when($typeEnum, function ($query) use ($typeEnum) {
+                return $query->where('type', $typeEnum);
+            })
             ->where(function ($q) use ($userId, $guestId) {
                 if ($userId) {
                     $q->where('user_id', $userId);

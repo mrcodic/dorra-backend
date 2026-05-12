@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Design;
 
+use App\Enums\Item\TypeEnum;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\DimensionResource;
 use App\Http\Resources\FontResource;
@@ -114,6 +115,8 @@ class DesignResource extends JsonResource
                 })
             ),
             'is_added_to_cart' => $this->isAddedToCart(),
+            'is_added_to_cart_as_print' => $this->isAddedToCart(TypeEnum::PRINT),
+            'is_added_to_cart_as_download' => $this->isAddedToCart(TypeEnum::DOWNLOAD),
             'colors' => $this->when(request()->has('mockup_id'), function () {
                 $mockupId = request()->integer('mockup_id');
                 if (!$mockupId) {
