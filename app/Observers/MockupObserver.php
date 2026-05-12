@@ -13,10 +13,10 @@ class MockupObserver
         Design::whereIn('template_id', $templateIds)
             ->get()
             ->each(function ($design) {
-                $design->clearMediaCollections();
+                $design->clearMediaCollection();
                 $design->delete();
             });
-        $mockup->clearMediaCollections();
+        $mockup->clearMediaCollection();
     }
 
 }
