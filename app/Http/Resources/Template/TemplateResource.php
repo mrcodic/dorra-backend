@@ -42,9 +42,9 @@ class TemplateResource extends JsonResource
             })
             ->first();
         $categoryId = Product::find(request('product_id'))?->category?->id;
-        Log::info("dsf",[
-            $this->types->contains(TypeEnum::BACK)
-        ]);
+        Log::info("dsf",
+            $this->types->toArray(),
+        );
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
