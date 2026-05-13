@@ -594,21 +594,56 @@ class CartService extends BaseService
             ],
             'cartable_type' => ['required', 'in:product,category'],
             'itemable_type' => ['required', 'in:template,design'],
+            'specs'         => ['nullable', 'array'],
+            'specs.*.product_specification_id' => ['required_with:specs', 'integer', 'exists:product_specifications,id'],
+            'specs.*.spec_option_id'           => ['required_with:specs', 'integer', 'exists:product_specification_options,id'],
         ]);
+
         $cartId = auth('sanctum')->user()?->cart?->id ?? Guest::whereCookieValue(request()->cookie('cookie_id'))->first()?->cart?->id;
+
         $mapItemTypes = [
             'template' => Template::class,
-            'design' => Design::class,
+            'design'   => Design::class,
         ];
         $mapCartItem = [
             'category' => Category::class,
-            'product' => Product::class,
+            'product'  => Product::class,
         ];
-        return $this->cartItemRepository->query()->where('cart_id', $cartId)
+
+        $existing = $this->cartItemRepository->query()
+            ->where('cart_id', $cartId)
             ->where('cartable_id', $request->cartable_id)
             ->where('cartable_type', $mapCartItem[$request->cartable_type])
-            ->when($request->itemable_id, fn($q) => $q->where('itemable_id', $request->itemable_id)
-                ->where('itemable_type', $mapItemTypes[$request->itemable_type]))
-            ->exists();
-    }
-}
+            ->when($request->itemable_id, fn($q) => $q
+                ->where('itemable_id', $request->itemable_id)
+                ->where('itemable_type', $mapItemTypes[$request->itemable_type])
+            )
+            ->with('specs')
+            ->get();
+
+        if ($existing->isEmpty()) {
+            return false;
+        }
+
+        $newSpecs = collect($request->specs ?? [])
+            ->map(fn($s) => [
+                'product_specification_id' => (int) $s['product_specification_id'],
+                'spec_option_id'           => (int) $s['spec_option_id'],
+            ])
+            ->sortBy('product_specification_id')
+            ->values()
+            ->toArray();
+
+        return $existing->contains(function ($item) use ($newSpecs) {
+            $existingSpecs = $item->specs
+                ->map(fn($s) => [
+                    'product_specification_id' => (int) $s->product_specification_id,
+                    'spec_option_id'           => (int) $s->spec_option_id,
+                ])
+                ->sortBy('product_specification_id')
+                ->values()
+                ->toArray();
+
+            return $existingSpecs === $newSpecs;
+        });
+    }}

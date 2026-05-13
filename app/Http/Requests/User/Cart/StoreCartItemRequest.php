@@ -206,20 +206,43 @@ class StoreCartItemRequest extends BaseRequest
         }
 
         $cartId = auth('sanctum')->user()->cart->id ?? null;
-
-        $exists = CartItem::where('cart_id', $cartId)
+        $existing = CartItem::where('cart_id', $cartId)
             ->where('cartable_id', $this->cartable_id)
             ->where('cartable_type', $this->cartable_type)
             ->when($this->product_price_id, fn($q) => $q->where('product_price_id', $this->product_price_id))
             ->when($this->template_id, fn($q) => $q->where('itemable_id', $this->template_id))
             ->when($this->design_id, fn($q) => $q->where('itemable_id', $this->design_id))
-            ->exists();
+            ->with('specs')
+            ->get();
 
+        if ($existing->isNotEmpty()) {
+            $newSpecs = collect($this->specs ?? [])
+                ->map(fn($s) => [
+                    'product_specification_id' => (int) $s['product_specification_id'],
+                    'spec_option_id'           => (int) $s['spec_option_id'],
+                ])
+                ->sortBy('product_specification_id')
+                ->values()
+                ->toArray();
 
-        if ($exists) {
-            throw ValidationException::withMessages([
-                'cart_item' => 'This item is already in your cart.',
-            ]);
+            $isDuplicate = $existing->contains(function ($item) use ($newSpecs) {
+                $existingSpecs = $item->specs
+                    ->map(fn($s) => [
+                        'product_specification_id' => (int) $s->product_specification_id,
+                        'spec_option_id'           => (int) $s->spec_option_id,
+                    ])
+                    ->sortBy('product_specification_id')
+                    ->values()
+                    ->toArray();
+
+                return $existingSpecs === $newSpecs;
+            });
+
+            if ($isDuplicate) {
+                throw ValidationException::withMessages([
+                    'cart_item' => 'This item is already in your cart.',
+                ]);
+            }
         }
 
 
