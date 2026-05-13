@@ -80,11 +80,15 @@ class RenderMockupJob implements ShouldQueue
             $template= $this->item->template;
             $tempPath  = sys_get_temp_dir() . "/mockup_{$this->mockup->id}_{$template->id}_{$side}_{$hex}.png";
             file_put_contents($tempPath, $response->body());
-            $modelColorHex = null;
-            $pivot = $this->mockup->templates()->where('templates.id', $template->id)->first()?->pivot;
-            if ($pivot?->model_color) {
-                $modelColorHex = strtolower(ltrim(trim($pivot->model_color), '#'));
-            }
+            $protectedHexes = $this->mockup->templates()
+                ->wherePivotNotNull('model_color')
+                ->get()
+                ->pluck('pivot.model_color')
+                ->map(fn($c) => strtolower(ltrim(trim($c), '#')))
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
 
             $deleteQuery = $this->mockup->media()
                 ->where('collection_name', 'generated_mockups')
@@ -93,11 +97,13 @@ class RenderMockupJob implements ShouldQueue
                 ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
                 ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(int) $this->mockup->category_id]);
 
-            if ($modelColorHex) {
-                $deleteQuery->whereRaw(
-                    "LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) != ?",
-                    [$modelColorHex]
-                );
+            if (!empty($protectedHexes)) {
+                foreach ($protectedHexes as $protectedHex) {
+                    $deleteQuery->whereRaw(
+                        "LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) != ?",
+                        [$protectedHex]
+                    );
+                }
             }
 
             $deleteQuery->get()->each(fn($media) => $media->delete());
