@@ -80,17 +80,8 @@ class RenderMockupJob implements ShouldQueue
             $template= $this->item->template;
             $tempPath  = sys_get_temp_dir() . "/mockup_{$this->mockup->id}_{$template->id}_{$side}_{$hex}.png";
             file_put_contents($tempPath, $response->body());
-            $this->mockup->media()
-                ->where('collection_name', 'generated_mockups')
-                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $template->id])
-                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$side])
-                ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
-                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(int) $this->mockup->category_id])
-                ->get()
-                ->each(fn ($media) => $media->delete());
-            $this->mockup->templates()->updateExistingPivot($template->id, [
-                'model_color' => null,
-            ]);            try {
+
+            try {
                 $this->mockup
                     ->addMedia($tempPath)
                     ->usingFileName("mockup_{$side}_tpl{$template->id}_{$hex}.png")
