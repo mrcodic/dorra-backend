@@ -81,7 +81,22 @@ class TemplateResource extends JsonResource
                 ];
             })->values()->all()
             ),
-            'show_back' => $this->types->whereIn('value', [TypeEnum::FRONT->value, TypeEnum::BACK->value])->count() > 0 || ($media?->getCustomProperty('side') === 'back'),            'source_design_svg' => $this->when(isset($this->image), $this->image),
+            'show_back' => (function () use ($media) {
+                $hasBackType = $this->types->whereIn('value', [TypeEnum::FRONT->value, TypeEnum::BACK->value])->count() > 0;
+
+                if (!$hasBackType) {
+                    return false;
+                }
+
+                // If media exists, check if side is 'back'
+                if ($media) {
+                    return $media->getCustomProperty('side') === 'back';
+                }
+
+                // If no media found but has back type, return true
+                return true;
+            })(),
+            'source_design_svg' => $this->when(isset($this->image), $this->image),
             'back_base64_preview_image' => $this->use_front_as_back
                 ? $this->getFirstMediaUrl('templates-preview')
                 : ($this->approach == 'without_editor'
