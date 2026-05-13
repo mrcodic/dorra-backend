@@ -161,12 +161,23 @@ class TemplateResource extends JsonResource
                 if (!$mockupId) {
                     return false;
                 }
+
                 if ($this->relationLoaded('mockups')) {
-                    return $this->mockups->contains('id', (int) $mockupId);
+                    $mockup = $this->mockups->firstWhere('id', (int) $mockupId);
+                    if (!$mockup) return false;
+
+                    $pivot = $mockup->pivot;
+                    return !empty($pivot->colors) && !empty($pivot->positions);
                 }
-                return $this->mockups()
+
+                $mockup = $this->mockups()
                     ->where('mockups.id', $mockupId)
-                    ->exists();
+                    ->first();
+
+                if (!$mockup) return false;
+
+                $pivot = $mockup->pivot;
+                return !empty($pivot->colors) && !empty($pivot->positions);
             }),
         ];
     }
