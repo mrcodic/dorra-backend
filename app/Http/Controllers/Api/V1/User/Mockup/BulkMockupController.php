@@ -38,6 +38,7 @@ class BulkMockupController extends Controller
         $templateIds = $request->input('template_ids');
 
         $colors = collect($request->input('colors'))
+            ->map(fn($c) => $c)
             ->filter()
             ->unique()
             ->values()
@@ -56,23 +57,6 @@ class BulkMockupController extends Controller
         $sides = array_keys($positions);
 
         // -----------------------------------------------------------------------
-        // Delete images for ALL previously attached templates before re-syncing
-        // -----------------------------------------------------------------------
-        $existingTemplateIds = $mockup->templates()->pluck('templates.id')->toArray();
-
-        foreach ($existingTemplateIds as $templateId) {
-            $mockup->media()
-                ->where('collection_name', 'generated_mockups')
-                ->whereRaw(
-                    "JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?",
-                    [(string) $templateId]
-                )
-                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(int) $mockup->category_id])
-                ->get()
-                ->each(fn($m) => $m->delete());
-        }
-
-        // -----------------------------------------------------------------------
         // Sync each template: update colors + positions on the pivot
         // -----------------------------------------------------------------------
         $syncData = [];
@@ -82,9 +66,8 @@ class BulkMockupController extends Controller
                 'positions' => $request->input('positions'),
             ];
         }
-        $mockup->templates()->sync($syncData);
+        $mockup->templates()->syncWithoutDetaching($syncData);
         $mockup->update(['colors' => $colors]);
-
         // -----------------------------------------------------------------------
         // Dispatch bulk job
         // -----------------------------------------------------------------------
@@ -120,7 +103,7 @@ class BulkMockupController extends Controller
             'started_at' => now(),
         ]);
 
-        return Response::api(data: [
+        return Response::api(data:[
             'success'     => true,
             'bulk_job_id' => $bulkJob->id,
             'total_count' => $totalCount,
@@ -136,7 +119,7 @@ class BulkMockupController extends Controller
         $rate    = $job->completed_count / max($elapsed, 1);
         $remaining = ($job->total_count - $job->completed_count) / max($rate, 0.01);
 
-        return Response::api(data: [
+        return Response::api(data:[
             'id'                          => $job->id,
             'status'                      => $job->status,
             'total_count'                 => $job->total_count,
@@ -153,9 +136,11 @@ class BulkMockupController extends Controller
         $job = MockupGenerationJob::findOrFail($id);
         $job->update(['status' => 'cancelled']);
 
+
         BulkJobItem::where('bulk_job_id', $id)
             ->where('status', 'pending')
             ->update(['status' => 'cancelled']);
+
 
         $mockup = Mockup::findOrFail($job->mockup_id);
 
@@ -168,21 +153,13 @@ class BulkMockupController extends Controller
 
             $mockup->media()
                 ->where('collection_name', 'generated_mockups')
-                ->whereRaw(
-                    "JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?",
-                    [(string) $item->template_id]
-                )
-                ->whereRaw(
-                    "JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?",
-                    [$item->side]
-                )
-                ->whereRaw(
-                    "LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?",
-                    [$hex]
-                )
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $item->template_id])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$item->side])
+                ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
                 ->get()
                 ->each(fn($media) => $media->delete());
         }
+
 
         $templateIds = BulkJobItem::where('bulk_job_id', $id)
             ->pluck('template_id')
@@ -239,6 +216,7 @@ class BulkMockupController extends Controller
             'started_at'   => now(),
         ]);
 
+        // ✅ Dispatch only after all rows are already 'pending' in the DB
         foreach ($failedItems as $item) {
             RenderMockupJob::dispatch($bulkJob, $item->fresh(), $mockup);
         }
@@ -247,89 +225,6 @@ class BulkMockupController extends Controller
             'success'     => true,
             'retried'     => $failedItems->count(),
             'bulk_job_id' => $bulkJob->id,
-        ]);
-    }
-
-    public function detachTemplates(Request $request, Mockup $mockup)
-    {
-        $request->validate([
-            'template_ids'   => 'required|array|min:1',
-            'template_ids.*' => 'string|exists:templates,id',
-            'colors'         => 'nullable|array',
-            'colors.*'       => 'string',
-        ]);
-
-        $templateIds = $request->input('template_ids');
-        $colors      = $request->input('colors');
-
-        $deletedImages = 0;
-
-        foreach ($templateIds as $templateId) {
-            $mediaQuery = $mockup->media()
-                ->where('collection_name', 'generated_mockups')
-                ->whereRaw(
-                    "JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?",
-                    [(string) $templateId]
-                );
-
-            // Scope deletion to specific colors if provided
-            if (!empty($colors)) {
-                $hexList = array_map(
-                    fn($c) => strtolower(ltrim(trim($c), '#')),
-                    $colors
-                );
-
-                $mediaQuery->where(function ($q) use ($hexList) {
-                    foreach ($hexList as $hex) {
-                        $q->orWhereRaw(
-                            "LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?",
-                            [$hex]
-                        );
-                    }
-                });
-            }
-
-            $deletedImages += $mediaQuery->get()->each(fn($m) => $m->delete())->count();
-        }
-
-        // No colors given → fully detach templates from pivot
-        if (empty($colors)) {
-            $mockup->templates()->detach($templateIds);
-        } else {
-            // Partial removal → strip only the given colors from each template's pivot
-            foreach ($templateIds as $templateId) {
-                $pivot = $mockup->templates()
-                    ->wherePivot('template_id', $templateId)
-                    ->first();
-
-                if (!$pivot) {
-                    continue;
-                }
-
-                $hexList = array_map(
-                    fn($c) => strtolower(ltrim(trim($c), '#')),
-                    $colors
-                );
-
-                $remainingColors = collect($pivot->pivot->colors ?? [])
-                    ->filter(fn($c) => !in_array(strtolower(ltrim(trim($c), '#')), $hexList))
-                    ->values()
-                    ->all();
-
-                if (empty($remainingColors)) {
-                    $mockup->templates()->detach($templateId);
-                } else {
-                    $mockup->templates()->updateExistingPivot($templateId, [
-                        'colors' => $remainingColors,
-                    ]);
-                }
-            }
-        }
-
-        return Response::api(data: [
-            'success'        => true,
-            'detached'       => count($templateIds),
-            'deleted_images' => $deletedImages,
         ]);
     }
 }
