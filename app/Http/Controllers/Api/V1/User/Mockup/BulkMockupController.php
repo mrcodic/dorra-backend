@@ -67,6 +67,7 @@ class BulkMockupController extends Controller
                     "JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?",
                     [(string) $templateId]
                 )
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(int) $mockup->category_id])
                 ->get()
                 ->each(fn($m) => $m->delete());
         }
