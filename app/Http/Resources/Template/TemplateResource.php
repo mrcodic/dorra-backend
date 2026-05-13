@@ -97,6 +97,7 @@ class TemplateResource extends JsonResource
                     ->where('custom_properties->template_id', (string) $this->id)
                     ->where('custom_properties->cart_item_id', (string) $cartItemId)
                     ->where('custom_properties->category_id', (int) $catId)
+                    ->whereHas('model', fn($q) => $q->whereNull('deleted_at'))
                     ->first()
                     ?->getUrl();
             })(),
