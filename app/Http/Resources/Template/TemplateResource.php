@@ -13,6 +13,7 @@ use App\Models\Guest;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Log;
 
 class TemplateResource extends JsonResource
 {
@@ -41,6 +42,9 @@ class TemplateResource extends JsonResource
             })
             ->first();
         $categoryId = Product::find(request('product_id'))?->category?->id;
+        Log::info("dsf",[
+            $this->types->contains(TypeEnum::BACK)
+        ]);
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
