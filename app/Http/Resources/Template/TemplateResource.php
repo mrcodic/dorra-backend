@@ -42,9 +42,7 @@ class TemplateResource extends JsonResource
             })
             ->first();
         $categoryId = Product::find(request('product_id'))?->category?->id;
-        Log::info("dsf",[
-            $this->types->contains(TypeEnum::BACK)
-        ]);
+
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
@@ -83,7 +81,9 @@ class TemplateResource extends JsonResource
                 ];
             })->values()->all()
             ),
-            'show_back' => $this->types->contains(TypeEnum::BACK) && (!$media || $media->getCustomProperty('side') == 'back' || $this->getFirstMediaUrl('template_model_image')),
+            'show_back' => $this->types->contains(TypeEnum::BACK) && (
+                    !$media || $media->getCustomProperty('side') === 'back'
+                ),
             'source_design_svg' => $this->when(isset($this->image), $this->image),
             'back_base64_preview_image' => $this->use_front_as_back
                 ? $this->getFirstMediaUrl('templates-preview')
