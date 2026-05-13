@@ -80,22 +80,27 @@ class RenderMockupJob implements ShouldQueue
             $template= $this->item->template;
             $tempPath  = sys_get_temp_dir() . "/mockup_{$this->mockup->id}_{$template->id}_{$side}_{$hex}.png";
             file_put_contents($tempPath, $response->body());
-            // Get the current model_color for this template to protect it
             $modelColorHex = null;
             $pivot = $this->mockup->templates()->where('templates.id', $template->id)->first()?->pivot;
             if ($pivot?->model_color) {
                 $modelColorHex = strtolower(ltrim(trim($pivot->model_color), '#'));
             }
-            if ($modelColorHex !== $hex) {
-                $this->mockup->media()
-                    ->where('collection_name', 'generated_mockups')
-                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $template->id])
-                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$side])
-                    ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
-                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(int) $this->mockup->category_id])
-                    ->get()
-                    ->each(fn($media) => $media->delete());
+
+            $deleteQuery = $this->mockup->media()
+                ->where('collection_name', 'generated_mockups')
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $template->id])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$side])
+                ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(int) $this->mockup->category_id]);
+
+            if ($modelColorHex) {
+                $deleteQuery->whereRaw(
+                    "LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) != ?",
+                    [$modelColorHex]
+                );
             }
+
+            $deleteQuery->get()->each(fn($media) => $media->delete());
 
             try {
                 $this->mockup
