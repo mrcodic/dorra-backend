@@ -218,8 +218,8 @@ class StoreCartItemRequest extends BaseRequest
         if ($existing->isNotEmpty()) {
             $newSpecs = collect($this->specs ?? [])
                 ->map(fn($s) => [
-                    'product_specification_id' => (int) $s['product_specification_id'],
-                    'spec_option_id'           => (int) $s['spec_option_id'],
+                    'product_specification_id' => (int) $s['id'],
+                    'spec_option_id'           => (int) $s['option'],
                 ])
                 ->sortBy('product_specification_id')
                 ->values()
