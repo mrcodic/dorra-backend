@@ -27,7 +27,6 @@ class TemplateResource extends JsonResource
             ->where('collection_name', 'generated_mockups')
             ->where('custom_properties->template_id', (string) $this->id)
             ->where('custom_properties->model_image', 1)
-            ->whereHas('model', fn($q) => $q->whereNull('deleted_at'))
             ->where(function ($query) {
                 $id = (int)(request('product_without_category_id') ?? request('product_id'));
                 $query->where('custom_properties->category_id', $id)
