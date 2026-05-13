@@ -29,9 +29,11 @@ class TemplateResource extends JsonResource
             ->where('custom_properties->model_image', 1)
             ->whereHas('model', fn($q) => $q->whereNull('deleted_at'))
             ->where(function ($query) {
-                $id = (int)(request('product_without_category_id') ?? request('product_id'));
-                $query->where('custom_properties->category_id', $id)
-                    ->orWhereJsonContains('custom_properties->product_ids', $id);
+                $productId  = (int) (request('product_without_category_id') ?? request('product_id'));
+                $categoryId = (int) request('category_id');
+
+                $query->when($categoryId, fn($q) => $q->where('custom_properties->category_id', $categoryId))
+                    ->when($productId,  fn($q) => $q->orWhereJsonContains('custom_properties->product_ids', $productId));
             })
             ->first();
         $categoryId = Product::find(request('product_id'))?->category?->id;
