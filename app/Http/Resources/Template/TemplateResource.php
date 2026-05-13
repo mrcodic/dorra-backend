@@ -81,7 +81,7 @@ class TemplateResource extends JsonResource
                 ];
             })->values()->all()
             ),
-            'show_back' => $this->types->contains(TypeEnum::BACK) && (
+            'show_back' => $this->types->contains(TypeEnum::BACK) || (
                     $media->getCustomProperty('side') === 'back'
                 ),
             'source_design_svg' => $this->when(isset($this->image), $this->image),
