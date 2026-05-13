@@ -85,7 +85,7 @@ class RenderMockupJob implements ShouldQueue
                 ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $template->id])
                 ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$side])
                 ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
-                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(string) $this->mockup->category_id])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(int) $this->mockup->category_id])
                 ->get()
                 ->each(fn ($media) => $media->delete());
             $this->mockup->templates()->updateExistingPivot($template->id, [
