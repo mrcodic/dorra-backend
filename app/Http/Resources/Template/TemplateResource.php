@@ -82,18 +82,20 @@ class TemplateResource extends JsonResource
             })->values()->all()
             ),
             'show_back' => (function () use ($media) {
+                if (!$this->relationLoaded('types')) {
+                    $this->load('types'); // Load it now
+                }
+
                 $hasBackType = $this->types->whereIn('value', [TypeEnum::FRONT->value, TypeEnum::BACK->value])->count() > 0;
 
                 if (!$hasBackType) {
                     return false;
                 }
 
-                // If media exists, check if side is 'back'
                 if ($media) {
                     return $media->getCustomProperty('side') === 'back';
                 }
 
-                // If no media found but has back type, return true
                 return true;
             })(),
             'source_design_svg' => $this->when(isset($this->image), $this->image),
