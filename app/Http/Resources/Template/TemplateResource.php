@@ -90,7 +90,7 @@ class TemplateResource extends JsonResource
                     return $media->getCustomProperty('side') === 'back';
                 }
 
-                return true;
+                return false;
             })(),
             'source_design_svg' => $this->when(isset($this->image), $this->image),
             'back_base64_preview_image' => $this->use_front_as_back
