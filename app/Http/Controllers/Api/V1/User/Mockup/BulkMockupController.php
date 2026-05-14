@@ -37,6 +37,7 @@ class BulkMockupController extends Controller
 
         $templateIds = $request->input('template_ids');
 
+        // Keep original colors as-is (with # prefix) for pivot storage
         $colors = collect($request->input('colors'))
             ->filter()
             ->unique()
@@ -55,6 +56,7 @@ class BulkMockupController extends Controller
 
         $sides = array_keys($positions);
 
+        // Normalized hexes used ONLY for media DB queries
         $newColorsNormalized = collect($colors)
             ->map(fn($c) => $this->normalizeHex($c))
             ->all();
@@ -83,12 +85,13 @@ class BulkMockupController extends Controller
 
         // -----------------------------------------------------------------------
         // 2. For already-attached templates:
-        //    - Merge old pivot colors + incoming colors (never delete old files)
+        //    - Merge old pivot colors (original format) + incoming colors
+        //    - Never delete old files
         //    - Only render colors that have NO media yet
         //    - If positions changed → re-render ALL merged colors
         // -----------------------------------------------------------------------
-        $renderJobs  = [];
-        $pivotColors = []; // track merged colors per template for sync
+        $renderJobs      = [];
+        $mergedPivotColors = []; // stores original color strings (with #) per template
 
         foreach ($alreadyAttachedTemplateIds as $templateId) {
             $existingTemplate  = $existingTemplates->get($templateId);
@@ -96,42 +99,48 @@ class BulkMockupController extends Controller
             $previousPositions = $pivot->positions ?? [];
             $positionsChanged  = json_encode($previousPositions) !== json_encode($request->input('positions'));
 
-            // Merge old pivot colors with incoming colors — never drop old ones
-            $oldPivotColors = collect($pivot->colors ?? [])
-                ->map(fn($c) => $this->normalizeHex($c))
-                ->filter()
-                ->all();
+            // Old pivot colors kept as original strings (with #)
+            $oldPivotColors = collect($pivot->colors ?? [])->filter()->values()->all();
 
-            $mergedColors = collect(array_unique(array_merge($oldPivotColors, $newColorsNormalized)))
-                ->values()
-                ->all();
+            // Merge: old pivot colors + incoming colors, deduplicated by normalized hex
+            // Keep original string format for storage, use normalized only for dedup
+            $mergedByNormalized = [];
+            foreach (array_merge($oldPivotColors, $colors) as $c) {
+                $normalized = $this->normalizeHex($c);
+                if (!isset($mergedByNormalized[$normalized])) {
+                    $mergedByNormalized[$normalized] = $c; // first occurrence wins
+                }
+            }
 
-            $pivotColors[$templateId] = $mergedColors;
+            // $mergedByNormalized = [ 'ff0000' => '#FF0000', 'aabbcc' => '#AABBCC', ... ]
+            $mergedPivotColors[$templateId] = array_values($mergedByNormalized); // original strings for pivot
+            $mergedNormalizedHexes          = array_keys($mergedByNormalized);   // normalized for media queries
 
-            // Fetch all hexes that currently have at least one media record for this template
+            // Fetch existing media hexes for this template
             $existingMediaHexes = $mockup->media()
                 ->where('collection_name', 'generated_mockups')
                 ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
                 ->get()
+                ->map(fn($m) => $this->normalizeHex($m->getCustomProperty('hex') ?? ''))
                 ->filter()
                 ->unique()
                 ->values()
                 ->all();
 
-            // Colors that need rendering = merged colors that have NO media yet
-            $hexesToRender = array_diff($mergedColors, $existingMediaHexes);
+            // Colors with no media yet (need rendering)
+            $hexesToRender  = array_diff($mergedNormalizedHexes, $existingMediaHexes);
 
             // Colors that already have media
-            $hexesWithMedia = array_intersect($mergedColors, $existingMediaHexes);
+            $hexesWithMedia = array_intersect($mergedNormalizedHexes, $existingMediaHexes);
 
-            // Clear model_color on pivot only if that color is no longer in merged list
+            // Clear model_color only if it's no longer in the merged list
             $modelColorHex = $pivot?->model_color ? $this->normalizeHex($pivot->model_color) : null;
-            if ($modelColorHex && !in_array($modelColorHex, $mergedColors)) {
+            if ($modelColorHex && !in_array($modelColorHex, $mergedNormalizedHexes)) {
                 $mockup->templates()->updateExistingPivot($templateId, ['model_color' => null]);
             }
 
             if ($positionsChanged) {
-                // Positions changed → delete ALL existing media and re-render everything
+                // Positions changed → delete existing media and re-render all merged colors
                 foreach ($hexesWithMedia as $hex) {
                     $mockup->media()
                         ->where('collection_name', 'generated_mockups')
@@ -140,8 +149,7 @@ class BulkMockupController extends Controller
                         ->get()
                         ->each(fn($media) => $media->delete());
                 }
-                // Re-render ALL merged colors
-                foreach ($mergedColors as $hex) {
+                foreach ($mergedNormalizedHexes as $hex) {
                     $renderJobs[] = ['template_id' => $templateId, 'hex' => $hex];
                 }
             } else {
@@ -149,7 +157,6 @@ class BulkMockupController extends Controller
                 foreach ($hexesToRender as $hex) {
                     $renderJobs[] = ['template_id' => $templateId, 'hex' => $hex];
                 }
-                // Colors with existing media → keep as-is ✅
             }
         }
 
@@ -157,19 +164,19 @@ class BulkMockupController extends Controller
         // 3. New templates → render all incoming colors
         // -----------------------------------------------------------------------
         foreach ($newTemplateIds as $templateId) {
-            $pivotColors[$templateId] = $newColorsNormalized;
+            $mergedPivotColors[$templateId] = $colors; // original strings
             foreach ($newColorsNormalized as $hex) {
                 $renderJobs[] = ['template_id' => $templateId, 'hex' => $hex];
             }
         }
 
         // -----------------------------------------------------------------------
-        // 4. Sync pivot — use merged colors per template (preserves old colors)
+        // 4. Sync pivot — use merged original color strings per template
         // -----------------------------------------------------------------------
         $syncData = [];
         foreach ($templateIds as $templateId) {
             $syncData[$templateId] = [
-                'colors'    => $pivotColors[$templateId] ?? $newColorsNormalized,
+                'colors'    => $mergedPivotColors[$templateId] ?? $colors,
                 'positions' => $request->input('positions'),
             ];
         }
@@ -180,7 +187,7 @@ class BulkMockupController extends Controller
         // 5. Dispatch jobs only for what actually needs rendering
         // -----------------------------------------------------------------------
 
-        // Map normalized hex back to original color string from request
+        // Map normalized hex → original color string from incoming request
         $hexToOriginalColor = collect($colors)
             ->keyBy(fn($c) => $this->normalizeHex($c))
             ->all();
@@ -196,7 +203,7 @@ class BulkMockupController extends Controller
         ]);
 
         foreach ($renderJobs as $job) {
-            // Use original color string if available, otherwise fall back to hex
+            // Use original color from request if available, else use hex as fallback
             $originalColor = $hexToOriginalColor[$job['hex']] ?? $job['hex'];
 
             foreach ($sides as $side) {
@@ -340,6 +347,7 @@ class BulkMockupController extends Controller
         ]);
     }
 
+    // Used ONLY for media DB queries and deduplication — never for pivot storage
     private function normalizeHex(string $color): string
     {
         return strtolower(ltrim(trim($color), '#'));
