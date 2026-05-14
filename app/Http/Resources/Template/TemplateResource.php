@@ -41,7 +41,14 @@ class TemplateResource extends JsonResource
                     ->orWhereJsonContains('custom_properties->product_ids', $id);
             })
             ->first();
+
         $categoryId = Product::find(request('product_id'))?->category?->id;
+
+        $backPreviewImage = $this->use_front_as_back
+            ? $this->getFirstMediaUrl('templates-preview')
+            : ($this->approach == 'without_editor'
+                ? $this->getFirstMediaUrl('back-templates-preview')
+                : $this->getFirstMediaUrl('back_templates'));
 
         return [
             'id' => $this->when(isset($this->id), $this->id),
@@ -80,13 +87,20 @@ class TemplateResource extends JsonResource
                 ];
             })->values()->all()
             ),
-
+            'show_back' => (function () use ($media, $backPreviewImage) {
+                if (empty($this->image) && !empty($backPreviewImage)) {
+                    return true;
+                }
+                if (!empty($this->image) && !empty($backPreviewImage)) {
+                    if ($media) {
+                        return $media->getCustomProperty('side') === 'back';
+                    }
+                    return true;
+                }
+                return false;
+            })(),
             'source_design_svg' => $this->when(isset($this->image), $this->image),
-            'back_base64_preview_image' => $this->use_front_as_back
-                ? $this->getFirstMediaUrl('templates-preview')
-                : ($this->approach == 'without_editor'
-                    ? $this->getFirstMediaUrl('back-templates-preview')
-                    : $this->getFirstMediaUrl('back_templates')),
+            'back_base64_preview_image' => $backPreviewImage,
             'has_mockup' => (boolean)$this->products->contains('has_mockup', true),
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
             'template_model_image' => $media
@@ -108,18 +122,6 @@ class TemplateResource extends JsonResource
                     ->whereHas('model', fn($q) => $q->whereNull('deleted_at'))
                     ->first()
                     ?->getUrl();
-            })(),
-            'show_back' => (function () use ($media) {
-                if (empty($this->source_design_svg) && !empty($this->back_base64_preview_image)) {
-                    return true;
-                }
-                if (!empty($this->source_design_svg) && !empty($this->back_base64_preview_image)) {
-                    if ($media) {
-                        return $media->getCustomProperty('side') === 'back';
-                    }
-                    return true;
-                }
-                return false;
             })(),
             'orientation' => [
                 'value' => $this->orientation?->value,
@@ -202,6 +204,4 @@ class TemplateResource extends JsonResource
             }),
         ];
     }
-
-
 }
