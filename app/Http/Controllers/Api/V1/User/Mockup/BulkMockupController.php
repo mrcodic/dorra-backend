@@ -176,7 +176,7 @@ class BulkMockupController extends Controller
         $syncData = [];
         foreach ($templateIds as $templateId) {
             $syncData[$templateId] = [
-                'colors'    => $colors,
+                'colors'    => array_unique(array_merge($pivot->colors,$colors)),
                 'positions' => $request->input('positions'),
             ];
         }
