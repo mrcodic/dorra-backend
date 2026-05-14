@@ -82,26 +82,14 @@ class TemplateResource extends JsonResource
             })->values()->all()
             ),
             'show_back' => (function () use ($media) {
-                // Step 1: Load types if not loaded
-                if (!$this->relationLoaded('types')) {
-                    $this->load('types');
+                if (empty($this->source_design_svg) && !empty($this->back_base64_preview_image)) {
+                    return true;
                 }
 
-                // Step 2: Check if FRONT or BACK type exists
-                // Your data has BACK (value: 2), so this should be TRUE
-                $hasBackType = $this->types->whereIn('value', [TypeEnum::FRONT->value, TypeEnum::BACK->value])->count() > 0;
-                // whereIn([1, 2]) finds value: 2 ✓ → count = 1 → count > 0 = TRUE
-
-                if (!$hasBackType) {
-                    return false;  // Should NOT enter here
-                }
-
-                // Step 3: If $media exists, check its custom property
                 if ($media) {
-                    return $media->getCustomProperty('side') === 'back';  // ← Returns FALSE here?
+                    return $media->getCustomProperty('side') === 'back';
                 }
 
-                // Step 4: If no $media, return TRUE
                 return true;
             })(),
             'source_design_svg' => $this->when(isset($this->image), $this->image),
