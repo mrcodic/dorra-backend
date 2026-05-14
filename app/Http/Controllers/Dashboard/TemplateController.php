@@ -513,12 +513,11 @@ class TemplateController extends DashboardController
         if ($alreadyAttached) {
             $template->mockups()->updateExistingPivot($mockup->id, [
                 'model_color' => $request->model_color,
-                'is_primary'  => true,               // ← FIX 2: mark new mockup primary
+
             ]);
         } else {
             $template->mockups()->attach($mockup->id, [
                 'model_color' => $request->model_color,
-                'is_primary'  => true,               // ← FIX 2: mark new mockup primary
             ]);
         }
 
@@ -526,7 +525,7 @@ class TemplateController extends DashboardController
         $template->mockups()
             ->where('mockups.id', '!=', $mockup->id)
             ->each(fn(Mockup $other) =>
-            $template->mockups()->updateExistingPivot($other->id, ['is_primary' => false])
+            $template->mockups()->updateExistingPivot($other->id, ['model_color' => null,])
             );
 
         // ── Base query builders ───────────────────────────────────────────────────
