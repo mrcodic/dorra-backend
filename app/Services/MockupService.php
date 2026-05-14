@@ -261,9 +261,9 @@ class MockupService extends BaseService
                     $q->whereIn('types.value', $types);
                 }, '=', count($types));
 
-//                $query->whereDoesntHave('types', function ($q) use ($types) {
-//                    $q->whereNotIn('types.value', $types);
-//                });
+                $query->whereDoesntHave('types', function ($q) use ($types) {
+                    $q->whereNotIn('types.value', $types);
+                });
             })
             ->when(request()->filled('search'), function ($q) {
                 $q->where('name', 'like', '%' . request('search') . '%');
