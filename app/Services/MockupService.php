@@ -69,7 +69,11 @@ class MockupService extends BaseService
             : null;
 
         $filtered = $mockups->filter(fn($mockup) => $mockup->templates->contains('id', $templateId));
-
+        $filtered = $filtered->sortByDesc(function ($mockup) use ($templateId) {
+            return $mockup->templates
+                ->first(fn($tpl) => $tpl->id == $templateId)
+                ?->pivot->model_color ? 1 : 0;
+        });
         // --- All colors across all mockups ---
         $allColors = $filtered
             ->flatMap(fn($mockup) => $mockup->templates
@@ -131,16 +135,14 @@ class MockupService extends BaseService
                         if ($m->getCustomProperty('template_id') != $templateId) {
                             return false;
                         }
-
-                        // Both sides normalized without '#'
                         $storedHex  = strtolower(ltrim($m->getCustomProperty('hex', ''), '#'));
                         $compareHex = $activeColor ? strtolower(ltrim($activeColor, '#')) : null;
-
                         return !$compareHex || $storedHex === $compareHex;
                     });
 
                 $pickBySide = fn(string $side) => $mockupMedia
                     ->filter(fn($m) => $m->getCustomProperty('side') === $side)
+                    ->sortByDesc(fn($m) => $m->getCustomProperty('model_image', 0)) // ← model_image file first
                     ->map(fn($m) => $m->getFullUrl())
                     ->values()
                     ->all();
