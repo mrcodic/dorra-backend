@@ -27,7 +27,7 @@ class TemplateResource extends JsonResource
         $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
             ->where('model_type', \App\Models\Mockup::class)
             ->where('collection_name', 'generated_mockups')
-            ->where('custom_properties->template_id', (string) $this->id)
+            ->where('custom_properties->template_id', (string)$this->id)
             ->where('custom_properties->model_image', 1)
             ->whereExists(function ($query) {
                 $query->selectRaw(1)
@@ -66,18 +66,17 @@ class TemplateResource extends JsonResource
             'types' => TypeResource::collection($this->whenLoaded('types')),
             'tags' => TagResource::collection($this->whenLoaded('tags')),
             'products' => ProductResource::collection($this->whenLoaded('products')),
-            'mockups' => $this->whenLoaded('mockups', fn() =>
-            $this->mockups->map(function ($mockup) {
+            'mockups' => $this->whenLoaded('mockups', fn() => $this->mockups->map(function ($mockup) {
                 $colors = $mockup->pivot->colors ?? [];
                 $positions = is_array($mockup->pivot->positions)
                     ? $mockup->pivot->positions
                     : json_decode($mockup->pivot->positions ?? '[]', true);
                 return [
-                    'mockup_id'   => $mockup->id,
+                    'mockup_id' => $mockup->id,
                     'mockup_name' => $mockup->name,
                     'mockup_model_color' => $mockup->pivot->model_color,
-                    'colors'      => $colors,
-                    'positions'   =>$positions,
+                    'colors' => $colors,
+                    'positions' => $positions,
                 ];
             })->values()->all()
             ),
@@ -85,11 +84,12 @@ class TemplateResource extends JsonResource
                 if (empty($this->source_design_svg) && !empty($this->back_base64_preview_image)) {
                     return true;
                 }
-
-                if ($media) {
-                    return $media->getCustomProperty('side') === 'back';
+                if (!empty($this->source_design_svg) && !empty($this->back_base64_preview_image)) {
+                    if ($media) {
+                        return $media->getCustomProperty('side') === 'back';
+                    }
+                    return true;
                 }
-
                 return false;
             })(),
             'source_design_svg' => $this->when(isset($this->image), $this->image),
@@ -104,7 +104,7 @@ class TemplateResource extends JsonResource
                 ?->getUrl() ?: $this->getFirstMediaUrl('template_model_image'),
             'mockup_template_image' => (function () use ($categoryId) {
                 $cartItemId = $this->additional['cart_item_id'] ?? null;
-                $catId      = $this->additional['category_id'] ?? $categoryId ?? null;
+                $catId = $this->additional['category_id'] ?? $categoryId ?? null;
 
                 if (!$cartItemId || !$catId) {
                     return null;
@@ -113,9 +113,9 @@ class TemplateResource extends JsonResource
                 return \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
                     ->where('model_type', \App\Models\Mockup::class)
                     ->where('collection_name', 'generated_mockups')
-                    ->where('custom_properties->template_id', (string) $this->id)
-                    ->where('custom_properties->cart_item_id', (string) $cartItemId)
-                    ->where('custom_properties->category_id', (int) $catId)
+                    ->where('custom_properties->template_id', (string)$this->id)
+                    ->where('custom_properties->cart_item_id', (string)$cartItemId)
+                    ->where('custom_properties->category_id', (int)$catId)
                     ->whereHas('model', fn($q) => $q->whereNull('deleted_at'))
                     ->first()
                     ?->getUrl();
@@ -128,7 +128,7 @@ class TemplateResource extends JsonResource
             'has_corner' => $this->has_corner,
             'has_safety_area' => $this->has_safety_area,
             'safety_area' => $this->safety_area,
-            'border' =>(float) $this->border,
+            'border' => (float)$this->border,
             'has_cut_margin' => (bool)$this->cut_margin,
             'cut_margin' => $this->cut_margin,
             'approach' => $this->approach,
@@ -149,8 +149,8 @@ class TemplateResource extends JsonResource
                     ? $colors
                     : json_decode($colors ?: '[]', true);
             }),
-            'color_templates_media' => $this->when($this->approach == 'without_editor',function(){
-               return MediaResource::collection( $this->getMedia('color_templates'));
+            'color_templates_media' => $this->when($this->approach == 'without_editor', function () {
+                return MediaResource::collection($this->getMedia('color_templates'));
             }),
             'font_media' => FontResource::collection(
                 $this->whenLoaded('libraryMedia', function () {
@@ -167,7 +167,7 @@ class TemplateResource extends JsonResource
                             $model->loadMissing('font');
                             if (!$model->font) return null;
 
-                            return $model->font->loadMissing(['fontStyles.media','fontStyles.font']);
+                            return $model->font->loadMissing(['fontStyles.media', 'fontStyles.font']);
                         })
                         ->filter()
                         ->unique('id')
@@ -175,7 +175,7 @@ class TemplateResource extends JsonResource
                 })
             ),
             'price' => $this->price,
-            'visible_download_btn' => $this->when($this->price,true),
+            'visible_download_btn' => $this->when($this->price, true),
             'attached_with_mockup' => $this->when(request()->has('mockup_id'), function () {
                 $mockupId = request('mockup_id');
                 if (!$mockupId) {
@@ -183,7 +183,7 @@ class TemplateResource extends JsonResource
                 }
 
                 if ($this->relationLoaded('mockups')) {
-                    $mockup = $this->mockups->firstWhere('id', (int) $mockupId);
+                    $mockup = $this->mockups->firstWhere('id', (int)$mockupId);
                     if (!$mockup) return false;
 
                     $pivot = $mockup->pivot;
