@@ -190,7 +190,9 @@ class TemplateResource extends JsonResource
                     if (!$mockup) return false;
 
                     $pivot = $mockup->pivot;
-                    return !empty($pivot->colors) && !empty($pivot->positions);
+                    return !empty($pivot->colors) &&
+                        !empty($pivot->positions) &&
+                        $pivot->colors === $mockup->colors;
                 }
 
                 $mockup = $this->mockups()
@@ -200,7 +202,9 @@ class TemplateResource extends JsonResource
                 if (!$mockup) return false;
 
                 $pivot = $mockup->pivot;
-                return !empty($pivot->colors) && !empty($pivot->positions);
+                return !empty($pivot->colors) &&
+                    !empty($pivot->positions) &&
+                    $pivot->colors === $mockup->colors;
             }),
         ];
     }
