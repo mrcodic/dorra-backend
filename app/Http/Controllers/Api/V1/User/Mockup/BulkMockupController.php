@@ -98,6 +98,7 @@ class BulkMockupController extends Controller
 
             // Merge old pivot colors with incoming colors — never drop old ones
             $oldPivotColors = collect($pivot->colors ?? [])
+                ->map(fn($c) => $this->normalizeHex($c))
                 ->filter()
                 ->all();
 
@@ -112,7 +113,6 @@ class BulkMockupController extends Controller
                 ->where('collection_name', 'generated_mockups')
                 ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
                 ->get()
-                ->map(fn($m) => $this->normalizeHex($m->getCustomProperty('hex') ?? ''))
                 ->filter()
                 ->unique()
                 ->values()
