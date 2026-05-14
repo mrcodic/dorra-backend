@@ -80,18 +80,7 @@ class TemplateResource extends JsonResource
                 ];
             })->values()->all()
             ),
-            'show_back' => (function () use ($media) {
-                if (empty($this->source_design_svg) && !empty($this->back_base64_preview_image)) {
-                    return true;
-                }
-                if (!empty($this->source_design_svg) && !empty($this->back_base64_preview_image)) {
-                    if ($media) {
-                        return $media->getCustomProperty('side') === 'back';
-                    }
-                    return true;
-                }
-                return false;
-            })(),
+
             'source_design_svg' => $this->when(isset($this->image), $this->image),
             'back_base64_preview_image' => $this->use_front_as_back
                 ? $this->getFirstMediaUrl('templates-preview')
@@ -119,6 +108,18 @@ class TemplateResource extends JsonResource
                     ->whereHas('model', fn($q) => $q->whereNull('deleted_at'))
                     ->first()
                     ?->getUrl();
+            })(),
+            'show_back' => (function () use ($media) {
+                if (empty($this->source_design_svg) && !empty($this->back_base64_preview_image)) {
+                    return true;
+                }
+                if (!empty($this->source_design_svg) && !empty($this->back_base64_preview_image)) {
+                    if ($media) {
+                        return $media->getCustomProperty('side') === 'back';
+                    }
+                    return true;
+                }
+                return false;
             })(),
             'orientation' => [
                 'value' => $this->orientation?->value,
