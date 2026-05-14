@@ -190,20 +190,24 @@ class MockupService extends BaseService
                 $query->whereApproach(request('approach'));
             })
             ->when(request()->filled('product_id') || request()->filled('product_ids') || request()->filled('category_ids'), function ($q) {
-                $type       = request('product_type');
-                $productId  = request('product_id');
-                $productIds = request('product_ids');
+                $type        = request('product_type');
+                $productId   = request('product_id');
+                $productIds  = request('product_ids');
                 $categoryIds = request('category_ids');
 
                 if (request('filter') == 'both') {
-                    if ($categoryIds) {
-                        $q->whereHas('products', function ($q) use ($categoryIds) {
-                            $q->whereIn('products.id', $categoryIds);
-                        });
-                    }
-                    if ($productIds) {
-                        $q->orWhereIn('category_id', $productIds);
-                    }
+                    // ── Wrap in a group so OR doesn't leak into the outer query ──────
+                    $q->where(function ($q) use ($categoryIds, $productIds) {
+                        if ($categoryIds) {
+                            $q->whereHas('products', function ($q) use ($categoryIds) {
+                                $q->whereIn('products.id', $categoryIds);
+                            });
+                        }
+                        if ($productIds) {
+                            $q->orWhereIn('category_id', $productIds);  // safe inside group
+                        }
+                    });
+                    return; // skip the type/product blocks below for 'both'
                 }
 
                 if ($type === 'category') {
@@ -237,7 +241,7 @@ class MockupService extends BaseService
                         $query->where('templates.id', $design->template_id);
                     });
                 }
-            }) // ✅ was missing closing }) here
+            })
             ->when(
                 request()->filled('template_id') &&
                 request()->filled('category_id') &&

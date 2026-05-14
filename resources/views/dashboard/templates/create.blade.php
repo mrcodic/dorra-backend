@@ -1980,8 +1980,8 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
             }
 
             checkboxes.forEach(checkbox => {
-                fetchMockups();
-                // checkbox.addEventListener('change', toggleCheckboxes);
+
+                checkbox.addEventListener('change', toggleCheckboxes);
             });
 
             // Initial state
