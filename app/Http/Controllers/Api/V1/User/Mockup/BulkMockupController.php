@@ -98,7 +98,6 @@ class BulkMockupController extends Controller
 
             // Merge old pivot colors with incoming colors — never drop old ones
             $oldPivotColors = collect($pivot->colors ?? [])
-                ->map(fn($c) => $this->normalizeHex($c))
                 ->filter()
                 ->all();
 
