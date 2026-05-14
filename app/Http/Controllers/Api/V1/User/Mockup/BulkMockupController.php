@@ -56,7 +56,7 @@ class BulkMockupController extends Controller
         $sides = array_keys($positions);
 
         $newColorsNormalized = collect($colors)
-            ->map(fn($c) => strtolower(ltrim(trim($c), '#')))
+            ->map(fn($c) => $this->normalizeHex($c))
             ->all();
 
         // -----------------------------------------------------------------------
@@ -83,72 +83,81 @@ class BulkMockupController extends Controller
 
         // -----------------------------------------------------------------------
         // 2. For already-attached templates:
-        //    - Delete media for removed colors
-        //    - Keep media for existing colors
-        //    - Track new colors that need rendering
-        //    - If positions changed → re-render ALL colors
+        //    Use ACTUAL MEDIA in DB as source of truth (not just pivot colors),
+        //    so single-action uploads are respected.
+        //
+        //    - Colors in incoming but NO media yet   → render
+        //    - Colors in incoming and media exists   → keep (skip render)
+        //    - Colors NOT in incoming but have media → delete
+        //    - Positions changed                     → re-render ALL colors
         // -----------------------------------------------------------------------
-
-        // $renderJobs = [ ['template_id' => ..., 'color' => ..., 'sides' => [...]] ]
         $renderJobs = [];
 
         foreach ($alreadyAttachedTemplateIds as $templateId) {
             $existingTemplate  = $existingTemplates->get($templateId);
             $pivot             = $existingTemplate->pivot;
-
-            $previousColors = collect($pivot->colors ?? [])
-                ->map(fn($c) => strtolower(ltrim(trim($c), '#')))
-                ->all();
-
             $previousPositions = $pivot->positions ?? [];
             $positionsChanged  = json_encode($previousPositions) !== json_encode($request->input('positions'));
 
-            $removedHexes = array_diff($previousColors, $newColorsNormalized);
-            $addedHexes   = array_diff($newColorsNormalized, $previousColors);
-            $keptHexes    = array_intersect($previousColors, $newColorsNormalized);
+            // Fetch all hexes that currently have at least one media record for this template
+            $existingMediaHexes = $mockup->media()
+                ->where('collection_name', 'generated_mockups')
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
+                ->get()
+                ->map(fn($m) => $this->normalizeHex($m->getCustomProperty('hex') ?? ''))
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
 
-            // Delete media for removed colors
-            foreach ($removedHexes as $hex) {
-                foreach ($sides as $side) {
+            // Colors to DELETE: have media but are NOT in the incoming list
+            $hexesToDelete = array_diff($existingMediaHexes, $newColorsNormalized);
+
+            // Colors to RENDER: in incoming list but have NO media yet
+            $hexesToRender = array_diff($newColorsNormalized, $existingMediaHexes);
+
+            // Colors to KEEP: in incoming list and already have media
+            $hexesToKeep   = array_intersect($newColorsNormalized, $existingMediaHexes);
+
+            // Delete media for colors no longer in the incoming list
+            if (!empty($hexesToDelete)) {
+                foreach ($hexesToDelete as $hex) {
                     $mockup->media()
                         ->where('collection_name', 'generated_mockups')
                         ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
-                        ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$side])
                         ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
                         ->get()
                         ->each(fn($media) => $media->delete());
                 }
             }
 
-            // Clear model_color on pivot if that color was removed
-            $modelColorHex = $pivot?->model_color ? strtolower(ltrim(trim($pivot->model_color), '#')) : null;
-            if ($modelColorHex && in_array($modelColorHex, $removedHexes)) {
+            // Clear model_color on pivot if that color was deleted
+            $modelColorHex = $pivot?->model_color ? $this->normalizeHex($pivot->model_color) : null;
+            if ($modelColorHex && in_array($modelColorHex, $hexesToDelete)) {
                 $mockup->templates()->updateExistingPivot($templateId, ['model_color' => null]);
             }
 
             if ($positionsChanged) {
-                // Positions changed → re-render ALL colors (delete kept ones too)
-                foreach ($keptHexes as $hex) {
-                    foreach ($sides as $side) {
-                        $mockup->media()
-                            ->where('collection_name', 'generated_mockups')
-                            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
-                            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$side])
-                            ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
-                            ->get()
-                            ->each(fn($media) => $media->delete());
-                    }
+                // Positions changed → delete ALL kept media and re-render everything
+                foreach ($hexesToKeep as $hex) {
+                    $mockup->media()
+                        ->where('collection_name', 'generated_mockups')
+                        ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
+                        ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
+                        ->get()
+                        ->each(fn($media) => $media->delete());
                 }
-                // Queue all colors for re-render
+                // Re-render ALL incoming colors
                 foreach ($newColorsNormalized as $hex) {
                     $renderJobs[] = ['template_id' => $templateId, 'hex' => $hex];
                 }
             } else {
-                // Positions unchanged → only render NEW colors, keep existing media
-                foreach ($addedHexes as $hex) {
+                // Positions unchanged:
+                // - Kept colors → media exists (from bulk OR single action), skip ✅
+                // - New colors  → no media yet, render
+                foreach ($hexesToRender as $hex) {
                     $renderJobs[] = ['template_id' => $templateId, 'hex' => $hex];
                 }
-                // Kept colors → no action needed, media already exists ✅
             }
         }
 
@@ -177,10 +186,8 @@ class BulkMockupController extends Controller
         // -----------------------------------------------------------------------
         // 5. Dispatch jobs only for what actually needs rendering
         // -----------------------------------------------------------------------
-
-        // Map normalized hex back to original color value from request
         $hexToOriginalColor = collect($colors)
-            ->keyBy(fn($c) => strtolower(ltrim(trim($c), '#')))
+            ->keyBy(fn($c) => $this->normalizeHex($c))
             ->all();
 
         $totalCount = count($renderJobs) * count($sides);
@@ -216,12 +223,12 @@ class BulkMockupController extends Controller
         ]);
 
         return Response::api(data: [
-            'success'           => true,
-            'bulk_job_id'       => $bulkJob->id,
-            'total_count'       => $totalCount,
-            'sides'             => $sides,
-            'colors'            => $colors,
-            'rendered_jobs'     => count($renderJobs),
+            'success'        => true,
+            'bulk_job_id'    => $bulkJob->id,
+            'total_count'    => $totalCount,
+            'sides'          => $sides,
+            'colors'         => $colors,
+            'rendered_jobs'  => count($renderJobs),
         ]);
     }
 
@@ -260,7 +267,7 @@ class BulkMockupController extends Controller
             ->get();
 
         foreach ($items as $item) {
-            $hex = strtolower(ltrim(trim($item->color), '#'));
+            $hex = $this->normalizeHex($item->color);
 
             $mockup->media()
                 ->where('collection_name', 'generated_mockups')
@@ -335,5 +342,10 @@ class BulkMockupController extends Controller
             'retried'     => $failedItems->count(),
             'bulk_job_id' => $bulkJob->id,
         ]);
+    }
+
+    private function normalizeHex(string $color): string
+    {
+        return strtolower(ltrim(trim($color), '#'));
     }
 }
