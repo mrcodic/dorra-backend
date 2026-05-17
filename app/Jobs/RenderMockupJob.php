@@ -28,6 +28,7 @@ class RenderMockupJob implements ShouldQueue
         public Mockup              $mockup,
     ) {}
 
+
     public function handle(): void
     {
         if ($this->bulkJob->fresh()->status === 'cancelled') {
@@ -195,11 +196,11 @@ class RenderMockupJob implements ShouldQueue
 
             $counts = BulkJobItem::where('bulk_job_id', $job->id)
                 ->selectRaw("
-                    COUNT(*) as total,
-                    SUM(status = 'completed') as completed,
-                    SUM(status = 'failed') as failed,
-                    SUM(status IN ('pending', 'processing')) as pending
-                ")
+                COUNT(*) as total,
+                SUM(status = 'completed') as completed,
+                SUM(status = 'failed') as failed,
+                SUM(status IN ('pending', 'processing')) as pending
+            ")
                 ->first();
 
             // Don't mark complete until ALL items are done
@@ -214,13 +215,15 @@ class RenderMockupJob implements ShouldQueue
             $job->update([
                 'completed_count' => $completed,
                 'failed_count'    => $failed,
-                'status'          => match (true) {
-                    $failed === 0    => 'completed',
-                    $completed === 0 => 'failed',
-                    default          => 'completed_with_errors',
+                'status'          => match(true) {
+                    $failed === 0              => 'completed',
+                    $completed === 0           => 'failed',
+                    default                    => 'completed_with_errors', // some passed, some failed
                 },
                 'completed_at'    => now(),
             ]);
         });
     }
+
+
 }

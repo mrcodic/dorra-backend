@@ -87,10 +87,11 @@ class BulkMockupController extends Controller
         // 2. For already-attached templates:
         //    - Merge old pivot colors (original format) + incoming colors
         //    - Never delete old files
-        //    - Only render colors that have NO media yet
-        //    - If positions changed → re-render ALL merged colors
+        //    - Check per side+hex whether media exists — only render what is missing
+        //    - If positions changed → re-render ALL merged colors for ALL sides
         // -----------------------------------------------------------------------
-        $renderJobs      = [];
+        // Each entry: ['template_id' => ..., 'hex' => ..., 'side' => ...]
+        $renderJobs        = [];
         $mergedPivotColors = []; // stores original color strings (with #) per template
 
         foreach ($alreadyAttachedTemplateIds as $templateId) {
@@ -103,35 +104,16 @@ class BulkMockupController extends Controller
             $oldPivotColors = collect($pivot->colors ?? [])->filter()->values()->all();
 
             // Merge: old pivot colors + incoming colors, deduplicated by normalized hex
-            // Keep original string format for storage, use normalized only for dedup
             $mergedByNormalized = [];
             foreach (array_merge($oldPivotColors, $colors) as $c) {
                 $normalized = $this->normalizeHex($c);
                 if (!isset($mergedByNormalized[$normalized])) {
-                    $mergedByNormalized[$normalized] = $c; // first occurrence wins
+                    $mergedByNormalized[$normalized] = $c;
                 }
             }
 
-            // $mergedByNormalized = [ 'ff0000' => '#FF0000', 'aabbcc' => '#AABBCC', ... ]
-            $mergedPivotColors[$templateId] = array_values($mergedByNormalized); // original strings for pivot
-            $mergedNormalizedHexes          = array_keys($mergedByNormalized);   // normalized for media queries
-
-            // Fetch existing media hexes for this template
-            $existingMediaHexes = $mockup->media()
-                ->where('collection_name', 'generated_mockups')
-                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
-                ->get()
-                ->map(fn($m) => $this->normalizeHex($m->getCustomProperty('hex') ?? ''))
-                ->filter()
-                ->unique()
-                ->values()
-                ->all();
-
-            // Colors with no media yet (need rendering)
-            $hexesToRender  = array_diff($mergedNormalizedHexes, $existingMediaHexes);
-
-            // Colors that already have media
-            $hexesWithMedia = array_intersect($mergedNormalizedHexes, $existingMediaHexes);
+            $mergedPivotColors[$templateId] = array_values($mergedByNormalized);
+            $mergedNormalizedHexes          = array_keys($mergedByNormalized);
 
             // Clear model_color only if it's no longer in the merged list
             $modelColorHex = $pivot?->model_color ? $this->normalizeHex($pivot->model_color) : null;
@@ -140,8 +122,8 @@ class BulkMockupController extends Controller
             }
 
             if ($positionsChanged) {
-                // Positions changed → delete existing media and re-render all merged colors
-                foreach ($hexesWithMedia as $hex) {
+                // Positions changed → delete existing media and re-render all merged colors × all sides
+                foreach ($mergedNormalizedHexes as $hex) {
                     $mockup->media()
                         ->where('collection_name', 'generated_mockups')
                         ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
@@ -149,24 +131,47 @@ class BulkMockupController extends Controller
                         ->get()
                         ->each(fn($media) => $media->delete());
                 }
+
                 foreach ($mergedNormalizedHexes as $hex) {
-                    $renderJobs[] = ['template_id' => $templateId, 'hex' => $hex];
+                    foreach ($sides as $side) {
+                        $renderJobs[] = ['template_id' => $templateId, 'hex' => $hex, 'side' => $side];
+                    }
                 }
             } else {
-                // Positions unchanged → only render colors with no media yet
-                foreach ($hexesToRender as $hex) {
-                    $renderJobs[] = ['template_id' => $templateId, 'hex' => $hex];
+                // Positions unchanged → check per side+hex whether media already exists.
+                // A hex is only skipped for a specific side if that side already has media.
+                // This ensures a new color is always rendered for ALL sides, and a color
+                // with a missing side is re-dispatched only for the missing side.
+                foreach ($sides as $side) {
+                    $existingHexesForSide = $mockup->media()
+                        ->where('collection_name', 'generated_mockups')
+                        ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
+                        ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$side])
+                        ->get()
+                        ->map(fn($m) => $this->normalizeHex($m->getCustomProperty('hex') ?? ''))
+                        ->filter()
+                        ->unique()
+                        ->values()
+                        ->all();
+
+                    foreach ($mergedNormalizedHexes as $hex) {
+                        if (!in_array($hex, $existingHexesForSide)) {
+                            $renderJobs[] = ['template_id' => $templateId, 'hex' => $hex, 'side' => $side];
+                        }
+                    }
                 }
             }
         }
 
         // -----------------------------------------------------------------------
-        // 3. New templates → render all incoming colors
+        // 3. New templates → render all incoming colors × all sides
         // -----------------------------------------------------------------------
         foreach ($newTemplateIds as $templateId) {
-            $mergedPivotColors[$templateId] = $colors; // original strings
+            $mergedPivotColors[$templateId] = $colors;
             foreach ($newColorsNormalized as $hex) {
-                $renderJobs[] = ['template_id' => $templateId, 'hex' => $hex];
+                foreach ($sides as $side) {
+                    $renderJobs[] = ['template_id' => $templateId, 'hex' => $hex, 'side' => $side];
+                }
             }
         }
 
@@ -184,7 +189,7 @@ class BulkMockupController extends Controller
         $mockup->update(['colors' => $colors]);
 
         // -----------------------------------------------------------------------
-        // 5. Dispatch jobs only for what actually needs rendering
+        // 5. Dispatch jobs — renderJobs already include side, no need to multiply
         // -----------------------------------------------------------------------
 
         // Map normalized hex → original color string from incoming request
@@ -192,7 +197,7 @@ class BulkMockupController extends Controller
             ->keyBy(fn($c) => $this->normalizeHex($c))
             ->all();
 
-        $totalCount = count($renderJobs) * count($sides);
+        $totalCount = count($renderJobs);
 
         $bulkJob = MockupGenerationJob::create([
             'mockup_id'       => $mockup->id,
@@ -203,21 +208,18 @@ class BulkMockupController extends Controller
         ]);
 
         foreach ($renderJobs as $job) {
-            // Use original color from request if available, else use hex as fallback
             $originalColor = $hexToOriginalColor[$job['hex']] ?? $job['hex'];
 
-            foreach ($sides as $side) {
-                $item = BulkJobItem::create([
-                    'bulk_job_id' => $bulkJob->id,
-                    'template_id' => $job['template_id'],
-                    'color'       => $originalColor,
-                    'side'        => $side,
-                    'points'      => $positions[$side],
-                    'status'      => 'pending',
-                ]);
+            $item = BulkJobItem::create([
+                'bulk_job_id' => $bulkJob->id,
+                'template_id' => $job['template_id'],
+                'color'       => $originalColor,
+                'side'        => $job['side'],
+                'points'      => $positions[$job['side']],
+                'status'      => 'pending',
+            ]);
 
-                RenderMockupJob::dispatch($bulkJob, $item, $mockup);
-            }
+            RenderMockupJob::dispatch($bulkJob, $item, $mockup);
         }
 
         $bulkJob->update([
