@@ -505,27 +505,13 @@ class TemplateController extends DashboardController
 
         $normalizedColor = $this->normalizeHex($request->model_color);
 
-        // ── Sync pivot ────────────────────────────────────────────────────────────
-        $alreadyAttached = $template->mockups()
-            ->where('mockups.id', $mockup->id)
-            ->exists();
-
-        if ($alreadyAttached) {
-            $template->mockups()->updateExistingPivot($mockup->id, [
-                'model_color' => $request->model_color,
-
-            ]);
-        } else {
-            $template->mockups()->attach($mockup->id, [
-                'model_color' => $request->model_color,
-            ]);
-        }
         $currentProductIds = $mockup->products()
             ->pluck('products.id')
             ->map(fn($id) => (int) $id)
             ->values();
-        // ── FIX 2: demote every OTHER mockup on this template ────────────────────
-        $template->mockups()
+
+        // Previous mockups = same template + same category + same products
+        $previousMockupsQuery = fn() => $template->mockups()
             ->where('mockups.id', '!=', $mockup->id)
             ->where('mockups.category_id', $mockup->category_id)
             ->when(
@@ -536,54 +522,64 @@ class TemplateController extends DashboardController
                     });
                 },
                 function ($query) {
-                    // If current mockup has no products, don't demote any other mockup
+                    // If current mockup has no products, do not affect any previous mockup
                     $query->whereRaw('1 = 0');
                 }
-            )
-            ->each(function (Mockup $other) use ($template) {
-                $template->mockups()->updateExistingPivot($other->id, [
-                    'model_color' => null,
-                ]);
-            });
+            );
 
-        // ── Base query builders ───────────────────────────────────────────────────
-        // Targets only the newly selected mockup
         $baseQuery = fn() => Media::query()
             ->where('model_type', Mockup::class)
             ->where('model_id', $mockup->id)
             ->where('collection_name', 'generated_mockups')
             ->where('custom_properties->template_id', (string) $template->id);
 
-        // ── Reset media only for OTHER mockups on same template AND same product ──
-        $otherMockupIds = $template->mockups()
-            ->where('mockups.id', '!=', $mockup->id)
-            ->where('mockups.category_id', $mockup->category_id)
-            ->when(
-                $currentProductIds->isNotEmpty(),
-                function ($query) use ($currentProductIds) {
-                    $query->whereHas('products', function ($productQuery) use ($currentProductIds) {
-                        $productQuery->whereIn('products.id', $currentProductIds);
-                    });
-                },
-                function ($query) {
-                    // If current mockup has no products, don't reset media for any other mockup
-                    $query->whereRaw('1 = 0');
-                }
-            )
-            ->pluck('mockups.id');
+        DB::transaction(function () use (
+            $template,
+            $mockup,
+            $request,
+            $normalizedColor,
+            $previousMockupsQuery,
+            $baseQuery
+        ) {
+            // 1. Set current mockup model_color
+            $alreadyAttached = $template->mockups()
+                ->where('mockups.id', $mockup->id)
+                ->exists();
 
-        DB::transaction(function () use ($baseQuery, $normalizedColor, $request, $otherMockupIds, $template) {
+            if ($alreadyAttached) {
+                $template->mockups()->updateExistingPivot($mockup->id, [
+                    'model_color' => $request->model_color,
+                ]);
+            } else {
+                $template->mockups()->attach($mockup->id, [
+                    'model_color' => $request->model_color,
+                ]);
+            }
 
-            // 1a. Reset model_image on the NEW mockup's media
-            $baseQuery()->get()->each(function (Media $media) {
-                $media->setCustomProperty('model_image', 0);
-                $media->save();
-            });
+            // 2. Make model_color = null for previous mockups
+            $previousMockupsQuery()
+                ->each(function (Mockup $previousMockup) use ($template) {
+                    $template->mockups()->updateExistingPivot($previousMockup->id, [
+                        'model_color' => null,
+                    ]);
+                });
 
-            // 1b. FIX 1 — reset model_image on OLD mockups' media for this template
+            // 3. Get previous mockup ids
+            $previousMockupIds = $previousMockupsQuery()
+                ->pluck('mockups.id');
+
+            // 4. Reset model_image on current mockup media
+            $baseQuery()
+                ->get()
+                ->each(function (Media $media) {
+                    $media->setCustomProperty('model_image', 0);
+                    $media->save();
+                });
+
+            // 5. Set model_image = 0 for previous mockups media
             Media::query()
                 ->where('model_type', Mockup::class)
-                ->whereIn('model_id', $otherMockupIds)
+                ->whereIn('model_id', $previousMockupIds)
                 ->where('collection_name', 'generated_mockups')
                 ->where('custom_properties->template_id', (string) $template->id)
                 ->get()
@@ -592,13 +588,13 @@ class TemplateController extends DashboardController
                     $media->save();
                 });
 
-            // 2. Try exact match: hex + side
+            // 6. Find selected media by hex + side
             $matched = $baseQuery()
                 ->where('custom_properties->hex', $normalizedColor)
                 ->where('custom_properties->side', $request->side)
                 ->get();
 
-            // 3. Fallback: hex only, prefer the requested side
+            // 7. Fallback: hex only
             if ($matched->isEmpty()) {
                 $matched = $baseQuery()
                     ->where('custom_properties->hex', $normalizedColor)
@@ -609,7 +605,7 @@ class TemplateController extends DashboardController
                     ->take(1);
             }
 
-            // 4. Mark selected media as model image
+            // 8. Mark selected media as model image
             $matched->each(function (Media $media) {
                 $media->setCustomProperty('model_image', 1);
                 $media->save();
@@ -617,5 +613,4 @@ class TemplateController extends DashboardController
         });
 
         return Response::api();
-    }
-}
+    }}
