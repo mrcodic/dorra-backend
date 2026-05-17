@@ -525,7 +525,7 @@ class TemplateController extends DashboardController
                 }
             )
             ->pluck('mockups.id')
-            ->map(fn($id) => (int)$id)
+            ->map(fn($id) => $id)
             ->values();
 
         $baseQuery = fn() => Media::query()
