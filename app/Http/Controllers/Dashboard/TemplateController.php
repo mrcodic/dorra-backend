@@ -30,7 +30,7 @@ use App\Repositories\Interfaces\{CategoryRepositoryInterface,
 };
 use App\Services\TemplateService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{Cache, DB, Response, Validator};
+use Illuminate\Support\Facades\{Cache, DB, Log, Response, Validator};
 
 
 class TemplateController extends DashboardController
@@ -507,7 +507,7 @@ class TemplateController extends DashboardController
 
         $currentProductIds = $mockup->products()
             ->pluck('products.id')
-            ->map(fn($id) => (int)$id)
+            ->map(fn($id) => $id)
             ->values();
 
         $previousMockupIds = $template->mockups()
@@ -527,6 +527,7 @@ class TemplateController extends DashboardController
             ->pluck('mockups.id')
             ->map(fn($id) => $id)
             ->values();
+        Log::info("sdfsdfsd",[$previousMockupIds]);
 
         $baseQuery = fn() => Media::query()
             ->where('model_type', Mockup::class)
