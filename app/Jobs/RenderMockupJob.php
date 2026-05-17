@@ -90,12 +90,26 @@ class RenderMockupJob implements ShouldQueue
                 ->values()
                 ->all();
 
+
+
+
             $deleteQuery = $this->mockup->media()
                 ->where('collection_name', 'generated_mockups')
                 ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $template->id])
                 ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$side])
                 ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
                 ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(int) $this->mockup->category_id]);
+            if (!empty($protectedHexes)) {
+                foreach ($protectedHexes as $protectedHex) {
+                    $deleteQuery->whereRaw(
+                        "LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) != ?",
+                        [$protectedHex]
+                    );
+                }
+            }
+            $wasModelImage = (clone $deleteQuery)
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])
+                ->exists();
 
             if (!empty($protectedHexes)) {
                 foreach ($protectedHexes as $protectedHex) {
@@ -118,7 +132,8 @@ class RenderMockupJob implements ShouldQueue
                         'hex'         => $hex,
                         'category_id' => (int) $this->mockup->category_id,
                         'product_ids' => (array) $mockup->products->pluck('id')->toArray(),
-
+                        // ✅ 2. Preserve model_image if it was set before bulk re-render
+                        'model_image' => $wasModelImage ? 1 : 0,
                     ])
                     ->toMediaCollection('generated_mockups');
 
