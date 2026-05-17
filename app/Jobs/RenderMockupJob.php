@@ -37,8 +37,8 @@ class RenderMockupJob implements ShouldQueue
 
         $this->item->update(['status' => 'processing']);
         $mockup = $this->mockup;
-        try {
 
+        try {
             $side        = $this->item->side;
             $mediaByRole = $mockup->getMedia('mockups')
                 ->filter(function ($media) use ($side) {
@@ -95,8 +95,6 @@ class RenderMockupJob implements ShouldQueue
 
             // -----------------------------------------------------------------------
             // Check pivot model_color for THIS template to determine model_image flag.
-            // If the pivot's model_color matches the current hex being rendered,
-            // the new media should be marked as the model image (model_image = 1).
             // -----------------------------------------------------------------------
             $pivotModelColor = $this->mockup->templates()
                 ->wherePivot('template_id', $template->id)
@@ -141,7 +139,6 @@ class RenderMockupJob implements ShouldQueue
                         'hex'         => $hex,
                         'category_id' => (int) $this->mockup->category_id,
                         'product_ids' => (array) $mockup->products->pluck('id')->toArray(),
-                        // Carry forward model_image=1 if pivot model_color matches this hex
                         'model_image' => $isModelImage,
                     ])
                     ->toMediaCollection('generated_mockups');
@@ -193,33 +190,66 @@ class RenderMockupJob implements ShouldQueue
                 return;
             }
 
-            $counts = BulkJobItem::where('bulk_job_id', $job->id)
+            // -----------------------------------------------------------------------
+            // Group all items by template_id + color + side, then sum via foreach.
+            //
+            // Example breakdown entry:
+            // { "template_id": "abc-123", "color": "#FF0000", "side": "front", "total": 1, "completed": 1, "failed": 0 }
+            // { "template_id": "abc-123", "color": "#FF0000", "side": "back",  "total": 1, "completed": 0, "failed": 1 }
+            // -----------------------------------------------------------------------
+            $rows = BulkJobItem::where('bulk_job_id', $job->id)
                 ->selectRaw("
+                    template_id,
+                    color,
+                    side,
                     COUNT(*) as total,
                     SUM(status = 'completed') as completed,
                     SUM(status = 'failed') as failed,
                     SUM(status IN ('pending', 'processing')) as pending
                 ")
-                ->first();
+                ->groupBy('template_id', 'color', 'side')
+                ->orderBy('template_id')
+                ->orderBy('color')
+                ->orderBy('side')
+                ->get();
+
+            $completed = 0;
+            $failed    = 0;
+            $total     = 0;
+            $pending   = 0;
+            $breakdown = [];
+
+            foreach ($rows as $row) {
+                $completed += (int) $row->completed;
+                $failed    += (int) $row->failed;
+                $total     += (int) $row->total;
+                $pending   += (int) $row->pending;
+
+                $breakdown[] = [
+                    'template_id' => $row->template_id,
+                    'color'       => $row->color,
+                    'side'        => $row->side,
+                    'total'       => (int) $row->total,
+                    'completed'   => (int) $row->completed,
+                    'failed'      => (int) $row->failed,
+                ];
+            }
 
             // Don't mark complete until ALL items are done
-            if ((int) $counts->pending > 0) {
+            if ($pending > 0) {
                 return;
             }
 
-            $completed = (int) $counts->completed;
-            $failed    = (int) $counts->failed;
-            $total     = (int) $counts->total;
-
             $job->update([
-                'completed_count' => $completed,
-                'failed_count'    => $failed,
-                'status'          => match (true) {
+                'completed_count'             => $completed,
+                'failed_count'                => $failed,
+                'completed_by_template_color' => $breakdown,
+                'status'                      => match (true) {
                     $failed === 0    => 'completed',
                     $completed === 0 => 'failed',
                     default          => 'completed_with_errors',
                 },
-                'completed_at'    => now(),
+                'completed_at'                => now(),
             ]);
         });
     }
