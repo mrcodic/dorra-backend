@@ -27,8 +27,6 @@ class RenderMockupJob implements ShouldQueue
         public BulkJobItem         $item,
         public Mockup              $mockup,
     ) {}
-
-
     public function handle(): void
     {
         if ($this->bulkJob->fresh()->status === 'cancelled') {
