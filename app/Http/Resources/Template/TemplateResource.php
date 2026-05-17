@@ -119,7 +119,15 @@ class TemplateResource extends JsonResource
                     ->where('custom_properties->template_id', (string)$this->id)
                     ->where('custom_properties->cart_item_id', (string)$cartItemId)
                     ->where('custom_properties->category_id', (int)$catId)
-                    ->whereHas('model', fn($q) => $q->whereNull('deleted_at'))
+                    // Fixed: replaced ->whereHas('model', ...) which triggered a polymorphic
+                    // fan-out across all morph types (most lacking deleted_at), causing:
+                    // SQLSTATE[42S22]: Column not found: 1054 Unknown column 'deleted_at'
+                    ->whereExists(function ($query) {
+                        $query->selectRaw(1)
+                            ->from('mockups')
+                            ->whereColumn('mockups.id', 'media.model_id')
+                            ->whereNull('mockups.deleted_at');
+                    })
                     ->first()
                     ?->getUrl();
             })(),
