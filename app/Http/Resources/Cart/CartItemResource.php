@@ -18,33 +18,42 @@ class CartItemResource extends JsonResource
     {
         $item = $this->itemable;
         $cartable = $this->cartable;
-        $lastOffer = $cartable?->lastOffer;
-        $sub  = (float) $this->getAttribute('sub_total');
-        $val  = (float) ($lastOffer?->getRawOriginal('value') ?? 0);
+
+        $lastOffer = $this->discount_amount > 0 || $this->cart->discount_amount > 0 ? null : $cartable?->lastOffer;
+
+        $sub   = (float) $this->getAttribute('sub_total');
+        $val   = (float) ($lastOffer?->getRawOriginal('value') ?? 0);
         $after = $lastOffer ? round($sub * (1 - ($val / 100)), 2) : null;
-        $priceAfterDiscountCode =  max(0,$this->sub_total - $this->discount_amount);
+
+        $priceAfterDiscountCode = max(0, $this->sub_total - $this->discount_amount);
+
         return [
-            'id' => $this->id,
+            'id'   => $this->id,
             'type' => $this->when($item, class_basename($item)),
             'item' => $this->when($item, function () use ($cartable, $item) {
                 return $item instanceof Design
                     ? new DesignResource($item)
-                    : (new TemplateResource($item))->additional(['cart_item_id' => $this->id, 'category_id' => $cartable->category_id??$cartable->id]);
+                    : (new TemplateResource($item))->additional([
+                        'cart_item_id' => $this->id,
+                        'category_id'  => $cartable->category_id ?? $cartable->id,
+                    ]);
             }),
             'show_edit_design' => $item instanceof Design,
-            'specs' => CartItemSpecsResource::collection($this->whenLoaded('specs')),
+            'specs'   => CartItemSpecsResource::collection($this->whenLoaded('specs')),
             'product' => $this->when($cartable, function () use ($cartable) {
                 return $cartable instanceof Product
                     ? new ProductResource($cartable->load('lastOffer'))
                     : new CategoryResource($cartable->load('lastOffer'));
             }),
-            'price' =>$this->sub_total &&  $cartable? $this->sub_total : $item?->price,
-            'product_price' => $this->product_price,
-            'price_after_offer' => $this->discount_amount > 0
+            'price'              => $this->sub_total && $cartable ? $this->sub_total : $item?->price,
+            'product_price'      => $this->product_price,
+
+            'price_after_offer'  => $this->discount_amount > 0
                 ? sprintf('%.2f', $priceAfterDiscountCode)
                 : ($lastOffer ? sprintf('%.2f', $after) : null),
-            'quantity' => $this->quantity,
-            'color' => $this->color,
+
+            'quantity'  => $this->quantity,
+            'color'     => $this->color,
             'item_type' => [
                 'value' => $this->type?->value,
                 'label' => $this->type?->label(),

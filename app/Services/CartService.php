@@ -259,6 +259,7 @@ class CartService extends BaseService
                     ]);
                 },
                 'items.product.category',
+                'items.cart',
                 'discountCode'
             ])
             ->first();
