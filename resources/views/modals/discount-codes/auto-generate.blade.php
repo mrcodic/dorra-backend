@@ -69,6 +69,7 @@
                             <input type="date" name="expired_at" id="createExpiryDate" class="form-control">
                         </div>
                     </div>
+
                     <div class="form-group mb-2 new-registered-users d-none">
                         <input type="hidden" name="show_for_new_registered_users" value="0">
                         <div class="form-check">
@@ -84,6 +85,7 @@
                             </label>
                         </div>
                     </div>
+
                     <!-- Scope -->
                     <div class="form-group mb-2">
                         <label class="label-text mb-1 d-block">Type</label>
@@ -150,7 +152,6 @@
 <script>
     $('#showForNewRegisteredUser').on('change', function () {
         if ($(this).is(':checked')) {
-            // Hide & disable max_usage
             $('#createRestrictions')
                 .closest('.form-group')
                 .addClass('d-none');
@@ -158,7 +159,6 @@
                 .val('')
                 .prop('disabled', true);
 
-            // ✅ Hide & disable expired_at
             $('#createExpiryDate')
                 .closest('.form-group')
                 .addClass('d-none');
@@ -166,14 +166,12 @@
                 .val('')
                 .prop('disabled', true);
         } else {
-            // Show & enable max_usage
             $('#createRestrictions')
                 .closest('.form-group')
                 .removeClass('d-none');
             $('#createRestrictions')
                 .prop('disabled', false);
 
-            // ✅ Show & enable expired_at
             $('#createExpiryDate')
                 .closest('.form-group')
                 .removeClass('d-none');
@@ -181,6 +179,7 @@
                 .prop('disabled', false);
         }
     });
+
     $(function () {
         $('.select2').select2({
             dropdownParent: $('#createCodeTemplateModal')
@@ -203,7 +202,6 @@
                 $('.new-registered-users').addClass('d-none');
                 $('#numberOfCodes').prop('required', false);
 
-
                 $('#showForNewRegisteredUser').prop('checked', false);
 
                 $('#createRestrictions')
@@ -213,7 +211,6 @@
                     .val('')
                     .prop('disabled', false);
 
-            // ✅ Reset expiry date
                 $('#createExpiryDate')
                     .closest('.form-group')
                     .removeClass('d-none');
@@ -266,6 +263,8 @@
 
         $('input[name="scope"]:checked').trigger('change');
 
+        // ─── Generate Button ───────────────────────────────────────────────────────
+        // No responseType: 'blob' → xhr.responseJSON is available directly
         $('#addDiscountForm').on('submit', function (e) {
             e.preventDefault();
 
@@ -287,25 +286,26 @@
                 data: formData,
                 processData: false,
                 contentType: false,
-                    success: function (response) {
-                        Toastify({
-                            text: "Code added successfully!",
-                            duration: 2000,
-                            gravity: "top",
-                            position: "right",
-                            backgroundColor: "#28C76F",
-                            close: true,
-                        }).showToast();
+                success: function (response) {
+                    Toastify({
+                        text: "Code added successfully!",
+                        duration: 2000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#28C76F",
+                        close: true,
+                    }).showToast();
 
-                        $('#createCodeTemplateModal').modal('hide');
-                        form[0].reset();
-                        $('#showForNewRegisteredUser').prop('checked', false);
-                        $('.select2').val(null).trigger('change');
-                        toggleCodeModeFields();
-                        $('input[name="scope"]:checked').trigger('change');
-                        $(".code-list-table").DataTable().ajax.reload();
-                    },
+                    $('#createCodeTemplateModal').modal('hide');
+                    form[0].reset();
+                    $('#showForNewRegisteredUser').prop('checked', false);
+                    $('.select2').val(null).trigger('change');
+                    toggleCodeModeFields();
+                    $('input[name="scope"]:checked').trigger('change');
+                    $(".code-list-table").DataTable().ajax.reload();
+                },
                 error: function (xhr) {
+                    // No blob responseType here — use responseJSON directly
                     let errors = xhr.responseJSON?.errors;
 
                     if (errors) {
@@ -340,6 +340,8 @@
             });
         });
 
+        // ─── Generate & Export Button ──────────────────────────────────────────────
+        // Uses responseType: 'blob' → must capture native XHR and use FileReader on error
         $('#SaveChangesButton').on('click', function () {
             const button = $(this);
             const loader = $('#saveLoader');
@@ -351,14 +353,18 @@
             loader.removeClass('d-none');
             $('button[type="submit"]').attr('disabled', true);
 
+            let nativeXhr = null; // capture native XHR to access .response Blob on error
+
             $.ajax({
                 url: exportUrl,
                 method: 'POST',
                 data: formData,
                 processData: false,
                 contentType: false,
-                xhrFields: {
-                    responseType: 'blob'
+                xhr: function () {
+                    nativeXhr = $.ajaxSettings.xhr();
+                    nativeXhr.responseType = 'blob';
+                    return nativeXhr;
                 },
                 success: function (response, status, xhr) {
                     const disposition = xhr.getResponseHeader('Content-Disposition');
@@ -400,10 +406,9 @@
                     $('input[name="scope"]:checked').trigger('change');
                     $(".code-list-table").DataTable().ajax.reload();
                 },
-                error: function (xhr) {
-                    const blob = xhr.responseText ? xhr.responseText : xhr.response;
-
-                    // xhr.response is a Blob because of responseType: 'blob'
+                error: function () {
+                    // responseType is 'blob' so jqXHR won't have .responseJSON
+                    // Read the blob from the native XHR instead
                     const reader = new FileReader();
                     reader.onload = function () {
                         let errors = null;
@@ -436,7 +441,7 @@
                             }).showToast();
                         }
                     };
-                    reader.readAsText(xhr.response); // xhr.response is the Blob
+                    reader.readAsText(nativeXhr.response);
                 },
                 complete: function () {
                     button.attr('disabled', false);
