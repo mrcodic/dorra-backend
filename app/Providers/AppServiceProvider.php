@@ -76,11 +76,13 @@ class AppServiceProvider extends ServiceProvider
 
         Fortify::loginView(fn () => view('dashboard.auth.login'));
 
-        Response::macro('api',function ($statusCode = HttpEnum::OK , $message = "Request completed successfully", $data = [], $errors = []) {
+        Response::macro('api',function ($statusCode = HttpEnum::OK ,   $message = null, $data = [], $errors = []) {
             $response = [
                 'status' => $statusCode->value,
                 'success' => $statusCode->value < HttpEnum::BAD_REQUEST->value,
-                'message' => $message,
+                'message' => $message
+                    ? __($message)
+                    : __('messages.request_completed_successfully'),
             ];
             if (!empty($errors)) {
                 $response['errors'] = $errors;
