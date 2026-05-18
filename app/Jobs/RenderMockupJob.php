@@ -27,7 +27,6 @@ class RenderMockupJob implements ShouldQueue
         public BulkJobItem         $item,
         public Mockup              $mockup,
     ) {}
-
     public function handle(): void
     {
         if ($this->bulkJob->fresh()->status === 'cancelled') {
@@ -39,7 +38,7 @@ class RenderMockupJob implements ShouldQueue
         $mockup = $this->mockup;
         try {
 
-            $side       = $this->item->side;
+            $side        = $this->item->side;
             $mediaByRole = $mockup->getMedia('mockups')
                 ->filter(function ($media) use ($side) {
                     return $media->getCustomProperty('side') === $side;
@@ -47,50 +46,91 @@ class RenderMockupJob implements ShouldQueue
                 ->keyBy(function ($media) {
                     return $media->getCustomProperty('role');
                 });
+
             $config = [
                 'mockupConfig' => [
-                    'scene' => optional($mediaByRole->get('base'))->getFullUrl(),
-                    'mask' => optional($mediaByRole->get('mask'))->getFullUrl(),
-                    'shadow' => optional($mediaByRole->get('shadow'))->getFullUrl(),
-                    'displacement' => optional($mediaByRole->get('displacement'))->getFullUrl(),
-                    'light' => optional($mediaByRole->get('light'))->getFullUrl(),
-                    'fillRatio'        => $mockup->fill_ratio / 100,
+                    'scene'             => optional($mediaByRole->get('base'))->getFullUrl(),
+                    'mask'              => optional($mediaByRole->get('mask'))->getFullUrl(),
+                    'shadow'            => optional($mediaByRole->get('shadow'))->getFullUrl(),
+                    'displacement'      => optional($mediaByRole->get('displacement'))->getFullUrl(),
+                    'light'             => optional($mediaByRole->get('light'))->getFullUrl(),
+                    'fillRatio'         => $mockup->fill_ratio / 100,
                     'displacementScale' => $mockup->displacement_scale,
-                    'shadowStrength'   => $mockup->shadow_strength,
-                    'lightStrength'    => $mockup->light_strength,
-                    'vertices'         => $this->item->points,
-                    'pixiBundleUrl'    => config('services.node_render_url').'/pixi-render-bundle.js',
+                    'shadowStrength'    => $mockup->shadow_strength,
+                    'lightStrength'     => $mockup->light_strength,
+                    'vertices'          => $this->item->points,
+                    'pixiBundleUrl'     => config('services.node_render_url') . '/pixi-render-bundle.js',
                 ],
                 'designUrl' => $this->item->getDesignUrl(),
-                'color'    => $this->item->color,
-                'side'     => $this->item->side,
+                'color'     => $this->item->color,
+                'side'      => $this->item->side,
             ];
+
             Log::error("configFront", $config);
+
             $response = Http::timeout(30)->post(
                 config('services.node_render_url') . '/api/render',
                 $config
             );
 
             if (!$response->successful()) {
-                throw new \Exception("Render service returned: " . $response->status());
+                throw new \Exception("Render service returned: " . $response->body());
             }
 
-
-            $hex       = strtolower(ltrim(trim($this->item->color), '#'));
-            $template= $this->item->template;
-            $tempPath  = sys_get_temp_dir() . "/mockup_{$this->mockup->id}_{$template->id}_{$side}_{$hex}.png";
+            $hex      = strtolower(ltrim(trim($this->item->color), '#'));
+            $template = $this->item->template;
+            $tempPath = sys_get_temp_dir() . "/mockup_{$this->mockup->id}_{$template->id}_{$side}_{$hex}.png";
             file_put_contents($tempPath, $response->body());
-            $this->mockup->media()
+
+            $protectedHexes = $this->mockup->templates()
+                ->wherePivotNotNull('model_color')
+                ->get()
+                ->pluck('pivot.model_color')
+                ->map(fn($c) => strtolower(ltrim(trim($c), '#')))
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+
+            // -----------------------------------------------------------------------
+            // Check pivot model_color for THIS template to determine model_image flag.
+            // If the pivot's model_color matches the current hex being rendered,
+            // the new media should be marked as the model image (model_image = 1).
+            // -----------------------------------------------------------------------
+            $pivotModelColor = $this->mockup->templates()
+                ->wherePivot('template_id', $template->id)
+                ->first()
+                ?->pivot
+                ?->model_color;
+
+            $pivotModelColorHex = $pivotModelColor
+                ? strtolower(ltrim(trim($pivotModelColor), '#'))
+                : null;
+
+            $isModelImage = $pivotModelColorHex && $pivotModelColorHex === $hex ? 1 : 0;
+
+            // -----------------------------------------------------------------------
+            // Delete old media for this template + side + hex before saving new one
+            // -----------------------------------------------------------------------
+            $deleteQuery = $this->mockup->media()
                 ->where('collection_name', 'generated_mockups')
                 ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $template->id])
                 ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$side])
                 ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
-                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(string) $this->mockup->category_id])
-                ->get()
-                ->each(fn ($media) => $media->delete());
-            $this->mockup->templates()->updateExistingPivot($template->id, [
-                'model_color' => null,
-            ]);            try {
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(int) $this->mockup->category_id]);
+
+            if (!empty($protectedHexes)) {
+                foreach ($protectedHexes as $protectedHex) {
+                    $deleteQuery->whereRaw(
+                        "LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) != ?",
+                        [$protectedHex]
+                    );
+                }
+            }
+
+            $deleteQuery->get()->each(fn($media) => $media->delete());
+
+            try {
                 $this->mockup
                     ->addMedia($tempPath)
                     ->usingFileName("mockup_{$side}_tpl{$template->id}_{$hex}.png")
@@ -100,17 +140,16 @@ class RenderMockupJob implements ShouldQueue
                         'hex'         => $hex,
                         'category_id' => (int) $this->mockup->category_id,
                         'product_ids' => (array) $mockup->products->pluck('id')->toArray(),
-
+                        // Carry forward model_image=1 if pivot model_color matches this hex
+                        'model_image' => $isModelImage,
                     ])
                     ->toMediaCollection('generated_mockups');
 
             } finally {
-
                 if (file_exists($tempPath)) {
                     unlink($tempPath);
                 }
             }
-
 
             $media = $this->mockup->media()
                 ->where('collection_name', 'generated_mockups')
@@ -124,12 +163,15 @@ class RenderMockupJob implements ShouldQueue
                 'status'      => 'completed',
                 'output_path' => $media ? parse_url($media->getUrl(), PHP_URL_PATH) : null,
             ]);
+
             $this->checkCompletion();
-        }  catch (Throwable $e) {
+
+        } catch (Throwable $e) {
             $this->item->update(['error_message' => $e->getMessage()]);
             throw $e;
         }
     }
+
     public function failed(Throwable $e): void
     {
         $this->item->update([

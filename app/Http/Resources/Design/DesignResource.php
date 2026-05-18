@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Design;
 
+use App\Enums\Item\TypeEnum;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\DimensionResource;
 use App\Http\Resources\FontResource;
@@ -114,15 +115,17 @@ class DesignResource extends JsonResource
                 })
             ),
             'is_added_to_cart' => $this->isAddedToCart(),
+            'is_added_to_cart_as_print' => $this->isAddedToCart(TypeEnum::PRINT),
+            'is_added_to_cart_as_download' => $this->isAddedToCart(TypeEnum::DOWNLOAD),
             'colors' => $this->when(request()->has('mockup_id'), function () {
-                $mockupId = request('mockup_id');
+                $mockupId = request()->integer('mockup_id');
                 if (!$mockupId) {
                     return [];
                 }
 
                 if ($this->template)
                 {
-                    
+
                     $mockup = $this->template?->mockups()
                         ->where('mockups.id', $mockupId)
                         ->first();
@@ -132,7 +135,7 @@ class DesignResource extends JsonResource
                     $colors = $mockup->pivot->colors ?? [];
                 }else{
                     $mockup = Mockup::find($mockupId);
-                    $colors = $mockup->colors;
+                    $colors = $mockup->templateColors ?: $mockup->colors;
 
                 }
 

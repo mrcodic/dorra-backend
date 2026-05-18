@@ -30,7 +30,7 @@ use App\Repositories\Interfaces\{CategoryRepositoryInterface,
 };
 use App\Services\TemplateService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{Cache, Response, Validator};
+use Illuminate\Support\Facades\{Cache, DB, Log, Response, Validator};
 
 
 class TemplateController extends DashboardController
@@ -126,7 +126,7 @@ class TemplateController extends DashboardController
         }
         return Response::api(data: [
             "redirect_url" =>
-                config('services.editor_url') . 'templates/' . $template->id . '?is_clear&product_id='.request('product_without_category_id')
+                config('services.editor_url') . 'templates/' . $template->id . '?is_clear&product_id=' . request('product_without_category_id')
         ]);
     }
 
@@ -154,7 +154,7 @@ class TemplateController extends DashboardController
             ]);
         }
         if ($request->boolean('go_to_editor')) {
-            return Response::api(data: ['editor_url' => config('services.editor_url') . 'templates/' . $model->id . '?is_clear=1&product_id='.request('product_without_category_id')]);
+            return Response::api(data: ['editor_url' => config('services.editor_url') . 'templates/' . $model->id . '?is_clear=1&product_id=' . request('product_without_category_id')]);
         }
 
         return Response::api(data: $this->resourceClass::make($model));
@@ -171,7 +171,7 @@ class TemplateController extends DashboardController
     {
         return Response::api(data: TemplateResource::make($this->templateService->showResource($id,
             ['products.dimensions', 'types',
-                'dimension', 'libraryMedia','mockups'])));
+                'dimension', 'libraryMedia', 'mockups'])));
     }
 
     public function getProductTemplates()
@@ -367,7 +367,7 @@ class TemplateController extends DashboardController
                 function ($attribute, $value, $fail) use ($request) {
                     $colors = $request->input('colors', []);
                     $normalizedColors = array_map(fn($c) => strtolower(ltrim($c, '#')), $colors);
-                    $normalizedValue  = strtolower(ltrim($value, '#'));
+                    $normalizedValue = strtolower(ltrim($value, '#'));
 
                     if (!in_array($normalizedValue, $normalizedColors)) {
                         $fail("The $attribute must be one of the provided colors.");
@@ -387,16 +387,15 @@ class TemplateController extends DashboardController
             ->values()
             ->all();
 
-        $mockup->update(['colors' => $merged]);
         if ($template->mockups()->where('mockup_id', $mockup->id)->exists()) {
             $template->mockups()->updateExistingPivot($mockup->id, [
                 'positions' => $request->input('positions'),
-                'colors'    => $request->input('colors'),
+                'colors' => $request->input('colors'),
             ]);
         } else {
             $template->mockups()->attach($mockup->id, [
                 'positions' => $request->input('positions'),
-                'colors'    => $request->input('colors'),
+                'colors' => $request->input('colors'),
             ]);
         }
 
@@ -447,8 +446,7 @@ class TemplateController extends DashboardController
             ->where('collection_name', 'generated_mockups')
             ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$template->id])
             ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])
-            ->when($modelColor, fn($q) =>
-                // keep only if hex matches current model color, delete the rest
+            ->when($modelColor, fn($q) => // keep only if hex matches current model color, delete the rest
             $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) != ?", [$modelColor])
             )
             ->cursor()
@@ -465,7 +463,7 @@ class TemplateController extends DashboardController
             }
 
             $side = $fileData['side'] ?? 'front';
-            $hex  = $this->normalizeHex($fileData['color'] ?? '#000000');
+            $hex = $this->normalizeHex($fileData['color'] ?? '#000000');
 
             // Delete existing media for this exact side + hex (including model image — will be re-uploaded)
             $mockup->media()
@@ -478,11 +476,11 @@ class TemplateController extends DashboardController
                 ->each->delete();
 
             $customProperties = [
-                'side'        => $side,
+                'side' => $side,
                 'template_id' => (string)$template->id,
-                'hex'         => $hex,
+                'hex' => $hex,
                 'category_id' => (int)$mockup->category_id,
-                'product_ids' => (array) $mockup->products->pluck('id')->toArray(),
+                'product_ids' => (array)$mockup->products->pluck('id')->toArray(),
                 'model_image' => ($modelColor && $hex === $modelColor) ? 1 : 0,
             ];
 
@@ -495,65 +493,140 @@ class TemplateController extends DashboardController
 
     private function normalizeHex(?string $hex): string
     {
-        return strtolower(ltrim(trim((string) $hex), '#'));
+        return strtolower(ltrim(trim((string)$hex), '#'));
     }
+
     public function setTemplateImage(Template $template, Mockup $mockup, Request $request)
     {
         $request->validate([
             'model_color' => ['required', 'string'],
-            'side'        => ['required', 'string', 'in:front,back,none'],
+            'side' => ['required', 'string', 'in:front,back,none'],
         ]);
 
         $normalizedColor = $this->normalizeHex($request->model_color);
 
-        $alreadyAttached = $template->mockups()
-            ->where('mockups.id', $mockup->id)
-            ->exists();
+        $currentProductIds = $mockup->products()
+            ->pluck('products.id')
+            ->map(fn($id) => $id)
+            ->values();
 
-        if ($alreadyAttached) {
-            $template->mockups()->updateExistingPivot($mockup->id, [
-                'model_color' => $request->model_color,
-            ]);
-        } else {
-            $template->mockups()->attach($mockup->id, [
-                'model_color' => $request->model_color,
-            ]);
-        }
+        $previousMockupIds = $template->mockups()
+            ->where('mockups.id', '!=', $mockup->id)
+            ->where('mockups.category_id', $mockup->category_id)
+//            ->when(
+//                $currentProductIds->isNotEmpty(),
+//                function ($query) use ($currentProductIds) {
+//                    $query->whereHas('products', function ($productQuery) use ($currentProductIds) {
+//                        $productQuery->whereIn('products.id', $currentProductIds);
+//                    });
+//                },
+//                function ($query) {
+//                    $query->whereRaw('1 = 0');
+//                }
+//            )
+            ->pluck('mockups.id')
+            ->map(fn($id) => $id)
+            ->values();
+        Log::info("sdfsdfsd",[$previousMockupIds]);
 
-        Media::query()
+        $baseQuery = fn() => Media::query()
             ->where('model_type', Mockup::class)
             ->where('model_id', $mockup->id)
             ->where('collection_name', 'generated_mockups')
-            ->where('custom_properties->template_id', (string) $template->id)
-            ->get()
-            ->each(function (Media $media) {
-                $media->setCustomProperty('model_image', 0);
+            ->whereRaw(
+                "JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?",
+                [(string)$template->id]
+            );
+
+        DB::transaction(function () use (
+            $template,
+            $mockup,
+            $request,
+            $normalizedColor,
+            $previousMockupIds,
+            $baseQuery
+        ) {
+            // 1. Attach/update current mockup pivot model_color
+            $alreadyAttached = $template->mockups()
+                ->where('mockups.id', $mockup->id)
+                ->exists();
+
+            if ($alreadyAttached) {
+                $template->mockups()->updateExistingPivot($mockup->id, [
+                    'model_color' => $request->model_color,
+                ]);
+            } else {
+                $template->mockups()->attach($mockup->id, [
+                    'model_color' => $request->model_color,
+                ]);
+            }
+
+            // 2. Set previous mockups model_color = null
+            if ($previousMockupIds->isNotEmpty()) {
+                DB::table('mockup_template')
+                    ->where('template_id', $template->id)
+                    ->whereIn('mockup_id', $previousMockupIds)
+                    ->update([
+                        'model_color' => null,
+                        'updated_at' => now(),
+                    ]);
+            }
+
+            // 3. Reset model_image for current mockup media
+            $baseQuery()
+                ->get()
+                ->each(function (Media $media) {
+                    $media->setCustomProperty('model_image', 0);
+                    $media->save();
+                });
+
+            // 4. Reset model_image for previous mockups media
+            if ($previousMockupIds->isNotEmpty()) {
+                Media::query()
+                    ->where('model_type', Mockup::class)
+                    ->whereIn('model_id', $previousMockupIds)
+                    ->where('collection_name', 'generated_mockups')
+                    ->whereRaw(
+                        "JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?",
+                        [(string)$template->id]
+                    )
+                    ->get()
+                    ->each(function (Media $media) {
+                        $media->setCustomProperty('model_image', 0);
+                        $media->save();
+                    });
+            }
+
+            // 5. Find exact media: same hex + same side
+            $matched = $baseQuery()
+                ->whereRaw(
+                    "LOWER(REPLACE(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex')), '#', '')) = ?",
+                    [$normalizedColor]
+                )
+                ->whereRaw(
+                    "JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?",
+                    [$request->side]
+                )
+                ->get();
+
+            // 6. Fallback: same hex only
+            if ($matched->isEmpty()) {
+                $matched = $baseQuery()
+                    ->whereRaw(
+                        "LOWER(REPLACE(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex')), '#', '')) = ?",
+                        [$normalizedColor]
+                    )
+                    ->get()
+                    ->sortByDesc(fn(Media $media) => $media->getCustomProperty('side') === $request->side ? 1 : 0
+                    )
+                    ->take(1);
+            }
+
+            // 7. Mark selected media as model image
+            $matched->each(function (Media $media) {
+                $media->setCustomProperty('model_image', 1);
                 $media->save();
             });
-
-        $matchedMedia = Media::query()
-            ->where('model_type', Mockup::class)
-            ->where('model_id', $mockup->id)
-            ->where('collection_name', 'generated_mockups')
-            ->where('custom_properties->template_id', (string) $template->id)
-            ->where('custom_properties->hex', $normalizedColor)
-            ->where('custom_properties->side', $request->side)
-            ->get();
-
-
-        if ($matchedMedia->isEmpty()) {
-            $matchedMedia = Media::query()
-                ->where('model_type', Mockup::class)
-                ->where('model_id', $mockup->id)
-                ->where('collection_name', 'generated_mockups')
-                ->where('custom_properties->template_id', (string) $template->id)
-                ->where('custom_properties->hex', $normalizedColor)
-                ->get();
-        }
-
-        $matchedMedia->each(function (Media $media) {
-            $media->setCustomProperty('model_image', 1);
-            $media->save();
         });
 
         return Response::api();

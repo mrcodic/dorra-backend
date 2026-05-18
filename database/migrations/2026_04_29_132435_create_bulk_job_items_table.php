@@ -26,6 +26,7 @@ return new class extends Migration
                 'processing',
                 'completed',
                 'failed',
+                'cancelled',
             ])->default('pending')->index();
 
             $table->string('output_path', 500)->nullable();

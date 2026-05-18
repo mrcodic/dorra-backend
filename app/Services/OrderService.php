@@ -640,8 +640,6 @@ class OrderService extends BaseService
                 paymentMethod: $selectedPaymentMethod,
                 request: $request,
                 user: $user,
-                cart: null,
-                discountCode: null,
             );
 
             return [
@@ -677,24 +675,54 @@ class OrderService extends BaseService
                 'discountCode' => ['This discount code is not valid.'],
             ]);
         }
-        $subTotal = $cart->items->sum(fn($item) => $item->sub_total_after_offer ?? $item->sub_total);
-
-        // create order + items + address inside transaction
-        $order = $this->handleTransaction(function () use ($cart, $discountCode, $subTotal, $request, $idempotencyKey, $allDownload) {
-            return $this->createOrderFromCart(
-                cart: $cart,
-                discountCode: $discountCode,
-                subTotal: $subTotal,
-                request: $request,
-                idempotencyKey: $idempotencyKey,
-                allDownload: $allDownload
+        $invalidItemDiscount = $cart->items
+            ->filter(fn($item) => $item->discount_code_id !== null)
+            ->first(
+                fn($item) => $item->discountCode()->isNotValid()->exists()
             );
-        });
+
+        if ($invalidItemDiscount) {
+            throw ValidationException::withMessages([
+                'discountCode' => ['One or more items have an invalid or expired discount code. Please remove it and try again.'],
+            ]);
+        }
+        $subTotal = round(
+            $cart->items->sum(function ($item) {
+                $hasOffer = (float) optional($item->cartable?->lastOffer)->getRawOriginal('value') > 0;
+
+                if ($hasOffer) {
+                    return (float) $item->sub_total_after_offer;
+                }
+
+                return max(0, (float) $item->sub_total - (float) ($item->discount_amount ?? 0));
+            }),
+            2
+        );
+        $isGeneralDiscount = $discountCode?->scope === \App\Enums\DiscountCode\ScopeEnum::GENERAL;
+
+        $orderLevelDiscountCode   = $isGeneralDiscount ? $discountCode : null;
+        // create order + items + address inside transaction
+        $order = $this->handleTransaction(
+            function () use (
+                $cart, $orderLevelDiscountCode ,
+                $subTotal, $request, $idempotencyKey, $allDownload
+            ) {
+                return $this->createOrderFromCart(
+                    cart: $cart,
+                    discountCode: $orderLevelDiscountCode,
+                    subTotal: $subTotal,
+                    request: $request,
+                    idempotencyKey: $idempotencyKey,
+                    allDownload: $allDownload,
+                );
+            }
+        );
         $this->copyMockupMediaToOrderItems($cart, $order);
         $this->clearCartAfterCashOnDelivery($cart);
 
         // 3) Cash on delivery → no online payment
         if ($selectedPaymentMethod->code === 'cash_on_delivery') {
+
             return [
                 'order' => [
                     'id' => $order->id,
@@ -758,30 +786,53 @@ class OrderService extends BaseService
     /**
      * Creates order + items + specs + address/pickup from the cart.
      */
-    protected function createOrderFromCart($cart, $discountCode, $subTotal, $request, string $idempotencyKey, $allDownload)
-    {
+    protected function createOrderFromCart(
+        $cart, $discountCode, $subTotal, $request, string $idempotencyKey, $allDownload
+    ) {
         $order = $this->repository->query()->create(
             array_merge(
                 OrderData::fromCart($subTotal, $discountCode, $cart),
-                ['idempotency_key' => $idempotencyKey,'all_items_are_download' => $allDownload]
+                ['idempotency_key' => $idempotencyKey, 'all_items_are_download' => $allDownload]
             )
         );
-
         // order items
         $orderItems = $order->orderItems()->createMany(
-            $cart->items->map(fn($item) => [
-                'orderable_id' => $item->cartable_id,
-                'orderable_type' => $item->cartable_type,
-                'quantity' => $item->quantity,
-                'product_price' => $item->product_price,
-                'itemable_id' => $item->itemable_id,
-                'itemable_type' => $item->itemable_type,
-                'specs_price' => $item->specs_price,
-                'sub_total' => $item->sub_total_after_offer ?: $item->sub_total,
-                'product_price_id' => $item->product_price_id,
-                'color' => $item->color,
-                'type' => $item->type,
-            ])->toArray()
+            $cart->items->map(function ($item) {
+                $hasOffer   = $item->hasActiveOffer();
+                $hasDiscount = !$hasOffer && $item->discount_code_id !== null;
+
+                if ($hasOffer) {
+                    $subTotal       = (float) $item->sub_total_after_offer;
+                    $discountCodeId = null;
+                    $discountAmount = 0;
+
+                } elseif ($hasDiscount) {
+                    $subTotal       = max(0, (float) $item->sub_total - (float) ($item->discount_amount ?? 0));
+                    $discountCodeId = $item->discount_code_id;
+                    $discountAmount = (float) ($item->discount_amount ?? 0);
+
+                } else {
+                    $subTotal       = (float) $item->sub_total;
+                    $discountCodeId = null;
+                    $discountAmount = 0;
+                }
+
+                return [
+                    'orderable_id'     => $item->cartable_id,
+                    'orderable_type'   => $item->cartable_type,
+                    'quantity'         => $item->quantity,
+                    'product_price'    => $item->product_price,
+                    'itemable_id'      => $item->itemable_id,
+                    'itemable_type'    => $item->itemable_type,
+                    'specs_price'      => $item->specs_price,
+                    'sub_total'        => $subTotal,
+                    'discount_code_id' => $discountCodeId,
+                    'discount_amount'  => $discountAmount,
+                    'product_price_id' => $item->product_price_id,
+                    'color'            => $item->color,
+                    'type'             => $item->type,
+                ];
+            })->toArray()
         );
 
         // specs

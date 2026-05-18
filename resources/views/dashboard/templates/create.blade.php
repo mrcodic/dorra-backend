@@ -1950,14 +1950,14 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
 
             function toggleCheckboxes() {
                 let frontChecked = false;
-                let backChecked = false;
-                let noneChecked = false;
+                let backChecked  = false;
+                let noneChecked  = false;
 
                 checkboxes.forEach(checkbox => {
                     const type = checkbox.dataset.typeName;
                     if (type === 'front' && checkbox.checked) frontChecked = true;
-                    if (type === 'back' && checkbox.checked) backChecked = true;
-                    if (type === 'none' && checkbox.checked) noneChecked = true;
+                    if (type === 'back'  && checkbox.checked) backChecked  = true;
+                    if (type === 'none'  && checkbox.checked) noneChecked  = true;
                 });
 
                 checkboxes.forEach(checkbox => {
@@ -1965,15 +1965,22 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
 
                     if (noneChecked && (type === 'front' || type === 'back')) {
                         checkbox.disabled = true;
+                        checkbox.checked  = false;  // ← uncheck, not just disable
                     } else if ((frontChecked || backChecked) && type === 'none') {
                         checkbox.disabled = true;
+                        checkbox.checked  = false;  // ← uncheck, not just disable
                     } else {
                         checkbox.disabled = false;
                     }
                 });
+
+                // Re-sync dropzone visibility and re-fetch mockups after state change
+                updateTemplateTypeDropzones();
+                fetchMockups();
             }
 
             checkboxes.forEach(checkbox => {
+
                 checkbox.addEventListener('change', toggleCheckboxes);
             });
 

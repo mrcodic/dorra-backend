@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Cart;
 
+use App\Enums\DiscountCode\TypeEnum;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\Design\DesignResource;
 use App\Http\Resources\Product\ProductResource;
@@ -21,6 +22,7 @@ class CartItemResource extends JsonResource
         $sub  = (float) $this->getAttribute('sub_total');
         $val  = (float) ($lastOffer?->getRawOriginal('value') ?? 0);
         $after = $lastOffer ? round($sub * (1 - ($val / 100)), 2) : null;
+        $priceAfterDiscountCode =  max(0,$this->sub_total - $this->discount_amount);
         return [
             'id' => $this->id,
             'type' => $this->when($item, class_basename($item)),
@@ -38,12 +40,33 @@ class CartItemResource extends JsonResource
             }),
             'price' =>$this->sub_total &&  $cartable? $this->sub_total : $item?->price,
             'product_price' => $this->product_price,
-            'price_after_offer' => is_null($after) ? null : sprintf('%.2f', round($after, 2)),
+            'price_after_offer' => $lastOffer
+                ? sprintf('%.2f', $after)
+                : ($this->discount_amount > 0 ? sprintf('%.2f', $priceAfterDiscountCode) : null),
             'quantity' => $this->quantity,
             'color' => $this->color,
             'item_type' => [
                 'value' => $this->type?->value,
                 'label' => $this->type?->label(),
+            ],
+            'discount' => [
+                'id'    => $this->discountCode?->id,
+                'code'  => $this->discountCode?->code,
+                'ratio' => $this->sub_total
+                    ? (
+                        ($this->discountCode?->type === TypeEnum::PERCENTAGE
+                            ? (intval($this->discountCode?->value * 100) == $this->discountCode?->value * 100
+                                ? intval($this->discountCode?->value * 100)
+                                : number_format($this->discountCode?->value * 100, 2, '.', '')
+                            )
+                            : (intval(($this->discountCode?->value / $this->sub_total) * 100) == ($this->discountCode?->value / $this->sub_total) * 100
+                                ? intval(($this->discountCode?->value / $this->sub_total) * 100)
+                                : number_format(($this->discountCode?->value / $this->sub_total) * 100, 2, '.', '')
+                            )
+                        ) . '%'
+                    )
+                    : '0%',
+                'value' => getDiscountAmount($this->discountCode, $this->sub_total) ?? 0,
             ],
         ];
     }

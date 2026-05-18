@@ -62,7 +62,8 @@ class CartController extends Controller
 
     public function removeDiscount(Request $request)
     {
-        $this->cartService->removeDiscount();
+        $request->validate(['item_id' => 'nullable','exists:cart_items,id']);
+        $this->cartService->removeDiscount($request->item_id);
         return Response::api(data: (object)[]);
     }
 

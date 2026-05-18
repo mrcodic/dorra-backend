@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Enums\Mockup\TypeEnum;
 use App\Jobs\HandleMockupFilesJob;
+use App\Models\Design;
 use App\Models\Product;
 use App\Models\Template;
 use App\Repositories\Base\BaseRepositoryInterface;
@@ -68,7 +69,11 @@ class MockupService extends BaseService
             : null;
 
         $filtered = $mockups->filter(fn($mockup) => $mockup->templates->contains('id', $templateId));
-
+        $filtered = $filtered->sortByDesc(function ($mockup) use ($templateId) {
+            return $mockup->templates
+                ->first(fn($tpl) => $tpl->id == $templateId)
+                ?->pivot->model_color ? 1 : 0;
+        });
         // --- All colors across all mockups ---
         $allColors = $filtered
             ->flatMap(fn($mockup) => $mockup->templates
@@ -130,16 +135,14 @@ class MockupService extends BaseService
                         if ($m->getCustomProperty('template_id') != $templateId) {
                             return false;
                         }
-
-                        // Both sides normalized without '#'
                         $storedHex  = strtolower(ltrim($m->getCustomProperty('hex', ''), '#'));
                         $compareHex = $activeColor ? strtolower(ltrim($activeColor, '#')) : null;
-
                         return !$compareHex || $storedHex === $compareHex;
                     });
 
                 $pickBySide = fn(string $side) => $mockupMedia
                     ->filter(fn($m) => $m->getCustomProperty('side') === $side)
+                    ->sortByDesc(fn($m) => $m->getCustomProperty('model_image', 0)) // ← model_image file first
                     ->map(fn($m) => $m->getFullUrl())
                     ->values()
                     ->all();
@@ -167,13 +170,12 @@ class MockupService extends BaseService
     public function getAll(
         $relations = [], bool $paginate = false, $columns = ['*'], $perPage = 16, $counts = [])
     {
-
         $requested = request('per_page', $perPage);
         $pageSize = $requested === 'all' ? null : (int)$requested;
 
         $query = $this->repository
             ->query()
-            ->with(['category:id,name,is_has_category', 'types','products'])
+            ->with(['category:id,name,is_has_category', 'types', 'products'])
             ->when(request()->filled('search_value'), function ($q) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $q->where('name', 'LIKE', '%' . request('search_value') . '%');
@@ -183,57 +185,68 @@ class MockupService extends BaseService
             })
             ->when(request()->filled('approachWithEditor'), function ($query) {
                 $query->whereApproach('with_editor');
-            })->when(request()->filled('approach'), function ($query) {
+            })
+            ->when(request()->filled('approach'), function ($query) {
                 $query->whereApproach(request('approach'));
             })
-            ->when(request()->filled('product_id') || request()->filled('product_ids') ||request()->filled('category_ids') , function ($q) {
-                $type = request('product_type');
-                $productId = request('product_id');
-                $productIds = request('product_ids');
+            ->when(request()->filled('product_id') || request()->filled('product_ids') || request()->filled('category_ids'), function ($q) {
+                $type        = request('product_type');
+                $productId   = request('product_id');
+                $productIds  = request('product_ids');
                 $categoryIds = request('category_ids');
-                if (request('filter') == 'both'){
-                    if ($categoryIds){
-                        $q->whereHas('products', function ($q) use ($categoryIds) {
-                            $q->whereIn('products.id', $categoryIds);
-                        });
-                    }
-                    if ($productIds){
-                        $q->orWhereIn('category_id',$productIds);
-                    }
+
+                if (request('filter') == 'both') {
+                    // ── Wrap in a group so OR doesn't leak into the outer query ──────
+                    $q->where(function ($q) use ($categoryIds, $productIds) {
+                        if ($categoryIds) {
+                            $q->whereHas('products', function ($q) use ($categoryIds) {
+                                $q->whereIn('products.id', $categoryIds);
+                            });
+                        }
+                        if ($productIds) {
+                            $q->orWhereIn('category_id', $productIds);  // safe inside group
+                        }
+                    });
+                    return; // skip the type/product blocks below for 'both'
                 }
 
                 if ($type === 'category') {
-                    if ($productIds){
-                        $q->whereIn('category_id',$productIds);
-                    }else{
+                    if ($productIds) {
+                        $q->whereIn('category_id', $productIds);
+                    } else {
                         $q->whereCategoryId($productId);
-
                     }
                 }
+
                 if ($type === 'product') {
-                    if ($productIds){
+                    if ($productIds) {
                         $q->whereHas('products', function ($q) use ($productIds) {
                             $q->whereIn('products.id', $productIds);
                         });
+                    } else {
+                        $product = Product::find($productId);
+                        if ($product) {
+                            $q->whereCategoryId($product->category_id);
+                        }
                     }
-                   else{
-                       $product = Product::find($productId);
-
-                       if ($product) {
-                           $q->whereCategoryId($product->category_id);
-                       }
-                   }
-
                 }
             })
             ->when(request()->filled('template_id'), fn($q) => $q->whereHas('templates', function ($query) {
                 $query->where('templates.id', request('template_id'));
             }))
+            ->when(request()->filled('design_id'), function ($query) {
+                $design = Design::find(request('design_id'));
+                if ($design?->template_id) {
+                    $query->whereHas('templates', function ($query) use ($design) {
+                        $query->where('templates.id', $design->template_id);
+                    });
+                }
+            })
             ->when(
                 request()->filled('template_id') &&
                 request()->filled('category_id') &&
-                request()->filled('color')
-                && request()->filled('mockup_id'),
+                request()->filled('color') &&
+                request()->filled('mockup_id'),
                 fn($q) => $q
                     ->whereKeyNot(request('mockup_id'))
                     ->where('category_id', request('category_id'))
@@ -243,9 +256,9 @@ class MockupService extends BaseService
                             ->whereJsonContains('mockup_template.colors', request('color'));
                     })
             )
-            ->when(request()->filled('type'), fn($q) => $q->whereHas('types', fn($q) => $q->where('types.value', (int)request('type'))
-            )
-            )
+            ->when(request()->filled('type'), fn($q) => $q->whereHas('types', fn($q) =>
+            $q->where('types.value', (int)request('type'))
+            ))
             ->when(request()->filled('types'), function ($query) {
                 $types = array_map('intval', request()->input('types'));
                 $query->whereHas('types', function ($q) use ($types) {
@@ -266,9 +279,11 @@ class MockupService extends BaseService
                 ? $query->get()
                 : $query->paginate($pageSize)->withQueryString();
         }
+
         if (request()->expectsJson()) {
             return $query->paginate($pageSize);
         }
+
         return $this->repository->all(
             $paginate,
             $columns,

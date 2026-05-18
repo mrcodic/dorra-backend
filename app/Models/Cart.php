@@ -54,7 +54,7 @@ class Cart extends Model
 
     public function addItem(Model $itemable, $type, $quantity=null, $specsSum=null, $productPrice=null,
                             $productPriceId=null, $subTotal=null, $cartable_id=null, $cartable_type=null,
-                            $color=null): CartItem
+                            $color=null): Model
     {
         return $this->items()->updateOrCreate([
             'itemable_id' => $itemable->id,
@@ -91,4 +91,5 @@ class Cart extends Model
     {
         return $this->belongsTo(Guest::class);
     }
+
 }
