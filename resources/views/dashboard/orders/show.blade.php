@@ -1,3 +1,4 @@
+@php use Illuminate\Support\Str; @endphp
 @extends('layouts/contentLayoutMaster')
 @section('title', 'Show Order')
 @section('main-page', 'Orders')
@@ -139,7 +140,7 @@
                        $isDownload  = $orderItem->type === \App\Enums\Item\TypeEnum::DOWNLOAD;
 
                        $previewImage = match(true) {
-                           $isDesign && $orderItem->itemable->linked_to_mockup =>
+                           $isDesign && $orderItem->itemable->mockup_id =>
                                $orderItem->itemable->getFirstMediaUrl('front-mockup-designs')
                                ?: $orderItem->itemable->getFirstMediaUrl('none-mockup-designs'),
 
