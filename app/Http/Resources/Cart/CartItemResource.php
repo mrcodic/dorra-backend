@@ -18,7 +18,9 @@ class CartItemResource extends JsonResource
     {
         $item = $this->itemable;
         $cartable = $this->cartable;
-        $cartHasDiscount = $this->cart->items->some(fn($i) => $i->discount_amount > 0)|| $this->cart->discount_amount;
+        $cartHasDiscount = $this->cart->discount_amount > 0
+            || $this->cart->items()->where('discount_amount', '>', 0)->exists();
+        
         $lastOffer = $cartHasDiscount ? null : $cartable?->lastOffer;
         $sub   = (float) $this->getAttribute('sub_total');
         $val   = (float) ($lastOffer?->getRawOriginal('value') ?? 0);
