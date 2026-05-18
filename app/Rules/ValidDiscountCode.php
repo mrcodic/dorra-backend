@@ -26,11 +26,11 @@ class ValidDiscountCode implements ValidationRule
             $fail('Discount code does not exist.');
             return;
         }
-//        if ($code->type === TypeEnum::FIXED) {
-//            if ($this->cart?->price < $code->getRawOriginal('value')) {
-//                $fail('Cart total is less than the discount value.');
-//            }
-//        }
+        if ($code->type === TypeEnum::FIXED) {
+            if ($this->cart?->price < $code->getRawOriginal('value')) {
+                $fail('Cart total is less than the discount value.');
+            }
+        }
 
         if ($code?->expired_at && $code?->expired_at <= now()) {
             $fail('Discount code has expired.');
