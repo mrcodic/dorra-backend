@@ -137,7 +137,31 @@ return [
         'symbols' => 'Your password must be at least 8 characters long, contain uppercase and lowercase letters, at least one number, and one special symbol. Example: MyP@ssw0rd!',
     ],
 
+    'discount_code_not_exist' => 'Discount code does not exist.',
 
+    'cart_total_less_than_discount' =>
+        'Cart total is less than the discount value.',
+
+    'discount_code_expired' =>
+        'Discount code has expired.',
+
+    'discount_code_not_valid' =>
+        'This discount code is no longer valid.',
+
+    'login_required_for_promo_code' =>
+        'You must be logged in to use a promotional code.',
+
+    'promo_code_only_new_users' =>
+        'This promotional code is only available for new users within their first month of registration.',
+
+    'promo_code_already_used' =>
+        'This promotional code has already been used in the last order.',
+
+    'promo_code_not_assigned' =>
+        'This promotional code is not assigned to your account.',
+
+    'discount_code_invalid_for_selection' =>
+        'This discount code is not valid for the selected product or category.',
 
 
     /*

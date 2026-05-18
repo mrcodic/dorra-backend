@@ -130,7 +130,32 @@ return [
     'url' => 'يجب أن يكون :attribute عنوان URL صالح.',
     'uuid' => 'يجب أن يكون :attribute UUID صالح.',
     'phone' => 'يجب أن يكون :attribute رقمًا صالحًا.',
+    'discount_code_not_exist' =>
+        'كود الخصم غير موجود.',
 
+    'cart_total_less_than_discount' =>
+        'إجمالي السلة أقل من قيمة الخصم.',
+
+    'discount_code_expired' =>
+        'انتهت صلاحية كود الخصم.',
+
+    'discount_code_not_valid' =>
+        'كود الخصم هذا لم يعد صالحًا.',
+
+    'login_required_for_promo_code' =>
+        'يجب تسجيل الدخول لاستخدام الكود الترويجي.',
+
+    'promo_code_only_new_users' =>
+        'هذا الكود الترويجي متاح فقط للمستخدمين الجدد خلال الشهر الأول من التسجيل.',
+
+    'promo_code_already_used' =>
+        'تم استخدام هذا الكود الترويجي مسبقًا في آخر طلب.',
+
+    'promo_code_not_assigned' =>
+        'هذا الكود الترويجي غير مخصص لحسابك.',
+
+    'discount_code_invalid_for_selection' =>
+        'كود الخصم غير صالح للمنتج أو التصنيف المحدد.',
     /*
     |----------------------------------------------------------------------
     | Custom Validation Language Lines
