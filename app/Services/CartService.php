@@ -510,7 +510,7 @@ class CartService extends BaseService
 
     public function addQuantity($request, $id)
     {
-        $message = "Request completed successfully.";
+        $message =  __('messages.request_completed_successfully');
         $cartItem = $this->cartItemRepository->find($id);
         if ($cartItem->cartable->has_custom_prices) {
             $productPrice = $this->productPriceRepository->query()->find($request->product_price_id);
@@ -547,7 +547,7 @@ class CartService extends BaseService
 
     public function updatePriceDetails($validatedData, $itemId)
     {
-        $message = "Request completed successfully.";
+        $message = __('messages.request_completed_successfully');
         $cartItem = $this->cartItemRepository->query()
             ->whereKey($itemId)
             ->firstOrFail();
