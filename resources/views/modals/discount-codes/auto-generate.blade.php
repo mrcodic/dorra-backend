@@ -306,42 +306,31 @@
                         $(".code-list-table").DataTable().ajax.reload();
                     },
                 error: function (xhr) {
-                    const blob = xhr.responseText ? xhr.responseText : xhr.response;
+                    let errors = xhr.responseJSON?.errors;
 
-                    // xhr.response is a Blob because of responseType: 'blob'
-                    const reader = new FileReader();
-                    reader.onload = function () {
-                        let errors = null;
-                        try {
-                            const json = JSON.parse(reader.result);
-                            errors = json?.errors;
-                        } catch (e) {}
-
-                        if (errors) {
-                            Object.values(errors).forEach(errorArray => {
-                                errorArray.forEach(message => {
-                                    Toastify({
-                                        text: message,
-                                        duration: 4000,
-                                        gravity: "top",
-                                        position: "right",
-                                        backgroundColor: "#EA5455",
-                                        close: true,
-                                    }).showToast();
-                                });
+                    if (errors) {
+                        Object.values(errors).forEach(errorArray => {
+                            errorArray.forEach(message => {
+                                Toastify({
+                                    text: message,
+                                    duration: 4000,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "#EA5455",
+                                    close: true,
+                                }).showToast();
                             });
-                        } else {
-                            Toastify({
-                                text: "Something went wrong. Please try again.",
-                                duration: 4000,
-                                gravity: "top",
-                                position: "right",
-                                backgroundColor: "#EA5455",
-                                close: true,
-                            }).showToast();
-                        }
-                    };
-                    reader.readAsText(xhr.response); // xhr.response is the Blob
+                        });
+                    } else {
+                        Toastify({
+                            text: "Something went wrong. Please try again.",
+                            duration: 4000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455",
+                            close: true,
+                        }).showToast();
+                    }
                 },
                 complete: function () {
                     generateBtn.attr('disabled', false);
