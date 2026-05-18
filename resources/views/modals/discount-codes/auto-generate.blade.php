@@ -362,14 +362,18 @@
             loader.removeClass('d-none');
             $('button[type="submit"]').attr('disabled', true);
 
+            let nativeXhr = null; // ← capture native XHR reference
+
             $.ajax({
                 url: exportUrl,
                 method: 'POST',
                 data: formData,
                 processData: false,
                 contentType: false,
-                xhrFields: {
-                    responseType: 'blob'
+                xhr: function () {           // ← override xhr factory
+                    nativeXhr = $.ajaxSettings.xhr();
+                    nativeXhr.responseType = 'blob';
+                    return nativeXhr;
                 },
                 success: function (response, status, xhr) {
                     const disposition = xhr.getResponseHeader('Content-Disposition');
@@ -411,10 +415,8 @@
                     $('input[name="scope"]:checked').trigger('change');
                     $(".code-list-table").DataTable().ajax.reload();
                 },
-                error: function (xhr) {
-                    const blob = xhr.responseText ? xhr.responseText : xhr.response;
-
-                    // xhr.response is a Blob because of responseType: 'blob'
+                error: function () {
+                    // ← use nativeXhr.response (the actual Blob) instead of jqXHR.response
                     const reader = new FileReader();
                     reader.onload = function () {
                         let errors = null;
@@ -447,7 +449,7 @@
                             }).showToast();
                         }
                     };
-                    reader.readAsText(xhr.response); // xhr.response is the Blob
+                    reader.readAsText(nativeXhr.response); // ← native XHR has the real Blob
                 },
                 complete: function () {
                     button.attr('disabled', false);
