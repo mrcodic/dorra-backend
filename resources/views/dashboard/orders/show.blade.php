@@ -140,9 +140,10 @@
                        $isDownload  = $orderItem->type === \App\Enums\Item\TypeEnum::DOWNLOAD;
 
                        $previewImage = match(true) {
-                           $isDesign && $orderItem->itemable->mockup_id =>
+                           $isDesign && $orderItem->itemable->linked_to_mockup =>
                                $orderItem->itemable->getFirstMediaUrl('front-mockup-designs')
-                               ?: $orderItem->itemable->getFirstMediaUrl('none-mockup-designs'),
+                               ?: $orderItem->itemable->getFirstMediaUrl('none-mockup-designs')
+                               ?: $orderItem->itemable->getFirstMediaUrl('back-mockup-designs'),
 
                            $isTemplate =>
                                $orderItem->getFirstMediaUrl('order_item_mockups')
