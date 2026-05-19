@@ -76,9 +76,9 @@ return Application::configure(basePath: dirname(__DIR__))
         });
         $exceptions->render(function (AuthenticationException $e, $request) {
             if ($request->expectsJson()) {
-                return response()->api(
+                return Response::api(
                     HttpEnum::UNAUTHORIZED,
-                    'Unauthenticated. Please log in to continue.',
+                    message:   'Unauthenticated. Please log in to continue.',
                 );
             }
         });
