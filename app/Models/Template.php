@@ -153,7 +153,7 @@ class Template extends Model implements HasMedia
 
         )
             ->using(MockupTemplate::class)
-            ->withPivot(['id', 'positions', 'colors','model_color'])
+            ->withPivot(['id', 'positions', 'colors','model_color','type'])
             ->withTimestamps();
     }
 

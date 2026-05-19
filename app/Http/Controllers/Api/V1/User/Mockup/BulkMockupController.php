@@ -178,6 +178,7 @@ class BulkMockupController extends Controller
             $syncData[$templateId] = [
                 'colors'    => $mergedPivotColors[$templateId] ?? $colors,
                 'positions' => $request->input('positions'),
+                'type' => 'bulk'
             ];
         }
         $mockup->templates()->sync($syncData);
