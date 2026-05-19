@@ -91,6 +91,7 @@ class TemplateResource extends JsonResource
                     'mockup_id' => $mockup->id,
                     'mockup_name' => $mockup->name,
                     'mockup_model_color' => $mockup->pivot->model_color,
+                    'mockup_template_type' => $mockup->pivot->type,
                     'colors' => $colors,
                     'positions' => $positions,
                 ];
