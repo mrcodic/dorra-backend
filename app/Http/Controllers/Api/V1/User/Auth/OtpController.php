@@ -23,7 +23,7 @@ class OtpController extends Controller
             'email' => [
                 'required',
                 'email',
-                Rule::unique('users', 'email'),
+                Rule::unique('users', 'email')->whereNull('deleted_at'),
                 Rule::unique('social_accounts', 'email'),
             ],
         ]);
