@@ -331,6 +331,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         });
         Route::put('templates/{template}/mockups/{mockup}/positions',[TemplateController::class,'savePositionsAndUploadMockups']);
         Route::put('templates/{template}/mockups/{mockup}/image',[TemplateController::class,'setTemplateImage']);
+        Route::put('templates/{template}/mockups/{mockup}/detach',[TemplateController::class,'detachMockup']);
         Route::controller(MainController::class)->group(function () {
             Route::get('states', 'states')->name('states');
             Route::get('sub-categories', 'subCategories')->name('sub-categories');

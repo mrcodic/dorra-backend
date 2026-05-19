@@ -633,4 +633,19 @@ class TemplateController extends DashboardController
 
         return Response::api();
     }
+
+    public function detachMockup(Template $template, Mockup $mockup)
+    {
+        DB::transaction(function () use ($template, $mockup) {
+            $template->mockups()->detach($mockup);
+            $mockup->media()
+                ->where('collection_name', 'generated_mockups')
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$template->id])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(string)$mockup->category_id])
+                ->cursor()
+                ->each->delete();
+        });
+
+        return Response::api();
+    }
 }
