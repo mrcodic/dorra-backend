@@ -47,14 +47,14 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (Illuminate\Auth\AuthenticationException $e, $request) {
-            if ($request->is('api/v1/*')) {
-                return response()->json(['message' => 'Unauthenticated.'], 401);
-            }
             if ($request->is('api/v1/user/*')) {
                 return Response::api(
                     HttpEnum::UNAUTHORIZED,
                     message:   'Unauthenticated. Please log in to continue.',
                 );
+            }
+            if ($request->is('api/v1/*')) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
             }
             return redirect()->guest(route('login'));
     });
