@@ -221,6 +221,22 @@ class TemplateResource extends JsonResource
                     !empty($pivot->positions) ;
 //                    &&$pivot->colors === $mockup->colors
             }),
+
+            'mockup_template_type' => $this->when(request()->has('mockup_id'), function () {
+                $mockupId = request('mockup_id');
+                if (!$mockupId) {
+                    return '';
+                }
+
+                $mockup = $this->mockups()
+                    ->where('mockups.id', $mockupId)
+                    ->first();
+
+                if (!$mockup) return '';
+
+                $pivot = $mockup->pivot;
+                return $pivot->type;
+            }),
         ];
     }
 }
