@@ -638,12 +638,26 @@ class TemplateController extends DashboardController
     {
         DB::transaction(function () use ($template, $mockup) {
             $template->mockups()->detach($mockup);
+
             $mockup->media()
                 ->where('collection_name', 'generated_mockups')
-                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$template->id])
-                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(string)$mockup->category_id])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $template->id])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(string) $mockup->category_id])
                 ->cursor()
                 ->each->delete();
+            
+            $remainingColors = $mockup->templates()
+                ->get()
+                ->flatMap(fn($t) => $t->pivot->colors ?? [])
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+
+
+            $mockup->update([
+                'colors' => $remainingColors,
+            ]);
         });
 
         return Response::api();
