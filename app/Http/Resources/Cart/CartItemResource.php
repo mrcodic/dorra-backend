@@ -18,7 +18,7 @@ class CartItemResource extends JsonResource
     {
         $item = $this->itemable;
         $cartable = $this->cartable;
-        $cartHasDiscount = $this->cart->discount_amount > 0
+        $cartHasDiscount = $this->cart?->discount_amount > 0
             || $this->cart->items()->where('discount_amount', '>', 0)->exists();
 
         $lastOffer = $cartHasDiscount ? null : $cartable?->lastOffer;
