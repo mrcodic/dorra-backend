@@ -62,7 +62,7 @@ class CartItemResource extends JsonResource
             'discount' => [
                 'id'    => $this->discountCode?->id,
                 'code'  => $this->discountCode?->code,
-                'ratio' => $this->sub_total
+                'ratio' => $this->sub_total > 0
                     ? (
                         ($this->discountCode?->type === TypeEnum::PERCENTAGE
                             ? (intval($this->discountCode?->value * 100) == $this->discountCode?->value * 100
