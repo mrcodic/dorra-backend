@@ -151,25 +151,36 @@ class PaymentController extends Controller
     {
         $this->handleTransaction(function () use ($transaction, $paymentMethod, $paymentStatus, $data) {
             $cart = $transaction->payable?->user?->cart ?? $transaction->payable?->guest?->cart;
+
             if ($cart) {
+                // Increment used count for item-level discount codes
+                $cart->items()
+                    ->whereNotNull('discount_code_id')
+                    ->with('discountCode')
+                    ->get()
+                    ->groupBy('discount_code_id')
+                    ->each(function ($items, $discountCodeId) {
+                        $items->first()->discountCode?->increment('used', $items->count());
+                    });
+
                 $cart->items()->delete();
 
-//                if ($cart->discountCode) {
-                    $cart->discountCode?->increment('used');
-//                }
-                if ($cart->discountCode?->show_for_new_registered_users){
+                // Increment cart-level discount code
+                if ($cart->discountCode) {
+                    $cart->discountCode->increment('used');
+                }
+
+                if ($cart->discountCode?->show_for_new_registered_users) {
                     auth('sanctum')->user()->update(['discount_code_id' => null]);
                 }
 
                 $cart->update([
-                    'price' => 0,
-                    'discount_amount' => 0,
-                    'delivery_amount' => 0,
+                    'price'            => 0,
+                    'discount_amount'  => 0,
+                    'delivery_amount'  => 0,
                     'discount_code_id' => null,
                 ]);
             }
-
-
         });
     }
 

@@ -878,11 +878,19 @@ class OrderService extends BaseService
      */
     protected function clearCartAfterCashOnDelivery($cart): void
     {
-        $cart->items()->delete();
 
-//        if ($cart->discountCode ) {
+        $cart->items()
+            ->whereNotNull('discount_code_id')
+            ->with('discountCode')
+            ->get()
+            ->groupBy('discount_code_id')
+            ->each(function ($items, $discountCodeId) {
+                $items->first()->discountCode?->increment('used', $items->count());
+            });
+        $cart->items()->delete();
+        if ($cart->discountCode ) {
             $cart->discountCode?->increment('used');
-//        }
+        }
         if ($cart->discountCode?->show_for_new_registered_users){
             auth('sanctum')->user()->update(['discount_code_id' => null]);
         }
