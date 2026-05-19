@@ -159,10 +159,13 @@ class RenderMockupJob implements ShouldQueue
                 ->latest()
                 ->first();
 
+            // after
             $this->item->update([
                 'status'      => 'completed',
                 'output_path' => $media ? parse_url($media->getUrl(), PHP_URL_PATH) : null,
             ]);
+
+            $this->bulkJob->increment('completed_count'); // ← add this line
 
             $this->checkCompletion();
 
@@ -182,7 +185,7 @@ class RenderMockupJob implements ShouldQueue
         $this->bulkJob->increment('failed_count');
         $this->checkCompletion();
     }
-
+    
     private function checkCompletion(): void
     {
         DB::transaction(function () {
@@ -192,33 +195,26 @@ class RenderMockupJob implements ShouldQueue
                 return;
             }
 
-            $counts = BulkJobItem::where('bulk_job_id', $job->id)
-                ->selectRaw("
-                COUNT(*) as total,
-                SUM(status = 'completed') as completed,
-                SUM(status = 'failed') as failed,
-                SUM(status IN ('pending', 'processing')) as pending
-            ")
-                ->first();
+            $pending = BulkJobItem::where('bulk_job_id', $job->id)
+                ->whereIn('status', ['pending', 'processing'])
+                ->count();
 
             // Don't mark complete until ALL items are done
-            if ((int) $counts->pending > 0) {
+            if ($pending > 0) {
                 return;
             }
 
-            $completed = (int) $counts->completed;
-            $failed    = (int) $counts->failed;
-            $total     = (int) $counts->total;
+            // Use already-incremented counters from the job row itself
+            $completed = (int) $job->completed_count;
+            $failed    = (int) $job->failed_count;
 
             $job->update([
-                'completed_count' => $completed,
-                'failed_count'    => $failed,
-                'status'          => match(true) {
-                    $failed === 0              => 'completed',
-                    $completed === 0           => 'failed',
-                    default                    => 'completed_with_errors', // some passed, some failed
+                'status' => match(true) {
+                    $failed === 0    => 'completed',
+                    $completed === 0 => 'failed',
+                    default          => 'completed_with_errors',
                 },
-                'completed_at'    => now(),
+                'completed_at' => now(),
             ]);
         });
     }
