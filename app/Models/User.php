@@ -71,6 +71,9 @@ class User extends Authenticatable implements HasMedia
         static::created(function ($user) {
             $user->notificationTypes()->sync(NotificationType::all(['id'])->pluck('id'));
         });
+        static::deleted(function ($user) {
+            $user->tokens()->delete();
+        });
         parent::booted();
     }
 
