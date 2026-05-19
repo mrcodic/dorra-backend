@@ -50,6 +50,12 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->is('api/v1/*')) {
                 return response()->json(['message' => 'Unauthenticated.'], 401);
             }
+            if ($request->is('api/v1/user/*')) {
+                return Response::api(
+                    HttpEnum::UNAUTHORIZED,
+                    message:   'Unauthenticated. Please log in to continue.',
+                );
+            }
             return redirect()->guest(route('login'));
     });
         $exceptions->render(function( ValidationException $e, $request) {
@@ -74,14 +80,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 );
             }
         });
-        $exceptions->render(function (AuthenticationException $e, $request) {
-            if ($request->expectsJson()) {
-                return Response::api(
-                    HttpEnum::UNAUTHORIZED,
-                    message:   'Unauthenticated. Please log in to continue.',
-                );
-            }
-        });
+
         $exceptions->render(function (HttpException $e, $request) {
             if ($e->getStatusCode() === HttpResponse::HTTP_FORBIDDEN && $request->expectsJson()) {
                 return Response::api(
