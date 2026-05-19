@@ -59,6 +59,14 @@ class TemplateResource extends JsonResource
                 ? $this->getFirstMediaUrl('back-templates-preview')
                 : $this->getFirstMediaUrl('back_templates'));
 
+        $mockupId = request('mockup_id');
+        if (!$mockupId) {
+            return [];
+        }
+        $mockup = $this->mockups()
+            ->where('mockups.id', $mockupId)
+            ->first();
+
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
@@ -150,15 +158,16 @@ class TemplateResource extends JsonResource
             'has_cut_margin' => (bool)$this->cut_margin,
             'cut_margin' => $this->cut_margin,
             'approach' => $this->approach,
-            'colors' => $this->when(request()->has('mockup_id'), function () {
-                $mockupId = request('mockup_id');
-                if (!$mockupId) {
+            'mockup_colors' =>$this->when(request()->has('mockup_id'), function () use($mockup){
+                if (!$mockup || !$mockup->pivot) {
                     return [];
                 }
-                $mockup = $this->mockups()
-                    ->where('mockups.id', $mockupId)
-                    ->first();
-
+                $colors = $mockup->colors ?? [];
+                return is_array($colors)
+                    ? $colors
+                    : json_decode($colors ?: '[]', true);
+            }),
+            'colors' => $this->when(request()->has('mockup_id'), function () use($mockup){
                 if (!$mockup || !$mockup->pivot) {
                     return [];
                 }

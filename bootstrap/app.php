@@ -6,6 +6,7 @@ use App\Jobs\SyncFawryOrderStatus;
 use App\Models\Cart;
 
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
@@ -73,7 +74,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 );
             }
         });
-
+        $exceptions->render(function (AuthenticationException $e, $request) {
+            if ($request->expectsJson()) {
+                return response()->api(
+                    HttpEnum::UNAUTHORIZED,
+                    'Unauthenticated. Please log in to continue.',
+                );
+            }
+        });
         $exceptions->render(function (HttpException $e, $request) {
             if ($e->getStatusCode() === HttpResponse::HTTP_FORBIDDEN && $request->expectsJson()) {
                 return Response::api(
