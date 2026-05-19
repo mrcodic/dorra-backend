@@ -165,7 +165,8 @@ class RenderMockupJob implements ShouldQueue
                 'output_path' => $media ? parse_url($media->getUrl(), PHP_URL_PATH) : null,
             ]);
 
-            $this->bulkJob->increment('completed_count'); // ← add this line
+            MockupGenerationJob::where('id', $this->bulkJob->id)
+                ->increment('completed_count'); // ← add this line
 
             $this->checkCompletion();
 
@@ -185,7 +186,7 @@ class RenderMockupJob implements ShouldQueue
         $this->bulkJob->increment('failed_count');
         $this->checkCompletion();
     }
-    
+
     private function checkCompletion(): void
     {
         DB::transaction(function () {
@@ -199,16 +200,15 @@ class RenderMockupJob implements ShouldQueue
                 ->whereIn('status', ['pending', 'processing'])
                 ->count();
 
-            // Don't mark complete until ALL items are done
             if ($pending > 0) {
                 return;
             }
 
-            // Use already-incremented counters from the job row itself
-            $completed = (int) $job->completed_count;
+            $completed = (int) $job->completed_count; // reads already-incremented value
             $failed    = (int) $job->failed_count;
 
             $job->update([
+                // NO completed_count here — don't overwrite it
                 'status' => match(true) {
                     $failed === 0    => 'completed',
                     $completed === 0 => 'failed',
