@@ -59,14 +59,6 @@ class TemplateResource extends JsonResource
                 ? $this->getFirstMediaUrl('back-templates-preview')
                 : $this->getFirstMediaUrl('back_templates'));
 
-        $mockupId = request('mockup_id');
-        if (!$mockupId) {
-            return [];
-        }
-        $mockup = $this->mockups()
-            ->where('mockups.id', $mockupId)
-            ->first();
-
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
@@ -91,7 +83,7 @@ class TemplateResource extends JsonResource
             'tags' => TagResource::collection($this->whenLoaded('tags')),
             'products' => ProductResource::collection($this->whenLoaded('products')),
             'mockups' => $this->whenLoaded('mockups', fn() => $this->mockups->map(function ($mockup) {
-                $colors = $mockup->colors ?? [];
+                $colors = $mockup->pivot->colors ?? [];
                 $positions = is_array($mockup->pivot->positions)
                     ? $mockup->pivot->positions
                     : json_decode($mockup->pivot->positions ?? '[]', true);
@@ -99,7 +91,6 @@ class TemplateResource extends JsonResource
                     'mockup_id' => $mockup->id,
                     'mockup_name' => $mockup->name,
                     'mockup_model_color' => $mockup->pivot->model_color,
-                    'mockup_template_type' => $mockup->pivot->type,
                     'colors' => $colors,
                     'positions' => $positions,
                 ];
@@ -158,16 +149,15 @@ class TemplateResource extends JsonResource
             'has_cut_margin' => (bool)$this->cut_margin,
             'cut_margin' => $this->cut_margin,
             'approach' => $this->approach,
-            'mockup_colors' =>$this->when(request()->has('mockup_id'), function () use($mockup){
-                if (!$mockup || !$mockup->pivot) {
+            'colors' => $this->when(request()->has('mockup_id'), function () {
+                $mockupId = request('mockup_id');
+                if (!$mockupId) {
                     return [];
                 }
-                $colors = $mockup->colors ?? [];
-                return is_array($colors)
-                    ? $colors
-                    : json_decode($colors ?: '[]', true);
-            }),
-            'colors' => $this->when(request()->has('mockup_id'), function () use($mockup){
+                $mockup = $this->mockups()
+                    ->where('mockups.id', $mockupId)
+                    ->first();
+
                 if (!$mockup || !$mockup->pivot) {
                     return [];
                 }
