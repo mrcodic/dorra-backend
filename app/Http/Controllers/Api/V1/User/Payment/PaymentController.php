@@ -154,9 +154,9 @@ class PaymentController extends Controller
             if ($cart) {
                 $cart->items()->delete();
 
-                if ($cart->discountCode) {
-                    $cart->discountCode->increment('used');
-                }
+//                if ($cart->discountCode) {
+                    $cart->discountCode?->increment('used');
+//                }
                 if ($cart->discountCode?->show_for_new_registered_users){
                     auth('sanctum')->user()->update(['discount_code_id' => null]);
                 }
