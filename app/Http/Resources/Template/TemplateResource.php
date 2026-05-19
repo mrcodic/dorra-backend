@@ -83,7 +83,7 @@ class TemplateResource extends JsonResource
             'tags' => TagResource::collection($this->whenLoaded('tags')),
             'products' => ProductResource::collection($this->whenLoaded('products')),
             'mockups' => $this->whenLoaded('mockups', fn() => $this->mockups->map(function ($mockup) {
-                $colors = $mockup->pivot->colors ?? [];
+                $colors = $mockup->colors ?? [];
                 $positions = is_array($mockup->pivot->positions)
                     ? $mockup->pivot->positions
                     : json_decode($mockup->pivot->positions ?? '[]', true);

@@ -391,11 +391,13 @@ class TemplateController extends DashboardController
             $template->mockups()->updateExistingPivot($mockup->id, [
                 'positions' => $request->input('positions'),
                 'colors' => $request->input('colors'),
+                'type' => 'single'
             ]);
         } else {
             $template->mockups()->attach($mockup->id, [
                 'positions' => $request->input('positions'),
                 'colors' => $request->input('colors'),
+                'type' => 'single'
             ]);
         }
 
