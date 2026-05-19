@@ -21,7 +21,9 @@ class CartResource extends JsonResource
 
         $subAfter = round(
             $this->items->sum(function ($item) {
-                $hasOffer = (float)optional($item->cartable?->lastOffer)->getRawOriginal('value') > 0;
+                $cartHasDiscount = $this->cart?->discount_amount > 0
+                    || $this->cart?->items()->where('discount_amount', '>', 0)->exists();
+                $hasOffer = $cartHasDiscount ? null : (float)optional($item->cartable?->lastOffer)->getRawOriginal('value') > 0;
 
                 if ($hasOffer) {
                     return (float)$item->sub_total_after_offer;
