@@ -383,6 +383,7 @@ class MainController extends Controller
                 $query->orWhereHas('products', fn($q) => $applyContainsAnyLocale($q));
 
                 // match category templates tags
+                $query->orWhereHas('templates', fn($q) => $applyPlainSearch($q));
                 $query->orWhereHas('templates.tags', fn($q) => $applyPlainSearch($q));
 
                 // match category templates industries
