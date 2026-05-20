@@ -87,7 +87,8 @@ class JobTicketService extends BaseService
                         ?: $itemable->getFirstMediaUrl('none-mockup-designs'),
                     $isTemplate =>
                     $orderItem->getFirstMediaUrl('order_item_mockups')
-                        ?: $itemable->getFirstMediaUrl('templates-preview'),
+                        ?: $itemable->getFirstMediaUrl('templates-preview')
+                        ?: $orderItem->itemable?->getFirstMediaUrl('templates'),
 
                     default => $orderItem?->orderable?->getMainImageUrl(),
                 };
