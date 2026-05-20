@@ -121,6 +121,17 @@ class ProductService extends BaseService
                     $q->whereIn('templates.id', is_array($templates) ? $templates : [$templates]);
                 });
             })
+            ->when(request()->filled('template_id'), function ($query) {
+                $query->where(function ($query) {
+                    $query->whereHas('templates', function ($query) {
+                        $query->where('product_template.template_id', request('template_id'));
+                    })->orWhereHas('products.templates', function ($query) {
+                        $query->where('product_template.template_id', request('template_id'));
+                    });;
+                });
+
+
+            })
             ->allowedFilters([
                 AllowedFilter::partial('category.id'),
                 AllowedFilter::custom('sub_categories', new SubCategoryFilter()),
