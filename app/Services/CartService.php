@@ -324,8 +324,11 @@ class CartService extends BaseService
     public function applyDiscount($request)
     {
         $cart = $this->resolveUserCart();
+
         if (!$cart) {
-            throw ValidationException::withMessages(['cart' => ['Cart not found for this user.']]);
+            throw ValidationException::withMessages([
+                'cart' => [__('discount.cart_not_found')],
+            ]);
         }
 
         $items = $cart->items;
@@ -336,7 +339,7 @@ class CartService extends BaseService
 
         if ($hasOffer) {
             throw ValidationException::withMessages([
-                'offer' => ["You can't apply discount when at least one item is offered."],
+                'offer' => [__('discount.offer_exists')],
             ]);
         }
 
@@ -348,26 +351,28 @@ class CartService extends BaseService
             ->whereCode($request->code)
             ->firstOrFail();
 
-
         if ($cart->discount_code_id && $cart->discount_code_id !== $discountCode->id) {
             throw ValidationException::withMessages([
-                'code' => ['A discount code is already applied to your cart. Remove it first.'],
+                'code' => [__('discount.cart_discount_exists')],
             ]);
         }
 
-
-        $itemsWithDiscount = $items->filter(fn($item) => $item->discount_code_id !== null);
+        $itemsWithDiscount = $items->filter(
+            fn($item) => $item->discount_code_id !== null
+        );
 
         if ($discountCode->scope === ScopeEnum::GENERAL && $itemsWithDiscount->isNotEmpty()) {
             throw ValidationException::withMessages([
-                'code' => ['An item-level discount is already applied. Remove it first before applying a cart-wide discount.'],
+                'code' => [__('discount.item_discount_exists')],
             ]);
         }
 
-
-        if (in_array($discountCode->scope, [ScopeEnum::PRODUCT, ScopeEnum::CATEGORY]) && $cart->discount_code_id) {
+        if (
+            in_array($discountCode->scope, [ScopeEnum::PRODUCT, ScopeEnum::CATEGORY]) &&
+            $cart->discount_code_id
+        ) {
             throw ValidationException::withMessages([
-                'code' => ['A cart-wide discount is already applied. Remove it first before applying an item discount.'],
+                'code' => [__('discount.cart_wide_discount_exists')],
             ]);
         }
 
@@ -377,14 +382,11 @@ class CartService extends BaseService
 
         if ($conflictingItem) {
             throw ValidationException::withMessages([
-                'code' => ['Another discount code is already applied to one or more items. Remove it first.'],
+                'code' => [__('discount.another_item_discount_exists')],
             ]);
         }
 
-
         if ($discountCode->scope === ScopeEnum::GENERAL) {
-
-
             $items->each(fn($item) => $item->update([
                 'discount_code_id' => null,
                 'discount_amount'  => 0,
@@ -394,9 +396,7 @@ class CartService extends BaseService
                 'discount_code_id' => $discountCode->id,
                 'discount_amount'  => getDiscountAmount($discountCode, $cart->price),
             ]);
-
         } elseif ($discountCode->scope === ScopeEnum::PRODUCT) {
-
             $discountProductIds = $discountCode->products()->pluck('products.id');
 
             $matchingItems = $items->filter(
@@ -406,11 +406,15 @@ class CartService extends BaseService
 
             if ($matchingItems->isEmpty()) {
                 throw ValidationException::withMessages([
-                    'code' => ['No items in your cart match this discount code.'],
+                    'code' => [__('discount.no_matching_products')],
                 ]);
             }
 
-            $cart->update(['discount_code_id' => null, 'discount_amount' => 0]);
+            $cart->update([
+                'discount_code_id' => null,
+                'discount_amount'  => 0,
+            ]);
+
             $items->each(fn($item) => $item->update([
                 'discount_code_id' => null,
                 'discount_amount'  => 0,
@@ -420,9 +424,7 @@ class CartService extends BaseService
                 'discount_code_id' => $discountCode->id,
                 'discount_amount'  => getDiscountAmount($discountCode, $item->sub_total),
             ]));
-
         } elseif ($discountCode->scope === ScopeEnum::CATEGORY) {
-
             $discountCategoryIds = $discountCode->categories()->pluck('categories.id');
 
             $matchingItems = $items->filter(
@@ -432,12 +434,15 @@ class CartService extends BaseService
 
             if ($matchingItems->isEmpty()) {
                 throw ValidationException::withMessages([
-                    'code' => ['No items in your cart belong to this discount\'s category.'],
+                    'code' => [__('discount.no_matching_categories')],
                 ]);
             }
 
+            $cart->update([
+                'discount_code_id' => null,
+                'discount_amount'  => 0,
+            ]);
 
-            $cart->update(['discount_code_id' => null, 'discount_amount' => 0]);
             $items->each(fn($item) => $item->update([
                 'discount_code_id' => null,
                 'discount_amount'  => 0,
@@ -450,7 +455,6 @@ class CartService extends BaseService
         }
 
         $cart->refresh();
-
 
         $totalDiscountValue = $discountCode->scope === ScopeEnum::GENERAL
             ? (float) $cart->discount_amount
