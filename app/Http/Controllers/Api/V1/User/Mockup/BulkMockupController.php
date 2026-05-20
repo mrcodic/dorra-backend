@@ -73,9 +73,21 @@ class BulkMockupController extends Controller
         $alreadyAttachedTemplateIds = array_intersect($incomingIds, $previouslyAttachedIds);
 
         // -----------------------------------------------------------------------
-        // 1. Delete ALL generated media for removed (deselected) templates
+        // 1. Delete ALL generated media for removed (deselected) BULK templates only
+        //    Skip 'single' type templates — they are managed separately
         // -----------------------------------------------------------------------
+        $singleTemplateIds = $mockup->templates()
+            ->wherePivot('type', 'single')
+            ->pluck('templates.id')
+            ->map(fn($id) => (string) $id)
+            ->toArray();
+
         foreach ($removedTemplateIds as $removedTemplateId) {
+            // Skip single templates — they're managed separately
+            if (in_array((string) $removedTemplateId, $singleTemplateIds)) {
+                continue;
+            }
+
             $mockup->media()
                 ->where('collection_name', 'generated_mockups')
                 ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $removedTemplateId])
@@ -169,16 +181,35 @@ class BulkMockupController extends Controller
         }
 
         // -----------------------------------------------------------------------
-        // 4. Sync pivot — use incoming color strings per template
+        // 4. Sync pivot — preserve 'single' type templates, replace 'bulk' ones
         // -----------------------------------------------------------------------
+
+        // Load existing 'single' templates to keep them untouched
+        $singleTemplates = $mockup->templates()
+            ->wherePivot('type', 'single')
+            ->get()
+            ->keyBy('id');
+
+        // Build sync data starting with existing single templates
         $syncData = [];
+
+        foreach ($singleTemplates as $templateId => $template) {
+            $syncData[(string) $templateId] = [
+                'colors'    => $template->pivot->colors,
+                'positions' => $template->pivot->positions,
+                'type'      => 'single',
+            ];
+        }
+
+        // Overlay bulk templates (incoming)
         foreach ($templateIds as $templateId) {
-            $syncData[$templateId] = [
+            $syncData[(string) $templateId] = [
                 'colors'    => $mergedPivotColors[$templateId] ?? $colors,
                 'positions' => $request->input('positions'),
                 'type'      => 'bulk',
             ];
         }
+
         $mockup->templates()->sync($syncData);
         $mockup->update(['colors' => $colors]);
 
