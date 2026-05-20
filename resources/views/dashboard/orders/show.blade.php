@@ -147,7 +147,8 @@
 
                            $isTemplate =>
                                $orderItem->getFirstMediaUrl('order_item_mockups')
-                               ?: $orderItem->itemable?->getFirstMediaUrl('templates-preview'),
+                               ?: $orderItem->itemable?->getFirstMediaUrl('templates-preview')
+                                ?: $orderItem->itemable?->getFirstMediaUrl('templates'),
 
                            default =>
                                $orderItem->itemable?->getFirstMediaUrl(
