@@ -367,9 +367,6 @@ class MainController extends Controller
                 'templates.industries' => function ($query) use ($applyContainsAnyLocale) {
                     $applyContainsAnyLocale($query);
                 },
-                'templates' => function ($query) use ($applyContainsAnyLocale) {
-                    $applyContainsAnyLocale($query);
-                },
                 'products.templates.industries' => function ($query) use ($applyContainsAnyLocale) {
                     $applyContainsAnyLocale($query);
                 },
