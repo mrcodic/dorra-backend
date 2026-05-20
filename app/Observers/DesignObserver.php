@@ -59,7 +59,49 @@ class DesignObserver
         if ($design->wasChanged('mockup_color')){
             getAuthOrGuest()->cartItems()->whereMorphedTo('itemable',$design)->update(['color' => $design->mockup_color]);
         }
+        if ($design->wasChanged('product_price_id')) {
+            $cartItems = getAuthOrGuest()
+                ->cartItems()
+                ->whereMorphedTo('itemable', $design)
+                ->get();
 
+            foreach ($cartItems as $cartItem) {
+                $cartItem->update([
+                    'product_price_id' => $design->product_price_id,
+                ]);
+            }
+        }
+
+        if ($design->wasChanged('design_data') === false && $design->specifications()->exists()) {
+            $this->syncSpecsToCartItems($design);
+        }
+    }
+    private function syncSpecsToCartItems(Design $design): void
+    {
+        $cartItems = getAuthOrGuest()
+            ->cartItems()
+            ->whereMorphedTo('itemable', $design)
+            ->with('specs')
+            ->get();
+
+        if ($cartItems->isEmpty()) {
+            return;
+        }
+
+        // Get current design specs
+        $designSpecs = $design->specifications()
+            ->withPivot('option_id')
+            ->get()
+            ->map(fn($spec) => [
+                'product_specification_id' => $spec->id,
+                'spec_option_id'           => $spec->pivot->option_id,
+            ]);
+
+        foreach ($cartItems as $cartItem) {
+
+            $cartItem->specs()->delete();
+            $cartItem->specs()->createMany($designSpecs->toArray());
+        }
     }
     public function deleting(Design $design): void
     {
