@@ -67,13 +67,15 @@ class User extends Authenticatable implements HasMedia
         static::creating(function ($user) {
             $user->last_login_ip = request()->ip();
             $user->last_login_at = now();
-        });
-        static::created(function ($user) {
-            $user->notificationTypes()->sync(NotificationType::all(['id'])->pluck('id'));
             $user->discount_code_id = DiscountCode::query()
                 ->where('show_for_new_registered_users', true)
                 ->latest()
                 ->first()?->id;
+        });
+        static::created(function ($user) {
+            $user->notificationTypes()->sync(NotificationType::all(['id'])->pluck('id'));
+
+
         });
         static::deleted(function ($user) {
             $user->tokens()->delete();
