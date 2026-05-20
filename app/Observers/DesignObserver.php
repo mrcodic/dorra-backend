@@ -68,6 +68,7 @@ class DesignObserver
             foreach ($cartItems as $cartItem) {
                 $cartItem->update([
                     'product_price_id' => $design->product_price_id,
+                    'quantity' => $design->productPrice?->quantity
                 ]);
             }
         }
