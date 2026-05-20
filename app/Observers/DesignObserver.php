@@ -59,23 +59,23 @@ class DesignObserver
         if ($design->wasChanged('mockup_color')){
             getAuthOrGuest()->cartItems()->whereMorphedTo('itemable',$design)->update(['color' => $design->mockup_color]);
         }
-        if ($design->wasChanged('product_price_id')) {
-            $cartItems = getAuthOrGuest()
-                ->cartItems()
-                ->whereMorphedTo('itemable', $design)
-                ->get();
-
-            foreach ($cartItems as $cartItem) {
-                $cartItem->update([
-                    'product_price_id' => $design->product_price_id,
-                    'quantity' => $design->productPrice?->quantity
-                ]);
-            }
-        }
-
-        if ($design->wasChanged('design_data') === false && $design->specifications()->exists()) {
-            $this->syncSpecsToCartItems($design);
-        }
+//        if ($design->wasChanged('product_price_id')) {
+//            $cartItems = getAuthOrGuest()
+//                ->cartItems()
+//                ->whereMorphedTo('itemable', $design)
+//                ->get();
+//
+//            foreach ($cartItems as $cartItem) {
+//                $cartItem->update([
+//                    'product_price_id' => $design->product_price_id,
+//                    'quantity' => $design->productPrice?->quantity
+//                ]);
+//            }
+//        }
+//
+//        if ($design->wasChanged('design_data') === false && $design->specifications()->exists()) {
+//            $this->syncSpecsToCartItems($design);
+//        }
     }
     private function syncSpecsToCartItems(Design $design): void
     {
