@@ -156,18 +156,28 @@ class JobTicketService extends BaseService
 
 
             $currentIndex = 0;
+            $justInitialized = false;  // ← track fresh init
+
             if ($ticket->current_status_id) {
-                $found = $statuses->search(fn ($s) => (int) $s->id === (int) $ticket->current_status_id);
+                $found = $statuses->search(fn($s) => (int) $s->id === (int) $ticket->current_status_id);
                 if ($found !== false) {
                     $currentIndex = (int) $found;
                 } else {
+                    // status ID exists but not in this station's custom list → reset
                     $ticket->current_status_id = $statuses->first()->id;
                     $ticket->save();
+                    $justInitialized = true;  // ← treat as fresh
+                    $currentIndex = -1;       // ← so get(0) = first status
                 }
             } else {
+                // brand new ticket, no status yet
                 $ticket->current_status_id = $statuses->first()->id;
                 $ticket->save();
+                $justInitialized = true;  // ← treat as fresh
+                $currentIndex = -1;       // ← so get(0) = first status
             }
+
+            $nextStatusInSame = $statuses->get($currentIndex + 1);
 
             $nextStatusInSame = $statuses->get($currentIndex + 1);
 
