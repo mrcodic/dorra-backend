@@ -378,22 +378,22 @@ class MainController extends Controller
             ->where(function ($query) use ($applyContainsAnyLocale, $applyPlainSearch) {
                 // match category name
                 $applyContainsAnyLocale($query);
+                $query->orWhereHas('templates', fn($q) => $applyContainsAnyLocale($q));
 
                 // match product name
                 $query->orWhereHas('products', fn($q) => $applyContainsAnyLocale($q));
 
                 // match category templates tags
-                $query->orWhereHas('templates', fn($q) => $applyPlainSearch($q));
-                $query->orWhereHas('templates.tags', fn($q) => $applyPlainSearch($q));
+                $query->orWhereHas('templates.tags', fn($q) => $applyContainsAnyLocale($q));
 
                 // match category templates industries
-                $query->orWhereHas('templates.industries', fn($q) => $applyPlainSearch($q));
+                $query->orWhereHas('templates.industries', fn($q) => $applyContainsAnyLocale($q));
 
                 // match product templates tags
-                $query->orWhereHas('products.templates.tags', fn($q) => $applyPlainSearch($q));
+                $query->orWhereHas('products.templates.tags', fn($q) => $applyContainsAnyLocale($q));
 
                 // match product templates industries
-                $query->orWhereHas('products.templates.industries', fn($q) => $applyPlainSearch($q));
+                $query->orWhereHas('products.templates.industries', fn($q) => $applyContainsAnyLocale($q));
             })
             ->when($rates, function ($q) use ($rates) {
                 $placeholders = implode(',', array_fill(0, count($rates), '?'));
