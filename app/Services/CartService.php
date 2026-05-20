@@ -533,7 +533,7 @@ class CartService extends BaseService
     public function priceDetails($cartItem)
     {
         return $cartItem?->load([
-            'itemable:id', 'itemable.media', 'product',
+            'itemable', 'itemable.media', 'product',
             'cartable' => function (MorphTo $cartable) {
                 $cartable->constrain([
                     Product::class => fn($q) => $q->withLastOfferId()->with('lastOffer'),
