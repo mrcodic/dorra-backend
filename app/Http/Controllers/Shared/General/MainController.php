@@ -322,16 +322,15 @@ class MainController extends Controller
     {
         $term  = trim((string)($request->search ?? ''));
         $rates = $request->rates;
-        $take  = min((int)($request->take ?? 20), 100); // ← hard cap, never trust client
+        $take  = min((int)($request->take ?? 20), 50);
 
         $locales = config('app.locales', []);
         $terms = collect(preg_split('/[\s,;]+/u', $term))
             ->map(fn($t) => mb_strtolower($t))
-            ->filter(fn($t) => hasMeaningfulSearch($t)) // ← filter here, not inside loop
+            ->filter(fn($t) => hasMeaningfulSearch($t))
             ->unique()
             ->values();
 
-        // Early return — no meaningful search terms
         if ($terms->isEmpty()) {
             return Response::api(data: []);
         }
@@ -340,43 +339,61 @@ class MainController extends Controller
             fn($loc) => "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$loc}\"')))"
         );
 
+        // For JSON translatable columns (categories, products)
         $applyContainsAnyLocale = function ($q) use ($terms, $nameExprs) {
             $q->where(function ($qq) use ($terms, $nameExprs) {
                 foreach ($nameExprs as $expr) {
                     foreach ($terms as $w) {
-                        $qq->orWhereRaw("$expr LIKE ?", ['%' . $w . '%']); // ← clean, no 1=0
+                        $qq->orWhereRaw("$expr LIKE ?", ['%' . $w . '%']);
                     }
                 }
             });
         };
 
+        // For plain string columns (tags, industries)
+        $applyPlainSearch = function ($q) use ($terms) {
+            $q->where(function ($qq) use ($terms) {
+                foreach ($terms as $w) {
+                    $qq->orWhere('name', 'LIKE', '%' . $w . '%');
+                }
+            });
+        };
+
         $categories = $this->categoryRepository->query()
+            // -------------------------------------------------------
+            // Only load what the UI renders — NO tags/industries here
+            // Filtering via whereHas below handles the search logic
+            // -------------------------------------------------------
             ->with([
-                'products' => function ($query) use ($request) {
-                    $query->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
+                'media',
+                'products' => function ($q) use ($request) {
+                    $q->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
+                    $q->limit(10);
                 },
                 'products.media',
-                'media',
-                'templates.tags' => function ($query) use ($applyContainsAnyLocale) {
-                    $applyContainsAnyLocale($query);
-                },
-                'products.templates.tags' => function ($query) use ($applyContainsAnyLocale) {
-                    $applyContainsAnyLocale($query);
-                },
-                'templates.industries' => function ($query) use ($applyContainsAnyLocale) {
-                    $applyContainsAnyLocale($query);
-                },
-                'products.templates.industries' => function ($query) use ($applyContainsAnyLocale) {
-                    $applyContainsAnyLocale($query);
-                },
             ])
-            ->where(function ($query) use ($applyContainsAnyLocale) {
+            // -------------------------------------------------------
+            // SEARCH FILTER — pure SQL, zero memory cost
+            // -------------------------------------------------------
+            ->where(function ($query) use ($applyContainsAnyLocale, $applyPlainSearch) {
+                // match category name
                 $applyContainsAnyLocale($query);
-                $query->orWhereHas('products', function ($q) use ($applyContainsAnyLocale) {
-                    $applyContainsAnyLocale($q);
-                });
+
+                // match product name
+                $query->orWhereHas('products', fn($q) => $applyContainsAnyLocale($q));
+
+                // match category templates tags
+                $query->orWhereHas('templates.tags', fn($q) => $applyPlainSearch($q));
+
+                // match category templates industries
+                $query->orWhereHas('templates.industries', fn($q) => $applyPlainSearch($q));
+
+                // match product templates tags
+                $query->orWhereHas('products.templates.tags', fn($q) => $applyPlainSearch($q));
+
+                // match product templates industries
+                $query->orWhereHas('products.templates.industries', fn($q) => $applyPlainSearch($q));
             })
-            ->take($take) // ← use capped value, not raw request
             ->when($rates, function ($q) use ($rates) {
                 $placeholders = implode(',', array_fill(0, count($rates), '?'));
                 $q->where(function ($qq) use ($rates, $placeholders) {
@@ -388,6 +405,7 @@ class MainController extends Controller
                         });
                 });
             })
+            ->take($take)
             ->get();
 
         return Response::api(data: CategoryResource::collection($categories));
