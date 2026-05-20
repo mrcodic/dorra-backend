@@ -320,32 +320,31 @@ class MainController extends Controller
 
     public function publicSearch(Request $request)
     {
-        $term = trim((string)($request->search ?? ''));
+        $term  = trim((string)($request->search ?? ''));
         $rates = $request->rates;
+        $take  = min((int)($request->take ?? 20), 100); // ← hard cap, never trust client
 
         $locales = config('app.locales', []);
         $terms = collect(preg_split('/[\s,;]+/u', $term))
             ->map(fn($t) => mb_strtolower($t))
-            ->filter()
+            ->filter(fn($t) => hasMeaningfulSearch($t)) // ← filter here, not inside loop
             ->unique()
             ->values();
 
+        // Early return — no meaningful search terms
+        if ($terms->isEmpty()) {
+            return Response::api(data: []);
+        }
 
         $nameExprs = collect($locales)->map(
             fn($loc) => "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$loc}\"')))"
         );
 
-
         $applyContainsAnyLocale = function ($q) use ($terms, $nameExprs) {
-            if ($terms->isEmpty()) return;
             $q->where(function ($qq) use ($terms, $nameExprs) {
                 foreach ($nameExprs as $expr) {
                     foreach ($terms as $w) {
-                        if (hasMeaningfulSearch($w)) {
-                            $qq->orWhereRaw("$expr LIKE ?", ['%' . $w . '%']);
-                        } else {
-                            $qq->whereRaw('1 = 0');
-                        }
+                        $qq->orWhereRaw("$expr LIKE ?", ['%' . $w . '%']); // ← clean, no 1=0
                     }
                 }
             });
@@ -370,7 +369,6 @@ class MainController extends Controller
                 'products.templates.industries' => function ($query) use ($applyContainsAnyLocale) {
                     $applyContainsAnyLocale($query);
                 },
-
             ])
             ->where(function ($query) use ($applyContainsAnyLocale) {
                 $applyContainsAnyLocale($query);
@@ -378,7 +376,7 @@ class MainController extends Controller
                     $applyContainsAnyLocale($q);
                 });
             })
-            ->when($request->take, fn($q, $take) => $q->take($take))
+            ->take($take) // ← use capped value, not raw request
             ->when($rates, function ($q) use ($rates) {
                 $placeholders = implode(',', array_fill(0, count($rates), '?'));
                 $q->where(function ($qq) use ($rates, $placeholders) {
