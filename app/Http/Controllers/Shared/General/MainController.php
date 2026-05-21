@@ -416,8 +416,13 @@ class MainController extends Controller
                     $q->limit($limit);
                 },
 
-                'products.templates.tags',
-                'products.templates.industries',
+                'products.templates.tags' => function ($q) use ($applyNameSearch) {
+                    $applyNameSearch($q, 'tags');
+                },
+
+                'products.templates.industries' => function ($q) use ($applyNameSearch) {
+                    $applyNameSearch($q, 'industries');
+                },
             ])
             ->where(function ($query) use ($applyNameSearch, $applyTemplateSearch, $applyProductSearch) {
                 // category name
