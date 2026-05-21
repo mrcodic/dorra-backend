@@ -402,11 +402,6 @@ class MainController extends Controller
                 // category name
                 $applyJsonSearch($query, 'categories', 'name');
 
-                // template name directly under category
-                $query->orWhereHas('templates', function ($q) use ($applyJsonSearch) {
-                    $applyJsonSearch($q, 'templates', 'name');
-                });
-
                 // product name
                 $query->orWhereHas('products', function ($q) use ($applyJsonSearch) {
                     $applyJsonSearch($q, 'products', 'name');
@@ -420,11 +415,6 @@ class MainController extends Controller
                 // category templates industries
                 $query->orWhereHas('templates.industries', function ($q) use ($applyJsonSearch) {
                     $applyJsonSearch($q, 'industries', 'name');
-                });
-
-                // product templates name
-                $query->orWhereHas('products.templates', function ($q) use ($applyJsonSearch) {
-                    $applyJsonSearch($q, 'templates', 'name');
                 });
 
                 // product templates tags
