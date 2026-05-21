@@ -332,12 +332,6 @@ class MainController extends Controller
             ->unique()
             ->values();
 
-// Always include the full trimmed phrase so "scarf 1" is also searched as-is
-        $fullTerm = mb_strtolower($term);
-        if (!$terms->contains($fullTerm) && hasMeaningfulSearch($fullTerm)) {
-            $terms->push($fullTerm);
-        }
-
         if ($terms->isEmpty()) {
             return Response::api(data: []);
         }
@@ -365,10 +359,18 @@ class MainController extends Controller
         $categories = $this->categoryRepository->query()
             ->with([
                 'media',
-                'products'       => function ($q) use ($request) {
+
+                'products' => function ($q) use ($request, $applyJsonSearch) {
+                    $q->where(function ($qq) use ($applyJsonSearch) {
+                        $applyJsonSearch($qq, 'products', 'name');
+                        $qq->orWhereHas('templates', fn($t) => $applyJsonSearch($t, 'templates', 'name'));
+                        $qq->orWhereHas('templates.tags', fn($t) => $applyJsonSearch($t, 'tags', 'name'));
+                        $qq->orWhereHas('templates.industries', fn($t) => $applyJsonSearch($t, 'industries', 'name'));
+                    });
                     $q->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
                     $q->limit(3);
                 },
+
                 'products.media',
 
                 'products.templates' => function ($q) use ($applyJsonSearch) {
@@ -387,34 +389,20 @@ class MainController extends Controller
                     })->limit(3);
                 },
             ])
-            ->where(function ($query) use ($applyJsonSearch, $applyPlainSearch) {
+            ->where(function ($query) use ($applyJsonSearch) {
                 // category name
                 $applyJsonSearch($query, 'categories', 'name');
 
-                // product name
-                $query->orWhereHas('products', function ($q) use ($applyJsonSearch) {
-                    $applyJsonSearch($q, 'products', 'name');
-                });
+                // category templates
+                $query->orWhereHas('templates', fn($q) => $applyJsonSearch($q, 'templates', 'name'));
+                $query->orWhereHas('templates.tags', fn($q) => $applyJsonSearch($q, 'tags', 'name'));
+                $query->orWhereHas('templates.industries', fn($q) => $applyJsonSearch($q, 'industries', 'name'));
 
-                // category templates tags
-//                $query->orWhereHas('templates.tags', function ($q) use ($applyJsonSearch) {
-//                    $applyJsonSearch($q, 'tags', 'name');
-//                });
-//
-//                // category templates industries
-//                $query->orWhereHas('templates.industries', function ($q) use ($applyJsonSearch) {
-//                    $applyJsonSearch($q, 'industries', 'name');
-//                });
-//
-//                // product templates tags
-//                $query->orWhereHas('products.templates.tags', function ($q) use ($applyPlainSearch) {
-//                    $applyPlainSearch($q, 'tags', 'name');
-//                });
-//
-//                // product templates industries
-//                $query->orWhereHas('products.templates.industries', function ($q) use ($applyJsonSearch) {
-//                    $applyJsonSearch($q, 'industries', 'name');
-//                });
+                // products
+                $query->orWhereHas('products', fn($q) => $applyJsonSearch($q, 'products', 'name'));
+                $query->orWhereHas('products.templates', fn($q) => $applyJsonSearch($q, 'templates', 'name'));
+                $query->orWhereHas('products.templates.tags', fn($q) => $applyJsonSearch($q, 'tags', 'name'));
+                $query->orWhereHas('products.templates.industries', fn($q) => $applyJsonSearch($q, 'industries', 'name'));
             })
             ->when($rates, function ($q) use ($rates) {
                 $rates = is_array($rates) ? $rates : [$rates];
