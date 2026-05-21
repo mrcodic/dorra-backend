@@ -386,16 +386,16 @@ class MainController extends Controller
                 'products.templates' => function ($q) use ($applyJsonSearch, $applyPlainSearch) {
                     $q->where(function ($qq) use ($applyJsonSearch, $applyPlainSearch) {
                         $applyJsonSearch($qq, 'templates', 'name');
-                        $qq->orWhereHas('tags', fn($t) => $applyPlainSearch($t, 'tags', 'name'));
-                        $qq->orWhereHas('industries', fn($i) => $applyPlainSearch($i, 'industries', 'name'));
+                        $qq->orWhereHas('tags', fn($t) => $applyJsonSearch($t, 'tags', 'name'));
+                        $qq->orWhereHas('industries', fn($i) => $applyJsonSearch($i, 'industries', 'name'));
                     })->limit(3);
                 },
 
                 'templates' => function ($q) use ($applyJsonSearch, $applyPlainSearch) {
                     $q->where(function ($qq) use ($applyJsonSearch, $applyPlainSearch) {
                         $applyJsonSearch($qq, 'templates', 'name');
-                        $qq->orWhereHas('tags', fn($t) => $applyPlainSearch($t, 'tags', 'name'));
-                        $qq->orWhereHas('industries', fn($i) => $applyPlainSearch($i, 'industries', 'name'));
+                        $qq->orWhereHas('tags', fn($t) => $applyJsonSearch($t, 'tags', 'name'));
+                        $qq->orWhereHas('industries', fn($i) => $applyJsonSearch($i, 'industries', 'name'));
                     })->limit(3);
                 },
             ])
