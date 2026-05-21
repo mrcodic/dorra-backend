@@ -78,6 +78,7 @@ class CartService extends BaseService
                             'option' => $specification->pivot->option_id,
                         ];
                     })->toArray();
+                    $request->quantity =  $design?->quantity;
                 }
                 $priceDetails = $this->calculatePriceDetails($validatedData, $product, $design);
 

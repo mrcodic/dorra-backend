@@ -124,6 +124,8 @@ class  StoreDesignRequest extends BaseRequest
                 }),
                 'exists:product_prices,id',
             ],
+            //            'quantity' => ['required_without:product_price_id', 'integer', 'min:1'],
+            'quantity' => ['sometimes', 'integer', 'min:1'],
             "specs" => ["sometimes", "array"],
             "specs.*.id" => ["sometimes", "exists:product_specifications,id"],
             "specs.*.option" => ["sometimes", "exists:product_specification_options,id"],
