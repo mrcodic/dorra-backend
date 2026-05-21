@@ -105,6 +105,7 @@ class StoreCartItemRequest extends BaseRequest
                 }),
                 'exists:product_prices,id',
             ],
+            'quantity' => ['sometimes', 'integer', 'min:1'],
             'specs' => [
                 Rule::requiredIf(function () use($hasSpecs,$type){
                     return $hasSpecs && $type == TypeEnum::PRINT->value;

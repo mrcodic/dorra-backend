@@ -6,6 +6,7 @@ use App\Enums\Template\StatusEnum;
 use App\Http\Resources\Product\ProductPriceResource;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\Product\ProductSpecificationResource;
+use App\Http\Resources\Template\TemplateResource;
 use App\Models\Industry;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -20,8 +21,8 @@ class CategoryResource extends JsonResource
     public function toArray(Request $request): array
     {
         $lastOffer = $this?->lastOffer;
-        $sub  = (float) $this->getAttribute('base_price');
-        $val  = (float) ($lastOffer?->getRawOriginal('value') ?? 0);
+        $sub = (float)$this->getAttribute('base_price');
+        $val = (float)($lastOffer?->getRawOriginal('value') ?? 0);
         $after = $lastOffer ? round($sub * (1 - ($val / 100)), 2) : null;
         return [
             'id' => $this->when(isset($this->id), $this->id),
@@ -114,17 +115,17 @@ class CategoryResource extends JsonResource
 
                 return IndustryResource::collection($subs);
             }),
-
+            'templates' => TemplateResource::collection($this->whenLoaded('templates')),
             'is_has_category' => $this->is_has_category,
             'show_add_cart_btn' => $this->show_add_cart_btn,
             'show_customize_design_btn' => $this->show_customize_design_btn,
             'type' => 'category',
             'rating' => $this->is_has_category ? $this->products_rating : $this->rating,
-            'reviews_count' =>$this->is_has_category ? $this->products_reviews_count : $this->reviews_count ,
+            'reviews_count' => $this->is_has_category ? $this->products_reviews_count : $this->reviews_count,
 
             'colors' => $this->colors,
-            'has_mockup' => (boolean) $this->has_mockup,
-            'has_orientation' => (boolean) $this->has_orientation,
+            'has_mockup' => (boolean)$this->has_mockup,
+            'has_orientation' => (boolean)$this->has_orientation,
         ];
     }
 }

@@ -375,6 +375,8 @@ class MainController extends Controller
                     $q->limit(10);
                 },
                 'products.media',
+                'products.templates',
+                'templates',
             ])
             ->where(function ($query) use ($applyJsonSearch, $applyPlainSearch) {
                 // category name

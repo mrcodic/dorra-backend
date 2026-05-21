@@ -9,6 +9,7 @@ use App\Http\Resources\IndustryResource;
 use App\Http\Resources\MediaResource;
 use App\Http\Resources\OfferResource;
 use App\Http\Resources\TagResource;
+use App\Http\Resources\Template\TemplateResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -50,6 +51,7 @@ class ProductResource extends JsonResource
             'all_product_images' => $this->whenLoaded('media', function () {
                 return MediaResource::collection($this->getAllProductImages());
             }),
+            'templates' => TemplateResource::collection($this->whenLoaded('templates')),
 
             'template_tags' => $this->whenLoaded('templates', function () {
                 $this->templates->loadMissing('tags');
