@@ -509,7 +509,6 @@ class TemplateController extends DashboardController
 
         $currentProductIds = $mockup->products()
             ->pluck('products.id')
-            ->map(fn($id) => $id)
             ->values();
 
         $previousMockupIds = $template->mockups()
@@ -518,16 +517,17 @@ class TemplateController extends DashboardController
             ->when(
                 $currentProductIds->isNotEmpty(),
                 function ($query) use ($currentProductIds) {
+                    // Must have ALL the same products (exact match, not just any)
                     $query->whereHas('products', function ($productQuery) use ($currentProductIds) {
                         $productQuery->whereIn('products.id', $currentProductIds);
-                    });
+                    }, '=', $currentProductIds->count());
                 },
                 function ($query) {
-                    $query->whereRaw('1 = 0');
+                    // Current mockup has no products → only match mockups with no products either
+                    $query->whereDoesntHave('products');
                 }
             )
             ->pluck('mockups.id')
-            ->map(fn($id) => $id)
             ->values();
 
 
@@ -564,13 +564,14 @@ class TemplateController extends DashboardController
             }
 
             // 2. Set previous mockups model_color = null
+            //    (only those with same category_id + same product_ids)
             if ($previousMockupIds->isNotEmpty()) {
                 DB::table('mockup_template')
                     ->where('template_id', $template->id)
                     ->whereIn('mockup_id', $previousMockupIds)
                     ->update([
                         'model_color' => null,
-                        'updated_at' => now(),
+                        'updated_at'  => now(),
                     ]);
             }
 
@@ -582,7 +583,8 @@ class TemplateController extends DashboardController
                     $media->save();
                 });
 
-            // 4. Reset model_image for previous mockups media
+            // 4. Reset model_image ONLY for previous mockups that share
+            //    the same category_id AND exact same product_ids
             if ($previousMockupIds->isNotEmpty()) {
                 Media::query()
                     ->where('model_type', Mockup::class)
@@ -619,8 +621,7 @@ class TemplateController extends DashboardController
                         [$normalizedColor]
                     )
                     ->get()
-                    ->sortByDesc(fn(Media $media) => $media->getCustomProperty('side') === $request->side ? 1 : 0
-                    )
+                    ->sortByDesc(fn(Media $media) => $media->getCustomProperty('side') === $request->side ? 1 : 0)
                     ->take(1);
             }
 
@@ -633,7 +634,6 @@ class TemplateController extends DashboardController
 
         return Response::api();
     }
-
     public function detachMockup(Template $template, Mockup $mockup)
     {
         DB::transaction(function () use ($template, $mockup) {
