@@ -30,7 +30,7 @@ class TemplateResource extends JsonResource
         $mockupId = Mockup::whereCategoryId($categoryId)?->first()?->id;
         $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
             ->where('model_type', \App\Models\Mockup::class)
-            ->where('model_id', $mockupId)
+//            ->where('model_id', $mockupId)
             ->where('collection_name', 'generated_mockups')
             ->where('custom_properties->template_id', (string)$this->id)
             ->where('custom_properties->model_image', 1)
