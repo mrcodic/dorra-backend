@@ -515,21 +515,21 @@ class TemplateController extends DashboardController
         $previousMockupIds = $template->mockups()
             ->where('mockups.id', '!=', $mockup->id)
             ->where('mockups.category_id', $mockup->category_id)
-//            ->when(
-//                $currentProductIds->isNotEmpty(),
-//                function ($query) use ($currentProductIds) {
-//                    $query->whereHas('products', function ($productQuery) use ($currentProductIds) {
-//                        $productQuery->whereIn('products.id', $currentProductIds);
-//                    });
-//                },
-//                function ($query) {
-//                    $query->whereRaw('1 = 0');
-//                }
-//            )
+            ->when(
+                $currentProductIds->isNotEmpty(),
+                function ($query) use ($currentProductIds) {
+                    $query->whereHas('products', function ($productQuery) use ($currentProductIds) {
+                        $productQuery->whereIn('products.id', $currentProductIds);
+                    });
+                },
+                function ($query) {
+                    $query->whereRaw('1 = 0');
+                }
+            )
             ->pluck('mockups.id')
             ->map(fn($id) => $id)
             ->values();
-        Log::info("sdfsdfsd",[$previousMockupIds]);
+
 
         $baseQuery = fn() => Media::query()
             ->where('model_type', Mockup::class)
