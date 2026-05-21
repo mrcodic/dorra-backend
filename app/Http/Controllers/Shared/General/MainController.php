@@ -375,14 +375,29 @@ class MainController extends Controller
 
         $categories = $this->categoryRepository->query()
             ->with([
-                'media',
-                'products' => function ($q) use ($request) {
+                'media'          => fn($q) => $q->limit(3),
+                'products'       => function ($q) use ($request) {
                     $q->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
                     $q->limit(3);
                 },
-                'products.media',
-                'products.templates'  => fn($q) => $q->limit(3),
-                'templates'           => fn($q) => $q->limit(3),
+                'products.media' => fn($q) => $q->limit(3),
+
+                // Filter templates by search term, not just limit
+                'products.templates' => function ($q) use ($applyJsonSearch, $applyPlainSearch) {
+                    $q->where(function ($qq) use ($applyJsonSearch, $applyPlainSearch) {
+                        $applyJsonSearch($qq, 'templates', 'name');
+                        $qq->orWhereHas('tags', fn($t) => $applyPlainSearch($t, 'tags', 'name'));
+                        $qq->orWhereHas('industries', fn($i) => $applyPlainSearch($i, 'industries', 'name'));
+                    })->limit(3);
+                },
+
+                'templates' => function ($q) use ($applyJsonSearch, $applyPlainSearch) {
+                    $q->where(function ($qq) use ($applyJsonSearch, $applyPlainSearch) {
+                        $applyJsonSearch($qq, 'templates', 'name');
+                        $qq->orWhereHas('tags', fn($t) => $applyPlainSearch($t, 'tags', 'name'));
+                        $qq->orWhereHas('industries', fn($i) => $applyPlainSearch($i, 'industries', 'name'));
+                    })->limit(3);
+                },
             ])
             ->where(function ($query) use ($applyJsonSearch, $applyPlainSearch) {
                 // category name
