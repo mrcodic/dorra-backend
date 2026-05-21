@@ -13,6 +13,7 @@ use App\Models\Template;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\RequiredIf;
 use Illuminate\Validation\ValidationException;
 
 class StoreCartItemRequest extends BaseRequest
@@ -105,7 +106,7 @@ class StoreCartItemRequest extends BaseRequest
                 }),
                 'exists:product_prices,id',
             ],
-            'quantity' => ['sometimes', 'integer', 'min:1'],
+            'quantity' => ['required_without:product_price_id', 'integer', 'min:1'],
             'specs' => [
                 Rule::requiredIf(function () use($hasSpecs,$type){
                     return $hasSpecs && $type == TypeEnum::PRINT->value;

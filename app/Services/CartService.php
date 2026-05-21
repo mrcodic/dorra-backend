@@ -84,7 +84,7 @@ class CartService extends BaseService
                 $cartItem = $cart->addItem(
                     $design ?? $template,
                     \App\Enums\Item\TypeEnum::tryFrom($request->type),
-                    Arr::get($priceDetails, 'quantity'),
+                    Arr::get($priceDetails, 'quantity') ?? $request->quantity,
                     $priceDetails['specs_sum'],
                     $priceDetails['product_price'],
                     $priceDetails['product_price_id'],
