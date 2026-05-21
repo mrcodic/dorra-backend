@@ -332,6 +332,12 @@ class MainController extends Controller
             ->unique()
             ->values();
 
+// Always include the full trimmed phrase so "scarf 1" is also searched as-is
+        $fullTerm = mb_strtolower($term);
+        if (!$terms->contains($fullTerm) && hasMeaningfulSearch($fullTerm)) {
+            $terms->push($fullTerm);
+        }
+
         if ($terms->isEmpty()) {
             return Response::api(data: []);
         }
@@ -374,7 +380,7 @@ class MainController extends Controller
                     $q->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
                     $q->limit(3);
                 },
-                'products.media'      => fn($q) => $q->limit(3),
+                'products.media',
                 'products.templates'  => fn($q) => $q->limit(3),
                 'templates'           => fn($q) => $q->limit(3),
             ])
