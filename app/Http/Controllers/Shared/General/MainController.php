@@ -342,8 +342,8 @@ class MainController extends Controller
 
         $limit = min((int)($request->limit ?? 3), 10);
 
-        // Now accepts $table so expressions are never ambiguous
-        $applySearch = function ($q, string $table) use ($terms, $locales, $limit) {
+        // Used inside whereHas — NO limit (breaks EXISTS subquery in MySQL)
+        $applySearchExists = function ($q, string $table) use ($terms, $locales) {
             if ($terms->isEmpty()) return;
 
             $exprs = collect($locales)->map(
@@ -358,41 +358,47 @@ class MainController extends Controller
                         }
                     }
                 }
-            })->limit($limit);
+            });
+        };
+
+        // Used inside with — WITH limit (eager load constraint)
+        $applySearchWith = function ($q, string $table) use ($applySearchExists, $limit) {
+            $applySearchExists($q, $table);
+            $q->limit($limit);
         };
 
         $categories = $this->categoryRepository->query()
             ->with([
                 'media',
 
-                'products' => function ($q) use ($request, $applySearch) {
-                    $applySearch($q, 'products');
+                'products' => function ($q) use ($request, $applySearchWith) {
+                    $applySearchWith($q, 'products');
                     $q->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
                 },
                 'products.media',
 
-                'templates'                     => fn($q) => $applySearch($q, 'templates'),
-                'templates.tags'                => fn($q) => $applySearch($q, 'tags'),
-                'templates.industries'          => fn($q) => $applySearch($q, 'industries'),
+                'templates'                     => fn($q) => $applySearchWith($q, 'templates'),
+                'templates.tags'                => fn($q) => $applySearchWith($q, 'tags'),
+                'templates.industries'          => fn($q) => $applySearchWith($q, 'industries'),
 
-                'products.templates'            => fn($q) => $applySearch($q, 'templates'),
-                'products.templates.tags'       => fn($q) => $applySearch($q, 'tags'),
-                'products.templates.industries' => fn($q) => $applySearch($q, 'industries'),
+                'products.templates'            => fn($q) => $applySearchWith($q, 'templates'),
+                'products.templates.tags'       => fn($q) => $applySearchWith($q, 'tags'),
+                'products.templates.industries' => fn($q) => $applySearchWith($q, 'industries'),
             ])
-            ->where(function ($query) use ($applySearch) {
+            ->where(function ($query) use ($applySearchExists) {
                 // category name
-                $applySearch($query, 'categories');
+                $applySearchExists($query, 'categories');
 
                 // category templates
-                $query->orWhereHas('templates', fn($q) => $applySearch($q, 'templates'));
-                $query->orWhereHas('templates.tags', fn($q) => $applySearch($q, 'tags'));
-                $query->orWhereHas('templates.industries', fn($q) => $applySearch($q, 'industries'));
+                $query->orWhereHas('templates',            fn($q) => $applySearchExists($q, 'templates'));
+                $query->orWhereHas('templates.tags',       fn($q) => $applySearchExists($q, 'tags'));
+                $query->orWhereHas('templates.industries', fn($q) => $applySearchExists($q, 'industries'));
 
                 // products
-                $query->orWhereHas('products', fn($q) => $applySearch($q, 'products'));
-                $query->orWhereHas('products.templates', fn($q) => $applySearch($q, 'templates'));
-                $query->orWhereHas('products.templates.tags', fn($q) => $applySearch($q, 'tags'));
-                $query->orWhereHas('products.templates.industries', fn($q) => $applySearch($q, 'industries'));
+                $query->orWhereHas('products',                        fn($q) => $applySearchExists($q, 'products'));
+                $query->orWhereHas('products.templates',              fn($q) => $applySearchExists($q, 'templates'));
+                $query->orWhereHas('products.templates.tags',         fn($q) => $applySearchExists($q, 'tags'));
+                $query->orWhereHas('products.templates.industries',   fn($q) => $applySearchExists($q, 'industries'));
             })
             ->when($rates, function ($q) use ($rates) {
                 $rates        = is_array($rates) ? $rates : [$rates];
