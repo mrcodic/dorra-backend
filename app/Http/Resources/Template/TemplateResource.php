@@ -30,7 +30,6 @@ class TemplateResource extends JsonResource
         $mockupId = Mockup::whereCategoryId($categoryId)?->first()?->id;
         $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
             ->where('model_type', \App\Models\Mockup::class)
-//            ->where('model_id', $mockupId)
             ->where('collection_name', 'generated_mockups')
             ->where('custom_properties->template_id', (string)$this->id)
             ->where('custom_properties->model_image', 1)
@@ -39,21 +38,25 @@ class TemplateResource extends JsonResource
                     ->from('mockups')
                     ->whereColumn('mockups.id', 'media.model_id')
                     ->whereNull('mockups.deleted_at')
-                    ->when(request('product_without_category_id'),
-                        fn($q) => $q->where('mockups.category_id', request('product_without_category_id')));
+                    ->when(
+                        request('product_without_category_id'),
+                        fn($q) => $q->where('mockups.category_id', request('product_without_category_id'))
+                    );
             })
             ->where(function ($query) {
                 $id = (int)(request('product_without_category_id') ?? request('product_id'));
                 $query->where('custom_properties->category_id', $id)
                     ->orWhereJsonContains('custom_properties->product_ids', $id);
             })
-            ->whereExists(function ($query) {
-                $id = (int)request('product_id');
-                $query->selectRaw(1)
-                    ->from('mockup_product')
-                    ->whereColumn('mockup_product.mockup_id', 'media.model_id')
-                    ->when($id,fn($q)=>$q->where('mockup_product.product_id', $id));
-            })
+            ->when(
+                request('product_id'),
+                fn($query) => $query->whereExists(function ($query) {
+                    $query->selectRaw(1)
+                        ->from('mockup_product')
+                        ->whereColumn('mockup_product.mockup_id', 'media.model_id')
+                        ->where('mockup_product.product_id', (int)request('product_id'));
+                })
+            )
             ->first();
 
         $categoryId = Product::find(request('product_id'))?->category?->id;
