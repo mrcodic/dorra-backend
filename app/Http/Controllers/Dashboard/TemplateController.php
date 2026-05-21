@@ -515,17 +515,17 @@ class TemplateController extends DashboardController
         $previousMockupIds = $template->mockups()
             ->where('mockups.id', '!=', $mockup->id)
             ->where('mockups.category_id', $mockup->category_id)
-//            ->when(
-//                $currentProductIds->isNotEmpty(),
-//                function ($query) use ($currentProductIds) {
-//                    $query->whereHas('products', function ($productQuery) use ($currentProductIds) {
-//                        $productQuery->whereIn('products.id', $currentProductIds);
-//                    });
-//                },
-//                function ($query) {
-//                    $query->whereRaw('1 = 0');
-//                }
-//            )
+            ->when(
+                $currentProductIds->isNotEmpty(),
+                function ($query) use ($currentProductIds) {
+                    $query->whereHas('products', function ($productQuery) use ($currentProductIds) {
+                        $productQuery->whereIn('products.id', $currentProductIds);
+                    });
+                },
+                function ($query) {
+                    $query->whereRaw('1 = 0');
+                }
+            )
             ->pluck('mockups.id')
             ->map(fn($id) => $id)
             ->values();
@@ -645,7 +645,7 @@ class TemplateController extends DashboardController
                 ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.category_id')) = ?", [(string) $mockup->category_id])
                 ->cursor()
                 ->each->delete();
-            
+
             $remainingColors = $mockup->templates()
                 ->get()
                 ->flatMap(fn($t) => $t->pivot->colors ?? [])
