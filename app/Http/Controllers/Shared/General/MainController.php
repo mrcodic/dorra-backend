@@ -372,11 +372,11 @@ class MainController extends Controller
                 'media',
                 'products' => function ($q) use ($request) {
                     $q->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
-                    $q->limit(10);
+                    $q->limit(3);
                 },
-                'products.media',
-                'products.templates',
-                'templates',
+                'products.media'      => fn($q) => $q->limit(3),
+                'products.templates'  => fn($q) => $q->limit(3),
+                'templates'           => fn($q) => $q->limit(3),
             ])
             ->where(function ($query) use ($applyJsonSearch, $applyPlainSearch) {
                 // category name
