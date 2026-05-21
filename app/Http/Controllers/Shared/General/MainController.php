@@ -320,8 +320,8 @@ class MainController extends Controller
 
     public function publicSearch(Request $request)
     {
-        $term   = trim((string)($request->search ?? ''));
-        $rates  = $request->rates;
+        $term  = trim((string)($request->search ?? ''));
+        $rates = $request->rates;
 
         $locales = config('app.locales', []);
 
@@ -331,7 +331,6 @@ class MainController extends Controller
             ->unique()
             ->values();
 
-        // Always include the full trimmed phrase so "scarf 1" is also searched as-is
         $fullTerm = mb_strtolower($term);
         if (!$terms->contains($fullTerm) && hasMeaningfulSearch($fullTerm)) {
             $terms->push($fullTerm);
@@ -341,21 +340,21 @@ class MainController extends Controller
             return Response::api(data: []);
         }
 
-        $nameExprs = collect($locales)->map(
-            fn($loc) => "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$loc}\"')))"
-        );
-
         $limit = min((int)($request->limit ?? 3), 10);
 
-        $applyContainsAnyLocale = function ($q) use ($terms, $nameExprs, $limit) {
+        // Now accepts $table so expressions are never ambiguous
+        $applySearch = function ($q, string $table) use ($terms, $locales, $limit) {
             if ($terms->isEmpty()) return;
-            $q->where(function ($qq) use ($terms, $nameExprs) {
-                foreach ($nameExprs as $expr) {
+
+            $exprs = collect($locales)->map(
+                fn($loc) => "LOWER(JSON_UNQUOTE(JSON_EXTRACT({$table}.name, '$.\"{$loc}\"')))"
+            );
+
+            $q->where(function ($qq) use ($terms, $exprs) {
+                foreach ($exprs as $expr) {
                     foreach ($terms as $w) {
                         if (hasMeaningfulSearch($w)) {
                             $qq->orWhereRaw("$expr LIKE ?", ['%' . $w . '%']);
-                        } else {
-                            $qq->whereRaw('1 = 0');
                         }
                     }
                 }
@@ -366,45 +365,34 @@ class MainController extends Controller
             ->with([
                 'media',
 
-                'products' => function ($query) use ($request, $applyContainsAnyLocale) {
-                    $applyContainsAnyLocale($query);
-                    $query->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
+                'products' => function ($q) use ($request, $applySearch) {
+                    $applySearch($q, 'products');
+                    $q->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
                 },
                 'products.media',
 
-                'templates'                     => fn($q) => $applyContainsAnyLocale($q),
-                'templates.tags'                => fn($q) => $applyContainsAnyLocale($q),
-                'templates.industries'          => fn($q) => $applyContainsAnyLocale($q),
+                'templates'                     => fn($q) => $applySearch($q, 'templates'),
+                'templates.tags'                => fn($q) => $applySearch($q, 'tags'),
+                'templates.industries'          => fn($q) => $applySearch($q, 'industries'),
 
-                'products.templates'            => fn($q) => $applyContainsAnyLocale($q),
-                'products.templates.tags'       => fn($q) => $applyContainsAnyLocale($q),
-                'products.templates.industries' => fn($q) => $applyContainsAnyLocale($q),
+                'products.templates'            => fn($q) => $applySearch($q, 'templates'),
+                'products.templates.tags'       => fn($q) => $applySearch($q, 'tags'),
+                'products.templates.industries' => fn($q) => $applySearch($q, 'industries'),
             ])
-            ->where(function ($query) use ($applyContainsAnyLocale) {
+            ->where(function ($query) use ($applySearch) {
                 // category name
-                $applyContainsAnyLocale($query);
+                $applySearch($query, 'categories');
 
-                // category templates name
-                $query->orWhereHas('products', fn($q) => $applyContainsAnyLocale($q));
-                $query->orWhereHas('templates', fn($q) => $applyContainsAnyLocale($q));
+                // category templates
+                $query->orWhereHas('templates', fn($q) => $applySearch($q, 'templates'));
+                $query->orWhereHas('templates.tags', fn($q) => $applySearch($q, 'tags'));
+                $query->orWhereHas('templates.industries', fn($q) => $applySearch($q, 'industries'));
 
-                // category templates tags
-                $query->orWhereHas('templates.tags', fn($q) => $applyContainsAnyLocale($q));
-
-                // category templates industries
-                $query->orWhereHas('templates.industries', fn($q) => $applyContainsAnyLocale($q));
-
-                // product name
-                $query->orWhereHas('products', fn($q) => $applyContainsAnyLocale($q));
-
-                // product templates name
-                $query->orWhereHas('products.templates', fn($q) => $applyContainsAnyLocale($q));
-
-                // product templates tags
-                $query->orWhereHas('products.templates.tags', fn($q) => $applyContainsAnyLocale($q));
-
-                // product templates industries
-                $query->orWhereHas('products.templates.industries', fn($q) => $applyContainsAnyLocale($q));
+                // products
+                $query->orWhereHas('products', fn($q) => $applySearch($q, 'products'));
+                $query->orWhereHas('products.templates', fn($q) => $applySearch($q, 'templates'));
+                $query->orWhereHas('products.templates.tags', fn($q) => $applySearch($q, 'tags'));
+                $query->orWhereHas('products.templates.industries', fn($q) => $applySearch($q, 'industries'));
             })
             ->when($rates, function ($q) use ($rates) {
                 $rates        = is_array($rates) ? $rates : [$rates];
