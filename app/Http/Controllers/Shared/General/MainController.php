@@ -375,12 +375,12 @@ class MainController extends Controller
 
         $categories = $this->categoryRepository->query()
             ->with([
-                'media'          => fn($q) => $q->limit(3),
+                'media',
                 'products'       => function ($q) use ($request) {
                     $q->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
                     $q->limit(3);
                 },
-                'products.media' => fn($q) => $q->limit(3),
+                'products.media',
 
                 'products.templates' => function ($q) use ($applyJsonSearch) {
                     $q->where(function ($qq) use ($applyJsonSearch) {
