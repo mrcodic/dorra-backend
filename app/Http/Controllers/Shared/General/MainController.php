@@ -382,17 +382,16 @@ class MainController extends Controller
                 },
                 'products.media' => fn($q) => $q->limit(3),
 
-                // Filter templates by search term, not just limit
-                'products.templates' => function ($q) use ($applyJsonSearch, $applyPlainSearch) {
-                    $q->where(function ($qq) use ($applyJsonSearch, $applyPlainSearch) {
+                'products.templates' => function ($q) use ($applyJsonSearch) {
+                    $q->where(function ($qq) use ($applyJsonSearch) {
                         $applyJsonSearch($qq, 'templates', 'name');
                         $qq->orWhereHas('tags', fn($t) => $applyJsonSearch($t, 'tags', 'name'));
                         $qq->orWhereHas('industries', fn($i) => $applyJsonSearch($i, 'industries', 'name'));
                     })->limit(3);
                 },
 
-                'templates' => function ($q) use ($applyJsonSearch, $applyPlainSearch) {
-                    $q->where(function ($qq) use ($applyJsonSearch, $applyPlainSearch) {
+                'templates' => function ($q) use ($applyJsonSearch) {
+                    $q->where(function ($qq) use ($applyJsonSearch) {
                         $applyJsonSearch($qq, 'templates', 'name');
                         $qq->orWhereHas('tags', fn($t) => $applyJsonSearch($t, 'tags', 'name'));
                         $qq->orWhereHas('industries', fn($i) => $applyJsonSearch($i, 'industries', 'name'));
@@ -414,13 +413,13 @@ class MainController extends Controller
                 });
 
                 // category templates tags
-                $query->orWhereHas('templates.tags', function ($q) use ($applyPlainSearch) {
-                    $applyPlainSearch($q, 'tags', 'name');
+                $query->orWhereHas('templates.tags', function ($q) use ($applyJsonSearch) {
+                    $applyJsonSearch($q, 'tags', 'name');
                 });
 
                 // category templates industries
-                $query->orWhereHas('templates.industries', function ($q) use ($applyPlainSearch) {
-                    $applyPlainSearch($q, 'industries', 'name');
+                $query->orWhereHas('templates.industries', function ($q) use ($applyJsonSearch) {
+                    $applyJsonSearch($q, 'industries', 'name');
                 });
 
                 // product templates name
@@ -434,8 +433,8 @@ class MainController extends Controller
                 });
 
                 // product templates industries
-                $query->orWhereHas('products.templates.industries', function ($q) use ($applyPlainSearch) {
-                    $applyPlainSearch($q, 'industries', 'name');
+                $query->orWhereHas('products.templates.industries', function ($q) use ($applyJsonSearch) {
+                    $applyJsonSearch($q, 'industries', 'name');
                 });
             })
             ->when($rates, function ($q) use ($rates) {
