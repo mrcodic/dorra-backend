@@ -320,19 +320,22 @@ class MainController extends Controller
 
     public function publicSearch(Request $request)
     {
-        $term  = trim((string)($request->search ?? ''));
+        $term  = trim((string) ($request->search ?? ''));
         $rates = $request->rates;
 
-        $locales = config('app.locales', []);
+        $locales = collect(config('app.locales', ['en', 'ar']))
+            ->filter()
+            ->values();
 
         $terms = collect(preg_split('/[\s,;]+/u', $term))
-            ->map(fn($t) => mb_strtolower($t))
-            ->filter()
+            ->map(fn ($t) => mb_strtolower(trim($t)))
+            ->filter(fn ($t) => hasMeaningfulSearch($t))
             ->unique()
             ->values();
 
         $fullTerm = mb_strtolower($term);
-        if (!$terms->contains($fullTerm) && hasMeaningfulSearch($fullTerm)) {
+
+        if (hasMeaningfulSearch($fullTerm) && !$terms->contains($fullTerm)) {
             $terms->push($fullTerm);
         }
 
@@ -340,72 +343,102 @@ class MainController extends Controller
             return Response::api(data: []);
         }
 
-        $limit = min((int)($request->limit ?? 3), 10);
+        $limit = min((int) ($request->limit ?? 3), 10);
 
-        // Used inside whereHas — NO limit (breaks EXISTS subquery in MySQL)
-        $applySearchExists = function ($q, string $table) use ($terms, $locales) {
-            if ($terms->isEmpty()) return;
+        $applyNameSearch = function ($q, string $table) use ($terms, $locales) {
+            $q->where(function ($qq) use ($terms, $locales, $table) {
+                foreach ($locales as $loc) {
+                    $expr = "LOWER(JSON_UNQUOTE(JSON_EXTRACT({$table}.name, '$.\"{$loc}\"')))";
 
-            $exprs = collect($locales)->map(
-                fn($loc) => "LOWER(JSON_UNQUOTE(JSON_EXTRACT({$table}.name, '$.\"{$loc}\"')))"
-            );
-
-            $q->where(function ($qq) use ($terms, $exprs) {
-                foreach ($exprs as $expr) {
-                    foreach ($terms as $w) {
-                        if (hasMeaningfulSearch($w)) {
-                            $qq->orWhereRaw("$expr LIKE ?", ['%' . $w . '%']);
-                        }
+                    foreach ($terms as $term) {
+                        $qq->orWhereRaw("$expr LIKE ?", ['%' . $term . '%']);
                     }
                 }
             });
         };
 
-        // Used inside with — WITH limit (eager load constraint)
-        $applySearchWith = function ($q, string $table) use ($applySearchExists, $limit) {
-            $applySearchExists($q, $table);
-            $q->limit($limit);
+        $applyTemplateSearch = function ($q) use ($applyNameSearch) {
+            $q->where(function ($qq) use ($applyNameSearch) {
+                // template name
+                $applyNameSearch($qq, 'templates');
+
+                // template tags
+                $qq->orWhereHas('tags', function ($tagQuery) use ($applyNameSearch) {
+                    $applyNameSearch($tagQuery, 'tags');
+                });
+
+                // template industries
+                $qq->orWhereHas('industries', function ($industryQuery) use ($applyNameSearch) {
+                    $applyNameSearch($industryQuery, 'industries');
+                });
+            });
+        };
+
+        $applyProductSearch = function ($q) use ($applyNameSearch, $applyTemplateSearch) {
+            $q->where(function ($qq) use ($applyNameSearch, $applyTemplateSearch) {
+                // product name
+                $applyNameSearch($qq, 'products');
+
+                // product templates / tags / industries
+                $qq->orWhereHas('templates', function ($templateQuery) use ($applyTemplateSearch) {
+                    $applyTemplateSearch($templateQuery);
+                });
+            });
         };
 
         $categories = $this->categoryRepository->query()
             ->with([
                 'media',
 
-                'products' => function ($q) use ($request, $applySearchWith) {
-                    $applySearchWith($q, 'products');
-                    $q->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
+                'products' => function ($q) use ($request, $applyProductSearch, $limit) {
+                    $applyProductSearch($q);
+
+                    $q->when($request->rates, function ($q) use ($request) {
+                        $q->withReviewRating($request->rates);
+                    });
+
+                    $q->limit($limit);
                 },
+
                 'products.media',
 
-                'templates'                     => fn($q) => $applySearchWith($q, 'templates'),
-                'templates.tags'                => fn($q) => $applySearchWith($q, 'tags'),
-                'templates.industries'          => fn($q) => $applySearchWith($q, 'industries'),
+                'templates' => function ($q) use ($applyTemplateSearch, $limit) {
+                    $applyTemplateSearch($q);
+                    $q->limit($limit);
+                },
 
-                'products.templates'            => fn($q) => $applySearchWith($q, 'templates'),
-                'products.templates.tags'       => fn($q) => $applySearchWith($q, 'tags'),
-                'products.templates.industries' => fn($q) => $applySearchWith($q, 'industries'),
+                // Do not filter these again, because parent template already matched
+                'templates.tags',
+                'templates.industries',
+
+                'products.templates' => function ($q) use ($applyTemplateSearch, $limit) {
+                    $applyTemplateSearch($q);
+                    $q->limit($limit);
+                },
+
+                'products.templates.tags',
+                'products.templates.industries',
             ])
-            ->where(function ($query) use ($applySearchExists) {
+            ->where(function ($query) use ($applyNameSearch, $applyTemplateSearch, $applyProductSearch) {
                 // category name
-                $applySearchExists($query, 'categories');
+                $applyNameSearch($query, 'categories');
 
-                // category templates
-                $query->orWhereHas('templates',            fn($q) => $applySearchExists($q, 'templates'));
-                $query->orWhereHas('templates.tags',       fn($q) => $applySearchExists($q, 'tags'));
-                $query->orWhereHas('templates.industries', fn($q) => $applySearchExists($q, 'industries'));
+                // direct category templates
+                $query->orWhereHas('templates', function ($q) use ($applyTemplateSearch) {
+                    $applyTemplateSearch($q);
+                });
 
-                // products
-                $query->orWhereHas('products',                        fn($q) => $applySearchExists($q, 'products'));
-                $query->orWhereHas('products.templates',              fn($q) => $applySearchExists($q, 'templates'));
-                $query->orWhereHas('products.templates.tags',         fn($q) => $applySearchExists($q, 'tags'));
-                $query->orWhereHas('products.templates.industries',   fn($q) => $applySearchExists($q, 'industries'));
+                // products / product templates / product tags
+                $query->orWhereHas('products', function ($q) use ($applyProductSearch) {
+                    $applyProductSearch($q);
+                });
             })
             ->when($rates, function ($q) use ($rates) {
-                $rates        = is_array($rates) ? $rates : [$rates];
+                $rates = is_array($rates) ? $rates : [$rates];
                 $placeholders = implode(',', array_fill(0, count($rates), '?'));
 
                 $q->where(function ($qq) use ($rates, $placeholders) {
-                    $qq->whereHas('products', fn($p) => $p->withReviewRating($rates))
+                    $qq->whereHas('products', fn ($p) => $p->withReviewRating($rates))
                         ->orWhereHas('reviews', function ($rq) use ($rates, $placeholders) {
                             $rq->select('reviewable_id')
                                 ->groupBy('reviewable_id', 'reviewable_type')
@@ -413,7 +446,7 @@ class MainController extends Controller
                         });
                 });
             })
-            ->when($request->take, fn($q, $take) => $q->take(min((int)$take, 50)))
+            ->when($request->take, fn ($q, $take) => $q->take(min((int) $take, 50)))
             ->get();
 
         return Response::api(data: CategoryResource::collection($categories));
