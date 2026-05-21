@@ -320,23 +320,32 @@ class MainController extends Controller
 
     public function publicSearch(Request $request)
     {
-        $term = trim((string)($request->search ?? ''));
-        $rates = $request->rates;
+        $term   = trim((string)($request->search ?? ''));
+        $rates  = $request->rates;
 
         $locales = config('app.locales', []);
+
         $terms = collect(preg_split('/[\s,;]+/u', $term))
             ->map(fn($t) => mb_strtolower($t))
             ->filter()
             ->unique()
             ->values();
 
+        // Always include the full trimmed phrase so "scarf 1" is also searched as-is
+        $fullTerm = mb_strtolower($term);
+        if (!$terms->contains($fullTerm) && hasMeaningfulSearch($fullTerm)) {
+            $terms->push($fullTerm);
+        }
+
+        if ($terms->isEmpty()) {
+            return Response::api(data: []);
+        }
 
         $nameExprs = collect($locales)->map(
             fn($loc) => "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$loc}\"')))"
         );
 
-
-        $limit = min((int) ($request->limit ?? 3), 10);
+        $limit = min((int)($request->limit ?? 3), 10);
 
         $applyContainsAnyLocale = function ($q) use ($terms, $nameExprs, $limit) {
             if ($terms->isEmpty()) return;
@@ -352,39 +361,54 @@ class MainController extends Controller
                 }
             })->limit($limit);
         };
+
         $categories = $this->categoryRepository->query()
             ->with([
-                'products' => function ($query) use ($request) {
+                'media',
+
+                'products' => function ($query) use ($request, $applyContainsAnyLocale) {
+                    $applyContainsAnyLocale($query);
                     $query->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
                 },
                 'products.media',
-                'media',
-                'templates.tags' => function ($query) use ($applyContainsAnyLocale) {
-                    $applyContainsAnyLocale($query);
-                },
-                'products.templates.tags' => function ($query) use ($applyContainsAnyLocale) {
-                    $applyContainsAnyLocale($query);
-                },
-                'templates.industries' => function ($query) use ($applyContainsAnyLocale) {
-                    $applyContainsAnyLocale($query);
-                },
-                'templates' => function ($query) use ($applyContainsAnyLocale) {
-                    $applyContainsAnyLocale($query);
-                },
-                'products.templates.industries' => function ($query) use ($applyContainsAnyLocale) {
-                    $applyContainsAnyLocale($query);
-                },
 
+                'templates'                     => fn($q) => $applyContainsAnyLocale($q),
+                'templates.tags'                => fn($q) => $applyContainsAnyLocale($q),
+                'templates.industries'          => fn($q) => $applyContainsAnyLocale($q),
+
+                'products.templates'            => fn($q) => $applyContainsAnyLocale($q),
+                'products.templates.tags'       => fn($q) => $applyContainsAnyLocale($q),
+                'products.templates.industries' => fn($q) => $applyContainsAnyLocale($q),
             ])
             ->where(function ($query) use ($applyContainsAnyLocale) {
+                // category name
                 $applyContainsAnyLocale($query);
-                $query->orWhereHas('products', function ($q) use ($applyContainsAnyLocale) {
-                    $applyContainsAnyLocale($q);
-                });
+
+                // category templates name
+                $query->orWhereHas('templates', fn($q) => $applyContainsAnyLocale($q));
+
+                // category templates tags
+                $query->orWhereHas('templates.tags', fn($q) => $applyContainsAnyLocale($q));
+
+                // category templates industries
+                $query->orWhereHas('templates.industries', fn($q) => $applyContainsAnyLocale($q));
+
+                // product name
+                $query->orWhereHas('products', fn($q) => $applyContainsAnyLocale($q));
+
+                // product templates name
+                $query->orWhereHas('products.templates', fn($q) => $applyContainsAnyLocale($q));
+
+                // product templates tags
+                $query->orWhereHas('products.templates.tags', fn($q) => $applyContainsAnyLocale($q));
+
+                // product templates industries
+                $query->orWhereHas('products.templates.industries', fn($q) => $applyContainsAnyLocale($q));
             })
-            ->when($request->take, fn($q, $take) => $q->take($take))
             ->when($rates, function ($q) use ($rates) {
+                $rates        = is_array($rates) ? $rates : [$rates];
                 $placeholders = implode(',', array_fill(0, count($rates), '?'));
+
                 $q->where(function ($qq) use ($rates, $placeholders) {
                     $qq->whereHas('products', fn($p) => $p->withReviewRating($rates))
                         ->orWhereHas('reviews', function ($rq) use ($rates, $placeholders) {
@@ -394,11 +418,11 @@ class MainController extends Controller
                         });
                 });
             })
+            ->when($request->take, fn($q, $take) => $q->take(min((int)$take, 50)))
             ->get();
 
         return Response::api(data: CategoryResource::collection($categories));
     }
-
     public function dimensions(Request $request)
     {
         $validatedData = $request->validate([
