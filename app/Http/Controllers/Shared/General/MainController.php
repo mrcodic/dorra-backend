@@ -320,95 +320,71 @@ class MainController extends Controller
 
     public function publicSearch(Request $request)
     {
-        $term  = trim((string) ($request->search ?? ''));
+        $term = trim((string)($request->search ?? ''));
         $rates = $request->rates;
-        $take  = min((int) ($request->take ?? 20), 50);
 
         $locales = config('app.locales', []);
-
         $terms = collect(preg_split('/[\s,;]+/u', $term))
             ->map(fn($t) => mb_strtolower($t))
-            ->filter(fn($t) => hasMeaningfulSearch($t))
+            ->filter()
             ->unique()
             ->values();
 
-        if ($terms->isEmpty()) {
-            return Response::api(data: []);
-        }
 
-        $applyJsonSearch = function ($q, string $table, string $column = 'name') use ($terms, $locales) {
-            $q->where(function ($qq) use ($terms, $locales, $table, $column) {
-                foreach ($locales as $loc) {
-                    $expr = "LOWER(JSON_UNQUOTE(JSON_EXTRACT({$table}.{$column}, '$.\"{$loc}\"')))";
+        $nameExprs = collect($locales)->map(
+            fn($loc) => "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"{$loc}\"')))"
+        );
 
-                    foreach ($terms as $word) {
-                        $qq->orWhereRaw("$expr LIKE ?", ['%' . $word . '%']);
+
+        $limit = min((int) ($request->limit ?? 3), 10);
+
+        $applyContainsAnyLocale = function ($q) use ($terms, $nameExprs, $limit) {
+            if ($terms->isEmpty()) return;
+            $q->where(function ($qq) use ($terms, $nameExprs) {
+                foreach ($nameExprs as $expr) {
+                    foreach ($terms as $w) {
+                        if (hasMeaningfulSearch($w)) {
+                            $qq->orWhereRaw("$expr LIKE ?", ['%' . $w . '%']);
+                        } else {
+                            $qq->whereRaw('1 = 0');
+                        }
                     }
                 }
-            });
+            })->limit($limit);
         };
-
-        $applyPlainSearch = function ($q, string $table, string $column = 'name') use ($terms) {
-            $q->where(function ($qq) use ($terms, $table, $column) {
-                foreach ($terms as $word) {
-                    $qq->orWhereRaw("LOWER({$table}.{$column}) LIKE ?", ['%' . $word . '%']);
-                }
-            });
-        };
-
         $categories = $this->categoryRepository->query()
             ->with([
-                'media',
-
-                'products' => function ($q) use ($request, $applyJsonSearch) {
-                    $q->where(function ($qq) use ($applyJsonSearch) {
-                        $applyJsonSearch($qq, 'products', 'name');
-                        $qq->orWhereHas('templates', fn($t) => $applyJsonSearch($t, 'templates', 'name'));
-                        $qq->orWhereHas('templates.tags', fn($t) => $applyJsonSearch($t, 'tags', 'name'));
-                        $qq->orWhereHas('templates.industries', fn($t) => $applyJsonSearch($t, 'industries', 'name'));
-                    });
-                    $q->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
-                    $q->limit(3);
+                'products' => function ($query) use ($request) {
+                    $query->when($request->rates, fn($q) => $q->withReviewRating($request->rates));
                 },
-
                 'products.media',
-
-                'products.templates' => function ($q) use ($applyJsonSearch) {
-                    $q->where(function ($qq) use ($applyJsonSearch) {
-                        $applyJsonSearch($qq, 'templates', 'name');
-                        $qq->orWhereHas('tags', fn($t) => $applyJsonSearch($t, 'tags', 'name'));
-                        $qq->orWhereHas('industries', fn($i) => $applyJsonSearch($i, 'industries', 'name'));
-                    })->limit(3);
+                'media',
+                'templates.tags' => function ($query) use ($applyContainsAnyLocale) {
+                    $applyContainsAnyLocale($query);
+                },
+                'products.templates.tags' => function ($query) use ($applyContainsAnyLocale) {
+                    $applyContainsAnyLocale($query);
+                },
+                'templates.industries' => function ($query) use ($applyContainsAnyLocale) {
+                    $applyContainsAnyLocale($query);
+                },
+                'templates' => function ($query) use ($applyContainsAnyLocale) {
+                    $applyContainsAnyLocale($query);
+                },
+                'products.templates.industries' => function ($query) use ($applyContainsAnyLocale) {
+                    $applyContainsAnyLocale($query);
                 },
 
-                'templates' => function ($q) use ($applyJsonSearch) {
-                    $q->where(function ($qq) use ($applyJsonSearch) {
-                        $applyJsonSearch($qq, 'templates', 'name');
-                        $qq->orWhereHas('tags', fn($t) => $applyJsonSearch($t, 'tags', 'name'));
-                        $qq->orWhereHas('industries', fn($i) => $applyJsonSearch($i, 'industries', 'name'));
-                    })->limit(3);
-                },
             ])
-            ->where(function ($query) use ($applyJsonSearch) {
-                // category name
-                $applyJsonSearch($query, 'categories', 'name');
-
-                // category templates
-                $query->orWhereHas('templates', fn($q) => $applyJsonSearch($q, 'templates', 'name'));
-                $query->orWhereHas('templates.tags', fn($q) => $applyJsonSearch($q, 'tags', 'name'));
-                $query->orWhereHas('templates.industries', fn($q) => $applyJsonSearch($q, 'industries', 'name'));
-
-                // products
-                $query->orWhereHas('products', fn($q) => $applyJsonSearch($q, 'products', 'name'));
-                $query->orWhereHas('products.templates', fn($q) => $applyJsonSearch($q, 'templates', 'name'));
-                $query->orWhereHas('products.templates.tags', fn($q) => $applyJsonSearch($q, 'tags', 'name'));
-                $query->orWhereHas('products.templates.industries', fn($q) => $applyJsonSearch($q, 'industries', 'name'));
+            ->where(function ($query) use ($applyContainsAnyLocale) {
+                $applyContainsAnyLocale($query);
+                $query->orWhereHas('products', function ($q) use ($applyContainsAnyLocale) {
+                    $applyContainsAnyLocale($q);
+                });
             })
+            ->when($request->take, fn($q, $take) => $q->take($take))
             ->when($rates, function ($q) use ($rates) {
-                $rates = is_array($rates) ? $rates : [$rates];
-
                 $placeholders = implode(',', array_fill(0, count($rates), '?'));
-
                 $q->where(function ($qq) use ($rates, $placeholders) {
                     $qq->whereHas('products', fn($p) => $p->withReviewRating($rates))
                         ->orWhereHas('reviews', function ($rq) use ($rates, $placeholders) {
@@ -418,7 +394,6 @@ class MainController extends Controller
                         });
                 });
             })
-            ->take($take)
             ->get();
 
         return Response::api(data: CategoryResource::collection($categories));
