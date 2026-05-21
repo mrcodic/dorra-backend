@@ -9,7 +9,9 @@ use App\Http\Resources\MediaResource;
 use App\Http\Resources\MockupResource;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\TagResource;
+use App\Models\Category;
 use App\Models\Guest;
+use App\Models\Mockup;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -24,8 +26,11 @@ class TemplateResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $categoryId = (int)(request('product_without_category_id') ?? Product::find(request('product_id'))?->category_id);
+        $mockupId = Mockup::whereCategoryId($categoryId)?->first()?->id;
         $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
             ->where('model_type', \App\Models\Mockup::class)
+            ->where('model_id', $mockupId)
             ->where('collection_name', 'generated_mockups')
             ->where('custom_properties->template_id', (string)$this->id)
             ->where('custom_properties->model_image', 1)
