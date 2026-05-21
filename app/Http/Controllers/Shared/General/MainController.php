@@ -342,12 +342,6 @@ class MainController extends Controller
             return Response::api(data: []);
         }
 
-        /**
-         * For JSON translatable columns:
-         * categories.name
-         * products.name
-         * templates.name
-         */
         $applyJsonSearch = function ($q, string $table, string $column = 'name') use ($terms, $locales) {
             $q->where(function ($qq) use ($terms, $locales, $table, $column) {
                 foreach ($locales as $loc) {
@@ -360,11 +354,6 @@ class MainController extends Controller
             });
         };
 
-        /**
-         * For plain string columns:
-         * tags.name
-         * industries.name
-         */
         $applyPlainSearch = function ($q, string $table, string $column = 'name') use ($terms) {
             $q->where(function ($qq) use ($terms, $table, $column) {
                 foreach ($terms as $word) {
@@ -408,24 +397,24 @@ class MainController extends Controller
                 });
 
                 // category templates tags
-                $query->orWhereHas('templates.tags', function ($q) use ($applyJsonSearch) {
-                    $applyJsonSearch($q, 'tags', 'name');
-                });
-
-                // category templates industries
-                $query->orWhereHas('templates.industries', function ($q) use ($applyJsonSearch) {
-                    $applyJsonSearch($q, 'industries', 'name');
-                });
-
-                // product templates tags
-                $query->orWhereHas('products.templates.tags', function ($q) use ($applyPlainSearch) {
-                    $applyPlainSearch($q, 'tags', 'name');
-                });
-
-                // product templates industries
-                $query->orWhereHas('products.templates.industries', function ($q) use ($applyJsonSearch) {
-                    $applyJsonSearch($q, 'industries', 'name');
-                });
+//                $query->orWhereHas('templates.tags', function ($q) use ($applyJsonSearch) {
+//                    $applyJsonSearch($q, 'tags', 'name');
+//                });
+//
+//                // category templates industries
+//                $query->orWhereHas('templates.industries', function ($q) use ($applyJsonSearch) {
+//                    $applyJsonSearch($q, 'industries', 'name');
+//                });
+//
+//                // product templates tags
+//                $query->orWhereHas('products.templates.tags', function ($q) use ($applyPlainSearch) {
+//                    $applyPlainSearch($q, 'tags', 'name');
+//                });
+//
+//                // product templates industries
+//                $query->orWhereHas('products.templates.industries', function ($q) use ($applyJsonSearch) {
+//                    $applyJsonSearch($q, 'industries', 'name');
+//                });
             })
             ->when($rates, function ($q) use ($rates) {
                 $rates = is_array($rates) ? $rates : [$rates];
