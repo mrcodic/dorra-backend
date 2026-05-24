@@ -999,7 +999,11 @@ class TemplateService extends BaseService
                 $media = $getMedia($product->id, 'product');
                 $rows->push([
                     'template_id'          => $template->id,
-                    'template_image'       => $template->image,
+                    'template_image'       => $template->image ?: ($template->use_front_as_back
+                        ? $template->getFirstMediaUrl('templates-preview')
+                        : ($template->approach == 'without_editor'
+                            ? $template->getFirstMediaUrl('back-templates-preview')
+                            : $template->getFirstMediaUrl('back_templates'))),
                     'template_model_image' => $media?->getUrl() ?: $template->getFirstMediaUrl('template_model_image'),
                     'type'                 => 'product',
                     'product_id'           => $product->id,
@@ -1013,7 +1017,11 @@ class TemplateService extends BaseService
                 $media = $getMedia($category->id, 'category');
                 $rows->push([
                     'template_id'          => $template->id,
-                    'template_image'       => $template->image,
+                    'template_image'       => $template->image ?: ($template->use_front_as_back
+                        ? $template->getFirstMediaUrl('templates-preview')
+                        : ($template->approach == 'without_editor'
+                            ? $template->getFirstMediaUrl('back-templates-preview')
+                            : $template->getFirstMediaUrl('back_templates'))),
                     'template_model_image' => $media?->getUrl() ?: $template->getFirstMediaUrl('template_model_image'),
                     'type'                 => 'category',
                     'product_id'           => $category->id,
@@ -1026,7 +1034,11 @@ class TemplateService extends BaseService
             if ($rows->isEmpty()) {
                 $rows->push([
                     'template_id'          => $template->id,
-                    'template_image'       => $template->image,
+                    'template_image'       => $template->image ?: ($template->use_front_as_back
+                        ? $template->getFirstMediaUrl('templates-preview')
+                        : ($template->approach == 'without_editor'
+                            ? $template->getFirstMediaUrl('back-templates-preview')
+                            : $template->getFirstMediaUrl('back_templates'))),
                     'template_model_image' => $template->getFirstMediaUrl('template_model_image'),
                     'type'                 => null,
                     'product_id'           => null,
