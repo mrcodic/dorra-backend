@@ -952,7 +952,7 @@ class TemplateService extends BaseService
             })
             ->with([
                 'products:id,name,category_id',
-                'categories:id,name,',
+                'categories:id,name',
             ])
             ->get();
 
