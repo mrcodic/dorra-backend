@@ -966,11 +966,11 @@ class TemplateService extends BaseService
             foreach ($template->products as $product) {
                 $rows->push([
                     'template_id'    => $template->id,
-                    'template_image' => $template->image,
+                    'template_image' => $template->image ,
                     'type'           => 'product',
                     'product_id'             => $product->id,
                     'name'           => $product->name,
-                    'is_has_category'=> $product->is_has_category,
+                    'is_has_category'=> 1,
                     'category'         => $product->category?->only('id', 'name'),
                 ]);
             }
