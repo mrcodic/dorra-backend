@@ -942,6 +942,7 @@ class TemplateService extends BaseService
     public function searchTemplates($request)
     {
         $search  = $request->input('search');
+        $locale = app()->getLocale();
         $templates = Template::query()
             ->live()
             ->when($search, function (Builder $query) use ($search, $locale) {
