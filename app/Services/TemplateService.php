@@ -942,9 +942,11 @@ class TemplateService extends BaseService
     public function searchTemplates($request)
     {
         $search  = $request->input('search');
-        $locale = app()->getLocale();
+        $locale  = app()->getLocale();
+
         $templates = Template::query()
             ->live()
+            ->select('id', 'name')
             ->when($search, function (Builder $query) use ($search, $locale) {
                 $query->whereRaw(
                     "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, ?))) LIKE ?",
@@ -952,54 +954,62 @@ class TemplateService extends BaseService
                 );
             })
             ->with([
-                'products:id,name,category_id',
-                'categories:id,name',
+                'products:id,name,category_id,is_has_category',
+                'categories:id,name,is_has_category',
+                'media',
             ])
             ->get();
 
-        // Flatten: one row per product
         $flattened = $templates->flatMap(function ($template) {
             $rows = collect();
+
             foreach ($template->products as $product) {
                 $rows->push([
-                    'template' => $template,
-                    'type'     => 'product',
-                    'item'     => $product,
-                    'parent'   => $product?->category,  // null if no parent
+                    'template_id'    => $template->id,
+                    'template_image' => $template->image,
+                    'type'           => 'product',
+                    'id'             => $product->id,
+                    'name'           => $product->name,
+                    'is_has_category'=> $product->is_has_category,
+                    'parent'         => $product->category?->only('id', 'name'),
                 ]);
             }
 
             foreach ($template->categories as $category) {
                 $rows->push([
-                    'template' => $template,
-                    'type'     => 'category',
-                    'item'     => $category,
-                    'parent'   => null,
+                    'template_id'    => $template->id,
+                    'template_image' => $template->image,
+                    'type'           => 'category',
+                    'id'             => $category->id,
+                    'name'           => $category->name,
+                    'is_has_category'=> $category->is_has_category,
+                    'parent'         => null,
                 ]);
             }
 
             if ($rows->isEmpty()) {
                 $rows->push([
-                    'template' => $template,
-                    'type'     => null,
-                    'item'     => null,
-                    'parent'   => null,
+                    'template_id'    => $template->id,
+                    'template_image' => $template->image,
+                    'type'           => null,
+                    'id'             => null,
+                    'name'           => null,
+                    'is_has_category'=> null,
+                    'parent'         => null,
                 ]);
             }
+
             return $rows;
         });
 
-        // Manual pagination on the flattened collection
         $page    = request()->input('page', 1);
         $perPage = $request->input('per_page', 15);
-        $paged   = new \Illuminate\Pagination\LengthAwarePaginator(
+
+        return new \Illuminate\Pagination\LengthAwarePaginator(
             $flattened->forPage($page, $perPage)->values(),
             $flattened->count(),
             $perPage,
             $page,
             ['path' => request()->url()]
         );
-
-        return $paged;
-    }
-}
+    }}
