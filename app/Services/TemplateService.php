@@ -986,6 +986,7 @@ class TemplateService extends BaseService
                     'parent'   => null,
                 ]);
             }
+            return $rows;
         });
 
         // Manual pagination on the flattened collection
