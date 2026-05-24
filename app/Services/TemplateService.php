@@ -968,10 +968,10 @@ class TemplateService extends BaseService
                     'template_id'    => $template->id,
                     'template_image' => $template->image,
                     'type'           => 'product',
-                    'id'             => $product->id,
+                    'product_id'             => $product->id,
                     'name'           => $product->name,
                     'is_has_category'=> $product->is_has_category,
-                    'parent'         => $product->category?->only('id', 'name'),
+                    'category'         => $product->category?->only('id', 'name'),
                 ]);
             }
 
@@ -980,10 +980,10 @@ class TemplateService extends BaseService
                     'template_id'    => $template->id,
                     'template_image' => $template->image,
                     'type'           => 'category',
-                    'id'             => $category->id,
+                    'product_id'             => $category->id,
                     'name'           => $category->name,
                     'is_has_category'=> $category->is_has_category,
-                    'parent'         => null,
+                    'category'         => null,
                 ]);
             }
 
@@ -992,10 +992,10 @@ class TemplateService extends BaseService
                     'template_id'    => $template->id,
                     'template_image' => $template->image,
                     'type'           => null,
-                    'id'             => null,
+                    'product_id'             => null,
                     'name'           => null,
                     'is_has_category'=> null,
-                    'parent'         => null,
+                    'category'         => null,
                 ]);
             }
 
