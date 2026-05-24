@@ -958,6 +958,46 @@ class TemplateService extends BaseService
                 'categories:id,name,is_has_category',
                 'media',
             ])
+            ->when(request()->filled('industries'), function ($q) {
+                $industries = request('industries');
+                $q->whereHas('industries', function ($q) use ($industries) {
+                    $q->whereIn('industries.id', is_array($industries) ? $industries : [$industries]);
+                });
+            })->when(request()->filled('tags'), function ($q) {
+                $tags = request('tags');
+                $q->whereHas('tags', function ($q) use ($tags) {
+                    $q->whereIn('tags.id', is_array($tags) ? $tags : [$tags]);
+                });
+            })->when(request('category_id'), function ($q) {
+                $categoryId =request('category_id');
+                $q->whereHas('categories', function ($q) use ($categoryId) {
+                    $q->where('categories.id', $categoryId);
+                });
+            })->when(request('product_id'), function ($q) {
+                $productId =request('product_id');
+                $q->whereHas('products', function ($q) use ($productId) {
+                    $q->where('products.id', $productId);
+                });
+            })->when($search, function (Builder $query) use ($search, $locale) {
+                $query->where(function (Builder $q) use ($search, $locale) {
+                    $q->whereRaw(
+                        "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, ?))) LIKE ?",
+                        ['$.' . $locale, '%' . strtolower($search) . '%']
+                    )
+                        ->orWhereHas('industries', function (Builder $q) use ($search) {
+                            $q->whereRaw(
+                                "LOWER(JSON_UNQUOTE(JSON_EXTRACT(industries.name, ?))) LIKE ?",
+                                ['$.' . app()->getLocale(), '%' . strtolower($search) . '%']
+                            );
+                        })
+                        ->orWhereHas('tags', function (Builder $q) use ($search) {
+                            $q->whereRaw(
+                                "LOWER(JSON_UNQUOTE(JSON_EXTRACT(tags.name, ?))) LIKE ?",
+                                ['$.' . app()->getLocale(), '%' . strtolower($search) . '%']
+                            );
+                        });
+                });
+            })
             ->get();
 
         $flattened = $templates->flatMap(function ($template) {
@@ -999,6 +1039,7 @@ class TemplateService extends BaseService
                 $media = $getMedia($product->id, 'product');
                 $rows->push([
                     'template_id'          => $template->id,
+                    'template_name'          => $template->name,
                     'template_image'       => $template->image ?: ($template->use_front_as_back
                         ? $template->getFirstMediaUrl('templates-preview')
                         : ($template->approach == 'without_editor'
@@ -1017,6 +1058,7 @@ class TemplateService extends BaseService
                 $media = $getMedia($category->id, 'category');
                 $rows->push([
                     'template_id'          => $template->id,
+                    'template_name'          => $template->name,
                     'template_image'       => $template->image ?: ($template->use_front_as_back
                         ? $template->getFirstMediaUrl('templates-preview')
                         : ($template->approach == 'without_editor'
