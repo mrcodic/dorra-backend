@@ -70,4 +70,9 @@ class TemplateController extends Controller
         return Response::api(data: MediaResource::make($media));
     }
 
+    public function templatesSearch(Request $request)
+    {
+        $templates = $this->templateService->searchTemplates($request);
+        return Response::api(data: $templates);
+    }
 }

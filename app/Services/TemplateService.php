@@ -15,6 +15,7 @@ use App\Models\Template;
 use App\Models\Type;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Traits\RendersTemplateMockups;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
@@ -936,5 +937,67 @@ class TemplateService extends BaseService
             'skipped_count' => count($skipped),
             'skipped' => $skipped,
         ];
+    }
+
+    public function searchTemplates($request)
+    {
+        $search  = $request->input('search');
+        $templates = Template::query()
+            ->live()
+            ->when($search, function (Builder $query) use ($search) {
+                $query->whereRaw(
+                    "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name))) LIKE ?",
+                    ["%{$search}%"]
+                );;
+            })
+            ->with([
+                'products:id,name,category_id',
+                'categories:id,name,',
+            ])
+            ->get();
+
+        // Flatten: one row per product
+        $flattened = $templates->flatMap(function ($template) {
+            $rows = collect();
+            foreach ($template->products as $product) {
+                $rows->push([
+                    'template' => $template,
+                    'type'     => 'product',
+                    'item'     => $product,
+                    'parent'   => $product?->category,  // null if no parent
+                ]);
+            }
+
+            foreach ($template->categories as $category) {
+                $rows->push([
+                    'template' => $template,
+                    'type'     => 'category',
+                    'item'     => $category,
+                    'parent'   => null,
+                ]);
+            }
+
+            if ($rows->isEmpty()) {
+                $rows->push([
+                    'template' => $template,
+                    'type'     => null,
+                    'item'     => null,
+                    'parent'   => null,
+                ]);
+            }
+        });
+
+        // Manual pagination on the flattened collection
+        $page    = request()->input('page', 1);
+        $perPage = $request->input('per_page', 15);
+        $paged   = new \Illuminate\Pagination\LengthAwarePaginator(
+            $flattened->forPage($page, $perPage)->values(),
+            $flattened->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url()]
+        );
+
+        return $paged;
     }
 }
