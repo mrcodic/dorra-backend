@@ -946,7 +946,7 @@ class TemplateService extends BaseService
 
         $templates = Template::query()
             ->live()
-            ->select('id', 'name')
+            ->select('id', 'name','use_front_as_back','approach')
             ->when($search, function (Builder $query) use ($search, $locale) {
                 $query->whereRaw(
                     "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, ?))) LIKE ?",
@@ -963,45 +963,81 @@ class TemplateService extends BaseService
         $flattened = $templates->flatMap(function ($template) {
             $rows = collect();
 
+            $getMedia = function (int $id, string $type) use ($template) {
+                return \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
+                    ->where('model_type', \App\Models\Mockup::class)
+                    ->where('collection_name', 'generated_mockups')
+                    ->where('custom_properties->template_id', (string) $template->id)
+                    ->where('custom_properties->model_image', 1)
+                    ->whereExists(function ($query) use ($id, $type) {
+                        $query->selectRaw(1)
+                            ->from('mockups')
+                            ->whereColumn('mockups.id', 'media.model_id')
+                            ->whereNull('mockups.deleted_at')
+                            ->when(
+                                $type === 'category',
+                                fn($q) => $q->where('mockups.category_id', $id)
+                            );
+                    })
+                    ->where(function ($query) use ($id) {
+                        $query->where('custom_properties->category_id', $id)
+                            ->orWhereJsonContains('custom_properties->product_ids', $id);
+                    })
+                    ->when(
+                        $type === 'product',
+                        fn($query) => $query->whereExists(function ($query) use ($id) {
+                            $query->selectRaw(1)
+                                ->from('mockup_product')
+                                ->whereColumn('mockup_product.mockup_id', 'media.model_id')
+                                ->where('mockup_product.product_id', $id);
+                        })
+                    )
+                    ->first();
+            };
+
             foreach ($template->products as $product) {
+                $media = $getMedia($product->id, 'product');
                 $rows->push([
-                    'template_id'    => $template->id,
-                    'template_image' => $template->image ,
-                    'type'           => 'product',
-                    'product_id'             => $product->id,
-                    'name'           => $product->name,
-                    'is_has_category'=> 1,
-                    'category'         => $product->category?->only('id', 'name'),
+                    'template_id'          => $template->id,
+                    'template_image'       => $template->image,
+                    'template_model_image' => $media?->getUrl() ?: $template->getFirstMediaUrl('template_model_image'),
+                    'type'                 => 'product',
+                    'product_id'           => $product->id,
+                    'name'                 => $product->name,
+                    'is_has_category'      => 1,
+                    'category'             => $product->category?->only('id', 'name'),
                 ]);
             }
 
             foreach ($template->categories as $category) {
+                $media = $getMedia($category->id, 'category');
                 $rows->push([
-                    'template_id'    => $template->id,
-                    'template_image' => $template->image,
-                    'type'           => 'category',
-                    'product_id'             => $category->id,
-                    'name'           => $category->name,
-                    'is_has_category'=> $category->is_has_category,
-                    'category'         => null,
+                    'template_id'          => $template->id,
+                    'template_image'       => $template->image,
+                    'template_model_image' => $media?->getUrl() ?: $template->getFirstMediaUrl('template_model_image'),
+                    'type'                 => 'category',
+                    'product_id'           => $category->id,
+                    'name'                 => $category->name,
+                    'is_has_category'      => $category->is_has_category,
+                    'category'             => null,
                 ]);
             }
 
             if ($rows->isEmpty()) {
                 $rows->push([
-                    'template_id'    => $template->id,
-                    'template_image' => $template->image,
-                    'type'           => null,
-                    'product_id'             => null,
-                    'name'           => null,
-                    'is_has_category'=> null,
-                    'category'         => null,
+                    'template_id'          => $template->id,
+                    'template_image'       => $template->image,
+                    'template_model_image' => $template->getFirstMediaUrl('template_model_image'),
+                    'type'                 => null,
+                    'product_id'           => null,
+                    'name'                 => null,
+                    'is_has_category'      => null,
+                    'category'             => null,
                 ]);
             }
 
             return $rows;
         });
-
         $page    = request()->input('page', 1);
         $perPage = $request->input('per_page', 15);
 
