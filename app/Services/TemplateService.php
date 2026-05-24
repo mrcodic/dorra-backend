@@ -954,7 +954,7 @@ class TemplateService extends BaseService
                 );
             })
             ->with([
-                'products:id,name,category_id,is_has_category',
+                'products:id,name,category_id',
                 'categories:id,name,is_has_category',
                 'media',
             ])
