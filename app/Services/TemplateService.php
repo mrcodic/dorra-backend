@@ -1030,24 +1030,6 @@ class TemplateService extends BaseService
                     'category'             => null,
                 ]);
             }
-
-            if ($rows->isEmpty()) {
-                $rows->push([
-                    'template_id'          => $template->id,
-                    'template_image'       => $template->image ?: ($template->use_front_as_back
-                        ? $template->getFirstMediaUrl('templates-preview')
-                        : ($template->approach == 'without_editor'
-                            ? $template->getFirstMediaUrl('back-templates-preview')
-                            : $template->getFirstMediaUrl('back_templates'))),
-                    'template_model_image' => $template->getFirstMediaUrl('template_model_image'),
-                    'type'                 => null,
-                    'product_id'           => null,
-                    'name'                 => null,
-                    'is_has_category'      => null,
-                    'category'             => null,
-                ]);
-            }
-
             return $rows;
         });
         $page    = request()->input('page', 1);
