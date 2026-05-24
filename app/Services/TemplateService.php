@@ -944,11 +944,11 @@ class TemplateService extends BaseService
         $search  = $request->input('search');
         $templates = Template::query()
             ->live()
-            ->when($search, function (Builder $query) use ($search) {
+            ->when($search, function (Builder $query) use ($search, $locale) {
                 $query->whereRaw(
-                    "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name))) LIKE ?",
-                    ["%{$search}%"]
-                );;
+                    "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, ?))) LIKE ?",
+                    ['$.' . $locale, '%' . strtolower($search) . '%']
+                );
             })
             ->with([
                 'products:id,name,category_id',
