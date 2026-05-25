@@ -190,10 +190,10 @@ class TemplateResource extends JsonResource
                 ->values(),
             'mockup_model_id' => $this->mockups()
                 ->whereCategoryId($categoryId)
-                ->wherePivotNotNull('model_color')
+                ->wherePivot('model_color', '!=', null)
+                ->whereRaw("mockup_template.model_color != ''")
                 ->first()
                 ?->id,
-
             'color_templates_media' => $this->when($this->approach == 'without_editor', function () {
                 return MediaResource::collection($this->getMedia('color_templates'));
             }),
