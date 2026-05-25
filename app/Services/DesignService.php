@@ -151,6 +151,10 @@ class DesignService extends BaseService
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->repository->update($validatedData, $id);
+        $selectedTypeValues = Arr::get($validatedData, 'types', []);
+        if (!empty($selectedTypeValues)) {
+            $model->types()->sync($selectedTypeValues);
+        }
         $fontStyleIds = collect($validatedData['font_styles_ids'] ?? [])
             ->filter()
             ->unique()
