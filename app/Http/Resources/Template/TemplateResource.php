@@ -175,6 +175,17 @@ class TemplateResource extends JsonResource
                     ? $colors
                     : json_decode($colors ?: '[]', true);
             }),
+            'template_colors' => $this->mockups()
+                ->get()
+                ->flatMap(function ($mockup) {
+                    $colors = $mockup->pivot->colors ?? [];
+                    return is_array($colors)
+                        ? $colors
+                        : json_decode($colors ?: '[]', true);
+                })
+                ->unique()
+                ->values(),
+
             'color_templates_media' => $this->when($this->approach == 'without_editor', function () {
                 return MediaResource::collection($this->getMedia('color_templates'));
             }),
