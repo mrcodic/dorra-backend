@@ -802,12 +802,12 @@ class OrderService extends BaseService
                 $hasDiscount = !$hasOffer && $item->discount_code_id !== null;
 
                 if ($hasOffer) {
-                    $subTotal       = (float) $item->sub_total_after_offer;
+                    $subTotal       = (float) $item->sub_total;
                     $discountCodeId = null;
-                    $discountAmount = 0;
+                    $discountAmount = $item->offerAmount;
 
                 } elseif ($hasDiscount) {
-                    $subTotal       = max(0, (float) $item->sub_total - (float) ($item->discount_amount ?? 0));
+                    $subTotal       = max(0, (float) $item->sub_total);
                     $discountCodeId = $item->discount_code_id;
                     $discountAmount = (float) ($item->discount_amount ?? 0);
 
