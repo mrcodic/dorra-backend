@@ -335,13 +335,14 @@ class MainController extends Controller
 
         $terms = collect(preg_split('/[\s,;]+/u', $term))
             ->map(fn ($t) => mb_strtolower(trim($t)))
-            ->filter(fn ($t) => hasMeaningfulSearch($t))
+            ->filter(fn ($t) => mb_strlen($t) >= 1) // ✅ don't filter numeric/short parts
             ->unique()
             ->values();
 
         $fullTerm = mb_strtolower($term);
 
-        if (hasMeaningfulSearch($fullTerm) && !$terms->contains($fullTerm)) {
+// Always push the full term regardless of hasMeaningfulSearch
+        if (!$terms->contains($fullTerm)) {
             $terms->push($fullTerm);
         }
 
@@ -354,15 +355,18 @@ class MainController extends Controller
         $applyNameSearch = function ($q, string $table) use ($terms, $locales) {
             $q->where(function ($qq) use ($terms, $locales, $table) {
                 foreach ($locales as $loc) {
-                    $expr = "LOWER(JSON_UNQUOTE(JSON_EXTRACT({$table}.name, '$.\"{$loc}\"')))";
+                    // ✅ Match the same format used in searchTemplates
+                    $path = '$.' . $loc;
 
-                    foreach ($terms as $term) {
-                        $qq->orWhereRaw("$expr LIKE ?", ['%' . $term . '%']);
+                    foreach ($terms as $t) {
+                        $qq->orWhereRaw(
+                            "LOWER(JSON_UNQUOTE(JSON_EXTRACT({$table}.name, ?))) LIKE ?",
+                            [$path, '%' . $t . '%']
+                        );
                     }
                 }
             });
         };
-
         $applyTemplateSearch = function ($q) use ($applyNameSearch) {
             $q->where(function ($qq) use ($applyNameSearch) {
                 // template name
