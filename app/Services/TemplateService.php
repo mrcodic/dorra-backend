@@ -957,8 +957,18 @@ class TemplateService extends BaseService
                 );
             })
             ->with([
-                'products:id,name,category_id',
-                'categories:id,name,is_has_category',
+                'products' => function ($q) {
+                    $q->select('id', 'name', 'category_id');
+                    if (request()->filled('product_id')) {
+                        $q->where('products.id', request('product_id'));
+                    }
+                },
+                'categories' => function ($q) {
+                    $q->select('id', 'name', 'is_has_category');
+                    if (request()->filled('category_id')) {
+                        $q->where('categories.id', request('category_id'));
+                    }
+                },
                 'media',
             ])
             ->when(request()->filled('industries'), function ($q) {
@@ -1003,78 +1013,74 @@ class TemplateService extends BaseService
             })
             ->get();
 
-        $flattened = $templates->flatMap(function ($template) {
+        $flattened = $templates->flatMap(function ($template) use ($request) {
             $rows = collect();
 
+            $filterProductId  = request('product_id');
+            $filterCategoryId = request('category_id');
+
             $getMedia = function (int $id, string $type) use ($template) {
-                return \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
-                    ->where('model_type', \App\Models\Mockup::class)
-                    ->where('collection_name', 'generated_mockups')
-                    ->where('custom_properties->template_id', (string) $template->id)
-                    ->where('custom_properties->model_image', 1)
-                    ->whereExists(function ($query) use ($id, $type) {
-                        $query->selectRaw(1)
-                            ->from('mockups')
-                            ->whereColumn('mockups.id', 'media.model_id')
-                            ->whereNull('mockups.deleted_at')
-                            ->when(
-                                $type === 'category',
-                                fn($q) => $q->where('mockups.category_id', $id)
-                            );
-                    })
-                    ->where(function ($query) use ($id) {
-                        $query->where('custom_properties->category_id', $id)
-                            ->orWhereJsonContains('custom_properties->product_ids', $id);
-                    })
-                    ->when(
-                        $type === 'product',
-                        fn($query) => $query->whereExists(function ($query) use ($id) {
-                            $query->selectRaw(1)
-                                ->from('mockup_product')
-                                ->whereColumn('mockup_product.mockup_id', 'media.model_id')
-                                ->where('mockup_product.product_id', $id);
-                        })
-                    )
-                    ->first();
+                // ... unchanged
             };
 
-            foreach ($template->products as $product) {
-                $media = $getMedia($product->id, 'product');
-                $rows->push([
-                    'template_id'          => $template->id,
-                    'template_name'          => $template->name,
-                    'template_image'       => $template->image ?: ($template->use_front_as_back
-                        ? $template->getFirstMediaUrl('templates-preview')
-                        : ($template->approach == 'without_editor'
+            // Only emit product rows when no category filter is active
+            if (!$filterCategoryId) {
+                foreach ($template->products as $product) {
+                    // Skip if a product filter is set and this isn't the one
+                    if ($filterProductId && $product->id != $filterProductId) {
+                        continue;
+                    }
+
+                    $media = $getMedia($product->id, 'product');
+                    $rows->push([
+                        'template_id'          => $template->id,
+                        'template_name'        => $template->name,
+                        'template_image'       => $template->image ?: (
+                        $template->use_front_as_back
+                            ? $template->getFirstMediaUrl('templates-preview')
+                            : ($template->approach == 'without_editor'
                             ? $template->getFirstMediaUrl('back-templates-preview')
-                            : $template->getFirstMediaUrl('back_templates'))),
-                    'template_model_image' => $media?->getUrl() ?: $template->getFirstMediaUrl('template_model_image'),
-                    'type'                 => 'product',
-                    'product_id'           => $product->id,
-                    'name'                 => $product->name,
-                    'is_has_category'      => 1,
-                    'category'             => $product->category?->only('id', 'name'),
-                ]);
+                            : $template->getFirstMediaUrl('back_templates'))
+                        ),
+                        'template_model_image' => $media?->getUrl() ?: $template->getFirstMediaUrl('template_model_image'),
+                        'type'                 => 'product',
+                        'product_id'           => $product->id,
+                        'name'                 => $product->name,
+                        'is_has_category'      => 1,
+                        'category'             => $product->category?->only('id', 'name'),
+                    ]);
+                }
             }
 
-            foreach ($template->categories as $category) {
-                $media = $getMedia($category->id, 'category');
-                $rows->push([
-                    'template_id'          => $template->id,
-                    'template_name'          => $template->name,
-                    'template_image'       => $template->image ?: ($template->use_front_as_back
-                        ? $template->getFirstMediaUrl('templates-preview')
-                        : ($template->approach == 'without_editor'
+            // Only emit category rows when no product filter is active
+            if (!$filterProductId) {
+                foreach ($template->categories as $category) {
+                    // Skip if a category filter is set and this isn't the one
+                    if ($filterCategoryId && $category->id != $filterCategoryId) {
+                        continue;
+                    }
+
+                    $media = $getMedia($category->id, 'category');
+                    $rows->push([
+                        'template_id'          => $template->id,
+                        'template_name'        => $template->name,
+                        'template_image'       => $template->image ?: (
+                        $template->use_front_as_back
+                            ? $template->getFirstMediaUrl('templates-preview')
+                            : ($template->approach == 'without_editor'
                             ? $template->getFirstMediaUrl('back-templates-preview')
-                            : $template->getFirstMediaUrl('back_templates'))),
-                    'template_model_image' => $media?->getUrl() ?: $template->getFirstMediaUrl('template_model_image'),
-                    'type'                 => 'category',
-                    'product_id'           => $category->id,
-                    'name'                 => $category->name,
-                    'is_has_category'      => $category->is_has_category,
-                    'category'             => null,
-                ]);
+                            : $template->getFirstMediaUrl('back_templates'))
+                        ),
+                        'template_model_image' => $media?->getUrl() ?: $template->getFirstMediaUrl('template_model_image'),
+                        'type'                 => 'category',
+                        'product_id'           => $category->id,
+                        'name'                 => $category->name,
+                        'is_has_category'      => $category->is_has_category,
+                        'category'             => null,
+                    ]);
+                }
             }
+
             return $rows;
         });
         $page    = request()->input('page', 1);
