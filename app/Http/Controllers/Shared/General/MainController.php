@@ -436,12 +436,13 @@ class MainController extends Controller
                 $applyTemplateSearch($q);
                 $q->limit($limit);
             },
-            'templates.media' => fn ($q) => $q->whereCollectionName('templates'),
+            'templates.media'     => fn ($q) => $q->whereCollectionName('templates'),
+            'templates.tags',        // ✅ needed for template_tags in CategoryResource
+            'templates.industries',  // ✅ needed for template_industries in CategoryResource
 
             'products' => function ($q) use ($applyProductSearch, $request, $limit) {
                 $q->select('products.id', 'products.name', 'products.category_id');
                 $applyProductSearch($q);
-
                 $q->when($request->rates, fn ($q) => $q->withReviewRating($request->rates));
                 $q->limit($limit);
             },
@@ -452,9 +453,9 @@ class MainController extends Controller
                 $applyTemplateSearch($q);
                 $q->limit($limit);
             },
-            'products.templates.media' => fn ($q) => $q->whereCollectionName('templates'),
-            'products.templates.tags' => fn ($q) => $applyNameSearch($q, 'tags'),
-            'products.templates.industries' => fn ($q) => $applyNameSearch($q, 'industries')
+            'products.templates.media'       => fn ($q) => $q->whereCollectionName('templates'),
+            'products.templates.tags'        => fn ($q) => $applyNameSearch($q, 'tags'),
+            'products.templates.industries'  => fn ($q) => $applyNameSearch($q, 'industries'),
         ]);
 
         return Response::api(data: CategoryResource::collection($categories));
