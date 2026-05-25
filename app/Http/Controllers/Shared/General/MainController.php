@@ -452,8 +452,13 @@ class MainController extends Controller
             },
             'products.templates.media'      => fn ($q) => $q->whereCollectionName('templates'),
             // ✅ Plain loads — no filtering — same pattern as original
-            'products.templates.tags',
-            'products.templates.industries',
+            'products.templates.tags' => function ($q) use ($applyNameSearch) {
+                $applyNameSearch($q, 'tags');
+            },
+
+            'products.templates.industries' => function ($q) use ($applyNameSearch) {
+                $applyNameSearch($q, 'industries');
+            },
         ]);
 
         return Response::api(data: CategoryResource::collection($categories));
