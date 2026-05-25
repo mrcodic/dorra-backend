@@ -448,7 +448,7 @@ class MainController extends Controller
                 $q->when($request->rates, fn ($q) => $q->withReviewRating($request->rates));
                 $q->limit($limit);
             },
-            'products.media' => fn ($q) => $q->whereCollectionName('products'),
+            'products.media' => fn ($q) => $q->whereCollectionName('product_main_image'),
 
             'products.templates' => function ($q) use ($applyTemplateSearch, $limit) {
                 $q->select('templates.id', 'templates.name');
