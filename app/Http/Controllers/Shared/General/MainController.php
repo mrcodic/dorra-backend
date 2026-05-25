@@ -349,117 +349,66 @@ class MainController extends Controller
             return Response::api(data: []);
         }
 
-        // Bump limit when query contains a numeric token (e.g. "Business Card 837")
         $hasNumericToken = $terms->contains(fn ($t) => is_numeric($t));
         $limit = $hasNumericToken
             ? min((int) ($request->limit ?? 10), 50)
             : min((int) ($request->limit ?? 3), 10);
 
-        $applyNameSearch = function ($q, string $table) use ($terms, $locales) {
-            $q->where(function ($qq) use ($terms, $locales, $table) {
-                foreach ($locales as $loc) {
-                    $path = '$.' . $loc;
+        // ✅ Build raw LIKE conditions as a reusable string + bindings
+        $buildNameConditions = function (string $table) use ($terms, $locales): array {
+            $wheres   = [];
+            $bindings = [];
 
-                    foreach ($terms as $t) {
-                        $qq->orWhereRaw(
-                            "LOWER(JSON_UNQUOTE(JSON_EXTRACT({$table}.name, ?))) LIKE ?",
-                            [$path, '%' . $t . '%']
-                        );
-                    }
+            foreach ($locales as $loc) {
+                $path = '$.' . $loc;
+                foreach ($terms as $t) {
+                    $wheres[]   = "LOWER(JSON_UNQUOTE(JSON_EXTRACT({$table}.name, ?))) LIKE ?";
+                    $bindings[] = $path;
+                    $bindings[] = '%' . $t . '%';
                 }
-            });
+            }
+
+            return [implode(' OR ', $wheres), $bindings];
         };
 
-        $applyTemplateSearch = function ($q) use ($applyNameSearch, $fullTerm, $locales) {
+        $applyNameSearch = function ($q, string $table) use ($buildNameConditions) {
+            [$sql, $bindings] = $buildNameConditions($table);
+            $q->whereRaw("($sql)", $bindings);
+        };
+
+        // ✅ Precompute order SQL once — don't recompute per row
+        $orderSql      = collect($locales)
+            ->map(fn ($loc) => "LOWER(JSON_UNQUOTE(JSON_EXTRACT(templates.name, '$.$loc'))) LIKE ?")
+            ->implode(' OR ');
+        $orderBindings = collect($locales)
+            ->map(fn () => '%' . $fullTerm . '%')
+            ->toArray();
+
+        $applyTemplateSearch = function ($q) use ($applyNameSearch, $orderSql, $orderBindings) {
             $q->where(function ($qq) use ($applyNameSearch) {
-                // template name
                 $applyNameSearch($qq, 'templates');
 
-                // template tags
-                $qq->orWhereHas('tags', function ($tagQuery) use ($applyNameSearch) {
-                    $applyNameSearch($tagQuery, 'tags');
-                });
-
-                // template industries
-                $qq->orWhereHas('industries', function ($industryQuery) use ($applyNameSearch) {
-                    $applyNameSearch($industryQuery, 'industries');
-                });
+                $qq->orWhereHas('tags', fn ($tq) => $applyNameSearch($tq, 'tags'));
+                $qq->orWhereHas('industries', fn ($iq) => $applyNameSearch($iq, 'industries'));
             })
-                // Order full-term matches first, then per-locale
-                ->orderByRaw(
-                    "CASE
-                WHEN " . collect($locales)->map(fn ($loc) =>
-                    "LOWER(JSON_UNQUOTE(JSON_EXTRACT(templates.name, '$.$loc'))) LIKE ?"
-                    )->implode(' OR ') . "
-                THEN 0 ELSE 1
-            END",
-                    collect($locales)->map(fn () => '%' . $fullTerm . '%')->toArray()
-                );
+                ->orderByRaw("CASE WHEN ($orderSql) THEN 0 ELSE 1 END", $orderBindings);
         };
 
         $applyProductSearch = function ($q) use ($applyNameSearch, $applyTemplateSearch) {
             $q->where(function ($qq) use ($applyNameSearch, $applyTemplateSearch) {
-                // product name
                 $applyNameSearch($qq, 'products');
 
-                // product templates / tags / industries
-                $qq->orWhereHas('templates', function ($templateQuery) use ($applyTemplateSearch) {
-                    $applyTemplateSearch($templateQuery);
-                });
+                $qq->orWhereHas('templates', fn ($tq) => $applyTemplateSearch($tq));
             });
         };
 
         $categories = $this->categoryRepository->query()
-            ->with([
-                'media',
-
-                'products' => function ($q) use ($request, $applyProductSearch, $limit) {
-                    $applyProductSearch($q);
-
-                    $q->when($request->rates, function ($q) use ($request) {
-                        $q->withReviewRating($request->rates);
-                    });
-
-                    $q->limit($limit);
-                },
-
-                'products.media',
-
-                'templates' => function ($q) use ($applyTemplateSearch, $limit) {
-                    $applyTemplateSearch($q);
-                    $q->limit($limit);
-                },
-
-                // Do not filter these again, because parent template already matched
-                'templates.tags',
-                'templates.industries',
-
-                'products.templates' => function ($q) use ($applyTemplateSearch, $limit) {
-                    $applyTemplateSearch($q);
-                    $q->limit($limit);
-                },
-
-                'products.templates.tags' => function ($q) use ($applyNameSearch) {
-                    $applyNameSearch($q, 'tags');
-                },
-
-                'products.templates.industries' => function ($q) use ($applyNameSearch) {
-                    $applyNameSearch($q, 'industries');
-                },
-            ])
+            ->select('id', 'name', 'type', 'is_has_category')
             ->where(function ($query) use ($applyNameSearch, $applyTemplateSearch, $applyProductSearch) {
-                // category name
                 $applyNameSearch($query, 'categories');
 
-                // direct category templates
-                $query->orWhereHas('templates', function ($q) use ($applyTemplateSearch) {
-                    $applyTemplateSearch($q);
-                });
-
-                // products / product templates / product tags
-                $query->orWhereHas('products', function ($q) use ($applyProductSearch) {
-                    $applyProductSearch($q);
-                });
+                $query->orWhereHas('templates', fn ($q) => $applyTemplateSearch($q));
+                $query->orWhereHas('products',  fn ($q) => $applyProductSearch($q));
             })
             ->when($rates, function ($q) use ($rates) {
                 $rates        = is_array($rates) ? $rates : [$rates];
@@ -475,11 +424,42 @@ class MainController extends Controller
                 });
             })
             ->when($request->take, fn ($q, $take) => $q->take(min((int) $take, 50)))
+            // ✅ Get category IDs first, then load relations separately (avoids huge JOIN)
             ->get();
 
+        // ✅ Load all relations in bulk AFTER getting categories
+        $categoryIds = $categories->pluck('id');
+
+        // Load templates for categories
+        $categories->load([
+            'media' => fn ($q) => $q->whereCollectionName('categories'),
+
+            'templates' => function ($q) use ($applyTemplateSearch, $limit) {
+                $q->select('templates.id', 'templates.name');
+                $applyTemplateSearch($q);
+                $q->limit($limit);
+            },
+            'templates.media' => fn ($q) => $q->whereCollectionName('templates'),
+
+            'products' => function ($q) use ($applyProductSearch, $request, $limit) {
+                $q->select('products.id', 'products.name', 'products.category_id');
+                $applyProductSearch($q);
+
+                $q->when($request->rates, fn ($q) => $q->withReviewRating($request->rates));
+                $q->limit($limit);
+            },
+            'products.media' => fn ($q) => $q->whereCollectionName('products'),
+
+            'products.templates' => function ($q) use ($applyTemplateSearch, $limit) {
+                $q->select('templates.id', 'templates.name');
+                $applyTemplateSearch($q);
+                $q->limit($limit);
+            },
+            'products.templates.media' => fn ($q) => $q->whereCollectionName('templates'),
+        ]);
+
         return Response::api(data: CategoryResource::collection($categories));
-    }
-    public function dimensions(Request $request)
+    }    public function dimensions(Request $request)
     {
         $validatedData = $request->validate([
             'resource_id' => ['required', Rule::when($request->resource_type == 'product', function () {
