@@ -350,8 +350,8 @@ class MainController extends Controller
             return Response::api(data: []);
         }
 
-        $limit = min((int) ($request->limit ?? 10), 50);
-  
+        $limit = min((int) ($request->limit ?? 10), 20);
+
         $buildNameConditions = function (string $table) use ($terms, $locales): array {
             $wheres   = [];
             $bindings = [];
