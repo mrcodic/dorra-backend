@@ -176,6 +176,7 @@ class TemplateResource extends JsonResource
                     : json_decode($colors ?: '[]', true);
             }),
             'template_colors' => $this->mockups()
+                ->whereCategoryId($categoryId)
                 ->whereNull('mockups.deleted_at')
                 ->orderByRaw('CASE WHEN mockup_template.model_color IS NOT NULL THEN 0 ELSE 1 END')
                 ->get()
