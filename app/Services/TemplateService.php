@@ -513,7 +513,10 @@ class TemplateService extends BaseService
             ->filter()
             ->unique()
             ->values();
-
+        $selectedTypeValues = Arr::get($validatedData, 'types', []);
+        if (!empty($selectedTypeValues)) {
+            $model->types()->sync($selectedTypeValues);
+        }
         if ($fontStyleIds->isNotEmpty()) {
             $fontMediaIds = FontStyle::query()
                 ->whereIn('id', $fontStyleIds)
