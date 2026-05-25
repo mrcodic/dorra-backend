@@ -203,7 +203,7 @@ class MainController extends Controller
     }
     public function blankTypes()
     {
-        return Response::api(data: TypeResource::collection(Type::whereValue('!=',TypeEnum::NONE)->get(['id', 'value'])));
+        return Response::api(data: TypeResource::collection(Type::where('value','!=',TypeEnum::NONE)->get(['id', 'value'])));
 
     }
 
