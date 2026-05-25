@@ -27,7 +27,6 @@ class TemplateResource extends JsonResource
     public function toArray(Request $request): array
     {
         $categoryId = (int)(request('product_without_category_id') ?? Product::find(request('product_id'))?->category_id);
-        $mockupId = Mockup::whereCategoryId($categoryId)?->first()?->id;
         $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
             ->where('model_type', \App\Models\Mockup::class)
             ->where('collection_name', 'generated_mockups')
