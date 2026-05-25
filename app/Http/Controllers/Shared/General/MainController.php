@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shared\General;
 
 
 use App\Enums\Product\UnitEnum;
+use App\Enums\Template\TypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dimension\StoreDimensionRequest;
 use App\Models\Admin;
@@ -198,6 +199,11 @@ class MainController extends Controller
     public function templateTypes()
     {
         return Response::api(data: TypeResource::collection(Type::all(['id', 'value'])));
+
+    }
+    public function blankTypes()
+    {
+        return Response::api(data: TypeResource::collection(Type::whereValue('!=',TypeEnum::NONE)->get(['id', 'value'])));
 
     }
 

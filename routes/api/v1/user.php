@@ -216,7 +216,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::get('templates', [TemplateController::class, 'index']);
     Route::get('templates-search', [TemplateController::class, 'templatesSearch']);
     Route::get('templates/{template}', [TemplateController::class, 'show']);
-    Route::get('template-types', [MainController::class, 'templateTypes'])->name('template-types');
+    Route::get('template-types', [MainController::class, 'blankTypes'])->name('template-types');
 
 
 
