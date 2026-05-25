@@ -968,6 +968,7 @@ class TemplateService extends BaseService
                     if ($filterProductId) {
                         $q->where('products.id', $filterProductId);
                     } elseif ($categoryHasProducts && $filterCategoryId) {
+                        dd($cat?->products->pluck('id')->toArray(),$categoryHasProducts);
                         $q->whereIn('products.id', $cat?->products->pluck('id')->toArray());
                     }
                 },
