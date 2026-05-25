@@ -192,8 +192,7 @@ class TemplateResource extends JsonResource
                 ->whereCategoryId($categoryId)
                 ->wherePivotNotNull('model_color')
                 ->first()
-                ?->pivot
-                ?->mockup_id,
+                ?->id,
 
             'color_templates_media' => $this->when($this->approach == 'without_editor', function () {
                 return MediaResource::collection($this->getMedia('color_templates'));
