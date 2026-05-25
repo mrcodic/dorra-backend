@@ -1001,7 +1001,7 @@ class TemplateService extends BaseService
                         $q->where('categories.id', $filterCategoryId);
                     });
                 }
-                
+
             })
             ->when($filterProductId, function ($q) use ($filterProductId) {
                 $q->whereHas('products', function ($q) use ($filterProductId) {
