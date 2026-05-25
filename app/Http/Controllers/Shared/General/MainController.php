@@ -411,9 +411,9 @@ class MainController extends Controller
 
         $categories = $this->categoryRepository->query()
             ->with([
-                'media',
-
+                'media' => fn($q) => $q->whereCollectionName('categories'),
                 'products' => function ($q) use ($request, $applyProductSearch, $limit) {
+                    $q->select('products.id', 'products.name'); // ✅ products fields
                     $applyProductSearch($q);
 
                     $q->when($request->rates, function ($q) use ($request) {
@@ -423,21 +423,26 @@ class MainController extends Controller
                     $q->limit($limit);
                 },
 
-                'products.media',
+                'products.media' => fn($q) => $q->whereCollectionName('product_main_image'), // for product image
 
                 'templates' => function ($q) use ($applyTemplateSearch, $limit) {
+                    $q->select('templates.id', 'templates.name'); // ✅ templates fields
                     $applyTemplateSearch($q);
                     $q->limit($limit);
                 },
 
-                // Do not filter these again, because parent template already matched
+                'templates.media', // for template image
+
                 'templates.tags',
                 'templates.industries',
 
                 'products.templates' => function ($q) use ($applyTemplateSearch, $limit) {
+                    $q->select('templates.id', 'templates.name'); // ✅
                     $applyTemplateSearch($q);
                     $q->limit($limit);
                 },
+
+                'products.templates.media', // for product template image
 
                 'products.templates.tags' => function ($q) use ($applyNameSearch) {
                     $applyNameSearch($q, 'tags');
