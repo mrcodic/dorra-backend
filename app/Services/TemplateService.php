@@ -961,19 +961,17 @@ class TemplateService extends BaseService
             ->live()
             ->select('id', 'name', 'use_front_as_back', 'approach')
             ->with([
-                'products' => function ($q) use ($filterProductId, $filterCategoryId, $categoryHasProducts) {
+                'products' => function ($q) use ($filterProductId, $filterCategoryId, $categoryHasProducts,$cat) {
                     $q->select('products.id', 'products.name', 'products.category_id');
 
                     if ($filterProductId) {
                         $q->where('products.id', $filterProductId);
                     } elseif ($categoryHasProducts && $filterCategoryId) {
-                        // Load only products that belong to the requested category
-                        $q->where('products.category_id', $filterCategoryId);
+                        $q->whereIn('products.id', $cat->products->pluck('id')->toArray());
                     }
                 },
                 'categories' => function ($q) use ($filterCategoryId, $categoryHasProducts) {
                     $q->select('categories.id', 'categories.name', 'categories.is_has_category');
-
                     // Only constrain category if it does NOT expand into products
                     if ($filterCategoryId && !$categoryHasProducts) {
                         $q->where('categories.id', $filterCategoryId);
