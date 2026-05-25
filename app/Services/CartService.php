@@ -183,14 +183,13 @@ class CartService extends BaseService
         $basePrice = $product->base_price ?? $productPriceValue ?? $design?->price;
 
         $subTotal = $basePrice + $specsSum;
-        $quantity = $productPrice?->quantity ?? request()->quantity;
-
         $calculatePrices = [
             'product_price' => $basePrice,
-            'specs_sum' => $specsSum * $quantity,
+            'specs_sum' => $specsSum,
             'sub_total' => $subTotal,
             'product_price_id' => $productPrice?->id,
         ];
+        $quantity = $productPrice?->quantity;
         if ($quantity) {
             $calculatePrices['quantity'] = $quantity;
         }
