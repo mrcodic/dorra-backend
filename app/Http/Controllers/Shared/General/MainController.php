@@ -335,13 +335,12 @@ class MainController extends Controller
 
         $terms = collect(preg_split('/[\s,;]+/u', $term))
             ->map(fn ($t) => mb_strtolower(trim($t)))
-            ->filter(fn ($t) => mb_strlen($t) >= 1) // ✅ don't filter numeric/short parts
+            ->filter(fn ($t) => mb_strlen($t) >= 1)
             ->unique()
             ->values();
 
         $fullTerm = mb_strtolower($term);
 
-// Always push the full term regardless of hasMeaningfulSearch
         if (!$terms->contains($fullTerm)) {
             $terms->push($fullTerm);
         }
@@ -350,12 +349,15 @@ class MainController extends Controller
             return Response::api(data: []);
         }
 
-        $limit = min((int) ($request->limit ?? 3), 10);
+        // Bump limit when query contains a numeric token (e.g. "Business Card 837")
+        $hasNumericToken = $terms->contains(fn ($t) => is_numeric($t));
+        $limit = $hasNumericToken
+            ? min((int) ($request->limit ?? 10), 50)
+            : min((int) ($request->limit ?? 3), 10);
 
         $applyNameSearch = function ($q, string $table) use ($terms, $locales) {
             $q->where(function ($qq) use ($terms, $locales, $table) {
                 foreach ($locales as $loc) {
-                    // ✅ Match the same format used in searchTemplates
                     $path = '$.' . $loc;
 
                     foreach ($terms as $t) {
@@ -367,7 +369,8 @@ class MainController extends Controller
                 }
             });
         };
-        $applyTemplateSearch = function ($q) use ($applyNameSearch) {
+
+        $applyTemplateSearch = function ($q) use ($applyNameSearch, $fullTerm, $locales) {
             $q->where(function ($qq) use ($applyNameSearch) {
                 // template name
                 $applyNameSearch($qq, 'templates');
@@ -381,7 +384,17 @@ class MainController extends Controller
                 $qq->orWhereHas('industries', function ($industryQuery) use ($applyNameSearch) {
                     $applyNameSearch($industryQuery, 'industries');
                 });
-            });
+            })
+                // Order full-term matches first, then per-locale
+                ->orderByRaw(
+                    "CASE
+                WHEN " . collect($locales)->map(fn ($loc) =>
+                    "LOWER(JSON_UNQUOTE(JSON_EXTRACT(templates.name, '$.$loc'))) LIKE ?"
+                    )->implode(' OR ') . "
+                THEN 0 ELSE 1
+            END",
+                    collect($locales)->map(fn () => '%' . $fullTerm . '%')->toArray()
+                );
         };
 
         $applyProductSearch = function ($q) use ($applyNameSearch, $applyTemplateSearch) {
@@ -449,7 +462,7 @@ class MainController extends Controller
                 });
             })
             ->when($rates, function ($q) use ($rates) {
-                $rates = is_array($rates) ? $rates : [$rates];
+                $rates        = is_array($rates) ? $rates : [$rates];
                 $placeholders = implode(',', array_fill(0, count($rates), '?'));
 
                 $q->where(function ($qq) use ($rates, $placeholders) {
