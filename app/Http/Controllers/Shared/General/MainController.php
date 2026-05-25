@@ -344,17 +344,14 @@ class MainController extends Controller
         if (!$terms->contains($fullTerm)) {
             $terms->push($fullTerm);
         }
+        $terms = $terms->filter(fn ($t) => !is_numeric($t))->values();
 
         if ($terms->isEmpty()) {
             return Response::api(data: []);
         }
 
-        $hasNumericToken = $terms->contains(fn ($t) => is_numeric($t));
-        $limit = $hasNumericToken
-            ? min((int) ($request->limit ?? 10), 50)
-            : min((int) ($request->limit ?? 3), 10);
-
-        // ✅ Build raw LIKE conditions as a reusable string + bindings
+        $limit = min((int) ($request->limit ?? 10), 50);
+  
         $buildNameConditions = function (string $table) use ($terms, $locales): array {
             $wheres   = [];
             $bindings = [];
