@@ -956,6 +956,8 @@ class TemplateService extends BaseService
             $cat = \App\Models\Category::select('id', 'is_has_category')
                 ->find($filterCategoryId);
             $categoryHasProducts = $cat && $cat->is_has_category == 1;
+            dd($cat?->products->pluck('id')->toArray(),$categoryHasProducts);
+
         }
 
         $templates = Template::query()
@@ -968,7 +970,6 @@ class TemplateService extends BaseService
                     if ($filterProductId) {
                         $q->where('products.id', $filterProductId);
                     } elseif ($categoryHasProducts && $filterCategoryId) {
-                        dd($cat?->products->pluck('id')->toArray(),$categoryHasProducts);
                         $q->whereIn('products.id', $cat?->products->pluck('id')->toArray());
                     }
                 },
