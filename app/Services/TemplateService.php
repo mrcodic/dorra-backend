@@ -958,13 +958,13 @@ class TemplateService extends BaseService
             })
             ->with([
                 'products' => function ($q) {
-                    $q->select('id', 'name', 'category_id');
+                    $q->select('products.id', 'products.name', 'products.category_id');
                     if (request()->filled('product_id')) {
                         $q->where('products.id', request('product_id'));
                     }
                 },
                 'categories' => function ($q) {
-                    $q->select('id', 'name', 'is_has_category');
+                    $q->select('categories.id', 'categories.name', 'categories.is_has_category');
                     if (request()->filled('category_id')) {
                         $q->where('categories.id', request('category_id'));
                     }
