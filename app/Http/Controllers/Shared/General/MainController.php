@@ -403,7 +403,7 @@ class MainController extends Controller
         };
 
         $categories = $this->categoryRepository->query()
-            ->select('id', 'name', 'type', 'is_has_category')
+            ->select('id', 'name', 'is_has_category')
             ->where(function ($query) use ($applyNameSearch, $applyTemplateSearch, $applyProductSearch) {
                 $applyNameSearch($query, 'categories');
 
@@ -459,7 +459,9 @@ class MainController extends Controller
         ]);
 
         return Response::api(data: CategoryResource::collection($categories));
-    }    public function dimensions(Request $request)
+    }
+
+    public function dimensions(Request $request)
     {
         $validatedData = $request->validate([
             'resource_id' => ['required', Rule::when($request->resource_type == 'product', function () {
