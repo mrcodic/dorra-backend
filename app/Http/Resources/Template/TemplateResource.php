@@ -176,6 +176,8 @@ class TemplateResource extends JsonResource
                     : json_decode($colors ?: '[]', true);
             }),
             'template_colors' => $this->mockups()
+                ->whereNull('mockups.deleted_at')
+                ->orderByRaw('CASE WHEN mockup_template.model_color IS NOT NULL THEN 0 ELSE 1 END')
                 ->get()
                 ->flatMap(function ($mockup) {
                     $colors = $mockup->pivot->colors ?? [];
