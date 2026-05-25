@@ -1013,17 +1013,42 @@ class TemplateService extends BaseService
             })
             ->get();
 
-        $flattened = $templates->flatMap(function ($template) use ($request) {
+        $flattened = $templates->flatMap(function ($template) {
             $rows = collect();
-
             $filterProductId  = request('product_id');
             $filterCategoryId = request('category_id');
-
             $getMedia = function (int $id, string $type) use ($template) {
-                // ... unchanged
+                return \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
+                    ->where('model_type', \App\Models\Mockup::class)
+                    ->where('collection_name', 'generated_mockups')
+                    ->where('custom_properties->template_id', (string) $template->id)
+                    ->where('custom_properties->model_image', 1)
+                    ->whereExists(function ($query) use ($id, $type) {
+                        $query->selectRaw(1)
+                            ->from('mockups')
+                            ->whereColumn('mockups.id', 'media.model_id')
+                            ->whereNull('mockups.deleted_at')
+                            ->when(
+                                $type === 'category',
+                                fn($q) => $q->where('mockups.category_id', $id)
+                            );
+                    })
+                    ->where(function ($query) use ($id) {
+                        $query->where('custom_properties->category_id', $id)
+                            ->orWhereJsonContains('custom_properties->product_ids', $id);
+                    })
+                    ->when(
+                        $type === 'product',
+                        fn($query) => $query->whereExists(function ($query) use ($id) {
+                            $query->selectRaw(1)
+                                ->from('mockup_product')
+                                ->whereColumn('mockup_product.mockup_id', 'media.model_id')
+                                ->where('mockup_product.product_id', $id);
+                        })
+                    )
+                    ->first();
             };
 
-            // Only emit product rows when no category filter is active
             if (!$filterCategoryId) {
                 foreach ($template->products as $product) {
                     // Skip if a product filter is set and this isn't the one
@@ -1080,7 +1105,6 @@ class TemplateService extends BaseService
                     ]);
                 }
             }
-
             return $rows;
         });
         $page    = request()->input('page', 1);
