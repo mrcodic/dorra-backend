@@ -951,6 +951,7 @@ class TemplateService extends BaseService
 
         // Pre-check: does the requested category expand into products?
         $categoryHasProducts = false;
+        $cat = null;
         if ($filterCategoryId) {
             $cat = \App\Models\Category::select('id', 'is_has_category')
                 ->find($filterCategoryId);
@@ -967,7 +968,7 @@ class TemplateService extends BaseService
                     if ($filterProductId) {
                         $q->where('products.id', $filterProductId);
                     } elseif ($categoryHasProducts && $filterCategoryId) {
-                        $q->whereIn('products.id', $cat->products->pluck('id')->toArray());
+                        $q->whereIn('products.id', $cat?->products->pluck('id')->toArray());
                     }
                 },
                 'categories' => function ($q) use ($filterCategoryId, $categoryHasProducts) {
