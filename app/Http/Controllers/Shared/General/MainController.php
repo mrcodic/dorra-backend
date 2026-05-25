@@ -344,6 +344,7 @@ class MainController extends Controller
         if (!$terms->contains($fullTerm)) {
             $terms->push($fullTerm);
         }
+
         $terms = $terms->filter(fn ($t) => !is_numeric($t))->values();
 
         if ($terms->isEmpty()) {
@@ -373,10 +374,10 @@ class MainController extends Controller
             $q->whereRaw("($sql)", $bindings);
         };
 
-        // ✅ Precompute order SQL once — don't recompute per row
-        $orderSql      = collect($locales)
+        $orderSql = collect($locales)
             ->map(fn ($loc) => "LOWER(JSON_UNQUOTE(JSON_EXTRACT(templates.name, '$.$loc'))) LIKE ?")
             ->implode(' OR ');
+
         $orderBindings = collect($locales)
             ->map(fn () => '%' . $fullTerm . '%')
             ->toArray();
@@ -421,22 +422,21 @@ class MainController extends Controller
                 });
             })
             ->when($request->take, fn ($q, $take) => $q->take(min((int) $take, 50)))
-            // ✅ Get category IDs first, then load relations separately (avoids huge JOIN)
             ->get();
 
-        // ✅ Load all relations in bulk AFTER getting categories
-        $categoryIds = $categories->pluck('id');
-
-        // Load templates for categories
         $categories->load([
             'media' => fn ($q) => $q->whereCollectionName('categories'),
 
             'templates' => function ($q) use ($applyTemplateSearch, $limit) {
-                $q->select('templates.id', 'templates.name');
+                $q->select('templates.id', 'templates.name', 'templates.status');
                 $applyTemplateSearch($q);
                 $q->limit($limit);
             },
-            'templates.media'     => fn ($q) => $q->whereCollectionName('templates'),
+            'templates.media'      => fn ($q) => $q->whereCollectionName('templates'),
+            // ✅ Plain loads — no filtering — same pattern as original
+            'templates.tags',
+            'templates.industries',
+
             'products' => function ($q) use ($applyProductSearch, $request, $limit) {
                 $q->select('products.id', 'products.name', 'products.category_id');
                 $applyProductSearch($q);
@@ -446,15 +446,14 @@ class MainController extends Controller
             'products.media' => fn ($q) => $q->whereCollectionName('product_main_image'),
 
             'products.templates' => function ($q) use ($applyTemplateSearch, $limit) {
-                $q->select('templates.id', 'templates.name');
+                $q->select('templates.id', 'templates.name', 'templates.status');
                 $applyTemplateSearch($q);
                 $q->limit($limit);
             },
-            'products.templates.media'       => fn ($q) => $q->whereCollectionName('templates'),
-            'products.templates.tags'        => fn ($q) => $applyNameSearch($q, 'tags'),
-            'products.templates.industries'  => fn ($q) => $applyNameSearch($q, 'industries'),
-            'templates.tags'        => fn ($q) => $applyNameSearch($q, 'tags'),
-            'templates.industries'  => fn ($q) => $applyNameSearch($q, 'industries'),
+            'products.templates.media'      => fn ($q) => $q->whereCollectionName('templates'),
+            // ✅ Plain loads — no filtering — same pattern as original
+            'products.templates.tags',
+            'products.templates.industries',
         ]);
 
         return Response::api(data: CategoryResource::collection($categories));
