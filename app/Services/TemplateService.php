@@ -944,29 +944,39 @@ class TemplateService extends BaseService
 
     public function searchTemplates($request)
     {
-        $search  = $request->input('search');
-        $locale  = app()->getLocale();
+        $search           = $request->input('search');
+        $locale           = app()->getLocale();
+        $filterCategoryId = request('category_id');
+        $filterProductId  = request('product_id');
+
+        // Pre-check: does the requested category expand into products?
+        $categoryHasProducts = false;
+        if ($filterCategoryId) {
+            $cat = \App\Models\Category::select('id', 'is_has_category')
+                ->find($filterCategoryId);
+            $categoryHasProducts = $cat && $cat->is_has_category == 1;
+        }
 
         $templates = Template::query()
             ->live()
-            ->select('id', 'name','use_front_as_back','approach')
-            ->when($search, function (Builder $query) use ($search, $locale) {
-                $query->whereRaw(
-                    "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, ?))) LIKE ?",
-                    ['$.' . $locale, '%' . strtolower($search) . '%']
-                );
-            })
+            ->select('id', 'name', 'use_front_as_back', 'approach')
             ->with([
-                'products' => function ($q) {
+                'products' => function ($q) use ($filterProductId, $filterCategoryId, $categoryHasProducts) {
                     $q->select('products.id', 'products.name', 'products.category_id');
-                    if (request()->filled('product_id')) {
-                        $q->where('products.id', request('product_id'));
+
+                    if ($filterProductId) {
+                        $q->where('products.id', $filterProductId);
+                    } elseif ($categoryHasProducts && $filterCategoryId) {
+                        // Load only products that belong to the requested category
+                        $q->where('products.category_id', $filterCategoryId);
                     }
                 },
-                'categories' => function ($q) {
+                'categories' => function ($q) use ($filterCategoryId, $categoryHasProducts) {
                     $q->select('categories.id', 'categories.name', 'categories.is_has_category');
-                    if (request()->filled('category_id')) {
-                        $q->where('categories.id', request('category_id'));
+
+                    // Only constrain category if it does NOT expand into products
+                    if ($filterCategoryId && !$categoryHasProducts) {
+                        $q->where('categories.id', $filterCategoryId);
                     }
                 },
                 'media',
@@ -976,22 +986,24 @@ class TemplateService extends BaseService
                 $q->whereHas('industries', function ($q) use ($industries) {
                     $q->whereIn('industries.id', is_array($industries) ? $industries : [$industries]);
                 });
-            })->when(request()->filled('tags'), function ($q) {
+            })
+            ->when(request()->filled('tags'), function ($q) {
                 $tags = request('tags');
                 $q->whereHas('tags', function ($q) use ($tags) {
                     $q->whereIn('tags.id', is_array($tags) ? $tags : [$tags]);
                 });
-            })->when(request('category_id'), function ($q) {
-                $categoryId =request('category_id');
-                $q->whereHas('categories', function ($q) use ($categoryId) {
-                    $q->where('categories.id', $categoryId);
+            })
+            ->when($filterCategoryId, function ($q) use ($filterCategoryId) {
+                $q->whereHas('categories', function ($q) use ($filterCategoryId) {
+                    $q->where('categories.id', $filterCategoryId);
                 });
-            })->when(request('product_id'), function ($q) {
-                $productId =request('product_id');
-                $q->whereHas('products', function ($q) use ($productId) {
-                    $q->where('products.id', $productId);
+            })
+            ->when($filterProductId, function ($q) use ($filterProductId) {
+                $q->whereHas('products', function ($q) use ($filterProductId) {
+                    $q->where('products.id', $filterProductId);
                 });
-            })->when($search, function (Builder $query) use ($search, $locale) {
+            })
+            ->when($search, function (Builder $query) use ($search, $locale) {
                 $query->where(function (Builder $q) use ($search, $locale) {
                     $q->whereRaw(
                         "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, ?))) LIKE ?",
@@ -1013,10 +1025,9 @@ class TemplateService extends BaseService
             })
             ->get();
 
-        $flattened = $templates->flatMap(function ($template) {
+        $flattened = $templates->flatMap(function ($template) use ($filterProductId, $filterCategoryId, $categoryHasProducts) {
             $rows = collect();
-            $filterProductId  = request('product_id');
-            $filterCategoryId = request('category_id');
+
             $getMedia = function (int $id, string $type) use ($template) {
                 return \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
                     ->where('model_type', \App\Models\Mockup::class)
@@ -1049,10 +1060,22 @@ class TemplateService extends BaseService
                     ->first();
             };
 
-            if (!$filterCategoryId) {
+            $templateImage = $template->image ?: (
+            $template->use_front_as_back
+                ? $template->getFirstMediaUrl('templates-preview')
+                : ($template->approach == 'without_editor'
+                ? $template->getFirstMediaUrl('back-templates-preview')
+                : $template->getFirstMediaUrl('back_templates'))
+            );
+
+            // --- Emit PRODUCT rows ---
+            // When: no category filter, OR category filter with is_has_category=1, OR product filter
+            $shouldEmitProducts = !$filterCategoryId || $categoryHasProducts || $filterProductId;
+
+            if ($shouldEmitProducts) {
                 foreach ($template->products as $product) {
-                    // Skip if a product filter is set and this isn't the one
-                    if ($filterProductId && $product->id != $filterProductId) {
+                    // If category expands into products, only show products of that category
+                    if ($categoryHasProducts && $product->category_id != $filterCategoryId) {
                         continue;
                     }
 
@@ -1060,13 +1083,7 @@ class TemplateService extends BaseService
                     $rows->push([
                         'template_id'          => $template->id,
                         'template_name'        => $template->name,
-                        'template_image'       => $template->image ?: (
-                        $template->use_front_as_back
-                            ? $template->getFirstMediaUrl('templates-preview')
-                            : ($template->approach == 'without_editor'
-                            ? $template->getFirstMediaUrl('back-templates-preview')
-                            : $template->getFirstMediaUrl('back_templates'))
-                        ),
+                        'template_image'       => $templateImage,
                         'template_model_image' => $media?->getUrl() ?: $template->getFirstMediaUrl('template_model_image'),
                         'type'                 => 'product',
                         'product_id'           => $product->id,
@@ -1077,10 +1094,10 @@ class TemplateService extends BaseService
                 }
             }
 
-            // Only emit category rows when no product filter is active
-            if (!$filterProductId) {
+            // --- Emit CATEGORY rows ---
+            // Only when: no product filter AND category filter is absent OR is_has_category=0
+            if (!$filterProductId && !$categoryHasProducts) {
                 foreach ($template->categories as $category) {
-                    // Skip if a category filter is set and this isn't the one
                     if ($filterCategoryId && $category->id != $filterCategoryId) {
                         continue;
                     }
@@ -1089,13 +1106,7 @@ class TemplateService extends BaseService
                     $rows->push([
                         'template_id'          => $template->id,
                         'template_name'        => $template->name,
-                        'template_image'       => $template->image ?: (
-                        $template->use_front_as_back
-                            ? $template->getFirstMediaUrl('templates-preview')
-                            : ($template->approach == 'without_editor'
-                            ? $template->getFirstMediaUrl('back-templates-preview')
-                            : $template->getFirstMediaUrl('back_templates'))
-                        ),
+                        'template_image'       => $templateImage,
                         'template_model_image' => $media?->getUrl() ?: $template->getFirstMediaUrl('template_model_image'),
                         'type'                 => 'category',
                         'product_id'           => $category->id,
@@ -1105,8 +1116,10 @@ class TemplateService extends BaseService
                     ]);
                 }
             }
+
             return $rows;
         });
+
         $page    = request()->input('page', 1);
         $perPage = $request->input('per_page', 15);
 
@@ -1117,4 +1130,5 @@ class TemplateService extends BaseService
             $page,
             ['path' => request()->url()]
         );
-    }}
+    }
+}
