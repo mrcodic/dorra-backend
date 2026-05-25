@@ -995,7 +995,9 @@ class TemplateService extends BaseService
             })
             ->when($filterCategoryId, function ($q) use ($filterCategoryId,$categoryHasProducts,$cat) {
                 if ($categoryHasProducts && $filterCategoryId) {
-                    $q->whereIn('products.id', $cat?->products->pluck('id')->toArray());
+                    $q->whereHas('products',function ($q)use ($cat){
+                        $q->whereIn('products.id', $cat?->products->pluck('id')->toArray());
+                    });
                 }else{
                     $q->whereHas('categories', function ($q) use ($filterCategoryId) {
                         $q->where('categories.id', $filterCategoryId);
