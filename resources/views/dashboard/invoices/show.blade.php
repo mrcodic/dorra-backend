@@ -108,15 +108,15 @@
                     <p class="fs-16 text-black">April 30, 2025</p> --}}
                 </div>
                 <!-- Items List -->
-                @foreach ($model->order?->orderItems ??[] as $design)
+            @foreach ($model->order?->orderItems ??[] as $design)
                 @php
-                $product = $design->itemable;
+                    $product = $design->itemable;
                 @endphp
                 <div class="mb-1">
                     <div class="d-flex align-items-start justify-content-between">
                         <div class="d-flex">
                             <img src="{{ $design->itemable?->getFirstMediaUrl(Str::plural(Str::lower(class_basename($design->itemable)))) }}"
-                                class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
+                                 class="me-3 rounded" alt="Product" style="width: 60px; height: 60px;">
                             <div>
                                 <div class="fw-bold text-black fs-16">
                                     {{ $product->name ?? 'No Product Found' }}
@@ -126,13 +126,14 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="text-end">
                             @if($design->discount_amount)
                                 <div class="text-muted text-decoration-line-through small">
-                                    {{ number_format(($design->sub_total) ?? 0, 2) }}
+                                    {{ number_format(($design->sub_total + $design->discount_amount) ?? 0, 2) }}
                                 </div>
                                 <div class="fw-bold text-success">
-                                    {{ number_format($design->sub_total -$design->discount_amount ?? 0, 2) }}
+                                    {{ number_format($design->sub_total ?? 0, 2) }}
                                 </div>
                                 <div class="text-danger small">
                                     -{{ number_format($design->discount_amount, 2) }}
@@ -143,9 +144,10 @@
                                 </div>
                             @endif
                         </div>
+
                     </div>
                 </div>
-                @endforeach
+            @endforeach
 
                 <hr>
 
