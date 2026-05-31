@@ -133,7 +133,7 @@
                                     {{ number_format(($design->sub_total) ?? 0, 2) }}
                                 </div>
                                 <div class="fw-bold text-success">
-                                    {{ number_format($design->sub_total - $orderItem->discount_amount ?? 0, 2) }}
+                                    {{ number_format($design->sub_total - $design->discount_amount ?? 0, 2) }}
                                 </div>
                                 <div class="text-danger small">
                                     -{{ number_format($design->discount_amount, 2) }}
