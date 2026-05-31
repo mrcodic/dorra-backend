@@ -531,8 +531,16 @@
         // =========================
         document.addEventListener('DOMContentLoaded', function () {
 {{--            @if($model->approach === 'with_editor')--}}
-            const existingColors = @json($model->pre_fill_colors ?? []);
-
+            @php
+                $preFillColors = $model->pre_fill_colors;
+                if (is_string($preFillColors)) {
+                    $preFillColors = json_decode($preFillColors, true) ?? [];
+                }
+                if (!is_array($preFillColors)) {
+                    $preFillColors = [];
+                }
+            @endphp
+            const existingColors = @json($preFillColors);
             if (Array.isArray(existingColors) && existingColors.length) {
                 const selectedColors = document.getElementById('selected-colors');
                 const inputContainer = document.getElementById('colorsInputContainer');
