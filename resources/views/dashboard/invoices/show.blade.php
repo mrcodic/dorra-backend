@@ -128,7 +128,7 @@
                         </div>
 
                         <div class="text-end">
-                            @if($design->discount_amount)
+                            @if($design->discount_amount > 0)
                                 <div class="text-muted text-decoration-line-through small">
                                     {{ number_format(($design->sub_total + $design->discount_amount) ?? 0, 2) }}
                                 </div>
