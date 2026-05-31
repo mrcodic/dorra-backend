@@ -39,16 +39,7 @@ use App\Http\Controllers\Shared\General\MainController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
-Route::prefix('register')->group(function () {
-    Route::post('/otp/send', [OtpController::class, 'sendRegistrationOtp']);
-    Route::post('/', RegisterController::class);
-});
 
-Route::prefix('password')->group(function () {
-    Route::post('/otp/send', [OtpController::class, 'sendPasswordResetOtp']);
-    Route::post('/otp/confirm', [OtpController::class, 'confirmPasswordResetOtp']);
-    Route::post('reset', ResetPasswordController::class);
-});
 
 Route::prefix('login')->controller(LoginController::class)->group(function () {
     Route::post('/', LoginController::class);
@@ -96,6 +87,17 @@ Route::post('designs/{design}/fonts', [DesignController::class,'attachMultipleFo
 
 
 Route::middleware(LocalizationMiddleware::class)->group(function () {
+    Route::prefix('register')->group(function () {
+        Route::post('/otp/send', [OtpController::class, 'sendRegistrationOtp']);
+        Route::post('/', RegisterController::class);
+    });
+
+    Route::prefix('password')->group(function () {
+        Route::post('/otp/send', [OtpController::class, 'sendPasswordResetOtp']);
+        Route::post('/otp/confirm', [OtpController::class, 'confirmPasswordResetOtp']);
+        Route::post('reset', ResetPasswordController::class);
+    });
+
     Route::post('contact-us', [MainController::class, 'contactUs'])->name('contact-us');
     Route::get('country-codes', [MainController::class, 'countryCodes']);
 
