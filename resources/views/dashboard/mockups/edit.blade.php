@@ -531,7 +531,7 @@
         // =========================
         document.addEventListener('DOMContentLoaded', function () {
 {{--            @if($model->approach === 'with_editor')--}}
-            const existingColors = @json($model->colors ?? []);
+            const existingColors = @json($model->pre_fill_colors ?? []);
 
             if (Array.isArray(existingColors) && existingColors.length) {
                 const selectedColors = document.getElementById('selected-colors');
