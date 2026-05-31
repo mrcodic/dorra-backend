@@ -353,7 +353,10 @@ class MainController extends Controller
         $applyNameSearch = function ($q, string $table) use ($terms) {
             $q->where(function ($qq) use ($table, $terms) {
                 foreach ($terms as $t) {
-                    $qq->orWhereRaw("LOWER({$table}.name) LIKE ?", ['%' . $t . '%']);
+                    $qq->orWhereRaw(
+                        "JSON_SEARCH(LOWER({$table}.name), 'one', ?) IS NOT NULL",
+                        ['%' . $t . '%']
+                    );
                 }
             });
         };
@@ -365,7 +368,7 @@ class MainController extends Controller
                 $qq->orWhereHas('industries', fn ($iq) => $applyNameSearch($iq, 'industries'));
             })
                 ->orderByRaw(
-                    "CASE WHEN LOWER(templates.name) LIKE ? THEN 0 ELSE 1 END",
+                    "CASE WHEN JSON_SEARCH(LOWER(templates.name), 'one', ?) IS NOT NULL THEN 0 ELSE 1 END",
                     ['%' . $fullTerm . '%']
                 );
         };
