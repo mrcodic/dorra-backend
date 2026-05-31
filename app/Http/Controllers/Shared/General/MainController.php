@@ -328,8 +328,7 @@ class MainController extends Controller
     {
         $term     = trim((string) ($request->search ?? ''));
         $rates    = $request->rates;
-        $fullTerm = mb_strtolower($term);
-
+        $fullTerm = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], mb_strtolower($term));
         if (empty($fullTerm)) {
             return Response::api(data: []);
         }
