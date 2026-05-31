@@ -945,7 +945,6 @@ class TemplateService extends BaseService
     public function searchTemplates($request)
     {
         $search           = $request->input('search');
-        $locale           = app()->getLocale();
         $filterCategoryId = request('category_id');
         $filterProductId  = request('product_id');
 
@@ -1010,22 +1009,22 @@ class TemplateService extends BaseService
                     $q->where('products.id', $filterProductId);
                 });
             })
-            ->when($search, function (Builder $query) use ($search, $locale) {
-                $query->where(function (Builder $q) use ($search, $locale) {
+            ->when($search, function (Builder $query) use ($search) {
+                $query->where(function (Builder $q) use ($search) {
                     $q->whereRaw(
-                        "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, ?))) LIKE ?",
-                        ['$.' . $locale, '%' . strtolower($search) . '%']
+                        "LOWER(name) LIKE ?",
+                        ['%' . strtolower($search) . '%']
                     )
                         ->orWhereHas('industries', function (Builder $q) use ($search) {
                             $q->whereRaw(
-                                "LOWER(JSON_UNQUOTE(JSON_EXTRACT(industries.name, ?))) LIKE ?",
-                                ['$.' . app()->getLocale(), '%' . strtolower($search) . '%']
+                                "LOWER(industries.name) LIKE ?",
+                                ['%' . strtolower($search) . '%']
                             );
                         })
                         ->orWhereHas('tags', function (Builder $q) use ($search) {
                             $q->whereRaw(
-                                "LOWER(JSON_UNQUOTE(JSON_EXTRACT(tags.name, ?))) LIKE ?",
-                                ['$.' . app()->getLocale(), '%' . strtolower($search) . '%']
+                                "LOWER(tags.name) LIKE ?",
+                                ['%' . strtolower($search) . '%']
                             );
                         });
                 });
