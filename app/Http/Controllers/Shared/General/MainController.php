@@ -341,7 +341,7 @@ class MainController extends Controller
             $terms->push($fullTerm);
         }
 
-        $terms = $terms->filter(fn ($t) => !is_numeric($t))->values();
+        $terms = $terms->values();
 
         if ($terms->isEmpty()) {
             return Response::api(data: []);
