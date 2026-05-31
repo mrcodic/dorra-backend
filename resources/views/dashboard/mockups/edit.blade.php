@@ -560,7 +560,7 @@
                     // hidden input
                     const input = document.createElement('input');
                     input.type  = 'hidden';
-                    input.name  = 'colors[]';
+                    input.name  = 'pre_fill_colors[]';
                     input.value = normalizedHex;
                     inputContainer.appendChild(input);
                 });
@@ -800,7 +800,7 @@
 
                 const input = document.createElement('input');
                 input.type  = 'hidden';
-                input.name  = 'colors[]';
+                input.name  = 'pre_fill_colors[]';
                 input.value = hex;
                 inputContainer.appendChild(input);
 
@@ -1061,7 +1061,7 @@
         // Map: template_id -> colors[]
         const savedColorsById = new Map(
             (templatesData || []).map(t => {
-                let colors = t?.pivot?.colors ?? [];
+                let colors = t?.pivot?.pre_fill_colors ?? [];
                 if (typeof colors === 'string') {
                     try { colors = JSON.parse(colors); } catch(e) { colors = []; }
                 }
@@ -1158,7 +1158,7 @@
                 }
 
                 // Fallback to pivot data if UI not available
-                const pivotColors = safeJson(tpl?.pivot?.colors, []);
+                const pivotColors = safeJson(tpl?.pivot?.pre_fill_colors, []);
                 return Array.isArray(pivotColors) ? pivotColors : [];
             };
 

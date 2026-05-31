@@ -773,7 +773,7 @@
                 }
 
                 // Copy any existing selected colors from the card DOM inputs
-                const colorInputs = $cardWrapper.find('input[name="colors[]"]');
+                const colorInputs = $cardWrapper.find('input[name="pre_fill_colors[]"]');
                 $cardWrapper[0].selectedColors = Array.from(colorInputs).map(input => input.value);
 
                 // Highlight the selected card in templatesCardsWrapper
@@ -2013,7 +2013,7 @@
                     // hidden input
                     const input = document.createElement('input');
                     input.type = 'hidden';
-                    input.name = 'colors[]';
+                    input.name = 'pre_fill_colors[]';
                     input.value = hex;
                     inputContainer.appendChild(input);
 
@@ -2137,7 +2137,7 @@
 
                 const hiddenInput = document.createElement('input');
                 hiddenInput.type = 'hidden';
-                hiddenInput.name = 'colors[]';
+                hiddenInput.name = 'pre_fill_colors[]';
                 hiddenInput.value = c;
                 container.appendChild(hiddenInput);
             });
@@ -2156,7 +2156,7 @@
                 input.value = color.toLowerCase(); // توحيد اللون
                 const inputColors = document.createElement('input');
                 inputColors.type = 'hidden';
-                inputColors.name = 'colors[]';
+                inputColors.name = 'pre_fill_colors[]';
                 inputColors.value = color.toLowerCase();
                 container.appendChild(input);
                 container.appendChild(inputColors);

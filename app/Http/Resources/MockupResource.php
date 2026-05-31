@@ -69,6 +69,7 @@ class MockupResource extends JsonResource
             'product' => CategoryResource::make($this->whenLoaded('category')),
             'products' => ProductResource::collection($this->whenLoaded('products')),
             'colors' => $this->colors ?: [],
+            'pre_fill_colors' => $this->pre_fill_colors ?: [],
             'base_image_url' => $this->base_image_url,
             'area_top' => $this->area_top,
             'area_left' => $this->area_left,

@@ -32,6 +32,7 @@ class Mockup extends Model implements HasMedia
         'light_strength',
         'shadow_strength',
         'displacement_scale',
+        'pre_fill_colors',
     ];
     protected $appends = [
         'front_base_image_url',

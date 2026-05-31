@@ -65,7 +65,7 @@ class UpdateMockupRequest extends BaseRequest
             'category_id' => ['required', 'integer', Rule::exists(Category::class, 'id')],
             'product_ids' => ['nullable', 'array'],
             'product_ids.*' => ['nullable', 'integer', Rule::exists(Product::class, 'id')],
-            'colors' => ['sometimes', 'array'],
+            'pre_fill_colors' => ['sometimes', 'array'],
             'warp_points' => ['nullable', 'array'],
             'templates' => ['nullable', 'array'],
             'templates.*.template_id' => ['nullable', 'exists:templates,id'],
