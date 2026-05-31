@@ -1057,12 +1057,11 @@
     });
 
         const templatesData = @json($model->templates ?? []);
-        const preFillColors = "{{$model->pre_fill_colors ?? []}}";
 
         // Map: template_id -> colors[]
         const savedColorsById = new Map(
             (templatesData || []).map(t => {
-                let colors = preFillColors ?? [];
+                let colors = t?.pivot?.pre_fill_colors ?? [];
                 if (typeof colors === 'string') {
                     try { colors = JSON.parse(colors); } catch(e) { colors = []; }
                 }
