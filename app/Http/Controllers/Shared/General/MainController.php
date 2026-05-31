@@ -450,7 +450,7 @@ class MainController extends Controller
                 $applyTemplateSearch($q);
                 $q->limit($limit);
             },
-            'products.templates.media'      => fn ($q) => $q->whereCollectionName('templates'),
+            'products.templates.media',
             // ✅ Plain loads — no filtering — same pattern as original
             'products.templates.tags' => function ($q) use ($applyNameSearch) {
                 $applyNameSearch($q, 'tags');
