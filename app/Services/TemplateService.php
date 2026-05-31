@@ -944,7 +944,9 @@ class TemplateService extends BaseService
 
     public function searchTemplates($request)
     {
-        $search           = $request->input('search');
+        $search           = trim((string) ($request->search ?? ''));
+        $search = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], mb_strtolower($search));
+
         $filterCategoryId = request('category_id');
         $filterProductId  = request('product_id');
 
