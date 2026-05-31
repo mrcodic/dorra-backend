@@ -958,8 +958,8 @@ class TemplateService extends BaseService
 
         }
 
-        $templates = Template::query()
-            ->live()
+        $templates = Template::query()->
+            orderBy('name')->live()
             ->select('id', 'name', 'use_front_as_back', 'approach')
             ->with([
                 'products' => function ($q) use ($filterProductId, $filterCategoryId, $categoryHasProducts,$cat) {
