@@ -167,7 +167,7 @@ class MockupService extends BaseService
         ];
     }
 
-    public function getMockupUrl(): array
+    public function getMockupUrl(): ?string
     {
         $productId = request('product_id');
         $productType = request('type');
@@ -211,32 +211,6 @@ class MockupService extends BaseService
                 ->first(fn($tpl) => $tpl->id == $templateId)
                 ?->pivot->model_color ? 1 : 0;
         });
-
-        $allColors = $filtered
-            ->flatMap(fn($mockup) => $mockup->templates
-                ->filter(fn($tpl) => $tpl->id == $templateId)
-                ->flatMap(function ($tpl) {
-                    $c = $tpl->pivot->colors ?? [];
-                    if (is_string($c)) {
-                        $c = json_decode($c, true) ?: [];
-                    }
-                    $colors = is_array($c) ? $c : [];
-
-                    $modelColor = $tpl->pivot->model_color ?? null;
-                    if ($modelColor && in_array($modelColor, $colors)) {
-                        $colors = array_merge(
-                            [$modelColor],
-                            array_values(array_filter($colors, fn($color) => $color !== $modelColor))
-                        );
-                    }
-
-                    return $colors;
-                })
-            )
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
 
         $result = $filtered
             ->map(function ($mockup) use ($templateId, $requestedColor) {
@@ -292,7 +266,7 @@ class MockupService extends BaseService
             ->values()
             ->all();
 
-        return $result;
+        return array_values($result)[0] ?? null;
     }
     public function getAll(
         $relations = [], bool $paginate = false, $columns = ['*'], $perPage = 16, $counts = [])
