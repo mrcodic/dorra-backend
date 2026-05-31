@@ -28,7 +28,7 @@ class MockupController extends Controller
 
         public function getMockupUrl()
     {
-        $mockupUrl = $this->mockupService-$this->getMockupUrl();
+        $mockupUrl = $this->mockupService->getMockupUrl();
         return Response::api(data: ['url' => $mockupUrl]);
     }
 
