@@ -17,6 +17,8 @@
         <th>Item</th>
         <th width="15%">Qty</th>
         <th width="20%">Price</th>
+        <th width="20%">Discount</th>
+        <th width="20%">Price After Discount</th>
     </tr>
     </thead>
     <tbody>
@@ -25,6 +27,9 @@
             <td>{{ $item->itemable->name ?? 'N/A' }}</td>
             <td>{{ $item->quantity }}</td>
             <td>${{ number_format($item->sub_total, 2) }}</td>
+            <td>${{ number_format($item->discount_amount, 2) }}</td>
+            <td>${{ number_format($item->sub_total -  $item->discount_amount, 2) }}</td>
+
         </tr>
     @endforeach
     </tbody>
