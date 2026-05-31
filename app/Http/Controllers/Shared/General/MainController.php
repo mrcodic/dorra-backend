@@ -329,10 +329,6 @@ class MainController extends Controller
         $term  = trim((string) ($request->search ?? ''));
         $rates = $request->rates;
 
-        $locales = collect(config('app.locales', ['en', 'ar']))
-            ->filter()
-            ->values();
-
         $terms = collect(preg_split('/[\s,;]+/u', $term))
             ->map(fn ($t) => mb_strtolower(trim($t)))
             ->filter(fn ($t) => mb_strlen($t) >= 1)
@@ -353,49 +349,30 @@ class MainController extends Controller
 
         $limit = min((int) ($request->limit ?? 10), 20);
 
-        $buildNameConditions = function (string $table) use ($terms, $locales): array {
-            $wheres   = [];
-            $bindings = [];
-
-            foreach ($locales as $loc) {
-                $path = '$.' . $loc;
+        // Simple raw JSON column search across all locales at once
+        $applyNameSearch = function ($q, string $table) use ($terms) {
+            $q->where(function ($qq) use ($table, $terms) {
                 foreach ($terms as $t) {
-                    $wheres[]   = "LOWER(JSON_UNQUOTE(JSON_EXTRACT({$table}.name, ?))) LIKE ?";
-                    $bindings[] = $path;
-                    $bindings[] = '%' . $t . '%';
+                    $qq->orWhereRaw("LOWER({$table}.name) LIKE ?", ['%' . $t . '%']);
                 }
-            }
-
-            return [implode(' OR ', $wheres), $bindings];
+            });
         };
 
-        $applyNameSearch = function ($q, string $table) use ($buildNameConditions) {
-            [$sql, $bindings] = $buildNameConditions($table);
-            $q->whereRaw("($sql)", $bindings);
-        };
-
-        $orderSql = collect($locales)
-            ->map(fn ($loc) => "LOWER(JSON_UNQUOTE(JSON_EXTRACT(templates.name, '$.$loc'))) LIKE ?")
-            ->implode(' OR ');
-
-        $orderBindings = collect($locales)
-            ->map(fn () => '%' . $fullTerm . '%')
-            ->toArray();
-
-        $applyTemplateSearch = function ($q) use ($applyNameSearch, $orderSql, $orderBindings) {
-            $q->where(function ($qq) use ($applyNameSearch) {
+        $applyTemplateSearch = function ($q) use ($applyNameSearch, $fullTerm) {
+            $q->where(function ($qq) use ($applyNameSearch, $fullTerm) {
                 $applyNameSearch($qq, 'templates');
-
-                $qq->orWhereHas('tags', fn ($tq) => $applyNameSearch($tq, 'tags'));
+                $qq->orWhereHas('tags',       fn ($tq) => $applyNameSearch($tq, 'tags'));
                 $qq->orWhereHas('industries', fn ($iq) => $applyNameSearch($iq, 'industries'));
             })
-                ->orderByRaw("CASE WHEN ($orderSql) THEN 0 ELSE 1 END", $orderBindings);
+                ->orderByRaw(
+                    "CASE WHEN LOWER(templates.name) LIKE ? THEN 0 ELSE 1 END",
+                    ['%' . $fullTerm . '%']
+                );
         };
 
         $applyProductSearch = function ($q) use ($applyNameSearch, $applyTemplateSearch) {
             $q->where(function ($qq) use ($applyNameSearch, $applyTemplateSearch) {
                 $applyNameSearch($qq, 'products');
-
                 $qq->orWhereHas('templates', fn ($tq) => $applyTemplateSearch($tq));
             });
         };
@@ -404,7 +381,6 @@ class MainController extends Controller
             ->select('id', 'name', 'is_has_category')
             ->where(function ($query) use ($applyNameSearch, $applyTemplateSearch, $applyProductSearch) {
                 $applyNameSearch($query, 'categories');
-
                 $query->orWhereHas('templates', fn ($q) => $applyTemplateSearch($q));
                 $query->orWhereHas('products',  fn ($q) => $applyProductSearch($q));
             })
@@ -430,12 +406,9 @@ class MainController extends Controller
             'templates' => function ($q) use ($applyTemplateSearch, $limit) {
                 $q->select('templates.id', 'templates.name', 'templates.status');
                 $applyTemplateSearch($q);
-                $q->live()
-                    ->orderBy('name')
-                    ->limit($limit);
+                $q->live()->orderBy('name')->limit($limit);
             },
             'templates.media'      => fn ($q) => $q->whereCollectionName('templates'),
-            // ✅ Plain loads — no filtering — same pattern as original
             'templates.tags',
             'templates.industries',
 
@@ -453,14 +426,8 @@ class MainController extends Controller
                 $q->orderBy('name')->live()->limit($limit);
             },
             'products.templates.media',
-            // ✅ Plain loads — no filtering — same pattern as original
-            'products.templates.tags' => function ($q) use ($applyNameSearch) {
-                $applyNameSearch($q, 'tags');
-            },
-
-            'products.templates.industries' => function ($q) use ($applyNameSearch) {
-                $applyNameSearch($q, 'industries');
-            },
+            'products.templates.tags'       => fn ($q) => $applyNameSearch($q, 'tags'),
+            'products.templates.industries' => fn ($q) => $applyNameSearch($q, 'industries'),
         ]);
 
         return Response::api(data: CategoryResource::collection($categories));
