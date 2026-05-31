@@ -430,7 +430,7 @@ class MainController extends Controller
             'templates' => function ($q) use ($applyTemplateSearch, $limit) {
                 $q->select('templates.id', 'templates.name', 'templates.status');
                 $applyTemplateSearch($q);
-                $q->limit($limit);
+                $q->live()->limit($limit);
             },
             'templates.media'      => fn ($q) => $q->whereCollectionName('templates'),
             // ✅ Plain loads — no filtering — same pattern as original
@@ -448,7 +448,7 @@ class MainController extends Controller
             'products.templates' => function ($q) use ($applyTemplateSearch, $limit) {
                 $q->select('templates.id', 'templates.name', 'templates.status');
                 $applyTemplateSearch($q);
-                $q->limit($limit);
+                $q->live()->limit($limit);
             },
             'products.templates.media',
             // ✅ Plain loads — no filtering — same pattern as original
