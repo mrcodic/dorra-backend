@@ -194,44 +194,52 @@
                                     <label for="fillRatio" class="label-text mb-1 d-flex align-items-center gap-2">
                                         Fill Ratio
                                     </label>
-                                    <input type="number" id="fillRatio" class="form-control" name="fill_ratio" placeholder="ex: 70">
+                                    <input type="number" id="fillRatio" class="form-control" name="fill_ratio"
+                                           placeholder="ex: 70">
                                     <small class="form-text text-muted">
-                                        ex:  t-shirt: 70
+                                        ex: t-shirt: 70
                                     </small>
                                 </div>
 
                                 <div class="form-group mb-2 col-md-3">
-                                    <label for="light_strength" class="label-text mb-1 d-flex align-items-center gap-2 flex-wrap">
+                                    <label for="light_strength"
+                                           class="label-text mb-1 d-flex align-items-center gap-2 flex-wrap">
                                         Light Strength
                                     </label>
-                                    <input type="number" id="light_strength" class="form-control" name="light_strength" placeholder="ex: 40">
+                                    <input type="number" id="light_strength" class="form-control" name="light_strength"
+                                           placeholder="ex: 40">
                                     <small class="form-text text-muted">
-                                        ex:  t-shirt: 35 ,scarf: 35-45
+                                        ex: t-shirt: 35 ,scarf: 35-45
                                     </small>
 
                                 </div>
 
                                 <div class="form-group mb-2 col-md-3">
-                                    <label for="shadow_strength" class="label-text mb-1 d-flex align-items-center gap-2 flex-wrap">
+                                    <label for="shadow_strength"
+                                           class="label-text mb-1 d-flex align-items-center gap-2 flex-wrap">
                                         Shadow Strength
                                     </label>
-                                    <input type="number" id="shadow_strength" class="form-control" name="shadow_strength" placeholder="ex: 60">
+                                    <input type="number" id="shadow_strength" class="form-control"
+                                           name="shadow_strength" placeholder="ex: 60">
                                     <small class="form-text text-muted">
-                                      ex:  t-shirt: 45% , scarf: 55-65%
+                                        ex: t-shirt: 45% , scarf: 55-65%
                                     </small>
 
                                 </div>
 
                                 <div class="form-group mb-2 col-md-3">
-                                    <label for="displacement_scale" class="label-text mb-1 d-flex align-items-center gap-2 flex-wrap">
+                                    <label for="displacement_scale"
+                                           class="label-text mb-1 d-flex align-items-center gap-2 flex-wrap">
                                         Displacement Scale
                                     </label>
-                                    <input type="number" id="displacement_scale" class="form-control" name="displacement_scale" placeholder="ex: 15">
+                                    <input type="number" id="displacement_scale" class="form-control"
+                                           name="displacement_scale" placeholder="ex: 15">
                                     <small class="form-text text-muted">
-                                        ex:  t-shirt: 8-10 ,scarf: 12-18
+                                        ex: t-shirt: 8-10 ,scarf: 12-18
                                     </small>
                                 </div>
-                            </div>                            <div class="form-group mb-2 col-md-12">
+                            </div>
+                            <div class="form-group mb-2 col-md-12">
                                 <div class="row">
                                     @foreach($associatedData['types'] as $type)
                                         <div class="col-md-4 mb-1">
@@ -290,17 +298,19 @@
                             {{--                        @endif--}}
                         </div>
 
-                        {{--                    @if(request('q') === 'with')--}}
-                        {{--                    <div class="mb-2">--}}
-                        {{--                        <label class="label-text mb-1 d-block">Colors</label>--}}
-                        {{--                        <div class="d-flex flex-wrap align-items-center gap-1">--}}
-                        {{--                            <button type="button" id="openColorPicker" class="gradient-picker-trigger border openColorPicker"></button>--}}
 
-                        {{--                            <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center selected-colors"></span>--}}
-                        {{--                        </div>--}}
-                        {{--                        <div id="colorsInputContainer"></div>--}}
-                        {{--                    </div>--}}
-                        {{--                    @endif--}}
+                        <div class="mb-2">
+                            <label class="label-text mb-1 d-block">Colors</label>
+                            <div class="d-flex flex-wrap align-items-center gap-1">
+                                <button type="button" id="openColorPicker"
+                                        class="gradient-picker-trigger border openColorPicker"></button>
+
+                                <span id="selected-colors"
+                                      class="d-flex gap-1 flex-wrap align-items-center selected-colors"></span>
+                            </div>
+                            <div id="colorsInputContainer"></div>
+                        </div>
+
 
                         <div class="modal-footer border-top-0">
                             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel
@@ -395,7 +405,6 @@
                 $right.empty().trigger('change');
             }
         });
-
 
 
         window.templatePositions = window.templatePositions || {};
