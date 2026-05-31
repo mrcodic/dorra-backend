@@ -48,6 +48,7 @@ class Mockup extends Model implements HasMedia
 
     protected $casts = [
         'colors' => 'array',
+        'pre_fill_colors' => 'array',
         'type' => TypeEnum::class,
     ];
     protected $attributes = [
