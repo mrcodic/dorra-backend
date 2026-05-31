@@ -14,7 +14,7 @@ class MockupObserver
             ->get()
             ->each(function ($design) {
                 $design->clearMediaCollection();
-                $design->delete();
+                $design->forceDelete();
             });
         $mockup->clearMediaCollection();
     }
