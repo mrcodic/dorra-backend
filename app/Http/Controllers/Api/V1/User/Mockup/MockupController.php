@@ -20,11 +20,16 @@ class MockupController extends Controller
     {
     }
 
-    public function index(Request $request)
+    public function index()
     {
         $data = $this->mockupService->getAll(['types'], true, perPage: 10);
         return Response::api(data: MockupResource::collection($data)->response()->getData(true));
+    }
 
+        public function getMockupUrl()
+    {
+        $mockupUrl = $this->mockupService-$this->getMockupUrl();
+        return Response::api(data: ['url' => $mockupUrl]);
     }
 
 
