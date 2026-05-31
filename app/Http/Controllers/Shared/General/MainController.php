@@ -330,9 +330,9 @@ class MainController extends Controller
         $rates = $request->rates;
 
         $terms = collect(preg_split('/[\s,;]+/u', $term))
-            ->map(fn ($t) => mb_strtolower(trim($t)))
-            ->filter(fn ($t) => mb_strlen($t) >= 1)
-            ->unique()
+//            ->map(fn ($t) => mb_strtolower(trim($t)))
+//            ->filter(fn ($t) => mb_strlen($t) >= 1)
+//            ->unique()
             ->values();
 
         $fullTerm = mb_strtolower($term);
