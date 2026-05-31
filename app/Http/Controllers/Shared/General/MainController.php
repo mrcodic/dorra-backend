@@ -326,39 +326,21 @@ class MainController extends Controller
 
     public function publicSearch(Request $request)
     {
-        $term  = trim((string) ($request->search ?? ''));
-        $rates = $request->rates;
-
-        $terms = collect(preg_split('/[\s,;]+/u', $term))
-//            ->map(fn ($t) => mb_strtolower(trim($t)))
-//            ->filter(fn ($t) => mb_strlen($t) >= 1)
-//            ->unique()
-            ->values();
-
+        $term     = trim((string) ($request->search ?? ''));
+        $rates    = $request->rates;
         $fullTerm = mb_strtolower($term);
 
-        if (!$terms->contains($fullTerm)) {
-            $terms->push($fullTerm);
-        }
-
-        $terms = $terms->values();
-
-        if ($terms->isEmpty()) {
+        if (empty($fullTerm)) {
             return Response::api(data: []);
         }
 
         $limit = min((int) ($request->limit ?? 10), 20);
 
-        // Simple raw JSON column search across all locales at once
-        $applyNameSearch = function ($q, string $table) use ($terms) {
-            $q->where(function ($qq) use ($table, $terms) {
-                foreach ($terms as $t) {
-                    $qq->orWhereRaw(
-                        "JSON_SEARCH(LOWER({$table}.name), 'one', ?) IS NOT NULL",
-                        ['%' . $t . '%']
-                    );
-                }
-            });
+        $applyNameSearch = function ($q, string $table) use ($fullTerm) {
+            $q->whereRaw(
+                "JSON_SEARCH(LOWER({$table}.name), 'one', ?) IS NOT NULL",
+                ['%' . $fullTerm . '%']
+            );
         };
 
         $applyTemplateSearch = function ($q) use ($applyNameSearch, $fullTerm) {
@@ -435,7 +417,6 @@ class MainController extends Controller
 
         return Response::api(data: CategoryResource::collection($categories));
     }
-
     public function dimensions(Request $request)
     {
         $validatedData = $request->validate([
