@@ -127,9 +127,21 @@
                             </div>
                         </div>
                         <div class="text-end">
-                            <div class="fw-bold text-black">
-                                {{ number_format($design->sub_total ?? 0, 2) }}
-                            </div>
+                            @if($orderItem->discount_amount)
+                                <div class="text-muted text-decoration-line-through small">
+                                    {{ number_format(($design->sub_total) ?? 0, 2) }}
+                                </div>
+                                <div class="fw-bold text-success">
+                                    {{ number_format($design->sub_total -$design->discount_amount ?? 0, 2) }}
+                                </div>
+                                <div class="text-danger small">
+                                    -{{ number_format($design->discount_amount, 2) }}
+                                </div>
+                            @else
+                                <div class="fw-bold text-black">
+                                    {{ number_format($design->sub_total ?? 0, 2) }}
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
