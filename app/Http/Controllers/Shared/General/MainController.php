@@ -333,7 +333,7 @@ class MainController extends Controller
             return Response::api(data: []);
         }
 
-        $limit = min((int) ($request->limit ?? 5), 20);
+        $limit = min((int) ($request->limit ?? 5), 10);
 
         $applyNameSearch = function ($q, string $table) use ($fullTerm) {
             $q->whereRaw(
