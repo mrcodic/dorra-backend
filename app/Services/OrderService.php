@@ -26,7 +26,7 @@ use App\Services\Payment\PaymentGatewayFactory;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\{Auth, Cache, DB};
+use Illuminate\Support\Facades\{Auth, Cache, DB, Log};
 use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -810,6 +810,7 @@ class OrderService extends BaseService
                         || $cart->items->contains(fn($item) => $item->discountCode()->exists());
 
                     $discountAmount = $cartHasDiscount ? null : $item->offerAmount;
+                    Log::info("offer",[$discountAmount]);
                 } elseif ($hasDiscount) {
                     $subTotal       = max(0, (float) $item->sub_total);
                     $discountCodeId = $item->discount_code_id;
