@@ -85,7 +85,17 @@ Route::get('gallery', [LibraryAssetController::class,'gallery']);
 Route::delete('/media/{media}', [MainController::class, 'removeMedia']);
 Route::post('designs/{design}/fonts', [DesignController::class,'attachMultipleFonts']);
 
+Route::controller(CartController::class)->group(function () {
+    Route::get('/cart-info', 'cartInfo');
+    Route::get('/cart-items/check', 'checkItem');
+    Route::post('/carts/apply-discount', 'applyDiscount');
+    Route::get('/carts/remove-discount', 'removeDiscount');
+    Route::delete('/carts', 'destroy');
+    Route::get('carts/{item}/price-details', 'priceDetails');
+    Route::put('carts/{item}/price-details', 'updatePriceDetails');
+    Route::post('carts/{item}/add-quantity', 'addQuantity');
 
+});
 Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::prefix('register')->group(function () {
         Route::post('/otp/send', [OtpController::class, 'sendRegistrationOtp']);
@@ -127,17 +137,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::get('/design-versions/{design_version}', [DesignController::class, 'getDesignVersions']);
     Route::apiResource('/designs', DesignController::class)->except(['destroy']);
 
-    Route::controller(CartController::class)->group(function () {
-        Route::get('/cart-info', 'cartInfo');
-        Route::get('/cart-items/check', 'checkItem');
-        Route::post('/carts/apply-discount', 'applyDiscount');
-        Route::get('/carts/remove-discount', 'removeDiscount');
-        Route::delete('/carts', 'destroy');
-        Route::get('carts/{item}/price-details', 'priceDetails');
-        Route::put('carts/{item}/price-details', 'updatePriceDetails');
-        Route::post('carts/{item}/add-quantity', 'addQuantity');
 
-    });
     Route::apiResource('/carts', CartController::class)->only(['store', 'index']);
 
     Route::controller(OrderController::class)->group(function () {
