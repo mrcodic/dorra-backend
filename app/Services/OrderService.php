@@ -797,15 +797,19 @@ class OrderService extends BaseService
         );
         // order items
         $orderItems = $order->orderItems()->createMany(
-            $cart->items->map(function ($item) {
+            $cart->items->map(function ($item) use($cart){
                 $hasOffer   = $item->hasActiveOffer();
                 $hasDiscount = !$hasOffer && $item->discount_code_id !== null;
 
                 if ($hasOffer) {
                     $subTotal       = (float) $item->sub_total;
                     $discountCodeId = null;
-                    $discountAmount = $item->discount_amount;
+                    $cart->load('items.discountCode');
 
+                    $cartHasDiscount = $cart->discountCode()->exists()
+                        || $cart->items->contains(fn($item) => $item->discountCode()->exists());
+
+                    $discountAmount = $cartHasDiscount ? null : $item->offerAmount;
                 } elseif ($hasDiscount) {
                     $subTotal       = max(0, (float) $item->sub_total);
                     $discountCodeId = $item->discount_code_id;
