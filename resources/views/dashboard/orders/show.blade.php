@@ -211,7 +211,7 @@
                                 </div>
 
                                 <div class="text-end">
-                                    @if($orderItem->discount_amount)
+                                    @if($orderItem->discount_amount > 0)
                                         <div class="text-muted text-decoration-line-through small">
                                             {{ number_format(($orderItem->sub_total) ?? 0, 2) }}
                                         </div>
