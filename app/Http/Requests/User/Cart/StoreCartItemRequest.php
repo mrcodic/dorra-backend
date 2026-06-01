@@ -66,9 +66,9 @@ class StoreCartItemRequest extends BaseRequest
     private function cartable(): Category|Product|null
     {
         return $this->cartable_type === Product::class
-            ? Product::find($this->cartable_id)
+            ? Product::withLastOfferId()->find($this->cartable_id)
             : ($this->cartable_type === Category::class
-                ? Category::find($this->cartable_id)
+                ? Category::withLastOfferId()->find($this->cartable_id)
                 : null);
     }
 
