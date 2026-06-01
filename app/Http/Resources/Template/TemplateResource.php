@@ -26,6 +26,8 @@ class TemplateResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $templateId = $this->id;
+
         $categoryId = (int)(request('product_without_category_id') ?? Product::find(request('product_id'))?->category_id);
         $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
             ->where('model_type', \App\Models\Mockup::class)
@@ -177,26 +179,36 @@ class TemplateResource extends JsonResource
             'template_colors' => $this->mockups()
                 ->whereCategoryId($categoryId)
                 ->whereNull('mockups.deleted_at')
-                ->orderByRaw('CASE WHEN mockup_template.model_color IS NOT NULL THEN 0 ELSE 1 END')
+                ->with('templates:id')
                 ->get()
-                ->flatMap(function ($mockup) {
-                    $colors    = $mockup->pivot->colors ?? [];
-                    $colorList = is_array($colors)
-                        ? $colors
-                        : json_decode($colors ?: '[]', true);
-
-                    // tag each color with whether it has a model_color
-                    $hasModel = $mockup->pivot->model_color !== null;
-
-                    return collect($colorList)->map(fn($color) => [
-                        'color'     => $color,
-                        'has_model' => $hasModel,
-                    ]);
+                ->sortByDesc(function ($mockup) use($templateId){
+                    return $mockup->templates
+                        ->first(fn($tpl) => $tpl->id == $templateId)
+                        ?->pivot->model_color ? 1 : 0;
                 })
-                ->unique('color')
-                ->sortBy(fn($item) => $item['has_model'] ? 0 : 1)
-                ->values()
-                ->pluck('color'),
+                ->flatMap(function ($mockup) use ($templateId) {
+                    return $mockup->templates
+                        ->filter(fn($tpl) => $tpl->id == $templateId)
+                        ->flatMap(function ($tpl) {
+                            $colors = $tpl->pivot->colors ?? [];
+                            if (is_string($colors)) {
+                                $colors = json_decode($colors, true) ?: [];
+                            }
+                            $colors = is_array($colors) ? $colors : [];
+                            $modelColor = $tpl->pivot->model_color ?? null;
+                            if ($modelColor && in_array($modelColor, $colors)) {
+                                $colors = array_merge(
+                                    [$modelColor],
+                                    array_values(array_filter($colors, fn($c) => $c !== $modelColor))
+                                );
+                            }
+
+                            return $colors;
+                        });
+                })
+                ->filter()
+                ->unique()
+                ->values(),
             'mockup_model_id' => $this->mockups()
                 ->whereCategoryId($categoryId)
                 ->wherePivot('model_color', '!=', null)
