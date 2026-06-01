@@ -13,7 +13,6 @@ use App\Models\Template;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\RequiredIf;
 use Illuminate\Validation\ValidationException;
 
 class StoreCartItemRequest extends BaseRequest
@@ -22,14 +21,10 @@ class StoreCartItemRequest extends BaseRequest
     private Design|null $design = null;
     private Category|Product|null $product = null;
 
-    /**
-     * Determine if the v1 is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
-
 
     public function prepareForValidation(): void
     {
@@ -37,7 +32,7 @@ class StoreCartItemRequest extends BaseRequest
             ? Template::find($this->template_id)
             : null;
 
-        $design = $this->design =$this->design_id
+        $design = $this->design = $this->design_id
             ? Design::find($this->design_id)
             : null;
 
@@ -46,13 +41,15 @@ class StoreCartItemRequest extends BaseRequest
                 'template_id' => ['Selected template has no price.'],
             ]);
         }
+
         if ($design && is_null($design->price) && $this->type == TypeEnum::DOWNLOAD->value) {
             throw ValidationException::withMessages([
                 'design_id' => ['Selected design has no price.'],
             ]);
         }
+
         $map = [
-            'product' => \App\Models\Product::class,
+            'product'  => \App\Models\Product::class,
             'category' => \App\Models\Category::class,
         ];
 
@@ -72,26 +69,25 @@ class StoreCartItemRequest extends BaseRequest
                 : null);
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         $cartableType = $this->cartable_type;
         $cartable     = $this->cartable();
         $hasSpecs     = (bool) $cartable?->specifications()->exists();
-        $type = (int) $this->input('type', TypeEnum::PRINT->value);
+        $type         = (int) $this->input('type', TypeEnum::PRINT->value);
+
         return [
-            'type' =>['sometimes',Rule::in(TypeEnum::values())],
-            'design_id' => ['required_without:template_id', 'string', 'exists:designs,id'],
+            'type'        => ['sometimes', Rule::in(TypeEnum::values())],
+            'design_id'   => ['required_without:template_id', 'string', 'exists:designs,id'],
             'template_id' => ['required_without:design_id', 'string', 'exists:templates,id'],
+
             'cartable_type' => [
-                Rule::requiredIf(fn() => $type == TypeEnum::PRINT->value && !$this->design?->designable ),
-                 'in:' . Product::class . ',' . Category::class],
+                Rule::requiredIf(fn() => $type == TypeEnum::PRINT->value && !$this->design?->designable),
+                'in:' . Product::class . ',' . Category::class,
+            ],
+
             'cartable_id' => [
-                Rule::requiredIf(fn() => $type == TypeEnum::PRINT->value  && !$this->design?->designable ),
+                Rule::requiredIf(fn() => $type == TypeEnum::PRINT->value && !$this->design?->designable),
                 'integer',
                 Rule::when(
                     $cartableType === Product::class,
@@ -99,49 +95,53 @@ class StoreCartItemRequest extends BaseRequest
                     Rule::exists('categories', 'id')
                 ),
             ],
+
             'product_price_id' => [
-                Rule::requiredIf(function () use($type){
+                Rule::requiredIf(function () use ($type) {
                     $cartable = Product::find($this->cartable_id) ?? Category::find($this->cartable_id);
                     return $cartable && $cartable->prices()->exists() && $type == TypeEnum::PRINT->value;
                 }),
                 'exists:product_prices,id',
             ],
-//            'quantity' => ['required_without:product_price_id', 'integer', 'min:1'],
+
             'quantity' => ['sometimes', 'integer', 'min:1'],
+
             'specs' => [
-                Rule::requiredIf(function () use($hasSpecs,$type){
+                Rule::requiredIf(function () use ($hasSpecs, $type) {
                     return $hasSpecs && $type == TypeEnum::PRINT->value;
                 }),
                 'array',
                 $hasSpecs ? 'min:1' : 'sometimes',
             ],
+
             'specs.*.id' => [
-                Rule::requiredIf(function () use($hasSpecs,$type){
+                Rule::requiredIf(function () use ($hasSpecs, $type) {
                     return $hasSpecs && $type == TypeEnum::PRINT->value;
                 }),
                 'integer',
                 'exists:product_specifications,id',
             ],
+
             'specs.*.option' => [
-                Rule::requiredIf(function () use($hasSpecs,$type){
+                Rule::requiredIf(function () use ($hasSpecs, $type) {
                     return $hasSpecs && $type == TypeEnum::PRINT->value;
                 }),
                 'integer',
                 'exists:product_specification_options,id',
             ],
-            'color' => ['nullable', 'string'],
-            'mockup_id' => ['nullable', 'exists:mockups,id'],
 
+            'color'     => ['nullable', 'string'],
+            'mockup_id' => ['nullable', 'exists:mockups,id'],
         ];
     }
 
-    public function passedValidation()
+    public function passedValidation(): void
     {
-
         $this->product = $this->cartable_type === Product::class
             ? Product::find($this->cartable_id)
             : Category::find($this->cartable_id);
 
+        // ── 1. product must not be a category container ──────────────────────
         if ($this->product?->is_has_category) {
             throw new HttpResponseException(
                 Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
@@ -149,6 +149,8 @@ class StoreCartItemRequest extends BaseRequest
                 ])
             );
         }
+
+        // ── 2. template / design association checks ───────────────────────────
         if ($this->template && !$this->template->products->contains($this->cartable_id) && $this->cartable_type == Product::class) {
             throw new HttpResponseException(
                 Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
@@ -156,6 +158,7 @@ class StoreCartItemRequest extends BaseRequest
                 ])
             );
         }
+
         if ($this->template && !$this->template->categories->contains($this->cartable_id) && $this->cartable_type == Category::class) {
             throw new HttpResponseException(
                 Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
@@ -163,6 +166,7 @@ class StoreCartItemRequest extends BaseRequest
                 ])
             );
         }
+
         if ($this->design && !$this->design->designable_id && $this->cartable_type == Category::class) {
             throw new HttpResponseException(
                 Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
@@ -170,6 +174,7 @@ class StoreCartItemRequest extends BaseRequest
                 ])
             );
         }
+
         if ($this->design && !$this->design->designable_id && $this->cartable_type == Product::class) {
             throw new HttpResponseException(
                 Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
@@ -178,7 +183,7 @@ class StoreCartItemRequest extends BaseRequest
             );
         }
 
-
+        // ── 3. price selection check ──────────────────────────────────────────
         if ($this->cartable && $this->cartable->prices->isNotEmpty() && !$this->product_price_id) {
             throw new HttpResponseException(
                 Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
@@ -187,6 +192,7 @@ class StoreCartItemRequest extends BaseRequest
             );
         }
 
+        // ── 4. specs validation ───────────────────────────────────────────────
         if ($this->cartable && $this->has('specs')) {
             foreach ($this->specs as $index => $spec) {
                 if (!$this->product->specifications->contains($spec['id'])) {
@@ -208,7 +214,33 @@ class StoreCartItemRequest extends BaseRequest
             }
         }
 
-        $cartId = auth('sanctum')->user()->cart->id ?? null;
+        // ── 5. discount + offer conflict check ────────────────────────────────
+        $cartable = $this->cartable_type === Product::class
+            ? Product::withLastOfferId()->find($this->cartable_id)
+            : ($this->cartable_type === Category::class
+                ? Category::withLastOfferId()->find($this->cartable_id)
+                : null);
+
+        if ($cartable?->last_offer_id) {
+            $user =getAuthOrGuest();
+            $cart = $user?->load('cart.items.discountCode')->cart;
+
+            $cartHasDiscount = $cart && (
+                    $cart->discountCode()->exists()
+                    || $cart->items->contains(fn($item) => $item->discountCode()->exists())
+                );
+
+            if ($cartHasDiscount) {
+                throw new HttpResponseException(
+                    Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
+                        'cart' => 'Cannot add an item with an active offer while a discount code is applied to your cart.',
+                    ])
+                );
+            }
+        }
+
+        // ── 6. duplicate cart item check ──────────────────────────────────────
+        $cartId   =getAuthOrGuest()->cart->id ?? null;
         $existing = CartItem::where('cart_id', $cartId)
             ->where('cartable_id', $this->cartable_id)
             ->where('cartable_type', $this->cartable_type)
@@ -246,27 +278,7 @@ class StoreCartItemRequest extends BaseRequest
                     'cart_item' => 'This item is already in your cart.',
                 ]);
             }
-
-
-            $cart     = getAuthOrGuest()->load('items.discountCode')->cart;
-            $cartable = $this->cartable();
-
-            if ($cartable?->lastOffer) {
-                $cartHasDiscount = $cart->discountCode()->exists()
-                    || $cart->items->contains(fn($item) => $item->discountCode()->exists());
-
-                if ($cartHasDiscount) {
-                    throw new HttpResponseException(
-                        Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
-                            'cart' => 'Cannot add an item with an active offer while a discount code is applied to your cart.',
-                        ])
-                    );
-                }
-            }
-
         }
-
-
     }
 
     public function getTemplate(): ?Template
@@ -283,7 +295,4 @@ class StoreCartItemRequest extends BaseRequest
     {
         return $this->product;
     }
-
-
-
 }
