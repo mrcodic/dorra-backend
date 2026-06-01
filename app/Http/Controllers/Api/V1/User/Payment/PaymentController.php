@@ -46,19 +46,20 @@ class PaymentController extends Controller
             );
             $isDownload = $cart->items->every(fn($item) => $item->type == \App\Enums\Item\TypeEnum::DOWNLOAD);
 
-            $total = round(getTotalPrice($cart->discountCode ?? 0, $subAfter, $cart->delivery_amount, $isDownload), 2);
-              $methods = $total < 250 && $request->type !== 'credits' && !$isDownload ?
-                $this->paymentMethodRepository
-                    ->query()
-                    ->with('paymentGateway')
-                    ->whereActive(true)
-                    ->where(function ($q) {
-                        $q->whereHas('paymentGateway', fn($gw) => $gw->active())
-                            ->orWhereNull('payment_gateway_id');
-                    })
-                    ->where('code','cash_on_delivery')
-                    ->get()
-                : $this->paymentMethodRepository
+//            $total = round(getTotalPrice($cart->discountCode ?? 0, $subAfter, $cart->delivery_amount, $isDownload), 2);
+//              $methods = $total < 250 && $request->type !== 'credits' && !$isDownload ?
+//                $this->paymentMethodRepository
+//                    ->query()
+//                    ->with('paymentGateway')
+//                    ->whereActive(true)
+//                    ->where(function ($q) {
+//                        $q->whereHas('paymentGateway', fn($gw) => $gw->active())
+//                            ->orWhereNull('payment_gateway_id');
+//                    })
+//                    ->where('code','cash_on_delivery')
+//                    ->get()
+//                :
+        $methods =    $this->paymentMethodRepository
                 ->query()
                 ->with('paymentGateway')
                 ->whereActive(true)
