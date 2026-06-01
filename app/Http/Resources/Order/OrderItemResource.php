@@ -23,6 +23,8 @@ class OrderItemResource extends JsonResource
            'quantity' => $this->quantity,
             'color' => $this->color,
             'total_price' => $this->sub_total,
+            'discount_amount' => $this->discount_amount,
+            'final_price' => min(0,$this->sub_total - $this->discount_amount),
             'mockup_design_image' =>
                 $this->itemable?->getFirstMediaUrl('front-mockup-designs') ?:
                     $this->itemable?->getFirstMediaUrl('none-mockup-designs') ?:
