@@ -246,6 +246,24 @@ class StoreCartItemRequest extends BaseRequest
                     'cart_item' => 'This item is already in your cart.',
                 ]);
             }
+
+
+            $cart     = getAuthOrGuest()->load('items.discountCode')->cart;
+            $cartable = $this->cartable();
+
+            if ($cartable?->lastOffer) {
+                $cartHasDiscount = $cart->discountCode()->exists()
+                    || $cart->items->contains(fn($item) => $item->discountCode()->exists());
+
+                if ($cartHasDiscount) {
+                    throw new HttpResponseException(
+                        Response::api(HttpEnum::UNPROCESSABLE_ENTITY, 'Validation error', [
+                            'cart' => 'Cannot add an item with an active offer while a discount code is applied to your cart.',
+                        ])
+                    );
+                }
+            }
+
         }
 
 
