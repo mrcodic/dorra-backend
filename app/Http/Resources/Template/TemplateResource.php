@@ -180,13 +180,23 @@ class TemplateResource extends JsonResource
                 ->orderByRaw('CASE WHEN mockup_template.model_color IS NOT NULL THEN 0 ELSE 1 END')
                 ->get()
                 ->flatMap(function ($mockup) {
-                    $colors = $mockup->pivot->colors ?? [];
-                    return is_array($colors)
+                    $colors    = $mockup->pivot->colors ?? [];
+                    $colorList = is_array($colors)
                         ? $colors
                         : json_decode($colors ?: '[]', true);
+
+                    // tag each color with whether it has a model_color
+                    $hasModel = $mockup->pivot->model_color !== null;
+
+                    return collect($colorList)->map(fn($color) => [
+                        'color'     => $color,
+                        'has_model' => $hasModel,
+                    ]);
                 })
-                ->unique()
-                ->values(),
+                ->unique('color')
+                ->sortBy(fn($item) => $item['has_model'] ? 0 : 1)
+                ->values()
+                ->pluck('color'),
             'mockup_model_id' => $this->mockups()
                 ->whereCategoryId($categoryId)
                 ->wherePivot('model_color', '!=', null)
