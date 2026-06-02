@@ -190,6 +190,7 @@ class MockupService extends BaseService
                 });
             })
             ->with([
+                'products:id',
                 'templates:id',
                 'types:id,value',
                 'media' => fn($q) => $q->whereIn('collection_name', [
@@ -201,20 +202,27 @@ class MockupService extends BaseService
             ])
             ->get();
 
+
         $requestedColor = $color
             ? strtolower(ltrim($color, '#'))
             : null;
 
         $filtered = $mockups->filter(fn($mockup) => $mockup->templates->contains('id', $templateId));
-        $filtered = $filtered->sortByDesc(function ($mockup) use ($templateId) {
-            return $mockup->templates
+
+        $filtered = $filtered->sortByDesc(function ($mockup) use ($templateId, $productId) {
+            $productScore = $productId
+                ? ($mockup->products->contains('id', (int) $productId) ? 100 : 0)
+                : 0;
+
+            $modelColorScore = $mockup->templates
                 ->first(fn($tpl) => $tpl->id == $templateId)
                 ?->pivot->model_color ? 1 : 0;
+
+            return $productScore + $modelColorScore;
         });
 
         $result = $filtered
             ->map(function ($mockup) use ($templateId, $requestedColor) {
-
                 $colors = $mockup->templates
                     ->filter(fn($tpl) => $tpl->id == $templateId)
                     ->flatMap(function ($tpl) {
@@ -255,14 +263,14 @@ class MockupService extends BaseService
                     ->sortByDesc(fn($m) => $m->getCustomProperty('model_image', 0))
                     ->map(fn($m) => $m->getFullUrl())
                     ->values()
-                    ->first(); // ← only the top URL per side
+                    ->first();
 
-                // Return front if available, then back, then none
                 $url = $pickBySide('front') ?? $pickBySide('back') ?? $pickBySide('none');
 
-                return $url; // ← just the URL string, no mockup_id
+
+                return $url;
             })
-            ->filter() // remove nulls (mockups with no matching media)
+            ->filter()
             ->values()
             ->all();
 
