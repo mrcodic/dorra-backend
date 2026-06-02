@@ -277,7 +277,7 @@ class PaymentController extends Controller
 
         if ($statusCode != 200 && $orderStatus !== 'PAID' && $orderStatus !== 'UNPAID') {
             if ($transaction->order) {
-                $transaction->order->update('status',\App\Enums\Order\StatusEnum::FAILED);
+                $transaction->order()->update('status',\App\Enums\Order\StatusEnum::FAILED);
             }
             Log::info("Fawry payment failed. Order deleted for Ref: " . $merchantRef);
             return redirect()->to($transaction->failure_url ?? rtrim(config('services.site_url') . '/Home/order?status=failure'));
@@ -304,7 +304,7 @@ class PaymentController extends Controller
         }
 
         Log::info("Failure fallback triggered", [$transaction->failure_url]);
-        $transaction->order->update('status',\App\Enums\Order\StatusEnum::FAILED);
+        $transaction->order()->update('status',\App\Enums\Order\StatusEnum::FAILED);
         return redirect()->to($transaction->failure_url);
     }
     public function verifySignatureTest(Request $request)
