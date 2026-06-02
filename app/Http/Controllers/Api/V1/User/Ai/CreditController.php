@@ -145,7 +145,7 @@ class CreditController extends Controller
                 }
             });
 
-            return Response::api(status: $res['status'], errors: [
+            return Response::api(statusCode: $res['status'], errors: [
                 'error' => [$res['error']]
             ]);
         }
