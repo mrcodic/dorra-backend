@@ -276,8 +276,17 @@ class PaymentController extends Controller
         }
 
         if ($statusCode != 200 && $orderStatus !== 'PAID' && $orderStatus !== 'UNPAID') {
-            if ($transaction->order) {
-                $transaction->order()->update('status',\App\Enums\Order\StatusEnum::FAILED);
+            $payable = $transaction->payable;
+            if ($payable instanceof Order) {
+                $payable->forceFill([
+                    'status' => StatusEnum::FAILED->value,
+                ])->save();
+
+                Log::info('Payable order marked as failed', [
+                    'transaction_id' => $transaction->id,
+                    'order_id' => $payable->id,
+                    'status' => $payable->status,
+                ]);
             }
             Log::info("Fawry payment failed. Order deleted for Ref: " . $merchantRef);
             return redirect()->to($transaction->failure_url ?? rtrim(config('services.site_url') . '/Home/order?status=failure'));
@@ -304,7 +313,19 @@ class PaymentController extends Controller
         }
 
         Log::info("Failure fallback triggered", [$transaction->failure_url]);
-        $transaction->order()->update('status',\App\Enums\Order\StatusEnum::FAILED);
+        $payable = $transaction->payable;
+
+        if ($payable instanceof Order) {
+            $payable->forceFill([
+                'status' => StatusEnum::FAILED->value,
+            ])->save();
+
+            Log::info('Payable order marked as failed', [
+                'transaction_id' => $transaction->id,
+                'order_id' => $payable->id,
+                'status' => $payable->status,
+            ]);
+        }
         return redirect()->to($transaction->failure_url);
     }
     public function verifySignatureTest(Request $request)
