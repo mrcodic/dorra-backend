@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\User\Payment;
 
 
 use App\Enums\Payment\StatusEnum;
+use App\Enums\Order\StatusEnum as OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaymentResource;
 use App\Models\CreditOrder;
@@ -279,7 +280,7 @@ class PaymentController extends Controller
             $payable = $transaction->payable;
             if ($payable instanceof Order) {
                 $payable->forceFill([
-                    'status' => StatusEnum::FAILED->value,
+                    'status' => OrderStatus::FAILED->value,
                 ])->save();
 
                 Log::info('Payable order marked as failed', [
@@ -317,7 +318,7 @@ class PaymentController extends Controller
 
         if ($payable instanceof Order) {
             $payable->forceFill([
-                'status' => StatusEnum::FAILED->value,
+                'status' => OrderStatus::FAILED->value,
             ])->save();
 
             Log::info('Payable order marked as failed', [
