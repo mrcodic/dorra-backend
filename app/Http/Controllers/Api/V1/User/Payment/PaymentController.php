@@ -253,39 +253,60 @@ class PaymentController extends Controller
 
     }
 
+    /**
+     * @throws \Exception
+     */
     public function handleFawryRedirect(Request $request): RedirectResponse
     {
         $requestedData = $request->all();
+
+        $merchantRef = data_get($requestedData, 'merchantRefNumber', $request->query('merchantRef'));
+
         $statusCode = data_get($requestedData, 'statusCode');
         $orderStatus = data_get($requestedData, 'orderStatus');
-        $merchantRef = data_get($requestedData, 'merchantRefNumber');
         $paymentMethod = data_get($requestedData, 'paymentMethod');
         $referenceNumber = data_get($requestedData, 'referenceNumber');
+
         $transaction = Transaction::where('transaction_id', $merchantRef)->first();
 
         if (!$transaction) {
+            Log::error("Fawry redirect failed: Transaction not found for Ref: " . $merchantRef);
             $siteUrl = rtrim(config('services.site_url'), '/');
             return redirect()->to($siteUrl . '/Home/order?status=failure');
         }
+
+        if ($statusCode != 200 && $orderStatus !== 'PAID' && $orderStatus !== 'UNPAID') {
+            if ($transaction->order) {
+                $transaction->order->delete();
+            }
+            $transaction->delete();
+
+            Log::info("Fawry payment failed. Order deleted for Ref: " . $merchantRef);
+            return redirect()->to($transaction->failure_url ?? config('services.site_url'));
+        }
+
         $transaction->update([
             'kiosk_reference' => $referenceNumber
         ]);
+
         if ($orderStatus == 'PAID' && $statusCode == 200) {
             if ($paymentMethod == 'MWALLET') {
                 $transaction->update([
                     'wallet_reference' => $referenceNumber
                 ]);
             }
+            $this->resetCart($transaction, $paymentMethod, StatusEnum::PAID,$requestedData);
+
             return redirect()->to($transaction->success_url);
-        } elseif ($orderStatus == 'UNPAID' && $paymentMethod == 'PayAtFawry') {
-            $transaction->update([
-                'kiosk_reference' => $referenceNumber
-            ]);
-            return redirect()->to($transaction->pending_url . "&referenceNumber=$referenceNumber");
-        } else {
-            Log::info("failure",[$transaction->failure_url]);
-            return redirect()->to($transaction->failure_url);
         }
+
+        if ($orderStatus == 'UNPAID' && $paymentMethod == 'PayAtFawry') {
+            $this->resetCart($transaction, $paymentMethod, StatusEnum::PAID,$requestedData);
+            return redirect()->to($transaction->pending_url . "&referenceNumber=$referenceNumber");
+        }
+
+        Log::info("Failure fallback triggered", [$transaction->failure_url]);
+        return redirect()->to($transaction->failure_url);
     }
     public function verifySignatureTest(Request $request)
     {
