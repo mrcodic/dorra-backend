@@ -282,6 +282,7 @@ class PaymentController extends Controller
             ]);
             return redirect()->to($transaction->pending_url . "&referenceNumber=$referenceNumber");
         } else {
+            Log::info("failure",[$transaction->failure_url]);
             return redirect()->to($transaction->failure_url);
         }
     }
