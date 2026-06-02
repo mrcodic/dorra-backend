@@ -31,14 +31,16 @@ class PaymentRequestData
     public function toArray(): array
     {
         if ($this->order) {
-            $items = $this->order->orderItems->map(fn ($item) => [
-                'itemId' => (string) Str::uuid(),
-                'description' => Str::limit($item?->itemable->name ?? 'Item', 50, ''),
-                'price' => round((float) $item->sub_total, 2),
-                'quantity' => 1,
-            ])->toArray();
+            $items = $this->order->orderItems->map(function ($item) {
+                return [
+                    'itemId' => (string) Str::uuid(),
+                    'description' => Str::limit($item?->itemable?->name ?? 'Item', 50, ''),
+                    'price' => round((float) $item->sub_total, 2),
+                    'quantity' => 1,
+                ];
+            })->toArray();
 
-            if ($this->order->delivery_amount > 0) {
+            if ((float) $this->order->delivery_amount > 0) {
                 $items[] = [
                     'itemId' => (string) Str::uuid(),
                     'description' => 'Delivery Fee',
@@ -47,7 +49,7 @@ class PaymentRequestData
                 ];
             }
 
-            if ($this->order->tax_amount > 0) {
+            if ((float) $this->order->tax_amount > 0) {
                 $items[] = [
                     'itemId' => (string) Str::uuid(),
                     'description' => 'Tax',
@@ -56,7 +58,7 @@ class PaymentRequestData
                 ];
             }
 
-            if ($this->order->discount_amount > 0) {
+            if ((float) $this->order->discount_amount > 0) {
                 $items[] = [
                     'itemId' => (string) Str::uuid(),
                     'description' => 'Discount',
@@ -65,27 +67,37 @@ class PaymentRequestData
                 ];
             }
 
-            $merchantRef = str_replace('#', '', $this->order->order_number);
+            $merchantRef = str_replace('#', '', (string) $this->order->order_number);
         } else {
             $items = [[
                 'itemId' => (string) Str::uuid(),
-                'description' => Str::limit($this->plan->name ?? 'Plan', 50, ''),
-                'price' => round((float) $this->plan->price, 2),
+                'description' => Str::limit($this->plan?->name ?? 'Plan', 50, ''),
+                'price' => round((float) $this->plan?->price, 2),
                 'quantity' => 1,
             ]];
 
-            $merchantRef = 'PLAN-' . Str::uuid();
+            $merchantRef = 'PLAN-' . (string) Str::uuid();
         }
 
         $merchantCode = config('services.fawry.merchant_code');
-        $returnUrl = config('services.fawry.redirection_url');
+        $baseReturnUrl = config('services.fawry.redirection_url');
         $webhookUrl = config('services.fawry.webhook_url');
 
-        $profileId = (string) ($this->user?->id ?? $this->guest?->id ?? Str::uuid());
+        $returnUrl = $this->appendQueryToUrl($baseReturnUrl, [
+            'merchantRef' => $merchantRef,
+        ]);
+
+        $profileId = (string) (
+            $this->user?->id
+            ?? $this->guest?->id
+            ?? Str::uuid()
+        );
 
         $phone = $this->requestData?->full_phone_number
             ?? $this->user?->phone_number
             ?? '01000000000';
+
+        $phone = $this->normalizeEgyptPhone($phone);
 
         $customerName = trim(
             ($this->requestData?->first_name ?? '') . ' ' . ($this->requestData?->last_name ?? '')
@@ -108,18 +120,42 @@ class PaymentRequestData
         return [
             'merchantCode' => $merchantCode,
             'merchantRefNum' => $merchantRef,
-            'customerMobile' => preg_replace('/^2(01)/', '$1', $phone),
+            'customerMobile' => $phone,
             'customerEmail' => $this->requestData?->email ?? $this->user?->email ?? 'customer@example.com',
             'customerName' => $customerName,
             'customerProfileId' => $profileId,
-            'paymentExpiry' => now()->addHour(1)->valueOf(),
+            'paymentExpiry' => now()->addHour()->valueOf(),
             'language' => $language,
             'chargeItems' => $items,
             'paymentMethod' => (string) $this->method,
-            'returnUrl' => $returnUrl.'?merchantRef='.$this->order->order_number,
+            'returnUrl' => $returnUrl,
             'authCaptureModePayment' => false,
             'signature' => $signature,
             'orderWebHookUrl' => $webhookUrl,
         ];
+    }
+
+    private function appendQueryToUrl(?string $url, array $query): string
+    {
+        $url = rtrim((string) $url, '?&');
+
+        $separator = str_contains($url, '?') ? '&' : '?';
+
+        return $url . $separator . http_build_query($query);
+    }
+
+    private function normalizeEgyptPhone(?string $phone): string
+    {
+        $phone = preg_replace('/\D+/', '', (string) $phone);
+
+
+        if (str_starts_with($phone, '2') && str_starts_with(substr($phone, 1), '01')) {
+            return substr($phone, 1);
+        }
+        if (str_starts_with($phone, '1')) {
+            return '0' . $phone;
+        }
+
+        return $phone ?: '01000000000';
     }
 }
