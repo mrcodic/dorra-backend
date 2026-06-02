@@ -282,7 +282,7 @@ class PaymentController extends Controller
             $transaction->delete();
 
             Log::info("Fawry payment failed. Order deleted for Ref: " . $merchantRef);
-            return redirect()->to($transaction->failure_url ?? config('services.site_url'));
+            return redirect()->to($transaction->failure_url ?? rtrim(config('services.site_url') . '/Home/order?status=failure'));
         }
 
         $transaction->update([
