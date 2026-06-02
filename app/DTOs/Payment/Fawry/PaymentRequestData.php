@@ -116,7 +116,7 @@ class PaymentRequestData
             'language' => $language,
             'chargeItems' => $items,
             'paymentMethod' => (string) $this->method,
-            'returnUrl' => $returnUrl.'?merchantRef='.$this->order->order_number,
+            'returnUrl' => $returnUrl,
             'authCaptureModePayment' => false,
             'signature' => $signature,
             'orderWebHookUrl' => $webhookUrl,
