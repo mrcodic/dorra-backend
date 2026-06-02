@@ -264,7 +264,8 @@ class PaymentController extends Controller
         $transaction = Transaction::where('transaction_id', $merchantRef)->first();
 
         if (!$transaction) {
-            return redirect()->to(config('services.site_url').'/Home/order?status=failure');
+            $siteUrl = rtrim(config('services.site_url'), '/');
+            return redirect()->to($siteUrl . '/Home/order?status=failure');
         }
         $transaction->update([
             'kiosk_reference' => $referenceNumber
