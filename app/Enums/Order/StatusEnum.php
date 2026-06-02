@@ -19,6 +19,8 @@ enum StatusEnum : int
     case DELIVERED = 9;
     case REFUNDED = 10;
     case CANCELLED = 11;
+    case FAILED = 12;
+
     public function label(): string
     {
         return match ($this) {
@@ -32,24 +34,30 @@ enum StatusEnum : int
             self::DELIVERY_ATTEMPTED   => __('orders.status.delivery_attempted'),
             self::DELIVERED            => __('orders.status.delivered'),
             self::REFUNDED             => __('orders.status.refunded'),
-            self::CANCELLED             => __('orders.status.canceled'),
+            self::CANCELLED            => __('orders.status.canceled'),
+            self::FAILED               => __('orders.status.failed'),
         };
     }
 
-    public function icon()
+    public function icon(): string
     {
         return match ($this) {
             self::PENDING              => asset("images/orders/pending.svg"),
             self::CONFIRMED            => asset("images/orders/confirmed.svg"),
             self::PREPARED             => asset("images/orders/preparing.svg"),
-            self::REQUESTED_PICKUP, self::SHIPPED,
-            self::OUT_FOR_DELIVERY, self::IN_TRANSIT,
-            self::DELIVERED, self::DELIVERY_ATTEMPTED => asset("images/orders/delivered.svg"),
+
+            self::REQUESTED_PICKUP,
+            self::SHIPPED,
+            self::OUT_FOR_DELIVERY,
+            self::IN_TRANSIT,
+            self::DELIVERY_ATTEMPTED,
+            self::DELIVERED            => asset("images/orders/delivered.svg"),
+
             self::REFUNDED             => asset("images/orders/refund.svg"),
-            self::CANCELLED             => asset("images/orders/refund.svg"),
+            self::CANCELLED            => asset("images/orders/refund.svg"),
+            self::FAILED               =>  asset("images/orders/refund.svg"),
         };
     }
-
 
     public static function toArray(): array
     {
@@ -57,10 +65,8 @@ enum StatusEnum : int
             return [
                 'value' => $case->value,
                 'label' => $case->label(),
-                'icon' => asset($case->icon()),
+                'icon'  => $case->icon(),
             ];
         })->toArray();
     }
-
-
 }

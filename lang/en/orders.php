@@ -12,6 +12,8 @@ return [
         'delivered'           => 'Delivered',
         'refunded'            => 'Refunded',
         'canceled'            => 'Canceled',
+        'failed'            => 'Failed',
+
     ],
 
     'payment_failed_message' => 'Something went wrong',
