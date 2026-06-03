@@ -147,7 +147,7 @@ class CreditController extends Controller
 
             return Response::api(HttpEnum::INTERNAL_SERVER_ERROR, errors: [
                 'status' => $res['status'],
-                'error' => [$res['error']]
+                'error' => $res['error']
             ]);
         }
 
