@@ -492,7 +492,7 @@ class MockupService extends BaseService
                         ['side' => $side],
                         [
                             'is_active' => true,
-                            'positions' => $points,
+                            'warp_points' => $points,
                         ]
                     );
                 }
