@@ -22,7 +22,7 @@ class BulkMockupController extends Controller
             'template_ids'     => 'required|array|min:1',
             'template_ids.*'   => 'string|exists:templates,id',
             'colors'           => 'nullable|array|min:1',
-            'colors.*'         => 'string',
+            'colors.*'         => 'nullable|string',
             'positions'        => ['required', 'array'],
             'positions.*.name' => ['required', 'string', 'max:100',
                 Rule::in($mockup->types->map(fn($t) => $t->value->key())->toArray()),
