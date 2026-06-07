@@ -26,12 +26,8 @@ class UpdateMockupEditorRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'colors' => ['required', 'array'],
-            'area_top' => ['required', 'numeric', 'min:0'],
-            'area_left' => ['required', 'numeric', 'min:0'],
-            'area_height' => ['required', 'numeric', 'min:0'],
-            'area_width' => ['required', 'numeric', 'min:0'],
-        ];
+            'positions' => ['required', 'array'],
+       ];
     }
 
 

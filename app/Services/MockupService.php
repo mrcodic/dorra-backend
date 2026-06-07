@@ -486,18 +486,18 @@ class MockupService extends BaseService
             if ($model->category->is_has_category) {
                 $model->products()->sync($validatedData['product_ids'] ?? $model->category->products->pluck('id'));
             }
-//            if (!empty($warpPoints = $validatedData['warp_points'])) {
-//                foreach ($warpPoints as $side => $points) {
-//                    $model->sideSettings()->updateOrCreate(
-//                        ['side' => $side],
-//                        [
-//                            'is_active' => true,
-//                            'warp_points' => $points,
-//                        ]
-//                    );
-//                }
-//
-//            }
+            if (!empty($positions = $validatedData['positions'])) {
+                foreach ($positions as $side => $points) {
+                    $model->sideSettings()->updateOrCreate(
+                        ['side' => $side],
+                        [
+                            'is_active' => true,
+                            'positions' => $points,
+                        ]
+                    );
+                }
+
+            }
             $categoryChanged = (int)$oldCategoryId !== (int)($validatedData['category_id'] ?? $model->category_id);
             // Sync types (OK)
 
@@ -642,7 +642,7 @@ class MockupService extends BaseService
     public function showAndUpdateRecent($id)
     {
         $mockup = $this->repository->find($id);
-        return $mockup->load(['types']);
+        return $mockup->load(['types','sideSettings']);
 //        return auth('web')->user()->recentMockups()->syncWithoutDetaching([$mockup->id]);
     }
 
