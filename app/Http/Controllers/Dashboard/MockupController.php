@@ -106,7 +106,7 @@ class MockupController extends DashboardController
 
     public function updateEditorData(UpdateMockupEditorRequest $request, $id)
     {
-        $mockup = $this->mockupService->updateResource($request->validated(), $id);
+        $mockup = $this->mockupService->updateEditorData($request->validated(), $id);
         return Response::api(data: MockupResource::make($mockup));
 
     }

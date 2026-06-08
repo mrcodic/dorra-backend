@@ -587,6 +587,24 @@ class MockupService extends BaseService
         return $model;
     }
 
+    public function updateEditorData($validatedData, $id)
+    {
+        $model = $this->repository->update($validatedData, $id);
+        if (!empty($positions = $validatedData['positions'])) {
+            foreach ($positions as $side => $points) {
+                $model->sideSettings()->updateOrCreate(
+                    ['side' => $side],
+                    [
+                        'is_active' => true,
+                        'warp_points' => $points,
+                    ]
+                );
+            }
+
+        }
+        return $model;
+    }
+
     private function syncTemplatesSmart($model, array $syncData, bool $typesChanged)
     {
         $requestIds = collect(array_keys($syncData))->map('strval');

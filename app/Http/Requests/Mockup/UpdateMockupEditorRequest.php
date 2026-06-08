@@ -27,7 +27,7 @@ class UpdateMockupEditorRequest extends BaseRequest
     {
         return [
             'positions'           => ['required', 'array'],
-            'positions.*'         => ['required', 'array'],         
+            'positions.*'         => ['required', 'array'],
             'positions.*.p1x'     => ['required', 'numeric'],
             'positions.*.p1y'     => ['required', 'numeric'],
             'positions.*.p2x'     => ['required', 'numeric'],
