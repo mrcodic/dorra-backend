@@ -486,18 +486,18 @@ class MockupService extends BaseService
             if ($model->category->is_has_category) {
                 $model->products()->sync($validatedData['product_ids'] ?? $model->category->products->pluck('id'));
             }
-            if (!empty($positions = $validatedData['positions'])) {
-                foreach ($positions as $side => $points) {
-                    $model->sideSettings()->updateOrCreate(
-                        ['side' => $side],
-                        [
-                            'is_active' => true,
-                            'warp_points' => $points,
-                        ]
-                    );
-                }
-
-            }
+//            if (!empty($positions = $validatedData['positions'])) {
+//                foreach ($positions as $side => $points) {
+//                    $model->sideSettings()->updateOrCreate(
+//                        ['side' => $side],
+//                        [
+//                            'is_active' => true,
+//                            'warp_points' => $points,
+//                        ]
+//                    );
+//                }
+//
+//            }
             $categoryChanged = (int)$oldCategoryId !== (int)($validatedData['category_id'] ?? $model->category_id);
             // Sync types (OK)
 
