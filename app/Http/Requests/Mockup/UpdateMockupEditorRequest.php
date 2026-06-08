@@ -26,8 +26,17 @@ class UpdateMockupEditorRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'positions' => ['required', 'array'],
-       ];
+            'positions'           => ['required', 'array'],
+            'positions.*'         => ['required', 'array'],         
+            'positions.*.p1x'     => ['required', 'numeric'],
+            'positions.*.p1y'     => ['required', 'numeric'],
+            'positions.*.p2x'     => ['required', 'numeric'],
+            'positions.*.p2y'     => ['required', 'numeric'],
+            'positions.*.p3x'     => ['required', 'numeric'],
+            'positions.*.p3y'     => ['required', 'numeric'],
+            'positions.*.p4x'     => ['required', 'numeric'],
+            'positions.*.p4y'     => ['required', 'numeric'],
+        ];
     }
 
 
