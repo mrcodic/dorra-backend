@@ -135,26 +135,26 @@
                         @php
                             $product = $orderItem->itemable;
 
-                                 $isDesign    = $orderItem->itemable && get_class($orderItem->itemable) === \App\Models\Design::class;
-                       $isTemplate  = $orderItem->itemable && get_class($orderItem->itemable) === \App\Models\Template::class;
-                       $isDownload  = $orderItem->type === \App\Enums\Item\TypeEnum::DOWNLOAD;
+                            $isDesign    = $orderItem->itemable && get_class($orderItem->itemable) === \App\Models\Design::class;
+                            $isTemplate  = $orderItem->itemable && get_class($orderItem->itemable) === \App\Models\Template::class;
+                            $isDownload  = $orderItem->type === \App\Enums\Item\TypeEnum::DOWNLOAD;
 
-                       $previewImage = match(true) {
-                           $isDesign && $orderItem->itemable->linked_to_mockup =>
-                               $orderItem->itemable->getFirstMediaUrl('front-mockup-designs')
-                               ?: $orderItem->itemable->getFirstMediaUrl('none-mockup-designs')
-                               ?: $orderItem->itemable->getFirstMediaUrl('back-mockup-designs'),
+                            $previewImage = match(true) {
+                                $isDesign && $orderItem->itemable->linked_to_mockup =>
+                                    $orderItem->itemable->getFirstMediaUrl('front-mockup-designs')
+                                    ?: $orderItem->itemable->getFirstMediaUrl('none-mockup-designs')
+                                    ?: $orderItem->itemable->getFirstMediaUrl('back-mockup-designs'),
 
-                           $isTemplate =>
-                               $orderItem->getFirstMediaUrl('order_item_mockups')
-                               ?: $orderItem->itemable?->getFirstMediaUrl('templates-preview')
-                                ?: $orderItem->itemable?->getFirstMediaUrl('templates'),
+                                $isTemplate =>
+                                    $orderItem->getFirstMediaUrl('order_item_mockups')
+                                    ?: $orderItem->itemable?->getFirstMediaUrl('templates-preview')
+                                    ?: $orderItem->itemable?->getFirstMediaUrl('templates'),
 
-                           default =>
-                               $orderItem->itemable?->getFirstMediaUrl(
-                                   Str::plural(Str::lower(class_basename($orderItem->itemable)))
-                               ),
-                       };
+                                default =>
+                                    $orderItem->itemable?->getFirstMediaUrl(
+                                        Str::plural(Str::lower(class_basename($orderItem->itemable)))
+                                    ),
+                            };
                         @endphp
 
                         <div class="mb-1 border rounded p-1">
@@ -170,7 +170,6 @@
                                     <div>
                                         <div class="fw-bold text-black fs-16">
                                             {{ $product->name ?? 'No Product Found' }}
-
                                             <span class="badge ms-1 {{ $isDownload ? 'bg-info' : 'bg-success' }}">
                             {{ $isDownload ? 'Download' : 'Print' }}
                         </span>
@@ -185,28 +184,11 @@
                                                 <span class="me-1">Color:</span>
                                                 <span
                                                     class="rounded-circle border me-1"
-                                                    style="
-                                    width: 16px;
-                                    height: 16px;
-                                    display: inline-block;
-                                    background-color: {{ $orderItem->color }};
-                                "
+                                                    style="width: 16px; height: 16px; display: inline-block; background-color: {{ $orderItem->color }};"
                                                 ></span>
                                                 <span class="text-muted">{{ $orderItem->color }}</span>
                                             </div>
                                         @endif
-
-                                        {{-- Download button --}}
-{{--                                        @if($designDownloadUrl)--}}
-{{--                                            <div class="mt-1">--}}
-{{--                                                <a href="{{ $designDownloadUrl }}"--}}
-{{--                                                   download--}}
-{{--                                                   target="_blank"--}}
-{{--                                                   class="btn btn-sm btn-primary">--}}
-{{--                                                    Download Design--}}
-{{--                                                </a>--}}
-{{--                                            </div>--}}
-{{--                                        @endif--}}
                                     </div>
                                 </div>
 
@@ -216,7 +198,7 @@
                                             {{ number_format(($orderItem->sub_total) ?? 0, 2) }}
                                         </div>
                                         <div class="fw-bold text-success">
-                                            {{ number_format($orderItem->sub_total -$orderItem->discount_amount ?? 0, 2) }}
+                                            {{ number_format($orderItem->sub_total - $orderItem->discount_amount ?? 0, 2) }}
                                         </div>
                                         <div class="text-danger small">
                                             -{{ number_format($orderItem->discount_amount, 2) }}
@@ -229,38 +211,42 @@
                                 </div>
                             </div>
 
-                            {{-- Design Mockup Area --}}
-{{--                            @if(--}}
-{{--                                $isDesign &&--}}
-{{--                                !empty($orderItem->itemable->design_mockup_area) &&--}}
-{{--                                is_array($orderItem->itemable->design_mockup_area)--}}
-{{--                            )--}}
-{{--                                <div class="mt-1">--}}
-{{--                                    <h6 class="fw-bold mb-50">Design Mockup Areas</h6>--}}
+                            {{-- Types / Download Design Area --}}
+                            @if($orderItem->itemable?->types)
+                                <div class="d-flex flex-column mt-1">
+                                    <p style="color: #424746; margin: 0; font-size: 16px">Designs:</p>
+                                    <div class="d-flex flex-wrap align-items-center gap-1 justify-content-between mt-50">
+                                        @foreach($orderItem->itemable->types as $type)
+                                            @php
+                                                $itemable    = $orderItem->itemable;
+                                                $label       = $type->value->label();
+                                                $useTemplate = $isDesign && $itemable->template?->approach === 'without_editor';
+                                                $downloadUrl = ($useTemplate ? $itemable->template : $itemable)->getImageUrlForType($label);
+                                            @endphp
 
-{{--                                    @foreach($orderItem->itemable->design_mockup_area as $index => $area)--}}
-{{--                                        <div class="mb-1 p-1 border rounded bg-light">--}}
-{{--                                            <p class="mb-50">--}}
-{{--                                                <strong>Area {{ $index + 1 }} ({{ $area['name'] ?? 'unknown' }}):</strong>--}}
-{{--                                            </p>--}}
-
-{{--                                            <ul style="padding-left: 20px; margin: 0;">--}}
-{{--                                                <li>Top-Left X: {{ $area['p1x'] ?? '-' }}</li>--}}
-{{--                                                <li>Top-Left Y: {{ $area['p1y'] ?? '-' }}</li>--}}
-{{--                                                <li>Top-Right X: {{ $area['p2x'] ?? '-' }}</li>--}}
-{{--                                                <li>Top-Right Y: {{ $area['p2y'] ?? '-' }}</li>--}}
-{{--                                                <li>Bottom-Left X: {{ $area['p3x'] ?? '-' }}</li>--}}
-{{--                                                <li>Bottom-Left Y: {{ $area['p3y'] ?? '-' }}</li>--}}
-{{--                                                <li>Bottom-Right X: {{ $area['p4x'] ?? '-' }}</li>--}}
-{{--                                                <li>Bottom-Right Y: {{ $area['p4y'] ?? '-' }}</li>--}}
-{{--                                            </ul>--}}
-{{--                                        </div>--}}
-{{--                                    @endforeach--}}
-{{--                                </div>--}}
-{{--                            @endif--}}
+                                            <div class="d-flex flex-column">
+                                                <p style="margin: 0; color: #121212">{{ $label }} Design</p>
+                                                <img
+                                                    class="img-fluid rounded"
+                                                    style="max-height: 200px"
+                                                    src="{{ $downloadUrl }}"
+                                                    alt="{{ $label }} item photo"
+                                                >
+                                                <a href="{{ $downloadUrl }}"
+                                                   download
+                                                   target="_blank"
+                                                   class="btn btn-sm btn-primary mt-2 mb-2"
+                                                >
+                                                    <i data-feather="download" class="me-25"></i>
+                                                    Download Design
+                                                </a>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     @endforeach
-
 
                     {{-- <div class="mb-3 border-bottom pb-2">
                         <div class="d-flex align-items-start justify-content-between">
