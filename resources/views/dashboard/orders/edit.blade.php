@@ -209,28 +209,37 @@
                    ),
                 };
 
-                $designDownloadUrl = null;
-
-                if ($isDesign) {
-                $designDownloadUrl =
-                    $orderItem->itemable->getFirstMediaUrl('designs')
-                    ?: $orderItem->itemable->getFirstMediaUrl('back_designs');
-                }else{
-                 $designDownloadUrl =
-                    $orderItem->itemable->getFirstMediaUrl('templates')
-                    ?: $orderItem->itemable->getFirstMediaUrl('back_templates');
-                }
                         @endphp
 
                         <div class="mb-1 border rounded p-1">
                             <div class="d-flex align-items-start justify-content-between">
                                 <div class="d-flex">
-                                    <img
-                                        src="{{ $previewImage }}"
-                                        class="me-3 rounded"
-                                        alt="Product"
-                                        style="width: 60px; height: 60px;"
-                                    >
+                                    @if($isDesign && $orderItem->itemable?->types)
+                                        @foreach($orderItem->itemable->types as $type)
+                                            @php
+                                                $label      = $type->value->label();
+                                                $typePreview = match(strtolower($label)) {
+                                                    'front' => $orderItem->itemable->getFirstMediaUrl('front-mockup-designs'),
+                                                    'back'  => $orderItem->itemable->getFirstMediaUrl('back-mockup-designs'),
+                                                    'none'  => $orderItem->itemable->getFirstMediaUrl('none-mockup-designs'),
+                                                    default => $previewImage,
+                                                };
+                                            @endphp
+                                            <img
+                                                src="{{ $typePreview ?: $previewImage }}"
+                                                class="rounded"
+                                                alt="{{ $label }}"
+                                                style="width: 60px; height: 60px; object-fit: cover;"
+                                            >
+                                        @endforeach
+                                    @else
+                                        <img
+                                            src="{{ $previewImage }}"
+                                            class="rounded"
+                                            alt="Product"
+                                            style="width: 60px; height: 60px; object-fit: cover;"
+                                        >
+                                    @endif
 
                                     <div>
                                         <div class="fw-bold text-black fs-16">
@@ -261,17 +270,6 @@
                                             </div>
                                         @endif
 
-{{--                                        --}}{{-- Download button --}}
-{{--                                        @if($designDownloadUrl)--}}
-{{--                                            <div class="mt-1">--}}
-{{--                                                <a href="{{ $designDownloadUrl }}"--}}
-{{--                                                   download--}}
-{{--                                                   target="_blank"--}}
-{{--                                                   class="btn btn-sm btn-primary">--}}
-{{--                                                    Download Design--}}
-{{--                                                </a>--}}
-{{--                                            </div>--}}
-{{--                                        @endif--}}
                                     </div>
                                 </div>
 
