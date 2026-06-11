@@ -224,7 +224,7 @@
                                                 $downloadUrl   = ($useTemplate ? $itemable->template : $itemable)->getImageUrlForType($label);
 
                                                 $coloredPreview = $orderItem->getMedia('order_item_previews')
-//                                                    ->first(fn($m) => $m->getCustomProperty('type') === strtolower($label))
+                                                    ->first(fn($m) => $m->getCustomProperty('type') === strtolower($label))
                                                     ?->getUrl();
                                             @endphp
 
