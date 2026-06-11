@@ -22,7 +22,7 @@ class CategoryController extends Controller
             'landingSubCategories',
             'landingSubCategories.subCategoryProducts',
             'landingProducts',
-            'products',
+            'products.prices',
             'lastOffer',
             'reviews',
             ],
