@@ -230,12 +230,6 @@
                                                     $coloredPreview = $orderItem->getMedia('order_item_previews')
                                                         ->first(fn($m) => $m->getCustomProperty('type') === strtolower($label))
                                                         ?->getUrl();
-
-                                                    // Fallback: generate on-the-fly
-                                                    if (! $coloredPreview) {
-                                                        $coloredPreview = $orderItem->getColoredPreviewForType($label);
-                                                        // returns base64 data URI or null
-                                                    }
                                                 }
                                             @endphp
 
