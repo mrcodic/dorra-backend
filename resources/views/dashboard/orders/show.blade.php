@@ -230,7 +230,7 @@
                                                     $coloredPreview = $orderItem->getMedia('order_item_previews')
                                                         ->first(fn($m) => $m->getCustomProperty('type') === strtolower($label))
                                                         ?->getUrl();
-                                                    dd($coloredPreview);
+                                                    dd($orderItem->getMedia('order_item_previews'));
                                                 }
                                             @endphp
 
