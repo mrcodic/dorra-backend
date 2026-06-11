@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\Item\TypeEnum;
+use App\Observers\OrderItemObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
-
+#[ObservedBy(OrderItemObserver::class)]
 class OrderItem extends Model implements HasMedia
 {
     use InteractsWithMedia;
