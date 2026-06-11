@@ -255,7 +255,7 @@
                                                 {{-- Colored background download --}}
                                                 @if($coloredPreview)
                                                     <a href="{{ $coloredPreview }}"
-                                                       download="design_{{ $label }}_colored.png"
+                                                       download
                                                        target="_blank"
                                                        class="btn btn-sm btn-outline-secondary mt-50 mb-2 d-flex align-items-center justify-content-center gap-50"
                                                     >
