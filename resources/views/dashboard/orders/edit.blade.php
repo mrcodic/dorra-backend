@@ -293,6 +293,40 @@
                                     @endif
                                 </div>
                             </div>
+                            {{-- Types / Download Design Area --}}
+                            @if($orderItem->itemable?->types)
+                                <div class="d-flex flex-column mt-1">
+                                    <p style="color: #424746; margin: 0; font-size: 16px">Designs:</p>
+                                    <div class="d-flex flex-wrap align-items-center gap-1 justify-content-between mt-50">
+                                        @foreach($orderItem->itemable->types as $type)
+                                            @php
+                                                $itemable    = $orderItem->itemable;
+                                                $label       = $type->value->label();
+                                                $useTemplate = $isDesign && $itemable->template?->approach === 'without_editor';
+                                                $downloadUrl = ($useTemplate ? $itemable->template : $itemable)->getImageUrlForType($label);
+                                            @endphp
+
+                                            <div class="d-flex flex-column">
+                                                <p style="margin: 0; color: #121212">{{ $label }} Design</p>
+                                                <img
+                                                    class="img-fluid rounded"
+                                                    style="max-height: 200px"
+                                                    src="{{ $downloadUrl }}"
+                                                    alt="{{ $label }} item photo"
+                                                >
+                                                <a href="{{ $downloadUrl }}"
+                                                   download
+                                                   target="_blank"
+                                                   class="btn btn-sm btn-primary mt-2 mb-2"
+                                                >
+                                                    <i data-feather="download" class="me-25"></i>
+                                                    Download Design
+                                                </a>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
 
                             {{-- Design Mockup Area --}}
 {{--                            @if(--}}
