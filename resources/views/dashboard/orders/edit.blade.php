@@ -249,17 +249,7 @@
                                             </div>
                                         @endif
 
-{{--                                        --}}{{-- Download button --}}
-{{--                                        @if($designDownloadUrl)--}}
-{{--                                            <div class="mt-1">--}}
-{{--                                                <a href="{{ $designDownloadUrl }}"--}}
-{{--                                                   download--}}
-{{--                                                   target="_blank"--}}
-{{--                                                   class="btn btn-sm btn-primary">--}}
-{{--                                                    Download Design--}}
-{{--                                                </a>--}}
-{{--                                            </div>--}}
-{{--                                        @endif--}}
+
                                     </div>
                                 </div>
 
@@ -288,10 +278,14 @@
                                     <div class="d-flex flex-wrap align-items-center gap-1 justify-content-between mt-50">
                                         @foreach($orderItem->itemable->types as $type)
                                             @php
-                                                $itemable    = $orderItem->itemable;
-                                                $label       = $type->value->label();
-                                                $useTemplate = $isDesign && $itemable->template?->approach === 'without_editor';
-                                                $downloadUrl = ($useTemplate ? $itemable->template : $itemable)->getImageUrlForType($label);
+                                                $itemable      = $orderItem->itemable;
+                                                $label         = $type->value->label();
+                                                $useTemplate   = $isDesign && $itemable->template?->approach === 'without_editor';
+                                                $downloadUrl   = ($useTemplate ? $itemable->template : $itemable)->getImageUrlForType($label);
+
+                                                $coloredPreview = $orderItem->getMedia('order_item_previews')
+                                                    ->first(fn($m) => $m->getCustomProperty('type') === strtolower($label))
+                                                    ?->getUrl();
                                             @endphp
 
                                             <div class="d-flex flex-column">
@@ -302,14 +296,32 @@
                                                     src="{{ $downloadUrl }}"
                                                     alt="{{ $label }} item photo"
                                                 >
+
+                                                {{-- Original transparent download --}}
                                                 <a href="{{ $downloadUrl }}"
                                                    download
                                                    target="_blank"
-                                                   class="btn btn-sm btn-primary mt-2 mb-2"
+                                                   class="btn btn-sm btn-primary mt-2"
                                                 >
                                                     <i data-feather="download" class="me-25"></i>
                                                     Download Design
                                                 </a>
+
+                                                {{-- Colored background download --}}
+                                                @if($coloredPreview && $orderItem->color)
+                                                    <a href="{{ $coloredPreview }}"
+                                                       download
+                                                       target="_blank"
+                                                       class="btn btn-sm btn-outline-secondary mt-50 mb-2 d-flex align-items-center justify-content-center gap-50"
+                                                    >
+                            <span
+                                class="rounded-circle border"
+                                style="width: 12px; height: 12px; display:inline-block; background-color: {{ $orderItem->color }}; flex-shrink:0;"
+                            ></span>
+                                                        <i data-feather="download" class="me-25"></i>
+                                                        Download with Color
+                                                    </a>
+                                                @endif
                                             </div>
                                         @endforeach
                                     </div>
