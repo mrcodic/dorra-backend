@@ -228,9 +228,8 @@
                                                 if ($orderItem->color) {
                                                     // Try stored media first
                                                     $coloredPreview = $orderItem->getMedia('order_item_previews')
-                                                        ->first(fn($m) => $m->getCustomProperty('type') === strtolower($label))
+                                                        ->first(fn($m) => $m->getCustomProperty('type') == strtolower($label))
                                                         ?->getUrl();
-                                                    dd($orderItem->getMedia('order_item_previews'));
                                                 }
                                             @endphp
 
