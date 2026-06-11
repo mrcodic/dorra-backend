@@ -230,6 +230,7 @@
                                                     $coloredPreview = $orderItem->getMedia('order_item_previews')
                                                         ->first(fn($m) => $m->getCustomProperty('type') === strtolower($label))
                                                         ?->getUrl();
+                                                    dd($coloredPreview);
                                                 }
                                             @endphp
 
@@ -252,7 +253,7 @@
                                                     Download Design
                                                 </a>
 
-                                                {{-- Colored background download --}}
+
                                                 @if($coloredPreview)
                                                     <a href="{{ $coloredPreview }}"
                                                        download
