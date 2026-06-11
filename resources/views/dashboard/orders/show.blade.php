@@ -248,7 +248,7 @@
                                                 </a>
 
                                                 {{-- Colored background download --}}
-                                                @if($coloredPreview && $orderItem->color)
+{{--                                                @if($coloredPreview && $orderItem->color)--}}
                                                     <a href="{{ $coloredPreview }}"
                                                        download
                                                        target="_blank"
@@ -261,7 +261,7 @@
                                                         <i data-feather="download" class="me-25"></i>
                                                         Download with Color
                                                     </a>
-                                                @endif
+{{--                                                @endif--}}
                                             </div>
                                         @endforeach
                                     </div>
