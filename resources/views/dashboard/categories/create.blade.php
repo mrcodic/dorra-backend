@@ -302,33 +302,6 @@
                                             </span>
                                             </div>
                                         </div>
-                                        {{-- Tableau Transparent Image Upload (hidden by default) --}}
-                                        <div class="col-md-12" id="tableau-upload-section" style="display: none;">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text">
-                                                    Tableau Transparent Image <span style="color: red; font-size: 20px;">*</span>
-                                                </label>
-
-                                                {{-- Product's existing image (readonly preview) --}}
-                                                <div id="tableau-product-preview" class="mb-2 d-none">
-                                                    <p class="small text-muted mb-1">Product's current tableau image (reference):</p>
-                                                    <img id="tableau-product-preview-img" src="" alt="Product Tableau"
-                                                         style="width:100px;height:100px;object-fit:contain;
-                        background:repeating-conic-gradient(#ccc 0% 25%,#fff 0% 50%) 0 0/14px 14px;
-                        border-radius:6px;border:1px solid #ddd;">
-                                                </div>
-
-                                                {{-- Category's own upload --}}
-                                                <div id="tableau-dropzone" class="dropzone border rounded p-3"
-                                                     style="cursor:pointer; min-height:150px;">
-                                                    <div class="dz-message" data-dz-message>
-                                                        <span>Drop transparent PNG here or click to upload</span>
-                                                    </div>
-                                                </div>
-                                                <span class="image-hint small text-end">Max size: 1MB | PNG with transparency</span>
-                                                <input type="hidden" name="tableau_image_id" id="uploadedTableauImage">
-                                            </div>
-                                        </div>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-2">

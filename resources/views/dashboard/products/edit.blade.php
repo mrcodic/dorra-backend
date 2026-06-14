@@ -31,6 +31,44 @@
       })
       ->filter(fn($row) => !empty($row['name']) && count($row['options']))
       ->values();
+
+    $tableauMedia = $model->getFirstMedia('tableau_transparent_image')
+        ?? $model->getFirstMedia('tableau_image')
+        ?? $model->getFirstMedia('product_tableau_image')
+        ?? $model->getFirstMedia('product_tableau_transparent_image');
+
+    $mediaToArray = function ($media) {
+        if (! $media) {
+            return null;
+        }
+
+        return [
+            'id' => $media->id ?? null,
+            'file_name' => $media->file_name ?? 'Image',
+            'size' => $media->size ?? 12345,
+            'url' => method_exists($media, 'getUrl') ? $media->getUrl() : ($media->original_url ?? null),
+        ];
+    };
+
+    $getOptionFrameMedia = function ($option) {
+        $frame = null;
+
+        if ($option->relationLoaded('frameImage') || method_exists($option, 'frameImage')) {
+            $frame = $option->frameImage;
+        }
+
+        if (! $frame && ($option->relationLoaded('frame_image') || method_exists($option, 'frame_image'))) {
+            $frame = $option->frame_image;
+        }
+
+        if (! $frame && method_exists($option, 'getFirstMedia')) {
+            $frame = $option->getFirstMedia('option_frame_image')
+                ?? $option->getFirstMedia('frame_image')
+                ?? $option->getFirstMedia('option_frame');
+        }
+
+        return is_object($frame) ? $frame : null;
+    };
 @endphp
 @section('title', 'Edit Categories')
 @section('main-page', 'Categories')
@@ -406,7 +444,9 @@
                                                     <option value="" disabled selected>Select product</option>
                                                     @foreach($associatedData['categories'] as $category)
                                                         <option
-                                                            value="{{ $category->id }}" @selected($category->id == $model->category?->id)>{{ $category->name }}</option>
+                                                            value="{{ $category->id }}"
+                                                            data-is-tableau="{{ (int) $category->is_tableau }}"
+                                                            @selected($category->id == $model->category?->id)>{{ $category->name }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -431,6 +471,30 @@
                                                         @endforeach
                                                     @endif
                                                 </select>
+                                            </div>
+                                        </div>
+
+                                        {{-- Tableau Transparent Image Upload (hidden by default) --}}
+                                        <div class="col-md-12" id="tableau-upload-section" style="display: none;">
+                                            <div class="mb-2">
+                                                <label class="form-label label-text">
+                                                    Tableau Transparent Image <span style="color: red; font-size: 20px;">*</span>
+                                                </label>
+
+                                                <div id="tableau-dropzone"
+                                                     class="dropzone border rounded p-3"
+                                                     data-existing-media='@json($mediaToArray($tableauMedia))'
+                                                     style="cursor:pointer; min-height:150px;">
+                                                    <div class="dz-message" data-dz-message>
+                                                        <span>Drop transparent PNG here or click to upload</span>
+                                                    </div>
+                                                </div>
+
+                                                <span class="image-hint small text-end">
+                                                    Max size: 1MB | PNG with transparency
+                                                </span>
+
+                                                <input type="hidden" name="tableau_image_id" id="uploadedTableauImage" value="{{ $tableauMedia?->id ?? '' }}">
                                             </div>
                                         </div>
 
@@ -695,13 +759,13 @@
                                             </div>
                                             <div>
 
-                                                    <!-- Outer Repeater for Specifications -->
+                                                <!-- Outer Repeater for Specifications -->
                                                 <div class="outer-repeater">
                                                     <div class="{{ $hasSpecs ? '' :'d-none' }}"
                                                          data-repeater-list="specifications">
                                                         @forelse($model->specifications->filter(fn($specification) => $specification->type !=  'fixed') as $specification)
 
-                                                        <div data-repeater-item>
+                                                            <div data-repeater-item>
                                                                 <input type="hidden" name="id"
                                                                        value="{{ $specification->id }}">
 
@@ -801,6 +865,26 @@
                                                                                                 class="image-hint small text-end">
                                                 Max size: 1MB | Dimensions: 200x200 px
                                             </span>
+                                                                                            @php
+                                                                                                $frameMedia = $getOptionFrameMedia($option);
+                                                                                            @endphp
+                                                                                            <div class="col-md-12 mt-1 option-frame-wrapper" style="display:none;">
+                                                                                                <label class="form-label label-text">Option Frame Image</label>
+                                                                                                <div class="dropzone option-frame-dropzone border rounded p-3"
+                                                                                                     data-existing-frame-media='@json($mediaToArray($frameMedia))'
+                                                                                                     style="cursor:pointer; min-height:120px;">
+                                                                                                    <div class="dz-message" data-dz-message>
+                                                                                                        <span>Drop frame image here or click to upload</span>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                                <span class="image-hint small text-end">
+                                                                                                    Max size: 1MB | Dimensions: 200x200 px
+                                                                                                </span>
+                                                                                                <input type="hidden"
+                                                                                                       name="option_frame_image"
+                                                                                                       class="option-frame-image-hidden"
+                                                                                                       value="{{ $frameMedia?->id ?? '' }}">
+                                                                                            </div>
                                                                                             <div
                                                                                                 class="col-12 text-end mt-1 mb-2">
                                                                                                 <button type="button"
@@ -912,6 +996,22 @@
                                                                                         <input type="hidden"
                                                                                                name="option_image"
                                                                                                class="uploadedImage">
+                                                                                    </div>
+                                                                                    <div class="col-md-12 mt-1 option-frame-wrapper" style="display:none;">
+                                                                                        <label class="form-label label-text">Option Frame Image</label>
+                                                                                        <div class="dropzone option-frame-dropzone border rounded p-3"
+                                                                                             data-existing-frame-media='null'
+                                                                                             style="cursor:pointer; min-height:120px;">
+                                                                                            <div class="dz-message" data-dz-message>
+                                                                                                <span>Drop frame image here or click to upload</span>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <span class="image-hint small text-end">
+                                                                                            Max size: 1MB | Dimensions: 200x200 px
+                                                                                        </span>
+                                                                                        <input type="hidden"
+                                                                                               name="option_frame_image"
+                                                                                               class="option-frame-image-hidden">
                                                                                     </div>
                                                                                 </div>
 
@@ -1474,6 +1574,15 @@
                         if (dzElement && typeof initOptionDropzone === 'function') {
                             initOptionDropzone(dzElement);
                         }
+
+                        if (typeof resetClonedOptionFrameUploader === 'function') {
+                            resetClonedOptionFrameUploader(this);
+                        }
+
+                        if (window.selectedProductIsTableau && typeof initOptionFrameDropzones === 'function') {
+                            initOptionFrameDropzones();
+                        }
+
                         $(this).find('.uploadedImage').val('');
                         setTimeout(generateVariants, 0);
                     },
@@ -1502,6 +1611,15 @@
                     if (dzElement && typeof initOptionDropzone === 'function') {
                         initOptionDropzone(dzElement);
                     }
+
+                    if (typeof resetClonedOptionFrameUploader === 'function') {
+                        resetClonedOptionFrameUploader(this);
+                    }
+
+                    if (window.selectedProductIsTableau && typeof initOptionFrameDropzones === 'function') {
+                        initOptionFrameDropzones();
+                    }
+
                     $(this).find('.uploadedImage').val('');
                     setTimeout(generateVariants, 0);
                 },
@@ -2166,6 +2284,30 @@
             // Form submit
             $('#product-form').on('submit', function (e) {
                 e.preventDefault();
+
+                if (window.selectedProductIsTableau) {
+                    if (!$("#uploadedTableauImage").val()) {
+                        showTableauToastError("Please upload Tableau Transparent Image.");
+                        return;
+                    }
+
+                    let missingFrame = false;
+
+                    $(".option-frame-wrapper:visible").each(function () {
+                        const frameId = $(this).find(".option-frame-image-hidden").val();
+
+                        if (!frameId) {
+                            missingFrame = true;
+                            return false;
+                        }
+                    });
+
+                    if (missingFrame) {
+                        showTableauToastError("Please upload frame image for every option.");
+                        return;
+                    }
+                }
+
                 const isCustom = $('input[name="has_custom_prices"]:checked').val() === '1';
 
                 if (!isCustom) {
@@ -2373,6 +2515,252 @@
 
             // Initial load
             showStep(currentStep);
+        });
+    </script>
+
+
+
+    <script>
+        Dropzone.autoDiscover = false;
+
+        window.selectedProductIsTableau = false;
+        let tableauDzInstance = null;
+
+        function showTableauToastError(message) {
+            Toastify({
+                text: message,
+                duration: 4000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#EA5455",
+                close: true
+            }).showToast();
+        }
+
+        function parseTableauMediaDataset(value) {
+            if (!value || value === 'null') return null;
+
+            try {
+                return JSON.parse(value);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function addExistingDropzoneFile(dropzone, media) {
+            if (!media || !media.id || !media.url) return;
+
+            const mockFile = {
+                name: media.file_name || 'Image',
+                size: media.size || 12345,
+                _hiddenInputId: media.id
+            };
+
+            dropzone.emit("addedfile", mockFile);
+            dropzone.emit("thumbnail", mockFile, media.url);
+            dropzone.emit("complete", mockFile);
+            dropzone.files.push(mockFile);
+        }
+
+        function ensureTableauDropzone() {
+            if (tableauDzInstance) return;
+
+            const element = document.getElementById("tableau-dropzone");
+            if (!element) return;
+
+            const hiddenInput = document.getElementById("uploadedTableauImage");
+            const existingMedia = parseTableauMediaDataset(element.dataset.existingMedia);
+
+            tableauDzInstance = new Dropzone(element, {
+                url: "{{ route('media.store') }}",
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 1,
+                acceptedFiles: "image/png",
+                addRemoveLinks: true,
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                dictDefaultMessage: "Drop transparent PNG here or click to upload",
+                init: function () {
+                    addExistingDropzoneFile(this, existingMedia);
+
+                    if (existingMedia?.id) {
+                        hiddenInput.value = existingMedia.id;
+                    }
+
+                    this.on("success", function (file, response) {
+                        if (response.success && response.data) {
+                            file._hiddenInputId = response.data.id;
+                            hiddenInput.value = response.data.id;
+                        }
+                    });
+
+                    this.on("removedfile", function (file) {
+                        hiddenInput.value = "";
+
+                        if (file._hiddenInputId) {
+                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                method: "DELETE",
+                                headers: {
+                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function initOptionFrameDropzone(element, existingMedia = null) {
+            if (!element || element.dropzone) return;
+
+            const wrapper = element.closest(".option-frame-wrapper");
+            if (!wrapper) return;
+
+            const hiddenInput = wrapper.querySelector(".option-frame-image-hidden");
+            if (!hiddenInput) return;
+
+            new Dropzone(element, {
+                url: "{{ route('media.store') }}",
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 1,
+                acceptedFiles: "image/*",
+                addRemoveLinks: true,
+                headers: {
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                },
+                dictDefaultMessage: "Drop frame image here or click to upload",
+                init: function () {
+                    addExistingDropzoneFile(this, existingMedia);
+
+                    if (existingMedia?.id) {
+                        hiddenInput.value = existingMedia.id;
+                    }
+
+                    this.on("success", function (file, response) {
+                        if (response.success && response.data) {
+                            file._hiddenInputId = response.data.id;
+                            hiddenInput.value = response.data.id;
+                        }
+                    });
+
+                    this.on("removedfile", function (file) {
+                        hiddenInput.value = "";
+
+                        if (file._hiddenInputId) {
+                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                method: "DELETE",
+                                headers: {
+                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function initOptionFrameDropzones() {
+            document.querySelectorAll(".option-frame-dropzone").forEach(function (element) {
+                const existingMedia = parseTableauMediaDataset(element.dataset.existingFrameMedia);
+                initOptionFrameDropzone(element, existingMedia);
+            });
+        }
+
+        function resetClonedOptionFrameUploader(context) {
+            const $context = $(context);
+
+            $context.find(".option-frame-wrapper").show();
+            $context.find(".option-frame-image-hidden").val("");
+
+            $context.find(".option-frame-dropzone").each(function () {
+                if (this.dropzone) {
+                    this.dropzone.destroy();
+                }
+
+                this.dataset.existingFrameMedia = 'null';
+                this.classList.remove('dz-started', 'dz-max-files-reached');
+                this.innerHTML = '<div class="dz-message" data-dz-message><span>Drop frame image here or click to upload</span></div>';
+            });
+        }
+
+        function clearTableauDropzone() {
+            const hiddenInput = document.getElementById("uploadedTableauImage");
+            if (hiddenInput) hiddenInput.value = "";
+
+            if (tableauDzInstance) {
+                tableauDzInstance.removeAllFiles(true);
+            }
+        }
+
+        function clearOptionFrameImages() {
+            document.querySelectorAll(".option-frame-image-hidden").forEach(function (input) {
+                input.value = "";
+            });
+
+            document.querySelectorAll(".option-frame-dropzone").forEach(function (element) {
+                if (element.dropzone) {
+                    element.dropzone.removeAllFiles(true);
+                }
+            });
+        }
+
+        function setTableauMode(isTableau) {
+            window.selectedProductIsTableau = isTableau;
+
+            $("#tableau-upload-section").toggle(isTableau);
+            $(".option-frame-wrapper").toggle(isTableau);
+
+            // In edit mode, do not delete existing media just because the product was switched.
+            // Disable hidden inputs instead so non-tableau products do not submit these values.
+            $("#uploadedTableauImage").prop("disabled", !isTableau);
+            $(".option-frame-image-hidden").prop("disabled", !isTableau);
+
+            if (isTableau) {
+                ensureTableauDropzone();
+                initOptionFrameDropzones();
+            }
+        }
+
+        function handleSelectedProductTableauState() {
+            const selectedOption = $(".category-select option:selected");
+            const isTableau = Number(selectedOption.data("is-tableau")) === 1;
+
+            setTableauMode(isTableau);
+        }
+
+        $(document).ready(function () {
+            handleSelectedProductTableauState();
+
+            $(".category-select").on("change", function () {
+                handleSelectedProductTableauState();
+            });
+
+            $(document).on("click", "[data-repeater-create]", function () {
+                setTimeout(function () {
+                    document.querySelectorAll(".option-frame-dropzone").forEach(function (element) {
+                        if (!element.dropzone) {
+                            const wrapper = element.closest(".option-frame-wrapper");
+                            const hiddenInput = wrapper?.querySelector(".option-frame-image-hidden");
+
+                            if (hiddenInput && element.dataset.existingFrameMedia && element.dataset.existingFrameMedia !== 'null') {
+                                hiddenInput.value = "";
+                                element.dataset.existingFrameMedia = 'null';
+                                element.classList.remove('dz-started', 'dz-max-files-reached');
+                                element.innerHTML = '<div class="dz-message" data-dz-message><span>Drop frame image here or click to upload</span></div>';
+                            }
+                        }
+                    });
+
+                    $(".option-frame-wrapper").toggle(window.selectedProductIsTableau);
+
+                    if (window.selectedProductIsTableau) {
+                        initOptionFrameDropzones();
+                    }
+                }, 300);
+            });
         });
     </script>
 
