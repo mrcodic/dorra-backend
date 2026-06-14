@@ -152,7 +152,7 @@ class CategoryResource extends JsonResource
         $template = Template::query()
             ->with('media')
             ->find($templateId);
-
+dd($template);
         if (!$template) {
             return [
                 'source_design_svg' => null,
