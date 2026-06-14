@@ -197,8 +197,8 @@ class TemplateService extends BaseService
 //                        });
 //                })
                 ->where(function ($q) use ($locale) {
-                    $q->where('supported_languages', $locale)
-                        ->orWhere('supported_languages', 'both');
+                    $q->where('supported_languages', $locale);
+//                        ->orWhere('supported_languages', 'both');
                 })
                 ->orderByDesc('is_best_seller')
                 ->latest();
