@@ -8,6 +8,9 @@ use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\Product\ProductSpecificationResource;
 use App\Http\Resources\Template\TemplateResource;
 use App\Models\Industry;
+use App\Models\Media;
+use App\Models\Product;
+use App\Models\Template;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -24,6 +27,7 @@ class CategoryResource extends JsonResource
         $sub = (float)$this->getAttribute('base_price');
         $val = (float)($lastOffer?->getRawOriginal('value') ?? 0);
         $after = $lastOffer ? round($sub * (1 - ($val / 100)), 2) : null;
+        $templatePreviewData = $this->resolveTemplatePreviewData($request);
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
@@ -127,6 +131,88 @@ class CategoryResource extends JsonResource
             'colors' => $this->colors,
             'has_mockup' => (boolean)$this->has_mockup,
             'has_orientation' => (boolean)$this->has_orientation,
+            'source_design_svg' => $templatePreviewData['source_design_svg'],
+            'back_base64_preview_image' => $templatePreviewData['back_base64_preview_image'],
+            'template_model_image' => $templatePreviewData['template_model_image'],
+        ];
+    }
+
+    private function resolveTemplatePreviewData(Request $request): array
+    {
+        $templateId = (int) $request->get('template_id');
+
+        if (!$templateId) {
+            return [
+                'source_design_svg' => null,
+                'back_base64_preview_image' => null,
+                'template_model_image' => null,
+            ];
+        }
+
+        $template = Template::query()
+            ->with('media')
+            ->find($templateId);
+
+        if (!$template) {
+            return [
+                'source_design_svg' => null,
+                'back_base64_preview_image' => null,
+                'template_model_image' => null,
+            ];
+        }
+
+        $categoryId = (int) (
+        $request->get('product_without_category_id')
+            ?: $this->id
+            ?: Product::query()->find($request->get('product_id'))?->category_id
+        );
+
+        $productId = (int) $request->get('product_id');
+
+        $media = Media::query()
+            ->where('model_type', \App\Models\Mockup::class)
+            ->where('collection_name', 'generated_mockups')
+            ->where('custom_properties->template_id', (string) $template->id)
+            ->where('custom_properties->model_image', 1)
+            ->whereExists(function ($query) use ($categoryId) {
+                $query->selectRaw(1)
+                    ->from('mockups')
+                    ->whereColumn('mockups.id', 'media.model_id')
+                    ->whereNull('mockups.deleted_at')
+                    ->when($categoryId, fn ($q) => $q->where('mockups.category_id', $categoryId));
+            })
+            ->where(function ($query) use ($categoryId, $productId) {
+                if ($categoryId) {
+                    $query->where('custom_properties->category_id', $categoryId);
+                }
+
+                if ($productId) {
+                    $query->orWhereJsonContains('custom_properties->product_ids', $productId);
+                }
+            })
+            ->when($productId, function ($query) use ($productId) {
+                $query->whereExists(function ($query) use ($productId) {
+                    $query->selectRaw(1)
+                        ->from('mockup_product')
+                        ->whereColumn('mockup_product.mockup_id', 'media.model_id')
+                        ->where('mockup_product.product_id', $productId);
+                });
+            })
+            ->latest('id')
+            ->first();
+
+        $backPreviewImage = $template->use_front_as_back
+            ? $template->getFirstMediaUrl('templates-preview')
+            : (
+            $template->approach === 'without_editor'
+                ? $template->getFirstMediaUrl('back-templates-preview')
+                : $template->getFirstMediaUrl('back_templates')
+            );
+
+        return [
+            'source_design_svg' => $template->image,
+            'back_base64_preview_image' => $backPreviewImage,
+            'template_model_image' => $media?->getUrl() ?: $template->getFirstMediaUrl('template_model_image'),
         ];
     }
 }

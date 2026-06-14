@@ -253,7 +253,7 @@ class TemplateResource extends JsonResource
                     if (!$mockup) return false;
 
                     $pivot = $mockup->pivot;
-                    return 
+                    return
                         !empty($pivot->positions) ;
 //                        &&$pivot->colors === $mockup->colors
                 }
