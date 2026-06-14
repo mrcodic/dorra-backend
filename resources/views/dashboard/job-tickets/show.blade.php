@@ -117,10 +117,10 @@
                     @endphp
 
                     <img
-                        src="{{ $previewImage ?: asset('/images/item-photo.png') }}"
-                        alt="item photo"
-                        class="mb-2"
-                        width="500px"
+                        src="{{ $previewImage }}"
+                        class="me-3 rounded"
+                        alt="Product"
+                        style="width: 60px; height: 60px; object-fit: contain; background: #f8f8f8;"
                     >
 
                     @if($model->jobEvents->last()?->admin)
@@ -234,8 +234,8 @@
                             <p style="margin: 0; color: #121212">{{ $label }} Design</p>
 
                             <img
-                                class="img-fluid rounded"
-                                style="max-height: 200px"
+                                class="rounded"
+                                style="max-height: 200px; max-width: 100%; width: auto; height: auto; object-fit: contain;"
                                 src="{{ $downloadUrl }}"
                                 alt="{{ $label }} item photo"
                             >
