@@ -188,26 +188,33 @@
                         @php
                             $product = $orderItem->itemable;
 
-                    $isDesign    = $orderItem->itemable && get_class($orderItem->itemable) === \App\Models\Design::class;
-                $isTemplate  = $orderItem->itemable && get_class($orderItem->itemable) === \App\Models\Template::class;
-                $isDownload  = $orderItem->type === \App\Enums\Item\TypeEnum::DOWNLOAD;
+                            $isDesign    = $orderItem->itemable && get_class($orderItem->itemable) === \App\Models\Design::class;
+                            $isTemplate  = $orderItem->itemable && get_class($orderItem->itemable) === \App\Models\Template::class;
+                            $isDownload  = $orderItem->type === \App\Enums\Item\TypeEnum::DOWNLOAD;
 
-                $previewImage = match(true) {
-                $isDesign && $orderItem->itemable->linked_to_mockup =>
-                   $orderItem->itemable->getFirstMediaUrl('front-mockup-designs')
-                   ?: $orderItem->itemable->getFirstMediaUrl('none-mockup-designs')
-                   ?: $orderItem->itemable->getFirstMediaUrl('back-mockup-designs'),
 
-                $isTemplate =>
-                   $orderItem->getFirstMediaUrl('order_item_mockups')
-                   ?: $orderItem->itemable?->getFirstMediaUrl('templates-preview')
-                    ?: $orderItem->itemable?->getFirstMediaUrl('templates'),
+                            $orderItemPreview =
+                                $orderItem->getFirstMediaUrl('order_item_mockups')
+                                ?: $orderItem->getFirstMediaUrl('order_item_previews');
 
-                default =>
-                   $orderItem->itemable?->getFirstMediaUrl(
-                       Str::plural(Str::lower(class_basename($orderItem->itemable)))
-                   ),
-                };
+                            $previewImage = match (true) {
+                                filled($orderItemPreview) =>
+                                    $orderItemPreview,
+
+                                $isDesign && $orderItem->itemable->linked_to_mockup =>
+                                    $orderItem->itemable->getFirstMediaUrl('front-mockup-designs')
+                                    ?: $orderItem->itemable->getFirstMediaUrl('none-mockup-designs')
+                                    ?: $orderItem->itemable->getFirstMediaUrl('back-mockup-designs'),
+
+                                $isTemplate =>
+                                    $orderItem->itemable?->getFirstMediaUrl('templates-preview')
+                                    ?: $orderItem->itemable?->getFirstMediaUrl('templates'),
+
+                                default =>
+                                    $orderItem->itemable?->getFirstMediaUrl(
+                                        Str::plural(Str::lower(class_basename($orderItem->itemable)))
+                                    ),
+                            };
                         @endphp
 
                         <div class="mb-1 border rounded p-1">
