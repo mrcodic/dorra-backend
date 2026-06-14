@@ -99,14 +99,20 @@
                 $isTemplate  = $itemable && get_class($itemable) === \App\Models\Template::class;
                 $isDownload  = $orderItem->type === \App\Enums\Item\TypeEnum::DOWNLOAD;
 
+                $orderItemPreview =
+                    $orderItem?->getFirstMediaUrl('order_item_mockups')
+                    ?: $orderItem?->getFirstMediaUrl('order_item_previews');
+
                 $previewImage = match(true) {
+                filled($orderItemPreview) =>
+                   $orderItemPreview,
+
                 $isDesign && $itemable->linked_to_mockup =>
                    $itemable->getFirstMediaUrl('front-mockup-designs')
                    ?: $itemable->getFirstMediaUrl('none-mockup-designs'),
 
                 $isTemplate =>
-                   $orderItem->getFirstMediaUrl('order_item_mockups')
-                   ?: $itemable?->getFirstMediaUrl('templates-preview'),
+                   $itemable?->getFirstMediaUrl('templates-preview'),
 
                 default =>
                    $itemable?->getFirstMediaUrl(
@@ -117,10 +123,10 @@
                     @endphp
 
                     <img
-                        src="{{ $previewImage }}"
-                        class="me-3 rounded"
-                        alt="Product"
-                        style="width: 60px; height: 60px; object-fit: contain; background: #f8f8f8;"
+                        src="{{ $previewImage ?: asset('/images/item-photo.png') }}"
+                        alt="item photo"
+                        class="mb-2 rounded"
+                        style="max-width: 500px; width: 100%; height: auto; object-fit: contain; background: #f8f8f8;"
                     >
 
                     @if($model->jobEvents->last()?->admin)
@@ -207,67 +213,74 @@
                         </div>
                     </div>
                     <hr>
-                    @foreach($orderItem->itemable->types as $type)
-                        @php
-                            $itemable      = $orderItem->itemable;
-                            $label         = $type->value->label();
-                            $useTemplate   = $isDesign && $itemable->template?->approach === 'without_editor';
-                            $downloadUrl   = ($useTemplate ? $itemable->template : $itemable)->getImageUrlForType($label);
-
-                            // ✅ Colored preview saved on this specific order item
-                            $coloredPreview = null;
-
-                            if ($orderItem->color) {
-                                $coloredPreview = $orderItem->getMedia('order_item_previews')
-                                    ->first(function ($media) use ($label, $orderItem) {
-                                        return strtolower((string) $media->getCustomProperty('type')) === strtolower((string) $label)
-                                            && (
-                                                ! $media->hasCustomProperty('color')
-                                                || strtolower((string) $media->getCustomProperty('color')) === strtolower((string) $orderItem->color)
-                                            );
-                                    })
-                                    ?->getUrl();
-                            }
-                        @endphp
-
+                    @if($orderItem->itemable?->types)
                         <div class="d-flex flex-column">
-                            <p style="margin: 0; color: #121212">{{ $label }} Design</p>
+                            <p style="color: #424746; margin: 0; font-size: 16px">Designs:</p>
+                            <div class="d-flex flex-wrap align-items-start gap-1 justify-content-between mt-50">
+                                @foreach($orderItem->itemable->types as $type)
+                                    @php
+                                        $itemable      = $orderItem->itemable;
+                                        $label         = $type->value->label();
+                                        $useTemplate   = $isDesign && $itemable->template?->approach === 'without_editor';
+                                        $downloadUrl   = ($useTemplate ? $itemable->template : $itemable)->getImageUrlForType($label);
 
-                            <img
-                                class="rounded"
-                                style="max-height: 200px; max-width: 100%; width: auto; height: auto; object-fit: contain;"
-                                src="{{ $downloadUrl }}"
-                                alt="{{ $label }} item photo"
-                            >
+                                        // ✅ Colored preview saved on this specific order item
+                                        $coloredPreview = null;
 
-                            {{-- Original transparent download --}}
-                            <a href="{{ $downloadUrl }}"
-                               download
-                               target="_blank"
-                               class="btn btn-sm btn-primary mt-2"
-                            >
-                                <i data-feather="download" class="me-25"></i>
-                                Download Design
-                            </a>
+                                        if ($orderItem->color) {
+                                            $coloredPreview = $orderItem->getMedia('order_item_previews')
+                                                ->first(function ($media) use ($label, $orderItem) {
+                                                    return strtolower((string) $media->getCustomProperty('type')) === strtolower((string) $label)
+                                                        && (
+                                                            ! $media->hasCustomProperty('color')
+                                                            || strtolower((string) $media->getCustomProperty('color')) === strtolower((string) $orderItem->color)
+                                                        );
+                                                })
+                                                ?->getUrl();
+                                        }
+                                    @endphp
 
-                            {{-- ✅ Colored download --}}
-                            @if($coloredPreview)
-                                <a href="{{ $coloredPreview }}"
-                                   download
-                                   target="_blank"
-                                   class="btn btn-sm btn-outline-secondary mt-50 mb-2 d-flex align-items-center justify-content-center gap-50"
-                                >
+                                    <div class="d-flex flex-column">
+                                        <p style="margin: 0; color: #121212">{{ $label }} Design</p>
+
+                                        <img
+                                            class="rounded"
+                                            style="max-height: 200px; max-width: 100%; width: auto; height: auto; object-fit: contain; background: #f8f8f8;"
+                                            src="{{ $downloadUrl }}"
+                                            alt="{{ $label }} item photo"
+                                        >
+
+                                        {{-- Original transparent download --}}
+                                        <a href="{{ $downloadUrl }}"
+                                           download
+                                           target="_blank"
+                                           class="btn btn-sm btn-primary mt-2"
+                                        >
+                                            <i data-feather="download" class="me-25"></i>
+                                            Download Design
+                                        </a>
+
+                                        {{-- ✅ Colored download --}}
+                                        @if($coloredPreview)
+                                            <a href="{{ $coloredPreview }}"
+                                               download
+                                               target="_blank"
+                                               class="btn btn-sm btn-outline-secondary mt-50 mb-2 d-flex align-items-center justify-content-center gap-50"
+                                            >
                 <span
                     class="rounded-circle border"
                     style="width: 12px; height: 12px; display:inline-block; background-color: {{ $orderItem->color }}; flex-shrink:0;"
                 ></span>
 
-                                    <i data-feather="download" class="me-25"></i>
-                                    Download with Color
-                                </a>
-                            @endif
+                                                <i data-feather="download" class="me-25"></i>
+                                                Download with Color
+                                            </a>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
-                    @endforeach
+                    @endif
                 </div>
                 {{-- Details --}}
                 <div class="d-flex flex-column">
