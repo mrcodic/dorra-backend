@@ -164,7 +164,7 @@ class TemplateService extends BaseService
 //                $languages = is_array($languages) ? $languages : [$languages];
                 $q->where(function ($qq) use ($locale) {
 //                    foreach ($languages as $lang) {
-                        $qq->orWhereJsonContains('supported_languages', $locale);
+                        $qq->orWhereJsonContains('supported_languages', [$locale]);
 //                    }
                 });
             });
