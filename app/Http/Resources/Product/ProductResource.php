@@ -134,7 +134,7 @@ class ProductResource extends JsonResource
     }
     private function resolveTemplatePreviewData(Request $request): array
     {
-        $templateId = (int) $request->get('template_id');
+        $templateId = (string) $request->get('template_id');
 
         if (!$templateId) {
             return [
