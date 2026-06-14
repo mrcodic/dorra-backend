@@ -32,6 +32,7 @@ class Product extends Model implements HasMedia
         'show_add_cart_btn',
         'show_customize_design_btn',
         'colors',
+        'is_tableau',
     ];
 
 

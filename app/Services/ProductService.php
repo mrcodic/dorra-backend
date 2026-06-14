@@ -228,6 +228,13 @@ class ProductService extends BaseService
                                         'collection_name' => 'productSpecificationOptions',
                                     ]);
                             }
+                            if (isset($option['option_frame_image'])) {
+                                Media::where('id', $option['option_frame_image'])->update([
+                                    'model_type' => get_class($productOption),
+                                    'model_id' => $productOption->id,
+                                    'collection_name' => 'option_frame_image',
+                                ]);
+                            }
                         });
 
                     }
@@ -277,7 +284,15 @@ class ProductService extends BaseService
                     'model_id' => $product->id,
                     'collection_name' => 'product_main_image',
                 ]);
+            if (isset($validatedData['tableau_image_id'])) {
+                Media::where('id', $validatedData['tableau_image_id'])
+                    ->update([
+                        'model_type' => get_class($product),
+                        'model_id' => $product->id,
+                        'collection_name' => 'tableau_image',
+                    ]);
 
+            }
             if (isset($validatedData['image_model_id'])) {
                 Media::where('id', $validatedData['image_model_id'])
                     ->update([

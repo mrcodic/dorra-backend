@@ -60,6 +60,10 @@ class ProductSpecificationOption extends Model implements HasMedia
     {
         return Attribute::get(fn () => $this->getFirstMedia('productSpecificationOptions') ?: $this->getFirstMedia('categorySpecificationOptions'));
     }
+    public function frameImage(): Attribute
+    {
+        return Attribute::get(fn () => $this->getFirstMedia('option_frame_image'));
+    }
 
     public function price(): Attribute
     {

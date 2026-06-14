@@ -42,6 +42,8 @@ class ProductResource extends JsonResource
             'main_image' => $this->whenLoaded('media', function () {
                 return MediaResource::make($this->getFirstMedia('product_main_image'));
             }),
+            'tableau_image' => $this->whenLoaded('media', fn() => $this->getFirstMediaUrl("tableau_image")),
+
             'mobile_banner' => $this->whenLoaded('media', function () {
                 return MediaResource::make($this->getFirstMedia('mobile_banner'));
             }),

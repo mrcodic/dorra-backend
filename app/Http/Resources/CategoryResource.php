@@ -33,6 +33,7 @@ class CategoryResource extends JsonResource
             'price_after_offer' => is_null($after) ? null : sprintf('%.2f', round($after, 2)),
             'custom_prices' => ProductPriceResource::collection($this->whenLoaded('prices')),
             'image' => $this->whenLoaded('media', fn() => $this->getFirstMediaUrl("categories")),
+            'tableau_image' => $this->whenLoaded('media', fn() => $this->getFirstMediaUrl("tableau_image")),
             'main_image' => $this->whenLoaded('media', function () {
                 return MediaResource::make($this->getFirstMedia('categories'));
             }),

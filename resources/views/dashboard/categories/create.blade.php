@@ -302,6 +302,33 @@
                                             </span>
                                             </div>
                                         </div>
+                                        {{-- Tableau Transparent Image Upload (hidden by default) --}}
+                                        <div class="col-md-12" id="tableau-upload-section" style="display: none;">
+                                            <div class="mb-2">
+                                                <label class="form-label label-text">
+                                                    Tableau Transparent Image <span style="color: red; font-size: 20px;">*</span>
+                                                </label>
+
+                                                {{-- Product's existing image (readonly preview) --}}
+                                                <div id="tableau-product-preview" class="mb-2 d-none">
+                                                    <p class="small text-muted mb-1">Product's current tableau image (reference):</p>
+                                                    <img id="tableau-product-preview-img" src="" alt="Product Tableau"
+                                                         style="width:100px;height:100px;object-fit:contain;
+                        background:repeating-conic-gradient(#ccc 0% 25%,#fff 0% 50%) 0 0/14px 14px;
+                        border-radius:6px;border:1px solid #ddd;">
+                                                </div>
+
+                                                {{-- Category's own upload --}}
+                                                <div id="tableau-dropzone" class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
+                                                    <div class="dz-message" data-dz-message>
+                                                        <span>Drop transparent PNG here or click to upload</span>
+                                                    </div>
+                                                </div>
+                                                <span class="image-hint small text-end">Max size: 1MB | PNG with transparency</span>
+                                                <input type="hidden" name="tableau_image_id" id="uploadedTableauImage">
+                                            </div>
+                                        </div>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-2">
@@ -391,6 +418,34 @@
                                                name="has_orientation" value="1"/>
 
                                     </div>
+                                </div>
+                            </div>
+                            {{-- Tableau Toggle --}}
+                            <div class="col-md-6">
+                                <div class="mb-2 d-flex align-items-center gap-2">
+                                    <label class="form-label label-text">Is this product a Tableau?</label>
+                                    <div class="form-check form-switch">
+                                        <input type="hidden" name="is_tableau" value="0"/>
+                                        <input class="form-check-input" type="checkbox" id="is_tableau"
+                                               name="is_tableau" value="1"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Tableau Transparent Image Upload (hidden by default) --}}
+                            <div class="col-md-12" id="tableau-upload-section" style="display: none;">
+                                <div class="mb-2">
+                                    <label class="form-label label-text">
+                                        Tableau Transparent Image <span style="color: red; font-size: 20px;">*</span>
+                                    </label>
+                                    <div id="tableau-dropzone" class="dropzone border rounded p-3"
+                                         style="cursor:pointer; min-height:150px;">
+                                        <div class="dz-message" data-dz-message>
+                                            <span>Drop transparent PNG here or click to upload</span>
+                                        </div>
+                                    </div>
+                                    <span class="image-hint small text-end">Max size: 1MB | PNG with transparency</span>
+                                    <input type="hidden" name="tableau_image_id" id="uploadedTableauImage">
                                 </div>
                             </div>
                         </div>
@@ -643,6 +698,18 @@
                                                                                         <input type="hidden"
                                                                                                name="option_image"
                                                                                                class="option-image-hidden">
+                                                                                    </div>
+                                                                                    {{-- Frame Image Upload per Option --}}
+                                                                                    <div class="col-md-12 mt-1 option-frame-wrapper" style="display: none;">
+                                                                                        <label class="form-label label-text">Option Frame Image</label>
+                                                                                        <div class="dropzone option-frame-dropzone border rounded p-3"
+                                                                                             style="cursor:pointer; min-height:120px;">
+                                                                                            <div class="dz-message" data-dz-message>
+                                                                                                <span>Drop frame image here or click to upload</span>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <span class="image-hint small text-end">Max size: 1MB | Dimensions: 200x200 px</span>
+                                                                                        <input type="hidden" name="option_frame_image" class="option-frame-image-hidden">
                                                                                     </div>
                                                                                     <!-- ❌ Delete Option Button -->
                                                                                     <div class="row mt-2">
@@ -1764,6 +1831,100 @@
 
             // Initial load
             showStep(currentStep);
+        });
+    </script>
+    <script>
+        // ── Tableau toggle ──────────────────────────────────────────
+        Dropzone.autoDiscover = false;
+
+        let tableauDropzoneInstance = null;
+
+        $('#is_tableau').on('change', function () {
+            const isTableau = $(this).is(':checked');
+            $('#tableau-upload-section').toggle(isTableau);
+            $('.option-frame-wrapper').toggle(isTableau);
+
+            // Init tableau dropzone once
+            if (isTableau && !tableauDropzoneInstance) {
+                tableauDropzoneInstance = new Dropzone("#tableau-dropzone", {
+                    url: "{{ route('media.store') }}",
+                    paramName: "file",
+                    maxFiles: 1,
+                    maxFilesize: 1,
+                    acceptedFiles: "image/png", // transparent PNG only
+                    headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+                    addRemoveLinks: true,
+                    init: function () {
+                        this.on("success", function (file, response) {
+                            if (response.success && response.data) {
+                                file._hiddenInputId = response.data.id;
+                                document.getElementById("uploadedTableauImage").value = response.data.id;
+                            }
+                        });
+                        this.on("removedfile", function (file) {
+                            document.getElementById("uploadedTableauImage").value = "";
+                            if (file._hiddenInputId) {
+                                fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                    method: "DELETE",
+                                    headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Init frame dropzones on visible options
+            if (isTableau) {
+                initOptionFrameDropzones();
+            }
+        });
+
+        // ── Option Frame Dropzones ──────────────────────────────────
+        function initOptionFrameDropzones() {
+            document.querySelectorAll(".option-frame-dropzone").forEach(function (element) {
+                if (element.dropzone) return; // skip already inited
+
+                const hiddenInput = element.closest(".col-md-12").querySelector(".option-frame-image-hidden");
+
+                new Dropzone(element, {
+                    url: "{{ route('media.store') }}",
+                    paramName: "file",
+                    maxFiles: 1,
+                    maxFilesize: 1,
+                    acceptedFiles: "image/*",
+                    addRemoveLinks: true,
+                    headers: {
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                    },
+                    init: function () {
+                        this.on("success", function (file, response) {
+                            hiddenInput.value = response.data.id;
+                            file._hiddenInputId = response.data.id;
+                        });
+                        this.on("removedfile", function (file) {
+                            hiddenInput.value = "";
+                            if (file._hiddenInputId) {
+                                fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                    method: "DELETE",
+                                    headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
+        // Re-init frame dropzones when repeater adds new option rows
+        $(document).on("click", "[data-repeater-create]", function () {
+            setTimeout(function () {
+                // show frame wrapper if tableau is active
+                if ($('#is_tableau').is(':checked')) {
+                    $('.option-frame-wrapper').show();
+                    initOptionFrameDropzones();
+                }
+            }, 250);
         });
     </script>
 

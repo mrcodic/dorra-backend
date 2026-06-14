@@ -146,6 +146,17 @@
                                </div>
                            </div>
                        </div>
+                       {{-- Tableau Toggle --}}
+                       <div class="col-md-6">
+                           <div class="mb-2 d-flex align-items-center gap-2">
+                               <label class="form-label label-text">Is this product a Tableau?</label>
+                               <div class="form-check form-switch">
+                                   <input type="hidden" name="is_tableau" value="0"/>
+                                   <input class="form-check-input" type="checkbox" id="is_tableau"
+                                          name="is_tableau" value="1"/>
+                               </div>
+                           </div>
+                       </div>
                    </div>
                 </div>
 

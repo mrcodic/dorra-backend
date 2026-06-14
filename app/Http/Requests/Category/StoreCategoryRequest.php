@@ -45,6 +45,8 @@ class StoreCategoryRequest extends BaseRequest
             'mobile_banner_id' => ['required', 'exists:media,id'],
             'has_mockup' => ['required', 'boolean'],
             'has_orientation' => ['required', 'boolean'],
+            'is_tableau' => ['required', 'boolean'],
+
         ];
 
     }

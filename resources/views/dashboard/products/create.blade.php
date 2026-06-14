@@ -315,7 +315,8 @@
                                                     <option value="" selected disabled>Select product</option>
                                                     @foreach($associatedData['categories'] as $category)
                                                         <option
-                                                            value="{{ $category->id }}">{{ $category->name }}</option>
+                                                            value="{{ $category->id }}"
+                                                            data-is-tableau="{{ (int) $category->is_tableau }}">{{ $category->name }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -332,7 +333,24 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        {{-- Tableau Transparent Image Upload (hidden by default) --}}
+                                        <div class="col-md-12" id="tableau-upload-section" style="display: none;">
+                                            <div class="mb-2">
+                                                <label class="form-label label-text">
+                                                    Tableau Transparent Image <span style="color: red; font-size: 20px;">*</span>
+                                                </label>
 
+                                                {{-- Category's own upload --}}
+                                                <div id="tableau-dropzone" class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
+                                                    <div class="dz-message" data-dz-message>
+                                                        <span>Drop transparent PNG here or click to upload</span>
+                                                    </div>
+                                                </div>
+                                                <span class="image-hint small text-end">Max size: 1MB | PNG with transparency</span>
+                                                <input type="hidden" name="tableau_image_id" id="uploadedTableauImage">
+                                            </div>
+                                        </div>
                                         <!-- Tags -->
                                         <div class="col-md-12">
                                             <div class="mb-2">
@@ -635,6 +653,18 @@
                                                                                         class="image-hint small text-end">
                                                 Max size: 1MB | Dimensions: 200x200 px
                                             </span>
+                                                                                    {{-- Frame Image per Option --}}
+                                                                                    <div class="col-md-12 mt-1 option-frame-wrapper" style="display:none;">
+                                                                                        <label class="form-label label-text">Option Frame Image</label>
+                                                                                        <div class="dropzone option-frame-dropzone border rounded p-3"
+                                                                                             style="cursor:pointer; min-height:120px;">
+                                                                                            <div class="dz-message" data-dz-message>
+                                                                                                <span>Drop frame image here or click to upload</span>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <span class="image-hint small text-end">Max size: 1MB | Dimensions: 200x200 px</span>
+                                                                                        <input type="hidden" name="option_frame_image" class="option-frame-image-hidden">
+                                                                                    </div>
                                                                                     <!-- ❌ Delete Option Button -->
                                                                                     <div class="row mt-2">
                                                                                         <div class="col-12 text-end">
@@ -648,6 +678,7 @@
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
+
                                                                             </div>
                                                                         </div>
 
@@ -1869,6 +1900,30 @@
             // Form submit
             $('#product-form').on('submit', function (e) {
                 e.preventDefault();
+
+                if (window.selectedProductIsTableau) {
+                    if (!$("#uploadedTableauImage").val()) {
+                        showTableauToastError("Please upload Tableau Transparent Image.");
+                        return;
+                    }
+
+                    let missingFrame = false;
+
+                    $(".option-frame-wrapper:visible").each(function () {
+                        const frameId = $(this).find(".option-frame-image-hidden").val();
+
+                        if (!frameId) {
+                            missingFrame = true;
+                            return false;
+                        }
+                    });
+
+                    if (missingFrame) {
+                        showTableauToastError("Please upload frame image for every option.");
+                        return;
+                    }
+                }
+
                 const saveButton = $('.saveChangesButton');
                 const saveLoader = $('.saveLoader');
                 const saveButtonText = $('.saveChangesButton .btn-text');
@@ -1977,6 +2032,167 @@
 
             // Initial load
             showStep(currentStep);
+        });
+    </script>
+    <script>
+        Dropzone.autoDiscover = false;
+
+        window.selectedProductIsTableau = false;
+        let tableauDzInstance = null;
+
+        function showTableauToastError(message) {
+            Toastify({
+                text: message,
+                duration: 4000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#EA5455",
+                close: true
+            }).showToast();
+        }
+
+        function ensureTableauDropzone() {
+            if (tableauDzInstance) return;
+
+            tableauDzInstance = new Dropzone("#tableau-dropzone", {
+                url: "{{ route('media.store') }}",
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 1,
+                acceptedFiles: "image/png",
+                addRemoveLinks: true,
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                dictDefaultMessage: "Drop transparent PNG here or click to upload",
+                init: function () {
+                    this.on("success", function (file, response) {
+                        if (response.success && response.data) {
+                            file._hiddenInputId = response.data.id;
+                            document.getElementById("uploadedTableauImage").value = response.data.id;
+                        }
+                    });
+
+                    this.on("removedfile", function (file) {
+                        document.getElementById("uploadedTableauImage").value = "";
+
+                        if (file._hiddenInputId) {
+                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                method: "DELETE",
+                                headers: {
+                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function initOptionFrameDropzones() {
+            document.querySelectorAll(".option-frame-dropzone").forEach(function (element) {
+                if (element.dropzone) return;
+
+                const wrapper = element.closest(".option-frame-wrapper");
+                if (!wrapper) return;
+
+                const hiddenInput = wrapper.querySelector(".option-frame-image-hidden");
+                if (!hiddenInput) return;
+
+                new Dropzone(element, {
+                    url: "{{ route('media.store') }}",
+                    paramName: "file",
+                    maxFiles: 1,
+                    maxFilesize: 1,
+                    acceptedFiles: "image/*",
+                    addRemoveLinks: true,
+                    headers: {
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                    },
+                    dictDefaultMessage: "Drop frame image here or click to upload",
+                    init: function () {
+                        this.on("success", function (file, response) {
+                            if (response.success && response.data) {
+                                file._hiddenInputId = response.data.id;
+                                hiddenInput.value = response.data.id;
+                            }
+                        });
+
+                        this.on("removedfile", function (file) {
+                            hiddenInput.value = "";
+
+                            if (file._hiddenInputId) {
+                                fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                    method: "DELETE",
+                                    headers: {
+                                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
+        function clearTableauDropzone() {
+            document.getElementById("uploadedTableauImage").value = "";
+
+            if (tableauDzInstance) {
+                tableauDzInstance.removeAllFiles(true);
+            }
+        }
+
+        function clearOptionFrameImages() {
+            document.querySelectorAll(".option-frame-image-hidden").forEach(function (input) {
+                input.value = "";
+            });
+
+            document.querySelectorAll(".option-frame-dropzone").forEach(function (element) {
+                if (element.dropzone) {
+                    element.dropzone.removeAllFiles(true);
+                }
+            });
+        }
+
+        function setTableauMode(isTableau) {
+            window.selectedProductIsTableau = isTableau;
+
+            $("#tableau-upload-section").toggle(isTableau);
+            $(".option-frame-wrapper").toggle(isTableau);
+
+            if (isTableau) {
+                ensureTableauDropzone();
+                initOptionFrameDropzones();
+            } else {
+                clearTableauDropzone();
+                clearOptionFrameImages();
+            }
+        }
+
+        function handleSelectedProductTableauState() {
+            const selectedOption = $(".category-select option:selected");
+            const isTableau = Number(selectedOption.data("is-tableau")) === 1;
+
+            setTableauMode(isTableau);
+        }
+
+        $(document).ready(function () {
+            handleSelectedProductTableauState();
+
+            $(".category-select").on("change", function () {
+                handleSelectedProductTableauState();
+            });
+
+            $(document).on("click", "[data-repeater-create]", function () {
+                setTimeout(function () {
+                    $(".option-frame-wrapper").toggle(window.selectedProductIsTableau);
+
+                    if (window.selectedProductIsTableau) {
+                        initOptionFrameDropzones();
+                    }
+                }, 300);
+            });
         });
     </script>
 

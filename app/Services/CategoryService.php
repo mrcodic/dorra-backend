@@ -167,6 +167,15 @@ class CategoryService extends BaseService
                                         'model_id' => $productOption->id,
                                         'collection_name' => 'categorySpecificationOptions',
                                     ]);
+
+                            }
+                            if (isset($option['option_frame_image']) && isset($product->is_tableau)) {
+                                Media::where('id', $option['option_frame_image'])
+                                    ->update([
+                                        'model_type' => get_class($productOption),
+                                        'model_id' => $productOption->id,
+                                        'collection_name' => 'option_frame_image',
+                                    ]);
                             }
                         });
                     }
@@ -223,6 +232,14 @@ class CategoryService extends BaseService
                         'model_type' => get_class($product),
                         'model_id' => $product->id,
                         'collection_name' => 'category_model_image',
+                    ]);
+            }
+            if (isset($validatedData['tableau_image_id'])&& isset($validatedData['is_tableau'])) {
+                Media::where('id', $validatedData['tableau_image_id'])
+                    ->update([
+                        'model_type' => get_class($product),
+                        'model_id' => $product->id,
+                        'collection_name' => 'tableau_image',
                     ]);
             }
             if (isset($validatedData['images_ids'])) {
@@ -361,6 +378,13 @@ class CategoryService extends BaseService
                                 'collection_name' => 'categorySpecificationOptions',
                             ]);
                         }
+                        if (isset($option['option_frame_image'])) {
+                            Media::where('id', $option['option_frame_image'])->update([
+                                'model_type' => get_class($productOption),
+                                'model_id' => $productOption->id,
+                                'collection_name' => 'option_frame_image',
+                            ]);
+                        }
 
                         return $productOption->id;
                     })->toArray();
@@ -433,6 +457,15 @@ class CategoryService extends BaseService
                         'model_type' => get_class($product),
                         'model_id' => $product->id,
                         'collection_name' => 'categories',
+                    ]);
+
+            }
+            if (isset($validatedData['tableau_image_id'])) {
+                Media::where('id', $validatedData['tableau_image_id'])
+                    ->update([
+                        'model_type' => get_class($product),
+                        'model_id' => $product->id,
+                        'collection_name' => 'tableau_image',
                     ]);
 
             }

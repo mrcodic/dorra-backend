@@ -32,6 +32,7 @@
       })
       ->filter(fn($row) => !empty($row['name']) && count($row['options']))
       ->values();
+    $tableauMedia = $model->getFirstMedia('tableau_image');
 @endphp
 @section('title', 'Edit Products')
 @section('main-page', 'Products')
@@ -486,6 +487,37 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {{-- Tableau Toggle --}}
+                                        <div class="col-md-6">
+                                            <div class="mb-2 d-flex align-items-center gap-2">
+                                                <label class="form-label label-text">Is this product a Tableau?</label>
+                                                <div class="form-check form-switch">
+                                                    <input type="hidden" name="is_tableau" value="0"/>
+                                                    <input class="form-check-input" type="checkbox" id="is_tableau"
+                                                           name="is_tableau" value="1"
+                                                        @checked($model->is_tableau == 1) />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {{-- Tableau Transparent Image Upload --}}
+                                        <div class="col-md-12" id="tableau-upload-section"
+                                             style="{{ $model->is_tableau ? '' : 'display:none;' }}">
+                                            <div class="mb-2">
+                                                <label class="form-label label-text">
+                                                    Tableau Transparent Image <span style="color: red; font-size: 20px;">*</span>
+                                                </label>
+                                                <div id="tableau-dropzone" class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
+                                                    <div class="dz-message" data-dz-message>
+                                                        <span>Drop transparent PNG here or click to upload</span>
+                                                    </div>
+                                                </div>
+                                                <span class="image-hint small text-end">Max size: 1MB | PNG with transparency</span>
+                                                <input type="hidden" name="tableau_image_id" id="uploadedTableauImage"
+                                                       value="{{ $tableauMedia?->id ?? '' }}">
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div class="d-flex justify-content-end ">
@@ -838,6 +870,27 @@
                                                                                             </button>
                                                                                         </div>
                                                                                     </div>
+                                                                                    {{-- Frame Image per Option --}}
+                                                                                    <div class="col-md-12 mt-1 option-frame-wrapper"
+                                                                                         style="{{ $model->is_tableau ? '' : 'display:none;' }}">
+                                                                                        <label class="form-label label-text">Option Frame Image</label>
+                                                                                        <div class="dropzone option-frame-dropzone border rounded p-3"
+                                                                                             style="cursor:pointer; min-height:120px;"
+                                                                                             data-existing-frame='{{ json_encode($option->frameImage ? [
+             "id"  => $option->frameImage->id,
+             "url" => $option->frameImage->getUrl(),
+             "file_name" => $option->frameImage->file_name,
+             "size" => $option->frameImage->size,
+         ] : null) }}'>
+                                                                                            <div class="dz-message" data-dz-message>
+                                                                                                <span>Drop frame image here or click to upload</span>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <span class="image-hint small text-end">Max size: 1MB | Dimensions: 200x200 px</span>
+                                                                                        <input type="hidden" name="option_frame_image"
+                                                                                               class="option-frame-image-hidden"
+                                                                                               value="{{ $option->frameImage?->id ?? '' }}">
+                                                                                    </div>
                                                                                 </div>
                                                                             @endforeach
                                                                         </div>
@@ -943,6 +996,19 @@
                                                                                     class="image-hint small text-end">
                                                 Max size: 1MB | Dimensions: 200x200 px
                                             </span>
+                                                                                {{-- Frame Image per Option (empty state) --}}
+                                                                                <div class="col-md-12 mt-1 option-frame-wrapper"
+                                                                                     style="{{ $model->is_tableau ? '' : 'display:none;' }}">
+                                                                                    <label class="form-label label-text">Option Frame Image</label>
+                                                                                    <div class="dropzone option-frame-dropzone border rounded p-3"
+                                                                                         style="cursor:pointer; min-height:120px;">
+                                                                                        <div class="dz-message" data-dz-message>
+                                                                                            <span>Drop frame image here or click to upload</span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <span class="image-hint small text-end">Max size: 1MB | Dimensions: 200x200 px</span>
+                                                                                    <input type="hidden" name="option_frame_image" class="option-frame-image-hidden">
+                                                                                </div>
                                                                                 <!-- ✅ Delete Value Button -->
                                                                                 <div class="col-12 text-end mt-1 mb-2">
                                                                                     <button type="button"
@@ -2396,5 +2462,151 @@
             showStep(currentStep);
         });
     </script>
+    <script>
+        Dropzone.autoDiscover = false;
 
+        // ── Tableau Dropzone (init once, restore existing) ──────────
+        let tableauDropzoneInstance = null;
+
+        function initTableauDropzone() {
+            if (tableauDropzoneInstance) return;
+
+            tableauDropzoneInstance = new Dropzone("#tableau-dropzone", {
+                url: "{{ route('media.store') }}",
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 1,
+                acceptedFiles: "image/png",
+                headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+                addRemoveLinks: true,
+                init: function () {
+                    let dz = this;
+
+                    // ✅ Restore existing tableau image
+                    @if(!empty($tableauMedia))
+                    let mockFile = {
+                        name: "{{ $tableauMedia->file_name }}",
+                        size: {{ $tableauMedia->size ?? 12345 }},
+                        _hiddenInputId: "{{ $tableauMedia->id }}"
+                    };
+                    dz.emit("addedfile", mockFile);
+                    dz.emit("thumbnail", mockFile, "{{ $tableauMedia->getUrl() }}");
+                    dz.emit("complete", mockFile);
+                    dz.files.push(mockFile);
+                    @endif
+
+                    dz.on("success", function (file, response) {
+                        if (response?.data?.id) {
+                            file._hiddenInputId = response.data.id;
+                            document.getElementById("uploadedTableauImage").value = response.data.id;
+                        }
+                    });
+
+                    dz.on("removedfile", function (file) {
+                        document.getElementById("uploadedTableauImage").value = "";
+                        if (file._hiddenInputId) {
+                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                method: "DELETE",
+                                headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        // ── Toggle handler ──────────────────────────────────────────
+        $('#is_tableau').on('change', function () {
+            const isTableau = $(this).is(':checked');
+            $('#tableau-upload-section').toggle(isTableau);
+            $('.option-frame-wrapper').toggle(isTableau);
+
+            if (isTableau) {
+                initTableauDropzone();
+                initOptionFrameDropzones();
+            }
+        });
+
+        // Auto-init on page load if is_tableau already checked
+        $(document).ready(function () {
+            if ($('#is_tableau').is(':checked')) {
+                initTableauDropzone();
+                initOptionFrameDropzones();
+            }
+        });
+
+        // ── Option Frame Dropzones ──────────────────────────────────
+        function initOptionFrameDropzones() {
+            document.querySelectorAll(".option-frame-dropzone").forEach(function (element) {
+                if (element.dropzone) return;
+
+                const hiddenInput = element.closest(".col-md-12").querySelector(".option-frame-image-hidden");
+
+                // Parse existing frame media from data attribute
+                let existingFrame = null;
+                try {
+                    existingFrame = element.dataset.existingFrame
+                        ? JSON.parse(element.dataset.existingFrame)
+                        : null;
+                } catch(e) {}
+
+                const dz = new Dropzone(element, {
+                    url: "{{ route('media.store') }}",
+                    paramName: "file",
+                    maxFiles: 1,
+                    maxFilesize: 1,
+                    acceptedFiles: "image/*",
+                    addRemoveLinks: true,
+                    headers: {
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                    },
+                    init: function () {
+                        let dropzone = this;
+
+                        // ✅ Restore existing frame image
+                        if (existingFrame?.id) {
+                            let mockFile = {
+                                name: existingFrame.file_name,
+                                size: existingFrame.size ?? 12345,
+                                _hiddenInputId: existingFrame.id
+                            };
+                            dropzone.emit("addedfile", mockFile);
+                            dropzone.emit("thumbnail", mockFile, existingFrame.url);
+                            dropzone.emit("complete", mockFile);
+                            dropzone.files.push(mockFile);
+                        }
+
+                        dropzone.on("success", function (file, response) {
+                            if (response?.data?.id) {
+                                file._hiddenInputId = response.data.id;
+                                hiddenInput.value = response.data.id;
+                            }
+                        });
+
+                        dropzone.on("removedfile", function (file) {
+                            hiddenInput.value = "";
+                            if (file._hiddenInputId) {
+                                fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                    method: "DELETE",
+                                    headers: {
+                                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
+        // Re-init when repeater adds new option rows
+        $(document).on("click", "[data-repeater-create]", function () {
+            setTimeout(function () {
+                if ($('#is_tableau').is(':checked')) {
+                    $('.option-frame-wrapper').show();
+                    initOptionFrameDropzones();
+                }
+            }, 250);
+        });
+    </script>
 @endsection

@@ -42,6 +42,8 @@ class UpdateProductWithoutCategoryRequest extends BaseRequest
 
             'image_id' => ['required', 'exists:media,id'],
             'image_model_id' => ['required', 'exists:media,id'],
+            'is_tableau' => ['required', 'boolean'],
+            'tableau_image_id' => ['required_with:is_tableau', 'exists:media,id'],
             'images_ids' => ['nullable', 'array'],
             'images_ids.*' => ['nullable','exists:media,id'],
             'tags' => ['nullable', 'array'],
@@ -101,6 +103,7 @@ class UpdateProductWithoutCategoryRequest extends BaseRequest
             'specifications.*.specification_options.*.value_ar' => 'required_with:specifications|string',
             'specifications.*.specification_options.*.price' => 'nullable|numeric|min:0',
             'specifications.*.specification_options.*.option_image' => ['nullable', 'exists:media,id'],
+            'specifications.*.specification_options.*.option_frame_image' => ['nullable', 'exists:media,id'],
             'variants' => ['sometimes', 'array'],
             'variants.*.code' => ['sometimes', 'string'],
             'variants.*.image' => ['sometimes', 'exists:media,id'],
