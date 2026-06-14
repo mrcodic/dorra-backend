@@ -158,11 +158,11 @@ class ProductResource extends JsonResource
 
         $categoryId = (int) (
         $request->get('product_without_category_id')
-            ?: $this->id
+            ?: $this->category_id
             ?: Product::query()->find($request->get('product_id'))?->category_id
         );
 
-        $productId = (int) $request->get('product_id');
+        $productId = (int) $request->get('product_id') ?? $this->id;
 
         $media = Media::query()
             ->where('model_type', \App\Models\Mockup::class)
