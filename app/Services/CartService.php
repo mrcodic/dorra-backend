@@ -18,6 +18,7 @@ use App\Repositories\Interfaces\{CartItemRepositoryInterface,
 };
 use App\Rules\ValidDiscountCode;
 use Illuminate\Support\{Facades\Log, Facades\Response, Arr};
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -113,7 +114,8 @@ class CartService extends BaseService
                     ->where('model_type', Mockup::class)
                     ->where('model_id', $request->mockup_id)
                     ->where('collection_name', 'generated_mockups')
-                    ->where('custom_properties->hex', trim($validatedData['color'], '#'))
+                    ->when(!empty($validatedData['color']),
+                        fn(Builder $query) => $query->where('custom_properties->hex', trim($validatedData['color'], '#')))
                     ->where('custom_properties->template_id', (string)$template->id)
                     ->where('custom_properties->category_id', (int)$categoryId)
                     ->first();
