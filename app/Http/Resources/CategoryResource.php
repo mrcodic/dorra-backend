@@ -139,8 +139,7 @@ class CategoryResource extends JsonResource
 
     private function resolveTemplatePreviewData(Request $request): array
     {
-        $templateId = (int) $request->get('template_id');
-        dd($templateId);
+        $templateId = (string) $request->get('template_id');
         if (!$templateId) {
             return [
                 'source_design_svg' => null,
