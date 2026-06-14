@@ -752,37 +752,63 @@ class OrderService extends BaseService
 
     private function copyMockupMediaToOrderItems($cart, $order): void
     {
-        foreach ($cart->items as $cartItem) {
+        $order->loadMissing('orderItems');
 
+        $usedOrderItemIds = [];
+
+        foreach ($cart->items as $cartItem) {
             $orderItem = $order->orderItems
-                ->where('itemable_type', $cartItem->itemable_type)
-                ->where('itemable_id',   $cartItem->itemable_id)
-                ->first();
+                ->first(fn ($item) =>
+                    isset($item->cart_item_id)
+                    && (int) $item->cart_item_id === (int) $cartItem->id
+                );
+
+            if (!$orderItem) {
+                $orderItem = $order->orderItems
+                    ->where('itemable_type', $cartItem->itemable_type)
+                    ->where('itemable_id', $cartItem->itemable_id)
+                    ->reject(fn ($item) => in_array($item->id, $usedOrderItemIds, true))
+                    ->first();
+            }
 
             if (!$orderItem) {
                 continue;
             }
 
+            $usedOrderItemIds[] = $orderItem->id;
+
             $media = Media::query()
                 ->where('model_type', Mockup::class)
                 ->where('collection_name', 'generated_mockups')
-                ->where('custom_properties->cart_item_id', (string) $cartItem->id)
+                ->where(function ($query) use ($cartItem) {
+                    $query
+                        ->where('custom_properties->cart_item_id', (string) $cartItem->id)
+                        ->orWhere('custom_properties->cart_item_id', (int) $cartItem->id);
+                })
+                ->latest('id')
                 ->first();
 
             if (!$media) {
                 continue;
             }
 
+            $orderItem->getMedia('order_item_mockups')
+                ->filter(fn ($m) =>
+                    (string) $m->getCustomProperty('cart_item_id') === (string) $cartItem->id
+                )
+                ->each(fn ($m) => $m->delete());
+
             $newMedia = $media->copy($orderItem, 'order_item_mockups');
+
             $newMedia->setCustomProperty('template_id',   $media->getCustomProperty('template_id'));
             $newMedia->setCustomProperty('category_id',   $media->getCustomProperty('category_id'));
             $newMedia->setCustomProperty('cart_item_id',  $cartItem->id);
             $newMedia->setCustomProperty('order_item_id', $orderItem->id);
             $newMedia->setCustomProperty('order_id',      $order->id);
+
             $newMedia->save();
         }
-    }
-    /**
+    }    /**
      * Creates order + items + specs + address/pickup from the cart.
      */
     protected function createOrderFromCart(
