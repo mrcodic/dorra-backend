@@ -159,15 +159,17 @@ class TemplateService extends BaseService
             })
             ->when(request()->filled('limit'), function ($q) {
                 $q->limit((int)request('limit'));
-            })->when(request()->filled('use_local_lang'), function ($q,$locale) {
+            })
+//            ->when(request()->filled('languages'), function ($q) {
 //                $languages = request('languages');
 //                $languages = is_array($languages) ? $languages : [$languages];
-                $q->where(function ($qq) use ($locale) {
+//                $q->where(function ($qq) use ($languages) {
 //                    foreach ($languages as $lang) {
-                        $qq->orWhereJsonContains('supported_languages', [$locale]);
+//                        $qq->orWhereJsonContains('supported_languages', $lang);
 //                    }
-                });
-            });
+//                });
+//            })
+        ;
 
         if (request()->ajax()) {
             return $pageSize === null
@@ -194,6 +196,10 @@ class TemplateService extends BaseService
 
 //                        });
 //                })
+                ->where(function ($q) use ($locale) {
+                    $q->where('supported_languages', $locale)
+                        ->orWhere('supported_languages', 'both');
+                })
                 ->orderByDesc('is_best_seller')
                 ->latest();
 
