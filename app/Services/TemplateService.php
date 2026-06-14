@@ -159,7 +159,7 @@ class TemplateService extends BaseService
             })
             ->when(request()->filled('limit'), function ($q) {
                 $q->limit((int)request('limit'));
-            })->when(request()->is('api/v1/user/*'), function ($q) {
+            })->when(request()->filled('languages'), function ($q) {
                 $languages = request('languages');
                 $languages = is_array($languages) ? $languages : [$languages];
                 $q->where(function ($qq) use ($languages) {
