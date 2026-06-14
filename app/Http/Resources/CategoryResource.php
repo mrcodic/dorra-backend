@@ -140,7 +140,7 @@ class CategoryResource extends JsonResource
     private function resolveTemplatePreviewData(Request $request): array
     {
         $templateId = (int) $request->get('template_id');
-
+        dd($templateId);
         if (!$templateId) {
             return [
                 'source_design_svg' => null,
@@ -152,7 +152,7 @@ class CategoryResource extends JsonResource
         $template = Template::query()
             ->with('media')
             ->find($templateId);
-dd($template);
+
         if (!$template) {
             return [
                 'source_design_svg' => null,
