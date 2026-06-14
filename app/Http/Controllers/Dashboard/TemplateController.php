@@ -201,9 +201,9 @@ class TemplateController extends DashboardController
         return Response::api(data: TemplateResource::make($template));
     }
 
-    public function templateAssets()
+    public function templateAssets(Request $request)
     {
-        $media = $this->templateService->templateAssets();
+        $media = $this->templateService->templateAssets($request);
         return Response::api(data: MediaResource::collection($media)->response()->getData(true));
 
     }

@@ -674,7 +674,7 @@ class TemplateService extends BaseService
     }
 
 
-    public function templateAssets()
+    public function templateAssets($request)
     {
         $notAuth = request()->is('api/v1/admin/*');
         $model = $notAuth ? Admin::first() : getAuthOrGuest();
@@ -682,7 +682,7 @@ class TemplateService extends BaseService
             ->whereMorphedTo('model', $model)
             ->whereCollectionName("template_assets")
             ->latest()
-            ->paginate();
+            ->paginate($request->query('per_page', 10));
     }
 
     public function storeTemplateAssets($request)
