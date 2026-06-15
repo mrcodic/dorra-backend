@@ -89,7 +89,7 @@ class OrderService extends BaseService
             ->when(request('status'), function ($query) {
                 $query->where('status', request('status'));
             })
-            ->with(['orderItems', 'orderItems.specs'])
+            ->with(['orderItems', 'orderItems.specs','orderItems.itemable'])
             ->firstOrFail();
     }
 
