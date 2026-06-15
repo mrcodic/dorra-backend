@@ -25,11 +25,33 @@ class OrderItemResource extends JsonResource
             'total_price' => $this->sub_total,
             'discount_amount' => $this->discount_amount,
             'final_price' => max(0,$this->sub_total - $this->discount_amount),
-            'mockup_design_image' =>
-                $this->itemable?->getFirstMediaUrl('front-mockup-designs') ?:
-                    $this->itemable?->getFirstMediaUrl('none-mockup-designs') ?:
-                        $this->itemable?->getFirstMediaUrl('back-mockup-designs')
-            ,
+            'mockup_design_image' => (function () {
+                $orderItemPreview =
+                    $this->getFirstMediaUrl('order_item_mockups')
+                        ?: $this->getFirstMediaUrl('order_item_previews');
+
+                $isDesign    = $this->itemable && $this->itemable instanceof \App\Models\Design;
+                $isTemplate  = $this->itemable && $this->itemable instanceof \App\Models\Template;
+
+                return match (true) {
+                    filled($orderItemPreview) =>
+                    $orderItemPreview,
+
+                    $isDesign && $this->itemable->linked_to_mockup =>
+                    $this->itemable->getFirstMediaUrl('front-mockup-designs')
+                        ?: $this->itemable->getFirstMediaUrl('none-mockup-designs')
+                        ?: $this->itemable->getFirstMediaUrl('back-mockup-designs'),
+
+                    $isTemplate =>
+                    $this->itemable?->getFirstMediaUrl('templates-preview')
+                        ?: $this->itemable?->getFirstMediaUrl('templates'),
+
+                    default =>
+                    $this->itemable?->getFirstMediaUrl(
+                        Str::plural(Str::lower(class_basename($this->itemable)))
+                    ),
+                };
+            })(),
             'design_image' =>($this->approach == 'without_editor'
                 ? $this->itemable?->getFirstMediaUrl($collectionName.'-preview')
                 : $this->itemable?->getFirstMediaUrl($collectionName)),
