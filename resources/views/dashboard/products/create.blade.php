@@ -333,24 +333,6 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        {{-- Tableau Transparent Image Upload (hidden by default) --}}
-                                        <div class="col-md-12" id="tableau-upload-section" style="display: none;">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text">
-                                                    Tableau Transparent Image <span style="color: red; font-size: 20px;">*</span>
-                                                </label>
-
-                                                {{-- Category's own upload --}}
-                                                <div id="tableau-dropzone" class="dropzone border rounded p-3"
-                                                     style="cursor:pointer; min-height:150px;">
-                                                    <div class="dz-message" data-dz-message>
-                                                        <span>Drop transparent PNG here or click to upload</span>
-                                                    </div>
-                                                </div>
-                                                <span class="image-hint small text-end">Max size: 1MB | PNG with transparency</span>
-                                                <input type="hidden" name="tableau_image_id" id="uploadedTableauImage">
-                                            </div>
-                                        </div>
                                         <!-- Tags -->
                                         <div class="col-md-12">
                                             <div class="mb-2">
@@ -2077,11 +2059,6 @@
                 e.preventDefault();
 
                 if (window.selectedProductIsTableau) {
-                    if (!$("#uploadedTableauImage").val()) {
-                        showTableauToastError("Please upload Tableau Transparent Image.");
-                        return;
-                    }
-
                     let missingFrame = false;
 
                     $(".option-frame-wrapper:visible").each(function () {
@@ -2213,8 +2190,6 @@
         Dropzone.autoDiscover = false;
 
         window.selectedProductIsTableau = false;
-        let tableauDzInstance = null;
-
         function showTableauToastError(message) {
             Toastify({
                 text: message,
@@ -2224,44 +2199,6 @@
                 backgroundColor: "#EA5455",
                 close: true
             }).showToast();
-        }
-
-        function ensureTableauDropzone() {
-            if (tableauDzInstance) return;
-
-            tableauDzInstance = new Dropzone("#tableau-dropzone", {
-                url: "{{ route('media.store') }}",
-                paramName: "file",
-                maxFiles: 1,
-                maxFilesize: 1,
-                acceptedFiles: "image/png",
-                addRemoveLinks: true,
-                headers: {
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                },
-                dictDefaultMessage: "Drop transparent PNG here or click to upload",
-                init: function () {
-                    this.on("success", function (file, response) {
-                        if (response.success && response.data) {
-                            file._hiddenInputId = response.data.id;
-                            document.getElementById("uploadedTableauImage").value = response.data.id;
-                        }
-                    });
-
-                    this.on("removedfile", function (file) {
-                        document.getElementById("uploadedTableauImage").value = "";
-
-                        if (file._hiddenInputId) {
-                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
-                                method: "DELETE",
-                                headers: {
-                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-                                }
-                            });
-                        }
-                    });
-                }
-            });
         }
 
         function initOptionFrameDropzones() {
@@ -2310,14 +2247,6 @@
             });
         }
 
-        function clearTableauDropzone() {
-            document.getElementById("uploadedTableauImage").value = "";
-
-            if (tableauDzInstance) {
-                tableauDzInstance.removeAllFiles(true);
-            }
-        }
-
         function clearOptionFrameImages() {
             document.querySelectorAll(".option-frame-image-hidden").forEach(function (input) {
                 input.value = "";
@@ -2333,13 +2262,9 @@
         function setTableauMode(isTableau) {
             window.selectedProductIsTableau = isTableau;
 
-            $("#tableau-upload-section").toggle(isTableau);
-
             if (isTableau) {
-                ensureTableauDropzone();
                 initOptionFrameDropzones();
             } else {
-                clearTableauDropzone();
                 clearOptionFrameImages();
             }
 
