@@ -19,7 +19,7 @@
         ];
     });
     $specs =  $model->specifications
-
+      ->filter(fn($spec) => ! in_array($spec->fixed_key, ['frame_model', 'tableau_size', 'frame_color'], true))
       ->map(function ($spec) {
         return [
           'name' => $spec->getTranslation('name', 'en'),
@@ -32,7 +32,6 @@
       })
       ->filter(fn($row) => !empty($row['name']) && count($row['options']))
       ->values();
-    $tableauMedia = $model->getFirstMedia('tableau_image');
 @endphp
 @section('title', 'Edit Products')
 @section('main-page', 'Products')
@@ -402,30 +401,30 @@
                                             </div>
                                         </div>
 
-                                       <div class="row">
-                                           <div class="col-md-6">
-                                               <div class="mb-2">
-                                                   <label class="form-label label-text" for="sort">Product Ordering<span
-                                                           style="color: red; font-size: 20px;">*</span></label>
-                                                   <input type="number" id="sort" class="form-control"
-                                                          name="sort"
-                                                          placeholder="Product ordering"
-                                                          value="{{ $model->sort }}"/>
-                                               </div>
-                                           </div>
-                                           <!-- Tags -->
-                                           <div class="col-md-6">
-                                               <div class="mb-1">
-                                                   <label class="form-label label-text" for="tags">Tags</label>
-                                                   <select name="tags[]" id="tags" class="select2 form-select" multiple>
-                                                       @foreach($associatedData['tags'] as $tag)
-                                                           <option value="{{ $tag->id }}"
-                                                                   @if(in_array($tag->id, $model->tags->pluck('id')->toArray())) selected @endif >{{ $tag->name }}</option>
-                                                       @endforeach
-                                                   </select>
-                                               </div>
-                                           </div>
-                                       </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-2">
+                                                    <label class="form-label label-text" for="sort">Product Ordering<span
+                                                            style="color: red; font-size: 20px;">*</span></label>
+                                                    <input type="number" id="sort" class="form-control"
+                                                           name="sort"
+                                                           placeholder="Product ordering"
+                                                           value="{{ $model->sort }}"/>
+                                                </div>
+                                            </div>
+                                            <!-- Tags -->
+                                            <div class="col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label label-text" for="tags">Tags</label>
+                                                    <select name="tags[]" id="tags" class="select2 form-select" multiple>
+                                                        @foreach($associatedData['tags'] as $tag)
+                                                            <option value="{{ $tag->id }}"
+                                                                    @if(in_array($tag->id, $model->tags->pluck('id')->toArray())) selected @endif >{{ $tag->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
 
                                         <!-- Dimensions -->
                                         <div class="col-md-12">
@@ -497,25 +496,6 @@
                                                            name="is_tableau" value="1"
                                                         @checked($model->is_tableau == 1) />
                                                 </div>
-                                            </div>
-                                        </div>
-
-                                        {{-- Tableau Transparent Image Upload --}}
-                                        <div class="col-md-12" id="tableau-upload-section"
-                                             style="{{ $model->is_tableau ? '' : 'display:none;' }}">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text">
-                                                    Tableau Transparent Image <span style="color: red; font-size: 20px;">*</span>
-                                                </label>
-                                                <div id="tableau-dropzone" class="dropzone border rounded p-3"
-                                                     style="cursor:pointer; min-height:150px;">
-                                                    <div class="dz-message" data-dz-message>
-                                                        <span>Drop transparent PNG here or click to upload</span>
-                                                    </div>
-                                                </div>
-                                                <span class="image-hint small text-end">Max size: 1MB | PNG with transparency</span>
-                                                <input type="hidden" name="tableau_image_id" id="uploadedTableauImage"
-                                                       value="{{ $tableauMedia?->id ?? '' }}">
                                             </div>
                                         </div>
                                     </div>
@@ -682,7 +662,12 @@
                                         <div class="mb-1">
                                             <div>
                                                 @php
-                                                    $hasSpecs = $model->specifications->filter(fn($specification) => $specification->type !=  'fixed')->isNotEmpty();
+                                                    $tableauFixedKeys = ['frame_model', 'tableau_size', 'frame_color'];
+                                                    $editableSpecifications = $model->specifications->filter(function ($specification) use ($tableauFixedKeys) {
+                                                        return $specification->fixed_key !== 'cutting'
+                                                            && ($specification->type != 'fixed' || in_array($specification->fixed_key, $tableauFixedKeys, true));
+                                                    });
+                                                    $hasSpecs = $editableSpecifications->isNotEmpty();
                                                     $cuttingSpec = $model->specifications()
                                                                 ->where('fixed_key', 'cutting')
                                                                 ->first();
@@ -757,10 +742,12 @@
                                                 <div class="outer-repeater">
                                                     <div class="{{ $hasSpecs ? '' :'d-none' }}"
                                                          data-repeater-list="specifications">
-                                                        @forelse($model->specifications->filter(fn($specification) => $specification->type !=  'fixed') as $specification)
-                                                            <div data-repeater-item>
+                                                        @forelse($editableSpecifications as $specification)
+                                                            <div data-repeater-item @if(in_array($specification->fixed_key, $tableauFixedKeys, true)) data-spec-key="{{ $specification->fixed_key }}" @endif>
                                                                 <input type="hidden" name="id"
                                                                        value="{{ $specification->id }}">
+                                                                <input type="hidden" name="fixed_key" class="spec-fixed-key"
+                                                                       value="{{ in_array($specification->fixed_key, $tableauFixedKeys, true) ? $specification->fixed_key : '' }}">
 
                                                                 <!-- Specification Fields -->
                                                                 <div class="row mt-1">
@@ -771,6 +758,7 @@
                                                                             <input type="text" name="name_en"
                                                                                    value="{{ $specification->getTranslation('name','en') }}"
                                                                                    class="form-control spec-name-en"
+                                                                                   @readonly(in_array($specification->fixed_key, $tableauFixedKeys, true))
                                                                                    placeholder="Specification Name (EN)"/>
                                                                         </div>
                                                                     </div>
@@ -781,7 +769,8 @@
                                                                                 (AR)</label>
                                                                             <input type="text" name="name_ar"
                                                                                    value="{{ $specification->getTranslation('name','ar') }}"
-                                                                                   class="form-control"
+                                                                                   class="form-control spec-name-ar"
+                                                                                   @readonly(in_array($specification->fixed_key, $tableauFixedKeys, true))
                                                                                    placeholder="Specification Name (AR)"/>
                                                                         </div>
                                                                     </div>
@@ -831,6 +820,16 @@
                                                                                                    class="form-control"
                                                                                                    placeholder="Price"/>
                                                                                         </div>
+
+                                                                                        <!-- Frame Model Padding Value (Tableau only) -->
+                                                                                        <div class="col option-frame-model-padding-wrapper"
+                                                                                             style="{{ ($model->is_tableau && $specification->fixed_key === 'frame_model') ? '' : 'display:none;' }}">
+                                                                                            <label class="form-label label-text">Padding Value (Optional)</label>
+                                                                                            <input type="text" name="padding"
+                                                                                                   value="{{ $option->padding }}"
+                                                                                                   class="form-control option-padding-value"
+                                                                                                   placeholder="Padding Value"/>
+                                                                                        </div>
                                                                                     </div>
                                                                                     <div
                                                                                         class="row d-flex align-items-end mt-2">
@@ -872,7 +871,7 @@
                                                                                     </div>
                                                                                     {{-- Frame Image per Option --}}
                                                                                     <div class="col-md-12 mt-1 option-frame-wrapper"
-                                                                                         style="{{ $model->is_tableau ? '' : 'display:none;' }}">
+                                                                                         style="{{ ($model->is_tableau && $specification->fixed_key === 'frame_color') ? '' : 'display:none;' }}">
                                                                                         <label class="form-label label-text">Option Frame Image</label>
                                                                                         <div class="dropzone option-frame-dropzone border rounded p-3"
                                                                                              style="cursor:pointer; min-height:120px;"
@@ -912,7 +911,8 @@
                                                                     <!-- Delete Specification Button -->
                                                                     <div class="col-12 text-end mt-1 mb-2">
                                                                         <button type="button"
-                                                                                class="btn btn-outline-danger"
+                                                                                class="btn btn-outline-danger spec-delete-btn"
+                                                                                style="{{ in_array($specification->fixed_key, $tableauFixedKeys, true) ? 'display:none;' : '' }}"
                                                                                 data-repeater-delete>
                                                                             <i data-feather="x" class="me-25"></i>
                                                                             Delete Spec
@@ -923,6 +923,7 @@
                                                         @empty
                                                             <div data-repeater-item>
                                                                 <div class="row mt-1">
+                                                                    <input type="hidden" name="fixed_key" class="spec-fixed-key">
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
                                                                             <label class="form-label label-text">Name
@@ -938,7 +939,7 @@
                                                                             <label class="form-label label-text">Name
                                                                                 (AR)</label>
                                                                             <input type="text" name="name_ar"
-                                                                                   class="form-control"
+                                                                                   class="form-control spec-name-ar"
                                                                                    placeholder="Specification Name (AR)"/>
                                                                         </div>
                                                                     </div>
@@ -977,6 +978,14 @@
                                                                                                class="form-control"
                                                                                                placeholder="Price"/>
                                                                                     </div>
+
+                                                                                    <!-- Frame Model Padding Value (Tableau only) -->
+                                                                                    <div class="col option-frame-model-padding-wrapper" style="display: none;">
+                                                                                        <label class="form-label label-text">Padding Value (Optional)</label>
+                                                                                        <input type="text" name="padding"
+                                                                                               class="form-control option-padding-value"
+                                                                                               placeholder="Padding Value"/>
+                                                                                    </div>
                                                                                 </div>
 
                                                                                 <div
@@ -998,7 +1007,7 @@
                                             </span>
                                                                                 {{-- Frame Image per Option (empty state) --}}
                                                                                 <div class="col-md-12 mt-1 option-frame-wrapper"
-                                                                                     style="{{ $model->is_tableau ? '' : 'display:none;' }}">
+                                                                                     style="display:none;">
                                                                                     <label class="form-label label-text">Option Frame Image</label>
                                                                                     <div class="dropzone option-frame-dropzone border rounded p-3"
                                                                                          style="cursor:pointer; min-height:120px;">
@@ -1038,7 +1047,7 @@
 
                                                                     <div class="col-12 text-end mt-1 mb-2">
                                                                         <button type="button"
-                                                                                class="btn btn-outline-danger"
+                                                                                class="btn btn-outline-danger spec-delete-btn"
                                                                                 data-repeater-delete>
                                                                             <i data-feather="x" class="me-25"></i>
                                                                             Delete Spec
@@ -1062,7 +1071,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <label class="form-label label-text mt-2">Variants</label>
+                                        <label id="variants-title" class="form-label label-text mt-2">Variants</label>
 
                                         <div id="variants-container" class="mt-2"></div>
                                     </div>
@@ -1100,6 +1109,221 @@
 
 @section('page-script')
     <script !src="">
+        // ----- Tableau fixed specs helpers -----
+        const TABLEAU_FIXED_SPECS = [
+            {
+                key: 'frame_model',
+                nameEn: 'Frame Model',
+                nameAr: 'موديل البرواز'
+            },
+            {
+                key: 'tableau_size',
+                nameEn: 'Tableau Size',
+                nameAr: 'مقاس التابلوه'
+            },
+            {
+                key: 'frame_color',
+                nameEn: 'Frame Color',
+                nameAr: 'لون البرواز'
+            }
+        ];
+
+        let isSyncingTableauSpecs = false;
+
+        function getSpecListEl() {
+            return $('.outer-repeater').find('[data-repeater-list="specifications"]').first();
+        }
+
+        function findSpecItemByKey(key) {
+            return getSpecListEl().find('[data-repeater-item][data-spec-key="' + key + '"]');
+        }
+
+        function getOuterCreateButton() {
+            return $('.outer-repeater').children('.row').find('button[data-repeater-create]').first();
+        }
+
+        function isTableauProduct() {
+            return $('#is_tableau').is(':checked');
+        }
+
+        function clearAndHideVariants() {
+            $('#variants-title').hide();
+            $('#variants-container').empty().hide();
+        }
+
+        function showVariants() {
+            $('#variants-title').show();
+            $('#variants-container').show();
+        }
+
+        function addSpecRepeaterItem({ key, nameEn, nameAr, locked = false }) {
+            return new Promise(function (resolve) {
+                if (findSpecItemByKey(key).length) {
+                    resolve();
+                    return;
+                }
+
+                const beforeItems = getSpecListEl().children('[data-repeater-item]').toArray();
+                getSpecListEl().removeClass('d-none');
+                getOuterCreateButton().trigger('click');
+
+                setTimeout(function () {
+                    const $items = getSpecListEl().children('[data-repeater-item]');
+
+                    let $newItem = $items.filter(function () {
+                        return !beforeItems.includes(this);
+                    }).last();
+
+                    if (!$newItem.length) {
+                        $newItem = $items.last();
+                    }
+
+                    $newItem.attr('data-spec-key', key);
+                    $newItem.find('.spec-fixed-key').val(key);
+
+                    $newItem.find('.spec-name-en')
+                        .val(nameEn)
+                        .prop('readonly', locked)
+                        .trigger('change');
+
+                    $newItem.find('.spec-name-ar')
+                        .val(nameAr)
+                        .prop('readonly', locked)
+                        .trigger('change');
+
+                    if (locked) {
+                        $newItem.find('.spec-delete-btn').hide();
+                    }
+
+                    const hasOptionRow = $newItem
+                        .find('[data-repeater-list="specification_options"] > [data-repeater-item]')
+                        .length > 0;
+
+                    if (!hasOptionRow) {
+                        $newItem.find('.inner-repeater button[data-repeater-create]').first().trigger('click');
+                    }
+
+                    setTimeout(function () {
+                        syncOptionFrameVisibility();
+                        syncOptionPaddingVisibility();
+
+                        if (typeof initOptionDropzone === 'function') {
+                            $newItem.find('.option-dropzone').each(function () {
+                                initOptionDropzone(this);
+                            });
+                        }
+
+                        if (typeof initOptionFrameDropzones === 'function') {
+                            initOptionFrameDropzones();
+                        }
+
+                        if (window.feather) feather.replace();
+                        if (typeof generateVariants === 'function') generateVariants();
+
+                        resolve();
+                    }, 150);
+                }, 250);
+            });
+        }
+
+        function removeSpecRepeaterItem(key) {
+            const $item = findSpecItemByKey(key);
+            if (!$item.length) return;
+
+            $item.find('.spec-delete-btn').first().trigger('click');
+
+            setTimeout(function () {
+                syncOptionFrameVisibility();
+                syncOptionPaddingVisibility();
+                if (typeof generateVariants === 'function') generateVariants();
+            }, 250);
+        }
+
+        async function syncTableauFixedSpecs() {
+            if (isSyncingTableauSpecs) return;
+            isSyncingTableauSpecs = true;
+
+            const isTableau = $('#is_tableau').is(':checked');
+
+            if (isTableau) {
+                for (const spec of TABLEAU_FIXED_SPECS) {
+                    await addSpecRepeaterItem({
+                        key: spec.key,
+                        nameEn: spec.nameEn,
+                        nameAr: spec.nameAr,
+                        locked: true
+                    });
+                }
+                clearAndHideVariants();
+            } else {
+                TABLEAU_FIXED_SPECS.forEach(function (spec) {
+                    removeSpecRepeaterItem(spec.key);
+                });
+                showVariants();
+                generateVariants();
+            }
+
+            syncOptionFrameVisibility();
+            syncOptionPaddingVisibility();
+            isSyncingTableauSpecs = false;
+        }
+
+        function syncOptionFrameVisibility() {
+            const isTableau = $('#is_tableau').is(':checked');
+
+            $('.option-frame-wrapper').hide();
+
+            if (!isTableau) {
+                $('.option-frame-image-hidden').val('');
+                return;
+            }
+
+            const $frameColorSpec = findSpecItemByKey('frame_color');
+            if (!$frameColorSpec.length) {
+                $('.option-frame-image-hidden').val('');
+                return;
+            }
+
+            // Only frame_color can submit option_frame_image. Clear hidden values in all other specs.
+            getSpecListEl()
+                .children('[data-repeater-item]')
+                .not($frameColorSpec)
+                .find('.option-frame-image-hidden')
+                .val('');
+
+            $frameColorSpec.find('.option-frame-wrapper').show();
+
+            if (typeof initOptionFrameDropzones === 'function') {
+                initOptionFrameDropzones();
+            }
+        }
+
+        function syncOptionPaddingVisibility() {
+            const isTableau = $('#is_tableau').is(':checked');
+
+            $('.option-frame-model-padding-wrapper').hide();
+
+            if (!isTableau) {
+                $('.option-padding-value').val('');
+                return;
+            }
+
+            const $frameModelSpec = findSpecItemByKey('frame_model');
+            if (!$frameModelSpec.length) {
+                $('.option-padding-value').val('');
+                return;
+            }
+
+            // Only frame_model can submit padding. Clear hidden values in all other specs.
+            getSpecListEl()
+                .children('[data-repeater-item]')
+                .not($frameModelSpec)
+                .find('.option-padding-value')
+                .val('');
+
+            $frameModelSpec.find('.option-frame-model-padding-wrapper').show();
+        }
+
         // ----- Select2 UI -----
         $(document).ready(function () {
 
@@ -1164,6 +1388,13 @@
 
     <script>
         function generateVariants() {
+            if (isTableauProduct()) {
+                clearAndHideVariants();
+                return;
+            }
+
+            showVariants();
+
             let specs = @json($specs);
 
             // helper: upsert spec by name (replace if same name exists)
@@ -1359,7 +1590,12 @@
 
         // When creating → safe to regenerate immediately
         $(document).on('click', '[data-repeater-create]', function () {
-            setTimeout(generateVariants, 0);
+            setTimeout(function () {
+                syncOptionFrameVisibility();
+                syncOptionPaddingVisibility();
+                if (typeof initOptionFrameDropzones === 'function') initOptionFrameDropzones();
+                generateVariants();
+            }, 0);
         });
 
 
@@ -1569,7 +1805,12 @@
                         }
 
                         $(this).find('.uploadedImage').val('');
-                        setTimeout(generateVariants, 0);
+                        setTimeout(function () {
+                            syncOptionFrameVisibility();
+                            syncOptionPaddingVisibility();
+                            if (typeof initOptionFrameDropzones === 'function') initOptionFrameDropzones();
+                            generateVariants();
+                        }, 0);
                     },
                     hide: function (deleteElement) {
                         const $row = $(this);
@@ -2267,6 +2508,11 @@
                 saveButton.prop('disabled', true);
                 saveLoader.removeClass('d-none');
                 saveButtonText.addClass('d-none');
+
+                if ($('#is_tableau').is(':checked')) {
+                    clearAndHideVariants();
+                }
+
                 const formData = new FormData(this);
                 const customDimensions = sessionStorage.getItem('custom_dimensions');
                 if (customDimensions) {
@@ -2465,131 +2711,86 @@
     <script>
         Dropzone.autoDiscover = false;
 
-        // ── Tableau Dropzone (init once, restore existing) ──────────
-        let tableauDropzoneInstance = null;
+        $('#is_tableau').on('change', function () {
+            syncTableauFixedSpecs();
+        });
 
-        function initTableauDropzone() {
-            if (tableauDropzoneInstance) return;
+        $(document).ready(function () {
+            getSpecListEl().children('[data-repeater-item]').each(function () {
+                const key = $(this).find('.spec-fixed-key').val();
 
-            tableauDropzoneInstance = new Dropzone("#tableau-dropzone", {
-                url: "{{ route('media.store') }}",
-                paramName: "file",
-                maxFiles: 1,
-                maxFilesize: 1,
-                acceptedFiles: "image/png",
-                headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
-                addRemoveLinks: true,
-                init: function () {
-                    let dz = this;
+                if (key) {
+                    $(this).attr('data-spec-key', key);
+                }
 
-                    // ✅ Restore existing tableau image
-                    @if(!empty($tableauMedia))
-                    let mockFile = {
-                        name: "{{ $tableauMedia->file_name }}",
-                        size: {{ $tableauMedia->size ?? 12345 }},
-                        _hiddenInputId: "{{ $tableauMedia->id }}"
-                    };
-                    dz.emit("addedfile", mockFile);
-                    dz.emit("thumbnail", mockFile, "{{ $tableauMedia->getUrl() }}");
-                    dz.emit("complete", mockFile);
-                    dz.files.push(mockFile);
-                    @endif
-
-                    dz.on("success", function (file, response) {
-                        if (response?.data?.id) {
-                            file._hiddenInputId = response.data.id;
-                            document.getElementById("uploadedTableauImage").value = response.data.id;
-                        }
-                    });
-
-                    dz.on("removedfile", function (file) {
-                        document.getElementById("uploadedTableauImage").value = "";
-                        if (file._hiddenInputId) {
-                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
-                                method: "DELETE",
-                                headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content }
-                            });
-                        }
-                    });
+                if (['frame_model', 'tableau_size', 'frame_color'].includes(key)) {
+                    $(this).find('.spec-name-en, .spec-name-ar').prop('readonly', true);
+                    $(this).find('.spec-delete-btn').hide();
                 }
             });
-        }
 
-        // ── Toggle handler ──────────────────────────────────────────
-        $('#is_tableau').on('change', function () {
-            const isTableau = $(this).is(':checked');
-            $('#tableau-upload-section').toggle(isTableau);
-            $('.option-frame-wrapper').toggle(isTableau);
-
-            if (isTableau) {
-                initTableauDropzone();
-                initOptionFrameDropzones();
-            }
+            syncTableauFixedSpecs();
+            syncOptionFrameVisibility();
+            syncOptionPaddingVisibility();
         });
 
-        // Auto-init on page load if is_tableau already checked
-        $(document).ready(function () {
-            if ($('#is_tableau').is(':checked')) {
-                initTableauDropzone();
-                initOptionFrameDropzones();
-            }
-        });
-
-        // ── Option Frame Dropzones ──────────────────────────────────
         function initOptionFrameDropzones() {
-            document.querySelectorAll(".option-frame-dropzone").forEach(function (element) {
+            document.querySelectorAll('.option-frame-dropzone').forEach(function (element) {
                 if (element.dropzone) return;
 
-                const hiddenInput = element.closest(".col-md-12").querySelector(".option-frame-image-hidden");
+                const wrapper = element.closest('.option-frame-wrapper');
+                if (!wrapper) return;
 
-                // Parse existing frame media from data attribute
+                const hiddenInput = wrapper.querySelector('.option-frame-image-hidden');
+
                 let existingFrame = null;
                 try {
                     existingFrame = element.dataset.existingFrame
                         ? JSON.parse(element.dataset.existingFrame)
                         : null;
-                } catch(e) {}
+                } catch (e) {}
 
                 const dz = new Dropzone(element, {
                     url: "{{ route('media.store') }}",
-                    paramName: "file",
+                    paramName: 'file',
                     maxFiles: 1,
                     maxFilesize: 1,
-                    acceptedFiles: "image/*",
+                    acceptedFiles: 'image/*',
                     addRemoveLinks: true,
                     headers: {
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     init: function () {
                         let dropzone = this;
 
-                        // ✅ Restore existing frame image
                         if (existingFrame?.id) {
                             let mockFile = {
                                 name: existingFrame.file_name,
                                 size: existingFrame.size ?? 12345,
                                 _hiddenInputId: existingFrame.id
                             };
-                            dropzone.emit("addedfile", mockFile);
-                            dropzone.emit("thumbnail", mockFile, existingFrame.url);
-                            dropzone.emit("complete", mockFile);
+
+                            dropzone.emit('addedfile', mockFile);
+                            dropzone.emit('thumbnail', mockFile, existingFrame.url);
+                            dropzone.emit('complete', mockFile);
                             dropzone.files.push(mockFile);
                         }
 
-                        dropzone.on("success", function (file, response) {
+                        dropzone.on('success', function (file, response) {
                             if (response?.data?.id) {
                                 file._hiddenInputId = response.data.id;
                                 hiddenInput.value = response.data.id;
                             }
                         });
 
-                        dropzone.on("removedfile", function (file) {
-                            hiddenInput.value = "";
+                        dropzone.on('removedfile', function (file) {
+                            hiddenInput.value = '';
+
                             if (file._hiddenInputId) {
                                 fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
-                                    method: "DELETE",
+                                    method: 'DELETE',
                                     headers: {
-                                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                                     }
                                 });
                             }
@@ -2599,11 +2800,12 @@
             });
         }
 
-        // Re-init when repeater adds new option rows
-        $(document).on("click", "[data-repeater-create]", function () {
+        $(document).on('click', '[data-repeater-create]', function () {
             setTimeout(function () {
-                if ($('#is_tableau').is(':checked')) {
-                    $('.option-frame-wrapper').show();
+                syncOptionFrameVisibility();
+                syncOptionPaddingVisibility();
+
+                if (typeof initOptionFrameDropzones === 'function') {
                     initOptionFrameDropzones();
                 }
             }, 250);

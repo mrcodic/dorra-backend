@@ -565,6 +565,7 @@
                                                             <div data-repeater-item>
                                                                 <!-- Specification Fields -->
                                                                 <div class="row mt-1">
+                                                                    <input type="hidden" name="fixed_key" class="spec-fixed-key">
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
                                                                             <label class="form-label label-text">Name
@@ -581,7 +582,7 @@
                                                                                 (AR) <span
                                                                                     style="color: red; font-size: 20px;">*</span></label>
                                                                             <input type="text" name="name_ar"
-                                                                                   class="form-control"
+                                                                                   class="form-control spec-name-ar"
                                                                                    placeholder="Specification Name (AR)"/>
                                                                         </div>
                                                                     </div>
@@ -624,6 +625,14 @@
                                                                                         <input type="text" name="price"
                                                                                                class="form-control"
                                                                                                placeholder="Price"/>
+                                                                                    </div>
+
+                                                                                    <!-- Frame Model Padding Value (Tableau only) -->
+                                                                                    <div class="col option-frame-model-padding-wrapper" style="display: none;">
+                                                                                        <label class="form-label label-text">Padding Value (Optional)</label>
+                                                                                        <input type="text" name="padding"
+                                                                                               class="form-control option-padding-value"
+                                                                                               placeholder="Padding Value"/>
                                                                                     </div>
                                                                                 </div>
                                                                                 <div
@@ -700,7 +709,7 @@
                                                                     <!-- Delete Specification Button -->
                                                                     <div class="col-12 text-end mt-1 mb-2">
                                                                         <button type="button"
-                                                                                class="btn btn-outline-danger"
+                                                                                class="btn btn-outline-danger spec-delete-btn"
                                                                                 data-repeater-delete>
                                                                             <i data-feather="x" class="me-25"></i>
                                                                             Delete
@@ -719,7 +728,7 @@
                                                                         class="w-100 rounded-3 p-1 text-dark"
                                                                         style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
                                                                         data-repeater-create>
-                                                                    <i data-feather="plus" class="me-25"></i> <span>Add New
+                                                                    <i data-feather="plus" class="me-25"></i> <span>Add Custom
                                                                     Spec</span>
                                                                 </button>
                                                             </div>
@@ -728,7 +737,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <label class="form-label label-text mt-2">Variants</label>
+                                        <label id="variants-title" class="form-label label-text mt-2">Variants</label>
 
                                         <div id="variants-container" class="mt-2"></div>
                                         <!-- Free Shipping -->
@@ -777,86 +786,244 @@
 
 @section('page-script')
     <script !src="">
-        // ----- helpers -----
+        // ----- Tableau fixed specs helpers -----
+        const TABLEAU_FIXED_SPECS = [
+            {
+                key: 'frame_model',
+                nameEn: 'Frame Model',
+                nameAr: 'موديل البرواز'
+            },
+            {
+                key: 'tableau_size',
+                nameEn: 'Tableau Size',
+                nameAr: 'مقاس التابلوه'
+            },
+            {
+                key: 'frame_color',
+                nameEn: 'Frame Color',
+                nameAr: 'لون البرواز'
+            }
+        ];
+
+        window.selectedProductIsTableau = window.selectedProductIsTableau || false;
+        let isSyncingTableauSpecs = false;
+
         function getSpecListEl() {
-            return $('.outer-repeater').find('[data-repeater-list="specifications"]');
+            return $('.outer-repeater').find('[data-repeater-list="specifications"]').first();
         }
 
         function findSpecItemByKey(key) {
             return getSpecListEl().find('[data-repeater-item][data-spec-key="' + key + '"]');
         }
 
-        function addSpecRepeaterItem({ key, nameEn, nameAr }) {
-            // avoid duplicates
-            if (findSpecItemByKey(key).length) return;
+        function getOuterCreateButton() {
+            return $('.outer-repeater').children('.row').find('button[data-repeater-create]').first();
+        }
 
-            // trigger outer repeater create button (the one for specs)
-            // this creates a new [data-repeater-item] at end
-            $('.outer-repeater > .row button[data-repeater-create]').first().trigger('click');
+        function isTableauProduct() {
+            return window.selectedProductIsTableau === true;
+        }
 
-            // grab last created spec item
-            const $list = getSpecListEl();
-            const $newItem = $list.children('[data-repeater-item]').last();
+        function clearAndHideVariants() {
+            $('#variants-title').hide();
+            $('#variants-container').empty().hide();
+            window.variantImageMemory = {};
+        }
 
-            // mark it so we can remove later
-            $newItem.attr('data-spec-key', key);
+        function showVariants() {
+            $('#variants-title').show();
+            $('#variants-container').show();
+        }
 
-            // fill names
-            $newItem.find('input[name="name_en"]').val(nameEn).trigger('change');
-            $newItem.find('input[name="name_ar"]').val(nameAr).trigger('change');
+        function addSpecRepeaterItem({ key, nameEn, nameAr, locked = false }) {
+            return new Promise(function (resolve) {
+                if (findSpecItemByKey(key).length) {
+                    resolve();
+                    return;
+                }
 
-            // ensure it has at least 1 option row (it already does in your markup)
-            // optional: set a default value text for cutting specs
-            // $newItem.find('input[name="value_en"]').first().val(''); // keep empty
+                const beforeItems = getSpecListEl().children('[data-repeater-item]').toArray();
+                getOuterCreateButton().trigger('click');
 
-            setTimeout(() => {
-                feather.replace();
-                generateVariants();
-            }, 0);
+                setTimeout(function () {
+                    const $items = getSpecListEl().children('[data-repeater-item]');
+
+                    let $newItem = $items.filter(function () {
+                        return !beforeItems.includes(this);
+                    }).last();
+
+                    if (!$newItem.length) {
+                        $newItem = $items.last();
+                    }
+
+                    $newItem.attr('data-spec-key', key);
+                    $newItem.find('.spec-fixed-key').val(key);
+
+                    $newItem.find('.spec-name-en')
+                        .val(nameEn)
+                        .prop('readonly', locked)
+                        .trigger('change');
+
+                    $newItem.find('.spec-name-ar')
+                        .val(nameAr)
+                        .prop('readonly', locked)
+                        .trigger('change');
+
+                    if (locked) {
+                        $newItem.find('.spec-delete-btn').hide();
+                    }
+
+                    const hasOptionRow = $newItem
+                        .find('[data-repeater-list="specification_options"] > [data-repeater-item]')
+                        .length > 0;
+
+                    if (!hasOptionRow) {
+                        $newItem.find('.inner-repeater button[data-repeater-create]').first().trigger('click');
+                    }
+
+                    setTimeout(function () {
+                        syncOptionFrameVisibility();
+                        syncOptionPaddingVisibility();
+                        initOptionDropzones();
+
+                        if (window.feather) feather.replace();
+                        if (typeof generateVariants === 'function') generateVariants();
+
+                        resolve();
+                    }, 150);
+                }, 250);
+            });
         }
 
         function removeSpecRepeaterItem(key) {
             const $item = findSpecItemByKey(key);
             if (!$item.length) return;
 
-            // Click the spec delete button inside that item
-            // Ensure you select the DELETE SPEC button (not value delete)
-            $item.find('> .row .btn[data-repeater-delete]').last().trigger('click');
+            $item.find('.spec-delete-btn').first().trigger('click');
 
-            setTimeout(generateVariants, 0);
+            setTimeout(function () {
+                syncOptionFrameVisibility();
+                syncOptionPaddingVisibility();
+                if (typeof generateVariants === 'function') generateVariants();
+            }, 250);
+        }
+
+        async function syncTableauFixedSpecs() {
+            if (isSyncingTableauSpecs) return;
+            isSyncingTableauSpecs = true;
+
+            if (isTableauProduct()) {
+                for (const spec of TABLEAU_FIXED_SPECS) {
+                    await addSpecRepeaterItem({
+                        key: spec.key,
+                        nameEn: spec.nameEn,
+                        nameAr: spec.nameAr,
+                        locked: true
+                    });
+                }
+                clearAndHideVariants();
+            } else {
+                TABLEAU_FIXED_SPECS.forEach(function (spec) {
+                    removeSpecRepeaterItem(spec.key);
+                });
+                showVariants();
+                if (typeof generateVariants === 'function') generateVariants();
+            }
+
+            syncOptionFrameVisibility();
+            syncOptionPaddingVisibility();
+            isSyncingTableauSpecs = false;
+        }
+
+        function syncOptionFrameVisibility() {
+            const isTableau = isTableauProduct();
+
+            $('.option-frame-wrapper').hide();
+
+            if (!isTableau) {
+                $('.option-frame-image-hidden').val('');
+                return;
+            }
+
+            const $frameColorSpec = findSpecItemByKey('frame_color');
+            if (!$frameColorSpec.length) {
+                $('.option-frame-image-hidden').val('');
+                return;
+            }
+
+            // Only frame_color can submit option_frame_image. Clear hidden values in all other specs.
+            getSpecListEl()
+                .children('[data-repeater-item]')
+                .not($frameColorSpec)
+                .find('.option-frame-image-hidden')
+                .val('');
+
+            $frameColorSpec.find('.option-frame-wrapper').show();
+
+            if (typeof initOptionFrameDropzones === 'function') {
+                initOptionFrameDropzones();
+            }
+        }
+
+        function syncOptionPaddingVisibility() {
+            const isTableau = isTableauProduct();
+
+            $('.option-frame-model-padding-wrapper').hide();
+
+            if (!isTableau) {
+                $('.option-padding-value').val('');
+                return;
+            }
+
+            const $frameModelSpec = findSpecItemByKey('frame_model');
+            if (!$frameModelSpec.length) {
+                $('.option-padding-value').val('');
+                return;
+            }
+
+            // Only frame_model can submit padding. Clear hidden values in all other specs.
+            getSpecListEl()
+                .children('[data-repeater-item]')
+                .not($frameModelSpec)
+                .find('.option-padding-value')
+                .val('');
+
+            $frameModelSpec.find('.option-frame-model-padding-wrapper').show();
         }
 
         // ----- Select2 UI -----
         $(document).ready(function () {
-
-            // Toggle select box
             $('#btnAddCuttingSpecs').on('click', function () {
                 $('#cuttingSpecsBox').toggleClass('d-none');
 
-                // init select2 once when shown first time
                 if (!$('#cuttingSpecsSelect').data('select2')) {
                     $('#cuttingSpecsSelect').select2({
                         placeholder: 'Select cutting specs...',
                         closeOnSelect: false,
-                        width: '100'
+                        width: '100%'
                     });
                     setTimeout(generateVariants, 0);
                 }
             });
+
             $('#cuttingSpecsSelect').on('change', function () {
                 generateVariants();
             });
+
             if (($('#cuttingSpecsSelect').val() || []).length) {
-                $('#cuttingSpecsBox').removeClass('d-none'); // optional: show it
+                $('#cuttingSpecsBox').removeClass('d-none');
                 setTimeout(generateVariants, 0);
             }
-
-
         });
     </script>
 
     <script>
         function generateVariants() {
+            if (isTableauProduct()) {
+                clearAndHideVariants();
+                return;
+            }
+
             let specs = [];
 
             // -----------------------------
@@ -1825,7 +1992,11 @@
                         updateDeleteButtons($(this).closest('.inner-repeater'));
                         initializeImageUploaders(this);
                         feather.replace();
-                        setTimeout(generateVariants, 0);
+                        setTimeout(function () {
+                            syncOptionFrameVisibility();
+                            syncOptionPaddingVisibility();
+                            generateVariants();
+                        }, 0);
                     },
                     hide: function (deleteElement) {
                         const $row = $(this);
@@ -1850,7 +2021,11 @@
                     updateDeleteButtons($('.outer-repeater'));
                     initializeImageUploaders(this);
                     feather.replace();
-                    setTimeout(generateVariants, 0);
+                    setTimeout(function () {
+                        syncOptionFrameVisibility();
+                        syncOptionPaddingVisibility();
+                        generateVariants();
+                    }, 0);
                 },
                 hide: function (deleteElement) {
                     const $row = $(this);
@@ -2159,7 +2334,6 @@
             window.selectedProductIsTableau = isTableau;
 
             $("#tableau-upload-section").toggle(isTableau);
-            $(".option-frame-wrapper").toggle(isTableau);
 
             if (isTableau) {
                 ensureTableauDropzone();
@@ -2168,6 +2342,10 @@
                 clearTableauDropzone();
                 clearOptionFrameImages();
             }
+
+            syncTableauFixedSpecs();
+            syncOptionFrameVisibility();
+            syncOptionPaddingVisibility();
         }
 
         function handleSelectedProductTableauState() {
@@ -2186,11 +2364,9 @@
 
             $(document).on("click", "[data-repeater-create]", function () {
                 setTimeout(function () {
-                    $(".option-frame-wrapper").toggle(window.selectedProductIsTableau);
-
-                    if (window.selectedProductIsTableau) {
-                        initOptionFrameDropzones();
-                    }
+                    syncOptionFrameVisibility();
+                    syncOptionPaddingVisibility();
+                    initOptionDropzones();
                 }, 300);
             });
         });

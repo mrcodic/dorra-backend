@@ -32,6 +32,7 @@ class CategoryResource extends JsonResource
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
             'description' => $this->description,
+            'is_tableau' => $this->is_tableau,
             'has_custom_prices' => $this->has_custom_prices,
             'base_price' => $this->base_price,
             'price_after_offer' => is_null($after) ? null : sprintf('%.2f', round($after, 2)),

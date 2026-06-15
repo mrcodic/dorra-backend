@@ -240,14 +240,6 @@ class CategoryService extends BaseService
                         'collection_name' => 'category_model_image',
                     ]);
             }
-            if (isset($validatedData['tableau_image_id'])&& isset($validatedData['is_tableau'])) {
-                Media::where('id', $validatedData['tableau_image_id'])
-                    ->update([
-                        'model_type' => get_class($product),
-                        'model_id' => $product->id,
-                        'collection_name' => 'tableau_image',
-                    ]);
-            }
             if (isset($validatedData['images_ids'])) {
                 collect($validatedData['images_ids'])->each(function ($imageId) use ($product) {
                     Media::where('id', $imageId)
@@ -361,7 +353,9 @@ class CategoryService extends BaseService
                                 'en' => $specification['name_en'],
                                 'ar' => $specification['name_ar'],
                             ],
-                            'fixed_key' => $specification['fixed_key'],
+                            'type' => $specification['fixed_key'] ? 'fixed' : 'custom',
+                            'fixed_key' => $specification['fixed_key'] ?? null,
+
                         ]
                     );
 
@@ -375,6 +369,9 @@ class CategoryService extends BaseService
                                     'ar' => $option['value_ar'],
                                 ],
                                 'price' => $option['price'] ?? 0,
+                                'padding' => $productSpecification->fixed_key === 'frame_model'
+                                    ? ($option['padding'] ?? null)
+                                    : null,
                             ]
                         );
 
@@ -467,16 +464,6 @@ class CategoryService extends BaseService
                     ]);
 
             }
-            if (isset($validatedData['tableau_image_id'])) {
-                Media::where('id', $validatedData['tableau_image_id'])
-                    ->update([
-                        'model_type' => get_class($product),
-                        'model_id' => $product->id,
-                        'collection_name' => 'tableau_image',
-                    ]);
-
-            }
-
             if (isset($validatedData['images_ids'])) {
                 collect($validatedData['images_ids'])->each(function ($imageId) use ($product) {
                     Media::where('id', $imageId)

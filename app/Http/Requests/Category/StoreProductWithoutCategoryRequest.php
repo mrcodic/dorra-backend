@@ -42,7 +42,6 @@ class StoreProductWithoutCategoryRequest extends BaseRequest
             'image_id' => ['required', 'exists:media,id'],
             'image_model_id' => ['required', 'exists:media,id'],
             'is_tableau' => ['required', 'boolean'],
-
             'images_ids' => ['nullable', 'array'],
             'images_ids.*' => ['nullable','exists:media,id'],
             'tags' => ['nullable', 'array'],

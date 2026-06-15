@@ -16,8 +16,8 @@
 
                         <!-- Dropzone upload area -->
                         <div id="category-dropzone"
-                            class="d-flex align-items-center justify-content-center dropzone rounded p-3 text-center"
-                            style="border: 2px dashed rgba(0, 0, 0, 0.3);">
+                             class="d-flex align-items-center justify-content-center dropzone rounded p-3 text-center"
+                             style="border: 2px dashed rgba(0, 0, 0, 0.3);">
                             <div class="dz-message" data-dz-message>
                                 <span>Drop image here or click to upload</span>
                             </div>
@@ -29,54 +29,54 @@
                         Max size: 1MB | Dimensions: 512x512 px
                     </span>
                     <div class="row my-1">
-                    <div class="col-md-6">
-                        <div class="mb-2">
-                            <label class="form-label label-text" for="website-image-banner-dropzone">
-                                Product Banner (Website) <span
-                                    style="color: red; font-size: 20px;">*</span>
-                            </label>
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <label class="form-label label-text" for="website-image-banner-dropzone">
+                                    Product Banner (Website) <span
+                                        style="color: red; font-size: 20px;">*</span>
+                                </label>
 
-                            <!-- Dropzone Container -->
-                            <div id="website-image-banner-dropzone" class="dropzone border rounded p-3"
-                                 style="cursor:pointer; min-height:150px;">
-                                <div class="dz-message" data-dz-message>
-                                    <span>Drop image here or click to upload</span>
+                                <!-- Dropzone Container -->
+                                <div id="website-image-banner-dropzone" class="dropzone border rounded p-3"
+                                     style="cursor:pointer; min-height:150px;">
+                                    <div class="dz-message" data-dz-message>
+                                        <span>Drop image here or click to upload</span>
+                                    </div>
                                 </div>
-                            </div>
 
 
-                            <span class="image-hint small text-end">
+                                <span class="image-hint small text-end">
                                                 Max size: 1MB | Dimensions: 1920×520 px
                                             </span>
-                            <!-- ✅ Hidden input outside Dropzone -->
-                            <input type="hidden" name="website_banner_id" id="uploadedImageWebsiteBanner">
+                                <!-- ✅ Hidden input outside Dropzone -->
+                                <input type="hidden" name="website_banner_id" id="uploadedImageWebsiteBanner">
 
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-2">
-                            <label class="form-label label-text" for="mobile-image-banner-dropzone">
-                                Product Banner (Mobile) <span
-                                    style="color: red; font-size: 20px;">*</span>
-                            </label>
-
-                            <!-- Dropzone Container -->
-                            <div id="mobile-image-banner-dropzone" class="dropzone border rounded p-3"
-                                 style="cursor:pointer; min-height:150px;">
-                                <div class="dz-message" data-dz-message>
-                                    <span>Drop image here or click to upload</span>
-                                </div>
                             </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <label class="form-label label-text" for="mobile-image-banner-dropzone">
+                                    Product Banner (Mobile) <span
+                                        style="color: red; font-size: 20px;">*</span>
+                                </label>
+
+                                <!-- Dropzone Container -->
+                                <div id="mobile-image-banner-dropzone" class="dropzone border rounded p-3"
+                                     style="cursor:pointer; min-height:150px;">
+                                    <div class="dz-message" data-dz-message>
+                                        <span>Drop image here or click to upload</span>
+                                    </div>
+                                </div>
 
 
-                            <span class="image-hint small text-end">
+                                <span class="image-hint small text-end">
                                                 Max size: 1MB | Dimensions: 375*504 px
                                             </span>
-                            <!-- ✅ Hidden input outside Dropzone -->
-                            <input type="hidden" name="mobile_banner_id" id="uploadedImageMobileBanner">
+                                <!-- ✅ Hidden input outside Dropzone -->
+                                <input type="hidden" name="mobile_banner_id" id="uploadedImageMobileBanner">
 
+                            </div>
                         </div>
-                    </div>
                     </div>
                     <!-- Name in Arabic and English -->
                     <div class="row my-1">
@@ -84,13 +84,13 @@
                             <label class="form-label label-text">Name (EN) <span
                                     style="color: red; font-size: 20px;">*</span></label>
                             <input type="text" class="form-control" placeholder="Enter Category Name(En)"
-                                id="add-category-name-en" name="name[en]" />
+                                   id="add-category-name-en" name="name[en]" />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label label-text">Name (AR) <span
                                     style="color: red; font-size: 20px;">*</span></label>
                             <input type="text" class="form-control" placeholder="Enter Category Name(Ar)"
-                                id="add-category-name-ar" name="name[ar]" />
+                                   id="add-category-name-ar" name="name[ar]" />
                         </div>
                     </div>
 
@@ -100,13 +100,13 @@
                             <label class="form-label label-text">Description (EN) <span
                                     style="color: red; font-size: 20px;">*</span></label>
                             <textarea class="form-control" id="add-category-description-en"
-                                placeholder="Enter Description Name(En)" name="description[en]" rows="2"></textarea>
+                                      placeholder="Enter Description Name(En)" name="description[en]" rows="2"></textarea>
                         </div>
                         <div class="col-lg-6">
                             <label class="form-label label-text">Description (AR) <span
                                     style="color: red; font-size: 20px;">*</span></label>
                             <textarea class="form-control" id="add-category-description-ar"
-                                placeholder="Enter Description Name(Ar)" name="description[ar]" rows="2"></textarea>
+                                      placeholder="Enter Description Name(Ar)" name="description[ar]" rows="2"></textarea>
                         </div>
                     </div>
                     <div class="col-md-12">
@@ -119,45 +119,56 @@
                         </div>
                     </div>
                     <!-- Has Mockup -->
-                   <div class="row">
+                    <div class="row">
 
-                       <div class="col-md-6">
-                           <div class="mb-2 d-flex align-items-center gap-2">
-                               <label class="form-label label-text ">Is this product has
-                                   Mockup?</label>
-                               <div class="form-check form-switch">
-                                   <input type="hidden" name="has_mockup" value="0" />
-                                   <input class="form-check-input" type="checkbox" id="has_mockup" name="has_mockup"
-                                          value="1" />
+                        <div class="col-md-6">
+                            <div class="mb-2 d-flex align-items-center gap-2">
+                                <label class="form-label label-text ">Is this product has
+                                    Mockup?</label>
+                                <div class="form-check form-switch">
+                                    <input type="hidden" name="has_mockup" value="0" />
+                                    <input class="form-check-input" type="checkbox" id="has_mockup" name="has_mockup"
+                                           value="1" />
 
-                               </div>
-                           </div>
-                       </div>
+                                </div>
+                            </div>
+                        </div>
 
-                       <div class="col-md-6">
-                           <div class="mb-2 d-flex align-items-center gap-2">
-                               <label class="form-label label-text ">Is this product has
-                                   Orientation?</label>
-                               <div class="form-check form-switch">
-                                   <input type="hidden" name="has_orientation" value="0" />
-                                   <input class="form-check-input" type="checkbox"  name="has_orientation"
-                                          value="1" />
+                        <div class="col-md-6">
+                            <div class="mb-2 d-flex align-items-center gap-2">
+                                <label class="form-label label-text ">Is this product has
+                                    Orientation?</label>
+                                <div class="form-check form-switch">
+                                    <input type="hidden" name="has_orientation" value="0" />
+                                    <input class="form-check-input" type="checkbox"  name="has_orientation"
+                                           value="1" />
 
-                               </div>
-                           </div>
-                       </div>
-                       {{-- Tableau Toggle --}}
-                       <div class="col-md-6">
-                           <div class="mb-2 d-flex align-items-center gap-2">
-                               <label class="form-label label-text">Is this product a Tableau?</label>
-                               <div class="form-check form-switch">
-                                   <input type="hidden" name="is_tableau" value="0"/>
-                                   <input class="form-check-input" type="checkbox" id="is_tableau"
-                                          name="is_tableau" value="1"/>
-                               </div>
-                           </div>
-                       </div>
-                   </div>
+                                </div>
+                            </div>
+                        </div>
+                        {{-- Tableau Toggle --}}
+                        <div class="col-md-6">
+                            <div class="mb-2 d-flex align-items-center gap-2">
+                                <label class="form-label label-text">Is this product a Tableau?</label>
+                                <div class="form-check form-switch">
+                                    <input type="hidden" name="is_tableau" value="0"/>
+                                    <input class="form-check-input" type="checkbox" id="modal_is_tableau"
+                                           name="is_tableau" value="1"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div id="modalTableauFixedSpecsBox" class="alert alert-info d-none mt-1 mb-0">
+                                <div class="fw-bold mb-1">Tableau fixed specs will be added automatically:</div>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <span class="badge bg-primary">Frame Model</span>
+                                    <span class="badge bg-primary">Tableau Size</span>
+                                    <span class="badge bg-primary">Frame Color</span>
+                                </div>
+                            </div>
+                            <div id="modalTableauFixedSpecsInputs"></div>
+                        </div>
+                    </div>
                 </div>
 
 
@@ -168,7 +179,7 @@
                     <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="saveChangesButton">
                         <span class="btn-text">Save</span>
                         <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                            aria-hidden="true"></span>
+                              aria-hidden="true"></span>
                     </button>
                 </div>
             </form>
@@ -243,17 +254,24 @@
                         headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content}
                     });
                 }
-                document.getElementById("uploaded-image-main").classList.add("d-none");
+                const uploadedImageMainPreview = document.getElementById("uploaded-image-main");
+                if (uploadedImageMainPreview) uploadedImageMainPreview.classList.add("d-none");
             });
         }
     });
 
-    // Manual remove
-    document.getElementById("remove-image-main").addEventListener("click", function () {
-        websiteDropzone.removeAllFiles(true);
-        document.getElementById("uploadedImageMain").value = "";
-        document.getElementById("uploaded-image-main").classList.add("d-none");
-    });
+    // Manual remove (guarded because this modal does not always render preview/remove elements)
+    const websiteRemoveBtn = document.getElementById("remove-image-main");
+    if (websiteRemoveBtn) {
+        websiteRemoveBtn.addEventListener("click", function () {
+            websiteDropzone.removeAllFiles(true);
+            const uploadedImageMain = document.getElementById("uploadedImageMain");
+            const uploadedImageMainPreview = document.getElementById("uploaded-image-main");
+
+            if (uploadedImageMain) uploadedImageMain.value = "";
+            if (uploadedImageMainPreview) uploadedImageMainPreview.classList.add("d-none");
+        });
+    }
 
 </script>
 <script>
@@ -284,16 +302,63 @@
                         headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content}
                     });
                 }
-                document.getElementById("uploaded-image-main").classList.add("d-none");
+                const uploadedImageMainPreview = document.getElementById("uploaded-image-main");
+                if (uploadedImageMainPreview) uploadedImageMainPreview.classList.add("d-none");
             });
         }
     });
 
-    // Manual remove
-    document.getElementById("remove-image-main").addEventListener("click", function () {
-        mobileDropzone.removeAllFiles(true);
-        document.getElementById("uploadedImageMain").value = "";
-        document.getElementById("uploaded-image-main").classList.add("d-none");
-    });
+    // Manual remove (guarded because this modal does not always render preview/remove elements)
+    const mobileRemoveBtn = document.getElementById("remove-image-main");
+    if (mobileRemoveBtn) {
+        mobileRemoveBtn.addEventListener("click", function () {
+            mobileDropzone.removeAllFiles(true);
+            const uploadedImageMain = document.getElementById("uploadedImageMain");
+            const uploadedImageMainPreview = document.getElementById("uploaded-image-main");
 
+            if (uploadedImageMain) uploadedImageMain.value = "";
+            if (uploadedImageMainPreview) uploadedImageMainPreview.classList.add("d-none");
+        });
+    }
+
+</script>
+
+<script>
+    const MODAL_TABLEAU_FIXED_SPECS = [
+        {key: 'frame_model', nameEn: 'Frame Model', nameAr: 'موديل البرواز'},
+        {key: 'tableau_size', nameEn: 'Tableau Size', nameAr: 'مقاس التابلوه'},
+        {key: 'frame_color', nameEn: 'Frame Color', nameAr: 'لون البرواز'}
+    ];
+
+    function syncModalTableauFixedSpecs() {
+        const isTableau = $('#modal_is_tableau').is(':checked');
+        const $box = $('#modalTableauFixedSpecsBox');
+        const $inputs = $('#modalTableauFixedSpecsInputs');
+
+        $box.toggleClass('d-none', !isTableau);
+        $inputs.empty();
+
+        if (!isTableau) return;
+
+        MODAL_TABLEAU_FIXED_SPECS.forEach(function (spec, index) {
+            $inputs.append(`
+                <input type="hidden" name="specifications[${index}][fixed_key]" value="${spec.key}">
+                <input type="hidden" name="specifications[${index}][name_en]" value="${spec.nameEn}">
+                <input type="hidden" name="specifications[${index}][name_ar]" value="${spec.nameAr}">
+            `);
+        });
+    }
+
+    $(document).ready(function () {
+        syncModalTableauFixedSpecs();
+
+        $('#modal_is_tableau').on('change', function () {
+            syncModalTableauFixedSpecs();
+        });
+
+        $('#addCategoryModal').on('hidden.bs.modal', function () {
+            $('#modal_is_tableau').prop('checked', false);
+            syncModalTableauFixedSpecs();
+        });
+    });
 </script>
