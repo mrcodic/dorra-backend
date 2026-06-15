@@ -335,7 +335,7 @@
         const $box = $('#modalTableauFixedSpecsBox');
         const $inputs = $('#modalTableauFixedSpecsInputs');
 
-        $box.toggleClass('d-none', !isTableau);
+        // $box.toggleClass('d-none', !isTableau);
         $inputs.empty();
 
         if (!isTableau) return;

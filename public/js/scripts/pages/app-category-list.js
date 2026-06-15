@@ -119,6 +119,7 @@ const dt_user_table = $(".category-list-table").DataTable({
    data-sort="${row.sort}"
    data-name_en="${row.name_en}"
    data-has_mockup="${row.has_mockup}"
+   data-is_tableau="${row.is_tableau}"
    data-has_orientation="${row.has_orientation}"
    data-image="${row.image}"
  data-website_image="${row.website_banner}"
@@ -427,6 +428,7 @@ $(document).ready(function () {
                 img: "#imagePreview",
                 id: "#category-id",
                 has_mockup: "#has_mockup",
+                is_tableau: "#is_tableau",
                 has_orientation: "#has_orientation",
                 imgId: "#image-id",
                 subs: "#subcategories-container",
@@ -441,6 +443,7 @@ $(document).ready(function () {
                 descAr: "#edit-category-description-ar",
                 descEn: "#edit-category-description-en",
                 has_mockup: "#has_mockup",
+                is_tableau: "#is_tableau",
                 has_orientation: "#has_orientation",
                 img: "#edit-preview-image",
                 id: "#edit-category-id",
@@ -464,6 +467,7 @@ $(document).ready(function () {
         $scope.find(m.descAr).val(data.description_ar || "");
         $scope.find(m.descEn).val(data.description_en || "");
         $scope.find(m.has_mockup).prop('checked', !!data.has_mockup);
+        $scope.find(m.is_tableau).prop('checked', !!data.is_tableau);
         $scope.find(m.has_orientation).prop('checked', !!data.has_orientation);
         $scope.find(m.img).attr("src", data.image || "");
         if (m.imgId) $scope.find(m.imgId).val(data.image_id || "");
@@ -486,6 +490,7 @@ $(document).ready(function () {
         var descAR = $("#category-description-ar").val();
         var imageId = $("#image-id").val();
         var hasMockup = $("#has_mockup").val();
+        var hasTableau = $("#is_tableau").val();
         var hasOrientation = $("#has_orientation").val();
         console.log(hasOrientation)
         var image = $("#imagePreview").attr("src");
@@ -495,6 +500,7 @@ $(document).ready(function () {
         $("#edit-category-description-en").val(descEN);
         $("#edit-category-description-ar").val(descAR);
         $("#has_mockup").prop('checked', !!hasMockup);
+        $("#is_tableau").prop('checked', !!hasTableau);
         $("#has_orientation").prop('checked', !!hasOrientation);
         $("#edit-category-id").val(id);
         $("#edit-uploaded-image").removeClass("d-none");
