@@ -42,7 +42,7 @@ class StoreProductWithoutCategoryRequest extends BaseRequest
             'image_id' => ['required', 'exists:media,id'],
             'image_model_id' => ['required', 'exists:media,id'],
             'is_tableau' => ['required', 'boolean'],
-            'tableau_image_id' => ['required_with:is_tableau', 'exists:media,id'],
+
             'images_ids' => ['nullable', 'array'],
             'images_ids.*' => ['nullable','exists:media,id'],
             'tags' => ['nullable', 'array'],
@@ -96,6 +96,7 @@ class StoreProductWithoutCategoryRequest extends BaseRequest
             'fixed_specs.*' => ['sometimes', 'in:'.CuttingEnum::getValuesAsString()],
             'specifications.*.name_en' => 'sometimes|string',
             'specifications.*.name_ar' => 'sometimes|string',
+            'specifications.*.fixed_key' => 'sometimes|string',
             'specifications.*.specification_options' => ['required_with:specifications', 'array', 'min:1'],
             'specifications.*.specification_options.*.value_en' => 'required_with:specifications|string',
             'specifications.*.specification_options.*.value_ar' => 'required_with:specifications|string',

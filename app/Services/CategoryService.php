@@ -147,6 +147,9 @@ class CategoryService extends BaseService
                             'en' => $specification['name_en'],
                             'ar' => $specification['name_ar'],
                         ],
+                        'type' => $specification['fixed_key'] ? 'fixed' : 'custom',
+                        'fixed_key' => $specification['fixed_key'] ?? null,
+
                     ]);
 
                     if (isset($specification['specification_options'])) {
@@ -355,6 +358,7 @@ class CategoryService extends BaseService
                                 'en' => $specification['name_en'],
                                 'ar' => $specification['name_ar'],
                             ],
+                            'fixed_key' => $specification['fixed_key'],
                         ]
                     );
 

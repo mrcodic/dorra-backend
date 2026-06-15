@@ -302,29 +302,29 @@
                                             </span>
                                             </div>
                                         </div>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text" for="sort">Product Ordering<span
-                                                        style="color: red; font-size: 20px;">*</span></label>
-                                                <input type="number" id="sort" class="form-control"
-                                                       name="sort"
-                                                       placeholder="Product ordering"/>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-2">
+                                                    <label class="form-label label-text" for="sort">Product Ordering<span
+                                                            style="color: red; font-size: 20px;">*</span></label>
+                                                    <input type="number" id="sort" class="form-control"
+                                                           name="sort"
+                                                           placeholder="Product ordering"/>
+                                                </div>
+                                            </div>
+                                            <!-- Tags -->
+                                            <div class="col-md-6">
+                                                <div class="mb-2">
+                                                    <label class="form-label label-text" for="tags">Tags <span
+                                                            style="color: red; font-size: 20px;">*</span></label>
+                                                    <select name="tags[]" id="tags" class="select2 form-select" multiple>
+                                                        @foreach($associatedData['tags'] as $tag)
+                                                            <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
-                                        <!-- Tags -->
-                                        <div class="col-md-6">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text" for="tags">Tags <span
-                                                        style="color: red; font-size: 20px;">*</span></label>
-                                                <select name="tags[]" id="tags" class="select2 form-select" multiple>
-                                                    @foreach($associatedData['tags'] as $tag)
-                                                        <option value="{{ $tag->id }}">{{ $tag->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
                                         <!-- Dimensions -->
 
                                         <div class="col-md-12 mb-2">
@@ -367,61 +367,45 @@
                                             </div>
                                         </div>
 
-                        <div class="row">
-                            <!-- Has Mockup -->
-                            <div class="col-md-6">
-                                <div class="mb-2 d-flex align-items-center gap-2">
-                                    <label class="form-label label-text ">Is this product has
-                                        Mockup?</label>
-                                    <div class="form-check form-switch">
-                                        <input type="hidden" name="has_mockup" value="0"/>
-                                        <input class="form-check-input" type="checkbox" id="has_mockup"
-                                               name="has_mockup" value="1"/>
+                                        <div class="row">
+                                            <!-- Has Mockup -->
+                                            <div class="col-md-6">
+                                                <div class="mb-2 d-flex align-items-center gap-2">
+                                                    <label class="form-label label-text ">Is this product has
+                                                        Mockup?</label>
+                                                    <div class="form-check form-switch">
+                                                        <input type="hidden" name="has_mockup" value="0"/>
+                                                        <input class="form-check-input" type="checkbox" id="has_mockup"
+                                                               name="has_mockup" value="1"/>
 
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-2 d-flex align-items-center gap-2">
-                                    <label class="form-label label-text ">Is this product has
-                                        Orientation?</label>
-                                    <div class="form-check form-switch">
-                                        <input type="hidden" name="has_orientation" value="0"/>
-                                        <input class="form-check-input" type="checkbox" id="has_orientation"
-                                               name="has_orientation" value="1"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-2 d-flex align-items-center gap-2">
+                                                    <label class="form-label label-text ">Is this product has
+                                                        Orientation?</label>
+                                                    <div class="form-check form-switch">
+                                                        <input type="hidden" name="has_orientation" value="0"/>
+                                                        <input class="form-check-input" type="checkbox" id="has_orientation"
+                                                               name="has_orientation" value="1"/>
 
-                                    </div>
-                                </div>
-                            </div>
-                            {{-- Tableau Toggle --}}
-                            <div class="col-md-6">
-                                <div class="mb-2 d-flex align-items-center gap-2">
-                                    <label class="form-label label-text">Is this product a Tableau?</label>
-                                    <div class="form-check form-switch">
-                                        <input type="hidden" name="is_tableau" value="0"/>
-                                        <input class="form-check-input" type="checkbox" id="is_tableau"
-                                               name="is_tableau" value="1"/>
-                                    </div>
-                                </div>
-                            </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {{-- Tableau Toggle --}}
+                                            <div class="col-md-6">
+                                                <div class="mb-2 d-flex align-items-center gap-2">
+                                                    <label class="form-label label-text">Is this product a Tableau?</label>
+                                                    <div class="form-check form-switch">
+                                                        <input type="hidden" name="is_tableau" value="0"/>
+                                                        <input class="form-check-input" type="checkbox" id="is_tableau"
+                                                               name="is_tableau" value="1"/>
+                                                    </div>
+                                                </div>
+                                            </div>
 
-                            {{-- Tableau Transparent Image Upload (hidden by default) --}}
-                            <div class="col-md-12" id="tableau-upload-section" style="display: none;">
-                                <div class="mb-2">
-                                    <label class="form-label label-text">
-                                        Tableau Transparent Image <span style="color: red; font-size: 20px;">*</span>
-                                    </label>
-                                    <div id="tableau-dropzone" class="dropzone border rounded p-3"
-                                         style="cursor:pointer; min-height:150px;">
-                                        <div class="dz-message" data-dz-message>
-                                            <span>Drop transparent PNG here or click to upload</span>
                                         </div>
-                                    </div>
-                                    <span class="image-hint small text-end">Max size: 1MB | PNG with transparency</span>
-                                    <input type="hidden" name="tableau_image_id" id="uploadedTableauImage">
-                                </div>
-                            </div>
-                        </div>
 
 
 
@@ -564,10 +548,10 @@
                                                 @php use App\Enums\Product\CuttingEnum; @endphp
                                                 <select id="cuttingSpecsSelect" class="form-control" name="fixed_specs[]" multiple="multiple" style="width:100%">
                                                     @foreach(CuttingEnum::cases() as $cutting)
-                                                    <option value="{{$cutting->value }}"  data-name-en="{{$cutting->label('en') }}"
-                                                            data-name-ar="{{$cutting->label('en') }}">
-                                                        {{$cutting->label('en') }}
-                                                    </option>
+                                                        <option value="{{$cutting->value }}"  data-name-en="{{$cutting->label('en') }}"
+                                                                data-name-ar="{{$cutting->label('en') }}">
+                                                            {{$cutting->label('en') }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
 
@@ -584,6 +568,7 @@
                                                             <div data-repeater-item>
                                                                 <!-- Specification Fields -->
                                                                 <div class="row mt-1">
+                                                                    <input type="hidden" name="fixed_key" class="spec-fixed-key">
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
                                                                             <label class="form-label label-text">Name
@@ -600,7 +585,7 @@
                                                                                 (AR) <span
                                                                                     style="color: red; font-size: 20px;">*</span></label>
                                                                             <input type="text" name="name_ar"
-                                                                                   class="form-control"
+                                                                                   class="form-control spec-name-ar"
                                                                                    placeholder="Specification Name (AR)"/>
                                                                         </div>
                                                                     </div>
@@ -718,7 +703,7 @@
                                                                     <!-- Delete Specification Button -->
                                                                     <div class="col-12 text-end mt-1 mb-2">
                                                                         <button type="button"
-                                                                                class="btn btn-outline-danger"
+                                                                                class="btn btn-outline-danger spec-delete-btn"
                                                                                 data-repeater-delete>
                                                                             <i data-feather="x" class="me-25"></i>
                                                                             Delete
@@ -743,7 +728,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <label class="form-label label-text mt-2">Variants</label>
+                                                    <label id="variants-title" class="form-label label-text mt-2">Variants</label>
 
                                                     <div id="variants-container" class="mt-2"></div>
 
@@ -796,53 +781,212 @@
 
 @section('page-script')
     <script !src="">
-        // ----- helpers -----
+        // ----- Tableau fixed specs helpers -----
+        const TABLEAU_FIXED_SPECS = [
+            {
+                key: 'frame_model',
+                nameEn: 'Frame Model',
+                nameAr: 'موديل البرواز'
+            },
+            {
+                key: 'tableau_size',
+                nameEn: 'Tableau Size',
+                nameAr: 'مقاس التابلوه'
+            },
+            {
+                key: 'frame_color',
+                nameEn: 'Frame Color',
+                nameAr: 'لون البرواز'
+            }
+        ];
+
+        let isSyncingTableauSpecs = false;
+
+        function slugifyFixedKey(value) {
+            return String(value || '')
+                .trim()
+                .toLowerCase()
+                .replace(/&/g, ' and ')
+                .replace(/[^a-z0-9]+/g, '_')
+                .replace(/^_+|_+$/g, '');
+        }
+
+        function isTableauFixedKey(key) {
+            return TABLEAU_FIXED_SPECS.some(spec => spec.key === key);
+        }
+
         function getSpecListEl() {
-            return $('.outer-repeater').find('[data-repeater-list="specifications"]');
+            return $('.outer-repeater').find('[data-repeater-list="specifications"]').first();
         }
 
         function findSpecItemByKey(key) {
             return getSpecListEl().find('[data-repeater-item][data-spec-key="' + key + '"]');
         }
 
-        function addSpecRepeaterItem({ key, nameEn, nameAr }) {
-            // avoid duplicates
-            if (findSpecItemByKey(key).length) return;
+        function getOuterCreateButton() {
+            return $('.outer-repeater').children('.row').find('button[data-repeater-create]').first();
+        }
 
-            // trigger outer repeater create button (the one for specs)
-            // this creates a new [data-repeater-item] at end
-            $('.outer-repeater > .row button[data-repeater-create]').first().trigger('click');
+        function syncSpecFixedKey($specItem) {
+            if (!$specItem || !$specItem.length) return;
 
-            // grab last created spec item
-            const $list = getSpecListEl();
-            const $newItem = $list.children('[data-repeater-item]').last();
+            const currentKey = ($specItem.attr('data-spec-key') || $specItem.find('.spec-fixed-key').val() || '').trim();
 
-            // mark it so we can remove later
-            $newItem.attr('data-spec-key', key);
+            // Tableau specs must keep their business keys and must not be regenerated from name.
+            if (isTableauFixedKey(currentKey)) {
+                $specItem.attr('data-spec-key', currentKey);
+                $specItem.find('.spec-fixed-key').val(currentKey);
+                return;
+            }
 
-            // fill names
-            $newItem.find('input[name="name_en"]').val(nameEn).trigger('change');
-            $newItem.find('input[name="name_ar"]').val(nameAr).trigger('change');
+            const nameEn = ($specItem.find('.spec-name-en').val() || '').trim();
+            const generatedKey = slugifyFixedKey(nameEn);
 
-            // ensure it has at least 1 option row (it already does in your markup)
-            // optional: set a default value text for cutting specs
-            // $newItem.find('input[name="value_en"]').first().val(''); // keep empty
+            $specItem.attr('data-spec-key', generatedKey);
+            $specItem.find('.spec-fixed-key').val(generatedKey);
+        }
 
-            setTimeout(() => {
-                feather.replace();
-                generateVariants();
-            }, 0);
+        function syncAllSpecFixedKeys() {
+            getSpecListEl().children('[data-repeater-item]').each(function () {
+                syncSpecFixedKey($(this));
+            });
+        }
+
+        function isTableauProduct() {
+            return $('#is_tableau').is(':checked');
+        }
+
+        function clearAndHideVariants() {
+            $('#variants-title').hide();
+            $('#variants-container').empty().hide();
+            window.variantImageMemory = {};
+        }
+
+        function showVariants() {
+            $('#variants-title').show();
+            $('#variants-container').show();
+        }
+
+        function addSpecRepeaterItem({ key, nameEn, nameAr, locked = false }) {
+            return new Promise(function (resolve) {
+                if (findSpecItemByKey(key).length) {
+                    resolve();
+                    return;
+                }
+
+                const beforeItems = getSpecListEl().children('[data-repeater-item]').toArray();
+                getOuterCreateButton().trigger('click');
+
+                setTimeout(function () {
+                    const $items = getSpecListEl().children('[data-repeater-item]');
+
+                    let $newItem = $items.filter(function () {
+                        return !beforeItems.includes(this);
+                    }).last();
+
+                    if (!$newItem.length) {
+                        $newItem = $items.last();
+                    }
+
+                    $newItem.attr('data-spec-key', key);
+                    $newItem.find('.spec-fixed-key').val(key);
+
+                    $newItem.find('.spec-name-en')
+                        .val(nameEn)
+                        .prop('readonly', locked)
+                        .trigger('change');
+
+                    $newItem.find('.spec-name-ar')
+                        .val(nameAr)
+                        .prop('readonly', locked)
+                        .trigger('change');
+
+                    if (locked) {
+                        $newItem.find('.spec-delete-btn').hide();
+                    }
+
+                    const hasOptionRow = $newItem
+                        .find('[data-repeater-list="specification_options"] > [data-repeater-item]')
+                        .length > 0;
+
+                    if (!hasOptionRow) {
+                        $newItem.find('.inner-repeater button[data-repeater-create]').first().trigger('click');
+                    }
+
+                    setTimeout(function () {
+                        syncSpecFixedKey($newItem);
+                        syncOptionFrameVisibility();
+                        initOptionDropzones();
+
+                        if (window.feather) feather.replace();
+                        if (typeof generateVariants === 'function') generateVariants();
+
+                        resolve();
+                    }, 150);
+                }, 250);
+            });
         }
 
         function removeSpecRepeaterItem(key) {
             const $item = findSpecItemByKey(key);
             if (!$item.length) return;
 
-            // Click the spec delete button inside that item
-            // Ensure you select the DELETE SPEC button (not value delete)
-            $item.find('> .row .btn[data-repeater-delete]').last().trigger('click');
+            $item.find('.spec-delete-btn').first().trigger('click');
 
-            setTimeout(generateVariants, 0);
+            setTimeout(function () {
+                syncAllSpecFixedKeys();
+                syncOptionFrameVisibility();
+                if (typeof generateVariants === 'function') generateVariants();
+            }, 250);
+        }
+
+        async function syncTableauFixedSpecs() {
+            if (isSyncingTableauSpecs) return;
+            isSyncingTableauSpecs = true;
+
+            const isTableau = $('#is_tableau').is(':checked');
+
+            if (isTableau) {
+                for (const spec of TABLEAU_FIXED_SPECS) {
+                    await addSpecRepeaterItem({
+                        key: spec.key,
+                        nameEn: spec.nameEn,
+                        nameAr: spec.nameAr,
+                        locked: true
+                    });
+                }
+                clearAndHideVariants();
+            } else {
+                TABLEAU_FIXED_SPECS.forEach(function (spec) {
+                    removeSpecRepeaterItem(spec.key);
+                });
+                showVariants();
+                generateVariants();
+            }
+
+            syncAllSpecFixedKeys();
+            syncOptionFrameVisibility();
+            isSyncingTableauSpecs = false;
+        }
+
+        function syncOptionFrameVisibility() {
+            const isTableau = $('#is_tableau').is(':checked');
+
+            $('.option-frame-wrapper').hide();
+
+            if (!isTableau) {
+                $('.option-frame-image-hidden').val('');
+                return;
+            }
+
+            const $frameColorSpec = findSpecItemByKey('frame_color');
+            if (!$frameColorSpec.length) return;
+
+            $frameColorSpec.find('.option-frame-wrapper').show();
+
+            if (typeof initOptionFrameDropzones === 'function') {
+                initOptionFrameDropzones();
+            }
         }
 
         // ----- Select2 UI -----
@@ -877,6 +1021,15 @@
         window.variantImageMemory = {};
 
         function generateVariants() {
+            syncAllSpecFixedKeys();
+
+            if (isTableauProduct()) {
+                clearAndHideVariants();
+                return;
+            }
+
+            showVariants();
+
             let specs = [];
 
             // -----------------------------
@@ -885,6 +1038,8 @@
             $('[data-repeater-list="specifications"] > [data-repeater-item]').each(function () {
                 // ignore hidden (deleted but animating)
                 if (!$(this).is(':visible')) return;
+
+                syncSpecFixedKey($(this));
 
                 let specName = $(this).find('.spec-name-en').val().trim();
                 let options = [];
@@ -1045,7 +1200,12 @@
             });
         }
 
-        $(document).on('keyup change', '.option-value-en, .spec-name-en', function () {
+        $(document).on('keyup change', '.spec-name-en', function () {
+            syncSpecFixedKey($(this).closest('[data-repeater-item]'));
+            generateVariants();
+        });
+
+        $(document).on('keyup change', '.option-value-en', function () {
             generateVariants();
         });
 
@@ -1669,6 +1829,15 @@
                 saveButtonText.addClass('d-none');
 
                 const formEl = this;
+
+                syncAllSpecFixedKeys();
+
+                // Tableau products use specs/options only, not variant combinations.
+                if ($('#is_tableau').is(':checked')) {
+                    $('#variants-container').empty();
+                    window.variantImageMemory = {};
+                }
+
                 const formData = new FormData(formEl);
 
                 // (Optional) also inject as hidden inputs for full safety
@@ -1807,58 +1976,22 @@
         });
     </script>
     <script>
-        // ── Tableau toggle ──────────────────────────────────────────
+        // ── Tableau fixed specs + frame color image only ─────────────
         Dropzone.autoDiscover = false;
 
-        let tableauDropzoneInstance = null;
-
         $('#is_tableau').on('change', function () {
-            const isTableau = $(this).is(':checked');
-            $('#tableau-upload-section').toggle(isTableau);
-            $('.option-frame-wrapper').toggle(isTableau);
-
-            // Init tableau dropzone once
-            if (isTableau && !tableauDropzoneInstance) {
-                tableauDropzoneInstance = new Dropzone("#tableau-dropzone", {
-                    url: "{{ route('media.store') }}",
-                    paramName: "file",
-                    maxFiles: 1,
-                    maxFilesize: 1,
-                    acceptedFiles: "image/png", // transparent PNG only
-                    headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
-                    addRemoveLinks: true,
-                    init: function () {
-                        this.on("success", function (file, response) {
-                            if (response.success && response.data) {
-                                file._hiddenInputId = response.data.id;
-                                document.getElementById("uploadedTableauImage").value = response.data.id;
-                            }
-                        });
-                        this.on("removedfile", function (file) {
-                            document.getElementById("uploadedTableauImage").value = "";
-                            if (file._hiddenInputId) {
-                                fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
-                                    method: "DELETE",
-                                    headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content }
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-
-            // Init frame dropzones on visible options
-            if (isTableau) {
-                initOptionFrameDropzones();
-            }
+            syncTableauFixedSpecs();
         });
 
-        // ── Option Frame Dropzones ──────────────────────────────────
         function initOptionFrameDropzones() {
             document.querySelectorAll(".option-frame-dropzone").forEach(function (element) {
-                if (element.dropzone) return; // skip already inited
+                if (element.dropzone) return;
 
-                const hiddenInput = element.closest(".col-md-12").querySelector(".option-frame-image-hidden");
+                const wrapper = element.closest(".option-frame-wrapper");
+                if (!wrapper) return;
+
+                const hiddenInput = wrapper.querySelector(".option-frame-image-hidden");
+                if (!hiddenInput) return;
 
                 new Dropzone(element, {
                     url: "{{ route('media.store') }}",
@@ -1872,15 +2005,21 @@
                     },
                     init: function () {
                         this.on("success", function (file, response) {
-                            hiddenInput.value = response.data.id;
-                            file._hiddenInputId = response.data.id;
+                            if (response.success && response.data) {
+                                hiddenInput.value = response.data.id;
+                                file._hiddenInputId = response.data.id;
+                            }
                         });
+
                         this.on("removedfile", function (file) {
                             hiddenInput.value = "";
+
                             if (file._hiddenInputId) {
                                 fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                                     method: "DELETE",
-                                    headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content }
+                                    headers: {
+                                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                    }
                                 });
                             }
                         });
@@ -1889,15 +2028,15 @@
             });
         }
 
-        // Re-init frame dropzones when repeater adds new option rows
         $(document).on("click", "[data-repeater-create]", function () {
             setTimeout(function () {
-                // show frame wrapper if tableau is active
-                if ($('#is_tableau').is(':checked')) {
-                    $('.option-frame-wrapper').show();
-                    initOptionFrameDropzones();
-                }
+                syncOptionFrameVisibility();
+                initOptionDropzones();
             }, 250);
+        });
+
+        $(document).ready(function () {
+            syncTableauFixedSpecs();
         });
     </script>
 
