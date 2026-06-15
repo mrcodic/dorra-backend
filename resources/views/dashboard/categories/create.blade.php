@@ -1,10 +1,10 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Add Categories')
-@section('main-page', 'Categories')
-@section('sub-page', 'Add New Category')
-@section('main-page-url', route("products.index"))
-@section('sub-page-url', route("products.create"))
+@section('title', 'Add Products')
+@section('main-page', 'Products')
+@section('sub-page', 'Add New Product')
+@section('main-page-url', route("categories.index"))
+@section('sub-page-url', route("categories.create"))
 
 
 @section('vendor-style')
@@ -19,8 +19,9 @@
                 <div class="card">
 
                     <div class="card-body ">
-                        <form id="product-form" class="form" action="{{ route('products.store') }}" method="POST"
-                              enctype="multipart/form-data" novalidate>
+
+                        <form id="category-form" class="form" action="{{ route('product-without-categories.store') }}"
+                              method="POST" enctype="multipart/form-data" novalidate>
                             @csrf
                             {{-- checkbox added --}}
                             <div class="px-2 row gap-2">
@@ -68,7 +69,7 @@
 
                             <ul class="nav nav-tabs mb-2 w-100 d-flex justify-content-center" id="formTabs">
                                 <li class="nav-item" style="width: 30%;">
-                                    <a class="nav-link active" data-step="0" href="#" style="font-size: 14px;">Category
+                                    <a class="nav-link active" data-step="0" href="#" style="font-size: 14px;">Product
                                         Details</a>
                                 </li>
                                 <li class="nav-item" style="width: 30%;">
@@ -76,7 +77,7 @@
                                         Price</a>
                                 </li>
                                 <li class="nav-item" style="width: 30%;">
-                                    <a class="nav-link" data-step="2" href="#" style="font-size: 14px;">Category
+                                    <a class="nav-link" data-step="2" href="#" style="font-size: 14px;">Product
                                         Specs</a>
                                 </li>
                             </ul>
@@ -86,45 +87,46 @@
                                 <!-- first tab content -->
                                 <div class="tab-pane active" id="step1">
                                     <div class="row">
-                                        <!-- Category Name EN/AR -->
+                                        <input type="hidden" name="is_has_category" value="0">
+                                        <!-- Product Name EN/AR -->
                                         <div class="col-md-6">
                                             <div class="mb-2">
-                                                <label class="form-label label-text" for="product-name-en">Category Name
+                                                <label class="form-label label-text" for="product-name-en">Product Name
                                                     (EN) <span style="color: red; font-size: 20px;">*</span></label>
                                                 <input type="text" id="product-name-en" class="form-control"
                                                        name="name[en]"
-                                                       placeholder="Category Name (EN)"/>
+                                                       placeholder="Product Name (EN)"/>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-2">
-                                                <label class="form-label label-text" for="product-name-ar">Category Name
+                                                <label class="form-label label-text" for="product-name-ar">Product Name
                                                     (AR) <span style="color: red; font-size: 20px;">*</span></label>
                                                 <input type="text" id="product-name-ar" class="form-control"
                                                        name="name[ar]"
-                                                       placeholder="Category Name (AR)"/>
+                                                       placeholder="Product Name (AR)"/>
                                             </div>
                                         </div>
 
                                         <!-- Description EN/AR -->
                                         <div class="col-md-6">
                                             <div class="mb-2">
-                                                <label class="form-label label-text" for="description-en">Category
+                                                <label class="form-label label-text" for="description-en">Product
                                                     Description (EN) <span
                                                         style="color: red; font-size: 20px;">*</span></label>
                                                 <textarea name="description[en]" id="description-en"
                                                           class="form-control"
-                                                          placeholder="Category Description (EN)"></textarea>
+                                                          placeholder="Product Description (EN)"></textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-2">
-                                                <label class="form-label label-text" for="description-ar">Category
+                                                <label class="form-label label-text" for="description-ar">Product
                                                     Description (AR) <span
                                                         style="color: red; font-size: 20px;">*</span></label>
                                                 <textarea name="description[ar]" id="description-ar"
                                                           class="form-control"
-                                                          placeholder="Category Description (AR)"></textarea>
+                                                          placeholder="Product Description (AR)"></textarea>
                                             </div>
                                         </div>
 
@@ -133,7 +135,7 @@
                                         <div class="col-md-12">
                                             <div class="mb-2">
                                                 <label class="form-label label-text" for="product-image-main">
-                                                    Category Image (main) <span
+                                                    Product Image (main) <span
                                                         style="color: red; font-size: 20px;">*</span>
                                                 </label>
 
@@ -155,11 +157,10 @@
                                             </div>
                                         </div>
 
-
                                         <div class="col-md-12">
                                             <div class="mb-2">
                                                 <label class="form-label label-text" for="product-image-main">
-                                                    Category Model Image (main) <span
+                                                    Product Model Image (main) <span
                                                         style="color: red; font-size: 20px;">*</span>
                                                 </label>
 
@@ -187,103 +188,101 @@
                                                         <div class="file-name fw-bold"></div>
                                                         <div class="file-size text-muted small"></div>
                                                     </div>
+                                                    <button type="button" id="remove-image"
+                                                            class="btn btn-sm position-absolute text-danger"
+                                                            style="top: 5px; right: 5px; background-color: #FFEEED">
+                                                        <i data-feather="trash"></i>
+                                                    </button>
                                                 </div>
                                             </div>
-                                            <!-- Category Colors -->
-                                            {{-- <div class="col-md-12">--}}
-                                            {{-- <div class="mb-2">--}}
-                                            {{-- <label class="form-label label-text">Category Colors</label>--}}
-
-                                            {{-- <div class="color-repeater">--}}
-                                            {{-- <div data-repeater-list="colors">--}}
-                                            {{-- <div data-repeater-item>--}}
-                                            {{-- <div class="row align-items-start mt-1">--}}
-
-
-                                            {{-- <div class="col-md-12">--}}
-                                            {{-- <label class="form-label label-text">Color
-                                                Value *</label>--}}
-                                            {{-- <div class="d-flex gap-1 align-items-center">
-                                                --}}
-                                            {{--
-                                            <!-- Color picker -->--}}
-                                            {{--
-                                            <input--}} {{-- type="color" --}} {{--
-                                                                            class="form-control rounded-circle color-picker border border-0  "
-                                                                            --}} {{--
-                                                                            style="max-width: 30px; padding: 0;" --}}
-                                            {{-- value="#000" --}} {{-- />--}}
-
-                                            {{--
-                                            <!-- Text hex input (this will actually submit the value) -->--}}
-                                            {{--
-                                            <input--}} {{-- type="text" --}} {{--
-                                                                            name="value" --}} {{--
-                                                                            class="form-control color-hex-input" --}}
-                                            {{-- placeholder="#000000" --}} {{--
-                                                                            value="#000000" --}} {{--
-                                                                            pattern="^#([A-Fa-f0-9]{6})$" --}} {{-- />
-                                                                        --}}
-                                            {{--
-                                        </div>--}}
-                                            {{-- <small class="text-muted">Pick a color or type
-                                                hex (e.g. #FFAA00).</small>--}}
-                                            {{-- </div>--}}
-
-
-
-
-                                            {{-- <div class="col-md-12 mt-1">--}}
-                                            {{-- <label class="form-label label-text">Color
-                                                Image *</label>--}}
-                                            {{-- <div
-                                                class="dropzone color-dropzone border rounded p-2"
-                                                --}} {{--
-                                                                        style="cursor:pointer; min-height:100px;">--}}
-                                            {{-- <div class="dz-message" data-dz-message>
-                                                --}}
-                                            {{-- <span>Drop image or click</span>--}}
-                                            {{-- </div>--}}
-                                            {{-- </div>--}}
-                                            {{-- <input type="hidden" name="image_id"
-                                                class="color-image-hidden">--}}
-                                            {{-- </div>--}}
-
-
-                                            {{-- <div class="col-md-2 text-center mt-1  ms-auto">
-                                                --}}
-                                            {{-- <button type="button" --}} {{--
-                                                                        class="btn btn-outline-danger" --}} {{--
-                                                                        data-repeater-delete>--}}
-                                            {{-- <i data-feather="x" class="me-25"></i>--}}
-                                            {{-- Delete--}}
-                                            {{-- </button>--}}
-                                            {{-- </div>--}}
-                                            {{-- </div>--}}
-                                            {{-- </div>--}}
-                                            {{-- </div>--}}
-
-                                            {{-- <div class="row mt-1">--}}
-                                            {{-- <div class="col-12">--}}
-                                            {{-- <button type="button" --}} {{--
-                                                                class="w-100 rounded-3 p-1 text-dark" --}} {{--
-                                                                style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
-                                                                --}} {{-- data-repeater-create>--}}
-                                            {{-- <i data-feather="plus" class="me-25"></i>--}}
-                                            {{-- <span>Add New Color</span>--}}
-                                            {{-- </button>--}}
-                                            {{-- </div>--}}
-                                            {{-- </div>--}}
-                                            {{-- </div>--}}
-                                            {{-- </div>--}}
-                                            {{-- </div>--}}
-
-
                                         </div>
 
+                                        <!-- Product Colors -->
+                                        {{-- <div class="col-md-12">--}}
+                                        {{-- <div class="mb-2">--}}
+                                        {{-- <label class="form-label label-text">Product Colors</label>--}}
+
+                                        {{-- <div class="color-repeater">--}}
+                                        {{-- <div data-repeater-list="colors">--}}
+                                        {{-- <div data-repeater-item>--}}
+                                        {{-- <div class="row align-items-start mt-1">--}}
+
+
+                                        {{-- <div class="col-md-12">--}}
+                                        {{-- <label class="form-label label-text">Color Value
+                                            *</label>--}}
+                                        {{-- <div class="d-flex gap-1 align-items-center">--}}
+                                        {{--
+                                        <!-- Color picker -->--}}
+                                        {{--
+                                        <input--}} {{-- type="color" --}} {{--
+                                                                        class="form-control rounded-circle color-picker border border-0  "
+                                                                        --}} {{-- style="max-width: 30px; padding: 0;"
+                                                                        --}} {{-- value="#000" --}} {{-- />--}}
+
+                                        {{--
+                                        <!-- Text hex input (this will actually submit the value) -->--}}
+                                        {{--
+                                        <input--}} {{-- type="text" --}} {{-- name="value"
+                                                                        --}} {{-- class="form-control color-hex-input"
+                                                                        --}} {{-- placeholder="#000000" --}} {{--
+                                                                        value="#000000" --}} {{--
+                                                                        pattern="^#([A-Fa-f0-9]{6})$" --}} {{-- />--}}
+                                        {{--
+                                    </div>--}}
+                                        {{-- <small class="text-muted">Pick a color or type hex
+                                            (e.g. #FFAA00).</small>--}}
+                                        {{-- </div>--}}
+
+
+
+
+                                        {{-- <div class="col-md-12 mt-1">--}}
+                                        {{-- <label class="form-label label-text">Color Image
+                                            *</label>--}}
+                                        {{-- <div
+                                            class="dropzone color-dropzone border rounded p-2"
+                                            --}} {{-- style="cursor:pointer; min-height:100px;">
+                                                                    --}}
+                                        {{-- <div class="dz-message" data-dz-message>--}}
+                                        {{-- <span>Drop image or click</span>--}}
+                                        {{-- </div>--}}
+                                        {{-- </div>--}}
+                                        {{-- <input type="hidden" name="image_id"
+                                            class="color-image-hidden">--}}
+                                        {{-- </div>--}}
+
+
+                                        {{-- <div class="col-md-2 text-center mt-1  ms-auto">--}}
+                                        {{-- <button type="button" --}} {{--
+                                                                    class="btn btn-outline-danger" --}} {{--
+                                                                    data-repeater-delete>--}}
+                                        {{-- <i data-feather="x" class="me-25"></i>--}}
+                                        {{-- Delete--}}
+                                        {{-- </button>--}}
+                                        {{-- </div>--}}
+                                        {{-- </div>--}}
+                                        {{-- </div>--}}
+                                        {{-- </div>--}}
+
+                                        {{-- <div class="row mt-1">--}}
+                                        {{-- <div class="col-12">--}}
+                                        {{-- <button type="button" --}} {{--
+                                                            class="w-100 rounded-3 p-1 text-dark" --}} {{--
+                                                            style="border: 2px dashed #CED5D4; background-color: #EBEFEF"
+                                                            --}} {{-- data-repeater-create>--}}
+                                        {{-- <i data-feather="plus" class="me-25"></i>--}}
+                                        {{-- <span>Add New Color</span>--}}
+                                        {{-- </button>--}}
+                                        {{-- </div>--}}
+                                        {{-- </div>--}}
+                                        {{-- </div>--}}
+                                        {{-- </div>--}}
+                                        {{-- </div>--}}
+                                        <!-- Multiple Images Upload -->
                                         <div class="col-md-12">
                                             <div class="mb-2">
-                                                <label class="form-label label-text" for="product-images">Category
+                                                <label class="form-label label-text" for="product-images">Product
                                                     Images (optional)</label>
 
                                                 <!-- Dropzone container -->
@@ -303,53 +302,34 @@
                                             </span>
                                             </div>
                                         </div>
-
-
-                                        <!-- Category & Subcategory -->
-{{--                                        <div class="col-md-6">--}}
-{{--                                            <div class="mb-2">--}}
-{{--                                                <label class="form-label label-text" for="category">Product <span--}}
-{{--                                                        style="color: red; font-size: 20px;">*</span></label>--}}
-{{--                                                <select name="category_id" id="category"--}}
-{{--                                                        class="form-control category-select">--}}
-{{--                                                    <option value="" selected disabled>Select product</option>--}}
-{{--                                                    @foreach($associatedData['categories'] as $category)--}}
-{{--                                                        <option--}}
-{{--                                                            value="{{ $category->id }}"--}}
-{{--                                                            data-is-tableau="{{ (int) $category->is_tableau }}">{{ $category->name }}</option>--}}
-{{--                                                    @endforeach--}}
-{{--                                                </select>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-
-{{--                                        <div class="col-md-6">--}}
-{{--                                            <div class="mb-2">--}}
-{{--                                                <label class="form-label label-text"--}}
-{{--                                                       for="sub-category">Subproduct</label>--}}
-{{--                                                <select name="sub_category_id" id="sub-category"--}}
-{{--                                                        class="form-control sub-category-select"--}}
-{{--                                                        data-sub-category-url="{{ route('sub-categories') }}">--}}
-{{--                                                    <option value="" selected disabled>Select subproduct</option>--}}
-{{--                                                </select>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-                                        <!-- Tags -->
-                                        <div class="col-md-12">
-                                            <div class="mb-2">
-                                                <label class="form-label label-text" for="tags">Tags <span
-                                                        style="color: red; font-size: 20px;">*</span></label>
-                                                <select name="tags[]" id="tags" class="select2 form-select" multiple>
-                                                    @foreach($associatedData['tags'] as $tag)
-                                                        <option value="{{ $tag->id }}">{{ $tag->name }}</option>
-                                                    @endforeach
-                                                </select>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-2">
+                                                    <label class="form-label label-text" for="sort">Product Ordering<span
+                                                            style="color: red; font-size: 20px;">*</span></label>
+                                                    <input type="number" id="sort" class="form-control"
+                                                           name="sort"
+                                                           placeholder="Product ordering"/>
+                                                </div>
+                                            </div>
+                                            <!-- Tags -->
+                                            <div class="col-md-6">
+                                                <div class="mb-2">
+                                                    <label class="form-label label-text" for="tags">Tags <span
+                                                            style="color: red; font-size: 20px;">*</span></label>
+                                                    <select name="tags[]" id="tags" class="select2 form-select" multiple>
+                                                        @foreach($associatedData['tags'] as $tag)
+                                                            <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
                                         <!-- Dimensions -->
 
                                         <div class="col-md-12 mb-2">
                                             <div>
-                                                <label class="form-label label-text">Category Size <span
+                                                <label class="form-label label-text">Product Size <span
                                                         style="color: red; font-size: 20px;">*</span></label>
 
                                                 <!-- Standard Dimensions -->
@@ -385,6 +365,46 @@
                                                     Add Custom Size
                                                 </button>
                                             </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <!-- Has Mockup -->
+                                            <div class="col-md-6">
+                                                <div class="mb-2 d-flex align-items-center gap-2">
+                                                    <label class="form-label label-text ">Is this product has
+                                                        Mockup?</label>
+                                                    <div class="form-check form-switch">
+                                                        <input type="hidden" name="has_mockup" value="0"/>
+                                                        <input class="form-check-input" type="checkbox" id="has_mockup"
+                                                               name="has_mockup" value="1"/>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-2 d-flex align-items-center gap-2">
+                                                    <label class="form-label label-text ">Is this product has
+                                                        Orientation?</label>
+                                                    <div class="form-check form-switch">
+                                                        <input type="hidden" name="has_orientation" value="0"/>
+                                                        <input class="form-check-input" type="checkbox" id="has_orientation"
+                                                               name="has_orientation" value="1"/>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {{-- Tableau Toggle --}}
+                                            <div class="col-md-6">
+                                                <div class="mb-2 d-flex align-items-center gap-2">
+                                                    <label class="form-label label-text">Is this product a Tableau?</label>
+                                                    <div class="form-check form-switch">
+                                                        <input type="hidden" name="is_tableau" value="0"/>
+                                                        <input class="form-check-input" type="checkbox" id="is_tableau"
+                                                               name="is_tableau" value="1"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                         </div>
 
 
@@ -516,7 +536,7 @@
                                     <!-- Specifications -->
                                     <div class="col-12">
                                         <div class="mb-2">
-                                            <label class="form-label label-text">Category Specs</label>
+                                            <label class="form-label label-text">Product Specs</label>
                                             <div class="d-flex align-items-center gap-2 my-1">
                                                 <button type="button" id="btnAddCuttingSpecs" class="btn btn-outline-primary  px-3 py-2">
                                                     Add Cutting Specs
@@ -539,6 +559,7 @@
                                                     Select one or more specs. They will be added automatically below.
                                                 </div>
                                             </div>
+
                                             <div class="">
                                                 <div>
                                                     <!-- Outer Repeater for Specifications -->
@@ -634,18 +655,18 @@
                                                                                                 click to upload</span>
                                                                                             </div>
                                                                                         </div>
+                                                                                        <span
+                                                                                            class="image-hint small text-end">
+                                                Max size: 1MB | Dimensions: 200x200 px
+                                            </span>
 
                                                                                         <!-- Hidden input to store uploaded file id / path -->
                                                                                         <input type="hidden"
                                                                                                name="option_image"
                                                                                                class="option-image-hidden">
                                                                                     </div>
-                                                                                    <span
-                                                                                        class="image-hint small text-end">
-                                                Max size: 1MB | Dimensions: 200x200 px
-                                            </span>
-                                                                                    {{-- Frame Image per Option --}}
-                                                                                    <div class="col-md-12 mt-1 option-frame-wrapper" style="display:none;">
+                                                                                    {{-- Frame Image Upload per Option --}}
+                                                                                    <div class="col-md-12 mt-1 option-frame-wrapper" style="display: none;">
                                                                                         <label class="form-label label-text">Option Frame Image</label>
                                                                                         <div class="dropzone option-frame-dropzone border rounded p-3"
                                                                                              style="cursor:pointer; min-height:120px;">
@@ -669,7 +690,6 @@
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
-
                                                                             </div>
                                                                         </div>
 
@@ -716,19 +736,21 @@
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    <label id="variants-title" class="form-label label-text mt-2">Variants</label>
+
+                                                    <div id="variants-container" class="mt-2"></div>
+
                                                 </div>
                                             </div>
                                         </div>
-                                        <label id="variants-title" class="form-label label-text mt-2">Variants</label>
 
-                                        <div id="variants-container" class="mt-2"></div>
                                         <!-- Free Shipping -->
                                         {{-- <div class="col-md-12 col-12 mb-2">--}}
                                         {{-- <div class="form-check form-switch">--}}
                                         {{-- <input type="hidden" name="is_free_shipping" value="0">--}}
                                         {{-- <input type="checkbox" class="form-check-input" id="free-shipping"
                                             name="is_free_shipping" value="1">--}}
-                                        {{-- <label class="form-check-label" for="free-shipping">Category available
+                                        {{-- <label class="form-check-label" for="free-shipping">Product available
                                             for
                                             free shipping</label>--}}
                                         {{-- </div>--}}
@@ -741,7 +763,7 @@
                                             <button type="button" class="btn btn-secondary prev-tab">Previous</button>
                                             <button type="submit" class="btn btn-primary me-1 saveChangesButton"
                                                     id="SaveChangesButton">
-                                                <span class="btn-text">Add Category</span>
+                                                <span class="btn-text">Add Product</span>
                                                 <span id="saveLoader"
                                                       class="spinner-border spinner-border-sm d-none saveLoader"
                                                       role="status" aria-hidden="true"></span>
@@ -749,7 +771,6 @@
 
                                         </div>
                                     </div>
-
                                 </div>
                                 <!--third tab content end -->
 
@@ -787,8 +808,8 @@
             }
         ];
 
-        window.selectedProductIsTableau = window.selectedProductIsTableau || false;
         let isSyncingTableauSpecs = false;
+
 
         function getSpecListEl() {
             return $('.outer-repeater').find('[data-repeater-list="specifications"]').first();
@@ -802,8 +823,9 @@
             return $('.outer-repeater').children('.row').find('button[data-repeater-create]').first();
         }
 
+
         function isTableauProduct() {
-            return window.selectedProductIsTableau === true;
+            return $('#is_tableau').is(':checked');
         }
 
         function clearAndHideVariants() {
@@ -894,7 +916,9 @@
             if (isSyncingTableauSpecs) return;
             isSyncingTableauSpecs = true;
 
-            if (isTableauProduct()) {
+            const isTableau = $('#is_tableau').is(':checked');
+
+            if (isTableau) {
                 for (const spec of TABLEAU_FIXED_SPECS) {
                     await addSpecRepeaterItem({
                         key: spec.key,
@@ -909,7 +933,7 @@
                     removeSpecRepeaterItem(spec.key);
                 });
                 showVariants();
-                if (typeof generateVariants === 'function') generateVariants();
+                generateVariants();
             }
 
             syncOptionFrameVisibility();
@@ -918,7 +942,7 @@
         }
 
         function syncOptionFrameVisibility() {
-            const isTableau = isTableauProduct();
+            const isTableau = $('#is_tableau').is(':checked');
 
             $('.option-frame-wrapper').hide();
 
@@ -948,7 +972,7 @@
         }
 
         function syncOptionPaddingVisibility() {
-            const isTableau = isTableauProduct();
+            const isTableau = $('#is_tableau').is(':checked');
 
             $('.option-frame-model-padding-wrapper').hide();
 
@@ -975,36 +999,43 @@
 
         // ----- Select2 UI -----
         $(document).ready(function () {
+
+            // Toggle select box
             $('#btnAddCuttingSpecs').on('click', function () {
                 $('#cuttingSpecsBox').toggleClass('d-none');
 
+                // init select2 once when shown first time
                 if (!$('#cuttingSpecsSelect').data('select2')) {
                     $('#cuttingSpecsSelect').select2({
                         placeholder: 'Select cutting specs...',
                         closeOnSelect: false,
-                        width: '100%'
+                        width: '100'
                     });
                     setTimeout(generateVariants, 0);
                 }
             });
-
             $('#cuttingSpecsSelect').on('change', function () {
                 generateVariants();
             });
-
             if (($('#cuttingSpecsSelect').val() || []).length) {
-                $('#cuttingSpecsBox').removeClass('d-none');
+                $('#cuttingSpecsBox').removeClass('d-none'); // optional: show it
                 setTimeout(generateVariants, 0);
             }
+
+
         });
     </script>
-
     <script>
+        window.variantImageMemory = {};
+
         function generateVariants() {
+
             if (isTableauProduct()) {
                 clearAndHideVariants();
                 return;
             }
+
+            showVariants();
 
             let specs = [];
 
@@ -1014,6 +1045,7 @@
             $('[data-repeater-list="specifications"] > [data-repeater-item]').each(function () {
                 // ignore hidden (deleted but animating)
                 if (!$(this).is(':visible')) return;
+
 
                 let specName = $(this).find('.spec-name-en').val().trim();
                 let options = [];
@@ -1062,21 +1094,21 @@
             const combinations = cartesian(specs);
             renderVariants(combinations);
         }
-
         function collectExistingVariantImages() {
-            let map = {};
+            let map = { ...window.variantImageMemory }; // 💾 MEMORY FIRST
 
             $('.variant-box').each(function () {
                 let code = $(this).find('.variant-code-input').val();
                 let imageId = $(this).find('.variant-image-input').val();
-                console.log(imageId, code)
-                if (code && imageId) {
-                    map[code] = imageId;
+
+                if (code && imageId && !map[code]) {
+                    map[code] = { id: imageId };
                 }
             });
 
             return map;
         }
+
 
         function renderVariants(combinations) {
 
@@ -1095,14 +1127,14 @@
                 let savedImageId = existingImages[variantCode] || '';
 
                 html += `
-        <div class="col-auto mb-2">
-            <div class="variant-box border rounded p-2 h-100">
+        <div class="col-auto  mb-2">
+            <div class="variant-box border rounded p-2 h-100 ">
 
                 <div class="fw-bold small text-muted">${displayTitle}</div>
 
                 <div class="dropzone variant-dropzone" data-code="${variantCode}">
                     <div class="dz-message">Upload Variant Image</div>
-                </div>s
+                </div>
 
                 <input type="hidden" class="variant-code-input" name="variants[${index}][code]" value="${variantCode}" />
                 <input type="hidden" class="variant-image-input" name="variants[${index}][image]" value="${savedImageId}" />
@@ -1124,6 +1156,7 @@
         function initVariantDropzones(existingImages = {}) {
 
 
+
             $('.variant-dropzone').each(function () {
 
                 let box = $(this).closest('.variant-box');
@@ -1139,24 +1172,45 @@
                         "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
                     },
                     success: function (file, response) {
-                        hiddenInput.val(response.data.id);
-                        file._imageId = response.data.id;
+                        let mediaId = response.data.id;
+                        let imageUrl = response.data.original_url ?? response.data.url;
+
+                        hiddenInput.val(mediaId);
+                        file._imageId = mediaId;
+
+                        // 🧠 SAVE IN MEMORY
+                        window.variantImageMemory[code] = {
+                            id: mediaId,
+                            url: imageUrl
+                        };
                     }
+
                 });
 
                 // 🔁 Restore existing image preview
-                if (existingImages[code]) {
-                    let mockFile = {name: "Image", size: 12345};
+                if (existingImages[code]?.id) {
+                    let imageId = existingImages[code].id;
+                    let imageUrl = existingImages[code].url
+                        ?? `/api/v1/media/${imageId}`; // fallback for edit
+
+                    let mockFile = { name: "Image", size: 12345 };
+
                     dz.emit("addedfile", mockFile);
-                    dz.emit("thumbnail", mockFile, `/api/v1/media/${existingImages[code]}`);
+                    dz.emit("thumbnail", mockFile, imageUrl);
                     dz.emit("complete", mockFile);
-                    mockFile._imageId = existingImages[code];
+
+                    mockFile._imageId = imageId;
                 }
+
 
             });
         }
 
-        $(document).on('keyup change', '.option-value-en, .spec-name-en', function () {
+        $(document).on('keyup change', '.spec-name-en', function () {
+            generateVariants();
+        });
+
+        $(document).on('keyup change', '.option-value-en', function () {
             generateVariants();
         });
 
@@ -1177,61 +1231,107 @@
             observer.observe(document.body, { childList: true, subtree: true });
         });
     </script>
+    {{--     <script>--}}
+    {{--           document.addEventListener("DOMContentLoaded", function () {--}}
+    {{--         const $colorRepeater = $('.color-repeater');--}}
+    {{--        document.addEventListener("DOMContentLoaded", function () {--}}
+    {{--            const $colorRepeater = $('.color-repeater');--}}
 
-    <script>
-        // keep color picker & text field in sync
-        document.addEventListener("input", (e) => {
-            if (e.target.classList.contains("color-picker")) {
-                const picker = e.target;
-                const text = picker.closest(".d-flex").querySelector(".color-hex-input");
-                text.value = picker.value.toUpperCase();
-            }
 
-            if (e.target.classList.contains("color-hex-input")) {
-                const text = e.target;
-                const picker = text.closest(".d-flex").querySelector(".color-picker");
-                const val = text.value.trim();
+    {{--            $colorRepeater.find('[data-repeater-item]').each(function () {--}}
+    {{--                initColorItem(this);--}}
+    {{--            });--}}
 
-                // Only update if valid hex
-                if (/^#([A-Fa-f0-9]{6})$/.test(val)) {
-                    picker.value = val;
-                }
-            }
-        });
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const $colorRepeater = $('.color-repeater');
+    {{--            if (window.$ && $.fn.repeater) {--}}
+    {{--                $colorRepeater.repeater({--}}
+    {{--                    initEmpty: true,--}}
+    {{--                    show: function () {--}}
+    {{--                        $(this).slideDown();--}}
 
-            // لو في items جاهزة (في حالة edit مثلاً)
-            $colorRepeater.find('[data-repeater-item]').each(function () {
-                initColorItem(this);
-            });
+    {{--                        initColorItem(this);--}}
+    {{--                        if (window.feather) feather.replace();--}}
+    {{--                    },--}}
+    {{--                    hide: function (deleteElement) {--}}
+    {{--                        $(this).slideUp(deleteElement);--}}
+    {{--                    }--}}
+    {{--                });--}}
 
-            if (window.$ && $.fn.repeater) {
-                $colorRepeater.repeater({
-                    initEmpty: true, // يستخدم الـ item الموجود كـ template
-                    show: function () {
-                        $(this).slideDown();
-                        // this = data-repeater-item الجديد
-                        initColorItem(this);
-                        if (window.feather) feather.replace();
-                    },
-                    hide: function (deleteElement) {
-                        $(this).slideUp(deleteElement);
-                    }
-                });
+    {{--                --}}
+    {{--                const hasItems = $colorRepeater.find('[data-repeater-item]').length > 0;--}}
+    {{--                if (!hasItems) {--}}
+    {{--                    $colorRepeater.find('[data-repeater-create]').first().trigger('click');--}}
+    {{--                }--}}
+    {{--            }--}}
+    {{--        });--}}
+    {{--
+    </script>--}}
 
-                // نضيف أول صف تلقائيًا في صفحة الإنشاء
-                const hasItems = $colorRepeater.find('[data-repeater-item]').length > 0;
-                if (!hasItems) {
-                    $colorRepeater.find('[data-repeater-create]').first().trigger('click');
-                }
-            }
-        });
-    </script>
+    {{-- <script>
+        --}}
+    {{--        Dropzone.autoDiscover = false;--}}
 
-    <script>
+    {{--        function initColorItem(item) {--}}
+    {{--            const dropzoneElement = item.querySelector('.color-dropzone');--}}
+    {{--            const hiddenInput = item.querySelector('.color-image-hidden');--}}
+
+    {{--            if (!dropzoneElement || !hiddenInput) return;--}}
+
+
+    {{--            if (dropzoneElement.dropzone) return;--}}
+
+    {{--            const dz = new Dropzone(dropzoneElement, {--}}
+    {{--                url: "{{ route('media.store') }}",--}}
+    {{--                paramName: "file",--}}
+    {{--                maxFiles: 1,--}}
+    {{--                maxFilesize: 1, // MB--}}
+    {{--                acceptedFiles: "image/*",--}}
+    {{--                headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },--}}
+    {{--                addRemoveLinks: true,--}}
+    {{--                init: function () {--}}
+    {{--                    this.on("success", function (file, response) {--}}
+    {{--                        if (response.success && response.data) {--}}
+    {{--                            file._hiddenInputId = response.data.id;--}}
+    {{--                            hiddenInput.value = response.data.id;--}}
+    {{--                        }--}}
+    {{--                    });--}}
+
+    {{--                    this.on("removedfile", function (file) {--}}
+    {{--                        hiddenInput.value = "";--}}
+    {{--                        if (file._hiddenInputId) {--}}
+    {{--                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {--}}
+    {{--                                method: "DELETE",--}}
+    {{--                                headers: {--}}
+    {{--                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content--}}
+    {{--                                }--}}
+    {{--                            });--}}
+    {{--                        }--}}
+    {{--                    });--}}
+    {{--                }--}}
+    {{--            });--}}
+
+    {{--            const colorPicker = item.querySelector('.color-picker');--}}
+    {{--            const hexInput = item.querySelector('.color-hex-input');--}}
+
+    {{--            if (colorPicker && hexInput) {--}}
+    {{--                colorPicker.addEventListener('input', function () {--}}
+    {{--                    const hex = this.value.toUpperCase();--}}
+    {{--                    hexInput.value = hex;--}}
+    {{--                });--}}
+
+    {{--                hexInput.addEventListener('input', function () {--}}
+    {{--                    let v = this.value.toUpperCase();--}}
+    {{--                    if (!v.startsWith('#')) v = '#' + v;--}}
+    {{--                    this.value = v;--}}
+
+    {{--                    if (/^#([0-9A-F]{6})$/.test(v)) {--}}
+    {{--                        colorPicker.value = v;--}}
+    {{--                    }--}}
+    {{--                });--}}
+    {{--            }--}}
+    {{--        }--}}
+    {{--
+    </script>--}}
+    <script !src="">
         Dropzone.autoDiscover = false;
 
         const categoryDropzone = new Dropzone("#product-model-dropzone", {
@@ -1281,7 +1381,6 @@
             document.getElementById("uploaded-image").classList.add("d-none");
         });
     </script>
-
     <script>
         Dropzone.autoDiscover = false; // prevent auto init
 
@@ -1398,71 +1497,6 @@
             }
         });
     </script>
-    {{-- <script>
-        --}}
-    {{--        Dropzone.autoDiscover = false;--}}
-
-    {{--        function initColorItem(item) {--}}
-    {{--            const dropzoneElement = item.querySelector('.color-dropzone');--}}
-    {{--            const hiddenInput = item.querySelector('.color-image-hidden');--}}
-
-    {{--            if (!dropzoneElement || !hiddenInput) return;--}}
-
-
-    {{--            if (dropzoneElement.dropzone) return;--}}
-
-    {{--            const dz = new Dropzone(dropzoneElement, {--}}
-    {{--                url: "{{ route('media.store') }}",--}}
-    {{--                paramName: "file",--}}
-    {{--                maxFiles: 1,--}}
-    {{--                maxFilesize: 1, // MB--}}
-    {{--                acceptedFiles: "image/*",--}}
-    {{--                headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" },--}}
-    {{--                addRemoveLinks: true,--}}
-    {{--                init: function () {--}}
-    {{--                    this.on("success", function (file, response) {--}}
-    {{--                        if (response.success && response.data) {--}}
-    {{--                            file._hiddenInputId = response.data.id;--}}
-    {{--                            hiddenInput.value = response.data.id;--}}
-    {{--                        }--}}
-    {{--                    });--}}
-
-    {{--                    this.on("removedfile", function (file) {--}}
-    {{--                        hiddenInput.value = "";--}}
-    {{--                        if (file._hiddenInputId) {--}}
-    {{--                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {--}}
-    {{--                                method: "DELETE",--}}
-    {{--                                headers: {--}}
-    {{--                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content--}}
-    {{--                                }--}}
-    {{--                            });--}}
-    {{--                        }--}}
-    {{--                    });--}}
-    {{--                }--}}
-    {{--            });--}}
-
-    {{--            const colorPicker = item.querySelector('.color-picker');--}}
-    {{--            const hexInput = item.querySelector('.color-hex-input');--}}
-
-    {{--            if (colorPicker && hexInput) {--}}
-    {{--                colorPicker.addEventListener('input', function () {--}}
-    {{--                    const hex = this.value.toUpperCase();--}}
-    {{--                    hexInput.value = hex;--}}
-    {{--                });--}}
-
-    {{--                hexInput.addEventListener('input', function () {--}}
-    {{--                    let v = this.value.toUpperCase();--}}
-    {{--                    if (!v.startsWith('#')) v = '#' + v;--}}
-    {{--                    this.value = v;--}}
-
-    {{--                    if (/^#([0-9A-F]{6})$/.test(v)) {--}}
-    {{--                        colorPicker.value = v;--}}
-    {{--                    }--}}
-    {{--                });--}}
-    {{--            }--}}
-    {{--        }--}}
-    {{--
-    </script>--}}
 
     <script>
         Dropzone.autoDiscover = false;
@@ -1505,12 +1539,11 @@
         });
 
     </script>
-
     <script>
         console.log(jQuery.fn.jquery);
 
         $(document).ready(function () {
-            const form = $("#product-form");
+            const form = $("#category-form");
             let currentStep = 0;
 
             const steps = [
@@ -1606,268 +1639,9 @@
         });
     </script>
 
-    <script>
-        $(document).ready(function () {
-            let input = $('#product-image-main');
-            let uploadArea = $('#upload-area');
-            let progress = $('#upload-progress');
-            let progressBar = $('.progress-bar');
-            let uploadedImage = $('#uploaded-image');
-            let removeButton = $('#remove-image');
-
-            // Click on the upload area triggers the hidden input
-            uploadArea.on('click', function () {
-                input.click();
-            });
-
-            // Handle file selection
-            input.on('change', function (e) {
-                handleFiles(e.target.files);
-            });
-
-            // Handle Drag & Drop
-            uploadArea.on('dragover', function (e) {
-                e.preventDefault();
-                uploadArea.addClass('dragover');
-            });
-
-            uploadArea.on('dragleave', function (e) {
-                e.preventDefault();
-                uploadArea.removeClass('dragover');
-            });
-
-            uploadArea.on('drop', function (e) {
-                e.preventDefault();
-                uploadArea.removeClass('dragover');
-                handleFiles(e.originalEvent.dataTransfer.files);
-            });
-
-            function handleFiles(files) {
-                if (files.length > 0) {
-                    let file = files[0];
-
-                    // 🔽 This is the fix: assign the dropped file to the input element
-                    let dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    input[0].files = dataTransfer.files;
-
-                    console.log('Input files:', input[0].files); // Make sure this logs a FileList with 1 file
-
-                    // Show loader
-                    progress.removeClass('d-none');
-                    progressBar.css('width', '0%');
-
-                    // Fake loading effect
-                    let fakeProgress = 0;
-                    let interval = setInterval(function () {
-                        fakeProgress += 10;
-                        progressBar.css('width', fakeProgress + '%');
-
-                        if (fakeProgress >= 100) {
-                            clearInterval(interval);
-
-                            // Preview image
-                            let reader = new FileReader();
-                            reader.onload = function (e) {
-                                uploadedImage.find('img').attr('src', e.target.result);
-                                uploadedImage.removeClass('d-none');
-                                progress.addClass('d-none');
-
-                                // Show file name and size
-                                $('#file-details .file-name').text(file.name);
-                                $('#file-details .file-size').text((file.size / 1024).toFixed(2) + ' KB');
-                            }
-                            reader.readAsDataURL(file);
-                        }
-                    }, 100);
-                }
-            }
-
-            // Remove image
-            removeButton.on('click', function () {
-                uploadedImage.addClass('d-none');
-                input.val(''); // Clear the input
-            });
-        });
-    </script>
-    <script>
-        $(document).ready(function () {
-            let input = $('#product-images');
-            let uploadArea = $('#multi-upload-area');
-            let uploadedImages = $('#multi-uploaded-images');
-
-            // Click to open file input
-            uploadArea.on('click', function () {
-                input.click();
-            });
-
-            // Handle input change
-            input.on('change', function (e) {
-                handleFiles(e.target.files);
-            });
-
-            // Drag and Drop
-            uploadArea.on('dragover', function (e) {
-                e.preventDefault();
-                uploadArea.addClass('dragover');
-            });
-
-            uploadArea.on('dragleave', function (e) {
-                e.preventDefault();
-                uploadArea.removeClass('dragover');
-            });
-
-            uploadArea.on('drop', function (e) {
-                e.preventDefault();
-                uploadArea.removeClass('dragover');
-                handleFiles(e.originalEvent.dataTransfer.files);
-            });
-
-            function handleFiles(files) {
-                for (let i = 0; i < files.length; i++) {
-                    uploadFile(files[i]);
-                }
-            }
-
-            function uploadFile(file) {
-                if (!file.type.startsWith('image/')) return;
-
-                const fileSizeKB = (file.size / 1024).toFixed(2) + ' KB';
-
-                // Create wrapper with image hidden initially
-                let wrapper = $(`
-            <div class="image-wrapper position-relative mb-3 d-flex align-items-center gap-2">
-                <img src="" alt="Uploading..." style="width: 50px; height: 50px; object-fit: cover; display: none;">
-                <div class="file-info">
-                    <div class="file-name fw-bold">${file.name}</div>
-                    <div class="file-size text-muted small">${fileSizeKB}</div>
-                    <div class="progress mt-2 w-50" style="height: 6px;">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                    </div>
-                </div>
-                <button type="button" class="remove-btn btn btn-sm text-danger ms-auto" style="background-color:#FFEEED;">
-                    <i data-feather="trash"></i>
-                </button>
-            </div>
-        `);
-
-                uploadedImages.append(wrapper);
-
-                let progressBar = wrapper.find('.progress-bar');
-                let imgTag = wrapper.find('img');
-
-                // Fake upload progress
-                let progress = 0;
-                let interval = setInterval(function () {
-                    progress += 10;
-                    progressBar.css('width', progress + '%');
-
-                    if (progress >= 100) {
-                        clearInterval(interval);
-
-                        // Display the image after "upload" finishes
-                        let reader = new FileReader();
-                        reader.onload = function (e) {
-                            imgTag.attr('src', e.target.result).fadeIn();
-                            wrapper.find('.progress').remove();
-                        }
-                        reader.readAsDataURL(file);
-                    }
-                }, 100);
-
-                // Remove button
-                wrapper.find('.remove-btn').on('click', function () {
-                    wrapper.remove();
-                });
-
-                // Re-render feather icons
-                feather.replace();
-            }
-
-        });
 
 
-    </script>
 
-
-    <script>
-        $(document).ready(function () {
-            let optionInput = $('#option-image-input');
-            let optionUploadArea = $('#option-upload-area');
-            let optionProgress = $('#option-upload-progress');
-            let optionProgressBar = $('#option-upload-progress .progress-bar');
-            let optionUploadedImage = $('#option-uploaded-image');
-            let optionRemoveButton = $('#option-remove-image');
-
-            // Click to open file input
-            optionUploadArea.on('click', function () {
-                optionInput.click();
-            });
-
-            // Handle input change
-            optionInput.on('change', function (e) {
-                handleOptionFiles(e.target.files);
-            });
-
-            // Drag and Drop
-            optionUploadArea.on('dragover', function (e) {
-                e.preventDefault();
-                optionUploadArea.addClass('dragover');
-            });
-
-            optionUploadArea.on('dragleave', function (e) {
-                e.preventDefault();
-                optionUploadArea.removeClass('dragover');
-            });
-
-            optionUploadArea.on('drop', function (e) {
-                e.preventDefault();
-                optionUploadArea.removeClass('dragover');
-                handleOptionFiles(e.originalEvent.dataTransfer.files);
-            });
-
-            function handleOptionFiles(files) {
-                if (files.length > 0) {
-                    let file = files[0];
-
-                    optionProgress.removeClass('d-none');
-                    optionProgressBar.css('width', '0%');
-
-                    let fakeProgress = 0;
-                    let interval = setInterval(function () {
-                        fakeProgress += 10;
-                        optionProgressBar.css('width', fakeProgress + '%');
-
-                        if (fakeProgress >= 100) {
-                            clearInterval(interval);
-
-                            let reader = new FileReader();
-                            reader.onload = function (e) {
-                                optionUploadedImage.find('img').attr('src', e.target.result);
-                                optionUploadedImage.removeClass('d-none');
-                                optionProgress.addClass('d-none');
-
-                                // Show file name and size
-                                $('#option-uploaded-image .file-name').text(file.name);
-                                $('#option-uploaded-image .file-size').text((file.size / 1024).toFixed(2) + ' KB');
-                            }
-                            reader.readAsDataURL(file);
-                        }
-                    }, 100);
-                }
-            }
-
-            // Remove image
-            optionRemoveButton.on('click', function () {
-                optionUploadedImage.addClass('d-none');
-                optionInput.val('');
-
-                // Also clear file name and size
-                $('#option-uploaded-image .file-name').text('');
-                $('#option-uploaded-image .file-size').text('');
-            });
-        });
-    </script>
 
 
     <script>
@@ -1974,11 +1748,7 @@
                         updateDeleteButtons($(this).closest('.inner-repeater'));
                         initializeImageUploaders(this);
                         feather.replace();
-                        setTimeout(function () {
-                            syncOptionFrameVisibility();
-                            syncOptionPaddingVisibility();
-                            generateVariants();
-                        }, 0);
+                        setTimeout(generateVariants, 0);
                     },
                     hide: function (deleteElement) {
                         const $row = $(this);
@@ -2003,11 +1773,8 @@
                     updateDeleteButtons($('.outer-repeater'));
                     initializeImageUploaders(this);
                     feather.replace();
-                    setTimeout(function () {
-                        syncOptionFrameVisibility();
-                        syncOptionPaddingVisibility();
-                        generateVariants();
-                    }, 0);
+                    setTimeout(generateVariants, 0);
+
                 },
                 hide: function (deleteElement) {
                     const $row = $(this);
@@ -2037,92 +1804,112 @@
 
             $('.select2').select2();
 
-            // Category -> Subcategory
+            // Product -> Subcategory
             $('.category-select').on('change', function () {
                 const categoryId = $(this).val();
-                const $subCategorySelect = $('.sub-category-select');
+                const $subProductSelect = $('.sub-category-select');
                 $.ajax({
-                    url: `${$subCategorySelect.data('sub-category-url')}?filter[parent_id]=${categoryId}`,
+                    url: `${$subProductSelect.data('sub-category-url')}?filter[parent_id]=${categoryId}`,
                     method: "GET",
                     success: function (res) {
-                        $subCategorySelect.empty().append('<option value="">Select subproduct</option>');
-                        $.each(res.data, (i, s) => $subCategorySelect.append(`<option value="${s.id}">${s.name}</option>`));
+                        $subProductSelect.empty().append('<option value="">Select subproduct</option>');
+                        $.each(res.data, (i, s) => $subProductSelect.append(`<option value="${s.id}">${s.name}</option>`));
                     },
                     error: function () {
-                        $subCategorySelect.empty().append('<option value="">Error loading Subcategories</option>');
+                        $subProductSelect.empty().append('<option value="">Error loading Subcategories</option>');
                     }
                 });
             });
 
             // Form submit
-            $('#product-form').on('submit', function (e) {
+            $('#category-form').on('submit', function (e) {
                 e.preventDefault();
-
-                if (window.selectedProductIsTableau) {
-                    if (!$("#uploadedTableauImage").val()) {
-                        showTableauToastError("Please upload Tableau Transparent Image.");
-                        return;
-                    }
-
-                    let missingFrame = false;
-
-                    $(".option-frame-wrapper:visible").each(function () {
-                        const frameId = $(this).find(".option-frame-image-hidden").val();
-
-                        if (!frameId) {
-                            missingFrame = true;
-                            return false;
-                        }
-                    });
-
-                    if (missingFrame) {
-                        showTableauToastError("Please upload frame image for every option.");
-                        return;
-                    }
-                }
 
                 const saveButton = $('.saveChangesButton');
                 const saveLoader = $('.saveLoader');
                 const saveButtonText = $('.saveChangesButton .btn-text');
+
                 saveButton.prop('disabled', true);
                 saveLoader.removeClass('d-none');
                 saveButtonText.addClass('d-none');
-                const formData = new FormData(this);
-                const customDimensions = sessionStorage.getItem('custom_dimensions');
-                if (customDimensions) {
-                    const parsedDimensions = JSON.parse(customDimensions);
-                    parsedDimensions.forEach((dim, index) => {
-                        formData.append(`custom_dimensions[${index}][width]`, dim.width);
-                        formData.append(`custom_dimensions[${index}][height]`, dim.height);
-                        formData.append(`custom_dimensions[${index}][unit]`, dim.unit);
-                        formData.append(`custom_dimensions[${index}][name]`, dim.name);
-                        formData.append(`custom_dimensions[${index}][is_custom]`, dim.is_custom);
-                    });
+
+                const formEl = this;
+
+
+                // Tableau products use specs/options only, not variant combinations.
+                if ($('#is_tableau').is(':checked')) {
+                    $('#variants-container').empty();
+                    window.variantImageMemory = {};
+                }
+
+                const formData = new FormData(formEl);
+
+                // (Optional) also inject as hidden inputs for full safety
+                formEl.querySelectorAll('input[data-custom-dim="1"]').forEach(n => n.remove());
+
+                const raw = sessionStorage.getItem('custom_dimensions');
+                if (raw) {
+                    try {
+                        const dims = JSON.parse(raw);
+                        console.log('[custom_dimensions] parsed:', dims);
+
+                        dims.forEach((dim, i) => {
+                            const isCustom = dim.is_custom ? 1 : 0;
+
+                            // -> FormData (server receives via $_POST)
+                            formData.append(`custom_dimensions[${i}][width]`, dim.width);
+                            formData.append(`custom_dimensions[${i}][height]`, dim.height);
+                            formData.append(`custom_dimensions[${i}][unit]`, dim.unit);
+                            formData.append(`custom_dimensions[${i}][name]`, dim.name);
+                            formData.append(`custom_dimensions[${i}][is_custom]`, isCustom);
+
+                            // -> Hidden inputs (belt & suspenders)
+                            [['width', dim.width], ['height', dim.height], ['unit', dim.unit], ['name', dim.name], ['is_custom', isCustom]]
+                                .forEach(([k, v]) => {
+                                    const inp = document.createElement('input');
+                                    inp.type = 'hidden';
+                                    inp.name = `custom_dimensions[${i}][${k}]`;
+                                    inp.value = v;
+                                    inp.setAttribute('data-custom-dim', '1');
+                                    formEl.appendChild(inp);
+                                });
+                        });
+                    } catch (e) {
+                        console.warn('[custom_dimensions] JSON parse error:', e, 'raw:', raw);
+                    }
+                } else {
+                    console.log('[custom_dimensions] none in sessionStorage');
                 }
 
                 $.ajax({
-                    url: this.action,
+                    url: formEl.action,
                     method: 'POST',
                     data: formData,
                     processData: false,
                     contentType: false,
                     success: function (res) {
+                        window.location.replace('/categories');
                         if (res.success) {
                             Toastify({
-                                text: "Category created successfully!",
+                                text: "Product created successfully!",
                                 duration: 2000,
                                 gravity: "top",
                                 position: "right",
                                 backgroundColor: "#28C76F",
                                 close: true,
                             }).showToast();
-                            window.location.href = '/products';
+                        } else {
+                            // backend returned success:false
+                            saveButton.prop('disabled', false);
+                            saveLoader.addClass('d-none');
+                            saveButtonText.removeClass('d-none');
                         }
                     },
                     error: function (xhr) {
-                        $.each(xhr.responseJSON.errors, (k, msgArr) => {
+                        const errs = (xhr.responseJSON && xhr.responseJSON.errors) || {};
+                        Object.keys(errs).forEach(k => {
                             Toastify({
-                                text: msgArr[0],
+                                text: errs[k][0],
                                 duration: 4000,
                                 gravity: "top",
                                 position: "right",
@@ -2136,6 +1923,7 @@
                     }
                 });
             });
+
         });
     </script>
 
@@ -2192,59 +1980,12 @@
         });
     </script>
     <script>
+        // ── Tableau fixed specs + frame color image only ─────────────
         Dropzone.autoDiscover = false;
 
-        window.selectedProductIsTableau = false;
-        let tableauDzInstance = null;
-
-        function showTableauToastError(message) {
-            Toastify({
-                text: message,
-                duration: 4000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#EA5455",
-                close: true
-            }).showToast();
-        }
-
-        function ensureTableauDropzone() {
-            if (tableauDzInstance) return;
-
-            tableauDzInstance = new Dropzone("#tableau-dropzone", {
-                url: "{{ route('media.store') }}",
-                paramName: "file",
-                maxFiles: 1,
-                maxFilesize: 1,
-                acceptedFiles: "image/png",
-                addRemoveLinks: true,
-                headers: {
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                },
-                dictDefaultMessage: "Drop transparent PNG here or click to upload",
-                init: function () {
-                    this.on("success", function (file, response) {
-                        if (response.success && response.data) {
-                            file._hiddenInputId = response.data.id;
-                            document.getElementById("uploadedTableauImage").value = response.data.id;
-                        }
-                    });
-
-                    this.on("removedfile", function (file) {
-                        document.getElementById("uploadedTableauImage").value = "";
-
-                        if (file._hiddenInputId) {
-                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
-                                method: "DELETE",
-                                headers: {
-                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        }
+        $('#is_tableau').on('change', function () {
+            syncTableauFixedSpecs();
+        });
 
         function initOptionFrameDropzones() {
             document.querySelectorAll(".option-frame-dropzone").forEach(function (element) {
@@ -2266,12 +2007,11 @@
                     headers: {
                         "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
                     },
-                    dictDefaultMessage: "Drop frame image here or click to upload",
                     init: function () {
                         this.on("success", function (file, response) {
                             if (response.success && response.data) {
-                                file._hiddenInputId = response.data.id;
                                 hiddenInput.value = response.data.id;
+                                file._hiddenInputId = response.data.id;
                             }
                         });
 
@@ -2292,65 +2032,17 @@
             });
         }
 
-        function clearTableauDropzone() {
-            document.getElementById("uploadedTableauImage").value = "";
-
-            if (tableauDzInstance) {
-                tableauDzInstance.removeAllFiles(true);
-            }
-        }
-
-        function clearOptionFrameImages() {
-            document.querySelectorAll(".option-frame-image-hidden").forEach(function (input) {
-                input.value = "";
-            });
-
-            document.querySelectorAll(".option-frame-dropzone").forEach(function (element) {
-                if (element.dropzone) {
-                    element.dropzone.removeAllFiles(true);
-                }
-            });
-        }
-
-        function setTableauMode(isTableau) {
-            window.selectedProductIsTableau = isTableau;
-
-            $("#tableau-upload-section").toggle(isTableau);
-
-            if (isTableau) {
-                ensureTableauDropzone();
-                initOptionFrameDropzones();
-            } else {
-                clearTableauDropzone();
-                clearOptionFrameImages();
-            }
-
-            syncTableauFixedSpecs();
-            syncOptionFrameVisibility();
-            syncOptionPaddingVisibility();
-        }
-
-        function handleSelectedProductTableauState() {
-            const selectedOption = $(".category-select option:selected");
-            const isTableau = Number(selectedOption.data("is-tableau")) === 1;
-
-            setTableauMode(isTableau);
-        }
+        $(document).on("click", "[data-repeater-create]", function () {
+            setTimeout(function () {
+                syncOptionFrameVisibility();
+                syncOptionPaddingVisibility();
+                initOptionDropzones();
+            }, 250);
+        });
 
         $(document).ready(function () {
-            handleSelectedProductTableauState();
-
-            $(".category-select").on("change", function () {
-                handleSelectedProductTableauState();
-            });
-
-            $(document).on("click", "[data-repeater-create]", function () {
-                setTimeout(function () {
-                    syncOptionFrameVisibility();
-                    syncOptionPaddingVisibility();
-                    initOptionDropzones();
-                }, 300);
-            });
+            syncTableauFixedSpecs();
+            syncOptionPaddingVisibility();
         });
     </script>
 
