@@ -18,7 +18,7 @@
             ];
         });
     $specs =  $model->specifications
-
+      ->filter(fn($spec) => $spec->fixed_key !== 'cutting')
       ->map(function ($spec) {
         return [
           'name' => $spec->getTranslation('name', 'en'),
@@ -680,7 +680,8 @@
                                         <div class="mb-1">
                                             <label class="form-label label-text">Category Specs</label>
                                             @php
-                                                $hasSpecs = $model->specifications->filter(fn($specification) => $specification->type !=  'fixed')->isNotEmpty();
+                                                $editableSpecifications = $model->specifications->filter(fn($specification) => $specification->fixed_key !== 'cutting');
+                                                $hasSpecs = $editableSpecifications->isNotEmpty();
                                                 $cuttingSpec = $model->specifications()
                                                             ->where('fixed_key', 'cutting')
                                                             ->first();
@@ -734,11 +735,13 @@
                                                 <div class="outer-repeater">
                                                     <div class="{{ $hasSpecs ? '' :'d-none' }}"
                                                          data-repeater-list="specifications">
-                                                        @forelse($model->specifications->filter(fn($specification) => $specification->type !=  'fixed') as $specification)
+                                                        @forelse($editableSpecifications as $specification)
 
-                                                            <div data-repeater-item>
+                                                            <div data-repeater-item @if($specification->fixed_key) data-spec-key="{{ $specification->fixed_key }}" @endif>
                                                                 <input type="hidden" name="id"
                                                                        value="{{ $specification->id }}">
+                                                                <input type="hidden" name="fixed_key" class="spec-fixed-key"
+                                                                       value="{{ $specification->fixed_key ?? '' }}">
 
                                                                 <!-- Specification Fields -->
                                                                 <div class="row mt-1">
@@ -749,6 +752,7 @@
                                                                             <input type="text" name="name_en"
                                                                                    value="{{ $specification->getTranslation('name','en') }}"
                                                                                    class="form-control spec-name-en"
+                                                                                   @readonly(!empty($specification->fixed_key))
                                                                                    placeholder="Specification Name (EN)"/>
                                                                         </div>
                                                                     </div>
@@ -759,7 +763,8 @@
                                                                                 (AR)</label>
                                                                             <input type="text" name="name_ar"
                                                                                    value="{{ $specification->getTranslation('name','ar') }}"
-                                                                                   class="form-control"
+                                                                                   class="form-control spec-name-ar"
+                                                                                   @readonly(!empty($specification->fixed_key))
                                                                                    placeholder="Specification Name (AR)"/>
                                                                         </div>
                                                                     </div>
@@ -889,7 +894,8 @@
                                                                     <!-- Delete Specification Button -->
                                                                     <div class="col-12 text-end mt-1 mb-2">
                                                                         <button type="button"
-                                                                                class="btn btn-outline-danger"
+                                                                                class="btn btn-outline-danger spec-delete-btn"
+                                                                                style="{{ $specification->fixed_key ? 'display:none;' : '' }}"
                                                                                 data-repeater-delete>
                                                                             <i data-feather="x" class="me-25"></i>
                                                                             Delete Spec
@@ -900,6 +906,7 @@
                                                         @empty
                                                             <div data-repeater-item>
                                                                 <div class="row mt-1">
+                                                                    <input type="hidden" name="fixed_key" class="spec-fixed-key">
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
                                                                             <label class="form-label label-text">Name
@@ -915,7 +922,7 @@
                                                                             <label class="form-label label-text">Name
                                                                                 (AR)</label>
                                                                             <input type="text" name="name_ar"
-                                                                                   class="form-control"
+                                                                                   class="form-control spec-name-ar"
                                                                                    placeholder="Specification Name (AR)"/>
                                                                         </div>
                                                                     </div>
@@ -1015,7 +1022,7 @@
 
                                                                     <div class="col-12 text-end mt-1 mb-2">
                                                                         <button type="button"
-                                                                                class="btn btn-outline-danger"
+                                                                                class="btn btn-outline-danger spec-delete-btn"
                                                                                 data-repeater-delete>
                                                                             <i data-feather="x" class="me-25"></i>
                                                                             Delete Spec
@@ -1040,7 +1047,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <label class="form-label label-text mt-2">Variants</label>
+                                        <label id="variants-title" class="form-label label-text mt-2">Variants</label>
 
                                         <div id="variants-container" class="mt-2"></div>
                                     </div>
@@ -1141,6 +1148,8 @@
     <script>
 
         function generateVariants() {
+            showVariants();
+
             let specs = @json($specs);
 
             // helper: upsert spec by name (replace if same name exists)
@@ -1339,9 +1348,7 @@
         });
 
         $(document).ready(function () {
-            if (Object.keys(window.existingVariantsFromDB || {}).length) {
-                generateVariants(); // builds UI using DB variants
-            }
+            generateVariants(); // always build variants, including when selected product is tableau
         });
 
 
@@ -1629,6 +1636,10 @@
                     $specList.removeClass('d-none');
 
                     $(this).slideDown();
+                    $(this).removeAttr('data-spec-key');
+                    $(this).find('.spec-fixed-key').val('');
+                    $(this).find('.spec-name-en, .spec-name-ar').prop('readonly', false);
+                    $(this).find('.spec-delete-btn').show();
                     feather.replace();
 
                     // This runs ONLY for a NEW spec; safe to reset its inner list
@@ -2558,6 +2569,17 @@
         Dropzone.autoDiscover = false;
 
         window.selectedProductIsTableau = false;
+
+        function showVariants() {
+            $('#variants-title').show();
+            $('#variants-container').show();
+        }
+
+        function hideVariants() {
+            $('#variants-title').hide();
+            $('#variants-container').empty().hide();
+        }
+
         function showTableauToastError(message) {
             Toastify({
                 text: message,
@@ -2690,6 +2712,8 @@
         function setTableauMode(isTableau) {
             window.selectedProductIsTableau = isTableau;
 
+            showVariants();
+
             $(".option-frame-wrapper").toggle(isTableau);
 
             // In edit mode, do not delete existing media just because the product was switched.
@@ -2699,6 +2723,10 @@
             if (isTableau) {
                 initOptionFrameDropzones();
             }
+
+            setTimeout(function () {
+                if (typeof generateVariants === 'function') generateVariants();
+            }, 0);
         }
 
         function handleSelectedProductTableauState() {
