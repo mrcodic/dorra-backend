@@ -1783,6 +1783,39 @@
     {{--    </script>--}}
 
     <script>
+        function resetDropzoneElement(element, message) {
+            if (!element) return;
+
+            if (element.dropzone) {
+                try {
+                    element.dropzone.destroy();
+                } catch (e) {}
+            }
+
+            element.dropzone = null;
+            element.removeAttribute('data-existing-media');
+            element.removeAttribute('data-existing-frame');
+            element.classList.remove('dz-started', 'dz-max-files-reached', 'dz-clickable');
+            element.innerHTML = `<div class="dz-message" data-dz-message><span>${message}</span></div>`;
+        }
+
+        function resetClonedOptionValueRow($row) {
+            // New value must not keep ids from the cloned first value.
+            $row.find('input[name="id"]').val('');
+
+            // Normal option image reset.
+            $row.find('.uploadedImage').val('');
+            $row.find('.option-dropzone').each(function () {
+                resetDropzoneElement(this, 'Drop option image here or click to upload');
+            });
+
+            // Frame image reset.
+            $row.find('.option-frame-image-hidden').val('');
+            $row.find('.option-frame-dropzone').each(function () {
+                resetDropzoneElement(this, 'Drop frame image here or click to upload');
+            });
+        }
+
         $(document).ready(function () {
             var $outerRepeater = $('.outer-repeater');
 
@@ -1796,19 +1829,24 @@
                 repeaters: [{
                     selector: '.inner-repeater',
                     show: function () {
-                        $(this).slideDown();
+                        const $row = $(this);
+
+                        // ✅ IMPORTANT: jQuery repeater clones the first option row.
+                        // Clear cloned ids/images/dropzone previews BEFORE initializing Dropzone.
+                        resetClonedOptionValueRow($row);
+
+                        $row.slideDown();
                         feather.replace();
 
-                        let dzElement = $(this).find(".option-dropzone")[0];
+                        let dzElement = $row.find(".option-dropzone")[0];
                         if (dzElement && typeof initOptionDropzone === 'function') {
                             initOptionDropzone(dzElement);
                         }
 
-                        $(this).find('.uploadedImage').val('');
                         setTimeout(function () {
                             syncOptionFrameVisibility();
                             syncOptionPaddingVisibility();
-                            if (typeof initOptionFrameDropzones === 'function') initOptionFrameDropzones();
+                            if (typeof initOptionFrameDropzones === 'function') initOptionFrameDropzones($row[0]);
                             generateVariants();
                         }, 0);
                     },
@@ -2734,18 +2772,21 @@
             syncOptionPaddingVisibility();
         });
 
-        function initOptionFrameDropzones() {
-            document.querySelectorAll('.option-frame-dropzone').forEach(function (element) {
+        function initOptionFrameDropzones(context = document) {
+            context.querySelectorAll('.option-frame-dropzone').forEach(function (element) {
                 if (element.dropzone) return;
 
                 const wrapper = element.closest('.option-frame-wrapper');
                 if (!wrapper) return;
 
                 const hiddenInput = wrapper.querySelector('.option-frame-image-hidden');
+                if (!hiddenInput) return;
 
                 let existingFrame = null;
                 try {
-                    existingFrame = element.dataset.existingFrame
+                    // ✅ Only restore existing frame for real DB rows.
+                    // New cloned rows have hidden input cleared, so they must stay empty.
+                    existingFrame = hiddenInput.value && element.dataset.existingFrame
                         ? JSON.parse(element.dataset.existingFrame)
                         : null;
                 } catch (e) {}
@@ -2774,6 +2815,7 @@
                             dropzone.emit('thumbnail', mockFile, existingFrame.url);
                             dropzone.emit('complete', mockFile);
                             dropzone.files.push(mockFile);
+                            hiddenInput.value = existingFrame.id;
                         }
 
                         dropzone.on('success', function (file, response) {

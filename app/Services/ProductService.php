@@ -206,6 +206,7 @@ class ProductService extends BaseService
                         'name' => [
                             'en' => $specification['name_en'],
                             'ar' => $specification['name_ar'],
+                            'fixed_key' => $specification['fixed_key'] ?? null,
                         ],
                     ]);
 
@@ -218,6 +219,9 @@ class ProductService extends BaseService
                                     'ar' => $option['value_ar'],
                                 ],
                                 'price' => $option['price'],
+                                'padding' => $productSpecification->fixed_key === 'frame_model'
+                                    ? ($option['padding'] ?? null)
+                                    : null,
                             ]);
 
                             if (isset($option['option_image'])) {
@@ -284,15 +288,7 @@ class ProductService extends BaseService
                     'model_id' => $product->id,
                     'collection_name' => 'product_main_image',
                 ]);
-            if (isset($validatedData['tableau_image_id'])) {
-                Media::where('id', $validatedData['tableau_image_id'])
-                    ->update([
-                        'model_type' => get_class($product),
-                        'model_id' => $product->id,
-                        'collection_name' => 'tableau_image',
-                    ]);
 
-            }
             if (isset($validatedData['image_model_id'])) {
                 Media::where('id', $validatedData['image_model_id'])
                     ->update([
@@ -414,6 +410,7 @@ class ProductService extends BaseService
                                 'en' => $specification['name_en'],
                                 'ar' => $specification['name_ar'],
                             ],
+                            'fixed_key' => $specification['fixed_key'] ?? null,
                         ]
                     );
 
@@ -427,6 +424,9 @@ class ProductService extends BaseService
                                     'ar' => $option['value_ar'],
                                 ],
                                 'price' => $option['price'] ?? 0,
+                                'padding' => $productSpecification->fixed_key === 'frame_model'
+                                    ? ($option['padding'] ?? null)
+                                    : null,
                             ]
                         );
 
