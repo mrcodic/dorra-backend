@@ -142,7 +142,7 @@
                                     <label class="form-label label-text">Is this product a Tableau?</label>
                                     <div class="form-check form-switch">
                                         <input type="hidden" name="is_tableau" value="0"/>
-                                        <input class="form-check-input" type="checkbox" id="modal_is_tableau"
+                                        <input class="form-check-input" type="checkbox" id="is_tableau"
                                                name="is_tableau" value="1"/>
                                     </div>
                                 </div>
