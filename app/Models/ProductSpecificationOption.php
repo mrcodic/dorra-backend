@@ -17,6 +17,7 @@ class ProductSpecificationOption extends Model implements HasMedia
         'value',
         'fixed_key',
         'price',
+        'padding',
     ];
 
     protected $translatable = ['value'];

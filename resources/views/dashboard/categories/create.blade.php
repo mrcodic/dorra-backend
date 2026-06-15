@@ -629,6 +629,14 @@
                                                                                                class="form-control"
                                                                                                placeholder="Price"/>
                                                                                     </div>
+
+                                                                                    <!-- Frame Model Padding Value (Tableau only) -->
+                                                                                    <div class="col option-frame-model-padding-wrapper" style="display: none;">
+                                                                                        <label class="form-label label-text">Padding Value (Optional)</label>
+                                                                                        <input type="text" name="padding"
+                                                                                               class="form-control option-padding-value"
+                                                                                               placeholder="Padding Value"/>
+                                                                                    </div>
                                                                                 </div>
                                                                                 <div
                                                                                     class="row d-flex align-items-end mt-2">
@@ -802,18 +810,6 @@
 
         let isSyncingTableauSpecs = false;
 
-        function slugifyFixedKey(value) {
-            return String(value || '')
-                .trim()
-                .toLowerCase()
-                .replace(/&/g, ' and ')
-                .replace(/[^a-z0-9]+/g, '_')
-                .replace(/^_+|_+$/g, '');
-        }
-
-        function isTableauFixedKey(key) {
-            return TABLEAU_FIXED_SPECS.some(spec => spec.key === key);
-        }
 
         function getSpecListEl() {
             return $('.outer-repeater').find('[data-repeater-list="specifications"]').first();
@@ -827,30 +823,6 @@
             return $('.outer-repeater').children('.row').find('button[data-repeater-create]').first();
         }
 
-        function syncSpecFixedKey($specItem) {
-            if (!$specItem || !$specItem.length) return;
-
-            const currentKey = ($specItem.attr('data-spec-key') || $specItem.find('.spec-fixed-key').val() || '').trim();
-
-            // Tableau specs must keep their business keys and must not be regenerated from name.
-            if (isTableauFixedKey(currentKey)) {
-                $specItem.attr('data-spec-key', currentKey);
-                $specItem.find('.spec-fixed-key').val(currentKey);
-                return;
-            }
-
-            const nameEn = ($specItem.find('.spec-name-en').val() || '').trim();
-            const generatedKey = slugifyFixedKey(nameEn);
-
-            $specItem.attr('data-spec-key', generatedKey);
-            $specItem.find('.spec-fixed-key').val(generatedKey);
-        }
-
-        function syncAllSpecFixedKeys() {
-            getSpecListEl().children('[data-repeater-item]').each(function () {
-                syncSpecFixedKey($(this));
-            });
-        }
 
         function isTableauProduct() {
             return $('#is_tableau').is(':checked');
@@ -914,8 +886,8 @@
                     }
 
                     setTimeout(function () {
-                        syncSpecFixedKey($newItem);
                         syncOptionFrameVisibility();
+                        syncOptionPaddingVisibility();
                         initOptionDropzones();
 
                         if (window.feather) feather.replace();
@@ -934,8 +906,8 @@
             $item.find('.spec-delete-btn').first().trigger('click');
 
             setTimeout(function () {
-                syncAllSpecFixedKeys();
                 syncOptionFrameVisibility();
+                syncOptionPaddingVisibility();
                 if (typeof generateVariants === 'function') generateVariants();
             }, 250);
         }
@@ -964,8 +936,8 @@
                 generateVariants();
             }
 
-            syncAllSpecFixedKeys();
             syncOptionFrameVisibility();
+            syncOptionPaddingVisibility();
             isSyncingTableauSpecs = false;
         }
 
@@ -980,13 +952,49 @@
             }
 
             const $frameColorSpec = findSpecItemByKey('frame_color');
-            if (!$frameColorSpec.length) return;
+            if (!$frameColorSpec.length) {
+                $('.option-frame-image-hidden').val('');
+                return;
+            }
+
+            // Only frame_color can submit option_frame_image. Clear hidden values in all other specs.
+            getSpecListEl()
+                .children('[data-repeater-item]')
+                .not($frameColorSpec)
+                .find('.option-frame-image-hidden')
+                .val('');
 
             $frameColorSpec.find('.option-frame-wrapper').show();
 
             if (typeof initOptionFrameDropzones === 'function') {
                 initOptionFrameDropzones();
             }
+        }
+
+        function syncOptionPaddingVisibility() {
+            const isTableau = $('#is_tableau').is(':checked');
+
+            $('.option-frame-model-padding-wrapper').hide();
+
+            if (!isTableau) {
+                $('.option-padding-value').val('');
+                return;
+            }
+
+            const $frameModelSpec = findSpecItemByKey('frame_model');
+            if (!$frameModelSpec.length) {
+                $('.option-padding-value').val('');
+                return;
+            }
+
+            // Only frame_model can submit padding. Clear hidden values in all other specs.
+            getSpecListEl()
+                .children('[data-repeater-item]')
+                .not($frameModelSpec)
+                .find('.option-padding-value')
+                .val('');
+
+            $frameModelSpec.find('.option-frame-model-padding-wrapper').show();
         }
 
         // ----- Select2 UI -----
@@ -1021,7 +1029,6 @@
         window.variantImageMemory = {};
 
         function generateVariants() {
-            syncAllSpecFixedKeys();
 
             if (isTableauProduct()) {
                 clearAndHideVariants();
@@ -1039,7 +1046,6 @@
                 // ignore hidden (deleted but animating)
                 if (!$(this).is(':visible')) return;
 
-                syncSpecFixedKey($(this));
 
                 let specName = $(this).find('.spec-name-en').val().trim();
                 let options = [];
@@ -1201,7 +1207,6 @@
         }
 
         $(document).on('keyup change', '.spec-name-en', function () {
-            syncSpecFixedKey($(this).closest('[data-repeater-item]'));
             generateVariants();
         });
 
@@ -1830,7 +1835,6 @@
 
                 const formEl = this;
 
-                syncAllSpecFixedKeys();
 
                 // Tableau products use specs/options only, not variant combinations.
                 if ($('#is_tableau').is(':checked')) {
@@ -2031,12 +2035,14 @@
         $(document).on("click", "[data-repeater-create]", function () {
             setTimeout(function () {
                 syncOptionFrameVisibility();
+                syncOptionPaddingVisibility();
                 initOptionDropzones();
             }, 250);
         });
 
         $(document).ready(function () {
             syncTableauFixedSpecs();
+            syncOptionPaddingVisibility();
         });
     </script>
 

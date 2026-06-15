@@ -161,6 +161,9 @@ class CategoryService extends BaseService
                                     'ar' => $option['value_ar'],
                                 ],
                                 'price' => $option['price'],
+                                'padding' => $productSpecification->fixed_key === 'frame_model'
+                                    ? ($option['padding'] ?? null)
+                                    : null,
                             ]);
 
                             if (isset($option['option_image'])) {

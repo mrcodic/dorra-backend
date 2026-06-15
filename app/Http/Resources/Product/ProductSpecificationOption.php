@@ -20,6 +20,7 @@ class ProductSpecificationOption extends JsonResource
             'variant_key' => $this->getTranslation('value', 'en'),
             'fixed_key' => $this->fixed_key,
             'price' => $this->price,
+            'padding' => $this->padding,
             'image' => $this->getFirstMediaUrl('productSpecificationOptions') ?: $this->getFirstMediaUrl('categorySpecificationOptions'),
             'frame_image' => $this->frameImage?->getFullUrl(),
         ];
