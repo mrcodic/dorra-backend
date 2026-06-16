@@ -17,9 +17,14 @@ if (!function_exists('getMediaCollectionName')) {
 }
 
 if (!function_exists('handleMediaUploads')) {
-    function handleMediaUploads($files, $modelData = null, string $collectionName = null,
-                                array $customProperties = [], bool $clearExisting = false,$columns = null)
-    {
+    function handleMediaUploads(
+        $files,
+        $modelData = null,
+        string $collectionName = null,
+        array $customProperties = [],
+        bool $clearExisting = false,
+        $columns = null
+    ) {
         if (empty($files)) {
             return null;
         }
@@ -31,16 +36,15 @@ if (!function_exists('handleMediaUploads')) {
         $files = is_array($files) ? Arr::flatten($files) : [$files];
 
         if ($clearExisting && $modelData) {
-            // remove existing media in this collection before uploading new
             $modelData->clearMediaCollection($collectionName);
         }
-        $makeNames = static function ($originalName) {
 
+        $makeNames = static function ($originalName) {
             $base = pathinfo($originalName, PATHINFO_FILENAME);
             $ext  = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
 
-
             $slug = Str::slug($base);
+
             if ($slug === '' || $slug === null) {
                 $slug = (string) Str::uuid();
             }
@@ -50,24 +54,80 @@ if (!function_exists('handleMediaUploads')) {
 
             return [$humanName, $safeFileName, $ext];
         };
-        $uploaded = collect($files)->map(function ($file) use ($modelData, $collectionName, $customProperties,$makeNames) {
+
+        $getImageDimensions = static function ($file) {
+            try {
+                if (!($file instanceof \Illuminate\Http\UploadedFile)) {
+                    return [];
+                }
+
+                if (!$file->isValid()) {
+                    return [];
+                }
+
+                $mimeType = $file->getClientMimeType();
+
+                if (!str_starts_with((string) $mimeType, 'image/')) {
+                    return [];
+                }
+
+                if (!class_exists(\Imagick::class)) {
+                    return [];
+                }
+
+                $imagick = new \Imagick();
+                $imagick->pingImage($file->getPathname());
+
+                $width = $imagick->getImageWidth();
+                $height = $imagick->getImageHeight();
+
+                $imagick->clear();
+                $imagick->destroy();
+
+                if (!$width || !$height) {
+                    return [];
+                }
+
+                return [
+                    'width' => (int) $width,
+                    'height' => (int) $height,
+                ];
+            } catch (\Throwable $e) {
+                return [];
+            }
+        };
+
+        $uploaded = collect($files)->map(function ($file) use (
+            $modelData,
+            $collectionName,
+            $customProperties,
+            $makeNames,
+            $getImageDimensions
+        ) {
             [$humanName, $safeFileName, $ext] = $makeNames($file->getClientOriginalName());
+
+            $imageDimensions = $getImageDimensions($file);
+
+            $finalCustomProperties = array_merge(
+                $customProperties,
+                $imageDimensions
+            );
+
             if ($modelData) {
                 $mediaAdder = $modelData->addMedia($file)
                     ->usingName($humanName)
-                ->usingFileName($safeFileName);
+                    ->usingFileName($safeFileName);
 
-                if (!empty($customProperties)) {
-                    $mediaAdder->withCustomProperties($customProperties);
+                if (!empty($finalCustomProperties)) {
+                    $mediaAdder->withCustomProperties($finalCustomProperties);
                 }
+
                 return $mediaAdder->toMediaCollection($collectionName);
             } else {
-                // validate file
                 if (!($file instanceof \Illuminate\Http\UploadedFile) || !$file->isValid()) {
                     throw new \Exception("Invalid file upload");
                 }
 
-                // create media db record first
                 $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::create([
                     'collection_name'       => $collectionName,
                     'name'                  => $humanName,
@@ -76,20 +136,19 @@ if (!function_exists('handleMediaUploads')) {
                     'disk'                  => 'public',
                     'conversions_disk'      => 'public',
                     'size'                  => $file->getSize(),
-                    'custom_properties'     => $customProperties,
+                    'custom_properties'     => $finalCustomProperties,
                     'manipulations'         => [],
                     'responsive_images'     => [],
                     'generated_conversions' => [],
                 ]);
 
-                // directory by ID
                 $directory = (string) $media->id;
 
-                // now actually store file safely
                 $path = $file->storeAs($directory, $file->getClientOriginalName(), 'public');
 
-                // update with the stored filename
-                $media->update(['file_name' => basename($path)]);
+                $media->update([
+                    'file_name' => basename($path),
+                ]);
 
                 return $media;
             }
