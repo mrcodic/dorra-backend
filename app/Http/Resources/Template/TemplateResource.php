@@ -64,10 +64,11 @@ class TemplateResource extends JsonResource
         $categoryId = Product::find(request('product_id'))?->category?->id;
 
         $backPreviewImage = $this->use_front_as_back
-            ? $this->getFirstMediaUrl('templates-preview')
+            ? $this->getFirstMedia('templates-preview')
             : ($this->approach == 'without_editor'
-                ? $this->getFirstMediaUrl('back-templates-preview')
-                : $this->getFirstMediaUrl('back_templates'));
+                ? $this->getFirstMedia('back-templates-preview')
+                : $this->getFirstMedia('back_templates'));
+        $backPreviewImageUrl = $backPreviewImage->getFullUrl();
 
         return [
             'id' => $this->when(isset($this->id), $this->id),
@@ -107,11 +108,11 @@ class TemplateResource extends JsonResource
                 ];
             })->values()->all()
             ),
-            'show_back' => (function () use ($media, $backPreviewImage) {
-                if (empty($this->image) && !empty($backPreviewImage)) {
+            'show_back' => (function () use ($media, $backPreviewImageUrl) {
+                if (empty($this->image) && !empty($backPreviewImageUrl)) {
                     return true;
                 }
-                if (!empty($this->image) && !empty($backPreviewImage)) {
+                if (!empty($this->image) && !empty($backPreviewImageUrl)) {
                     if ($media) {
                         return $media->getCustomProperty('side') === 'back';
                     }
@@ -120,7 +121,9 @@ class TemplateResource extends JsonResource
                 return false;
             })(),
             'source_design_svg' => $this->when(isset($this->image), $this->image),
-            'back_base64_preview_image' => $backPreviewImage,
+            'back_base64_preview_image' => $backPreviewImageUrl,
+            'template_image_height' => $this->image?->getCustomProperty('height') ?: $backPreviewImage?->getCustomProperty('height'),
+            'template_image_width' => $this->image?->getCustomProperty('width') ?: $backPreviewImage?->getCustomProperty('height'),
             'has_mockup' => (boolean)$this->products->contains('has_mockup', true),
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
             'template_model_image' => $media

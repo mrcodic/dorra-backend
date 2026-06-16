@@ -23,8 +23,6 @@ class ProductSpecificationOption extends JsonResource
             'padding' => $this->padding,
             'image' => $this->getFirstMediaUrl('productSpecificationOptions') ?: $this->getFirstMediaUrl('categorySpecificationOptions'),
             'frame_image' => $this->frameImage?->getFullUrl(),
-            'frame_image_height' => $this->frameImage?->getCustomProperty('height'),
-            'frame_image_width' => $this->frameImage?->getCustomProperty('width'),
         ];
     }
 }
