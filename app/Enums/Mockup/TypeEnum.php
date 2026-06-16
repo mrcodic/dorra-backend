@@ -10,7 +10,7 @@ enum TypeEnum : int
 
     case FRONT = 1;
     case BACK = 2;
-//    case NONE = 3;
+    case NONE = 3;
 
 
     public function label()
@@ -18,7 +18,7 @@ enum TypeEnum : int
         return match ($this) {
             self::FRONT => "Front",
             self::BACK => "Back",
-//            self::NONE => "None",
+            self::NONE => "None",
         };
     }
     public function key(): string
@@ -26,7 +26,7 @@ enum TypeEnum : int
         return match ($this) {
             self::FRONT => 'front',
             self::BACK  => 'back',
-//            self::NONE  => 'none',
+            self::NONE  => 'none',
         };
     }
 }
