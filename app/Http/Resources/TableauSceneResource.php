@@ -12,6 +12,8 @@ class TableauSceneResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'top_position' => $this->top_position,
+            'left_position' => $this->left_position,
             'image_url' => $this->imageUrl(),
         ];
     }

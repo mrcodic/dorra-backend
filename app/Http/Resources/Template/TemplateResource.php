@@ -8,6 +8,7 @@ use App\Http\Resources\FontResource;
 use App\Http\Resources\MediaResource;
 use App\Http\Resources\MockupResource;
 use App\Http\Resources\Product\ProductResource;
+use App\Http\Resources\TableauSceneResource;
 use App\Http\Resources\TagResource;
 use App\Models\Category;
 use App\Models\Guest;
@@ -285,18 +286,7 @@ class TemplateResource extends JsonResource
                 $pivot = $mockup->pivot;
                 return $pivot->type;
             }),
-            'tableau_scenes_urls' => $this->whenLoaded('tableauScenes', function () {
-                return $this->tableauScenes
-                    ->flatMap(function ($scene) {
-                        $mediaItems = $scene->relationLoaded('media')
-                            ? $scene->media->where('collection_name', 'tableau_scene_image')
-                            : $scene->getMedia('tableau_scene_image');
-
-                        return $mediaItems->map(fn ($media) => $media->getFullUrl());
-                    })
-                    ->filter()
-                    ->values();
-            }),
+            'tableau_scenes' => TableauSceneResource::collection( $this->whenLoaded('tableauScenes.media')),
         ];
     }
 }
