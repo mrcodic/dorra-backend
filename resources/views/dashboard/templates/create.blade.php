@@ -2290,7 +2290,7 @@
                 ? selectedScenes.length > 0
                 : !!selectedScenes;
 
-            $('#newTableauSceneFields').toggle(!hasExistingScene);
+            // $('#newTableauSceneFields').toggle(!hasExistingScene);
 
             if (hasExistingScene) {
                 $('#newTableauSceneNameEn').val('');
