@@ -18,6 +18,7 @@
                         @php
                             $preselectedIndustryIds = $model->industries->whereNull('parent_id')->pluck('id')->values();
                             $preselectedSubIndustryIds = $model->industries->whereNotNull('parent_id')->pluck('id')->values();
+                            $selectedTableauSceneIds = $model->tableauScenes?->pluck('id')->map(fn ($id) => (string) $id)->values()->toArray() ?? [];
                         @endphp
 
                         <form id="editTemplateForm" enctype="multipart/form-data" method="post"
@@ -237,25 +238,25 @@
                                                             Minimum dimensions: 1000 × 1000 px.
                                                         </small>
                                                     </div>
-                                                        <!-- BACK -->
-                                                        <div class="form-group mb-2 col-md-6 d-none" id="dz-back">
-                                                            <label class="label-text mb-1">Upload Print File
-                                                                (Back)</label>
-                                                            <div id="back-template-dropzone"
-                                                                 class="dropzone border rounded p-3"
-                                                                 style="cursor:pointer; min-height:150px;">
-                                                                <div class="dz-message">
-                                                                    <span>Drop back image here or click</span>
-                                                                </div>
-                                                                <input type="hidden" name="template_image_back_id"
-                                                                       id="uploadedBackTemplateImage">
+                                                    <!-- BACK -->
+                                                    <div class="form-group mb-2 col-md-6 d-none" id="dz-back">
+                                                        <label class="label-text mb-1">Upload Print File
+                                                            (Back)</label>
+                                                        <div id="back-template-dropzone"
+                                                             class="dropzone border rounded p-3"
+                                                             style="cursor:pointer; min-height:150px;">
+                                                            <div class="dz-message">
+                                                                <span>Drop back image here or click</span>
                                                             </div>
-                                                            <small class="form-text text-muted">
-                                                                Allowed formats: PNG, JPG, JPEG, WEBP.
-                                                                Maximum file size: 30 MB.
-                                                                Minimum dimensions: 1000 × 1000 px.
-                                                            </small>
+                                                            <input type="hidden" name="template_image_back_id"
+                                                                   id="uploadedBackTemplateImage">
                                                         </div>
+                                                        <small class="form-text text-muted">
+                                                            Allowed formats: PNG, JPG, JPEG, WEBP.
+                                                            Maximum file size: 30 MB.
+                                                            Minimum dimensions: 1000 × 1000 px.
+                                                        </small>
+                                                    </div>
                                                     <!-- NONE -->
                                                     <div class="form-group mb-2 col-md-6 d-none" id="dz-none">
                                                         <label class="label-text mb-1">Upload Print File
@@ -380,8 +381,10 @@
                                             <select id="categoriesSelect" class="form-select select2"
                                                     name="product_with_category" multiple>
                                                 @foreach($associatedData['product_with_categories'] as $category)
-                                                    <option value="{{ $category->id }}" @selected($category->
-                                                load('products')->products->intersect($model->products)->isNotEmpty())>
+                                                    <option value="{{ $category->id }}"
+                                                            data-is-tableau="{{ $category->is_tableau ? '1' : '0' }}"
+                                                        @selected($category->
+                                            load('products')->products->intersect($model->products)->isNotEmpty())>
                                                         {{ $category->getTranslation('name', app()->getLocale()) }}
                                                     </option>
 
@@ -393,8 +396,10 @@
                                             <select id="productsSelect" class="form-select select2" name="product_ids[]"
                                                     multiple>
                                                 @foreach($associatedData['products'] as $product)
-                                                    <option value="{{ $product->id }}" @selected($model->
-                                                products->contains($product))>
+                                                    <option value="{{ $product->id }}"
+                                                            data-is-tableau="{{ $product->is_tableau ? '1' : '0' }}"
+                                                        @selected($model->
+                                            products->contains($product))>
                                                         {{ $product->getTranslation('name', app()->getLocale()) }}
                                                     </option>
                                                 @endforeach
@@ -408,13 +413,76 @@
                                         <select id="productsWithoutCategoriesSelect" class="form-select select2"
                                                 name="category_ids[]" multiple>
                                             @foreach($associatedData['product_without_categories'] as $category)
-                                                <option value="{{ $category->id }}" @selected($model->
-                                            categories->contains($category))>
+                                                <option value="{{ $category->id }}"
+                                                        data-is-tableau="{{ $category->is_tableau ? '1' : '0' }}"
+                                                    @selected($model->
+                                        categories->contains($category))>
                                                     {{ $category->getTranslation('name', app()->getLocale()) }}
                                                 </option>
                                             @endforeach
                                         </select>
                                     </div>
+
+                                    {{-- TABLEAU SCENE --}}
+                                    <div class="form-group mb-2 col-md-6 d-none" id="dz-tableau-scene">
+                                        <label class="label-text mb-1">Tableau Scene</label>
+
+                                        {{-- Choose existing scenes --}}
+                                        <select name="tableau_scene_ids[]"
+                                                id="tableauSceneSelect"
+                                                class="form-select select2 mb-1"
+                                                multiple>
+                                            @foreach(\App\Models\TableauScene::where('is_active', true)->latest()->get() as $scene)
+                                                <option value="{{ $scene->id }}"
+                                                    @selected(in_array((string) $scene->id, $selectedTableauSceneIds, true))>
+                                                    {{ $scene->getTranslation('name', app()->getLocale(), false) ?: 'Scene #' . $scene->id }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+
+                                        <div class="text-center my-1 text-muted">or create new scene</div>
+
+                                        {{-- New scene name --}}
+                                        <div id="newTableauSceneFields">
+                                            <div class="row mb-1">
+                                                <div class="col-md-6">
+                                                    <label class="label-text mb-1">Scene Name (EN)</label>
+                                                    <input type="text"
+                                                           name="new_tableau_scene_name[en]"
+                                                           id="newTableauSceneNameEn"
+                                                           class="form-control"
+                                                           placeholder="Example: Living Room Scene">
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <label class="label-text mb-1">Scene Name (AR)</label>
+                                                    <input type="text"
+                                                           name="new_tableau_scene_name[ar]"
+                                                           id="newTableauSceneNameAr"
+                                                           class="form-control"
+                                                           placeholder="مثال: مشهد غرفة معيشة">
+                                                </div>
+                                            </div>
+
+                                            {{-- New scene image --}}
+                                            <div id="tableau-scene-dropzone"
+                                                 class="dropzone border rounded p-3"
+                                                 style="cursor:pointer; min-height:150px;">
+                                                <div class="dz-message">
+                                                    <span>Drop tableau scene image here or click</span>
+                                                </div>
+
+                                                <input type="hidden"
+                                                       name="new_tableau_scene_image_id"
+                                                       id="uploadedTableauSceneImage">
+                                            </div>
+
+                                            <small class="form-text text-muted">
+                                                If you choose an existing scene, this new scene data will be ignored.
+                                            </small>
+                                        </div>
+                                    </div>
+
                                     <div
                                         class="col-md-12 form-group mb-2 mockupWrapper">
                                         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -686,7 +754,7 @@
     </section>
 
 
-        <!-- Back Design Modal -->
+    <!-- Back Design Modal -->
     <div class="modal fade" id="backDesignModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -1036,9 +1104,11 @@
                             (response.data || []).forEach(cat => {
                                 const opt = new Option(cat.name, cat.id, false, true);
                                 $(opt).attr('data-has-mockup', cat.has_mockup ? '1' : '0');
+                                $(opt).attr('data-is-tableau', cat.is_tableau ? '1' : '0');
                                 $right.append(opt);
                             });
                             $right.trigger('change.select2');
+                            if (typeof updateTemplateTypeDropzones === 'function') updateTemplateTypeDropzones();
                             fetchMockups(); // ✅ called AFTER #productsSelect is populated
                         },
                         error(xhr) {
@@ -1048,6 +1118,7 @@
                     });
                 } else {
                     $right.empty().trigger('change.select2');
+                    if (typeof updateTemplateTypeDropzones === 'function') updateTemplateTypeDropzones();
                     fetchMockups();
                 }
             });
@@ -1076,9 +1147,11 @@
                                 const isSelected = alreadySelected.includes(String(cat.id));
                                 const opt = new Option(cat.name, cat.id, isSelected, isSelected);
                                 $(opt).attr('data-has-mockup', cat.has_mockup ? '1' : '0');
+                                $(opt).attr('data-is-tableau', cat.is_tableau ? '1' : '0');
                                 $right.append(opt);
                             });
                             $right.trigger('change.select2');
+                            if (typeof updateTemplateTypeDropzones === 'function') updateTemplateTypeDropzones();
                             fetchMockups(); // ✅ called AFTER #productsSelect is populated
                         },
                         error() {
@@ -1093,6 +1166,42 @@
     </script>
 
     <script>
+        function selectedProductIsTableau() {
+            const selectedOptions = [
+                ...document.querySelectorAll('#productsWithoutCategoriesSelect option:checked'),
+                ...document.querySelectorAll('#productsSelect option:checked'),
+                ...document.querySelectorAll('#categoriesSelect option:checked')
+            ];
+
+            return selectedOptions.some(option => option.dataset.isTableau === '1');
+        }
+
+        function syncTableauSceneFields() {
+            const $select = $('#tableauSceneSelect');
+            const value = $select.val();
+            const hasExistingScene = Array.isArray(value) ? value.length > 0 : !!value;
+
+            $('#newTableauSceneFields').toggle(!hasExistingScene);
+
+            if (hasExistingScene) {
+                $('#newTableauSceneNameEn').val('');
+                $('#newTableauSceneNameAr').val('');
+                $('#uploadedTableauSceneImage').val('');
+            }
+        }
+
+        function resetTableauSceneFields() {
+            $('#tableauSceneSelect').val(null).trigger('change.select2');
+            $('#newTableauSceneNameEn').val('');
+            $('#newTableauSceneNameAr').val('');
+            $('#uploadedTableauSceneImage').val('');
+            $('#newTableauSceneFields').show();
+
+            if (window.tableauSceneDropzone) {
+                window.tableauSceneDropzone.removeAllFiles(true);
+            }
+        }
+
         function updateTemplateTypeDropzones() {
             const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox'))
                 .filter(cb => cb.checked)
@@ -1102,46 +1211,61 @@
             const dzBack = document.getElementById("dz-back");
             const dzNone = document.getElementById("dz-none");
             const dzModel = document.getElementById("dz-model");
+            const dzTableauScene = document.getElementById("dz-tableau-scene");
 
-
-            [dzFront, dzBack, dzNone, dzModel].forEach(dz => {
+            [dzFront, dzBack, dzNone, dzModel, dzTableauScene].forEach(dz => {
                 if (dz) {
                     dz.classList.add("d-none");
                     dz.classList.remove("col-md-4", "col-md-6", "col-md-12");
                 }
             });
-// Re-apply "use same design" state after dropzones are toggled
+
+            const visibleDZ = [];
+
+            if (selectedTypes.includes("front") && dzFront) {
+                dzFront.classList.remove("d-none");
+                visibleDZ.push(dzFront);
+            }
+
+            if (selectedTypes.includes("back") && dzBack) {
+                dzBack.classList.remove("d-none");
+                visibleDZ.push(dzBack);
+            }
+
+            if (selectedTypes.includes("none") && dzNone) {
+                dzNone.classList.remove("d-none");
+                visibleDZ.push(dzNone);
+            }
+
+            if (visibleDZ.length > 0 && dzModel) {
+                dzModel.classList.remove("d-none");
+                visibleDZ.push(dzModel);
+            }
+
+            @if($model->approach == 'with_editor')
+            if (dzModel) {
+                dzModel.classList.remove("d-none");
+                if (!visibleDZ.includes(dzModel)) {
+                    visibleDZ.push(dzModel);
+                }
+            }
+            @endif
+
+            if (selectedProductIsTableau() && dzTableauScene) {
+                dzTableauScene.classList.remove("d-none");
+                visibleDZ.push(dzTableauScene);
+                syncTableauSceneFields();
+            } else if (dzTableauScene) {
+                resetTableauSceneFields();
+            }
+
+            // Re-apply "use same design" state after dropzones are toggled
             if (document.getElementById('useFrontAsBack')?.value === '1') {
                 setTimeout(function () {
                     $('#dz-back').addClass('d-none');
                     $('#dz-front .label-text').text('Upload Print File (Front, Back)');
                 }, 0);
             }
-            const visibleDZ = [];
-            console.log(selectedTypes.includes("front"), dzFront)
-
-            if (selectedTypes.includes("front") && dzFront) {
-                dzFront.classList.remove("d-none");
-                visibleDZ.push(dzFront);
-            }
-            if (selectedTypes.includes("back") && dzBack) {
-                dzBack.classList.remove("d-none");
-                visibleDZ.push(dzBack);
-            }
-            if (selectedTypes.includes("none") && dzNone) {
-                dzNone.classList.remove("d-none");
-                visibleDZ.push(dzNone);
-            }
-
-
-            if (visibleDZ.length > 0 && dzModel) {
-                dzModel.classList.remove("d-none");
-                visibleDZ.push(dzModel);
-            }
-            @if($model->approach == 'with_editor')
-            dzModel.classList.remove("d-none");
-            @endif
-
 
             visibleDZ.forEach(dz => {
                 if (visibleDZ.length === 1) {
@@ -1154,16 +1278,25 @@
             });
         }
 
-
-        // trigger on checkbox change
+        // trigger on checkbox/product/scene change
         document.querySelectorAll('.type-checkbox').forEach(cb => {
             cb.addEventListener("change", updateTemplateTypeDropzones);
         });
 
-        // initial run
-        updateTemplateTypeDropzones();
+        $(document).on('change', '#categoriesSelect, #productsSelect, #productsWithoutCategoriesSelect', function () {
+            updateTemplateTypeDropzones();
+        });
 
+        $(document).on('change', '#tableauSceneSelect', function () {
+            syncTableauSceneFields();
+        });
+
+        $(document).ready(function () {
+            updateTemplateTypeDropzones();
+            syncTableauSceneFields();
+        });
     </script>
+
     <script>
         Dropzone.autoDiscover = false;
         const templateDropzones = {
@@ -1467,6 +1600,48 @@
         document.querySelectorAll('.type-checkbox').forEach(cb => {
             cb.addEventListener('change', handleTypeChangeAndResetDZ);
         });
+    </script>
+
+    <script>
+        Dropzone.autoDiscover = false;
+
+        window.tableauSceneDropzone = null;
+
+        if (document.getElementById("tableau-scene-dropzone")) {
+            window.tableauSceneDropzone = new Dropzone("#tableau-scene-dropzone", {
+                url: "{{ route('media.store') }}",
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 30,
+                acceptedFiles: "image/png,image/jpeg,image/webp",
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                addRemoveLinks: true,
+                dictDefaultMessage: "Drop tableau scene image here or click to upload",
+                init: function () {
+                    this.on("success", function (file, response) {
+                        if (response.success && response.data) {
+                            file._hiddenInputId = response.data.id;
+                            document.getElementById("uploadedTableauSceneImage").value = response.data.id;
+                        }
+                    });
+
+                    this.on("removedfile", function (file) {
+                        document.getElementById("uploadedTableauSceneImage").value = "";
+
+                        if (file._hiddenInputId) {
+                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                method: "DELETE",
+                                headers: {
+                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
     </script>
 
     <script>
@@ -1995,6 +2170,7 @@
                         (response.data || []).forEach(cat => {
                             const opt = new Option(cat.name, cat.id, false, true);
                             $(opt).attr('data-has-mockup', cat.has_mockup ? '1' : '0');
+                            $(opt).attr('data-is-tableau', cat.is_tableau ? '1' : '0');
                             $right.append(opt);
                         });
 
@@ -2271,6 +2447,12 @@
             $('#colorsSelect').select2({
                 placeholder: "Choose Colors",
                 allowClear: true
+            });
+
+            $('#tableauSceneSelect').select2({
+                placeholder: "Choose Tableau Scenes",
+                allowClear: true,
+                width: '100%'
             });
 
         });
