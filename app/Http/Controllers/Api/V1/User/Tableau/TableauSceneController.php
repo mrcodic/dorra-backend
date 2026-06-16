@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Tableau;
+namespace App\Http\Controllers\Api\V1\User\Tableau;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TableauSceneResource;

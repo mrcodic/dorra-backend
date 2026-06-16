@@ -1,7 +1,6 @@
 <?php
 
 
-use App\Http\Controllers\Api\Tableau\TableauSceneController;
 use App\Http\Controllers\Shared\LibraryAssetController;
 use App\Http\Middleware\LocalizationMiddleware;
 use App\Http\Middleware\TrackVisits;
@@ -31,6 +30,7 @@ use App\Http\Controllers\Api\V1\User\{Ai\AiAssetController,
     SavedItems\SaveController,
     ShippingAddress\ShippingAddressController,
     ShippingAddress\ShippingController,
+    Tableau\TableauSceneController,
     Team\TeamController,
     Template\TemplateController,
     Review\ReviewController,
