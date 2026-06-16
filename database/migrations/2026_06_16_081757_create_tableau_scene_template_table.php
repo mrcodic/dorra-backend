@@ -13,7 +13,7 @@ return new class extends Migration
         Schema::create('tableau_scene_template', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('template_id')
+            $table->foreignUuid('template_id')
                 ->constrained('templates')
                 ->cascadeOnDelete();
 
