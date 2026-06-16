@@ -237,7 +237,6 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                                                 </small>
                                             </div>
                                                 @endif
-
                                         </div>
 
 
@@ -331,7 +330,7 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                                                 @foreach($associatedData['product_without_categories'] as $cate)
                                                     <option value="{{ $cate->id }}"
                                                             @selected($cate->id === ($category?->id ?? 1))
-
+                                                            data-is-tableau="{{ $cate->is_tableau ? '1' : '0' }}"
                                                             data-has-mockup="{{ $cate->has_mockup ? '1' : '0' }}">
                                                         {{ $cate->getTranslation('name', app()->getLocale()) }}
                                                     </option>
@@ -341,6 +340,63 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
 
 
                                     </div>
+                                        {{-- TABLEAU SCENE IMAGE --}}
+                                        {{-- TABLEAU SCENE --}}
+                                        <div class="form-group mb-2 col-md-6 d-none" id="dz-tableau-scene">
+                                            <label class="label-text mb-1">Tableau Scene</label>
+
+                                            {{-- Choose existing scene --}}
+                                            <select name="tableau_scene_id" id="tableauSceneSelect" class="form-select select2 mb-1">
+                                                <option value="">Choose Existing Scene</option>
+                                                @foreach(\App\Models\TableauScene::where('is_active', true)->latest()->get() as $scene)
+                                                    <option value="{{ $scene->id }}">
+                                                        {{ $scene->getTranslation('name', app()->getLocale(), false) ?: 'Scene #' . $scene->id }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+
+                                            <div class="text-center my-1 text-muted">or create new scene</div>
+
+                                            {{-- New scene name --}}
+                                            <div id="newTableauSceneFields">
+                                                <div class="row mb-1">
+                                                    <div class="col-md-6">
+                                                        <label class="label-text mb-1">Scene Name (EN)</label>
+                                                        <input type="text"
+                                                               name="new_tableau_scene_name[en]"
+                                                               id="newTableauSceneNameEn"
+                                                               class="form-control"
+                                                               placeholder="Example: Living Room Scene">
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label class="label-text mb-1">Scene Name (AR)</label>
+                                                        <input type="text"
+                                                               name="new_tableau_scene_name[ar]"
+                                                               id="newTableauSceneNameAr"
+                                                               class="form-control"
+                                                               placeholder="مثال: مشهد غرفة معيشة">
+                                                    </div>
+                                                </div>
+
+                                                {{-- New scene image --}}
+                                                <div id="tableau-scene-dropzone"
+                                                     class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
+                                                    <div class="dz-message">
+                                                        <span>Drop tableau scene image here or click</span>
+                                                    </div>
+
+                                                    <input type="hidden"
+                                                           name="new_tableau_scene_image_id"
+                                                           id="uploadedTableauSceneImage">
+                                                </div>
+
+                                                <small class="form-text text-muted">
+                                                    If you choose an existing scene, this new scene data will be ignored.
+                                                </small>
+                                            </div>
+                                        </div>
                                     <div class="col-md-12 form-group mb-2 mockupWrapper d-none">
                                         <div class="d-flex align-items-center justify-content-between mb-2">
                                             <div>
@@ -888,6 +944,7 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                             );
 
                             $(option).attr('data-has-mockup', cat.has_mockup ? '1' : '0');
+                            $(option).attr('data-is-tableau', cat.is_tableau ? '1' : '0');
 
                             $categories.append(option);
                         });
@@ -897,6 +954,8 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                         if (typeof callback === 'function') {
                             callback();
                         }
+                        $categories.trigger('change.select2');
+                        updateTemplateTypeDropzones();
                     },
                     error(xhr) {
                         console.error("Error loading categories:", xhr.responseText);
@@ -1018,6 +1077,17 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
         });
     </script>
     <script>
+        function selectedProductIsTableau() {
+            const selectedOptions = [
+                ...document.querySelectorAll('#productsWithoutCategoriesSelect option:checked'),
+                ...document.querySelectorAll('#productsSelect option:checked'),
+                ...document.querySelectorAll('#categoriesSelect option:checked')
+            ];
+
+
+            return selectedOptions.some(option => option.dataset.isTableau === '1');
+        }
+
         function updateTemplateTypeDropzones() {
             const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox'))
                 .filter(cb => cb.checked)
@@ -1027,9 +1097,9 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
             const dzBack = document.getElementById("dz-back");
             const dzNone = document.getElementById("dz-none");
             const dzModel = document.getElementById("dz-model");
+            const dzTableauScene = document.getElementById("dz-tableau-scene");
 
-
-            [dzFront, dzBack, dzNone, dzModel].forEach(dz => {
+            [dzFront, dzBack, dzNone, dzModel, dzTableauScene].forEach(dz => {
                 if (dz) {
                     dz.classList.add("d-none");
                     dz.classList.remove("col-md-4", "col-md-6", "col-md-12");
@@ -1042,25 +1112,35 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                 dzFront.classList.remove("d-none");
                 visibleDZ.push(dzFront);
             }
+
             if (selectedTypes.includes("back") && dzBack) {
                 dzBack.classList.remove("d-none");
                 visibleDZ.push(dzBack);
             }
+
             if (selectedTypes.includes("none") && dzNone) {
                 dzNone.classList.remove("d-none");
                 visibleDZ.push(dzNone);
             }
 
-
             if (visibleDZ.length > 0 && dzModel) {
                 dzModel.classList.remove("d-none");
                 visibleDZ.push(dzModel);
             }
-            @if(request()->query('q') == 'with')
-            dzModel.classList.remove("d-none");
 
+            @if(request()->query('q') == 'with')
+            if (dzModel) {
+                dzModel.classList.remove("d-none");
+                visibleDZ.push(dzModel);
+            }
             @endif
 
+            if (selectedProductIsTableau() && dzTableauScene) {
+                dzTableauScene.classList.remove("d-none");
+                visibleDZ.push(dzTableauScene);
+            } else {
+                document.getElementById("uploadedTableauSceneImage").value = "";
+            }
 
             visibleDZ.forEach(dz => {
                 if (visibleDZ.length === 1) {
@@ -2110,5 +2190,60 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
             initializeImageUploaders($('.outer-repeater'));
         });
     </script>
+    <script>
+        Dropzone.autoDiscover = false;
 
+        let tableauSceneDropzone = null;
+
+        if (document.getElementById("tableau-scene-dropzone")) {
+            tableauSceneDropzone = new Dropzone("#tableau-scene-dropzone", {
+                url: "{{ route('media.store') }}",
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 30,
+                acceptedFiles: "image/png,image/jpeg,image/webp",
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                addRemoveLinks: true,
+                dictDefaultMessage: "Drop tableau scene image here or click to upload",
+                init: function () {
+                    this.on("success", function (file, response) {
+                        if (response.success && response.data) {
+                            file._hiddenInputId = response.data.id;
+                            document.getElementById("uploadedTableauSceneImage").value = response.data.id;
+                        }
+                    });
+
+                    this.on("removedfile", function (file) {
+                        document.getElementById("uploadedTableauSceneImage").value = "";
+
+                        if (file._hiddenInputId) {
+                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                method: "DELETE",
+                                headers: {
+                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+        $('#productsWithoutCategoriesSelect, #productsSelect, #categoriesSelect').on('change', function () {
+            updateTemplateTypeDropzones();
+        });
+
+        $('#tableauSceneSelect').on('change', function () {
+            const hasExistingScene = !!$(this).val();
+
+            $('#newTableauSceneFields').toggle(!hasExistingScene);
+
+            if (hasExistingScene) {
+                $('#newTableauSceneNameEn').val('');
+                $('#newTableauSceneNameAr').val('');
+                $('#uploadedTableauSceneImage').val('');
+            }
+        });
+    </script>
 @endsection

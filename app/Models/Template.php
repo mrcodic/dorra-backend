@@ -47,6 +47,7 @@ class Template extends Model implements HasMedia
         'supported_languages',
         'is_best_seller',
         'use_front_as_back',
+        'tableau_scene_id'
     ];
     protected $casts = [
         'supported_languages' => 'array',
@@ -61,6 +62,10 @@ class Template extends Model implements HasMedia
         'status' => StatusEnum::DRAFTED,
     ];
 
+    public function tableauScene(): BelongsTo
+    {
+        return $this->belongsTo(TableauScene::class);
+    }
     public function scopeIsLanding(Builder $builder): Builder
     {
         return $builder->where('is_landing', true);

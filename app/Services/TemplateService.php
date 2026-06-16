@@ -11,6 +11,7 @@ use App\Jobs\ProcessBase64Image;
 use App\Models\Admin;
 use App\Models\FontStyle;
 use App\Models\Mockup;
+use App\Models\TableauScene;
 use App\Models\Template;
 use App\Models\Type;
 use App\Repositories\Base\BaseRepositoryInterface;
@@ -225,6 +226,44 @@ class TemplateService extends BaseService
         })->toArray();
         $validatedData['colors'] = $finalColors;
         $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad, $colors) {
+            $tableauSceneId = $validatedData['tableau_scene_id'] ?? null;
+
+            $newSceneImageId = $validatedData['new_tableau_scene_image_id']
+                ?? $validatedData['tableau_scene_image_id']
+                ?? null;
+
+            if (empty($tableauSceneId) && !empty($newSceneImageId)) {
+                $sceneName = $validatedData['new_tableau_scene_name'] ?? [];
+
+                $scene = TableauScene::create([
+                    'name' => [
+                        'en' => $sceneName['en']
+                            ?? (($validatedData['name']['en'] ?? 'Tableau') . ' Scene'),
+
+                        'ar' => $sceneName['ar']
+                            ?? (($validatedData['name']['ar'] ?? 'تابلوه') . ' مشهد'),
+                    ],
+                    'is_active' => true,
+                ]);
+
+                Media::where('id', $newSceneImageId)
+                    ->update([
+                        'model_type' => TableauScene::class,
+                        'model_id' => $scene->id,
+                        'collection_name' => 'tableau_scene_image',
+                    ]);
+
+                $tableauSceneId = $scene->id;
+            }
+
+            $validatedData['tableau_scene_id'] = $tableauSceneId;
+
+            // Remove fields that are not columns in templates table
+            unset(
+                $validatedData['new_tableau_scene_name'],
+                $validatedData['new_tableau_scene_image_id'],
+                $validatedData['tableau_scene_image_id']
+            );
             $model = $this->repository->create($validatedData);
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->industries()->sync($validatedData['industry_ids'] ?? []);
