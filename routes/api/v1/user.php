@@ -1,5 +1,6 @@
 <?php
 
+
 use App\Http\Controllers\Api\Tableau\TableauSceneController;
 use App\Http\Controllers\Shared\LibraryAssetController;
 use App\Http\Middleware\LocalizationMiddleware;
