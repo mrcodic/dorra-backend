@@ -285,7 +285,7 @@ class TemplateResource extends JsonResource
                 $pivot = $mockup->pivot;
                 return $pivot->type;
             }),
-            'tableau_scene_urls' => $this->whenLoaded('tableauScenes', function () {
+            'tableau_scenes_urls' => $this->whenLoaded('tableauScenes', function () {
                 return $this->tableauScenes
                     ->flatMap(function ($scene) {
                         $mediaItems = $scene->relationLoaded('media')
