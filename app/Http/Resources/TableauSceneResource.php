@@ -12,7 +12,7 @@ class TableauSceneResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'media' => MediaResource::collection($this->whenLoaded('media')),
+            'image' => $this->image,
         ];
     }
 }
