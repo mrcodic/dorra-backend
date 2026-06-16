@@ -62,7 +62,6 @@ class TemplateResource extends JsonResource
             ->first();
 
         $categoryId = Product::find(request('product_id'))?->category?->id;
-
         $backPreviewImage = $this->use_front_as_back
             ? $this->getFirstMedia('templates-preview')
             : ($this->approach == 'without_editor'
@@ -71,10 +70,16 @@ class TemplateResource extends JsonResource
 
         $backPreviewImageUrl = $backPreviewImage?->getFullUrl();
 
-        $templateImageMedia = $this->image_media ?: $backPreviewImage;
+        $templateImageMedia = $this->getFirstMedia('templates-preview')
+            ?: $this->getFirstMedia('templates')
+                ?: $backPreviewImage;
 
-        $templateImageWidth = $templateImageMedia?->getCustomProperty('width');
-        $templateImageHeight = $templateImageMedia?->getCustomProperty('height');
+        $getMediaProperty = function ($media, string $key) {
+            return $media->getCustomProperty($key);
+        };
+
+        $templateImageWidth = $getMediaProperty($templateImageMedia, 'width');
+        $templateImageHeight = $getMediaProperty($templateImageMedia, 'height');
 
         return [
             'id' => $this->when(isset($this->id), $this->id),
