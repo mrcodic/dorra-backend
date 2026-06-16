@@ -237,7 +237,6 @@
                                                         </small>
                                                     </div>
                                                 @endif
-
                                             </div>
 
 
@@ -306,7 +305,8 @@
                                                         name="product_with_category" multiple>
                                                     @foreach($associatedData['product_with_categories'] as $cate)
                                                         <option value="{{ $cate->id }}"
-                                                            @selected($cate->id === ($category?->id ?? 1))
+                                                                @selected($cate->id === ($category?->id ?? 1))
+                                                                data-is-tableau="{{ $cate->is_tableau ? '1' : '0' }}"
                                                         >
                                                             {{ $cate->getTranslation('name', app()->getLocale()) }}
                                                         </option>
@@ -331,7 +331,7 @@
                                                     @foreach($associatedData['product_without_categories'] as $cate)
                                                         <option value="{{ $cate->id }}"
                                                                 @selected($cate->id === ($category?->id ?? 1))
-
+                                                                data-is-tableau="{{ $cate->is_tableau ? '1' : '0' }}"
                                                                 data-has-mockup="{{ $cate->has_mockup ? '1' : '0' }}">
                                                             {{ $cate->getTranslation('name', app()->getLocale()) }}
                                                         </option>
@@ -341,23 +341,107 @@
 
 
                                         </div>
-                                        <div class="col-md-12 form-group mb-2 mockupWrapper d-none">
-                                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                                <div>
-                                                    <h5 class="mb-0" style="color:#24B094;">Mockups</h5>
-                                                    <small class="text-muted">Select a mockup to show this template on
-                                                        it.</small>
+                                        {{-- TABLEAU SCENE IMAGE --}}
+                                        {{-- TABLEAU SCENE --}}
+                                        <div class="form-group mb-2 col-md-6 d-none" id="dz-tableau-scene">
+                                            <label class="label-text mb-1">Tableau Scene</label>
+
+                                            {{-- Choose existing scene --}}
+                                            <select name="tableau_scene_ids[]"
+                                                    id="tableauSceneSelect"
+                                                    class="form-select select2 mb-1"
+                                                    multiple>
+                                                @foreach(\App\Models\TableauScene::where('is_active', true)->latest()->get() as $scene)
+                                                    <option value="{{ $scene->id }}"
+                                                            data-image-url="{{ $scene->getFirstMediaUrl() }}">
+                                                        {{ $scene->getTranslation('name', app()->getLocale(), false) ?: 'Scene #' . $scene->id }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+
+                                            <div class="text-center my-1 text-muted">or create new scene</div>
+
+                                            {{-- New scene name --}}
+                                            <div id="newTableauSceneFields">
+                                                <div class="row mb-1">
+                                                    <div class="col-md-6">
+                                                        <label class="label-text mb-1">Scene Name (EN)</label>
+                                                        <input type="text"
+                                                               name="new_tableau_scene_name[en]"
+                                                               id="newTableauSceneNameEn"
+                                                               class="form-control"
+                                                               placeholder="Example: Living Room Scene">
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label class="label-text mb-1">Scene Name (AR)</label>
+                                                        <input type="text"
+                                                               name="new_tableau_scene_name[ar]"
+                                                               id="newTableauSceneNameAr"
+                                                               class="form-control"
+                                                               placeholder="مثال: مشهد غرفة معيشة">
+                                                    </div>
+                                                    <input type="hidden" name="top_position" id="topPosition">
+                                                    <input type="hidden" name="right_position" id="rightPosition">
+                                                    <input type="hidden" name="left_position" id="leftPosition">
+                                                    <input type="hidden" name="bottom_position" id="bottomPosition">
                                                 </div>
-                                                <span class="badge bg-light text-dark border">Optional</span>
+
+                                                {{-- New scene image --}}
+                                                <div id="tableau-scene-dropzone"
+                                                     class="dropzone border rounded p-3"
+                                                     style="cursor:pointer; min-height:150px;">
+                                                    <div class="dz-message">
+                                                        <span>Drop tableau scene image here or click</span>
+                                                    </div>
+
+                                                    <input type="hidden"
+                                                           name="new_tableau_scene_image_id"
+                                                           id="uploadedTableauSceneImage">
+                                                </div>
+
+                                                <div class="d-flex justify-content-end mt-1">
+                                                    <button type="button"
+                                                            id="createTableauSceneBtn"
+                                                            class="btn btn-outline-primary btn-sm"
+                                                            data-create-url="{{ url('/tableau-scenes') }}">
+                                                        Create Scene
+                                                    </button>
+                                                </div>
+
+                                                <small class="form-text text-muted">
+                                                    Upload the scene image, then click Create Scene. The created scene will be selected automatically.
+                                                </small>
                                             </div>
-                                            <!-- where cards will render -->
-                                            <div id="mockupsCards" class="row g-2"></div>
-                                            <input type="hidden" name="mockup_id" id="selectedMockupId" value="">
-
-                                            <!-- hidden inputs to submit selected ids -->
-                                            <div id="mockupsHiddenInputs"></div>
                                         </div>
+                                        {{-- SCENE POSITION EDITOR --}}
+                                        <div class="form-group mb-2 col-md-12 d-none" id="dz-scene-position-editor">
+                                            <div class="position-relative mt-3 text-center mb-2">
+                                                <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                                <span class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                                      style="color: #24B094;">
+            Scene Position Editor
+        </span>
+                                            </div>
 
+                                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-1 mb-2">
+                                                {{-- Tabs --}}
+                                                <div id="scenePosTabs" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+
+                                                <button type="button"
+                                                        id="saveScenePositionsBtn"
+                                                        class="btn btn-primary btn-sm">
+                                                    Save Positions
+                                                </button>
+                                            </div>
+
+                                            {{-- Panels --}}
+                                            <div id="scenePosPanels"></div>
+
+                                            <p class="text-muted mt-1" style="font-size:12px;">
+                                                Drag the template overlay on each scene, then click Save Positions before submitting the template.
+                                            </p>
+                                        </div>
                                         <div class="position-relative mt-3 text-center">
                                             <hr class="opacity-75" style="border: 1px solid #24B094;">
                                             <span
@@ -578,27 +662,18 @@
                                     <button type="button" class="btn btn-outline-secondary" id="cancelButton">Cancel
                                     </button>
                                     <div class="d-flex gap-1">
-                                        @if(request()->query('q') == 'without')
-                                            <button type="submit" class="btn btn-outline-secondary fs-5 saveChangesButton"
-                                                    data-action="draft">
-                                                <span>Add Template as Draft</span>
-                                                <span id="saveLoader"
-                                                      class="spinner-border spinner-border-sm d-none saveLoader"
-                                                      role="status" aria-hidden="true"></span>
-                                            </button>
-                                        @endif
-                                        @if(request()->query('q') == 'with')
-                                            <button type="submit" class="btn btn-primary fs-5 saveChangesButton"
-                                                    data-action="editor">
-                                                <span>Save & Go to Editor</span>
-                                                <span id="saveLoader"
-                                                      class="spinner-border spinner-border-sm d-none saveLoader"
-                                                      role="status" aria-hidden="true"></span>
-                                            </button>
-                                        @endif
 
+                                        <button type="submit" class="btn btn-outline-secondary fs-5 saveChangesButton"
+                                                data-action="draft">
+                                            <span>Add Template as Draft</span>
+                                            <span id="saveLoader"
+                                                  class="spinner-border spinner-border-sm d-none saveLoader"
+                                                  role="status" aria-hidden="true"></span>
+                                        </button>
                                     </div>
+
                                 </div>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -637,6 +712,9 @@
 
 @endsection
 @section('vendor-script')
+    <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+
 
     <script>
         handleAjaxFormSubmit("#addTagForm", {
@@ -707,317 +785,18 @@
         });
     </script>
 
-    {{-- Replace the entire mockup JS block in your blade file with this --}}
-
     <script>
-        $(function () {
-            const q = "{{ request()->query('q') }}";
-            const isWithoutEditor = (q === 'without' || q === 'without_editor');
+        function selectedProductIsTableau() {
+            const selectedOptions = [
+                ...document.querySelectorAll('#productsWithoutCategoriesSelect option:checked'),
+                ...document.querySelectorAll('#productsSelect option:checked'),
+                ...document.querySelectorAll('#categoriesSelect option:checked')
+            ];
 
-            const $cardsWrap  = $('#mockupsCards');
-            const $mockupWrap = $('.mockupWrapper');
-            const $hiddenWrap = $('#mockupsHiddenInputs');
 
-            const selected = new Set();
+            return selectedOptions.some(option => option.dataset.isTableau === '1');
+        }
 
-            function getSelectValues(selector) {
-                const value = $(selector).val();
-
-                if (Array.isArray(value)) {
-                    return value.map(String).filter(Boolean);
-                }
-
-                return value ? [String(value)] : [];
-            }
-
-            function syncHiddenInputs() {
-                $hiddenWrap.empty();
-
-                [...selected].forEach(id => {
-                    $hiddenWrap.append(`<input type="hidden" name="mockup_ids[]" value="${id}">`);
-                });
-            }
-            function checkAllSelectedHaveMockup() {
-                const allSelected = [
-                    ...$('#categoriesSelect').find('option:selected'),
-                    ...$('#productsSelect').find('option:selected'),
-                    ...$('#productsWithoutCategoriesSelect').find('option:selected')
-                ];
-
-                if (!allSelected.length) {
-                    $mockupWrap.addClass('d-none');
-                } else {
-                    $mockupWrap.removeClass('d-none');
-                }
-            }
-
-            window.checkAllSelectedHaveMockup = checkAllSelectedHaveMockup;
-
-            window.checkAllSelectedHaveMockup = checkAllSelectedHaveMockup;
-
-            function renderMockupCards(items) {
-                $mockupWrap.removeClass('d-none');
-                $cardsWrap.empty();
-
-                if (!items.length) {
-                    $cardsWrap.append(`<div class="col-12 text-muted py-2">No mockups found</div>`);
-                    syncHiddenInputs();
-                    return;
-                }
-
-                const urlParams = new URLSearchParams(window.location.search);
-                const isWithEditor = urlParams.get('q') === 'with';
-
-                items.forEach(mockup => {
-                    const id = String(mockup.id);
-                    const name = mockup.name ?? ('Mockup #' + id);
-                    const images = mockup?.images || {};
-                    const firstKey = Object.keys(images)[0];
-
-                    const img = (firstKey && images[firstKey]?.base_url)
-                        || "{{ asset('images/placeholder.svg') }}";
-
-                    const isSelected = selected.has(id);
-
-                    $cardsWrap.append(`
-                    <div class="col-12 col-md-4 col-lg-2">
-                        <div class="mockup-card${isSelected ? ' selected' : ''}" data-id="${id}">
-                            <div class="card rounded-3 shadow-sm" style="border:1px solid #24B094; position:relative;">
-
-                                <div class="position-absolute" style="top:10px;left:10px;z-index:20;">
-                                    <input
-                                        class="form-check-input js-mockup-checkbox"
-                                        type="checkbox"
-                                        value="${id}"
-                                        ${isSelected ? 'checked' : ''}
-                                    />
-                                </div>
-
-                                <div class="d-flex justify-content-center align-items-center"
-                                     style="background-color:#F4F6F6;height:160px;border-radius:12px;padding:10px;">
-                                    <img src="${img}" class="mx-auto d-block"
-                                         style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:8px;"
-                                         alt="${name}">
-                                </div>
-
-                                <div class="card-body py-2">
-                                    <h6 class="card-title mb-2 text-truncate">${name}</h6>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `);
-                });
-
-                syncHiddenInputs();
-            }
-
-            function toggleMockup(id) {
-                id = String(id);
-
-                if (selected.has(id)) {
-                    selected.delete(id);
-                } else {
-                    selected.add(id);
-                }
-
-                const $card = $(`.mockup-card[data-id="${id}"]`);
-
-                $card.toggleClass('selected', selected.has(id));
-                $card.find('.js-mockup-checkbox').prop('checked', selected.has(id));
-
-                syncHiddenInputs();
-            }
-
-            $(document).on('click', '.mockup-card', function (e) {
-                if ($(e.target).closest('button, a, input').length) {
-                    return;
-                }
-
-                toggleMockup($(this).data('id'));
-            });
-
-            $(document).on('click', '.js-mockup-checkbox', function (e) {
-                e.stopPropagation();
-                toggleMockup($(this).val());
-            });
-
-            function loadCategoriesForSelectedProducts(callback = null) {
-                const selectedProductIds = getSelectValues('#categoriesSelect');
-                const $categories = $('#productsSelect');
-
-                if (!selectedProductIds.length) {
-                    $categories.empty().trigger('change.select2');
-
-                    if (typeof callback === 'function') {
-                        callback();
-                    }
-
-                    return;
-                }
-
-                $.ajax({
-                    url: "{{ route('products.categories') }}",
-                    type: "POST",
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        category_ids: selectedProductIds
-                    },
-                    success(response) {
-                        const oldSelected = getSelectValues('#productsSelect');
-
-                        $categories.empty();
-
-                        (response.data || []).forEach(cat => {
-                            const catId = String(cat.id);
-
-                            /*
-                             * Important:
-                             * Select returned categories automatically.
-                             * This is why $('#productsSelect').val() will not be [] after reload.
-                             */
-                            const isSelected = oldSelected.length
-                                ? oldSelected.includes(catId)
-                                : true;
-
-                            const option = new Option(
-                                cat.name,
-                                cat.id,
-                                isSelected,
-                                isSelected
-                            );
-
-                            $(option).attr('data-has-mockup', cat.has_mockup ? '1' : '0');
-
-                            $categories.append(option);
-                        });
-
-                        $categories.trigger('change.select2');
-
-                        if (typeof callback === 'function') {
-                            callback();
-                        }
-                    },
-                    error(xhr) {
-                        console.error("Error loading categories:", xhr.responseText);
-
-                        $categories.empty().trigger('change.select2');
-
-                        if (typeof callback === 'function') {
-                            callback();
-                        }
-                    }
-                });
-            }
-
-            function fetchMockups() {
-                const productIdsWithCategory = getSelectValues('#categoriesSelect');
-                const productIdsWithoutCategory = getSelectValues('#productsWithoutCategoriesSelect');
-
-                // Categories loaded from selected products with categories
-                const categoryIds = getSelectValues('#productsSelect');
-
-                /*
-                 * IMPORTANT:
-                 * - Products With Categories => send ONLY category_ids
-                 * - Products Without Categories => send ONLY product_ids
-                 */
-                const productIdsToSend = productIdsWithoutCategory;
-                const categoryIdsToSend = productIdsWithCategory.length > 0 ? categoryIds : [];
-
-                console.log('productIdsWithCategory', productIdsWithCategory);
-                console.log('productIdsWithoutCategory', productIdsWithoutCategory);
-                console.log('categoryIdsToSend', categoryIdsToSend);
-                console.log('productIdsToSend', productIdsToSend);
-
-                if (!productIdsToSend.length && !categoryIdsToSend.length) {
-                    $cardsWrap.empty();
-                    $hiddenWrap.empty();
-                    selected.clear();
-                    checkAllSelectedHaveMockup();
-                    return;
-                }
-
-                const selectedTypes = $('.type-checkbox:checked').map(function () {
-                    return $(this).val();
-                }).get();
-
-                $.ajax({
-                    url: "{{ route('mockups.index') }}",
-                    type: "GET",
-                    traditional: false,
-                    data: {
-                        product_ids: productIdsToSend,
-                        category_ids: categoryIdsToSend,
-                        types: selectedTypes,
-                        filter: 'both'
-                    },
-                    success(response) {
-                        const items = response?.data?.data || response?.data || response || [];
-
-                        const validIds = new Set(items.map(x => String(x.id)));
-
-                        [...selected].forEach(id => {
-                            if (!validIds.has(id)) {
-                                selected.delete(id);
-                            }
-                        });
-
-                        renderMockupCards(items);
-                        checkAllSelectedHaveMockup();
-                    },
-                    error(xhr) {
-                        console.error("Error fetching mockups:", xhr.responseText);
-
-                        $cardsWrap.empty().append(
-                            `<div class="col-12 text-danger py-2">Failed to load mockups</div>`
-                        );
-                    }
-                });
-            }
-            $('#categoriesSelect').on('change', function () {
-                loadCategoriesForSelectedProducts(function () {
-                    fetchMockups();
-                });
-            });
-
-            $('#productsSelect').on('change', function () {
-                fetchMockups();
-            });
-
-            $('#productsWithoutCategoriesSelect').on('change', function () {
-                fetchMockups();
-            });
-
-            $('.type-checkbox').on('change', function () {
-                fetchMockups();
-            });
-
-            $(document).on('click', '.js-show-on-mockup', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const id = String($(this).data('id'));
-
-                $('#selectedMockupId').val(id);
-                $('#addTemplateForm').submit();
-            });
-
-            /*
-             * Initial load after page reload.
-             * If Products With Categories has selected values,
-             * load categories into #productsSelect first, then fetch mockups.
-             */
-            if (getSelectValues('#categoriesSelect').length) {
-                loadCategoriesForSelectedProducts(function () {
-                    fetchMockups();
-                });
-            } else {
-                fetchMockups();
-            }
-        });
-    </script>
-    <script>
         function updateTemplateTypeDropzones() {
             const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox'))
                 .filter(cb => cb.checked)
@@ -1027,9 +806,9 @@
             const dzBack = document.getElementById("dz-back");
             const dzNone = document.getElementById("dz-none");
             const dzModel = document.getElementById("dz-model");
+            const dzTableauScene = document.getElementById("dz-tableau-scene");
 
-
-            [dzFront, dzBack, dzNone, dzModel].forEach(dz => {
+            [dzFront, dzBack, dzNone, dzModel, dzTableauScene].forEach(dz => {
                 if (dz) {
                     dz.classList.add("d-none");
                     dz.classList.remove("col-md-4", "col-md-6", "col-md-12");
@@ -1042,25 +821,46 @@
                 dzFront.classList.remove("d-none");
                 visibleDZ.push(dzFront);
             }
+
             if (selectedTypes.includes("back") && dzBack) {
                 dzBack.classList.remove("d-none");
                 visibleDZ.push(dzBack);
             }
+
             if (selectedTypes.includes("none") && dzNone) {
                 dzNone.classList.remove("d-none");
                 visibleDZ.push(dzNone);
             }
 
-
             if (visibleDZ.length > 0 && dzModel) {
                 dzModel.classList.remove("d-none");
                 visibleDZ.push(dzModel);
             }
-            @if(request()->query('q') == 'with')
-            dzModel.classList.remove("d-none");
 
+            @if(request()->query('q') == 'with')
+            if (dzModel) {
+                dzModel.classList.remove("d-none");
+                visibleDZ.push(dzModel);
+            }
             @endif
 
+            if (selectedProductIsTableau() && dzTableauScene) {
+                dzTableauScene.classList.remove("d-none");
+                visibleDZ.push(dzTableauScene);
+
+                if (typeof window.initTableauSceneSelect === 'function') {
+                    window.initTableauSceneSelect();
+                }
+            } else {
+                const tableauSceneInput = document.getElementById("uploadedTableauSceneImage");
+
+                if (tableauSceneInput) {
+                    tableauSceneInput.value = "";
+                }
+
+                $('#tableauSceneSelect').val(null).trigger('change');
+                $('#newTableauSceneFields').show();
+            }
 
             visibleDZ.forEach(dz => {
                 if (visibleDZ.length === 1) {
@@ -1229,7 +1029,7 @@
                 });
             } else {
                 // Clear right select and sync
-                $('#industriesSelect').empty().trigger('change');
+                $('#subIndustriesSelect').empty().trigger('change');
             }
         });
     </script>
@@ -1497,7 +1297,13 @@
 
                         // If user has no selection, auto-select the first option
                         const selected = current.length ? current.includes(String(id)) : index === 0;
-                        $sizes.append(new Option(text, id, false, selected));
+                        const option = new Option(text, id, false, selected);
+                        const src = item.attributes ? item.attributes : item;
+
+                        $(option).attr('data-width', src.width ?? src.w ?? '');
+                        $(option).attr('data-height', src.height ?? src.h ?? '');
+
+                        $sizes.append(option);
                     });
 
                     $sizes.trigger('change');
@@ -1528,6 +1334,7 @@
                         (response.data || []).forEach(cat => {
                             const opt = new Option(cat.name, cat.id, false, true);
                             $(opt).attr('data-has-mockup', cat.has_mockup ? '1' : '0');
+                            $(opt).attr('data-is-tableau', cat.is_tableau ? '1' : '0');
                             $right.append(opt);
                         });
 
@@ -1552,7 +1359,7 @@
             syncSelectedResourcesToHiddenInputs();
             // optional immediate refresh:
             refreshSizes();
-            window.checkAllSelectedHaveMockup();
+
         });
 
         // Products without categories changed
@@ -1560,7 +1367,6 @@
             syncSelectedResourcesToHiddenInputs();
             // optional immediate refresh:
             refreshSizes();
-            window.checkAllSelectedHaveMockup();
         });
 
         // When user opens/clicks Sizes, fetch fresh sizes
@@ -1618,12 +1424,17 @@
             }
 
 
+            if (typeof window.syncTableauScenePositions === 'function') {
+                window.syncTableauScenePositions();
+            }
+
             // Let `handleAjaxFormSubmit()` take care of the actual submission
         });
 
         handleAjaxFormSubmit("#addTemplateForm", {
             successMessage: "Template created successfully",
             onSuccess: function (response, $form) {
+                setTableauTemplateUrl(response);
 
                 // Re-enable buttons & hide all loaders
                 $('.saveChangesButton')
@@ -1670,13 +1481,70 @@
 
     </script>
 
-    <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
 @endsection
 
 @section('page-script')
     <script>
         Dropzone.autoDiscover = false;
+
+        window.tableauTemplateUrl = window.tableauTemplateUrl || null;
+        window.newTableauSceneImageUrl = window.newTableauSceneImageUrl || null;
+
+        function getServerMediaUrl(response) {
+            const data = response?.data || response || {};
+
+            return response?.template_url ||
+                response?.templateUrl ||
+                data?.template_url ||
+                data?.templateUrl ||
+                data?.full_url ||
+                data?.fullUrl ||
+                data?.url ||
+                data?.base_url ||
+                data?.baseUrl ||
+                data?.original_url ||
+                data?.originalUrl ||
+                data?.preview_url ||
+                data?.previewUrl ||
+                data?.media?.full_url ||
+                data?.media?.url ||
+                data?.media?.base_url ||
+                data?.file?.full_url ||
+                data?.file?.url ||
+                null;
+        }
+
+        function setTableauTemplateUrl(response, fallbackUrl = null) {
+            const url = getServerMediaUrl(response) || fallbackUrl;
+
+            if (!url) return;
+
+            window.tableauTemplateUrl = url;
+
+            if (typeof window.refreshTableauTemplatePreview === 'function') {
+                window.refreshTableauTemplatePreview();
+            }
+        }
+
+        function clearTableauTemplateUrl() {
+            window.tableauTemplateUrl = null;
+
+            if (typeof window.refreshTableauTemplatePreview === 'function') {
+                window.refreshTableauTemplatePreview();
+            }
+        }
+
+        function setTableauSceneImageUrl(file, response = null) {
+            const url = getServerMediaUrl(response) || file?._fullDataUrl || null;
+
+            if (!url) return;
+
+            window.newTableauSceneImageUrl = url;
+
+            if (typeof window.triggerTableauScenePositionRebuild === 'function') {
+                setTimeout(window.triggerTableauScenePositionRebuild, 100);
+            }
+        }
 
         const templateDropzone = new Dropzone("#template-dropzone", {
             url: "{{ route('media.store') }}",
@@ -1694,11 +1562,13 @@
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedTemplateImage").value = response.data.id;
+                        setTableauTemplateUrl(response);
                     }
                 });
 
                 this.on("removedfile", function (file) {
                     document.getElementById("uploadedTemplateImage").value = "";
+                    clearTableauTemplateUrl();
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
@@ -1776,11 +1646,13 @@
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedFrontTemplateImage").value = response.data.id;
+                        setTableauTemplateUrl(response);
                     }
                 });
 
                 this.on("removedfile", function (file) {
                     document.getElementById("uploadedFrontTemplateImage").value = "";
+                    clearTableauTemplateUrl();
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
@@ -1850,11 +1722,13 @@
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedBackTemplateImage").value = response.data.id;
+                        setTableauTemplateUrl(response);
                     }
                 });
 
                 this.on("removedfile", function (file) {
                     document.getElementById("uploadedBackTemplateImage").value = "";
+                    clearTableauTemplateUrl();
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
@@ -1924,11 +1798,13 @@
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedNoneTemplateImage").value = response.data.id;
+                        setTableauTemplateUrl(response);
                     }
                 });
 
                 this.on("removedfile", function (file) {
                     document.getElementById("uploadedNoneTemplateImage").value = "";
+                    clearTableauTemplateUrl();
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
@@ -1990,37 +1866,72 @@
     </script>
 
     <script>
-        $(document).ready(function () {
-            $('#industriesSelect').select2({
-                placeholder: "Choose Industries",
-                allowClear: true
-            });
-            $('#subIndustriesSelect').select2({
-                placeholder: "Choose Sub Industries",
-                allowClear: true
-            });
-            $('#productsSelect').select2({
-                placeholder: "Choose Categories",
-                allowClear: true
-            });
-            $('#productsWithoutCategoriesSelect').select2({
-                placeholder: "Choose Products",
-                allowClear: true
-            });
-            $('#categoriesSelect').select2({
-                placeholder: "Choose Products",
-                allowClear: true
-            });
-            $('#tagsSelect').select2({
-                placeholder: "Choose Tags",
+        function initSelect2Field(selector, options = {}) {
+            const $field = $(selector);
+
+            if (!$field.length) {
+                return;
+            }
+
+            if (!$.fn.select2) {
+                console.error('Select2 is not loaded. Move select2.full.min.js before custom scripts.');
+                return;
+            }
+
+            if ($field.data('select2')) {
+                $field.select2('destroy');
+            }
+
+            $field.select2({
+                width: '100%',
                 allowClear: true,
-
+                ...options
             });
-            $('#colorsSelect').select2({
-                placeholder: "Choose Colors",
-                allowClear: true
+        }
+
+        window.initTableauSceneSelect = function () {
+            initSelect2Field('#tableauSceneSelect', {
+                placeholder: 'Choose Existing Scenes',
+                closeOnSelect: false
+            });
+        };
+
+        $(document).ready(function () {
+            initSelect2Field('#industriesSelect', {
+                placeholder: 'Choose Industries'
             });
 
+            initSelect2Field('#subIndustriesSelect', {
+                placeholder: 'Choose Sub Industries'
+            });
+
+            initSelect2Field('#productsSelect', {
+                placeholder: 'Choose Categories',
+                closeOnSelect: false
+            });
+
+            initSelect2Field('#productsWithoutCategoriesSelect', {
+                placeholder: 'Choose Products',
+                closeOnSelect: false
+            });
+
+            initSelect2Field('#categoriesSelect', {
+                placeholder: 'Choose Products',
+                closeOnSelect: false
+            });
+
+            initSelect2Field('#tagsSelect', {
+                placeholder: 'Choose Tags',
+                closeOnSelect: false
+            });
+
+            initSelect2Field('#colorsSelect', {
+                placeholder: 'Choose Colors'
+            });
+
+            window.initTableauSceneSelect();
+
+            $('#tableauSceneSelect').trigger('change');
         });
     </script>
     <script !src="">
@@ -2109,6 +2020,882 @@
             updateDeleteButtons($('.outer-repeater'));
             initializeImageUploaders($('.outer-repeater'));
         });
+    </script>
+    <script>
+        Dropzone.autoDiscover = false;
+
+        let tableauSceneDropzone = null;
+
+        if (document.getElementById("tableau-scene-dropzone")) {
+            tableauSceneDropzone = new Dropzone("#tableau-scene-dropzone", {
+                url: "{{ route('media.store') }}",
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 30,
+                acceptedFiles: "image/png,image/jpeg,image/webp",
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                addRemoveLinks: true,
+                dictDefaultMessage: "Drop tableau scene image here or click to upload",
+                init: function () {
+                    this.on("addedfile", function (file) {
+                        const reader = new FileReader();
+
+                        reader.onload = function (e) {
+                            file._fullDataUrl = e.target.result;
+                            window.newTableauSceneImageUrl = e.target.result;
+                        };
+
+                        reader.readAsDataURL(file);
+                    });
+
+                    this.on("success", function (file, response) {
+                        if (response.success && response.data) {
+                            file._hiddenInputId = response.data.id;
+                            document.getElementById("uploadedTableauSceneImage").value = response.data.id;
+                            setTableauSceneImageUrl(file, response);
+                        }
+                    });
+
+                    this.on("removedfile", function (file) {
+                        document.getElementById("uploadedTableauSceneImage").value = "";
+                        window.newTableauSceneImageUrl = null;
+
+                        if (typeof window.triggerTableauScenePositionRebuild === 'function') {
+                            setTimeout(window.triggerTableauScenePositionRebuild, 100);
+                        }
+
+                        if (file._hiddenInputId) {
+                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                method: "DELETE",
+                                headers: {
+                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+        $('#productsWithoutCategoriesSelect, #productsSelect, #categoriesSelect').on('change', function () {
+            updateTemplateTypeDropzones();
+        });
+
+        $('#tableauSceneSelect').on('change', function () {
+            const selectedScenes = $(this).val() || [];
+            const hasExistingScene = Array.isArray(selectedScenes)
+                ? selectedScenes.length > 0
+                : !!selectedScenes;
+
+            // $('#newTableauSceneFields').toggle(!hasExistingScene);
+
+            if (hasExistingScene) {
+                $('#newTableauSceneNameEn').val('');
+                $('#newTableauSceneNameAr').val('');
+            }
+        });
+
+
+        function notifyTableau(message, type = 'success') {
+            if (typeof Toastify === 'function') {
+                Toastify({
+                    text: message,
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: type === 'success' ? "#28C76F" : "#EA5455",
+                    close: true
+                }).showToast();
+                return;
+            }
+
+            if (type === 'success') {
+                console.log(message);
+            } else {
+                alert(message);
+            }
+        }
+
+        function getSceneTextFromResponse(response) {
+            const data = response?.data || response?.scene || response || {};
+            const name = data?.name || data?.translations?.name || {};
+
+            return name?.['{{ app()->getLocale() }}'] ||
+                name?.en ||
+                data?.name_en ||
+                data?.title ||
+                data?.label ||
+                ('Scene #' + (data?.id || ''));
+        }
+
+        function getSceneImageUrlFromResponse(response) {
+            const data = response?.data || response?.scene || response || {};
+
+            return data?.image_url ||
+                data?.imageUrl ||
+                data?.media_url ||
+                data?.mediaUrl ||
+                data?.full_url ||
+                data?.fullUrl ||
+                data?.url ||
+                data?.base_url ||
+                data?.baseUrl ||
+                data?.media?.full_url ||
+                data?.media?.url ||
+                window.newTableauSceneImageUrl ||
+                '';
+        }
+
+        function addAndSelectTableauScene(sceneId, sceneText, imageUrl) {
+            const $select = $('#tableauSceneSelect');
+
+            if (!$select.length || !sceneId) return;
+
+            let option = $select.find(`option[value="${sceneId}"]`)[0];
+
+            if (!option) {
+                option = new Option(sceneText || ('Scene #' + sceneId), sceneId, true, true);
+                $select.append(option);
+            }
+
+            $(option)
+                .attr('data-image-url', imageUrl || '')
+                .prop('selected', true);
+
+            $select.trigger('change');
+        }
+
+        $(document).on('click', '#createTableauSceneBtn', function () {
+            const $btn = $(this);
+            const url = $btn.data('create-url');
+            const nameEn = String($('#newTableauSceneNameEn').val() || '').trim();
+            const nameAr = String($('#newTableauSceneNameAr').val() || '').trim();
+            const imageId = $('#uploadedTableauSceneImage').val();
+
+            if (!nameEn && !nameAr) {
+                notifyTableau('Please enter scene name first.', 'error');
+                return;
+            }
+
+            if (!imageId) {
+                notifyTableau('Please upload scene image first.', 'error');
+                return;
+            }
+
+            $btn.prop('disabled', true).data('old-text', $btn.text()).text('Creating...');
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: {
+                    _token: document.querySelector('meta[name="csrf-token"]').content,
+                    'name[en]': nameEn,
+                    'name[ar]': nameAr,
+                    'new_tableau_scene_name[en]': nameEn,
+                    'new_tableau_scene_name[ar]': nameAr,
+                    image_id: imageId,
+                    media_id: imageId,
+                    new_tableau_scene_image_id: imageId,
+                    is_active: 1
+                },
+                success(response) {
+                    const data = response?.data || response?.scene || response || {};
+                    const sceneId = data?.id || response?.id;
+
+                    if (!sceneId) {
+                        notifyTableau('Scene created, but response does not contain scene id.', 'error');
+                        return;
+                    }
+
+                    addAndSelectTableauScene(
+                        sceneId,
+                        getSceneTextFromResponse(response),
+                        getSceneImageUrlFromResponse(response)
+                    );
+
+                    $('#newTableauSceneNameEn').val('');
+                    $('#newTableauSceneNameAr').val('');
+                    $('#uploadedTableauSceneImage').val('');
+                    window.newTableauSceneImageUrl = null;
+
+                    if (tableauSceneDropzone) {
+                        tableauSceneDropzone.files.forEach(file => {
+                            file._hiddenInputId = null;
+                        });
+                        tableauSceneDropzone.removeAllFiles(true);
+                    }
+
+                    notifyTableau('Scene created and selected successfully.');
+                },
+                error(xhr) {
+                    const message = xhr?.responseJSON?.message ||
+                        xhr?.responseJSON?.errors ||
+                        'Failed to create scene.';
+
+                    notifyTableau(typeof message === 'string' ? message : JSON.stringify(message), 'error');
+                },
+                complete() {
+                    $btn.prop('disabled', false).text($btn.data('old-text') || 'Create Scene');
+                }
+            });
+        });
+    </script>
+
+
+    <script>
+        (function () {
+            const positionState = {};
+            let templateSrc = null;
+            let templateAspect = 1;
+
+            const DEFAULT_TOP = 35;
+            const DEFAULT_LEFT = 35;
+            const DEFAULT_OVERLAY_WIDTH = 28;
+
+            function safeId(sceneId) {
+                return String(sceneId).replace(/[^a-zA-Z0-9_-]/g, '_');
+            }
+
+            function num(value, fallback = 0) {
+                const n = Number(value);
+                return Number.isFinite(n) ? n : fallback;
+            }
+
+            function pct(value) {
+                return Math.min(100, Math.max(0, Math.round(num(value) * 10) / 10));
+            }
+
+            function getSelectedDimension() {
+                const select = document.getElementById('sizesSelect');
+                const option = select?.selectedOptions?.[0];
+
+                let width = num(option?.dataset?.width, null);
+                let height = num(option?.dataset?.height, null);
+
+                if ((!width || !height) && option) {
+                    const text = option.textContent || '';
+                    const match = text.match(/([\d.]+)\s*[*×x]\s*([\d.]+)/i);
+
+                    if (match) {
+                        height = num(match[1], null);
+                        width = num(match[2], null);
+                    }
+                }
+
+                if (!width || !height) {
+                    return {
+                        width: 1,
+                        height: 1,
+                        aspect: templateAspect || 1
+                    };
+                }
+
+                return {
+                    width,
+                    height,
+                    aspect: width / height
+                };
+            }
+
+            function getCanvasAspect(canvas) {
+                const rect = canvas?.getBoundingClientRect();
+
+                if (rect?.width && rect?.height) {
+                    return rect.width / rect.height;
+                }
+
+                return 4 / 3;
+            }
+
+            function ensureState(sceneId) {
+                if (!positionState[sceneId]) {
+                    positionState[sceneId] = {
+                        top: DEFAULT_TOP,
+                        left: DEFAULT_LEFT,
+                        width: DEFAULT_OVERLAY_WIDTH
+                    };
+                }
+
+                return positionState[sceneId];
+            }
+
+            function getOverlaySize(canvas, sceneId) {
+                const st = ensureState(sceneId);
+                const dimension = getSelectedDimension();
+
+                const width = pct(st.width || DEFAULT_OVERLAY_WIDTH);
+                const canvasAspect = getCanvasAspect(canvas);
+                const overlayAspect = dimension.aspect || templateAspect || 1;
+
+                const height = pct(width * canvasAspect / overlayAspect);
+
+                return {
+                    width,
+                    height,
+                    aspect: overlayAspect
+                };
+            }
+
+            function clampPosition(canvas, sceneId, top, left) {
+                const size = getOverlaySize(canvas, sceneId);
+
+                const maxTop = Math.max(0, 100 - size.height);
+                const maxLeft = Math.max(0, 100 - size.width);
+
+                return {
+                    top: Math.min(maxTop, Math.max(0, top)),
+                    left: Math.min(maxLeft, Math.max(0, left))
+                };
+            }
+
+            function getBox(canvas, sceneId) {
+                const st = ensureState(sceneId);
+                const size = getOverlaySize(canvas, sceneId);
+                const clamped = clampPosition(canvas, sceneId, st.top, st.left);
+
+                st.top = clamped.top;
+                st.left = clamped.left;
+
+                return {
+                    top: pct(st.top),
+                    left: pct(st.left),
+                    right: pct(100 - st.left - size.width),
+                    bottom: pct(100 - st.top - size.height),
+                    width: pct(size.width),
+                    height: pct(size.height),
+                    aspect: size.aspect
+                };
+            }
+
+            function loadTemplateImage(url) {
+                templateSrc = url;
+
+                const img = new Image();
+
+                img.onload = function () {
+                    templateAspect = img.naturalWidth / img.naturalHeight || 1;
+                    refreshAllDraggables();
+                };
+
+                img.onerror = function () {
+                    templateSrc = null;
+                    refreshAllDraggables();
+                };
+
+                img.src = url;
+            }
+
+            function refreshTemplateSrc() {
+                if (window.tableauTemplateUrl) {
+                    loadTemplateImage(window.tableauTemplateUrl);
+                    return;
+                }
+
+                const preview = document.querySelector(
+                    '#front-template-dropzone .dz-image img, ' +
+                    '#front-template-dropzone .dz-preview img, ' +
+                    '#template-dropzone .dz-image img, ' +
+                    '#template-dropzone .dz-preview img, ' +
+                    '#back-template-dropzone .dz-image img, ' +
+                    '#back-template-dropzone .dz-preview img, ' +
+                    '#none-template-dropzone .dz-image img, ' +
+                    '#none-template-dropzone .dz-preview img'
+                );
+
+                if (preview && preview.src && !preview.src.includes('placeholder')) {
+                    loadTemplateImage(preview.src);
+                } else {
+                    templateSrc = null;
+                    refreshAllDraggables();
+                }
+            }
+
+            window.refreshTableauTemplatePreview = refreshTemplateSrc;
+
+            [
+                'front-template-dropzone',
+                'template-dropzone',
+                'back-template-dropzone',
+                'none-template-dropzone'
+            ].forEach(id => {
+                const el = document.getElementById(id);
+
+                if (el) {
+                    new MutationObserver(refreshTemplateSrc).observe(el, {
+                        childList: true,
+                        subtree: true,
+                        attributes: true,
+                        attributeFilter: ['src']
+                    });
+                }
+            });
+
+            function syncHiddenInput(sceneId) {
+                const form = document.getElementById('addTemplateForm');
+                const canvas = document.querySelector(`.spe-canvas[data-scene-id="${sceneId}"]`);
+
+                if (!form || !canvas) return;
+
+                const box = getBox(canvas, sceneId);
+                const key = `scene_positions[${sceneId}]`;
+
+                ['top', 'right', 'left', 'bottom', 'width', 'height'].forEach(axis => {
+                    const name = `${key}[${axis}]`;
+                    let input = form.querySelector(`input[name="${name}"]`);
+
+                    if (!input) {
+                        input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = name;
+                        form.appendChild(input);
+                    }
+
+                    input.value = box[axis];
+                });
+
+                if (String(sceneId) === 'new') {
+                    const legacyMap = {
+                        top: 'topPosition',
+                        right: 'rightPosition',
+                        left: 'leftPosition',
+                        bottom: 'bottomPosition'
+                    };
+
+                    Object.entries(legacyMap).forEach(([axis, id]) => {
+                        const input = document.getElementById(id);
+
+                        if (input) {
+                            input.value = box[axis];
+                        }
+                    });
+                }
+            }
+
+            function updateCoordsDisplay(sceneId) {
+                const id = safeId(sceneId);
+                const canvas = document.querySelector(`.spe-canvas[data-scene-id="${sceneId}"]`);
+
+                if (!canvas) return;
+
+                const box = getBox(canvas, sceneId);
+                const dimension = getSelectedDimension();
+
+                ['top', 'right', 'left', 'bottom'].forEach(axis => {
+                    const textEl = document.getElementById(`spe-${axis}-${id}`);
+
+                    if (textEl) {
+                        textEl.textContent = box[axis] + '%';
+                    }
+                });
+
+                const dimEl = document.getElementById(`spe-dim-${id}`);
+
+                if (dimEl) {
+                    dimEl.textContent = `Template canvas ratio: ${dimension.width} × ${dimension.height}`;
+                }
+
+                syncHiddenInput(sceneId);
+            }
+
+            function renderDraggable(canvas, sceneId) {
+                canvas.querySelectorAll('.spe-dragger').forEach(el => el.remove());
+
+                const box = getBox(canvas, sceneId);
+                let dragger;
+
+                if (templateSrc) {
+                    dragger = document.createElement('img');
+                    dragger.src = templateSrc;
+                    dragger.className = 'spe-dragger';
+                    dragger.style.cssText = `
+                            position:absolute;
+                            width:${box.width}%;
+                            aspect-ratio:${box.aspect};
+                            top:${box.top}%;
+                            left:${box.left}%;
+                            cursor:grab;
+                            touch-action:none;
+                            border:2px dashed rgba(255,255,255,.85);
+                            border-radius:4px;
+                            box-sizing:border-box;
+                            object-fit:contain;
+                            opacity:1;
+                            filter:none;
+                            user-select:none;
+                        `;
+                } else {
+                    dragger = document.createElement('div');
+                    dragger.className = 'spe-dragger';
+                    dragger.textContent = 'Canvas';
+                    dragger.style.cssText = `
+                            position:absolute;
+                            width:${box.width}%;
+                            aspect-ratio:${box.aspect};
+                            top:${box.top}%;
+                            left:${box.left}%;
+                            cursor:grab;
+                            touch-action:none;
+                            background:rgba(36,176,148,.18);
+                            border:2px dashed #24B094;
+                            border-radius:4px;
+                            box-sizing:border-box;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            font-size:11px;
+                            color:#24B094;
+                            user-select:none;
+                        `;
+                }
+
+                canvas.appendChild(dragger);
+                attachDrag(dragger, canvas, sceneId);
+                updateCoordsDisplay(sceneId);
+            }
+
+            function refreshAllDraggables() {
+                document.querySelectorAll('.spe-canvas').forEach(canvas => {
+                    renderDraggable(canvas, canvas.dataset.sceneId);
+                });
+            }
+
+            function attachDrag(el, canvas, sceneId) {
+                let dragging = false;
+                let startX = 0;
+                let startY = 0;
+                let startTop = 0;
+                let startLeft = 0;
+
+                function xy(e) {
+                    return e.touches
+                        ? {x: e.touches[0].clientX, y: e.touches[0].clientY}
+                        : {x: e.clientX, y: e.clientY};
+                }
+
+                function onStart(e) {
+                    e.preventDefault();
+
+                    dragging = true;
+
+                    const point = xy(e);
+                    const cRect = canvas.getBoundingClientRect();
+                    const elRect = el.getBoundingClientRect();
+
+                    startX = point.x;
+                    startY = point.y;
+                    startTop = ((elRect.top - cRect.top) / cRect.height) * 100;
+                    startLeft = ((elRect.left - cRect.left) / cRect.width) * 100;
+
+                    el.style.cursor = 'grabbing';
+                }
+
+                function onMove(e) {
+                    if (!dragging) return;
+
+                    e.preventDefault();
+
+                    const point = xy(e);
+                    const cRect = canvas.getBoundingClientRect();
+
+                    const newTop = startTop + ((point.y - startY) / cRect.height) * 100;
+                    const newLeft = startLeft + ((point.x - startX) / cRect.width) * 100;
+                    const clamped = clampPosition(canvas, sceneId, newTop, newLeft);
+
+                    positionState[sceneId].top = clamped.top;
+                    positionState[sceneId].left = clamped.left;
+
+                    el.style.top = clamped.top + '%';
+                    el.style.left = clamped.left + '%';
+
+                    updateCoordsDisplay(sceneId);
+                }
+
+                function onEnd() {
+                    dragging = false;
+                    el.style.cursor = 'grab';
+                }
+
+                el.addEventListener('mousedown', onStart);
+                el.addEventListener('touchstart', onStart, {passive: false});
+
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('touchmove', onMove, {passive: false});
+
+                window.addEventListener('mouseup', onEnd);
+                window.addEventListener('touchend', onEnd);
+            }
+
+            function applyManualInput(sceneId, axis) {
+                const id = safeId(sceneId);
+                const canvas = document.querySelector(`.spe-canvas[data-scene-id="${sceneId}"]`);
+
+                if (!canvas) return;
+
+                const current = getBox(canvas, sceneId);
+
+                let top = num(document.getElementById(`spe-input-top-${id}`)?.value, current.top);
+                let left = num(document.getElementById(`spe-input-left-${id}`)?.value, current.left);
+                const right = num(document.getElementById(`spe-input-right-${id}`)?.value, current.right);
+                const bottom = num(document.getElementById(`spe-input-bottom-${id}`)?.value, current.bottom);
+
+                if (axis === 'right') {
+                    left = 100 - right - current.width;
+                }
+
+                if (axis === 'bottom') {
+                    top = 100 - bottom - current.height;
+                }
+
+                const clamped = clampPosition(canvas, sceneId, top, left);
+
+                positionState[sceneId].top = clamped.top;
+                positionState[sceneId].left = clamped.left;
+
+                const dragger = canvas.querySelector('.spe-dragger');
+
+                if (dragger) {
+                    dragger.style.top = clamped.top + '%';
+                    dragger.style.left = clamped.left + '%';
+                }
+
+                updateCoordsDisplay(sceneId);
+            }
+
+            function buildPanel(sceneId, label, imageUrl) {
+                const id = safeId(sceneId);
+
+                ensureState(sceneId);
+
+                const panel = document.createElement('div');
+                panel.className = 'spe-panel';
+                panel.id = `spe-panel-${id}`;
+                panel.style.display = 'none';
+
+                const canvasWrap = document.createElement('div');
+                canvasWrap.className = 'spe-canvas';
+                canvasWrap.dataset.sceneId = sceneId;
+                canvasWrap.style.cssText = `
+                        position:relative;
+                        width:100%;
+                        max-width:100%;
+                        aspect-ratio:4/3;
+                        border-radius:8px;
+                        overflow:hidden;
+                        border:1px solid #dee2e6;
+                        background:#fff;
+                        user-select:none;
+                    `;
+
+                if (imageUrl) {
+                    const bg = document.createElement('img');
+                    bg.src = imageUrl;
+                    bg.style.cssText = `
+                            position:absolute;
+                            inset:0;
+                            width:100%;
+                            height:100%;
+                            object-fit:contain;
+                            opacity:1;
+                            filter:none;
+                            image-rendering:auto;
+                            pointer-events:none;
+                        `;
+
+                    bg.onload = function () {
+                        if (bg.naturalWidth && bg.naturalHeight) {
+                            canvasWrap.style.aspectRatio = `${bg.naturalWidth} / ${bg.naturalHeight}`;
+                            refreshAllDraggables();
+                        }
+                    };
+
+                    canvasWrap.appendChild(bg);
+                } else {
+                    const placeholder = document.createElement('div');
+                    placeholder.style.cssText = `
+                            position:absolute;
+                            inset:0;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            color:#adb5bd;
+                            font-size:13px;
+                            flex-direction:column;
+                            gap:6px;
+                        `;
+                    placeholder.innerHTML = `
+                            <i data-feather="image" style="width:32px;height:32px;stroke:#adb5bd"></i>
+                            <span>Scene image</span>
+                        `;
+                    canvasWrap.appendChild(placeholder);
+                }
+
+                const controls = document.createElement('div');
+                controls.className = 'd-flex flex-wrap align-items-center gap-1 mt-2';
+                controls.innerHTML = `
+                        <span class="badge bg-light text-dark border">Top: <strong id="spe-top-${id}">0%</strong></span>
+                        <span class="badge bg-light text-dark border">Right: <strong id="spe-right-${id}">0%</strong></span>
+                        <span class="badge bg-light text-dark border">Left: <strong id="spe-left-${id}">0%</strong></span>
+                        <span class="badge bg-light text-dark border">Bottom: <strong id="spe-bottom-${id}">0%</strong></span>
+                        <small class="text-muted ms-1" id="spe-dim-${id}"></small>
+                    `;
+
+                panel.appendChild(canvasWrap);
+                panel.appendChild(controls);
+
+                setTimeout(() => {
+                    updateCoordsDisplay(sceneId);
+                }, 0);
+
+                return panel;
+            }
+
+            function buildTab(sceneId, label) {
+                const id = safeId(sceneId);
+                const btn = document.createElement('button');
+
+                btn.type = 'button';
+                btn.className = 'btn btn-sm btn-outline-secondary spe-tab';
+                btn.dataset.sceneId = String(sceneId);
+                btn.dataset.panelId = id;
+                btn.textContent = label;
+                btn.addEventListener('click', () => activateTab(sceneId));
+
+                return btn;
+            }
+
+            function activateTab(sceneId) {
+                const id = safeId(sceneId);
+
+                document.querySelectorAll('.spe-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.sceneId === String(sceneId));
+                });
+
+                document.querySelectorAll('.spe-panel').forEach(panel => {
+                    panel.style.display = panel.id === `spe-panel-${id}` ? 'block' : 'none';
+                });
+
+                refreshAllDraggables();
+            }
+
+            function rebuildEditor(scenes) {
+                const tabsEl = document.getElementById('scenePosTabs');
+                const panelsEl = document.getElementById('scenePosPanels');
+                const wrapper = document.getElementById('dz-scene-position-editor');
+
+                if (!tabsEl || !panelsEl || !wrapper) return;
+
+                tabsEl.innerHTML = '';
+                panelsEl.innerHTML = '';
+
+                if (!scenes.length) {
+                    wrapper.classList.add('d-none');
+                    return;
+                }
+
+                wrapper.classList.remove('d-none');
+
+                scenes.forEach(scene => {
+                    tabsEl.appendChild(buildTab(scene.id, scene.label));
+                    panelsEl.appendChild(buildPanel(scene.id, scene.label, scene.imageUrl || ''));
+                });
+
+                refreshTemplateSrc();
+
+                scenes.forEach(scene => {
+                    const canvas = document.querySelector(`.spe-canvas[data-scene-id="${scene.id}"]`);
+
+                    if (canvas) {
+                        renderDraggable(canvas, scene.id);
+                    }
+                });
+
+                activateTab(scenes[0].id);
+
+                if (window.feather) {
+                    feather.replace();
+                }
+            }
+
+            function collectScenes() {
+                const scenes = [];
+                const $select = $('#tableauSceneSelect');
+
+                ($select.val() || []).forEach(id => {
+                    const $option = $select.find(`option[value="${id}"]`);
+
+                    scenes.push({
+                        id,
+                        label: $option.text().trim() || `Scene #${id}`,
+                        imageUrl: $option.data('image-url') || ''
+                    });
+                });
+
+                const uploadedId = document.getElementById('uploadedTableauSceneImage')?.value;
+
+                if (uploadedId) {
+                    const preview = document.querySelector(
+                        '#tableau-scene-dropzone .dz-image img, ' +
+                        '#tableau-scene-dropzone .dz-preview img'
+                    );
+
+                    scenes.push({
+                        id: 'new',
+                        label: 'New Scene',
+                        imageUrl: window.newTableauSceneImageUrl || (preview ? preview.src : '')
+                    });
+                }
+
+                return scenes;
+            }
+
+            function syncAllScenePositionInputs() {
+                let count = 0;
+
+                document.querySelectorAll('.spe-canvas[data-scene-id]').forEach(canvas => {
+                    syncHiddenInput(canvas.dataset.sceneId);
+                    count++;
+                });
+
+                return count;
+            }
+
+            window.syncTableauScenePositions = syncAllScenePositionInputs;
+
+            $(document).on('click', '#saveScenePositionsBtn', function () {
+                const count = syncAllScenePositionInputs();
+
+                if (!count) {
+                    notifyTableau('Please select or create a scene first.', 'error');
+                    return;
+                }
+
+                notifyTableau('Scene positions saved.');
+            });
+
+            function triggerRebuild() {
+                rebuildEditor(collectScenes());
+            }
+
+            window.triggerTableauScenePositionRebuild = triggerRebuild;
+
+            $(document).on('change', '#tableauSceneSelect', triggerRebuild);
+
+            $(document).on('change', '#sizesSelect', function () {
+                refreshAllDraggables();
+            });
+
+            const tableauDzEl = document.getElementById('tableau-scene-dropzone');
+
+            if (tableauDzEl && tableauDzEl.dropzone) {
+                tableauDzEl.dropzone.on('success', () => setTimeout(triggerRebuild, 200));
+                tableauDzEl.dropzone.on('removedfile', () => setTimeout(triggerRebuild, 200));
+            }
+
+            $(document).on('change', '#productsWithoutCategoriesSelect, #productsSelect, #categoriesSelect', function () {
+                setTimeout(triggerRebuild, 300);
+            });
+        })();
     </script>
 
 @endsection

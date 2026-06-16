@@ -669,4 +669,16 @@ class TemplateController extends DashboardController
 
         return Response::api();
     }
+
+    public function tableauCreate()
+    {
+        $associatedData = [
+            'industries' => $this->industryRepository->query()->whereNull('parent_id')->get(['id', 'name']),
+            'sub_industries' => $this->industryRepository->query()->whereNotNull('parent_id')->get(['id', 'name']),
+            'product_with_categories' => $this->categoryRepository->query()->where('is_has_category', 1)->whereIsTableau(1)->has('products')->get(['id', 'name']),
+            'product_without_categories' => $this->categoryRepository->query()->where('is_has_category', 0)->whereIsTableau(1)->get(['id', 'name']),
+            'tags' => $this->tagRepository->query()->get(['id', 'name']),
+        ];
+        return view('dashboard.templates.tableau',compact('associatedData'));
+    }
 }

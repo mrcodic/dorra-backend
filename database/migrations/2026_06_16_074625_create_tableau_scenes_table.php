@@ -13,8 +13,7 @@ return new class extends Migration
             $table->nullableMorphs('sceneable');
             $table->json('name')->nullable();
             $table->unsignedInteger('sort')->default(0);
-            $table->unsignedInteger('top_position')->default(0);
-            $table->unsignedInteger('left_position')->default(0);
+            $table->json('positions')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

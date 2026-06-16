@@ -19,8 +19,7 @@ class TableauScene extends Model implements HasMedia
     protected $fillable = [
         'sceneable_id',
         'sceneable_type',
-        'top_position',
-        'left_position',
+        'positions',
         'name',
         'sort',
         'is_active',
@@ -28,6 +27,7 @@ class TableauScene extends Model implements HasMedia
 
     protected $casts = [
         'is_active' => 'boolean',
+        'positions'=>'array',
     ];
 
     public function sceneable(): MorphTo
