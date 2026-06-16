@@ -75,7 +75,7 @@ class TemplateResource extends JsonResource
                 ?: $backPreviewImage;
 
         $getMediaProperty = function ($media, string $key) {
-            return $media->getCustomProperty($key);
+            return $media?->getCustomProperty($key);
         };
 
         $templateImageWidth = $getMediaProperty($templateImageMedia, 'width');
