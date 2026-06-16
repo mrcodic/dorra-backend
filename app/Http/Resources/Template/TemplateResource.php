@@ -68,7 +68,7 @@ class TemplateResource extends JsonResource
             : ($this->approach == 'without_editor'
                 ? $this->getFirstMedia('back-templates-preview')
                 : $this->getFirstMedia('back_templates'));
-        $backPreviewImageUrl = $backPreviewImage->getFullUrl();
+        $backPreviewImageUrl = $backPreviewImage?->getFullUrl();
 
         return [
             'id' => $this->when(isset($this->id), $this->id),
