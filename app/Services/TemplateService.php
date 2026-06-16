@@ -244,6 +244,8 @@ class TemplateService extends BaseService
                         'ar' => $sceneName['ar']
                             ?? (($validatedData['name']['ar'] ?? 'تابلوه') . ' مشهد'),
                     ],
+                    'top_position' =>$validatedData['top_position'],
+                    'left_position' =>$validatedData['left_position'],
                     'is_active' => true,
                 ]);
 
@@ -381,8 +383,82 @@ class TemplateService extends BaseService
         $finalColors = collect($colors)->flatMap(fn($color) => [$color['value']])->toArray();
         $validatedData['colors'] = $finalColors;
 
-        $model = $this->handleTransaction(function () use ($validatedData, $id, $colors) {
+        $tableauSceneIdsInput = $validatedData['tableau_scene_ids'] ?? [];
+        $newTableauSceneName = $validatedData['new_tableau_scene_name'] ?? [];
+        $newTableauSceneImageId = $validatedData['new_tableau_scene_image_id'] ?? null;
+        $topPosition = $validatedData['top_position'] ?? null;
+        $leftPosition = $validatedData['left_position'] ?? null;
+
+        unset(
+            $validatedData['tableau_scene_ids'],
+            $validatedData['new_tableau_scene_name'],
+            $validatedData['new_tableau_scene_image_id'],
+            $validatedData['top_position'],
+            $validatedData['left_position']
+        );
+
+        $model = $this->handleTransaction(function () use (
+            $validatedData,
+            $id,
+            $colors,
+            $tableauSceneIdsInput,
+            $newTableauSceneName,
+            $newTableauSceneImageId,
+            $topPosition,
+            $leftPosition
+        ) {
             $model = $this->repository->update($validatedData, $id);
+
+            $tableauSceneIds = collect($tableauSceneIdsInput)
+                ->filter()
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->values();
+
+            if (!empty($newTableauSceneImageId)) {
+                $scene = TableauScene::create([
+                    'name' => [
+                        'en' => $newTableauSceneName['en']
+                            ?? (($validatedData['name']['en'] ?? 'Tableau') . ' Scene'),
+
+                        'ar' => $newTableauSceneName['ar']
+                            ?? (($validatedData['name']['ar'] ?? 'تابلوه') . ' مشهد'),
+                    ],
+                    'top_position' => $topPosition,
+                    'left_position' => $leftPosition,
+                    'is_active' => true,
+                ]);
+
+                Media::where('id', $newTableauSceneImageId)
+                    ->update([
+                        'model_type' => TableauScene::class,
+                        'model_id' => $scene->id,
+                        'collection_name' => 'tableau_scene_image',
+                    ]);
+
+                $tableauSceneIds->push($scene->id);
+            }
+
+
+            if (
+                request()->has('sync_tableau_scenes') ||
+                request()->has('tableau_scene_ids') ||
+                !empty($newTableauSceneImageId)
+            ) {
+                $pivotData = $tableauSceneIds
+                    ->values()
+                    ->mapWithKeys(function ($sceneId, $index) {
+                        return [
+                            $sceneId => [
+                                'is_default' => $index === 0,
+                                'sort' => $index,
+                            ],
+                        ];
+                    })
+                    ->toArray();
+
+                $model->tableauScenes()->sync($pivotData);
+            }
 
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
             $modelTypesValues = $model->types->pluck('value.value')->toArray();
@@ -391,15 +467,16 @@ class TemplateService extends BaseService
                 != collect($modelTypesValues)->sort()->values()->all();
 
             if ($typesChanged) {
-                $hasFront = in_array(1, $selectedTypeValues);
-                $hasBack = in_array(2, $selectedTypeValues);
-                $hasNone = in_array(3, $selectedTypeValues);
+                $hasFront = in_array(\App\Enums\Template\TypeEnum::FRONT->value, $selectedTypeValues);
+                $hasBack = in_array(\App\Enums\Template\TypeEnum::BACK->value, $selectedTypeValues);
+                $hasNone = in_array(\App\Enums\Template\TypeEnum::NONE->value, $selectedTypeValues);
 
                 if (!($hasFront && $hasBack)) {
                     if ($hasFront) {
                         $model->clearMediaCollection('back_templates');
                         $model->clearMediaCollection('back-templates-preview');
                     }
+
                     if ($hasBack) {
                         $model->clearMediaCollection('templates');
                         $model->clearMediaCollection('templates-preview');
@@ -441,8 +518,10 @@ class TemplateService extends BaseService
                     $model->getMedia('templates')
                         ->where('id', '!=', $newId)
                         ->each->delete();
+
                     $model->getMedia('templates-preview')
                         ->each->delete();
+
                     Media::whereKey($newId)->update([
                         'model_type' => get_class($model),
                         'model_id' => $model->id,
@@ -452,6 +531,7 @@ class TemplateService extends BaseService
                     $this->imageService->processUploaded($newId);
                 }
             }
+
             if (isset($validatedData['template_image_back_id'])) {
                 $alreadyAttached = $model->getMedia('back_templates')
                     ->contains('id', $validatedData['template_image_back_id']);
@@ -460,26 +540,21 @@ class TemplateService extends BaseService
                     $model->getMedia('back_templates')
                         ->where('id', '!=', $validatedData['template_image_back_id'])
                         ->each->delete();
+
                     $model->getMedia('back-templates-preview')
                         ->each->delete();
+
                     Media::whereKey($validatedData['template_image_back_id'])->update([
                         'model_type' => get_class($model),
                         'model_id' => $model->id,
                         'collection_name' => 'back_templates',
                     ]);
 
-                    $this->imageService->processUploaded($validatedData['template_image_back_id'], 'back-templates-preview');
+                    $this->imageService->processUploaded(
+                        $validatedData['template_image_back_id'],
+                        'back-templates'
+                    );
                 }
-                $model->getMedia('back_templates')
-                    ->where('id', '!=', $validatedData['template_image_back_id'])
-                    ->each->delete();
-
-                Media::whereKey($validatedData['template_image_back_id'])->update([
-                    'model_type' => get_class($model),
-                    'model_id' => $model->id,
-                    'collection_name' => 'back_templates',
-                ]);
-                $this->imageService->processUploaded($validatedData['template_image_back_id'], 'back-templates');
             }
 
             $mockupIds = collect($validatedData['mockup_ids'] ?? [])->map(fn ($id) => (int) $id);
@@ -494,12 +569,12 @@ class TemplateService extends BaseService
                         $this->buildMockupAttachPayload($newMockupIds)
                     );
                 }
-
             } else {
                 $attachedMockupIds = $model->mockups()->pluck('mockups.id');
 
                 foreach ($attachedMockupIds as $mockupId) {
                     $mockup = Mockup::find($mockupId);
+
                     if (!$mockup) {
                         continue;
                     }
@@ -512,6 +587,7 @@ class TemplateService extends BaseService
 
             foreach ($removedMockupIds as $removedId) {
                 $removedMockup = Mockup::find($removedId);
+
                 if (!$removedMockup) {
                     continue;
                 }

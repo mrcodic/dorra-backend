@@ -380,6 +380,21 @@
                                                                class="form-control"
                                                                placeholder="مثال: مشهد غرفة معيشة">
                                                     </div>
+                                                    <div class="col-md-6">
+                                                        <label class="label-text mb-1">Top Position</label>
+                                                        <input type="text"
+                                                               name="top_position"
+                                                               id="topPosition"
+                                                               class="form-control"
+                                                            >
+                                                    </div>        <div class="col-md-6">
+                                                        <label class="label-text mb-1">Left Position</label>
+                                                        <input type="text"
+                                                               name="left_position"
+                                                               id="leftPosition"
+                                                               class="form-control"
+                                                             >
+                                                    </div>
                                                 </div>
 
                                                 {{-- New scene image --}}

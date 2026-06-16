@@ -19,6 +19,8 @@ class TableauScene extends Model implements HasMedia
     protected $fillable = [
         'sceneable_id',
         'sceneable_type',
+        'top_position',
+        'left_position',
         'name',
         'sort',
         'is_active',

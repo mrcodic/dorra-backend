@@ -108,6 +108,18 @@ class UpdateTemplateRequest extends BaseRequest
 //            'colors' => ['sometimes','array'],
 //            'colors.*.value' => ['sometimes','string'],
 //            'colors.*.image_id' => ['sometimes', 'integer', 'exists:media,id'],
+            'tableau_scene_ids' => ['nullable', 'array'],
+            'tableau_scene_ids.*' => ['integer', 'exists:tableau_scenes,id'],
+
+            'new_tableau_scene_name' => ['nullable', 'array'],
+            'new_tableau_scene_name.en' => ['nullable', 'string', 'max:255'],
+            'new_tableau_scene_name.ar' => ['nullable', 'string', 'max:255'],
+
+            'new_tableau_scene_image_id' => ['nullable', 'integer', 'exists:media,id'],
+
+            'top_position' => ['nullable', 'numeric'],
+            'left_position' => ['nullable', 'numeric'],
+            'sync_tableau_scenes' => ['nullable'],
         ];
     }
     public function messages(): array
