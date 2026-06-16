@@ -1645,7 +1645,13 @@
 
                         // If user has no selection, auto-select the first option
                         const selected = current.length ? current.includes(String(id)) : index === 0;
-                        $sizes.append(new Option(text, id, false, selected));
+                        const option = new Option(text, id, false, selected);
+                        const src = item.attributes ? item.attributes : item;
+
+                        $(option).attr('data-width', src.width ?? src.w ?? '');
+                        $(option).attr('data-height', src.height ?? src.h ?? '');
+
+                        $sizes.append(option);
                     });
 
                     $sizes.trigger('change');
@@ -1773,6 +1779,7 @@
         handleAjaxFormSubmit("#addTemplateForm", {
             successMessage: "Template created successfully",
             onSuccess: function (response, $form) {
+                setTableauTemplateUrl(response);
 
                 // Re-enable buttons & hide all loaders
                 $('.saveChangesButton')
@@ -1825,6 +1832,65 @@
     <script>
         Dropzone.autoDiscover = false;
 
+        window.tableauTemplateUrl = window.tableauTemplateUrl || null;
+        window.newTableauSceneImageUrl = window.newTableauSceneImageUrl || null;
+
+        function getServerMediaUrl(response) {
+            const data = response?.data || response || {};
+
+            return response?.template_url ||
+                response?.templateUrl ||
+                data?.template_url ||
+                data?.templateUrl ||
+                data?.full_url ||
+                data?.fullUrl ||
+                data?.url ||
+                data?.base_url ||
+                data?.baseUrl ||
+                data?.original_url ||
+                data?.originalUrl ||
+                data?.preview_url ||
+                data?.previewUrl ||
+                data?.media?.full_url ||
+                data?.media?.url ||
+                data?.media?.base_url ||
+                data?.file?.full_url ||
+                data?.file?.url ||
+                null;
+        }
+
+        function setTableauTemplateUrl(response, fallbackUrl = null) {
+            const url = getServerMediaUrl(response) || fallbackUrl;
+
+            if (!url) return;
+
+            window.tableauTemplateUrl = url;
+
+            if (typeof window.refreshTableauTemplatePreview === 'function') {
+                window.refreshTableauTemplatePreview();
+            }
+        }
+
+        function clearTableauTemplateUrl() {
+            window.tableauTemplateUrl = null;
+
+            if (typeof window.refreshTableauTemplatePreview === 'function') {
+                window.refreshTableauTemplatePreview();
+            }
+        }
+
+        function setTableauSceneImageUrl(file, response = null) {
+            const url = getServerMediaUrl(response) || file?._fullDataUrl || null;
+
+            if (!url) return;
+
+            window.newTableauSceneImageUrl = url;
+
+            if (typeof window.triggerTableauScenePositionRebuild === 'function') {
+                setTimeout(window.triggerTableauScenePositionRebuild, 100);
+            }
+        }
+
         const templateDropzone = new Dropzone("#template-dropzone", {
             url: "{{ route('media.store') }}",
             paramName: "file",
@@ -1841,11 +1907,13 @@
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedTemplateImage").value = response.data.id;
+                        setTableauTemplateUrl(response);
                     }
                 });
 
                 this.on("removedfile", function (file) {
                     document.getElementById("uploadedTemplateImage").value = "";
+                    clearTableauTemplateUrl();
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
@@ -1923,11 +1991,13 @@
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedFrontTemplateImage").value = response.data.id;
+                        setTableauTemplateUrl(response);
                     }
                 });
 
                 this.on("removedfile", function (file) {
                     document.getElementById("uploadedFrontTemplateImage").value = "";
+                    clearTableauTemplateUrl();
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
@@ -1997,11 +2067,13 @@
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedBackTemplateImage").value = response.data.id;
+                        setTableauTemplateUrl(response);
                     }
                 });
 
                 this.on("removedfile", function (file) {
                     document.getElementById("uploadedBackTemplateImage").value = "";
+                    clearTableauTemplateUrl();
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
@@ -2071,11 +2143,13 @@
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedNoneTemplateImage").value = response.data.id;
+                        setTableauTemplateUrl(response);
                     }
                 });
 
                 this.on("removedfile", function (file) {
                     document.getElementById("uploadedNoneTemplateImage").value = "";
+                    clearTableauTemplateUrl();
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
@@ -2325,19 +2399,17 @@
                         if (response.success && response.data) {
                             file._hiddenInputId = response.data.id;
                             document.getElementById("uploadedTableauSceneImage").value = response.data.id;
-
-                            window.newTableauSceneImageUrl =
-                                response.data.full_url ||
-                                response.data.url ||
-                                response.data.base_url ||
-                                file._fullDataUrl ||
-                                null;
+                            setTableauSceneImageUrl(file, response);
                         }
                     });
 
                     this.on("removedfile", function (file) {
                         document.getElementById("uploadedTableauSceneImage").value = "";
                         window.newTableauSceneImageUrl = null;
+
+                        if (typeof window.triggerTableauScenePositionRebuild === 'function') {
+                            setTimeout(window.triggerTableauScenePositionRebuild, 100);
+                        }
 
                         if (file._hiddenInputId) {
                             fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
@@ -2372,8 +2444,8 @@
     </script>
 
 
-        <script>
-            (function () {
+    <script>
+        (function () {
             const positionState = {};
             let templateSrc = null;
             let templateAspect = 1;
@@ -2383,639 +2455,668 @@
             const DEFAULT_OVERLAY_WIDTH = 28;
 
             function safeId(sceneId) {
-            return String(sceneId).replace(/[^a-zA-Z0-9_-]/g, '_');
-        }
+                return String(sceneId).replace(/[^a-zA-Z0-9_-]/g, '_');
+            }
 
             function num(value, fallback = 0) {
-            const n = Number(value);
-            return Number.isFinite(n) ? n : fallback;
-        }
+                const n = Number(value);
+                return Number.isFinite(n) ? n : fallback;
+            }
 
             function pct(value) {
-            return Math.min(100, Math.max(0, Math.round(num(value) * 10) / 10));
-        }
+                return Math.min(100, Math.max(0, Math.round(num(value) * 10) / 10));
+            }
 
             function getSelectedDimension() {
-            const select = document.getElementById('sizesSelect');
-            const option = select?.selectedOptions?.[0];
+                const select = document.getElementById('sizesSelect');
+                const option = select?.selectedOptions?.[0];
 
-            let width = num(option?.dataset?.width, null);
-            let height = num(option?.dataset?.height, null);
+                let width = num(option?.dataset?.width, null);
+                let height = num(option?.dataset?.height, null);
 
-            if ((!width || !height) && option) {
-            const text = option.textContent || '';
-            const match = text.match(/([\d.]+)\s*[*×x]\s*([\d.]+)/i);
+                if ((!width || !height) && option) {
+                    const text = option.textContent || '';
+                    const match = text.match(/([\d.]+)\s*[*×x]\s*([\d.]+)/i);
 
-            if (match) {
-            height = num(match[1], null);
-            width = num(match[2], null);
-        }
-        }
+                    if (match) {
+                        height = num(match[1], null);
+                        width = num(match[2], null);
+                    }
+                }
 
-            if (!width || !height) {
-            return {
-            width: 1,
-            height: 1,
-            aspect: templateAspect || 1
-        };
-        }
+                if (!width || !height) {
+                    return {
+                        width: 1,
+                        height: 1,
+                        aspect: templateAspect || 1
+                    };
+                }
 
-            return {
-            width,
-            height,
-            aspect: width / height
-        };
-        }
+                return {
+                    width,
+                    height,
+                    aspect: width / height
+                };
+            }
 
             function getCanvasAspect(canvas) {
-            const rect = canvas?.getBoundingClientRect();
+                const rect = canvas?.getBoundingClientRect();
 
-            if (rect?.width && rect?.height) {
-            return rect.width / rect.height;
-        }
+                if (rect?.width && rect?.height) {
+                    return rect.width / rect.height;
+                }
 
-            return 4 / 3;
-        }
+                return 4 / 3;
+            }
 
             function ensureState(sceneId) {
-            if (!positionState[sceneId]) {
-            positionState[sceneId] = {
-            top: DEFAULT_TOP,
-            left: DEFAULT_LEFT,
-            width: DEFAULT_OVERLAY_WIDTH
-        };
-        }
+                if (!positionState[sceneId]) {
+                    positionState[sceneId] = {
+                        top: DEFAULT_TOP,
+                        left: DEFAULT_LEFT,
+                        width: DEFAULT_OVERLAY_WIDTH
+                    };
+                }
 
-            return positionState[sceneId];
-        }
+                return positionState[sceneId];
+            }
 
             function getOverlaySize(canvas, sceneId) {
-            const st = ensureState(sceneId);
-            const dimension = getSelectedDimension();
+                const st = ensureState(sceneId);
+                const dimension = getSelectedDimension();
 
-            const width = pct(st.width || DEFAULT_OVERLAY_WIDTH);
-            const canvasAspect = getCanvasAspect(canvas);
-            const overlayAspect = dimension.aspect || 1;
+                const width = pct(st.width || DEFAULT_OVERLAY_WIDTH);
+                const canvasAspect = getCanvasAspect(canvas);
+                const overlayAspect = dimension.aspect || templateAspect || 1;
 
-            const height = pct(width * canvasAspect / overlayAspect);
+                const height = pct(width * canvasAspect / overlayAspect);
 
-            return {
-            width,
-            height,
-            aspect: overlayAspect
-        };
-        }
+                return {
+                    width,
+                    height,
+                    aspect: overlayAspect
+                };
+            }
 
             function clampPosition(canvas, sceneId, top, left) {
-            const size = getOverlaySize(canvas, sceneId);
+                const size = getOverlaySize(canvas, sceneId);
 
-            const maxTop = Math.max(0, 100 - size.height);
-            const maxLeft = Math.max(0, 100 - size.width);
+                const maxTop = Math.max(0, 100 - size.height);
+                const maxLeft = Math.max(0, 100 - size.width);
 
-            return {
-            top: Math.min(maxTop, Math.max(0, top)),
-            left: Math.min(maxLeft, Math.max(0, left))
-        };
-        }
+                return {
+                    top: Math.min(maxTop, Math.max(0, top)),
+                    left: Math.min(maxLeft, Math.max(0, left))
+                };
+            }
 
             function getBox(canvas, sceneId) {
-            const st = ensureState(sceneId);
-            const size = getOverlaySize(canvas, sceneId);
+                const st = ensureState(sceneId);
+                const size = getOverlaySize(canvas, sceneId);
+                const clamped = clampPosition(canvas, sceneId, st.top, st.left);
 
-            const clamped = clampPosition(canvas, sceneId, st.top, st.left);
+                st.top = clamped.top;
+                st.left = clamped.left;
 
-            st.top = clamped.top;
-            st.left = clamped.left;
+                return {
+                    top: pct(st.top),
+                    left: pct(st.left),
+                    right: pct(100 - st.left - size.width),
+                    bottom: pct(100 - st.top - size.height),
+                    width: pct(size.width),
+                    height: pct(size.height),
+                    aspect: size.aspect
+                };
+            }
 
-            return {
-            top: pct(st.top),
-            left: pct(st.left),
-            right: pct(100 - st.left - size.width),
-            bottom: pct(100 - st.top - size.height),
-            width: pct(size.width),
-            height: pct(size.height),
-            aspect: size.aspect
-        };
-        }
+            function loadTemplateImage(url) {
+                templateSrc = url;
+
+                const img = new Image();
+
+                img.onload = function () {
+                    templateAspect = img.naturalWidth / img.naturalHeight || 1;
+                    refreshAllDraggables();
+                };
+
+                img.onerror = function () {
+                    templateSrc = null;
+                    refreshAllDraggables();
+                };
+
+                img.src = url;
+            }
 
             function refreshTemplateSrc() {
-            const preview = document.querySelector(
-            '#front-template-dropzone .dz-image img, ' +
-            '#front-template-dropzone .dz-preview img, ' +
-            '#template-dropzone .dz-image img, ' +
-            '#template-dropzone .dz-preview img, ' +
-            '#none-template-dropzone .dz-image img, ' +
-            '#none-template-dropzone .dz-preview img'
-            );
+                if (window.tableauTemplateUrl) {
+                    loadTemplateImage(window.tableauTemplateUrl);
+                    return;
+                }
 
-            if (preview && preview.src && !preview.src.includes('placeholder')) {
-            templateSrc = preview.src;
+                const preview = document.querySelector(
+                    '#front-template-dropzone .dz-image img, ' +
+                    '#front-template-dropzone .dz-preview img, ' +
+                    '#template-dropzone .dz-image img, ' +
+                    '#template-dropzone .dz-preview img, ' +
+                    '#back-template-dropzone .dz-image img, ' +
+                    '#back-template-dropzone .dz-preview img, ' +
+                    '#none-template-dropzone .dz-image img, ' +
+                    '#none-template-dropzone .dz-preview img'
+                );
 
-            const img = new Image();
-            img.onload = function () {
-            templateAspect = img.naturalWidth / img.naturalHeight || 1;
-            refreshAllDraggables();
-        };
-            img.src = preview.src;
-        } else {
-            templateSrc = null;
-            refreshAllDraggables();
-        }
-        }
+                if (preview && preview.src && !preview.src.includes('placeholder')) {
+                    loadTemplateImage(preview.src);
+                } else {
+                    templateSrc = null;
+                    refreshAllDraggables();
+                }
+            }
+
+            window.refreshTableauTemplatePreview = refreshTemplateSrc;
 
             [
-            'front-template-dropzone',
-            'template-dropzone',
-            'none-template-dropzone'
+                'front-template-dropzone',
+                'template-dropzone',
+                'back-template-dropzone',
+                'none-template-dropzone'
             ].forEach(id => {
-            const el = document.getElementById(id);
+                const el = document.getElementById(id);
 
-            if (el) {
-            new MutationObserver(refreshTemplateSrc).observe(el, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['src']
-        });
-        }
-        });
+                if (el) {
+                    new MutationObserver(refreshTemplateSrc).observe(el, {
+                        childList: true,
+                        subtree: true,
+                        attributes: true,
+                        attributeFilter: ['src']
+                    });
+                }
+            });
 
             function syncHiddenInput(sceneId) {
-            const form = document.getElementById('addTemplateForm');
-            const canvas = document.querySelector(`.spe-canvas[data-scene-id="${sceneId}"]`);
+                const form = document.getElementById('addTemplateForm');
+                const canvas = document.querySelector(`.spe-canvas[data-scene-id="${sceneId}"]`);
 
-            if (!form || !canvas) return;
+                if (!form || !canvas) return;
 
-            const box = getBox(canvas, sceneId);
-            const key = `scene_positions[${sceneId}]`;
+                const box = getBox(canvas, sceneId);
+                const key = `scene_positions[${sceneId}]`;
 
-            ['top', 'right', 'left', 'bottom', 'width', 'height'].forEach(axis => {
-            const name = `${key}[${axis}]`;
-            let input = form.querySelector(`input[name="${name}"]`);
+                ['top', 'right', 'left', 'bottom', 'width', 'height'].forEach(axis => {
+                    const name = `${key}[${axis}]`;
+                    let input = form.querySelector(`input[name="${name}"]`);
 
-            if (!input) {
-            input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = name;
-            form.appendChild(input);
-        }
+                    if (!input) {
+                        input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = name;
+                        form.appendChild(input);
+                    }
 
-            input.value = box[axis];
-        });
+                    input.value = box[axis];
+                });
 
-            if (String(sceneId) === 'new') {
-            const legacyMap = {
-            top: 'topPosition',
-            right: 'rightPosition',
-            left: 'leftPosition',
-            bottom: 'bottomPosition'
-        };
+                if (String(sceneId) === 'new') {
+                    const legacyMap = {
+                        top: 'topPosition',
+                        right: 'rightPosition',
+                        left: 'leftPosition',
+                        bottom: 'bottomPosition'
+                    };
 
-            Object.entries(legacyMap).forEach(([axis, id]) => {
-            const input = document.getElementById(id);
-            if (input) input.value = box[axis];
-        });
-        }
-        }
+                    Object.entries(legacyMap).forEach(([axis, id]) => {
+                        const input = document.getElementById(id);
+
+                        if (input) {
+                            input.value = box[axis];
+                        }
+                    });
+                }
+            }
 
             function updateCoordsDisplay(sceneId) {
-            const id = safeId(sceneId);
-            const canvas = document.querySelector(`.spe-canvas[data-scene-id="${sceneId}"]`);
+                const id = safeId(sceneId);
+                const canvas = document.querySelector(`.spe-canvas[data-scene-id="${sceneId}"]`);
 
-            if (!canvas) return;
+                if (!canvas) return;
 
-            const box = getBox(canvas, sceneId);
-            const dimension = getSelectedDimension();
+                const box = getBox(canvas, sceneId);
+                const dimension = getSelectedDimension();
 
-            ['top', 'right', 'left', 'bottom'].forEach(axis => {
-            const textEl = document.getElementById(`spe-${axis}-${id}`);
-            const inputEl = document.getElementById(`spe-input-${axis}-${id}`);
+                ['top', 'right', 'left', 'bottom'].forEach(axis => {
+                    const textEl = document.getElementById(`spe-${axis}-${id}`);
+                    const inputEl = document.getElementById(`spe-input-${axis}-${id}`);
 
-            if (textEl) textEl.textContent = box[axis] + '%';
-            if (inputEl && document.activeElement !== inputEl) {
-            inputEl.value = box[axis];
-        }
-        });
+                    if (textEl) {
+                        textEl.textContent = box[axis] + '%';
+                    }
 
-            const dimEl = document.getElementById(`spe-dim-${id}`);
-            if (dimEl) {
-            dimEl.textContent = `Template canvas ratio: ${dimension.width} × ${dimension.height}`;
-        }
+                    if (inputEl && document.activeElement !== inputEl) {
+                        inputEl.value = box[axis];
+                    }
+                });
 
-            syncHiddenInput(sceneId);
-        }
+                const dimEl = document.getElementById(`spe-dim-${id}`);
+
+                if (dimEl) {
+                    dimEl.textContent = `Template canvas ratio: ${dimension.width} × ${dimension.height}`;
+                }
+
+                syncHiddenInput(sceneId);
+            }
 
             function renderDraggable(canvas, sceneId) {
-            canvas.querySelectorAll('.spe-dragger').forEach(el => el.remove());
+                canvas.querySelectorAll('.spe-dragger').forEach(el => el.remove());
 
-            const st = ensureState(sceneId);
-            const box = getBox(canvas, sceneId);
+                const box = getBox(canvas, sceneId);
+                let dragger;
 
-            let dragger;
+                if (templateSrc) {
+                    dragger = document.createElement('img');
+                    dragger.src = templateSrc;
+                    dragger.className = 'spe-dragger';
+                    dragger.style.cssText = `
+                            position:absolute;
+                            width:${box.width}%;
+                            aspect-ratio:${box.aspect};
+                            top:${box.top}%;
+                            left:${box.left}%;
+                            cursor:grab;
+                            touch-action:none;
+                            border:2px dashed rgba(255,255,255,.85);
+                            border-radius:4px;
+                            box-sizing:border-box;
+                            object-fit:contain;
+                            opacity:1;
+                            filter:none;
+                            user-select:none;
+                        `;
+                } else {
+                    dragger = document.createElement('div');
+                    dragger.className = 'spe-dragger';
+                    dragger.textContent = 'Canvas';
+                    dragger.style.cssText = `
+                            position:absolute;
+                            width:${box.width}%;
+                            aspect-ratio:${box.aspect};
+                            top:${box.top}%;
+                            left:${box.left}%;
+                            cursor:grab;
+                            touch-action:none;
+                            background:rgba(36,176,148,.18);
+                            border:2px dashed #24B094;
+                            border-radius:4px;
+                            box-sizing:border-box;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            font-size:11px;
+                            color:#24B094;
+                            user-select:none;
+                        `;
+                }
 
-            if (templateSrc) {
-            dragger = document.createElement('img');
-            dragger.src = templateSrc;
-            dragger.className = 'spe-dragger';
-            dragger.style.cssText = `
-                    position:absolute;
-                    width:${box.width}%;
-                    aspect-ratio:${box.aspect};
-                    top:${box.top}%;
-                    left:${box.left}%;
-                    cursor:grab;
-                    touch-action:none;
-                    border:2px dashed rgba(255,255,255,.85);
-                    border-radius:4px;
-                    box-sizing:border-box;
-                    object-fit:cover;
-                    user-select:none;
-                `;
-        } else {
-            dragger = document.createElement('div');
-            dragger.className = 'spe-dragger';
-            dragger.textContent = 'Canvas';
-            dragger.style.cssText = `
-                    position:absolute;
-                    width:${box.width}%;
-                    aspect-ratio:${box.aspect};
-                    top:${box.top}%;
-                    left:${box.left}%;
-                    cursor:grab;
-                    touch-action:none;
-                    background:rgba(36,176,148,.2);
-                    border:2px dashed #24B094;
-                    border-radius:4px;
-                    box-sizing:border-box;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    font-size:11px;
-                    color:#24B094;
-                    user-select:none;
-                `;
-        }
-
-            canvas.appendChild(dragger);
-            attachDrag(dragger, canvas, sceneId);
-            updateCoordsDisplay(sceneId);
-        }
+                canvas.appendChild(dragger);
+                attachDrag(dragger, canvas, sceneId);
+                updateCoordsDisplay(sceneId);
+            }
 
             function refreshAllDraggables() {
-            document.querySelectorAll('.spe-canvas').forEach(canvas => {
-            renderDraggable(canvas, canvas.dataset.sceneId);
-        });
-        }
+                document.querySelectorAll('.spe-canvas').forEach(canvas => {
+                    renderDraggable(canvas, canvas.dataset.sceneId);
+                });
+            }
 
             function attachDrag(el, canvas, sceneId) {
-            let dragging = false;
-            let startX = 0;
-            let startY = 0;
-            let startTop = 0;
-            let startLeft = 0;
+                let dragging = false;
+                let startX = 0;
+                let startY = 0;
+                let startTop = 0;
+                let startLeft = 0;
 
-            function xy(e) {
-            return e.touches
-            ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
-            : { x: e.clientX, y: e.clientY };
-        }
+                function xy(e) {
+                    return e.touches
+                        ? {x: e.touches[0].clientX, y: e.touches[0].clientY}
+                        : {x: e.clientX, y: e.clientY};
+                }
 
-            function onStart(e) {
-            e.preventDefault();
+                function onStart(e) {
+                    e.preventDefault();
 
-            dragging = true;
+                    dragging = true;
 
-            const point = xy(e);
-            const cRect = canvas.getBoundingClientRect();
-            const elRect = el.getBoundingClientRect();
+                    const point = xy(e);
+                    const cRect = canvas.getBoundingClientRect();
+                    const elRect = el.getBoundingClientRect();
 
-            startX = point.x;
-            startY = point.y;
-            startTop = ((elRect.top - cRect.top) / cRect.height) * 100;
-            startLeft = ((elRect.left - cRect.left) / cRect.width) * 100;
+                    startX = point.x;
+                    startY = point.y;
+                    startTop = ((elRect.top - cRect.top) / cRect.height) * 100;
+                    startLeft = ((elRect.left - cRect.left) / cRect.width) * 100;
 
-            el.style.cursor = 'grabbing';
-        }
+                    el.style.cursor = 'grabbing';
+                }
 
-            function onMove(e) {
-            if (!dragging) return;
+                function onMove(e) {
+                    if (!dragging) return;
 
-            e.preventDefault();
+                    e.preventDefault();
 
-            const point = xy(e);
-            const cRect = canvas.getBoundingClientRect();
+                    const point = xy(e);
+                    const cRect = canvas.getBoundingClientRect();
 
-            let newTop = startTop + ((point.y - startY) / cRect.height) * 100;
-            let newLeft = startLeft + ((point.x - startX) / cRect.width) * 100;
+                    const newTop = startTop + ((point.y - startY) / cRect.height) * 100;
+                    const newLeft = startLeft + ((point.x - startX) / cRect.width) * 100;
+                    const clamped = clampPosition(canvas, sceneId, newTop, newLeft);
 
-            const clamped = clampPosition(canvas, sceneId, newTop, newLeft);
+                    positionState[sceneId].top = clamped.top;
+                    positionState[sceneId].left = clamped.left;
 
-            positionState[sceneId].top = clamped.top;
-            positionState[sceneId].left = clamped.left;
+                    el.style.top = clamped.top + '%';
+                    el.style.left = clamped.left + '%';
 
-            el.style.top = clamped.top + '%';
-            el.style.left = clamped.left + '%';
+                    updateCoordsDisplay(sceneId);
+                }
 
-            updateCoordsDisplay(sceneId);
-        }
+                function onEnd() {
+                    dragging = false;
+                    el.style.cursor = 'grab';
+                }
 
-            function onEnd() {
-            dragging = false;
-            el.style.cursor = 'grab';
-        }
+                el.addEventListener('mousedown', onStart);
+                el.addEventListener('touchstart', onStart, {passive: false});
 
-            el.addEventListener('mousedown', onStart);
-            el.addEventListener('touchstart', onStart, { passive: false });
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('touchmove', onMove, {passive: false});
 
-            window.addEventListener('mousemove', onMove);
-            window.addEventListener('touchmove', onMove, { passive: false });
-
-            window.addEventListener('mouseup', onEnd);
-            window.addEventListener('touchend', onEnd);
-        }
+                window.addEventListener('mouseup', onEnd);
+                window.addEventListener('touchend', onEnd);
+            }
 
             function applyManualInput(sceneId, axis) {
-            const id = safeId(sceneId);
-            const canvas = document.querySelector(`.spe-canvas[data-scene-id="${sceneId}"]`);
+                const id = safeId(sceneId);
+                const canvas = document.querySelector(`.spe-canvas[data-scene-id="${sceneId}"]`);
 
-            if (!canvas) return;
+                if (!canvas) return;
 
-            const current = getBox(canvas, sceneId);
+                const current = getBox(canvas, sceneId);
 
-            let top = num(document.getElementById(`spe-input-top-${id}`)?.value, current.top);
-            let left = num(document.getElementById(`spe-input-left-${id}`)?.value, current.left);
-            const right = num(document.getElementById(`spe-input-right-${id}`)?.value, current.right);
-            const bottom = num(document.getElementById(`spe-input-bottom-${id}`)?.value, current.bottom);
+                let top = num(document.getElementById(`spe-input-top-${id}`)?.value, current.top);
+                let left = num(document.getElementById(`spe-input-left-${id}`)?.value, current.left);
+                const right = num(document.getElementById(`spe-input-right-${id}`)?.value, current.right);
+                const bottom = num(document.getElementById(`spe-input-bottom-${id}`)?.value, current.bottom);
 
-            if (axis === 'right') {
-            left = 100 - right - current.width;
-        }
+                if (axis === 'right') {
+                    left = 100 - right - current.width;
+                }
 
-            if (axis === 'bottom') {
-            top = 100 - bottom - current.height;
-        }
+                if (axis === 'bottom') {
+                    top = 100 - bottom - current.height;
+                }
 
-            const clamped = clampPosition(canvas, sceneId, top, left);
+                const clamped = clampPosition(canvas, sceneId, top, left);
 
-            positionState[sceneId].top = clamped.top;
-            positionState[sceneId].left = clamped.left;
+                positionState[sceneId].top = clamped.top;
+                positionState[sceneId].left = clamped.left;
 
-            const dragger = canvas.querySelector('.spe-dragger');
+                const dragger = canvas.querySelector('.spe-dragger');
 
-            if (dragger) {
-            dragger.style.top = clamped.top + '%';
-            dragger.style.left = clamped.left + '%';
-        }
+                if (dragger) {
+                    dragger.style.top = clamped.top + '%';
+                    dragger.style.left = clamped.left + '%';
+                }
 
-            updateCoordsDisplay(sceneId);
-        }
+                updateCoordsDisplay(sceneId);
+            }
 
             function buildPanel(sceneId, label, imageUrl) {
-            const id = safeId(sceneId);
+                const id = safeId(sceneId);
 
-            ensureState(sceneId);
+                ensureState(sceneId);
 
-            const panel = document.createElement('div');
-            panel.className = 'spe-panel';
-            panel.id = `spe-panel-${id}`;
-            panel.style.display = 'none';
+                const panel = document.createElement('div');
+                panel.className = 'spe-panel';
+                panel.id = `spe-panel-${id}`;
+                panel.style.display = 'none';
 
-            const canvasWrap = document.createElement('div');
-            canvasWrap.className = 'spe-canvas';
-            canvasWrap.dataset.sceneId = sceneId;
+                const canvasWrap = document.createElement('div');
+                canvasWrap.className = 'spe-canvas';
+                canvasWrap.dataset.sceneId = sceneId;
                 canvasWrap.style.cssText = `
-    position:relative;
-    width:100%;
-    max-width:100%;
-    aspect-ratio:4/3;
-    border-radius:8px;
-    overflow:hidden;
-    border:1px solid #dee2e6;
-    background:#fff;
-    user-select:none;
-`;
+                        position:relative;
+                        width:100%;
+                        max-width:100%;
+                        aspect-ratio:4/3;
+                        border-radius:8px;
+                        overflow:hidden;
+                        border:1px solid #dee2e6;
+                        background:#fff;
+                        user-select:none;
+                    `;
 
-            if (imageUrl) {
-            const bg = document.createElement('img');
-            bg.src = imageUrl;
-                bg.style.cssText = `
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    object-fit:contain;
-    opacity:1;
-    filter:none;
-    pointer-events:none;
-`;
+                if (imageUrl) {
+                    const bg = document.createElement('img');
+                    bg.src = imageUrl;
+                    bg.style.cssText = `
+                            position:absolute;
+                            inset:0;
+                            width:100%;
+                            height:100%;
+                            object-fit:contain;
+                            opacity:1;
+                            filter:none;
+                            image-rendering:auto;
+                            pointer-events:none;
+                        `;
 
-            bg.onload = function () {
-            if (bg.naturalWidth && bg.naturalHeight) {
-            canvasWrap.style.aspectRatio = `${bg.naturalWidth} / ${bg.naturalHeight}`;
-            refreshAllDraggables();
-        }
-        };
+                    bg.onload = function () {
+                        if (bg.naturalWidth && bg.naturalHeight) {
+                            canvasWrap.style.aspectRatio = `${bg.naturalWidth} / ${bg.naturalHeight}`;
+                            refreshAllDraggables();
+                        }
+                    };
 
-            canvasWrap.appendChild(bg);
-        } else {
-            const placeholder = document.createElement('div');
-            placeholder.style.cssText = `
-                    position:absolute;
-                    inset:0;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    color:#adb5bd;
-                    font-size:13px;
-                    flex-direction:column;
-                    gap:6px;
-                `;
-            placeholder.innerHTML = `
-                    <i data-feather="image" style="width:32px;height:32px;stroke:#adb5bd"></i>
-                    <span>Scene image</span>
-                `;
-            canvasWrap.appendChild(placeholder);
-        }
+                    canvasWrap.appendChild(bg);
+                } else {
+                    const placeholder = document.createElement('div');
+                    placeholder.style.cssText = `
+                            position:absolute;
+                            inset:0;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            color:#adb5bd;
+                            font-size:13px;
+                            flex-direction:column;
+                            gap:6px;
+                        `;
+                    placeholder.innerHTML = `
+                            <i data-feather="image" style="width:32px;height:32px;stroke:#adb5bd"></i>
+                            <span>Scene image</span>
+                        `;
+                    canvasWrap.appendChild(placeholder);
+                }
 
-            const controls = document.createElement('div');
-            controls.className = 'row g-1 mt-2';
-            controls.innerHTML = `
-                <div class="col-6 col-md-3">
-                    <label class="form-label mb-25">Top %</label>
-                    <input type="number" step="0.1" min="0" max="100"
-                           id="spe-input-top-${id}"
-                           class="form-control form-control-sm">
-                    <small>Top: <strong id="spe-top-${id}">0%</strong></small>
-                </div>
+                const controls = document.createElement('div');
+                controls.className = 'row g-1 mt-2';
+                controls.innerHTML = `
+                        <div class="col-6 col-md-3">
+                            <label class="form-label mb-25">Top %</label>
+                            <input type="number" step="0.1" min="0" max="100"
+                                   id="spe-input-top-${id}"
+                                   class="form-control form-control-sm">
+                            <small>Top: <strong id="spe-top-${id}">0%</strong></small>
+                        </div>
 
-                <div class="col-6 col-md-3">
-                    <label class="form-label mb-25">Right %</label>
-                    <input type="number" step="0.1" min="0" max="100"
-                           id="spe-input-right-${id}"
-                           class="form-control form-control-sm">
-                    <small>Right: <strong id="spe-right-${id}">0%</strong></small>
-                </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label mb-25">Right %</label>
+                            <input type="number" step="0.1" min="0" max="100"
+                                   id="spe-input-right-${id}"
+                                   class="form-control form-control-sm">
+                            <small>Right: <strong id="spe-right-${id}">0%</strong></small>
+                        </div>
 
-                <div class="col-6 col-md-3">
-                    <label class="form-label mb-25">Left %</label>
-                    <input type="number" step="0.1" min="0" max="100"
-                           id="spe-input-left-${id}"
-                           class="form-control form-control-sm">
-                    <small>Left: <strong id="spe-left-${id}">0%</strong></small>
-                </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label mb-25">Left %</label>
+                            <input type="number" step="0.1" min="0" max="100"
+                                   id="spe-input-left-${id}"
+                                   class="form-control form-control-sm">
+                            <small>Left: <strong id="spe-left-${id}">0%</strong></small>
+                        </div>
 
-                <div class="col-6 col-md-3">
-                    <label class="form-label mb-25">Bottom %</label>
-                    <input type="number" step="0.1" min="0" max="100"
-                           id="spe-input-bottom-${id}"
-                           class="form-control form-control-sm">
-                    <small>Bottom: <strong id="spe-bottom-${id}">0%</strong></small>
-                </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label mb-25">Bottom %</label>
+                            <input type="number" step="0.1" min="0" max="100"
+                                   id="spe-input-bottom-${id}"
+                                   class="form-control form-control-sm">
+                            <small>Bottom: <strong id="spe-bottom-${id}">0%</strong></small>
+                        </div>
 
-                <div class="col-12 mt-1">
-                    <small class="text-muted" id="spe-dim-${id}"></small>
-                </div>
-            `;
+                        <div class="col-12 mt-1">
+                            <small class="text-muted" id="spe-dim-${id}"></small>
+                        </div>
+                    `;
 
-            panel.appendChild(canvasWrap);
-            panel.appendChild(controls);
+                panel.appendChild(canvasWrap);
+                panel.appendChild(controls);
 
-            setTimeout(() => {
-            ['top', 'right', 'left', 'bottom'].forEach(axis => {
-            const input = document.getElementById(`spe-input-${axis}-${id}`);
+                setTimeout(() => {
+                    ['top', 'right', 'left', 'bottom'].forEach(axis => {
+                        const input = document.getElementById(`spe-input-${axis}-${id}`);
 
-            if (input) {
-            input.addEventListener('input', function () {
-            applyManualInput(sceneId, axis);
-        });
-        }
-        });
+                        if (input) {
+                            input.addEventListener('input', function () {
+                                applyManualInput(sceneId, axis);
+                            });
+                        }
+                    });
 
-            updateCoordsDisplay(sceneId);
-        }, 0);
+                    updateCoordsDisplay(sceneId);
+                }, 0);
 
-            return panel;
-        }
+                return panel;
+            }
 
             function buildTab(sceneId, label) {
-            const id = safeId(sceneId);
+                const id = safeId(sceneId);
+                const btn = document.createElement('button');
 
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'btn btn-sm btn-outline-secondary spe-tab';
-            btn.dataset.sceneId = String(sceneId);
-            btn.dataset.panelId = id;
-            btn.textContent = label;
-            btn.addEventListener('click', () => activateTab(sceneId));
+                btn.type = 'button';
+                btn.className = 'btn btn-sm btn-outline-secondary spe-tab';
+                btn.dataset.sceneId = String(sceneId);
+                btn.dataset.panelId = id;
+                btn.textContent = label;
+                btn.addEventListener('click', () => activateTab(sceneId));
 
-            return btn;
-        }
+                return btn;
+            }
 
             function activateTab(sceneId) {
-            const id = safeId(sceneId);
+                const id = safeId(sceneId);
 
-            document.querySelectorAll('.spe-tab').forEach(tab => {
-            tab.classList.toggle('active', tab.dataset.sceneId === String(sceneId));
-        });
+                document.querySelectorAll('.spe-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.sceneId === String(sceneId));
+                });
 
-            document.querySelectorAll('.spe-panel').forEach(panel => {
-            panel.style.display = panel.id === `spe-panel-${id}` ? 'block' : 'none';
-        });
+                document.querySelectorAll('.spe-panel').forEach(panel => {
+                    panel.style.display = panel.id === `spe-panel-${id}` ? 'block' : 'none';
+                });
 
-            refreshAllDraggables();
-        }
+                refreshAllDraggables();
+            }
 
             function rebuildEditor(scenes) {
-            const tabsEl = document.getElementById('scenePosTabs');
-            const panelsEl = document.getElementById('scenePosPanels');
-            const wrapper = document.getElementById('dz-scene-position-editor');
+                const tabsEl = document.getElementById('scenePosTabs');
+                const panelsEl = document.getElementById('scenePosPanels');
+                const wrapper = document.getElementById('dz-scene-position-editor');
 
-            if (!tabsEl || !panelsEl || !wrapper) return;
+                if (!tabsEl || !panelsEl || !wrapper) return;
 
-            tabsEl.innerHTML = '';
-            panelsEl.innerHTML = '';
+                tabsEl.innerHTML = '';
+                panelsEl.innerHTML = '';
 
-            if (!scenes.length) {
-            wrapper.classList.add('d-none');
-            return;
-        }
+                if (!scenes.length) {
+                    wrapper.classList.add('d-none');
+                    return;
+                }
 
-            wrapper.classList.remove('d-none');
+                wrapper.classList.remove('d-none');
 
-            scenes.forEach(scene => {
-            tabsEl.appendChild(buildTab(scene.id, scene.label));
-            panelsEl.appendChild(buildPanel(scene.id, scene.label, scene.imageUrl || ''));
-        });
+                scenes.forEach(scene => {
+                    tabsEl.appendChild(buildTab(scene.id, scene.label));
+                    panelsEl.appendChild(buildPanel(scene.id, scene.label, scene.imageUrl || ''));
+                });
 
-            refreshTemplateSrc();
+                refreshTemplateSrc();
 
-            scenes.forEach(scene => {
-            const canvas = document.querySelector(`.spe-canvas[data-scene-id="${scene.id}"]`);
+                scenes.forEach(scene => {
+                    const canvas = document.querySelector(`.spe-canvas[data-scene-id="${scene.id}"]`);
 
-            if (canvas) {
-            renderDraggable(canvas, scene.id);
-        }
-        });
+                    if (canvas) {
+                        renderDraggable(canvas, scene.id);
+                    }
+                });
 
-            activateTab(scenes[0].id);
+                activateTab(scenes[0].id);
 
-            if (window.feather) {
-            feather.replace();
-        }
-        }
+                if (window.feather) {
+                    feather.replace();
+                }
+            }
 
             function collectScenes() {
-            const scenes = [];
-            const $select = $('#tableauSceneSelect');
+                const scenes = [];
+                const $select = $('#tableauSceneSelect');
 
-            ($select.val() || []).forEach(id => {
-            const $option = $select.find(`option[value="${id}"]`);
+                ($select.val() || []).forEach(id => {
+                    const $option = $select.find(`option[value="${id}"]`);
 
-            scenes.push({
-            id,
-            label: $option.text().trim() || `Scene #${id}`,
-            imageUrl: $option.data('image-url') || ''
-        });
-        });
+                    scenes.push({
+                        id,
+                        label: $option.text().trim() || `Scene #${id}`,
+                        imageUrl: $option.data('image-url') || ''
+                    });
+                });
 
-            const uploadedId = document.getElementById('uploadedTableauSceneImage')?.value;
+                const uploadedId = document.getElementById('uploadedTableauSceneImage')?.value;
 
-            if (uploadedId) {
-            const preview = document.querySelector(
-            '#tableau-scene-dropzone .dz-image img, ' +
-            '#tableau-scene-dropzone .dz-preview img'
-            );
+                if (uploadedId) {
+                    const preview = document.querySelector(
+                        '#tableau-scene-dropzone .dz-image img, ' +
+                        '#tableau-scene-dropzone .dz-preview img'
+                    );
 
-            scenes.push({
-            id: 'new',
-            label: 'New Scene',
-                imageUrl: window.newTableauSceneImageUrl || (preview ? preview.src : '')
-        });
-        }
+                    scenes.push({
+                        id: 'new',
+                        label: 'New Scene',
+                        imageUrl: window.newTableauSceneImageUrl || (preview ? preview.src : '')
+                    });
+                }
 
-            return scenes;
-        }
+                return scenes;
+            }
 
             function triggerRebuild() {
-            rebuildEditor(collectScenes());
-        }
+                rebuildEditor(collectScenes());
+            }
+
+            window.triggerTableauScenePositionRebuild = triggerRebuild;
 
             $(document).on('change', '#tableauSceneSelect', triggerRebuild);
 
             $(document).on('change', '#sizesSelect', function () {
-            refreshAllDraggables();
-        });
+                refreshAllDraggables();
+            });
 
             const tableauDzEl = document.getElementById('tableau-scene-dropzone');
 
             if (tableauDzEl && tableauDzEl.dropzone) {
-            tableauDzEl.dropzone.on('success', () => setTimeout(triggerRebuild, 200));
-            tableauDzEl.dropzone.on('removedfile', () => setTimeout(triggerRebuild, 200));
-        }
+                tableauDzEl.dropzone.on('success', () => setTimeout(triggerRebuild, 200));
+                tableauDzEl.dropzone.on('removedfile', () => setTimeout(triggerRebuild, 200));
+            }
 
             $(document).on('change', '#productsWithoutCategoriesSelect, #productsSelect, #categoriesSelect', function () {
-            setTimeout(triggerRebuild, 300);
-        });
+                setTimeout(triggerRebuild, 300);
+            });
         })();
     </script>
 
