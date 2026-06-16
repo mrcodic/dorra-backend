@@ -352,7 +352,8 @@
                                                     class="form-select select2 mb-1"
                                                     multiple>
                                                 @foreach(\App\Models\TableauScene::where('is_active', true)->latest()->get() as $scene)
-                                                    <option value="{{ $scene->id }}">
+                                                    <option value="{{ $scene->id }}"
+                                                            data-image-url="{{ $scene->getFirstMediaUrl() }}">
                                                         {{ $scene->getTranslation('name', app()->getLocale(), false) ?: 'Scene #' . $scene->id }}
                                                     </option>
                                                 @endforeach
@@ -380,20 +381,36 @@
                                                                class="form-control"
                                                                placeholder="مثال: مشهد غرفة معيشة">
                                                     </div>
-                                                    <div class="col-md-6">
-                                                        <label class="label-text mb-1">Top Position</label>
-                                                        <input type="text"
+                                                    <div class="col-md-3">
+                                                        <label class="label-text mb-1">Top Position %</label>
+                                                        <input type="number" step="0.1" min="0" max="100"
                                                                name="top_position"
                                                                id="topPosition"
-                                                               class="form-control"
-                                                            >
-                                                    </div>        <div class="col-md-6">
-                                                        <label class="label-text mb-1">Left Position</label>
-                                                        <input type="text"
+                                                               class="form-control">
+                                                    </div>
+
+                                                    <div class="col-md-3">
+                                                        <label class="label-text mb-1">Right Position %</label>
+                                                        <input type="number" step="0.1" min="0" max="100"
+                                                               name="right_position"
+                                                               id="rightPosition"
+                                                               class="form-control">
+                                                    </div>
+
+                                                    <div class="col-md-3">
+                                                        <label class="label-text mb-1">Left Position %</label>
+                                                        <input type="number" step="0.1" min="0" max="100"
                                                                name="left_position"
                                                                id="leftPosition"
-                                                               class="form-control"
-                                                             >
+                                                               class="form-control">
+                                                    </div>
+
+                                                    <div class="col-md-3">
+                                                        <label class="label-text mb-1">Bottom Position %</label>
+                                                        <input type="number" step="0.1" min="0" max="100"
+                                                               name="bottom_position"
+                                                               id="bottomPosition"
+                                                               class="form-control">
                                                     </div>
                                                 </div>
 
@@ -414,6 +431,26 @@
                                                     If you choose an existing scene, this new scene data will be ignored.
                                                 </small>
                                             </div>
+                                        </div>
+                                        {{-- SCENE POSITION EDITOR --}}
+                                        <div class="form-group mb-2 col-md-12 d-none" id="dz-scene-position-editor">
+                                            <div class="position-relative mt-3 text-center mb-2">
+                                                <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                                <span class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                                      style="color: #24B094;">
+            Scene Position Editor
+        </span>
+                                            </div>
+
+                                            {{-- Tabs --}}
+                                            <div id="scenePosTabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;"></div>
+
+                                            {{-- Panels --}}
+                                            <div id="scenePosPanels"></div>
+
+                                            <p class="text-muted mt-1" style="font-size:12px;">
+                                                Drag the template overlay on each scene to set its position. Positions are saved automatically.
+                                            </p>
                                         </div>
                                         <div class="col-md-12 form-group mb-2 mockupWrapper d-none">
                                             <div class="d-flex align-items-center justify-content-between mb-2">
@@ -2273,15 +2310,34 @@
                 addRemoveLinks: true,
                 dictDefaultMessage: "Drop tableau scene image here or click to upload",
                 init: function () {
+                    this.on("addedfile", function (file) {
+                        const reader = new FileReader();
+
+                        reader.onload = function (e) {
+                            file._fullDataUrl = e.target.result;
+                            window.newTableauSceneImageUrl = e.target.result;
+                        };
+
+                        reader.readAsDataURL(file);
+                    });
+
                     this.on("success", function (file, response) {
                         if (response.success && response.data) {
                             file._hiddenInputId = response.data.id;
                             document.getElementById("uploadedTableauSceneImage").value = response.data.id;
+
+                            window.newTableauSceneImageUrl =
+                                response.data.full_url ||
+                                response.data.url ||
+                                response.data.base_url ||
+                                file._fullDataUrl ||
+                                null;
                         }
                     });
 
                     this.on("removedfile", function (file) {
                         document.getElementById("uploadedTableauSceneImage").value = "";
+                        window.newTableauSceneImageUrl = null;
 
                         if (file._hiddenInputId) {
                             fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
@@ -2314,4 +2370,653 @@
             }
         });
     </script>
+
+
+        <script>
+            (function () {
+            const positionState = {};
+            let templateSrc = null;
+            let templateAspect = 1;
+
+            const DEFAULT_TOP = 35;
+            const DEFAULT_LEFT = 35;
+            const DEFAULT_OVERLAY_WIDTH = 28;
+
+            function safeId(sceneId) {
+            return String(sceneId).replace(/[^a-zA-Z0-9_-]/g, '_');
+        }
+
+            function num(value, fallback = 0) {
+            const n = Number(value);
+            return Number.isFinite(n) ? n : fallback;
+        }
+
+            function pct(value) {
+            return Math.min(100, Math.max(0, Math.round(num(value) * 10) / 10));
+        }
+
+            function getSelectedDimension() {
+            const select = document.getElementById('sizesSelect');
+            const option = select?.selectedOptions?.[0];
+
+            let width = num(option?.dataset?.width, null);
+            let height = num(option?.dataset?.height, null);
+
+            if ((!width || !height) && option) {
+            const text = option.textContent || '';
+            const match = text.match(/([\d.]+)\s*[*×x]\s*([\d.]+)/i);
+
+            if (match) {
+            height = num(match[1], null);
+            width = num(match[2], null);
+        }
+        }
+
+            if (!width || !height) {
+            return {
+            width: 1,
+            height: 1,
+            aspect: templateAspect || 1
+        };
+        }
+
+            return {
+            width,
+            height,
+            aspect: width / height
+        };
+        }
+
+            function getCanvasAspect(canvas) {
+            const rect = canvas?.getBoundingClientRect();
+
+            if (rect?.width && rect?.height) {
+            return rect.width / rect.height;
+        }
+
+            return 4 / 3;
+        }
+
+            function ensureState(sceneId) {
+            if (!positionState[sceneId]) {
+            positionState[sceneId] = {
+            top: DEFAULT_TOP,
+            left: DEFAULT_LEFT,
+            width: DEFAULT_OVERLAY_WIDTH
+        };
+        }
+
+            return positionState[sceneId];
+        }
+
+            function getOverlaySize(canvas, sceneId) {
+            const st = ensureState(sceneId);
+            const dimension = getSelectedDimension();
+
+            const width = pct(st.width || DEFAULT_OVERLAY_WIDTH);
+            const canvasAspect = getCanvasAspect(canvas);
+            const overlayAspect = dimension.aspect || 1;
+
+            const height = pct(width * canvasAspect / overlayAspect);
+
+            return {
+            width,
+            height,
+            aspect: overlayAspect
+        };
+        }
+
+            function clampPosition(canvas, sceneId, top, left) {
+            const size = getOverlaySize(canvas, sceneId);
+
+            const maxTop = Math.max(0, 100 - size.height);
+            const maxLeft = Math.max(0, 100 - size.width);
+
+            return {
+            top: Math.min(maxTop, Math.max(0, top)),
+            left: Math.min(maxLeft, Math.max(0, left))
+        };
+        }
+
+            function getBox(canvas, sceneId) {
+            const st = ensureState(sceneId);
+            const size = getOverlaySize(canvas, sceneId);
+
+            const clamped = clampPosition(canvas, sceneId, st.top, st.left);
+
+            st.top = clamped.top;
+            st.left = clamped.left;
+
+            return {
+            top: pct(st.top),
+            left: pct(st.left),
+            right: pct(100 - st.left - size.width),
+            bottom: pct(100 - st.top - size.height),
+            width: pct(size.width),
+            height: pct(size.height),
+            aspect: size.aspect
+        };
+        }
+
+            function refreshTemplateSrc() {
+            const preview = document.querySelector(
+            '#front-template-dropzone .dz-image img, ' +
+            '#front-template-dropzone .dz-preview img, ' +
+            '#template-dropzone .dz-image img, ' +
+            '#template-dropzone .dz-preview img, ' +
+            '#none-template-dropzone .dz-image img, ' +
+            '#none-template-dropzone .dz-preview img'
+            );
+
+            if (preview && preview.src && !preview.src.includes('placeholder')) {
+            templateSrc = preview.src;
+
+            const img = new Image();
+            img.onload = function () {
+            templateAspect = img.naturalWidth / img.naturalHeight || 1;
+            refreshAllDraggables();
+        };
+            img.src = preview.src;
+        } else {
+            templateSrc = null;
+            refreshAllDraggables();
+        }
+        }
+
+            [
+            'front-template-dropzone',
+            'template-dropzone',
+            'none-template-dropzone'
+            ].forEach(id => {
+            const el = document.getElementById(id);
+
+            if (el) {
+            new MutationObserver(refreshTemplateSrc).observe(el, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['src']
+        });
+        }
+        });
+
+            function syncHiddenInput(sceneId) {
+            const form = document.getElementById('addTemplateForm');
+            const canvas = document.querySelector(`.spe-canvas[data-scene-id="${sceneId}"]`);
+
+            if (!form || !canvas) return;
+
+            const box = getBox(canvas, sceneId);
+            const key = `scene_positions[${sceneId}]`;
+
+            ['top', 'right', 'left', 'bottom', 'width', 'height'].forEach(axis => {
+            const name = `${key}[${axis}]`;
+            let input = form.querySelector(`input[name="${name}"]`);
+
+            if (!input) {
+            input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            form.appendChild(input);
+        }
+
+            input.value = box[axis];
+        });
+
+            if (String(sceneId) === 'new') {
+            const legacyMap = {
+            top: 'topPosition',
+            right: 'rightPosition',
+            left: 'leftPosition',
+            bottom: 'bottomPosition'
+        };
+
+            Object.entries(legacyMap).forEach(([axis, id]) => {
+            const input = document.getElementById(id);
+            if (input) input.value = box[axis];
+        });
+        }
+        }
+
+            function updateCoordsDisplay(sceneId) {
+            const id = safeId(sceneId);
+            const canvas = document.querySelector(`.spe-canvas[data-scene-id="${sceneId}"]`);
+
+            if (!canvas) return;
+
+            const box = getBox(canvas, sceneId);
+            const dimension = getSelectedDimension();
+
+            ['top', 'right', 'left', 'bottom'].forEach(axis => {
+            const textEl = document.getElementById(`spe-${axis}-${id}`);
+            const inputEl = document.getElementById(`spe-input-${axis}-${id}`);
+
+            if (textEl) textEl.textContent = box[axis] + '%';
+            if (inputEl && document.activeElement !== inputEl) {
+            inputEl.value = box[axis];
+        }
+        });
+
+            const dimEl = document.getElementById(`spe-dim-${id}`);
+            if (dimEl) {
+            dimEl.textContent = `Template canvas ratio: ${dimension.width} × ${dimension.height}`;
+        }
+
+            syncHiddenInput(sceneId);
+        }
+
+            function renderDraggable(canvas, sceneId) {
+            canvas.querySelectorAll('.spe-dragger').forEach(el => el.remove());
+
+            const st = ensureState(sceneId);
+            const box = getBox(canvas, sceneId);
+
+            let dragger;
+
+            if (templateSrc) {
+            dragger = document.createElement('img');
+            dragger.src = templateSrc;
+            dragger.className = 'spe-dragger';
+            dragger.style.cssText = `
+                    position:absolute;
+                    width:${box.width}%;
+                    aspect-ratio:${box.aspect};
+                    top:${box.top}%;
+                    left:${box.left}%;
+                    cursor:grab;
+                    touch-action:none;
+                    border:2px dashed rgba(255,255,255,.85);
+                    border-radius:4px;
+                    box-sizing:border-box;
+                    object-fit:cover;
+                    user-select:none;
+                `;
+        } else {
+            dragger = document.createElement('div');
+            dragger.className = 'spe-dragger';
+            dragger.textContent = 'Canvas';
+            dragger.style.cssText = `
+                    position:absolute;
+                    width:${box.width}%;
+                    aspect-ratio:${box.aspect};
+                    top:${box.top}%;
+                    left:${box.left}%;
+                    cursor:grab;
+                    touch-action:none;
+                    background:rgba(36,176,148,.2);
+                    border:2px dashed #24B094;
+                    border-radius:4px;
+                    box-sizing:border-box;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-size:11px;
+                    color:#24B094;
+                    user-select:none;
+                `;
+        }
+
+            canvas.appendChild(dragger);
+            attachDrag(dragger, canvas, sceneId);
+            updateCoordsDisplay(sceneId);
+        }
+
+            function refreshAllDraggables() {
+            document.querySelectorAll('.spe-canvas').forEach(canvas => {
+            renderDraggable(canvas, canvas.dataset.sceneId);
+        });
+        }
+
+            function attachDrag(el, canvas, sceneId) {
+            let dragging = false;
+            let startX = 0;
+            let startY = 0;
+            let startTop = 0;
+            let startLeft = 0;
+
+            function xy(e) {
+            return e.touches
+            ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
+            : { x: e.clientX, y: e.clientY };
+        }
+
+            function onStart(e) {
+            e.preventDefault();
+
+            dragging = true;
+
+            const point = xy(e);
+            const cRect = canvas.getBoundingClientRect();
+            const elRect = el.getBoundingClientRect();
+
+            startX = point.x;
+            startY = point.y;
+            startTop = ((elRect.top - cRect.top) / cRect.height) * 100;
+            startLeft = ((elRect.left - cRect.left) / cRect.width) * 100;
+
+            el.style.cursor = 'grabbing';
+        }
+
+            function onMove(e) {
+            if (!dragging) return;
+
+            e.preventDefault();
+
+            const point = xy(e);
+            const cRect = canvas.getBoundingClientRect();
+
+            let newTop = startTop + ((point.y - startY) / cRect.height) * 100;
+            let newLeft = startLeft + ((point.x - startX) / cRect.width) * 100;
+
+            const clamped = clampPosition(canvas, sceneId, newTop, newLeft);
+
+            positionState[sceneId].top = clamped.top;
+            positionState[sceneId].left = clamped.left;
+
+            el.style.top = clamped.top + '%';
+            el.style.left = clamped.left + '%';
+
+            updateCoordsDisplay(sceneId);
+        }
+
+            function onEnd() {
+            dragging = false;
+            el.style.cursor = 'grab';
+        }
+
+            el.addEventListener('mousedown', onStart);
+            el.addEventListener('touchstart', onStart, { passive: false });
+
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('touchmove', onMove, { passive: false });
+
+            window.addEventListener('mouseup', onEnd);
+            window.addEventListener('touchend', onEnd);
+        }
+
+            function applyManualInput(sceneId, axis) {
+            const id = safeId(sceneId);
+            const canvas = document.querySelector(`.spe-canvas[data-scene-id="${sceneId}"]`);
+
+            if (!canvas) return;
+
+            const current = getBox(canvas, sceneId);
+
+            let top = num(document.getElementById(`spe-input-top-${id}`)?.value, current.top);
+            let left = num(document.getElementById(`spe-input-left-${id}`)?.value, current.left);
+            const right = num(document.getElementById(`spe-input-right-${id}`)?.value, current.right);
+            const bottom = num(document.getElementById(`spe-input-bottom-${id}`)?.value, current.bottom);
+
+            if (axis === 'right') {
+            left = 100 - right - current.width;
+        }
+
+            if (axis === 'bottom') {
+            top = 100 - bottom - current.height;
+        }
+
+            const clamped = clampPosition(canvas, sceneId, top, left);
+
+            positionState[sceneId].top = clamped.top;
+            positionState[sceneId].left = clamped.left;
+
+            const dragger = canvas.querySelector('.spe-dragger');
+
+            if (dragger) {
+            dragger.style.top = clamped.top + '%';
+            dragger.style.left = clamped.left + '%';
+        }
+
+            updateCoordsDisplay(sceneId);
+        }
+
+            function buildPanel(sceneId, label, imageUrl) {
+            const id = safeId(sceneId);
+
+            ensureState(sceneId);
+
+            const panel = document.createElement('div');
+            panel.className = 'spe-panel';
+            panel.id = `spe-panel-${id}`;
+            panel.style.display = 'none';
+
+            const canvasWrap = document.createElement('div');
+            canvasWrap.className = 'spe-canvas';
+            canvasWrap.dataset.sceneId = sceneId;
+                canvasWrap.style.cssText = `
+    position:relative;
+    width:100%;
+    max-width:100%;
+    aspect-ratio:4/3;
+    border-radius:8px;
+    overflow:hidden;
+    border:1px solid #dee2e6;
+    background:#fff;
+    user-select:none;
+`;
+
+            if (imageUrl) {
+            const bg = document.createElement('img');
+            bg.src = imageUrl;
+                bg.style.cssText = `
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    opacity:1;
+    filter:none;
+    pointer-events:none;
+`;
+
+            bg.onload = function () {
+            if (bg.naturalWidth && bg.naturalHeight) {
+            canvasWrap.style.aspectRatio = `${bg.naturalWidth} / ${bg.naturalHeight}`;
+            refreshAllDraggables();
+        }
+        };
+
+            canvasWrap.appendChild(bg);
+        } else {
+            const placeholder = document.createElement('div');
+            placeholder.style.cssText = `
+                    position:absolute;
+                    inset:0;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    color:#adb5bd;
+                    font-size:13px;
+                    flex-direction:column;
+                    gap:6px;
+                `;
+            placeholder.innerHTML = `
+                    <i data-feather="image" style="width:32px;height:32px;stroke:#adb5bd"></i>
+                    <span>Scene image</span>
+                `;
+            canvasWrap.appendChild(placeholder);
+        }
+
+            const controls = document.createElement('div');
+            controls.className = 'row g-1 mt-2';
+            controls.innerHTML = `
+                <div class="col-6 col-md-3">
+                    <label class="form-label mb-25">Top %</label>
+                    <input type="number" step="0.1" min="0" max="100"
+                           id="spe-input-top-${id}"
+                           class="form-control form-control-sm">
+                    <small>Top: <strong id="spe-top-${id}">0%</strong></small>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label mb-25">Right %</label>
+                    <input type="number" step="0.1" min="0" max="100"
+                           id="spe-input-right-${id}"
+                           class="form-control form-control-sm">
+                    <small>Right: <strong id="spe-right-${id}">0%</strong></small>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label mb-25">Left %</label>
+                    <input type="number" step="0.1" min="0" max="100"
+                           id="spe-input-left-${id}"
+                           class="form-control form-control-sm">
+                    <small>Left: <strong id="spe-left-${id}">0%</strong></small>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label mb-25">Bottom %</label>
+                    <input type="number" step="0.1" min="0" max="100"
+                           id="spe-input-bottom-${id}"
+                           class="form-control form-control-sm">
+                    <small>Bottom: <strong id="spe-bottom-${id}">0%</strong></small>
+                </div>
+
+                <div class="col-12 mt-1">
+                    <small class="text-muted" id="spe-dim-${id}"></small>
+                </div>
+            `;
+
+            panel.appendChild(canvasWrap);
+            panel.appendChild(controls);
+
+            setTimeout(() => {
+            ['top', 'right', 'left', 'bottom'].forEach(axis => {
+            const input = document.getElementById(`spe-input-${axis}-${id}`);
+
+            if (input) {
+            input.addEventListener('input', function () {
+            applyManualInput(sceneId, axis);
+        });
+        }
+        });
+
+            updateCoordsDisplay(sceneId);
+        }, 0);
+
+            return panel;
+        }
+
+            function buildTab(sceneId, label) {
+            const id = safeId(sceneId);
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn btn-sm btn-outline-secondary spe-tab';
+            btn.dataset.sceneId = String(sceneId);
+            btn.dataset.panelId = id;
+            btn.textContent = label;
+            btn.addEventListener('click', () => activateTab(sceneId));
+
+            return btn;
+        }
+
+            function activateTab(sceneId) {
+            const id = safeId(sceneId);
+
+            document.querySelectorAll('.spe-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.sceneId === String(sceneId));
+        });
+
+            document.querySelectorAll('.spe-panel').forEach(panel => {
+            panel.style.display = panel.id === `spe-panel-${id}` ? 'block' : 'none';
+        });
+
+            refreshAllDraggables();
+        }
+
+            function rebuildEditor(scenes) {
+            const tabsEl = document.getElementById('scenePosTabs');
+            const panelsEl = document.getElementById('scenePosPanels');
+            const wrapper = document.getElementById('dz-scene-position-editor');
+
+            if (!tabsEl || !panelsEl || !wrapper) return;
+
+            tabsEl.innerHTML = '';
+            panelsEl.innerHTML = '';
+
+            if (!scenes.length) {
+            wrapper.classList.add('d-none');
+            return;
+        }
+
+            wrapper.classList.remove('d-none');
+
+            scenes.forEach(scene => {
+            tabsEl.appendChild(buildTab(scene.id, scene.label));
+            panelsEl.appendChild(buildPanel(scene.id, scene.label, scene.imageUrl || ''));
+        });
+
+            refreshTemplateSrc();
+
+            scenes.forEach(scene => {
+            const canvas = document.querySelector(`.spe-canvas[data-scene-id="${scene.id}"]`);
+
+            if (canvas) {
+            renderDraggable(canvas, scene.id);
+        }
+        });
+
+            activateTab(scenes[0].id);
+
+            if (window.feather) {
+            feather.replace();
+        }
+        }
+
+            function collectScenes() {
+            const scenes = [];
+            const $select = $('#tableauSceneSelect');
+
+            ($select.val() || []).forEach(id => {
+            const $option = $select.find(`option[value="${id}"]`);
+
+            scenes.push({
+            id,
+            label: $option.text().trim() || `Scene #${id}`,
+            imageUrl: $option.data('image-url') || ''
+        });
+        });
+
+            const uploadedId = document.getElementById('uploadedTableauSceneImage')?.value;
+
+            if (uploadedId) {
+            const preview = document.querySelector(
+            '#tableau-scene-dropzone .dz-image img, ' +
+            '#tableau-scene-dropzone .dz-preview img'
+            );
+
+            scenes.push({
+            id: 'new',
+            label: 'New Scene',
+                imageUrl: window.newTableauSceneImageUrl || (preview ? preview.src : '')
+        });
+        }
+
+            return scenes;
+        }
+
+            function triggerRebuild() {
+            rebuildEditor(collectScenes());
+        }
+
+            $(document).on('change', '#tableauSceneSelect', triggerRebuild);
+
+            $(document).on('change', '#sizesSelect', function () {
+            refreshAllDraggables();
+        });
+
+            const tableauDzEl = document.getElementById('tableau-scene-dropzone');
+
+            if (tableauDzEl && tableauDzEl.dropzone) {
+            tableauDzEl.dropzone.on('success', () => setTimeout(triggerRebuild, 200));
+            tableauDzEl.dropzone.on('removedfile', () => setTimeout(triggerRebuild, 200));
+        }
+
+            $(document).on('change', '#productsWithoutCategoriesSelect, #productsSelect, #categoriesSelect', function () {
+            setTimeout(triggerRebuild, 300);
+        });
+        })();
+    </script>
+
 @endsection
