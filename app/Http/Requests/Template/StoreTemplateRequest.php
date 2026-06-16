@@ -104,7 +104,9 @@ class StoreTemplateRequest extends BaseRequest
             'border' => ['sometimes', 'in:' . CornerEnum::getValuesAsString()],
             'safety_area' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
             'cut_margin' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
-            'tableau_scene_id' => ['nullable', 'exists:tableau_scenes,id'],
+            
+            'tableau_scene_ids' => ['nullable', 'array'],
+            'tableau_scene_ids.*' => ['integer', 'exists:tableau_scenes,id'],
 
             'new_tableau_scene_name' => ['nullable', 'array'],
             'new_tableau_scene_name.en' => ['nullable', 'string', 'max:255'],

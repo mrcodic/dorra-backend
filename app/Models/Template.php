@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\App;
@@ -47,7 +48,7 @@ class Template extends Model implements HasMedia
         'supported_languages',
         'is_best_seller',
         'use_front_as_back',
-        'tableau_scene_id'
+
     ];
     protected $casts = [
         'supported_languages' => 'array',
@@ -62,9 +63,17 @@ class Template extends Model implements HasMedia
         'status' => StatusEnum::DRAFTED,
     ];
 
-    public function tableauScene(): BelongsTo
+    public function tableauScenes(): BelongsToMany
     {
-        return $this->belongsTo(TableauScene::class);
+        return $this->belongsToMany(
+            TableauScene::class,
+            'tableau_scene_template',
+            'template_id',
+            'tableau_scene_id'
+        )
+            ->withPivot(['is_default', 'sort'])
+            ->withTimestamps()
+            ->orderByPivot('sort');
     }
     public function scopeIsLanding(Builder $builder): Builder
     {

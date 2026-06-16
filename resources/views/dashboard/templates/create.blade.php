@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
 @endsection
 @php
-$category = \App\Models\Category::find(request('category_id'));
-$HasMockupCategory = \App\Models\Category::find(request('category_id'));
+    $category = \App\Models\Category::find(request('category_id'));
+    $HasMockupCategory = \App\Models\Category::find(request('category_id'));
 @endphp
 
 @section('content')
@@ -135,219 +135,222 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                                             @endforeach
 
                                         </div>
-                                    <div class="form-group mb-2">
-                                        <label class="label-text mb-1">Template Type</label>
-                                        <div class="row">
-                                            @foreach(\App\Models\Type::all(['id','value']) as $type)
-                                                <div class="col-md-4 mb-1">
-                                                    <label class="radio-box">
-                                                        <input class="form-check-input type-checkbox" type="checkbox"
-                                                               name="types[]"
-                                                               value="{{ $type->value }}"
-                                                               data-type-name="{{ strtolower($type->value->name) }}"
-                                                            @checked(
-   $HasMockupCategory?->has_mockup == false ? $type->value === \App\Enums\Template\TypeEnum::FRONT
-           || $type->value === \App\Enums\Template\TypeEnum::BACK :$type->value === \App\Enums\Template\TypeEnum::FRONT
-       )
-                                                        >
-                                                        <span>{{ $type->value->label() }}</span>
-                                                    </label>
-                                                </div>
-                                            @endforeach
+                                        <div class="form-group mb-2">
+                                            <label class="label-text mb-1">Template Type</label>
+                                            <div class="row">
+                                                @foreach(\App\Models\Type::all(['id','value']) as $type)
+                                                    <div class="col-md-4 mb-1">
+                                                        <label class="radio-box">
+                                                            <input class="form-check-input type-checkbox" type="checkbox"
+                                                                   name="types[]"
+                                                                   value="{{ $type->value }}"
+                                                                   data-type-name="{{ strtolower($type->value->name) }}"
+                                                                @checked(
+       $HasMockupCategory?->has_mockup == false ? $type->value === \App\Enums\Template\TypeEnum::FRONT
+               || $type->value === \App\Enums\Template\TypeEnum::BACK :$type->value === \App\Enums\Template\TypeEnum::FRONT
+           )
+                                                            >
+                                                            <span>{{ $type->value->label() }}</span>
+                                                        </label>
+                                                    </div>
+                                                @endforeach
+
+                                            </div>
 
                                         </div>
+                                        <div class="row">
 
-                                    </div>
-                                    <div class="row">
-
-                                        <div class="row" id="templateTypeDropzones">
-                                            @if(request()->query('q') == 'without')
-                                                <!-- FRONT -->
-                                                <div class="form-group mb-2 col-md-6 d-none" id="dz-front">
-                                                    <label class="label-text mb-1">Upload Print File (Front)</label>
-                                                    <div id="front-template-dropzone"
-                                                         class="dropzone border rounded p-3"
-                                                         style="cursor:pointer; min-height:150px;">
-                                                        <div class="dz-message">
-                                                            <span>Drop front image here or click</span>
+                                            <div class="row" id="templateTypeDropzones">
+                                                @if(request()->query('q') == 'without')
+                                                    <!-- FRONT -->
+                                                    <div class="form-group mb-2 col-md-6 d-none" id="dz-front">
+                                                        <label class="label-text mb-1">Upload Print File (Front)</label>
+                                                        <div id="front-template-dropzone"
+                                                             class="dropzone border rounded p-3"
+                                                             style="cursor:pointer; min-height:150px;">
+                                                            <div class="dz-message">
+                                                                <span>Drop front image here or click</span>
+                                                            </div>
+                                                            <input type="hidden" name="template_image_front_id"
+                                                                   id="uploadedFrontTemplateImage">
                                                         </div>
-                                                        <input type="hidden" name="template_image_front_id"
-                                                               id="uploadedFrontTemplateImage">
+                                                        <small class="form-text text-muted">
+                                                            Allowed formats: PNG, JPG, JPEG, WEBP.
+                                                            Maximum file size: 30 MB.
+                                                            Minimum dimensions: 1000 × 1000 px.
+                                                        </small>
                                                     </div>
-                                                    <small class="form-text text-muted">
-                                                        Allowed formats: PNG, JPG, JPEG, WEBP.
-                                                        Maximum file size: 30 MB.
-                                                        Minimum dimensions: 1000 × 1000 px.
-                                                    </small>
-                                                </div>
 
-                                                <!-- BACK -->
-                                                <div class="form-group mb-2 col-md-6 d-none" id="dz-back">
-                                                    <label class="label-text mb-1">Upload Print File (Back)</label>
-                                                    <div id="back-template-dropzone" class="dropzone border rounded p-3"
-                                                         style="cursor:pointer; min-height:150px;">
-                                                        <div class="dz-message">
-                                                            <span>Drop back image here or click</span>
+                                                    <!-- BACK -->
+                                                    <div class="form-group mb-2 col-md-6 d-none" id="dz-back">
+                                                        <label class="label-text mb-1">Upload Print File (Back)</label>
+                                                        <div id="back-template-dropzone" class="dropzone border rounded p-3"
+                                                             style="cursor:pointer; min-height:150px;">
+                                                            <div class="dz-message">
+                                                                <span>Drop back image here or click</span>
+                                                            </div>
+                                                            <input type="hidden" name="template_image_back_id"
+                                                                   id="uploadedBackTemplateImage">
                                                         </div>
-                                                        <input type="hidden" name="template_image_back_id"
-                                                               id="uploadedBackTemplateImage">
+                                                        <small class="form-text text-muted">
+                                                            Allowed formats: PNG, JPG, JPEG, WEBP.
+                                                            Maximum file size: 30 MB.
+                                                            Minimum dimensions: 1000 × 1000 px.
+                                                        </small>
                                                     </div>
-                                                    <small class="form-text text-muted">
-                                                        Allowed formats: PNG, JPG, JPEG, WEBP.
-                                                        Maximum file size: 30 MB.
-                                                        Minimum dimensions: 1000 × 1000 px.
-                                                    </small>
-                                                </div>
 
 
-                                                <!-- NONE -->
-                                                <div class="form-group mb-2 col-md-6 d-none" id="dz-none">
-                                                    <label class="label-text mb-1">Upload Print File (General)</label>
-                                                    <div id="none-template-dropzone" class="dropzone border rounded p-3"
-                                                         style="cursor:pointer; min-height:150px;">
-                                                        <div class="dz-message">
-                                                            <span>Drop general image here or click</span>
+                                                    <!-- NONE -->
+                                                    <div class="form-group mb-2 col-md-6 d-none" id="dz-none">
+                                                        <label class="label-text mb-1">Upload Print File (General)</label>
+                                                        <div id="none-template-dropzone" class="dropzone border rounded p-3"
+                                                             style="cursor:pointer; min-height:150px;">
+                                                            <div class="dz-message">
+                                                                <span>Drop general image here or click</span>
+                                                            </div>
+                                                            <input type="hidden" name="template_image_none_id"
+                                                                   id="uploadedNoneTemplateImage">
                                                         </div>
-                                                        <input type="hidden" name="template_image_none_id"
-                                                               id="uploadedNoneTemplateImage">
-                                                    </div>
-                                                    <small class="form-text text-muted">
-                                                        Allowed formats: PNG, JPG, JPEG, WEBP.
-                                                        Maximum file size: 30 MB.
-                                                        Minimum dimensions: 1000 × 1000 px.
-                                                    </small>
+                                                        <small class="form-text text-muted">
+                                                            Allowed formats: PNG, JPG, JPEG, WEBP.
+                                                            Maximum file size: 30 MB.
+                                                            Minimum dimensions: 1000 × 1000 px.
+                                                        </small>
 
-                                                </div>
-                                            @endif
+                                                    </div>
+                                                @endif
 
                                                 @if(($HasMockupCategory && !$HasMockupCategory->has_mockup) || !$HasMockupCategory)
-                                            <!-- MODEL  -->
-                                            <div class="form-group mb-2 col-md-6 d-none" id="dz-model">
-                                                <label class="label-text mb-1">Template Model Image</label>
-                                                <div id="template-dropzone" class="dropzone border rounded p-3"
-                                                     style="cursor:pointer; min-height:150px;">
-                                                    <div class="dz-message" data-dz-message>
-                                                        <span>Drop image here or click to upload</span>
+                                                    <!-- MODEL  -->
+                                                    <div class="form-group mb-2 col-md-6 d-none" id="dz-model">
+                                                        <label class="label-text mb-1">Template Model Image</label>
+                                                        <div id="template-dropzone" class="dropzone border rounded p-3"
+                                                             style="cursor:pointer; min-height:150px;">
+                                                            <div class="dz-message" data-dz-message>
+                                                                <span>Drop image here or click to upload</span>
+                                                            </div>
+                                                            <input type="hidden" name="template_image_id"
+                                                                   id="uploadedTemplateImage">
+                                                        </div>
+                                                        <small class="form-text text-muted">
+                                                            Upload an image with an 8:9 aspect ratio (for example, 618 × 700 px).
+                                                        </small>
                                                     </div>
-                                                    <input type="hidden" name="template_image_id"
-                                                           id="uploadedTemplateImage">
-                                                </div>
-                                                <small class="form-text text-muted">
-                                                    Upload an image with an 8:9 aspect ratio (for example, 618 × 700 px).
-                                                </small>
-                                            </div>
                                                 @endif
+                                            </div>
+
+
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-md-6">
+                                                <label for="templateName" class="label-text mb-1">Name (EN)</label>
+                                                <input type="text" id="templateName" class="form-control" name="name[en]"
+                                                       placeholder="Template Name in English"
+                                                       value="{{ $category?->getTranslation('name','en') ?? 'Personal Card'}}">
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label for="templateName" class="label-text mb-1">Name (AR)</label>
+                                                <input type="text" id="templateName" class="form-control" name="name[ar]"
+                                                       placeholder="Template Name in Arabic"
+                                                       value="{{ $category?->getTranslation('name','ar') ?? 'كارت شخصى'}}">
+                                            </div>
+
+
                                         </div>
 
 
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-md-6">
-                                            <label for="templateName" class="label-text mb-1">Name (EN)</label>
-                                            <input type="text" id="templateName" class="form-control" name="name[en]"
-                                                   placeholder="Template Name in English"
-                                                   value="{{ $category?->getTranslation('name','en') ?? 'Personal Card'}}">
+                                        <div class="row mb-2">
+                                            <div class="col-md-6">
+                                                <label for="templateDescription" class="label-text mb-1">Description
+                                                    (AR)</label>
+                                                <textarea id="templateDescription" class="form-control" rows="3"
+                                                          name="description[ar]"
+                                                          placeholder="Template Description in Arabic"></textarea>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="templateDescription" class="label-text mb-1">Description
+                                                    (EN)</label>
+                                                <textarea id="templateDescription" class="form-control" rows="3"
+                                                          name="description[en]"
+                                                          placeholder="Template Description in English"></textarea>
+                                            </div>
                                         </div>
-
-                                        <div class="col-md-6">
-                                            <label for="templateName" class="label-text mb-1">Name (AR)</label>
-                                            <input type="text" id="templateName" class="form-control" name="name[ar]"
-                                                   placeholder="Template Name in Arabic"
-                                                   value="{{ $category?->getTranslation('name','ar') ?? 'كارت شخصى'}}">
-                                        </div>
-
-
-                                    </div>
-
-
-                                    <div class="row mb-2">
-                                        <div class="col-md-6">
-                                            <label for="templateDescription" class="label-text mb-1">Description
-                                                (AR)</label>
-                                            <textarea id="templateDescription" class="form-control" rows="3"
-                                                      name="description[ar]"
-                                                      placeholder="Template Description in Arabic"></textarea>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="templateDescription" class="label-text mb-1">Description
-                                                (EN)</label>
-                                            <textarea id="templateDescription" class="form-control" rows="3"
-                                                      name="description[en]"
-                                                      placeholder="Template Description in English"></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-md-12">
-                                            <label for="templatePrice" class="label-text mb-1">
-                                                Price</label>
-                                            <input id="templatePrice" class="form-control" type="number"
-                                                   name="price" placeholder="Template Price"
-                                                   step="0.01"
-                                                   min="0"/>
-                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-md-12">
+                                                <label for="templatePrice" class="label-text mb-1">
+                                                    Price</label>
+                                                <input id="templatePrice" class="form-control" type="number"
+                                                       name="price" placeholder="Template Price"
+                                                       step="0.01"
+                                                       min="0"/>
+                                            </div>
 
                                         </div>
 
-                                    <div class="position-relative mt-3 text-center">
-                                        <hr class="opacity-75" style="border: 1px solid #24B094;">
-                                        <span
-                                            class="d-none d-md-flex position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4"
-                                            style="color: #24B094;">
+                                        <div class="position-relative mt-3 text-center">
+                                            <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                            <span
+                                                class="d-none d-md-flex position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4"
+                                                style="color: #24B094;">
                                     Products & Categories
                                 </span>
-                                    </div>
-
-                                    <div class="row mb-2">
-                                        <div class="col-md-6 form-group mb-2">
-                                            <label for="categoriesSelect" class="label-text mb-1">Products With
-                                                Categories</label>
-                                            <select id="categoriesSelect" class="form-select select2"
-                                                    name="product_with_category" multiple>
-                                                @foreach($associatedData['product_with_categories'] as $cate)
-                                                    <option value="{{ $cate->id }}"
-                                                        @selected($cate->id === ($category?->id ?? 1))
-                                                    >
-                                                        {{ $cate->getTranslation('name', app()->getLocale()) }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="col-md-6 form-group mb-2">
-                                            <label for="productsSelect" class="label-text mb-1">Categories</label>
-                                            <select id="productsSelect" class="form-select select2" name="product_ids[]"
-                                                    multiple>
-
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-2">
-                                        <div class="col-md-12 form-group mb-2">
-                                            <label for="productsWithoutCategoriesSelect" class="label-text mb-1">Products
-                                                Without Categories</label>
-                                            <select id="productsWithoutCategoriesSelect" class="form-select select2"
-                                                    name="category_ids[]" multiple>
-                                                @foreach($associatedData['product_without_categories'] as $cate)
-                                                    <option value="{{ $cate->id }}"
-                                                            @selected($cate->id === ($category?->id ?? 1))
-                                                            data-is-tableau="{{ $cate->is_tableau ? '1' : '0' }}"
-                                                            data-has-mockup="{{ $cate->has_mockup ? '1' : '0' }}">
-                                                        {{ $cate->getTranslation('name', app()->getLocale()) }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
                                         </div>
 
+                                        <div class="row mb-2">
+                                            <div class="col-md-6 form-group mb-2">
+                                                <label for="categoriesSelect" class="label-text mb-1">Products With
+                                                    Categories</label>
+                                                <select id="categoriesSelect" class="form-select select2"
+                                                        name="product_with_category" multiple>
+                                                    @foreach($associatedData['product_with_categories'] as $cate)
+                                                        <option value="{{ $cate->id }}"
+                                                                @selected($cate->id === ($category?->id ?? 1))
+                                                                data-is-tableau="{{ $cate->is_tableau ? '1' : '0' }}"
+                                                        >
+                                                            {{ $cate->getTranslation('name', app()->getLocale()) }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 form-group mb-2">
+                                                <label for="productsSelect" class="label-text mb-1">Categories</label>
+                                                <select id="productsSelect" class="form-select select2" name="product_ids[]"
+                                                        multiple>
 
-                                    </div>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-2">
+                                            <div class="col-md-12 form-group mb-2">
+                                                <label for="productsWithoutCategoriesSelect" class="label-text mb-1">Products
+                                                    Without Categories</label>
+                                                <select id="productsWithoutCategoriesSelect" class="form-select select2"
+                                                        name="category_ids[]" multiple>
+                                                    @foreach($associatedData['product_without_categories'] as $cate)
+                                                        <option value="{{ $cate->id }}"
+                                                                @selected($cate->id === ($category?->id ?? 1))
+                                                                data-is-tableau="{{ $cate->is_tableau ? '1' : '0' }}"
+                                                                data-has-mockup="{{ $cate->has_mockup ? '1' : '0' }}">
+                                                            {{ $cate->getTranslation('name', app()->getLocale()) }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+
+                                        </div>
                                         {{-- TABLEAU SCENE IMAGE --}}
                                         {{-- TABLEAU SCENE --}}
                                         <div class="form-group mb-2 col-md-6 d-none" id="dz-tableau-scene">
                                             <label class="label-text mb-1">Tableau Scene</label>
 
                                             {{-- Choose existing scene --}}
-                                            <select name="tableau_scene_id" id="tableauSceneSelect" class="form-select select2 mb-1">
-                                                <option value="">Choose Existing Scene</option>
+                                            <select name="tableau_scene_ids[]"
+                                                    id="tableauSceneSelect"
+                                                    class="form-select select2 mb-1"
+                                                    multiple>
                                                 @foreach(\App\Models\TableauScene::where('is_active', true)->latest()->get() as $scene)
                                                     <option value="{{ $scene->id }}">
                                                         {{ $scene->getTranslation('name', app()->getLocale(), false) ?: 'Scene #' . $scene->id }}
@@ -397,55 +400,55 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                                                 </small>
                                             </div>
                                         </div>
-                                    <div class="col-md-12 form-group mb-2 mockupWrapper d-none">
-                                        <div class="d-flex align-items-center justify-content-between mb-2">
-                                            <div>
-                                                <h5 class="mb-0" style="color:#24B094;">Mockups</h5>
-                                                <small class="text-muted">Select a mockup to show this template on
-                                                    it.</small>
+                                        <div class="col-md-12 form-group mb-2 mockupWrapper d-none">
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <div>
+                                                    <h5 class="mb-0" style="color:#24B094;">Mockups</h5>
+                                                    <small class="text-muted">Select a mockup to show this template on
+                                                        it.</small>
+                                                </div>
+                                                <span class="badge bg-light text-dark border">Optional</span>
                                             </div>
-                                            <span class="badge bg-light text-dark border">Optional</span>
+                                            <!-- where cards will render -->
+                                            <div id="mockupsCards" class="row g-2"></div>
+                                            <input type="hidden" name="mockup_id" id="selectedMockupId" value="">
+
+                                            <!-- hidden inputs to submit selected ids -->
+                                            <div id="mockupsHiddenInputs"></div>
                                         </div>
-                                        <!-- where cards will render -->
-                                        <div id="mockupsCards" class="row g-2"></div>
-                                        <input type="hidden" name="mockup_id" id="selectedMockupId" value="">
 
-                                        <!-- hidden inputs to submit selected ids -->
-                                        <div id="mockupsHiddenInputs"></div>
-                                    </div>
-
-                                    <div class="position-relative mt-3 text-center">
-                                        <hr class="opacity-75" style="border: 1px solid #24B094;">
-                                        <span
-                                            class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
-                                            style="color: #24B094;">
+                                        <div class="position-relative mt-3 text-center">
+                                            <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                            <span
+                                                class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                                style="color: #24B094;">
                                     Industry
                                 </span>
-                                    </div>
+                                        </div>
 
-                                    <div class="row mb-2">
-                                        <div class="col-md-6 form-group mb-2">
-                                            <label for="industriesSelect" class="label-text mb-1">Industries</label>
-                                            <select id="industriesSelect" class="form-select select2"
-                                                    name="industry_ids[]"
-                                                    multiple>
-                                                @foreach($associatedData['industries'] as $industry)
-                                                    <option value="{{ $industry->id }}">
-                                                        {{ $industry->getTranslation('name', 'en').
-                        "({$industry->getTranslation('name', 'ar')})" }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
+                                        <div class="row mb-2">
+                                            <div class="col-md-6 form-group mb-2">
+                                                <label for="industriesSelect" class="label-text mb-1">Industries</label>
+                                                <select id="industriesSelect" class="form-select select2"
+                                                        name="industry_ids[]"
+                                                        multiple>
+                                                    @foreach($associatedData['industries'] as $industry)
+                                                        <option value="{{ $industry->id }}">
+                                                            {{ $industry->getTranslation('name', 'en').
+                            "({$industry->getTranslation('name', 'ar')})" }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 form-group mb-2">
+                                                <label for="subIndustriesSelect" class="label-text mb-1">Sub
+                                                    Industries</label>
+                                                <select id="subIndustriesSelect" class="form-select select2"
+                                                        name="industry_ids[]"
+                                                        multiple>
+                                                </select>
+                                            </div>
                                         </div>
-                                        <div class="col-md-6 form-group mb-2">
-                                            <label for="subIndustriesSelect" class="label-text mb-1">Sub
-                                                Industries</label>
-                                            <select id="subIndustriesSelect" class="form-select select2"
-                                                    name="industry_ids[]"
-                                                    multiple>
-                                            </select>
-                                        </div>
-                                    </div>
 
                                         <div class="row align-items-end">
                                             <div class="col-md-9 form-group mb-2">
@@ -469,192 +472,192 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                                             @endcan
                                         </div>
 
-                                    @if(request()->query('q') == 'with')
+                                        @if(request()->query('q') == 'with')
 
-                                        <div class="position-relative mt-3 text-center">
-                                            <hr class="opacity-75" style="border: 1px solid #24B094;">
-                                            <span
-                                                class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
-                                                style="color: #24B094;">
+                                            <div class="position-relative mt-3 text-center">
+                                                <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                                <span
+                                                    class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                                    style="color: #24B094;">
                                     Design Specifications
                                 </span>
-                                        </div>
-                                        <div class="form-group mb-2">
-                                            <label for="orientation" class="label-text mb-1">Orientation</label>
-                                            <select id="orientation" class="form-select" name="orientation">
-                                                <option value="" selected disabled>
-                                                    chooese orientation
-                                                </option>
-                                                @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
-
-                                                    <option value="{{ $orientation->value }}" selected>
-                                                        {{$orientation->label()}}
+                                            </div>
+                                            <div class="form-group mb-2">
+                                                <label for="orientation" class="label-text mb-1">Orientation</label>
+                                                <select id="orientation" class="form-select" name="orientation">
+                                                    <option value="" selected disabled>
+                                                        chooese orientation
                                                     </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
+                                                    @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
 
-                                        <div class="position-relative mt-3 text-center">
-                                            <hr class="opacity-75" style="border: 1px solid #24B094;">
-                                            <span
-                                                class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
-                                                style="color: #24B094;">
+                                                        <option value="{{ $orientation->value }}" selected>
+                                                            {{$orientation->label()}}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            <div class="position-relative mt-3 text-center">
+                                                <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                                <span
+                                                    class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                                    style="color: #24B094;">
                                     Guides Settings
                                 </span>
-                                        </div>
-                                        {{-- Persisted resources (used on submit) --}}
-                                        <input type="hidden" name="dimension_resource_ids" id="dimensionResourceIds">
-                                        <input type="hidden" name="dimension_resource_types"
-                                               id="dimensionResourceTypes">
-                                        <label class="label-text mb-1">Shape</label>
-                                        <div class="row mb-2">
-                                            {{-- Shape (col-6) --}}
-                                            <div class="col-md-4">
-                                                <div class="form-group mb-2">
-                                                    <input type="hidden" name="has_corner" id="has_corner_hidden"
-                                                           value="{{ old('has_corner') }}">
-                                                    <div class="d-flex gap-3">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"
-                                                                   name="has_corner"
-                                                                   id="shape_circle" value="0">
-                                                            <label class="form-check-label"
-                                                                   for="shape_circle">Circle</label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox"
-                                                                   name="has_corner"
-                                                                   id="shape_other" value="1" checked>
-                                                            <label class="form-check-label"
-                                                                   for="shape_other">Other</label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group mb-2 d-none" id="cornersBox">
-                                                    <label for="cornersSelect" class="label-text mb-1">Corners</label>
-                                                    <select id="cornersSelect" class="form-select select2"
-                                                            name="border">
-                                                        <option value="" selected disabled>Choose
-                                                            Corner
-                                                        </option>
-                                                        @foreach(\App\Enums\CornerEnum::cases() as $border)
-                                                            <option
-                                                                value="{{ $border->value }}"
-                                                            selected
-                                                            >{{$border->label()}}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
                                             </div>
-
-                                            {{-- Safety Area (col-6) --}}
-                                            <div class="col-md-4">
-                                                <div class="form-group mb-2">
-                                                    <div class="form-check mb-2">
-                                                        {{-- send 0 when unchecked --}}
-                                                        <input type="hidden" name="has_safety_area" value="0">
-                                                        <input class="form-check-input" type="checkbox"
-                                                               id="hasSafetyArea"
-                                                               name="has_safety_area" value="1" checked>
-                                                        <label class="form-check-label" for="hasSafetyArea">Enable
-                                                            Safety
-                                                            Area</label>
+                                            {{-- Persisted resources (used on submit) --}}
+                                            <input type="hidden" name="dimension_resource_ids" id="dimensionResourceIds">
+                                            <input type="hidden" name="dimension_resource_types"
+                                                   id="dimensionResourceTypes">
+                                            <label class="label-text mb-1">Shape</label>
+                                            <div class="row mb-2">
+                                                {{-- Shape (col-6) --}}
+                                                <div class="col-md-4">
+                                                    <div class="form-group mb-2">
+                                                        <input type="hidden" name="has_corner" id="has_corner_hidden"
+                                                               value="{{ old('has_corner') }}">
+                                                        <div class="d-flex gap-3">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox"
+                                                                       name="has_corner"
+                                                                       id="shape_circle" value="0">
+                                                                <label class="form-check-label"
+                                                                       for="shape_circle">Circle</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox"
+                                                                       name="has_corner"
+                                                                       id="shape_other" value="1" checked>
+                                                                <label class="form-check-label"
+                                                                       for="shape_other">Other</label>
+                                                            </div>
+                                                        </div>
                                                     </div>
-
-                                                    <div id="safetyAreaBox"
-                                                         class="{{ old('has_safety_area') ? '' : 'd-none' }}">
-                                                        <label for="safetyAreaSelect" class="label-text mb-1">Safety
-                                                            Area</label>
-                                                        <select id="safetyAreaSelect" class="form-select select2"
-                                                                name="safety_area">
-                                                            @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
-                                                                <option value="{{ $area }}" @selected($area === \App\Enums\SafetyAreaEnum::R15)>
-                                                                    {{ $area->label() }}
-                                                                </option>
+                                                    <div class="form-group mb-2 d-none" id="cornersBox">
+                                                        <label for="cornersSelect" class="label-text mb-1">Corners</label>
+                                                        <select id="cornersSelect" class="form-select select2"
+                                                                name="border">
+                                                            <option value="" selected disabled>Choose
+                                                                Corner
+                                                            </option>
+                                                            @foreach(\App\Enums\CornerEnum::cases() as $border)
+                                                                <option
+                                                                    value="{{ $border->value }}"
+                                                                    selected
+                                                                >{{$border->label()}}</option>
                                                             @endforeach
                                                         </select>
-                                                        <small class="form-text text-muted">Padding inside the design
-                                                            area.</small>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            {{-- Cut Margin (col-6) --}}
-                                            <div class="col-md-4">
-                                                <div class="form-group mb-2">
-                                                    <div class="form-check mb-2">
-                                                        {{-- send 0 when unchecked --}}
-                                                        <input type="hidden" value="0">
-                                                        <input class="form-check-input" type="checkbox"
-                                                               id="hasCutMargin" value="1"
-                                                               checked>
-                                                        <label class="form-check-label" for="hasCutMargin">Enable Cut
-                                                            Margin</label>
-                                                    </div>
+                                                {{-- Safety Area (col-6) --}}
+                                                <div class="col-md-4">
+                                                    <div class="form-group mb-2">
+                                                        <div class="form-check mb-2">
+                                                            {{-- send 0 when unchecked --}}
+                                                            <input type="hidden" name="has_safety_area" value="0">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                   id="hasSafetyArea"
+                                                                   name="has_safety_area" value="1" checked>
+                                                            <label class="form-check-label" for="hasSafetyArea">Enable
+                                                                Safety
+                                                                Area</label>
+                                                        </div>
 
-                                                    <div id="cutMarginBox"
-                                                         class="{{ old('cut_margin') ? '' : 'd-none' }}">
-                                                        <label for="cutMarginSelect" class="label-text mb-1">Cut
-                                                            Margin</label>
-                                                        <select id="cutMarginSelect" class="form-select select2"
-                                                                name="cut_margin">
-                                                            @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
-                                                                <option value="{{ $area->value }}"
-                                                                    @selected($area === \App\Enums\SafetyAreaEnum::R10)>
-
-                                                                    {{ $area->label() }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                        {{-- <small class="form-text text-muted">Padding inside the design--}}
-                                                        {{-- area.</small>--}}
+                                                        <div id="safetyAreaBox"
+                                                             class="{{ old('has_safety_area') ? '' : 'd-none' }}">
+                                                            <label for="safetyAreaSelect" class="label-text mb-1">Safety
+                                                                Area</label>
+                                                            <select id="safetyAreaSelect" class="form-select select2"
+                                                                    name="safety_area">
+                                                                @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
+                                                                    <option value="{{ $area }}" @selected($area === \App\Enums\SafetyAreaEnum::R15)>
+                                                                        {{ $area->label() }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                            <small class="form-text text-muted">Padding inside the design
+                                                                area.</small>
+                                                        </div>
                                                     </div>
                                                 </div>
+
+                                                {{-- Cut Margin (col-6) --}}
+                                                <div class="col-md-4">
+                                                    <div class="form-group mb-2">
+                                                        <div class="form-check mb-2">
+                                                            {{-- send 0 when unchecked --}}
+                                                            <input type="hidden" value="0">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                   id="hasCutMargin" value="1"
+                                                                   checked>
+                                                            <label class="form-check-label" for="hasCutMargin">Enable Cut
+                                                                Margin</label>
+                                                        </div>
+
+                                                        <div id="cutMarginBox"
+                                                             class="{{ old('cut_margin') ? '' : 'd-none' }}">
+                                                            <label for="cutMarginSelect" class="label-text mb-1">Cut
+                                                                Margin</label>
+                                                            <select id="cutMarginSelect" class="form-select select2"
+                                                                    name="cut_margin">
+                                                                @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
+                                                                    <option value="{{ $area->value }}"
+                                                                        @selected($area === \App\Enums\SafetyAreaEnum::R10)>
+
+                                                                        {{ $area->label() }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                            {{-- <small class="form-text text-muted">Padding inside the design--}}
+                                                            {{-- area.</small>--}}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
                                             </div>
 
+                                            <div class="form-group mb-2">
+                                                <label for="sizesSelect" class="label-text mb-1">Sizes</label>
+                                                <select id="sizesSelect" class="form-select" name="dimension_id">
+                                                    <option value="" selected disabled>Select Size</option>
+                                                </select>
+                                                <small class="form-text text-muted">
+                                                    If no size is selected, the default 650×650 will be applied.
+                                                </small>
+                                            </div>
 
-                                        </div>
-
-                                        <div class="form-group mb-2">
-                                            <label for="sizesSelect" class="label-text mb-1">Sizes</label>
-                                            <select id="sizesSelect" class="form-select" name="dimension_id">
-                                                <option value="" selected disabled>Select Size</option>
-                                            </select>
-                                            <small class="form-text text-muted">
-                                                If no size is selected, the default 650×650 will be applied.
-                                            </small>
-                                        </div>
-
-                                </div>
-                                @endif
-                            </div>
-
-
-                            <div class="d-flex flex-wrap-reverse gap-1 justify-content-between pt-2">
-                                <button type="button" class="btn btn-outline-secondary" id="cancelButton">Cancel
-                                </button>
-                                <div class="d-flex gap-1">
-                                    @if(request()->query('q') == 'without')
-                                        <button type="submit" class="btn btn-outline-secondary fs-5 saveChangesButton"
-                                                data-action="draft">
-                                            <span>Add Template as Draft</span>
-                                            <span id="saveLoader"
-                                                  class="spinner-border spinner-border-sm d-none saveLoader"
-                                                  role="status" aria-hidden="true"></span>
-                                        </button>
+                                    </div>
                                     @endif
-                                    @if(request()->query('q') == 'with')
-                                        <button type="submit" class="btn btn-primary fs-5 saveChangesButton"
-                                                data-action="editor">
-                                            <span>Save & Go to Editor</span>
-                                            <span id="saveLoader"
-                                                  class="spinner-border spinner-border-sm d-none saveLoader"
-                                                  role="status" aria-hidden="true"></span>
-                                        </button>
-                                    @endif
-
                                 </div>
-                            </div>
+
+
+                                <div class="d-flex flex-wrap-reverse gap-1 justify-content-between pt-2">
+                                    <button type="button" class="btn btn-outline-secondary" id="cancelButton">Cancel
+                                    </button>
+                                    <div class="d-flex gap-1">
+                                        @if(request()->query('q') == 'without')
+                                            <button type="submit" class="btn btn-outline-secondary fs-5 saveChangesButton"
+                                                    data-action="draft">
+                                                <span>Add Template as Draft</span>
+                                                <span id="saveLoader"
+                                                      class="spinner-border spinner-border-sm d-none saveLoader"
+                                                      role="status" aria-hidden="true"></span>
+                                            </button>
+                                        @endif
+                                        @if(request()->query('q') == 'with')
+                                            <button type="submit" class="btn btn-primary fs-5 saveChangesButton"
+                                                    data-action="editor">
+                                                <span>Save & Go to Editor</span>
+                                                <span id="saveLoader"
+                                                      class="spinner-border spinner-border-sm d-none saveLoader"
+                                                      role="status" aria-hidden="true"></span>
+                                            </button>
+                                        @endif
+
+                                    </div>
+                                </div>
                         </form>
                     </div>
                 </div>
@@ -693,6 +696,9 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
 
 @endsection
 @section('vendor-script')
+    <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
+    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+
 
     <script>
         handleAjaxFormSubmit("#addTagForm", {
@@ -949,12 +955,11 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                             $categories.append(option);
                         });
 
-                        $categories.trigger('change.select2');
+                        $categories.trigger('change');
 
                         if (typeof callback === 'function') {
                             callback();
                         }
-                        $categories.trigger('change.select2');
                         updateTemplateTypeDropzones();
                     },
                     error(xhr) {
@@ -1138,8 +1143,19 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
             if (selectedProductIsTableau() && dzTableauScene) {
                 dzTableauScene.classList.remove("d-none");
                 visibleDZ.push(dzTableauScene);
+
+                if (typeof window.initTableauSceneSelect === 'function') {
+                    window.initTableauSceneSelect();
+                }
             } else {
-                document.getElementById("uploadedTableauSceneImage").value = "";
+                const tableauSceneInput = document.getElementById("uploadedTableauSceneImage");
+
+                if (tableauSceneInput) {
+                    tableauSceneInput.value = "";
+                }
+
+                $('#tableauSceneSelect').val(null).trigger('change');
+                $('#newTableauSceneFields').show();
             }
 
             visibleDZ.forEach(dz => {
@@ -1309,7 +1325,7 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                 });
             } else {
                 // Clear right select and sync
-                $('#industriesSelect').empty().trigger('change');
+                $('#subIndustriesSelect').empty().trigger('change');
             }
         });
     </script>
@@ -1608,6 +1624,7 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
                         (response.data || []).forEach(cat => {
                             const opt = new Option(cat.name, cat.id, false, true);
                             $(opt).attr('data-has-mockup', cat.has_mockup ? '1' : '0');
+                            $(opt).attr('data-is-tableau', cat.is_tableau ? '1' : '0');
                             $right.append(opt);
                         });
 
@@ -1640,7 +1657,7 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
             syncSelectedResourcesToHiddenInputs();
             // optional immediate refresh:
             refreshSizes();
-           window.checkAllSelectedHaveMockup();
+            window.checkAllSelectedHaveMockup();
         });
 
         // When user opens/clicks Sizes, fetch fresh sizes
@@ -1750,8 +1767,6 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
 
     </script>
 
-    <script src="{{ asset(mix('vendors/js/forms/repeater/jquery.repeater.min.js')) }}"></script>
-    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
 @endsection
 
 @section('page-script')
@@ -2070,37 +2085,72 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
     </script>
 
     <script>
-        $(document).ready(function () {
-            $('#industriesSelect').select2({
-                placeholder: "Choose Industries",
-                allowClear: true
-            });
-            $('#subIndustriesSelect').select2({
-                placeholder: "Choose Sub Industries",
-                allowClear: true
-            });
-            $('#productsSelect').select2({
-                placeholder: "Choose Categories",
-                allowClear: true
-            });
-            $('#productsWithoutCategoriesSelect').select2({
-                placeholder: "Choose Products",
-                allowClear: true
-            });
-            $('#categoriesSelect').select2({
-                placeholder: "Choose Products",
-                allowClear: true
-            });
-            $('#tagsSelect').select2({
-                placeholder: "Choose Tags",
+        function initSelect2Field(selector, options = {}) {
+            const $field = $(selector);
+
+            if (!$field.length) {
+                return;
+            }
+
+            if (!$.fn.select2) {
+                console.error('Select2 is not loaded. Move select2.full.min.js before custom scripts.');
+                return;
+            }
+
+            if ($field.data('select2')) {
+                $field.select2('destroy');
+            }
+
+            $field.select2({
+                width: '100%',
                 allowClear: true,
-
+                ...options
             });
-            $('#colorsSelect').select2({
-                placeholder: "Choose Colors",
-                allowClear: true
+        }
+
+        window.initTableauSceneSelect = function () {
+            initSelect2Field('#tableauSceneSelect', {
+                placeholder: 'Choose Existing Scenes',
+                closeOnSelect: false
+            });
+        };
+
+        $(document).ready(function () {
+            initSelect2Field('#industriesSelect', {
+                placeholder: 'Choose Industries'
             });
 
+            initSelect2Field('#subIndustriesSelect', {
+                placeholder: 'Choose Sub Industries'
+            });
+
+            initSelect2Field('#productsSelect', {
+                placeholder: 'Choose Categories',
+                closeOnSelect: false
+            });
+
+            initSelect2Field('#productsWithoutCategoriesSelect', {
+                placeholder: 'Choose Products',
+                closeOnSelect: false
+            });
+
+            initSelect2Field('#categoriesSelect', {
+                placeholder: 'Choose Products',
+                closeOnSelect: false
+            });
+
+            initSelect2Field('#tagsSelect', {
+                placeholder: 'Choose Tags',
+                closeOnSelect: false
+            });
+
+            initSelect2Field('#colorsSelect', {
+                placeholder: 'Choose Colors'
+            });
+
+            window.initTableauSceneSelect();
+
+            $('#tableauSceneSelect').trigger('change');
         });
     </script>
     <script !src="">
@@ -2235,7 +2285,10 @@ $HasMockupCategory = \App\Models\Category::find(request('category_id'));
         });
 
         $('#tableauSceneSelect').on('change', function () {
-            const hasExistingScene = !!$(this).val();
+            const selectedScenes = $(this).val() || [];
+            const hasExistingScene = Array.isArray(selectedScenes)
+                ? selectedScenes.length > 0
+                : !!selectedScenes;
 
             $('#newTableauSceneFields').toggle(!hasExistingScene);
 

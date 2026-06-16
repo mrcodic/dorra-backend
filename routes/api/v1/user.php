@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Tableau\TableauSceneController;
 use App\Http\Controllers\Shared\LibraryAssetController;
 use App\Http\Middleware\LocalizationMiddleware;
 use App\Http\Middleware\TrackVisits;
@@ -248,6 +249,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::get('mockups/{mockup}/designs/{design}/positions', [MockupController::class, 'positions']);
     Route::resource('editor-mockups', MockupController::class)->only(['index', 'show']);
     Route::get('variants', [VariantController::class, 'index'])->name('variants');
+    Route::get('templates/{template}/tableau-scenes', [TableauSceneController::class, 'index'])->name('tableau-scenes');
 });
 
 

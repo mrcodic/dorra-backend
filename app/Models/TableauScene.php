@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
@@ -32,11 +33,17 @@ class TableauScene extends Model implements HasMedia
         return $this->morphTo();
     }
 
-    public function templates(): HasMany
+    public function templates(): BelongsToMany
     {
-        return $this->hasMany(Template::class, 'tableau_scene_id');
+        return $this->belongsToMany(
+            Template::class,
+            'tableau_scene_template',
+            'tableau_scene_id',
+            'template_id'
+        )
+            ->withPivot(['is_default', 'sort'])
+            ->withTimestamps();
     }
-
     public function image()
     {
         return $this->getFirstMedia('tableau_scene_image');

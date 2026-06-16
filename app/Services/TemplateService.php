@@ -226,13 +226,14 @@ class TemplateService extends BaseService
         })->toArray();
         $validatedData['colors'] = $finalColors;
         $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad, $colors) {
-            $tableauSceneId = $validatedData['tableau_scene_id'] ?? null;
+            $model = $this->repository->create($validatedData);
+            $tableauSceneIds = collect($validatedData['tableau_scene_ids'] ?? [])
+                ->filter()
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->values();
 
-            $newSceneImageId = $validatedData['new_tableau_scene_image_id']
-                ?? $validatedData['tableau_scene_image_id']
-                ?? null;
-
-            if (empty($tableauSceneId) && !empty($newSceneImageId)) {
+            if (!empty($validatedData['new_tableau_scene_image_id'])) {
                 $sceneName = $validatedData['new_tableau_scene_name'] ?? [];
 
                 $scene = TableauScene::create([
@@ -246,25 +247,33 @@ class TemplateService extends BaseService
                     'is_active' => true,
                 ]);
 
-                Media::where('id', $newSceneImageId)
-                    ->update([
-                        'model_type' => TableauScene::class,
-                        'model_id' => $scene->id,
-                        'collection_name' => 'tableau_scene_image',
-                    ]);
+                    Media::where(
+                    'id',
+                    $validatedData['new_tableau_scene_image_id']
+                )->update([
+                    'model_type' => TableauScene::class,
+                    'model_id' => $scene->id,
+                    'collection_name' => 'tableau_scene_image',
+                ]);
 
-                $tableauSceneId = $scene->id;
+                $tableauSceneIds->push($scene->id);
             }
 
-            $validatedData['tableau_scene_id'] = $tableauSceneId;
+            if ($tableauSceneIds->isNotEmpty()) {
+                $pivotData = $tableauSceneIds
+                    ->values()
+                    ->mapWithKeys(function ($sceneId, $index) {
+                        return [
+                            $sceneId => [
+                                'is_default' => $index === 0,
+                                'sort' => $index,
+                            ],
+                        ];
+                    })
+                    ->toArray();
 
-            // Remove fields that are not columns in templates table
-            unset(
-                $validatedData['new_tableau_scene_name'],
-                $validatedData['new_tableau_scene_image_id'],
-                $validatedData['tableau_scene_image_id']
-            );
-            $model = $this->repository->create($validatedData);
+                $model->tableauScenes()->sync($pivotData);
+            }
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->industries()->sync($validatedData['industry_ids'] ?? []);
             $model->categories()->sync($validatedData['category_ids'] ?? []);
