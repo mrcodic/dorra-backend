@@ -286,7 +286,7 @@ class TemplateResource extends JsonResource
                 $pivot = $mockup->pivot;
                 return $pivot->type;
             }),
-            'tableau_scenes' => TableauSceneResource::collection( $this->whenLoaded('tableauScenes.media')),
+            'tableau_scenes' => TableauSceneResource::collection( $this->whenLoaded('tableauScenes')),
         ];
     }
 }
