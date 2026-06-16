@@ -1181,7 +1181,7 @@
             const value = $select.val();
             const hasExistingScene = Array.isArray(value) ? value.length > 0 : !!value;
 
-            $('#newTableauSceneFields').toggle(!hasExistingScene);
+            // $('#newTableauSceneFields').toggle(!hasExistingScene);
 
             if (hasExistingScene) {
                 $('#newTableauSceneNameEn').val('');
