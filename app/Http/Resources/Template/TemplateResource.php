@@ -285,6 +285,18 @@ class TemplateResource extends JsonResource
                 $pivot = $mockup->pivot;
                 return $pivot->type;
             }),
+            'tableau_scenes_urls' => $this->whenLoaded('tableauScenes', function () {
+                return $this->tableauScenes
+                    ->flatMap(function ($scene) {
+                        $mediaItems = $scene->relationLoaded('media')
+                            ? $scene->media->where('collection_name', 'tableau_scene_image')
+                            : $scene->getMedia('tableau_scene_image');
+
+                        return $mediaItems->map(fn ($media) => $media->getFullUrl());
+                    })
+                    ->filter()
+                    ->values();
+            }),
         ];
     }
 }

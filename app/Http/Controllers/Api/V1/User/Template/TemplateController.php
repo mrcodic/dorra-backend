@@ -41,6 +41,7 @@ class TemplateController extends Controller
             'products' => fn($q) => $q->whereKey(request()->integer('product_id')),
             'products.specifications.options',
             'products.prices',
+            'tableauScenes.media'
             ])));
 
 
