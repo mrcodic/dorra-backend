@@ -93,6 +93,14 @@ class Template extends Model implements HasMedia
             $this->getFirstMediaUrl('templates');
 
     }
+    public function getImageMediaAttribute(): string
+    {
+        return $this->approach == 'without_editor' ?
+            $this->getFirstMedia('templates-preview') ?:
+                "" :
+            $this->getFirstMedia('templates');
+
+    }
     public function getPreviewImageUrlForType(string $type): string
     {
         $type = strtolower($type);

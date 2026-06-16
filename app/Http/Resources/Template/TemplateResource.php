@@ -122,8 +122,8 @@ class TemplateResource extends JsonResource
             })(),
             'source_design_svg' => $this->when(isset($this->image), $this->image),
             'back_base64_preview_image' => $backPreviewImageUrl,
-            'template_image_height' => $this->image?->getCustomProperty('height') ?: $backPreviewImage?->getCustomProperty('height'),
-            'template_image_width' => $this->image?->getCustomProperty('width') ?: $backPreviewImage?->getCustomProperty('height'),
+            'template_image_height' => $this->image_media?->getCustomProperty('height') ?: $backPreviewImage?->getCustomProperty('height'),
+            'template_image_width' => $this->image_media?->getCustomProperty('width') ?: $backPreviewImage?->getCustomProperty('height'),
             'has_mockup' => (boolean)$this->products->contains('has_mockup', true),
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
             'template_model_image' => $media
