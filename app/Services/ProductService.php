@@ -206,9 +206,9 @@ class ProductService extends BaseService
                         'name' => [
                             'en' => $specification['name_en'],
                             'ar' => $specification['name_ar'],
-                            'type' => $specification['fixed_key'] ? 'fixed' : 'custom',
-                            'fixed_key' => $specification['fixed_key'] ?? null,
                         ],
+                        'type' => $specification['fixed_key'] ? 'fixed' : 'custom',
+                        'fixed_key' => $specification['fixed_key'] ?? null,
                     ]);
 
                     if (isset($specification['specification_options'])) {

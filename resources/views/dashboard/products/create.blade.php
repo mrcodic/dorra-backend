@@ -546,7 +546,7 @@
                                                         <div data-repeater-list="specifications">
                                                             <div data-repeater-item>
                                                                 <input type="hidden" name="fixed_key" class="spec-fixed-key">
-                                                                
+
                                                                 <!-- Specification Fields -->
                                                                 <div class="row mt-1">
                                                                     <div class="col-md-6">
