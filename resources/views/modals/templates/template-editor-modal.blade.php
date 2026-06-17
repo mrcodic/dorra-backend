@@ -1,3 +1,4 @@
+@php  $category = \App\Models\Category::find(request('product_without_category_id'));@endphp
 <div class="modal new-user-modal fade" id="templateEditorModal">
     <div class="modal-dialog modal-dialog-centered">
         <div class="add-new-user modal-content pt-0 px-1">
@@ -19,7 +20,7 @@
                     <input type="hidden"
                            name="category_id"
                            value="{{ request('product_without_category_id') }}">
-
+                @if(!$category?->is_tableau)
                     {{-- With Editor --}}
                     <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
                         <input
@@ -48,20 +49,22 @@
                             Without Editor
                         </label>
                     </div>
+                    @else
+                        {{-- Tableau --}}
+                        <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
+                            <input
+                                class="form-check-input me-2"
+                                type="radio"
+                                name="q"
+                                id="tableau"
+                                value="tableau"
+                            />
+                            <label class="form-check-label mb-0 flex-grow-1" for="tableau">
+                                Tableau
+                            </label>
+                        </div>
 
-                    {{-- Tableau --}}
-                    <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
-                        <input
-                            class="form-check-input me-2"
-                            type="radio"
-                            name="q"
-                            id="tableau"
-                            value="tableau"
-                        />
-                        <label class="form-check-label mb-0 flex-grow-1" for="tableau">
-                            Tableau
-                        </label>
-                    </div>
+                    @endif
 
                 </div>
 
