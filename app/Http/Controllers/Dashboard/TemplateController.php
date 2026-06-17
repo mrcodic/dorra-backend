@@ -74,6 +74,14 @@ class TemplateController extends DashboardController
                 'tags' => $this->tagRepository->query()->get(['id', 'name']),
                 'mockups' => $this->mockupRepository->query()->with(['media'])->get(),
             ],
+            'edit' =>[
+                'product_with_categories' => $this->categoryRepository->query()
+                    ->where('is_has_category', 1)
+                    ->has('products')->get(['id', 'name']),
+                'product_without_categories' => $this->categoryRepository->query()
+                    ->where('is_has_category', 0)
+                    ->get(['id', 'name']),
+            ]
         ];
         $this->methodRelations = [
             'index' => ["media", "categories", "types"],
