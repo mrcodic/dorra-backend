@@ -10,9 +10,10 @@
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
 @endsection
 @php
-    $category = request('category_id') && request('q') == 'tableau'
+
+    $category =  request('q') == 'tableau'
     ?\App\Models\Category::whereIsTableau(true)->first()
-    : \App\Models\Category::find(request('category_id'));
+    :(request('category_id') ? \App\Models\Category::find(request('category_id')) : null);
     $HasMockupCategory = \App\Models\Category::find(request('category_id'));
 @endphp
 
@@ -140,7 +141,7 @@
                                         <div class="form-group mb-2">
                                             <label class="label-text mb-1">Template Type</label>
                                             <div class="row">
-                                                @foreach(\App\Models\Type::all(['id','value']) as $type)
+                                                @php $type = \App\Models\Type::whereValue(\App\Enums\Template\TypeEnum::FRONT)->first();  @endphp
                                                     <div class="col-md-4 mb-1">
                                                         <label class="radio-box">
                                                             <input class="form-check-input type-checkbox" type="checkbox"
@@ -155,7 +156,6 @@
                                                             <span>{{ $type->value->label() }}</span>
                                                         </label>
                                                     </div>
-                                                @endforeach
 
                                             </div>
 

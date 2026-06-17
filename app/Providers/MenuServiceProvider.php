@@ -28,7 +28,7 @@ class MenuServiceProvider extends ServiceProvider
 
         if ($categories === null) {
             $categories = cache()->remember('menu_categories', now()->addMinutes(10), function () {
-                return \App\Models\Category::select('id', 'name')->orderBy('sort')->whereIsTableau(false)->get();
+                return \App\Models\Category::select('id', 'name')->orderBy('sort')->get();
             });
         }
 

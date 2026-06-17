@@ -1536,7 +1536,7 @@
                     reader.readAsDataURL(file);
                 });
 
-                @if(!empty($media = $model->getFirstMedia('templates')) && $model->types->contains(\App\Enums\Template\TypeEnum::NONE->value))
+                @if(!empty($media = $model->getFirstMedia('templates'))))
                 let modelMockFile = {
                     name: "{{ $media->file_name }}",
                     size: {{ $media->size ?? 12345 }},
