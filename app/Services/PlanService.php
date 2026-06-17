@@ -66,20 +66,22 @@ class PlanService extends BaseService
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $resource = parent::updateResource($validatedData, $id, $relationsToLoad);
+        if (!empty($validatedData['features'])) {
+            $features = collect($validatedData['features']);
 
-        $features = collect($validatedData['features'] ?? []);
+            $features = $features->map(function ($feature) use ($resource) {
+                $featureId = $feature['id'] ?? null;
 
-        $features = $features->map(function ($feature) use ($resource) {
-            $featureId = $feature['id'] ?? null;
+                return $resource->features()->updateOrCreate(
+                    ['id' => $featureId],
+                    ['description' => $feature['description']]
+                );
+            });
 
-           return $resource->features()->updateOrCreate(
-                ['id' => $featureId],
-                ['description' => $feature['description']]
-            );
-        });
-;
-        $keptIds = $features->pluck('id')->filter()->values()->all();
-        $resource->features()->whereNotIn('id', $keptIds)->delete();
+            $keptIds = $features->pluck('id')->filter()->values()->all();
+            $resource->features()->whereNotIn('id', $keptIds)->delete();
+        }
+
 
         return $resource->load($relationsToLoad);
     }
@@ -112,7 +114,7 @@ class PlanService extends BaseService
             })
             ->addColumn('features', function ($plan) {
                 return $plan->features
-                    ->map(fn ($f) => [
+                    ->map(fn($f) => [
                         'id' => $f->id,
                         'description' => $f->description,
                     ])
