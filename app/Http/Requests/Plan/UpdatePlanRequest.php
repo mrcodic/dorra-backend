@@ -19,6 +19,7 @@ class UpdatePlanRequest extends BaseRequest
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
+            'recommended_for' => ['nullable', 'string'],
             'credits' => ['required', 'integer', 'min:1'],
             'is_active' => ['required', 'boolean'],
             'features' => ['required', 'array'],
