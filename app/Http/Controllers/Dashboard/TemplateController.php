@@ -85,7 +85,7 @@ class TemplateController extends DashboardController
         ];
         $this->methodRelations = [
             'index' => ["media", "categories", "types"],
-            'edit' => ['products', 'types']
+            'edit' => ['products', 'types','tableauScenes']
         ];
 
     }
