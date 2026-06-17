@@ -2406,7 +2406,6 @@
                 'front-template-dropzone',
                 'template-dropzone',
                 'back-template-dropzone',
-                // 'none-template-dropzone'
             ].forEach(id => {
                 const el = document.getElementById(id);
 

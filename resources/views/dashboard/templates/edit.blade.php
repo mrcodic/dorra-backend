@@ -1646,48 +1646,7 @@
             cb.addEventListener('change', handleTypeChangeAndResetDZ);
         });
     </script>
-
-    <script>
-        Dropzone.autoDiscover = false;
-
-        window.tableauSceneDropzone = null;
-
-        if (document.getElementById("tableau-scene-dropzone")) {
-            window.tableauSceneDropzone = new Dropzone("#tableau-scene-dropzone", {
-                url: "{{ route('media.store') }}",
-                paramName: "file",
-                maxFiles: 1,
-                maxFilesize: 30,
-                acceptedFiles: "image/png,image/jpeg,image/webp",
-                headers: {
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                },
-                addRemoveLinks: true,
-                dictDefaultMessage: "Drop tableau scene image here or click to upload",
-                init: function () {
-                    this.on("success", function (file, response) {
-                        if (response.success && response.data) {
-                            file._hiddenInputId = response.data.id;
-                            document.getElementById("uploadedTableauSceneImage").value = response.data.id;
-                        }
-                    });
-
-                    this.on("removedfile", function (file) {
-                        document.getElementById("uploadedTableauSceneImage").value = "";
-
-                        if (file._hiddenInputId) {
-                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
-                                method: "DELETE",
-                                headers: {
-                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        }
-    </script>
+    
 
     <script>
         // keep color picker & text field in sync
@@ -2994,7 +2953,6 @@
                 'front-template-dropzone',
                 'template-dropzone',
                 'back-template-dropzone',
-                // 'none-template-dropzone'
             ].forEach(id => {
                 const el = document.getElementById(id);
 
