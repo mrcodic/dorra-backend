@@ -193,43 +193,72 @@ $(document).ready(function () {
     }
 
     function renderFeaturesRows(features) {
-        const $rep  = $('#editFeaturesRepeater');
+        const $rep = $('#editFeaturesRepeater');
         const $list = $rep.find('[data-repeater-list="features"]');
 
         // normalize
         let arr = features;
-        if (!Array.isArray(arr) && arr && typeof arr === 'object') arr = Object.values(arr);
-        if (!Array.isArray(arr)) arr = [];
 
-        // Always show at least 1 row
-        if (!arr.length) arr = [{ id: '', description: '' }];
+        if (!Array.isArray(arr) && arr && typeof arr === 'object') {
+            arr = Object.values(arr);
+        }
 
-        const rows = arr.map(f, i => {
-            const fid  = (typeof f === 'object' && f) ? (f.id ?? '') : '';
-            const desc = (typeof f === 'object' && f) ? (f.description ?? '') : (f ?? '');
+        if (!Array.isArray(arr)) {
+            arr = [];
+        }
+
+        // Always show at least one row
+        if (!arr.length) {
+            arr = [{ id: '', description: '' }];
+        }
+
+        const rows = arr.map((f, i) => {
+            const fid =
+                typeof f === 'object' && f
+                    ? (f.id ?? '')
+                    : '';
+
+            const desc =
+                typeof f === 'object' && f
+                    ? (f.description ?? '')
+                    : (f ?? '');
 
             return `
+            <div data-repeater-item class="row g-1 align-items-end mb-1">
+                <div class="col-12 col-md-11">
+                    <label class="form-label">Description</label>
 
-                                <div data-repeater-item class="row g-1 align-items-end mb-1">
-                                    <div class="col-12 col-md-11">
-                                        <label class="form-label">Description</label>
+                    <input
+                        type="hidden"
+                        name="id"
+                        class="feature-id"
+                        value="${escapeHtml(fid)}">
 
-                                        <input type="hidden" name="id" class="feature-id" value="${escapeHtml(fid)}">
-                                        <input type="text" name="description" class="form-control" value="${escapeHtml(desc)}" required>
-                                    </div>
+                    <input
+                        type="text"
+                        name="description"
+                        class="form-control"
+                        value="${escapeHtml(desc)}"
+                        required>
+                </div>
 
-                                    <div class="col-12 col-md-1 d-flex justify-content-end">
-                                        <button type="button" class="btn btn-outline-danger btn-sm" data-repeater-delete>
-                                            <i data-feather="x"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-    `;
+                <div class="col-12 col-md-1 d-flex justify-content-end">
+                    <button
+                        type="button"
+                        class="btn btn-outline-danger btn-sm"
+                        data-repeater-delete>
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+            </div>
+        `;
         }).join('');
 
         $list.html(rows);
-        if (window.feather) feather.replace();
+
+        if (window.feather) {
+            feather.replace();
+        }
     }
     $(document).on('click', '.edit-details', function (e) {
         e.preventDefault();
