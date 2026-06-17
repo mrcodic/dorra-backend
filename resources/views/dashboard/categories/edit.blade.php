@@ -1865,6 +1865,12 @@
                     $(this).slideDown();
                     feather.replace();
 
+                    // ✅ Reset readonly/locked state for new custom specs
+                    $(this).removeAttr('data-spec-key');
+                    $(this).find('.spec-fixed-key').val('');
+                    $(this).find('.spec-name-en, .spec-name-ar').prop('readonly', false);
+                    $(this).find('.spec-delete-btn').show();
+
                     let dzElement = $(this).find(".option-dropzone")[0];
                     if (dzElement && typeof initOptionDropzone === 'function') {
                         initOptionDropzone(dzElement);
