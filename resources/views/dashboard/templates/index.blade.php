@@ -217,7 +217,6 @@
             });
         });
 
-        const templatesDataUrl = "{{ route('templates.data') }}";
         const showTemplateUrl = "{{ config("services.editor_url ") }}";
 
         const locale = "{{ app()->getLocale() }}";
