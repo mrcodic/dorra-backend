@@ -788,8 +788,8 @@
             }
         ];
 
-        window.selectedProductIsTableau = window.selectedProductIsTableau || false;
         let isSyncingTableauSpecs = false;
+
 
         function getSpecListEl() {
             return $('.outer-repeater').find('[data-repeater-list="specifications"]').first();
@@ -803,8 +803,9 @@
             return $('.outer-repeater').children('.row').find('button[data-repeater-create]').first();
         }
 
+
         function isTableauProduct() {
-            return window.selectedProductIsTableau === true;
+            return $('#is_tableau').is(':checked');
         }
 
         function clearAndHideVariants() {
@@ -877,6 +878,7 @@
                 }, 250);
             });
         }
+
         function removeSpecRepeaterItem(key) {
             const $item = findSpecItemByKey(key);
             if (!$item.length) return;
@@ -977,27 +979,30 @@
 
         // ----- Select2 UI -----
         $(document).ready(function () {
+
+            // Toggle select box
             $('#btnAddCuttingSpecs').on('click', function () {
                 $('#cuttingSpecsBox').toggleClass('d-none');
 
+                // init select2 once when shown first time
                 if (!$('#cuttingSpecsSelect').data('select2')) {
                     $('#cuttingSpecsSelect').select2({
                         placeholder: 'Select cutting specs...',
                         closeOnSelect: false,
-                        width: '100%'
+                        width: '100'
                     });
                     setTimeout(generateVariants, 0);
                 }
             });
-
             $('#cuttingSpecsSelect').on('change', function () {
                 generateVariants();
             });
-
             if (($('#cuttingSpecsSelect').val() || []).length) {
-                $('#cuttingSpecsBox').removeClass('d-none');
+                $('#cuttingSpecsBox').removeClass('d-none'); // optional: show it
                 setTimeout(generateVariants, 0);
             }
+
+
         });
     </script>
 
@@ -2198,19 +2203,12 @@
         });
     </script>
     <script>
+        // ── Tableau fixed specs + frame color image only ─────────────
         Dropzone.autoDiscover = false;
 
-        window.selectedProductIsTableau = false;
-        function showTableauToastError(message) {
-            Toastify({
-                text: message,
-                duration: 4000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#EA5455",
-                close: true
-            }).showToast();
-        }
+        $('#is_tableau').on('change', function () {
+            syncTableauFixedSpecs();
+        });
 
         function initOptionFrameDropzones() {
             document.querySelectorAll(".option-frame-dropzone").forEach(function (element) {
@@ -2232,12 +2230,11 @@
                     headers: {
                         "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
                     },
-                    dictDefaultMessage: "Drop frame image here or click to upload",
                     init: function () {
                         this.on("success", function (file, response) {
                             if (response.success && response.data) {
-                                file._hiddenInputId = response.data.id;
                                 hiddenInput.value = response.data.id;
+                                file._hiddenInputId = response.data.id;
                             }
                         });
 
@@ -2258,53 +2255,17 @@
             });
         }
 
-        function clearOptionFrameImages() {
-            document.querySelectorAll(".option-frame-image-hidden").forEach(function (input) {
-                input.value = "";
-            });
-
-            document.querySelectorAll(".option-frame-dropzone").forEach(function (element) {
-                if (element.dropzone) {
-                    element.dropzone.removeAllFiles(true);
-                }
-            });
-        }
-
-        function setTableauMode(isTableau) {
-            window.selectedProductIsTableau = isTableau;
-
-            if (isTableau) {
-                initOptionFrameDropzones();
-            } else {
-                clearOptionFrameImages();
-            }
-
-            syncTableauFixedSpecs();
-            syncOptionFrameVisibility();
-            syncOptionPaddingVisibility();
-        }
-
-        function handleSelectedProductTableauState() {
-            const selectedOption = $(".category-select option:selected");
-            const isTableau = Number(selectedOption.data("is-tableau")) === 1;
-
-            setTableauMode(isTableau);
-        }
+        $(document).on("click", "[data-repeater-create]", function () {
+            setTimeout(function () {
+                syncOptionFrameVisibility();
+                syncOptionPaddingVisibility();
+                initOptionDropzones();
+            }, 250);
+        });
 
         $(document).ready(function () {
-            handleSelectedProductTableauState();
-
-            $(".category-select").on("change", function () {
-                handleSelectedProductTableauState();
-            });
-
-            $(document).on("click", "[data-repeater-create]", function () {
-                setTimeout(function () {
-                    syncOptionFrameVisibility();
-                    syncOptionPaddingVisibility();
-                    initOptionDropzones();
-                }, 300);
-            });
+            syncTableauFixedSpecs();
+            syncOptionPaddingVisibility();
         });
     </script>
 
