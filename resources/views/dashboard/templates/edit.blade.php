@@ -2808,7 +2808,7 @@
             });
         });
     </script>
-    
+
     <script>
         (function () {
             const positionState = {};
@@ -2818,6 +2818,9 @@
             const DEFAULT_TOP = 35;
             const DEFAULT_LEFT = 35;
             const DEFAULT_OVERLAY_WIDTH = 28;
+
+// Positions already saved in DB, keyed by scene id (string) — edit page only
+            const existingScenePositions = @json($existingScenePositions ?? []);
 
             function safeId(sceneId) {
                 return String(sceneId).replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -2876,11 +2879,21 @@
 
             function ensureState(sceneId) {
                 if (!positionState[sceneId]) {
-                    positionState[sceneId] = {
-                        top: DEFAULT_TOP,
-                        left: DEFAULT_LEFT,
-                        width: DEFAULT_OVERLAY_WIDTH
-                    };
+                    const saved = existingScenePositions[String(sceneId)];
+
+                    if (saved && Number.isFinite(Number(saved.top)) && Number.isFinite(Number(saved.left))) {
+                        positionState[sceneId] = {
+                            top: num(saved.top, DEFAULT_TOP),
+                            left: num(saved.left, DEFAULT_LEFT),
+                            width: num(saved.width, DEFAULT_OVERLAY_WIDTH)
+                        };
+                    } else {
+                        positionState[sceneId] = {
+                            top: DEFAULT_TOP,
+                            left: DEFAULT_LEFT,
+                            width: DEFAULT_OVERLAY_WIDTH
+                        };
+                    }
                 }
 
                 return positionState[sceneId];
@@ -3447,6 +3460,33 @@
             $(document).on('change', '#productsWithoutCategoriesSelect, #productsSelect, #categoriesSelect', function () {
                 setTimeout(triggerRebuild, 300);
             });
+
+            // Build immediately on page load from already-selected scenes,
+            // retrying briefly until select2 has applied server-rendered selections
+            $(document).ready(function () {
+                let attempts = 0;
+
+                function attemptRebuild() {
+                    const hasSelection = ($('#tableauSceneSelect').val() || []).length > 0;
+
+                    if (hasSelection || attempts > 10) {
+                        triggerRebuild();
+                        return;
+                    }
+
+                    attempts++;
+                    setTimeout(attemptRebuild, 150);
+                }
+
+                setTimeout(attemptRebuild, 150);
+            });
+
+            // Re-sync positions right before the edit form submits
+            $('#editTemplateForm').on('submit', function () {
+                syncAllScenePositionInputs();
+            });
+        })();
+    </script>
         })();
     </script>
 
