@@ -1618,30 +1618,10 @@
 
         // ✅ لما المستخدم يغير الأنواع (front/back/none)
         function handleTypeChangeAndResetDZ() {
-            const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox'))
-                .filter(cb => cb.checked)
-                .map(cb => cb.dataset.typeName);
-
-            // const allTypes = ['front', 'back', 'none'];
-            const allTypes = ['front', 'back'];
-
-            allTypes.forEach(type => {
-                const dz = templateDropzones[type];
-                const hiddenInput = document.getElementById(`uploaded${type.charAt(0).toUpperCase() + type.slice(1)}TemplateImage`);
-
-                if (!selectedTypes.includes(type)) {
-                    if (dz && dz.files.length > 0) {
-                        dz.removeAllFiles(true);
-                    }
-                    if (hiddenInput) hiddenInput.value = "";
-                }
-            });
-
             if (typeof updateTemplateTypeDropzones === "function") {
                 updateTemplateTypeDropzones();
             }
         }
-
         document.querySelectorAll('.type-checkbox').forEach(cb => {
             cb.addEventListener('change', handleTypeChangeAndResetDZ);
         });
