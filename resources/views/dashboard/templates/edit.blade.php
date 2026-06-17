@@ -432,8 +432,6 @@
                                             @endforeach
                                         </select>
                                     </div>
-
-                                    {{-- TABLEAU SCENE --}}
                                     {{-- TABLEAU SCENE --}}
                                     <div class="form-group mb-2 col-md-6 d-none" id="dz-tableau-scene">
                                         <label class="label-text mb-1">Tableau Scene</label>
