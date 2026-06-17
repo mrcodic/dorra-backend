@@ -1142,12 +1142,17 @@
 
     <script>
         window.existingVariantsFromDB = @json($variantsForJs);
+        window.modelIsTableau = @json((bool) ($model->is_tableau ?? false));
     </script>
 
 
     <script>
 
         function generateVariants() {
+            if (window.modelIsTableau) {
+                hideVariants();
+                return;
+            }
             showVariants();
 
             let specs = @json($specs);
@@ -2711,8 +2716,11 @@
 
         function setTableauMode(isTableau) {
             window.selectedProductIsTableau = isTableau;
-
-            showVariants();
+            if (window.modelIsTableau) {
+                hideVariants();
+            } else {
+                showVariants();
+            }
 
             $(".option-frame-wrapper").toggle(isTableau);
 

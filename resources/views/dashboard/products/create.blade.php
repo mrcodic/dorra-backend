@@ -1970,8 +1970,17 @@
                     selector: '.inner-repeater',
                     initEmpty: true,
                     show: function () {
+                        // Repeater clones the LAST item as the template for new ones.
+                        // If that item was a locked Tableau fixed spec, strip its fixed_key,
+                        // data-spec-key, readonly state, and hidden delete button before
+                        // this becomes a real, independent (and correctly-keyed) spec row.
+                        $(this).removeAttr('data-spec-key');
+                        $(this).find('.spec-fixed-key').val('');
+                        $(this).find('.spec-name-en, .spec-name-ar').prop('readonly', false);
+                        $(this).find('.spec-delete-btn').show();
+
                         $(this).slideDown();
-                        updateDeleteButtons($(this).closest('.inner-repeater'));
+                        updateDeleteButtons($('.outer-repeater'));
                         initializeImageUploaders(this);
                         feather.replace();
                         setTimeout(function () {
