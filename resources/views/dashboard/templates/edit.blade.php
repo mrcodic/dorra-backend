@@ -29,6 +29,7 @@
                                     return [(string) $scene->id => $positions];
                                 })
                                 ->toArray() ?? [];
+                            $category = \App\Models\Category::find(request('product_without_category_id'));
                         @endphp
 
                         <form id="editTemplateForm" enctype="multipart/form-data" method="post"
@@ -209,7 +210,10 @@
                                         <div class="form-group mb-2">
                                             <label class="label-text mb-1">Template Type</label>
                                             <div class="row">
-                                                @foreach(\App\Models\Type::all(['id','value']) as $type)
+                                                @foreach(\App\Models\Type::when(
+          ($category?->is_tableau),
+           fn($q) => $q->whereValue(\App\Enums\Template\TypeEnum::FRONT)
+       )->get(['id','value']) as $type)
                                                     <div class="col-md-4 mb-1">
                                                         <label class="radio-box">
                                                             <input class="form-check-input type-checkbox"
@@ -287,9 +291,7 @@
 {{--                                                        </small>--}}
 {{--                                                    </div>--}}
                                                 @endif
-                                                @php
-                                                    $category = \App\Models\Category::find(request('product_without_category_id'));
-                                                @endphp
+
                                                 @if(($category && !$category->has_mockup) || !$category )
                                                     <!-- MODEL  -->
                                                     <div class="form-group mb-2 col-md-6 d-none" id="dz-model">
