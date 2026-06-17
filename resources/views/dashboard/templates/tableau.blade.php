@@ -2390,8 +2390,6 @@
                     '#template-dropzone .dz-preview img, ' +
                     '#back-template-dropzone .dz-image img, ' +
                     '#back-template-dropzone .dz-preview img, '
-                    // '#none-template-dropzone .dz-image img, ' +
-                    // '#none-template-dropzone .dz-preview img'
                 );
 
                 if (preview && preview.src && !preview.src.includes('placeholder')) {
