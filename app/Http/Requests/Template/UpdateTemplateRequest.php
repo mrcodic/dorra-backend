@@ -78,12 +78,6 @@ class UpdateTemplateRequest extends BaseRequest
                 'exists:media,id',
             ],
 
-            'template_image_none_id' => [
-                Rule::requiredIf(fn()=> in_array(TypeEnum::NONE->value, (array)request('types', []) )
-                    && request('approach') == 'without_editor'),
-                'nullable',
-                'exists:media,id',
-            ],
             'template_image_id' => ['nullable','exists:media,id'],
             'design_data' => ['sometimes', 'json'],
             'base64_preview_image' => ['sometimes', 'string'],

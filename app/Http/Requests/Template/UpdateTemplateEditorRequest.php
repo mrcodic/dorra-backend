@@ -35,9 +35,9 @@ class UpdateTemplateEditorRequest extends BaseRequest
 
         $hasFront = in_array(TypeEnum::FRONT->value, $types);
         $hasBack  = in_array(TypeEnum::BACK->value, $types);
-        $hasNone  = in_array(TypeEnum::NONE->value, $types);
 
-        $designDataRules = ($hasFront || $hasNone)
+
+        $designDataRules = ($hasFront)
             ? ['required_with:base64_preview_image', 'json', function ($attribute, $value, $fail) {
                 if ($value === 'null') {
                     $fail($attribute . ' cannot be null.');
@@ -59,7 +59,7 @@ class UpdateTemplateEditorRequest extends BaseRequest
             }]
             : ['prohibited'];
 
-        $previewImageRules = ($hasFront || $hasNone)
+        $previewImageRules = ($hasFront)
             ? ['required_with:design_data', 'string']
             : ['prohibited'];
 

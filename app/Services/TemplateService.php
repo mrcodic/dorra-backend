@@ -424,7 +424,6 @@ class TemplateService extends BaseService
             if ($typesChanged) {
                 $hasFront = in_array(\App\Enums\Template\TypeEnum::FRONT->value, $selectedTypeValues);
                 $hasBack = in_array(\App\Enums\Template\TypeEnum::BACK->value, $selectedTypeValues);
-                $hasNone = in_array(\App\Enums\Template\TypeEnum::NONE->value, $selectedTypeValues);
 
                 if (!($hasFront && $hasBack)) {
                     if ($hasFront) {
@@ -437,12 +436,6 @@ class TemplateService extends BaseService
                         $model->clearMediaCollection('templates-preview');
                     }
 
-                    if ($hasNone) {
-                        $model->clearMediaCollection('templates');
-                        $model->clearMediaCollection('templates-preview');
-                        $model->clearMediaCollection('back_templates');
-                        $model->clearMediaCollection('back-templates-preview');
-                    }
                 }
             }
 
