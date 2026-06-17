@@ -3321,7 +3321,7 @@
 
                 scenes.forEach(scene => {
                     tabsEl.appendChild(buildTab(scene.id, scene.label));
-                    panelsEl.appendChild(buildPanel(scene.id, scene.label, scene.imageUrl || ''));
+                    panelsEl.appendChild(buildPanel(scene.id, scene.label, scene.image_url || ''));
                 });
 
                 refreshTemplateSrc();
