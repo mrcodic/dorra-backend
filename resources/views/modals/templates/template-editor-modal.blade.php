@@ -20,7 +20,7 @@
                     <input type="hidden"
                            name="category_id"
                            value="{{ request('product_without_category_id') }}">
-                @if(!$category?->is_tableau)
+                @if(!$category?->is_tableau || !$category)
                     {{-- With Editor --}}
                     <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
                         <input
@@ -49,7 +49,9 @@
                             Without Editor
                         </label>
                     </div>
-                    @else
+                    @endif
+
+                    @if($category?->is_tableau || !$category)
                         {{-- Tableau --}}
                         <div class="form-check option-box rounded border py-1 px-3 d-flex align-items-center">
                             <input
