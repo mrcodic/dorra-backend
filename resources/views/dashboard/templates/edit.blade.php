@@ -258,24 +258,24 @@
                                                         </small>
                                                     </div>
                                                     <!-- NONE -->
-                                                    <div class="form-group mb-2 col-md-6 d-none" id="dz-none">
-                                                        <label class="label-text mb-1">Upload Print File
-                                                            (General)</label>
-                                                        <div id="none-template-dropzone"
-                                                             class="dropzone border rounded p-3"
-                                                             style="cursor:pointer; min-height:150px;">
-                                                            <div class="dz-message">
-                                                                <span>Drop general image here or click</span>
-                                                            </div>
-                                                            <input type="hidden" name="template_image_none_id"
-                                                                   id="uploadedNoneTemplateImage">
-                                                        </div>
-                                                        <small class="form-text text-muted">
-                                                            Allowed formats: PNG, JPG, JPEG, WEBP.
-                                                            Maximum file size: 30 MB.
-                                                            Minimum dimensions: 1000 × 1000 px.
-                                                        </small>
-                                                    </div>
+{{--                                                    <div class="form-group mb-2 col-md-6 d-none" id="dz-none">--}}
+{{--                                                        <label class="label-text mb-1">Upload Print File--}}
+{{--                                                            (General)</label>--}}
+{{--                                                        <div id="none-template-dropzone"--}}
+{{--                                                             class="dropzone border rounded p-3"--}}
+{{--                                                             style="cursor:pointer; min-height:150px;">--}}
+{{--                                                            <div class="dz-message">--}}
+{{--                                                                <span>Drop general image here or click</span>--}}
+{{--                                                            </div>--}}
+{{--                                                            <input type="hidden" name="template_image_none_id"--}}
+{{--                                                                   id="uploadedNoneTemplateImage">--}}
+{{--                                                        </div>--}}
+{{--                                                        <small class="form-text text-muted">--}}
+{{--                                                            Allowed formats: PNG, JPG, JPEG, WEBP.--}}
+{{--                                                            Maximum file size: 30 MB.--}}
+{{--                                                            Minimum dimensions: 1000 × 1000 px.--}}
+{{--                                                        </small>--}}
+{{--                                                    </div>--}}
                                                 @endif
                                                 @php
                                                     $category = \App\Models\Category::find(request('product_without_category_id'));
@@ -1484,93 +1484,93 @@
         });
 
         // 🔹 NONE Dropzone
-        templateDropzones.none = new Dropzone("#none-template-dropzone", {
-            url: "{{ route('media.store') }}",
-            paramName: "file",
-            maxFiles: 30,
-            acceptedFiles: "image/png,image/jpeg,image/webp",
-            headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
-            addRemoveLinks: true,
-            init: function () {
-                let dz = this;
+        {{--templateDropzones.none = new Dropzone("#none-template-dropzone", {--}}
+        {{--    url: "{{ route('media.store') }}",--}}
+        {{--    paramName: "file",--}}
+        {{--    maxFiles: 30,--}}
+        {{--    acceptedFiles: "image/png,image/jpeg,image/webp",--}}
+        {{--    headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},--}}
+        {{--    addRemoveLinks: true,--}}
+        {{--    init: function () {--}}
+        {{--        let dz = this;--}}
 
-                this.on("addedfile", function (file) {
-                    if (file._isMock) return;
+        {{--        this.on("addedfile", function (file) {--}}
+        {{--            if (file._isMock) return;--}}
 
-                    // ── Max file size check (30MB) ──
-                    if (file.size > 30 * 1024 * 1024) {
-                        this.removeFile(file);
-                        Toastify({
-                            text: `File size must not exceed 30MB. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB.`,
-                            duration: 3000,
-                            gravity: "top",
-                            position: "right",
-                            backgroundColor: "#EA5455",
-                            close: true,
-                        }).showToast();
-                        return;
-                    }
+        {{--            // ── Max file size check (30MB) ──--}}
+        {{--            if (file.size > 30 * 1024 * 1024) {--}}
+        {{--                this.removeFile(file);--}}
+        {{--                Toastify({--}}
+        {{--                    text: `File size must not exceed 30MB. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB.`,--}}
+        {{--                    duration: 3000,--}}
+        {{--                    gravity: "top",--}}
+        {{--                    position: "right",--}}
+        {{--                    backgroundColor: "#EA5455",--}}
+        {{--                    close: true,--}}
+        {{--                }).showToast();--}}
+        {{--                return;--}}
+        {{--            }--}}
 
-                    // ── Min dimensions check (1000×1000) ──
-                    const reader = new FileReader();
-                    const dzRef = this;
+        {{--            // ── Min dimensions check (1000×1000) ──--}}
+        {{--            const reader = new FileReader();--}}
+        {{--            const dzRef = this;--}}
 
-                    reader.onload = function (e) {
-                        const img = new Image();
-                        img.onload = function () {
-                            if (img.width < 1000 || img.height < 1000) {
-                                dzRef.removeFile(file);
-                                Toastify({
-                                    text: `Image must be at least 1000×1000px. Your image is ${img.width}×${img.height}px.`,
-                                    duration: 3000,
-                                    gravity: "top",
-                                    position: "right",
-                                    backgroundColor: "#EA5455",
-                                    close: true,
-                                }).showToast();
-                            }
-                        };
-                        img.src = e.target.result;
-                    };
+        {{--            reader.onload = function (e) {--}}
+        {{--                const img = new Image();--}}
+        {{--                img.onload = function () {--}}
+        {{--                    if (img.width < 1000 || img.height < 1000) {--}}
+        {{--                        dzRef.removeFile(file);--}}
+        {{--                        Toastify({--}}
+        {{--                            text: `Image must be at least 1000×1000px. Your image is ${img.width}×${img.height}px.`,--}}
+        {{--                            duration: 3000,--}}
+        {{--                            gravity: "top",--}}
+        {{--                            position: "right",--}}
+        {{--                            backgroundColor: "#EA5455",--}}
+        {{--                            close: true,--}}
+        {{--                        }).showToast();--}}
+        {{--                    }--}}
+        {{--                };--}}
+        {{--                img.src = e.target.result;--}}
+        {{--            };--}}
 
-                    reader.readAsDataURL(file);
-                });
+        {{--            reader.readAsDataURL(file);--}}
+        {{--        });--}}
 
-                @if(!empty($media = $model->getFirstMedia('templates'))))
-                let modelMockFile = {
-                    name: "{{ $media->file_name }}",
-                    size: {{ $media->size ?? 12345 }},
-                    _hiddenInputId: "{{ $media->id }}",
-                    _isMock: true,
-                };
-                document.getElementById("uploadedNoneTemplateImage").value = "{{ $media->id }}";
+        {{--        @if(!empty($media = $model->getFirstMedia('templates'))))--}}
+        {{--        let modelMockFile = {--}}
+        {{--            name: "{{ $media->file_name }}",--}}
+        {{--            size: {{ $media->size ?? 12345 }},--}}
+        {{--            _hiddenInputId: "{{ $media->id }}",--}}
+        {{--            _isMock: true,--}}
+        {{--        };--}}
+        {{--        document.getElementById("uploadedNoneTemplateImage").value = "{{ $media->id }}";--}}
 
-                dz.emit("addedfile", modelMockFile);
-                dz.emit("thumbnail", modelMockFile, "{{ $media->getUrl() }}");
-                dz.emit("complete", modelMockFile);
-                dz.files.push(modelMockFile);
-                @endif
+        {{--        dz.emit("addedfile", modelMockFile);--}}
+        {{--        dz.emit("thumbnail", modelMockFile, "{{ $media->getUrl() }}");--}}
+        {{--        dz.emit("complete", modelMockFile);--}}
+        {{--        dz.files.push(modelMockFile);--}}
+        {{--        @endif--}}
 
-                    this.on("success", function (file, response) {
-                    if (response.success && response.data) {
-                        file._hiddenInputId = response.data.id;
-                        document.getElementById("uploadedNoneTemplateImage").value = response.data.id;
-                    }
-                });
+        {{--            this.on("success", function (file, response) {--}}
+        {{--            if (response.success && response.data) {--}}
+        {{--                file._hiddenInputId = response.data.id;--}}
+        {{--                document.getElementById("uploadedNoneTemplateImage").value = response.data.id;--}}
+        {{--            }--}}
+        {{--        });--}}
 
-                this.on("removedfile", function (file) {
-                    document.getElementById("uploadedNoneTemplateImage").value = "";
-                    if (file._hiddenInputId) {
-                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
-                            method: "DELETE",
-                            headers: {
-                                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-                            }
-                        });
-                    }
-                });
-            },
-        });
+        {{--        this.on("removedfile", function (file) {--}}
+        {{--            document.getElementById("uploadedNoneTemplateImage").value = "";--}}
+        {{--            if (file._hiddenInputId) {--}}
+        {{--                fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {--}}
+        {{--                    method: "DELETE",--}}
+        {{--                    headers: {--}}
+        {{--                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content--}}
+        {{--                    }--}}
+        {{--                });--}}
+        {{--            }--}}
+        {{--        });--}}
+        {{--    },--}}
+        {{--});--}}
 
         // ✅ لما المستخدم يغير الأنواع (front/back/none)
         function handleTypeChangeAndResetDZ() {
@@ -1578,7 +1578,8 @@
                 .filter(cb => cb.checked)
                 .map(cb => cb.dataset.typeName);
 
-            const allTypes = ['front', 'back', 'none'];
+            // const allTypes = ['front', 'back', 'none'];
+            const allTypes = ['front', 'back'];
 
             allTypes.forEach(type => {
                 const dz = templateDropzones[type];
