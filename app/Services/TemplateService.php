@@ -337,81 +337,15 @@ class TemplateService extends BaseService
         $finalColors = collect($colors)->flatMap(fn($color) => [$color['value']])->toArray();
         $validatedData['colors'] = $finalColors;
 
-        $tableauSceneIdsInput = $validatedData['tableau_scene_ids'] ?? [];
-        $newTableauSceneName = $validatedData['new_tableau_scene_name'] ?? [];
-        $newTableauSceneImageId = $validatedData['new_tableau_scene_image_id'] ?? null;
-        $topPosition = $validatedData['top_position'] ?? null;
-        $leftPosition = $validatedData['left_position'] ?? null;
-
-        unset(
-            $validatedData['tableau_scene_ids'],
-            $validatedData['new_tableau_scene_name'],
-            $validatedData['new_tableau_scene_image_id'],
-            $validatedData['top_position'],
-            $validatedData['left_position']
-        );
-
         $model = $this->handleTransaction(function () use (
             $validatedData,
             $id,
             $colors,
-            $tableauSceneIdsInput,
-            $newTableauSceneName,
-            $newTableauSceneImageId,
-            $topPosition,
-            $leftPosition
         ) {
             $model = $this->repository->update($validatedData, $id);
-
-            $tableauSceneIds = collect($tableauSceneIdsInput)
-                ->filter()
-                ->map(fn ($id) => (int) $id)
-                ->unique()
-                ->values();
-
-            if (!empty($newTableauSceneImageId)) {
-                $scene = TableauScene::create([
-                    'name' => [
-                        'en' => $newTableauSceneName['en']
-                            ?? (($validatedData['name']['en'] ?? 'Tableau') . ' Scene'),
-
-                        'ar' => $newTableauSceneName['ar']
-                            ?? (($validatedData['name']['ar'] ?? 'تابلوه') . ' مشهد'),
-                    ],
-                    'top_position' => $topPosition,
-                    'left_position' => $leftPosition,
-                    'is_active' => true,
-                ]);
-
-                Media::where('id', $newTableauSceneImageId)
-                    ->update([
-                        'model_type' => TableauScene::class,
-                        'model_id' => $scene->id,
-                        'collection_name' => 'tableau_scene_image',
-                    ]);
-
-                $tableauSceneIds->push($scene->id);
-            }
-
-
-            if (
-                request()->has('sync_tableau_scenes') ||
-                request()->has('tableau_scene_ids') ||
-                !empty($newTableauSceneImageId)
-            ) {
-                $pivotData = $tableauSceneIds
-                    ->values()
-                    ->mapWithKeys(function ($sceneId, $index) {
-                        return [
-                            $sceneId => [
-                                'is_default' => $index === 0,
-                                'sort' => $index,
-                            ],
-                        ];
-                    })
-                    ->toArray();
-
-                $model->tableauScenes()->sync($pivotData);
+            if (!empty($validatedData['tableau_scene_ids'])) {
+                $scenes = json_decode($validatedData['tableau_scene_ids'], true);
+                $model->tableauScenes()->sync($scenes);
             }
 
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
