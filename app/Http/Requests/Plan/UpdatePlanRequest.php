@@ -22,7 +22,7 @@ class UpdatePlanRequest extends BaseRequest
             'recommended_for' => ['nullable', 'string'],
             'credits' => ['required', 'integer', 'min:1'],
             'is_active' => ['required', 'boolean'],
-            'features' => ['sometimes', 'array'],
+            'features' => ['required', 'array'],
             'features.*.id' => ['nullable', 'integer', 'exists:features,id'],
             'features.*.description' => ['required', 'string', 'max:4000'],
         ];
