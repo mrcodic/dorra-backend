@@ -546,7 +546,7 @@
                                                         <div data-repeater-list="specifications">
                                                             <div data-repeater-item>
                                                                 <input type="hidden" name="fixed_key" class="spec-fixed-key">
-
+                                                                
                                                                 <!-- Specification Fields -->
                                                                 <div class="row mt-1">
                                                                     <div class="col-md-6">
@@ -788,8 +788,8 @@
             }
         ];
 
+        window.selectedProductIsTableau = window.selectedProductIsTableau || false;
         let isSyncingTableauSpecs = false;
-
 
         function getSpecListEl() {
             return $('.outer-repeater').find('[data-repeater-list="specifications"]').first();
@@ -803,9 +803,8 @@
             return $('.outer-repeater').children('.row').find('button[data-repeater-create]').first();
         }
 
-
         function isTableauProduct() {
-            return $('#is_tableau').is(':checked');
+            return window.selectedProductIsTableau === true;
         }
 
         function clearAndHideVariants() {
@@ -896,9 +895,7 @@
             if (isSyncingTableauSpecs) return;
             isSyncingTableauSpecs = true;
 
-            const isTableau = $('#is_tableau').is(':checked');
-
-            if (isTableau) {
+            if (isTableauProduct()) {
                 for (const spec of TABLEAU_FIXED_SPECS) {
                     await addSpecRepeaterItem({
                         key: spec.key,
@@ -913,7 +910,7 @@
                     removeSpecRepeaterItem(spec.key);
                 });
                 showVariants();
-                generateVariants();
+                if (typeof generateVariants === 'function') generateVariants();
             }
 
             syncOptionFrameVisibility();
@@ -922,7 +919,7 @@
         }
 
         function syncOptionFrameVisibility() {
-            const isTableau = $('#is_tableau').is(':checked');
+            const isTableau = isTableauProduct();
 
             $('.option-frame-wrapper').hide();
 
@@ -952,7 +949,7 @@
         }
 
         function syncOptionPaddingVisibility() {
-            const isTableau = $('#is_tableau').is(':checked');
+            const isTableau = isTableauProduct();
 
             $('.option-frame-model-padding-wrapper').hide();
 
@@ -979,30 +976,27 @@
 
         // ----- Select2 UI -----
         $(document).ready(function () {
-
-            // Toggle select box
             $('#btnAddCuttingSpecs').on('click', function () {
                 $('#cuttingSpecsBox').toggleClass('d-none');
 
-                // init select2 once when shown first time
                 if (!$('#cuttingSpecsSelect').data('select2')) {
                     $('#cuttingSpecsSelect').select2({
                         placeholder: 'Select cutting specs...',
                         closeOnSelect: false,
-                        width: '100'
+                        width: '100%'
                     });
                     setTimeout(generateVariants, 0);
                 }
             });
+
             $('#cuttingSpecsSelect').on('change', function () {
                 generateVariants();
             });
+
             if (($('#cuttingSpecsSelect').val() || []).length) {
-                $('#cuttingSpecsBox').removeClass('d-none'); // optional: show it
+                $('#cuttingSpecsBox').removeClass('d-none');
                 setTimeout(generateVariants, 0);
             }
-
-
         });
     </script>
 
@@ -2203,12 +2197,19 @@
         });
     </script>
     <script>
-        // ── Tableau fixed specs + frame color image only ─────────────
         Dropzone.autoDiscover = false;
 
-        $('#is_tableau').on('change', function () {
-            syncTableauFixedSpecs();
-        });
+        window.selectedProductIsTableau = false;
+        function showTableauToastError(message) {
+            Toastify({
+                text: message,
+                duration: 4000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#EA5455",
+                close: true
+            }).showToast();
+        }
 
         function initOptionFrameDropzones() {
             document.querySelectorAll(".option-frame-dropzone").forEach(function (element) {
@@ -2230,11 +2231,12 @@
                     headers: {
                         "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
                     },
+                    dictDefaultMessage: "Drop frame image here or click to upload",
                     init: function () {
                         this.on("success", function (file, response) {
                             if (response.success && response.data) {
-                                hiddenInput.value = response.data.id;
                                 file._hiddenInputId = response.data.id;
+                                hiddenInput.value = response.data.id;
                             }
                         });
 
@@ -2255,17 +2257,53 @@
             });
         }
 
-        $(document).on("click", "[data-repeater-create]", function () {
-            setTimeout(function () {
-                syncOptionFrameVisibility();
-                syncOptionPaddingVisibility();
-                initOptionDropzones();
-            }, 250);
-        });
+        function clearOptionFrameImages() {
+            document.querySelectorAll(".option-frame-image-hidden").forEach(function (input) {
+                input.value = "";
+            });
+
+            document.querySelectorAll(".option-frame-dropzone").forEach(function (element) {
+                if (element.dropzone) {
+                    element.dropzone.removeAllFiles(true);
+                }
+            });
+        }
+
+        function setTableauMode(isTableau) {
+            window.selectedProductIsTableau = isTableau;
+
+            if (isTableau) {
+                initOptionFrameDropzones();
+            } else {
+                clearOptionFrameImages();
+            }
+
+            syncTableauFixedSpecs();
+            syncOptionFrameVisibility();
+            syncOptionPaddingVisibility();
+        }
+
+        function handleSelectedProductTableauState() {
+            const selectedOption = $(".category-select option:selected");
+            const isTableau = Number(selectedOption.data("is-tableau")) === 1;
+
+            setTableauMode(isTableau);
+        }
 
         $(document).ready(function () {
-            syncTableauFixedSpecs();
-            syncOptionPaddingVisibility();
+            handleSelectedProductTableauState();
+
+            $(".category-select").on("change", function () {
+                handleSelectedProductTableauState();
+            });
+
+            $(document).on("click", "[data-repeater-create]", function () {
+                setTimeout(function () {
+                    syncOptionFrameVisibility();
+                    syncOptionPaddingVisibility();
+                    initOptionDropzones();
+                }, 300);
+            });
         });
     </script>
 
