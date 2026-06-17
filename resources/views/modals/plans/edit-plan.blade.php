@@ -50,8 +50,6 @@
 
                         <div class="invoice-repeater mt-1" id="editFeaturesRepeater">
                             <div data-repeater-list="features" id="editFeaturesList">
-
-                                {{-- template row (will be replaced) --}}
                                 <div data-repeater-item class="row g-1 align-items-end mb-1">
                                     <div class="col-12 col-md-11">
                                         <label class="form-label">Description</label>
@@ -61,7 +59,9 @@
                                     </div>
 
                                     <div class="col-12 col-md-1 d-flex justify-content-end">
-                                        <button type="button" class="btn btn-outline-danger btn-sm" data-repeater-delete>
+                                        <button type="button"
+                                                data-repeater-delete
+                                                class="btn btn-outline-danger btn-sm feature-remove">
                                             <i data-feather="x"></i>
                                         </button>
                                     </div>
@@ -96,9 +96,7 @@
     </div>
 </div>
 <script>
-    $(document).on('click', '[data-repeater-delete]', function () {
-        $(this).closest('[data-repeater-item]').remove();
-    });
+
     window.initEditRepeater = function () {
         const $rep = $('#editFeaturesRepeater');
         if (!$rep.length) return;
