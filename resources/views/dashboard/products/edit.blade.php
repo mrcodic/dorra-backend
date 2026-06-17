@@ -1142,7 +1142,7 @@
 
     <script>
         window.existingVariantsFromDB = @json($variantsForJs);
-        window.modelIsTableau = @json((bool) ($model->is_tableau ?? false));
+        window.modelIsTableau = @json((bool) ($model->category?->is_tableau ?? false));
     </script>
 
 

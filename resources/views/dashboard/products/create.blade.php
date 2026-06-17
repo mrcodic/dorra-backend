@@ -545,9 +545,10 @@
                                                     <div class="outer-repeater">
                                                         <div data-repeater-list="specifications">
                                                             <div data-repeater-item>
+                                                                <input type="hidden" name="fixed_key" class="spec-fixed-key">
+                                                                
                                                                 <!-- Specification Fields -->
                                                                 <div class="row mt-1">
-                                                                    <input type="hidden" name="fixed_key" class="spec-fixed-key">
                                                                     <div class="col-md-6">
                                                                         <div class="mb-1">
                                                                             <label class="form-label label-text">Name
