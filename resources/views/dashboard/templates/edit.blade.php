@@ -2591,6 +2591,225 @@
         });
     </script>
     <script>
+        Dropzone.autoDiscover = false;
+
+        let tableauSceneDropzone = null;
+
+        if (document.getElementById("tableau-scene-dropzone")) {
+            tableauSceneDropzone = new Dropzone("#tableau-scene-dropzone", {
+                url: "{{ route('media.store') }}",
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 30,
+                acceptedFiles: "image/png,image/jpeg,image/webp",
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                addRemoveLinks: true,
+                dictDefaultMessage: "Drop tableau scene image here or click to upload",
+                init: function () {
+                    this.on("addedfile", function (file) {
+                        const reader = new FileReader();
+
+                        reader.onload = function (e) {
+                            file._fullDataUrl = e.target.result;
+                            window.newTableauSceneImageUrl = e.target.result;
+                        };
+
+                        reader.readAsDataURL(file);
+                    });
+
+                    this.on("success", function (file, response) {
+                        if (response.success && response.data) {
+                            file._hiddenInputId = response.data.id;
+                            document.getElementById("uploadedTableauSceneImage").value = response.data.id;
+                            setTableauSceneImageUrl(file, response);
+                        }
+                    });
+
+                    this.on("removedfile", function (file) {
+                        document.getElementById("uploadedTableauSceneImage").value = "";
+                        window.newTableauSceneImageUrl = null;
+
+                        if (file._hiddenInputId) {
+                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                method: "DELETE",
+                                headers: {
+                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+        $('#productsWithoutCategoriesSelect, #productsSelect, #categoriesSelect').on('change', function () {
+            updateTemplateTypeDropzones();
+        });
+
+        $('#tableauSceneSelect').on('change', function () {
+            const selectedScenes = $(this).val() || [];
+            const hasExistingScene = Array.isArray(selectedScenes)
+                ? selectedScenes.length > 0
+                : !!selectedScenes;
+
+            // $('#newTableauSceneFields').toggle(!hasExistingScene);
+
+            if (hasExistingScene) {
+                $('#newTableauSceneNameEn').val('');
+                $('#newTableauSceneNameAr').val('');
+            }
+        });
+
+
+        function notifyTableau(message, type = 'success') {
+            if (typeof Toastify === 'function') {
+                Toastify({
+                    text: message,
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: type === 'success' ? "#28C76F" : "#EA5455",
+                    close: true
+                }).showToast();
+                return;
+            }
+
+            if (type === 'success') {
+                console.log(message);
+            } else {
+                alert(message);
+            }
+        }
+
+        function getSceneTextFromResponse(response) {
+            const data = response?.data || response?.scene || response || {};
+            const name = data?.name || data?.translations?.name || {};
+
+            return name?.['{{ app()->getLocale() }}'] ||
+                name?.en ||
+                data?.name_en ||
+                data?.title ||
+                data?.label ||
+                ('Scene #' + (data?.id || ''));
+        }
+
+        function getSceneImageUrlFromResponse(response) {
+            const data = response?.data || response?.scene || response || {};
+
+            return data?.image_url ||
+                data?.imageUrl ||
+                data?.media_url ||
+                data?.mediaUrl ||
+                data?.full_url ||
+                data?.fullUrl ||
+                data?.url ||
+                data?.base_url ||
+                data?.baseUrl ||
+                data?.media?.full_url ||
+                data?.media?.url ||
+                window.newTableauSceneImageUrl ||
+                '';
+        }
+
+        function addAndSelectTableauScene(sceneId, sceneText, imageUrl) {
+            const $select = $('#tableauSceneSelect');
+
+            if (!$select.length || !sceneId) return;
+
+            let option = $select.find(`option[value="${sceneId}"]`)[0];
+
+            if (!option) {
+                option = new Option(sceneText || ('Scene #' + sceneId), sceneId, true, true);
+                $select.append(option);
+            }
+
+            $(option)
+                .attr('data-image-url', imageUrl || '')
+                .prop('selected', true);
+
+            $select.trigger('change');
+        }
+
+        $(document).on('click', '#createTableauSceneBtn', function () {
+            const $btn = $(this);
+            const url = $btn.data('create-url');
+            const nameEn = String($('#newTableauSceneNameEn').val() || '').trim();
+            const nameAr = String($('#newTableauSceneNameAr').val() || '').trim();
+            const imageId = $('#uploadedTableauSceneImage').val();
+
+            if (!nameEn && !nameAr) {
+                notifyTableau('Please enter scene name first.', 'error');
+                return;
+            }
+
+            if (!imageId) {
+                notifyTableau('Please upload scene image first.', 'error');
+                return;
+            }
+
+            $btn.prop('disabled', true).data('old-text', $btn.text()).text('Creating...');
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: {
+                    _token: document.querySelector('meta[name="csrf-token"]').content,
+                    'name[en]': nameEn,
+                    'name[ar]': nameAr,
+                    'new_tableau_scene_name[en]': nameEn,
+                    'new_tableau_scene_name[ar]': nameAr,
+                    image_id: imageId,
+                    media_id: imageId,
+                    new_tableau_scene_image_id: imageId,
+                    is_active: 1
+                },
+                success(response) {
+                    const data = response?.data || response?.scene || response || {};
+                    const sceneId = data?.id || response?.id;
+
+                    if (!sceneId) {
+                        notifyTableau('Scene created, but response does not contain scene id.', 'error');
+                        return;
+                    }
+
+                    addAndSelectTableauScene(
+                        sceneId,
+                        getSceneTextFromResponse(response),
+                        getSceneImageUrlFromResponse(response)
+                    );
+                    // addAndSelectTableauScene triggers 'change' on #tableauSceneSelect,
+                    // which fires triggerRebuild() and reveals the Scene Position Editor now.
+
+                    $('#newTableauSceneNameEn').val('');
+                    $('#newTableauSceneNameAr').val('');
+                    $('#uploadedTableauSceneImage').val('');
+                    window.newTableauSceneImageUrl = null;
+
+                    if (tableauSceneDropzone) {
+                        tableauSceneDropzone.files.forEach(file => {
+                            file._hiddenInputId = null;
+                        });
+                        tableauSceneDropzone.removeAllFiles(true);
+                    }
+
+                    notifyTableau('Scene created and selected successfully.');
+                },
+                error(xhr) {
+                    const message = xhr?.responseJSON?.message ||
+                        xhr?.responseJSON?.errors ||
+                        'Failed to create scene.';
+
+                    notifyTableau(typeof message === 'string' ? message : JSON.stringify(message), 'error');
+                },
+                complete() {
+                    $btn.prop('disabled', false).text($btn.data('old-text') || 'Create Scene');
+                }
+            });
+        });
+    </script>
+    
+    <script>
         (function () {
             const positionState = {};
             let templateSrc = null;
