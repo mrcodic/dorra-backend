@@ -61,7 +61,7 @@ class TemplateResource extends JsonResource
             )
             ->first();
 
-        $categoryId = Product::find(request('product_id'))?->category?->id;
+        $categoryId = Product::find(request('product_id'))?->category?->id ?? request('product_without_category_id');
         $backPreviewImage = $this->use_front_as_back
             ? $this->getFirstMedia('templates-preview')
             : ($this->approach == 'without_editor'
