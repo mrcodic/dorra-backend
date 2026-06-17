@@ -546,7 +546,7 @@
                                                         <div data-repeater-list="specifications">
                                                             <div data-repeater-item>
                                                                 <input type="hidden" name="fixed_key" class="spec-fixed-key">
-                                                                
+
                                                                 <!-- Specification Fields -->
                                                                 <div class="row mt-1">
                                                                     <div class="col-md-6">
@@ -877,7 +877,6 @@
                 }, 250);
             });
         }
-
         function removeSpecRepeaterItem(key) {
             const $item = findSpecItemByKey(key);
             if (!$item.length) return;
@@ -895,7 +894,9 @@
             if (isSyncingTableauSpecs) return;
             isSyncingTableauSpecs = true;
 
-            if (isTableauProduct()) {
+            const isTableau = $('#is_tableau').is(':checked');
+
+            if (isTableau) {
                 for (const spec of TABLEAU_FIXED_SPECS) {
                     await addSpecRepeaterItem({
                         key: spec.key,
@@ -910,7 +911,7 @@
                     removeSpecRepeaterItem(spec.key);
                 });
                 showVariants();
-                if (typeof generateVariants === 'function') generateVariants();
+                generateVariants();
             }
 
             syncOptionFrameVisibility();
@@ -919,7 +920,7 @@
         }
 
         function syncOptionFrameVisibility() {
-            const isTableau = isTableauProduct();
+            const isTableau = $('#is_tableau').is(':checked');
 
             $('.option-frame-wrapper').hide();
 
@@ -949,7 +950,7 @@
         }
 
         function syncOptionPaddingVisibility() {
-            const isTableau = isTableauProduct();
+            const isTableau = $('#is_tableau').is(':checked');
 
             $('.option-frame-model-padding-wrapper').hide();
 
