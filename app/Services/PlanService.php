@@ -66,7 +66,7 @@ class PlanService extends BaseService
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         $resource = parent::updateResource($validatedData, $id, $relationsToLoad);
-        if (!empty($validatedData['features'])) {
+
             $features = collect($validatedData['features']);
 
             $features = $features->map(function ($feature) use ($resource) {
@@ -80,7 +80,8 @@ class PlanService extends BaseService
 
             $keptIds = $features->pluck('id')->filter()->values()->all();
             $resource->features()->whereNotIn('id', $keptIds)->delete();
-        }
+
+
 
 
         return $resource->load($relationsToLoad);
