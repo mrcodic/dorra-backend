@@ -68,9 +68,7 @@
                                 </div>
                             </div>
 
-                            <button type="button"
-                                    class="btn btn-outline-primary btn-sm mt-1"
-                                    id="addFeatureBtn">
+                            <button type="button" class="btn btn-outline-primary btn-sm mt-1" data-repeater-create>
                                 <i data-feather="plus"></i> Add Feature
                             </button>
                         </div>
@@ -98,6 +96,9 @@
     </div>
 </div>
 <script>
+    $(document).on('click', '[data-repeater-delete]', function () {
+        $(this).closest('[data-repeater-item]').remove();
+    });
     window.initEditRepeater = function () {
         const $rep = $('#editFeaturesRepeater');
         if (!$rep.length) return;
@@ -152,34 +153,5 @@
 
             }
         });
-    $(document).on('click', '#addFeatureBtn', function () {
 
-        const index = $('#editFeaturesList [data-repeater-item]').length;
-
-        $('#editFeaturesList').append(`
-        <div data-repeater-item class="row g-1 align-items-end mb-1">
-            <div class="col-12 col-md-11">
-                <label class="form-label">Description</label>
-
-                <input type="hidden"
-                       name="features[${index}][id]"
-                       value="">
-
-                <input type="text"
-                       name="features[${index}][description]"
-                       class="form-control"
-                       required>
-            </div>
-
-            <div class="col-12 col-md-1 d-flex justify-content-end">
-                <button type="button"
-                        class="btn btn-outline-danger btn-sm remove-feature">
-                    <i data-feather="x"></i>
-                </button>
-            </div>
-        </div>
-    `);
-
-        feather.replace();
-    });
 </script>
