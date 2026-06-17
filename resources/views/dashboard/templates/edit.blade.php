@@ -3321,7 +3321,7 @@
 
                 scenes.forEach(scene => {
                     tabsEl.appendChild(buildTab(scene.id, scene.label));
-                    panelsEl.appendChild(buildPanel(scene.id, scene.label, scene.image_url || ''));
+                    panelsEl.appendChild(buildPanel(scene.id, scene.label, scene.imageUrl || ''));
                 });
 
                 refreshTemplateSrc();
@@ -3350,7 +3350,7 @@
 
                     // Use attr() not data() — Select2 clones options and loses .data() cache
                     const imageUrl = $option.attr('data-image-url') || $option.data('image-url') || '';
-
+log("imageUrl",imageUrl)
                     scenes.push({
                         id,
                         label: $option.text().trim() || `Scene #${id}`,
