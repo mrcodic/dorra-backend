@@ -2590,5 +2590,646 @@
             initializeImageUploaders($('.outer-repeater'));
         });
     </script>
+    <script>
+        (function () {
+            const positionState = {};
+            let templateSrc = null;
+            let templateAspect = 1;
+
+            const DEFAULT_TOP = 35;
+            const DEFAULT_LEFT = 35;
+            const DEFAULT_OVERLAY_WIDTH = 28;
+
+            function safeId(sceneId) {
+                return String(sceneId).replace(/[^a-zA-Z0-9_-]/g, '_');
+            }
+
+            function num(value, fallback = 0) {
+                const n = Number(value);
+                return Number.isFinite(n) ? n : fallback;
+            }
+
+            function pct(value) {
+                return Math.min(100, Math.max(0, Math.round(num(value) * 10) / 10));
+            }
+
+            function getSelectedDimension() {
+                const select = document.getElementById('sizesSelect');
+                const option = select?.selectedOptions?.[0];
+
+                let width = num(option?.dataset?.width, null);
+                let height = num(option?.dataset?.height, null);
+
+                if ((!width || !height) && option) {
+                    const text = option.textContent || '';
+                    const match = text.match(/([\d.]+)\s*[*×x]\s*([\d.]+)/i);
+
+                    if (match) {
+                        height = num(match[1], null);
+                        width = num(match[2], null);
+                    }
+                }
+
+                if (!width || !height) {
+                    return {
+                        width: 1,
+                        height: 1,
+                        aspect: templateAspect || 1
+                    };
+                }
+
+                return {
+                    width,
+                    height,
+                    aspect: width / height
+                };
+            }
+
+            function getCanvasAspect(canvas) {
+                const rect = canvas?.getBoundingClientRect();
+
+                if (rect?.width && rect?.height) {
+                    return rect.width / rect.height;
+                }
+
+                return 4 / 3;
+            }
+
+            function ensureState(sceneId) {
+                if (!positionState[sceneId]) {
+                    positionState[sceneId] = {
+                        top: DEFAULT_TOP,
+                        left: DEFAULT_LEFT,
+                        width: DEFAULT_OVERLAY_WIDTH
+                    };
+                }
+
+                return positionState[sceneId];
+            }
+
+            function getOverlaySize(canvas, sceneId) {
+                const st = ensureState(sceneId);
+                const dimension = getSelectedDimension();
+
+                const width = pct(st.width || DEFAULT_OVERLAY_WIDTH);
+                const canvasAspect = getCanvasAspect(canvas);
+                const overlayAspect = dimension.aspect || templateAspect || 1;
+
+                const height = pct(width * canvasAspect / overlayAspect);
+
+                return {
+                    width,
+                    height,
+                    aspect: overlayAspect
+                };
+            }
+
+            function clampPosition(canvas, sceneId, top, left) {
+                const size = getOverlaySize(canvas, sceneId);
+
+                const maxTop = Math.max(0, 100 - size.height);
+                const maxLeft = Math.max(0, 100 - size.width);
+
+                return {
+                    top: Math.min(maxTop, Math.max(0, top)),
+                    left: Math.min(maxLeft, Math.max(0, left))
+                };
+            }
+
+            function getBox(canvas, sceneId) {
+                const st = ensureState(sceneId);
+                const size = getOverlaySize(canvas, sceneId);
+                const clamped = clampPosition(canvas, sceneId, st.top, st.left);
+
+                st.top = clamped.top;
+                st.left = clamped.left;
+
+                return {
+                    top: pct(st.top),
+                    left: pct(st.left),
+                    right: pct(100 - st.left - size.width),
+                    bottom: pct(100 - st.top - size.height),
+                    width: pct(size.width),
+                    height: pct(size.height),
+                    aspect: size.aspect
+                };
+            }
+
+            function loadTemplateImage(url) {
+                templateSrc = url;
+
+                const img = new Image();
+
+                img.onload = function () {
+                    templateAspect = img.naturalWidth / img.naturalHeight || 1;
+                    refreshAllDraggables();
+                };
+
+                img.onerror = function () {
+                    templateSrc = null;
+                    refreshAllDraggables();
+                };
+
+                img.src = url;
+            }
+
+            function refreshTemplateSrc() {
+                if (window.tableauTemplateUrl) {
+                    loadTemplateImage(window.tableauTemplateUrl);
+                    return;
+                }
+
+                const preview = document.querySelector(
+                    '#front-template-dropzone .dz-image img, ' +
+                    '#front-template-dropzone .dz-preview img, ' +
+                    '#template-dropzone .dz-image img, ' +
+                    '#template-dropzone .dz-preview img, ' +
+                    '#back-template-dropzone .dz-image img, ' +
+                    '#back-template-dropzone .dz-preview img, '
+                    // '#none-template-dropzone .dz-image img, ' +
+                    // '#none-template-dropzone .dz-preview img'
+                );
+
+                if (preview && preview.src && !preview.src.includes('placeholder')) {
+                    loadTemplateImage(preview.src);
+                } else {
+                    templateSrc = null;
+                    refreshAllDraggables();
+                }
+            }
+
+            window.refreshTableauTemplatePreview = refreshTemplateSrc;
+
+            [
+                'front-template-dropzone',
+                'template-dropzone',
+                'back-template-dropzone',
+                // 'none-template-dropzone'
+            ].forEach(id => {
+                const el = document.getElementById(id);
+
+                if (el) {
+                    new MutationObserver(refreshTemplateSrc).observe(el, {
+                        childList: true,
+                        subtree: true,
+                        attributes: true,
+                        attributeFilter: ['src']
+                    });
+                }
+            });
+
+            function syncHiddenInput(sceneId) {
+                const canvas = document.querySelector(`.spe-canvas[data-scene-id="${sceneId}"]`);
+
+                if (!canvas) return;
+
+                const box = getBox(canvas, sceneId);
+
+                window.tableauScenePositions = window.tableauScenePositions || {};
+                window.tableauScenePositions[sceneId] = {
+                    positions: {
+                        top: box.top,
+                        right: box.right,
+                        left: box.left,
+                        bottom: box.bottom,
+                        width: box.width,
+                        height: box.height
+                    }
+                };
+
+                writeTableauScenePositionsInput();
+            }
+
+            function writeTableauScenePositionsInput() {
+                const input = document.getElementById('tableauScenePositionsInput');
+
+                if (!input) return;
+
+                input.value = JSON.stringify(window.tableauScenePositions || {});
+            }
+
+            function updateCoordsDisplay(sceneId) {
+                const id = safeId(sceneId);
+                const canvas = document.querySelector(`.spe-canvas[data-scene-id="${sceneId}"]`);
+
+                if (!canvas) return;
+
+                const box = getBox(canvas, sceneId);
+                const dimension = getSelectedDimension();
+
+                ['top', 'right', 'left', 'bottom'].forEach(axis => {
+                    const textEl = document.getElementById(`spe-${axis}-${id}`);
+
+                    if (textEl) {
+                        textEl.textContent = box[axis] + '%';
+                    }
+                });
+
+                const dimEl = document.getElementById(`spe-dim-${id}`);
+
+                if (dimEl) {
+                    dimEl.textContent = `Template canvas ratio: ${dimension.width} × ${dimension.height}`;
+                }
+
+                syncHiddenInput(sceneId);
+            }
+
+            function renderDraggable(canvas, sceneId) {
+                canvas.querySelectorAll('.spe-dragger').forEach(el => el.remove());
+
+                const box = getBox(canvas, sceneId);
+                let dragger;
+
+                if (templateSrc) {
+                    dragger = document.createElement('img');
+                    dragger.src = templateSrc;
+                    dragger.className = 'spe-dragger';
+                    dragger.style.cssText = `
+                            position:absolute;
+                            width:${box.width}%;
+                            aspect-ratio:${box.aspect};
+                            top:${box.top}%;
+                            left:${box.left}%;
+                            cursor:grab;
+                            touch-action:none;
+                            border:2px dashed rgba(255,255,255,.85);
+                            border-radius:4px;
+                            box-sizing:border-box;
+                            object-fit:contain;
+                            opacity:1;
+                            filter:none;
+                            user-select:none;
+                        `;
+                } else {
+                    dragger = document.createElement('div');
+                    dragger.className = 'spe-dragger';
+                    dragger.textContent = 'Canvas';
+                    dragger.style.cssText = `
+                            position:absolute;
+                            width:${box.width}%;
+                            aspect-ratio:${box.aspect};
+                            top:${box.top}%;
+                            left:${box.left}%;
+                            cursor:grab;
+                            touch-action:none;
+                            background:rgba(36,176,148,.18);
+                            border:2px dashed #24B094;
+                            border-radius:4px;
+                            box-sizing:border-box;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            font-size:11px;
+                            color:#24B094;
+                            user-select:none;
+                        `;
+                }
+
+                canvas.appendChild(dragger);
+                attachDrag(dragger, canvas, sceneId);
+                updateCoordsDisplay(sceneId);
+            }
+
+            function refreshAllDraggables() {
+                document.querySelectorAll('.spe-canvas').forEach(canvas => {
+                    renderDraggable(canvas, canvas.dataset.sceneId);
+                });
+            }
+
+            function attachDrag(el, canvas, sceneId) {
+                let dragging = false;
+                let startX = 0;
+                let startY = 0;
+                let startTop = 0;
+                let startLeft = 0;
+
+                function xy(e) {
+                    return e.touches
+                        ? {x: e.touches[0].clientX, y: e.touches[0].clientY}
+                        : {x: e.clientX, y: e.clientY};
+                }
+
+                function onStart(e) {
+                    e.preventDefault();
+
+                    dragging = true;
+
+                    const point = xy(e);
+                    const cRect = canvas.getBoundingClientRect();
+                    const elRect = el.getBoundingClientRect();
+
+                    startX = point.x;
+                    startY = point.y;
+                    startTop = ((elRect.top - cRect.top) / cRect.height) * 100;
+                    startLeft = ((elRect.left - cRect.left) / cRect.width) * 100;
+
+                    el.style.cursor = 'grabbing';
+                }
+
+                function onMove(e) {
+                    if (!dragging) return;
+
+                    e.preventDefault();
+
+                    const point = xy(e);
+                    const cRect = canvas.getBoundingClientRect();
+
+                    const newTop = startTop + ((point.y - startY) / cRect.height) * 100;
+                    const newLeft = startLeft + ((point.x - startX) / cRect.width) * 100;
+                    const clamped = clampPosition(canvas, sceneId, newTop, newLeft);
+
+                    positionState[sceneId].top = clamped.top;
+                    positionState[sceneId].left = clamped.left;
+
+                    el.style.top = clamped.top + '%';
+                    el.style.left = clamped.left + '%';
+
+                    updateCoordsDisplay(sceneId);
+                }
+
+                function onEnd() {
+                    dragging = false;
+                    el.style.cursor = 'grab';
+                }
+
+                el.addEventListener('mousedown', onStart);
+                el.addEventListener('touchstart', onStart, {passive: false});
+
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('touchmove', onMove, {passive: false});
+
+                window.addEventListener('mouseup', onEnd);
+                window.addEventListener('touchend', onEnd);
+            }
+
+            function applyManualInput(sceneId, axis) {
+                const id = safeId(sceneId);
+                const canvas = document.querySelector(`.spe-canvas[data-scene-id="${sceneId}"]`);
+
+                if (!canvas) return;
+
+                const current = getBox(canvas, sceneId);
+
+                let top = num(document.getElementById(`spe-input-top-${id}`)?.value, current.top);
+                let left = num(document.getElementById(`spe-input-left-${id}`)?.value, current.left);
+                const right = num(document.getElementById(`spe-input-right-${id}`)?.value, current.right);
+                const bottom = num(document.getElementById(`spe-input-bottom-${id}`)?.value, current.bottom);
+
+                if (axis === 'right') {
+                    left = 100 - right - current.width;
+                }
+
+                if (axis === 'bottom') {
+                    top = 100 - bottom - current.height;
+                }
+
+                const clamped = clampPosition(canvas, sceneId, top, left);
+
+                positionState[sceneId].top = clamped.top;
+                positionState[sceneId].left = clamped.left;
+
+                const dragger = canvas.querySelector('.spe-dragger');
+
+                if (dragger) {
+                    dragger.style.top = clamped.top + '%';
+                    dragger.style.left = clamped.left + '%';
+                }
+
+                updateCoordsDisplay(sceneId);
+            }
+
+            function buildPanel(sceneId, label, imageUrl) {
+                const id = safeId(sceneId);
+
+                ensureState(sceneId);
+
+                const panel = document.createElement('div');
+                panel.className = 'spe-panel';
+                panel.id = `spe-panel-${id}`;
+                panel.style.display = 'none';
+
+                const canvasWrap = document.createElement('div');
+                canvasWrap.className = 'spe-canvas';
+                canvasWrap.dataset.sceneId = sceneId;
+                canvasWrap.style.cssText = `
+                        position:relative;
+                        width:100%;
+                        max-width:100%;
+                        aspect-ratio:4/3;
+                        border-radius:8px;
+                        overflow:hidden;
+                        border:1px solid #dee2e6;
+                        background:#fff;
+                        user-select:none;
+                    `;
+
+                if (imageUrl) {
+                    const bg = document.createElement('img');
+                    bg.src = imageUrl;
+                    bg.style.cssText = `
+                            position:absolute;
+                            inset:0;
+                            width:100%;
+                            height:100%;
+                            object-fit:contain;
+                            opacity:1;
+                            filter:none;
+                            image-rendering:auto;
+                            pointer-events:none;
+                        `;
+
+                    bg.onload = function () {
+                        if (bg.naturalWidth && bg.naturalHeight) {
+                            canvasWrap.style.aspectRatio = `${bg.naturalWidth} / ${bg.naturalHeight}`;
+                            refreshAllDraggables();
+                        }
+                    };
+
+                    canvasWrap.appendChild(bg);
+                } else {
+                    const placeholder = document.createElement('div');
+                    placeholder.style.cssText = `
+                            position:absolute;
+                            inset:0;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            color:#adb5bd;
+                            font-size:13px;
+                            flex-direction:column;
+                            gap:6px;
+                        `;
+                    placeholder.innerHTML = `
+                            <i data-feather="image" style="width:32px;height:32px;stroke:#adb5bd"></i>
+                            <span>Scene image</span>
+                        `;
+                    canvasWrap.appendChild(placeholder);
+                }
+
+                const controls = document.createElement('div');
+                controls.className = 'd-flex flex-wrap align-items-center gap-1 mt-2';
+                controls.innerHTML = `
+                        <span class="badge bg-light text-dark border">Top: <strong id="spe-top-${id}">0%</strong></span>
+                        <span class="badge bg-light text-dark border">Right: <strong id="spe-right-${id}">0%</strong></span>
+                        <span class="badge bg-light text-dark border">Left: <strong id="spe-left-${id}">0%</strong></span>
+                        <span class="badge bg-light text-dark border">Bottom: <strong id="spe-bottom-${id}">0%</strong></span>
+                        <small class="text-muted ms-1" id="spe-dim-${id}"></small>
+                    `;
+
+                panel.appendChild(canvasWrap);
+                panel.appendChild(controls);
+
+                setTimeout(() => {
+                    updateCoordsDisplay(sceneId);
+                }, 0);
+
+                return panel;
+            }
+
+            function buildTab(sceneId, label) {
+                const id = safeId(sceneId);
+                const btn = document.createElement('button');
+
+                btn.type = 'button';
+                btn.className = 'btn btn-sm btn-outline-secondary spe-tab';
+                btn.dataset.sceneId = String(sceneId);
+                btn.dataset.panelId = id;
+                btn.textContent = label;
+                btn.addEventListener('click', () => activateTab(sceneId));
+
+                return btn;
+            }
+
+            function activateTab(sceneId) {
+                const id = safeId(sceneId);
+
+                document.querySelectorAll('.spe-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.sceneId === String(sceneId));
+                });
+
+                document.querySelectorAll('.spe-panel').forEach(panel => {
+                    panel.style.display = panel.id === `spe-panel-${id}` ? 'block' : 'none';
+                });
+
+                refreshAllDraggables();
+            }
+
+            function rebuildEditor(scenes) {
+                const tabsEl = document.getElementById('scenePosTabs');
+                const panelsEl = document.getElementById('scenePosPanels');
+                const wrapper = document.getElementById('dz-scene-position-editor');
+
+                if (!tabsEl || !panelsEl || !wrapper) return;
+
+                tabsEl.innerHTML = '';
+                panelsEl.innerHTML = '';
+
+                if (!scenes.length) {
+                    wrapper.classList.add('d-none');
+                    return;
+                }
+
+                wrapper.classList.remove('d-none');
+
+                scenes.forEach(scene => {
+                    tabsEl.appendChild(buildTab(scene.id, scene.label));
+                    panelsEl.appendChild(buildPanel(scene.id, scene.label, scene.imageUrl || ''));
+                });
+
+                refreshTemplateSrc();
+
+                scenes.forEach(scene => {
+                    const canvas = document.querySelector(`.spe-canvas[data-scene-id="${scene.id}"]`);
+
+                    if (canvas) {
+                        renderDraggable(canvas, scene.id);
+                    }
+                });
+
+                activateTab(scenes[0].id);
+
+                if (window.feather) {
+                    feather.replace();
+                }
+            }
+
+            function collectScenes() {
+                const scenes = [];
+                const $select = $('#tableauSceneSelect');
+
+                ($select.val() || []).forEach(id => {
+                    const $option = $select.find(`option[value="${id}"]`);
+
+                    scenes.push({
+                        id,
+                        label: $option.text().trim() || `Scene #${id}`,
+                        imageUrl: $option.data('image-url') || ''
+                    });
+                });
+
+                return scenes;
+            }
+            function syncAllScenePositionInputs() {
+                let count = 0;
+                const activeIds = [];
+
+                document.querySelectorAll('.spe-canvas[data-scene-id]').forEach(canvas => {
+                    const sceneId = canvas.dataset.sceneId;
+                    syncHiddenInput(sceneId);
+                    activeIds.push(String(sceneId));
+                    count++;
+                });
+
+                if (window.tableauScenePositions) {
+                    Object.keys(window.tableauScenePositions).forEach(id => {
+                        if (!activeIds.includes(String(id))) {
+                            delete window.tableauScenePositions[id];
+                        }
+                    });
+                }
+
+                writeTableauScenePositionsInput();
+
+                return count;
+            }
+
+            window.syncTableauScenePositions = syncAllScenePositionInputs;
+
+            $(document).on('click', '#saveScenePositionsBtn', function () {
+                const count = syncAllScenePositionInputs();
+
+                if (!count) {
+                    notifyTableau('Please select or create a scene first.', 'error');
+                    return;
+                }
+
+                notifyTableau('Scene positions saved.');
+            });
+
+            function triggerRebuild() {
+                rebuildEditor(collectScenes());
+            }
+
+            window.triggerTableauScenePositionRebuild = triggerRebuild;
+
+            $(document).on('change', '#tableauSceneSelect', triggerRebuild);
+
+            $(document).on('change', '#sizesSelect', function () {
+                refreshAllDraggables();
+            });
+
+            const tableauDzEl = document.getElementById('tableau-scene-dropzone');
+
+            if (tableauDzEl && tableauDzEl.dropzone) {
+                tableauDzEl.dropzone.on('success', () => setTimeout(triggerRebuild, 200));
+                tableauDzEl.dropzone.on('removedfile', () => setTimeout(triggerRebuild, 200));
+            }
+
+            $(document).on('change', '#productsWithoutCategoriesSelect, #productsSelect, #categoriesSelect', function () {
+                setTimeout(triggerRebuild, 300);
+            });
+        })();
+    </script>
+
 
 @endsection

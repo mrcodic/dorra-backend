@@ -2389,9 +2389,9 @@
                     '#template-dropzone .dz-image img, ' +
                     '#template-dropzone .dz-preview img, ' +
                     '#back-template-dropzone .dz-image img, ' +
-                    '#back-template-dropzone .dz-preview img, ' +
-                    '#none-template-dropzone .dz-image img, ' +
-                    '#none-template-dropzone .dz-preview img'
+                    '#back-template-dropzone .dz-preview img, '
+                    // '#none-template-dropzone .dz-image img, ' +
+                    // '#none-template-dropzone .dz-preview img'
                 );
 
                 if (preview && preview.src && !preview.src.includes('placeholder')) {
@@ -2408,7 +2408,7 @@
                 'front-template-dropzone',
                 'template-dropzone',
                 'back-template-dropzone',
-                'none-template-dropzone'
+                // 'none-template-dropzone'
             ].forEach(id => {
                 const el = document.getElementById(id);
 
