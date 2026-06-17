@@ -193,25 +193,60 @@ $(document).ready(function () {
     }
 
     function renderFeaturesRows(features) {
+        const $list = $('#editFeaturesList');
+
         let arr = features;
 
         if (!Array.isArray(arr) && arr && typeof arr === 'object') {
             arr = Object.values(arr);
         }
+
         if (!Array.isArray(arr)) {
             arr = [];
         }
 
-        const $rep = $('#editFeaturesRepeater');
+        if (!arr.length) {
+            arr = [{ id: '', description: '' }];
+        }
 
-        // setList expects an array of objects matching your input `name` attributes
-        // i.e. features[i][id], features[i][description] -> { id, description }
-        $rep.setList(arr.map(f => ({
-            id: f?.id ?? '',
-            description: f?.description ?? ''
-        })));
+        const rows = arr.map((f, i) => {
+            const fid = f?.id ?? '';
+            const desc = f?.description ?? '';
 
-        if (window.feather) feather.replace();
+            return `
+            <div data-repeater-item class="row g-1 align-items-end mb-1">
+                <div class="col-12 col-md-11">
+                    <label class="form-label">Description</label>
+
+                    <input
+                        type="hidden"
+                        name="features[${i}][id]"
+                        value="${fid}">
+
+                    <input
+                        type="text"
+                        name="features[${i}][description]"
+                        class="form-control"
+                        value="${desc}"
+                        required>
+                </div>
+
+                <div class="col-12 col-md-1 d-flex justify-content-end">
+                  <button type="button"
+                                                data-repeater-delete
+                                                class="btn btn-outline-danger btn-sm feature-remove">
+                                            <i data-feather="x"></i>
+                                        </button>
+                </div>
+            </div>
+        `;
+        }).join('');
+
+        $list.html(rows);
+
+        if (window.feather) {
+            feather.replace();
+        }
     }
     $(document).on('click', '.edit-details', function (e) {
         e.preventDefault();
