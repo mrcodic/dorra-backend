@@ -35,10 +35,10 @@ use App\Http\Controllers\Dashboard\{AdminController,
     StatisticsController,
     SubCategoryController,
     SubIndustryController,
+    TableauSceneController,
     TagController,
     TemplateController,
-    UserController
-};
+    UserController};
 use App\Jobs\SyncFawryOrderStatus;
 use App\Models\Order;
 use App\Models\Template;
@@ -312,7 +312,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         }));
         Route::resource('/credit-orders', CreditOrderController::class);
 
-
+        Route::post('tableau-scenes', [TableauSceneController::class, 'store'])
+            ->name('tableau-scenes.store');
     });
 
     Route::prefix('api/v1/')->group(function () {
@@ -399,6 +400,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             ->name('ship-blu.request-pickup');
 
         Route::post('social-links', [SettingController::class, 'socialLinks'])->name('social-links');
+
     });
 
 

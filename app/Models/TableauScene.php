@@ -37,13 +37,9 @@ class TableauScene extends Model implements HasMedia
 
     public function templates(): BelongsToMany
     {
-        return $this->belongsToMany(
-            Template::class,
-            'tableau_scene_template',
-            'tableau_scene_id',
-            'template_id'
-        )
-            ->withPivot(['is_default', 'sort'])
+        return $this->belongsToMany(Template::class)
+            ->using(TableauSceneTemplate::class)
+            ->withPivot('positions')
             ->withTimestamps();
     }
     public function image()

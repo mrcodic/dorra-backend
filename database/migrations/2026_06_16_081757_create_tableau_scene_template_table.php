@@ -21,8 +21,7 @@ return new class extends Migration
                 ->constrained('tableau_scenes')
                 ->cascadeOnDelete();
 
-            $table->boolean('is_default')->default(false);
-            $table->unsignedInteger('sort')->default(0);
+        $table->json('positions');
             $table->timestamps();
             $table->unique(['template_id', 'tableau_scene_id']);
         });

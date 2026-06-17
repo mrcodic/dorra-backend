@@ -227,54 +227,16 @@ class TemplateService extends BaseService
         $validatedData['colors'] = $finalColors;
         $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad, $colors) {
             $model = $this->repository->create($validatedData);
-            $tableauSceneIds = collect($validatedData['tableau_scene_ids'] ?? [])
-                ->filter()
-                ->map(fn ($id) => (int) $id)
-                ->unique()
-                ->values();
+            if (!empty($validatedData['tableau_scene_ids'])) {
+                $scenes = json_decode($validatedData['tableau_scene_ids'], true);
+                $syncData = [];
+                foreach ($scenes as $sceneId => $data) {
+                    $syncData[$sceneId] = [
+                        'positions' => $data['positions'] ?? [],
+                    ];
+                }
 
-            if (!empty($validatedData['new_tableau_scene_image_id'])) {
-                $sceneName = $validatedData['new_tableau_scene_name'] ?? [];
-
-                $scene = TableauScene::create([
-                    'name' => [
-                        'en' => $sceneName['en']
-                            ?? (($validatedData['name']['en'] ?? 'Tableau') . ' Scene'),
-
-                        'ar' => $sceneName['ar']
-                            ?? (($validatedData['name']['ar'] ?? 'تابلوه') . ' مشهد'),
-                    ],
-                    'top_position' =>$validatedData['top_position'],
-                    'left_position' =>$validatedData['left_position'],
-                    'is_active' => true,
-                ]);
-
-                    Media::where(
-                    'id',
-                    $validatedData['new_tableau_scene_image_id']
-                )->update([
-                    'model_type' => TableauScene::class,
-                    'model_id' => $scene->id,
-                    'collection_name' => 'tableau_scene_image',
-                ]);
-
-                $tableauSceneIds->push($scene->id);
-            }
-
-            if ($tableauSceneIds->isNotEmpty()) {
-                $pivotData = $tableauSceneIds
-                    ->values()
-                    ->mapWithKeys(function ($sceneId, $index) {
-                        return [
-                            $sceneId => [
-                                'is_default' => $index === 0,
-                                'sort' => $index,
-                            ],
-                        ];
-                    })
-                    ->toArray();
-
-                $model->tableauScenes()->sync($pivotData);
+                $model->tableauScenes()->syncWithoutDetaching($syncData);
             }
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->industries()->sync($validatedData['industry_ids'] ?? []);

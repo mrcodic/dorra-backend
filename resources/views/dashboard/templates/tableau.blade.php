@@ -10,7 +10,9 @@
     <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
 @endsection
 @php
-    $category = \App\Models\Category::find(request('category_id'));
+    $category = request('category_id') && request('q') == 'tableau'
+    ?\App\Models\Category::whereIsTableau(true)->first()
+    : \App\Models\Category::find(request('category_id'));
     $HasMockupCategory = \App\Models\Category::find(request('category_id'));
 @endphp
 
@@ -24,7 +26,7 @@
                               action="{{ route('templates.redirect.store') }}">
                             @csrf
                             <input type="hidden" name="approach"
-                                   value="{{ request()->query('q') == 'without' ? 'without_editor' : 'with_editor' }}">
+                                   value="{{ request()->query('q') == 'without' || 'tableau'? 'without_editor' : 'with_editor' }}">
                             <div class="flex-grow-1">
                                 <div class="">
                                     <input type="hidden" name="use_front_as_back" id="useFrontAsBack" value="0">
@@ -161,7 +163,7 @@
                                         <div class="row">
 
                                             <div class="row" id="templateTypeDropzones">
-                                                @if(request()->query('q') == 'without')
+                                                @if(request()->query('q') == 'without' || 'tableau')
                                                     <!-- FRONT -->
                                                     <div class="form-group mb-2 col-md-6 d-none" id="dz-front">
                                                         <label class="label-text mb-1">Upload Print File (Front)</label>
@@ -367,7 +369,6 @@
                                                     <div class="col-md-6">
                                                         <label class="label-text mb-1">Scene Name (EN)</label>
                                                         <input type="text"
-                                                               name="new_tableau_scene_name[en]"
                                                                id="newTableauSceneNameEn"
                                                                class="form-control"
                                                                placeholder="Example: Living Room Scene">
@@ -376,15 +377,12 @@
                                                     <div class="col-md-6">
                                                         <label class="label-text mb-1">Scene Name (AR)</label>
                                                         <input type="text"
-                                                               name="new_tableau_scene_name[ar]"
                                                                id="newTableauSceneNameAr"
                                                                class="form-control"
                                                                placeholder="مثال: مشهد غرفة معيشة">
                                                     </div>
-                                                    <input type="hidden" name="top_position" id="topPosition">
-                                                    <input type="hidden" name="right_position" id="rightPosition">
-                                                    <input type="hidden" name="left_position" id="leftPosition">
-                                                    <input type="hidden" name="bottom_position" id="bottomPosition">
+                                                    </div>
+                                                <input type="hidden" name="tableau_scene_ids" id="tableauScenePositionsInput">
                                                 </div>
 
                                                 {{-- New scene image --}}
@@ -396,7 +394,6 @@
                                                     </div>
 
                                                     <input type="hidden"
-                                                           name="new_tableau_scene_image_id"
                                                            id="uploadedTableauSceneImage">
                                                 </div>
 
@@ -1540,10 +1537,6 @@
             if (!url) return;
 
             window.newTableauSceneImageUrl = url;
-
-            if (typeof window.triggerTableauScenePositionRebuild === 'function') {
-                setTimeout(window.triggerTableauScenePositionRebuild, 100);
-            }
         }
 
         const templateDropzone = new Dropzone("#template-dropzone", {
@@ -2062,10 +2055,6 @@
                         document.getElementById("uploadedTableauSceneImage").value = "";
                         window.newTableauSceneImageUrl = null;
 
-                        if (typeof window.triggerTableauScenePositionRebuild === 'function') {
-                            setTimeout(window.triggerTableauScenePositionRebuild, 100);
-                        }
-
                         if (file._hiddenInputId) {
                             fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                                 method: "DELETE",
@@ -2213,6 +2202,8 @@
                         getSceneTextFromResponse(response),
                         getSceneImageUrlFromResponse(response)
                     );
+                    // addAndSelectTableauScene triggers 'change' on #tableauSceneSelect,
+                    // which fires triggerRebuild() and reveals the Scene Position Editor now.
 
                     $('#newTableauSceneNameEn').val('');
                     $('#newTableauSceneNameAr').val('');
@@ -2432,44 +2423,33 @@
             });
 
             function syncHiddenInput(sceneId) {
-                const form = document.getElementById('addTemplateForm');
                 const canvas = document.querySelector(`.spe-canvas[data-scene-id="${sceneId}"]`);
 
-                if (!form || !canvas) return;
+                if (!canvas) return;
 
                 const box = getBox(canvas, sceneId);
-                const key = `scene_positions[${sceneId}]`;
 
-                ['top', 'right', 'left', 'bottom', 'width', 'height'].forEach(axis => {
-                    const name = `${key}[${axis}]`;
-                    let input = form.querySelector(`input[name="${name}"]`);
-
-                    if (!input) {
-                        input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = name;
-                        form.appendChild(input);
+                window.tableauScenePositions = window.tableauScenePositions || {};
+                window.tableauScenePositions[sceneId] = {
+                    positions: {
+                        top: box.top,
+                        right: box.right,
+                        left: box.left,
+                        bottom: box.bottom,
+                        width: box.width,
+                        height: box.height
                     }
+                };
 
-                    input.value = box[axis];
-                });
+                writeTableauScenePositionsInput();
+            }
 
-                if (String(sceneId) === 'new') {
-                    const legacyMap = {
-                        top: 'topPosition',
-                        right: 'rightPosition',
-                        left: 'leftPosition',
-                        bottom: 'bottomPosition'
-                    };
+            function writeTableauScenePositionsInput() {
+                const input = document.getElementById('tableauScenePositionsInput');
 
-                    Object.entries(legacyMap).forEach(([axis, id]) => {
-                        const input = document.getElementById(id);
+                if (!input) return;
 
-                        if (input) {
-                            input.value = box[axis];
-                        }
-                    });
-                }
+                input.value = JSON.stringify(window.tableauScenePositions || {});
             }
 
             function updateCoordsDisplay(sceneId) {
@@ -2831,31 +2811,28 @@
                     });
                 });
 
-                const uploadedId = document.getElementById('uploadedTableauSceneImage')?.value;
+                return scenes;
+            }
+            function syncAllScenePositionInputs() {
+                let count = 0;
+                const activeIds = [];
 
-                if (uploadedId) {
-                    const preview = document.querySelector(
-                        '#tableau-scene-dropzone .dz-image img, ' +
-                        '#tableau-scene-dropzone .dz-preview img'
-                    );
+                document.querySelectorAll('.spe-canvas[data-scene-id]').forEach(canvas => {
+                    const sceneId = canvas.dataset.sceneId;
+                    syncHiddenInput(sceneId);
+                    activeIds.push(String(sceneId));
+                    count++;
+                });
 
-                    scenes.push({
-                        id: 'new',
-                        label: 'New Scene',
-                        imageUrl: window.newTableauSceneImageUrl || (preview ? preview.src : '')
+                if (window.tableauScenePositions) {
+                    Object.keys(window.tableauScenePositions).forEach(id => {
+                        if (!activeIds.includes(String(id))) {
+                            delete window.tableauScenePositions[id];
+                        }
                     });
                 }
 
-                return scenes;
-            }
-
-            function syncAllScenePositionInputs() {
-                let count = 0;
-
-                document.querySelectorAll('.spe-canvas[data-scene-id]').forEach(canvas => {
-                    syncHiddenInput(canvas.dataset.sceneId);
-                    count++;
-                });
+                writeTableauScenePositionsInput();
 
                 return count;
             }
