@@ -247,10 +247,9 @@ class TemplateService extends BaseService
                     ]);
             }
 
-            if (isset($validatedData['template_image_front_id']) || isset($validatedData['template_image_none_id'])) {
+            if (isset($validatedData['template_image_front_id']) ) {
             Media::where(function ($query) use ($validatedData) {
-                    $query->whereKey($validatedData['template_image_front_id'])
-                        ->orWhere('id', $validatedData['template_image_none_id']);
+                    $query->whereKey($validatedData['template_image_front_id']);
                 })
                     ->update([
                         'model_type' => get_class($model),
@@ -258,7 +257,7 @@ class TemplateService extends BaseService
                         'collection_name' => 'templates',
                     ]);
 
-                $this->imageService->processUploaded($validatedData['template_image_front_id'] ?? $validatedData['template_image_none_id']);
+                $this->imageService->processUploaded($validatedData['template_image_front_id']);
 
             }
             if (isset($validatedData['template_image_back_id'])) {
@@ -455,8 +454,7 @@ class TemplateService extends BaseService
             }
 
             $frontId = $validatedData['template_image_front_id'] ?? null;
-            $noneId = $validatedData['template_image_none_id'] ?? null;
-            $newId = $frontId ?? $noneId;
+            $newId = $frontId;
 
             if ($newId) {
                 $alreadyAttached = $model->getMedia('templates')
