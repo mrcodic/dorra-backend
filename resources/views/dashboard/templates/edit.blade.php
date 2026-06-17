@@ -19,6 +19,16 @@
                             $preselectedIndustryIds = $model->industries->whereNull('parent_id')->pluck('id')->values();
                             $preselectedSubIndustryIds = $model->industries->whereNotNull('parent_id')->pluck('id')->values();
                             $selectedTableauSceneIds = $model->tableauScenes?->pluck('id')->map(fn ($id) => (string) $id)->values()->toArray() ?? [];
+
+                            $existingScenePositions = $model->tableauScenes
+                                ?->mapWithKeys(function ($scene) {
+                                    $positions = $scene->pivot->positions ?? [];
+                                    if (is_string($positions)) {
+                                        $positions = json_decode($positions, true) ?: [];
+                                    }
+                                    return [(string) $scene->id => $positions];
+                                })
+                                ->toArray() ?? [];
                         @endphp
 
                         <form id="editTemplateForm" enctype="multipart/form-data" method="post"
@@ -424,6 +434,7 @@
                                     </div>
 
                                     {{-- TABLEAU SCENE --}}
+                                    {{-- TABLEAU SCENE --}}
                                     <div class="form-group mb-2 col-md-6 d-none" id="dz-tableau-scene">
                                         <label class="label-text mb-1">Tableau Scene</label>
 
@@ -434,6 +445,7 @@
                                                 multiple>
                                             @foreach(\App\Models\TableauScene::where('is_active', true)->latest()->get() as $scene)
                                                 <option value="{{ $scene->id }}"
+                                                        data-image-url="{{ $scene->getFirstMediaUrl() }}"
                                                     @selected(in_array((string) $scene->id, $selectedTableauSceneIds, true))>
                                                     {{ $scene->getTranslation('name', app()->getLocale(), false) ?: 'Scene #' . $scene->id }}
                                                 </option>
@@ -448,7 +460,6 @@
                                                 <div class="col-md-6">
                                                     <label class="label-text mb-1">Scene Name (EN)</label>
                                                     <input type="text"
-                                                           name="new_tableau_scene_name[en]"
                                                            id="newTableauSceneNameEn"
                                                            class="form-control"
                                                            placeholder="Example: Living Room Scene">
@@ -457,7 +468,6 @@
                                                 <div class="col-md-6">
                                                     <label class="label-text mb-1">Scene Name (AR)</label>
                                                     <input type="text"
-                                                           name="new_tableau_scene_name[ar]"
                                                            id="newTableauSceneNameAr"
                                                            class="form-control"
                                                            placeholder="مثال: مشهد غرفة معيشة">
@@ -473,16 +483,52 @@
                                                 </div>
 
                                                 <input type="hidden"
-                                                       name="new_tableau_scene_image_id"
                                                        id="uploadedTableauSceneImage">
                                             </div>
 
+                                            <div class="d-flex justify-content-end mt-1">
+                                                <button type="button"
+                                                        id="createTableauSceneBtn"
+                                                        class="btn btn-outline-primary btn-sm"
+                                                        data-create-url="{{ url('/tableau-scenes') }}">
+                                                    Create Scene
+                                                </button>
+                                            </div>
+
                                             <small class="form-text text-muted">
-                                                If you choose an existing scene, this new scene data will be ignored.
+                                                Upload the scene image, then click Create Scene. The created scene will be selected automatically.
                                             </small>
                                         </div>
                                     </div>
 
+                                    {{-- SCENE POSITION EDITOR --}}
+                                    <div class="form-group mb-2 col-md-12 d-none" id="dz-scene-position-editor">
+                                        <div class="position-relative mt-3 text-center mb-2">
+                                            <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                            <span class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                                  style="color: #24B094;">
+            Scene Position Editor
+        </span>
+                                        </div>
+
+                                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-1 mb-2">
+                                            <div id="scenePosTabs" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+
+                                            <button type="button"
+                                                    id="saveScenePositionsBtn"
+                                                    class="btn btn-primary btn-sm">
+                                                Save Positions
+                                            </button>
+                                        </div>
+
+                                        <div id="scenePosPanels"></div>
+
+                                        <p class="text-muted mt-1" style="font-size:12px;">
+                                            Drag the template overlay on each scene, then click Save Positions before saving the template.
+                                        </p>
+
+                                        <input type="hidden" name="tableau_scene_ids" id="tableauScenePositionsInput">
+                                    </div>
                                     <div
                                         class="col-md-12 form-group mb-2 mockupWrapper">
                                         <div class="d-flex align-items-center justify-content-between mb-2">
