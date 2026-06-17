@@ -1646,7 +1646,7 @@
             cb.addEventListener('change', handleTypeChangeAndResetDZ);
         });
     </script>
-    
+
 
     <script>
         // keep color picker & text field in sync
@@ -3188,7 +3188,7 @@
 
             function buildPanel(sceneId, label, imageUrl) {
                 const id = safeId(sceneId);
-
+                console.log('buildPanel', sceneId, imageUrl);
                 ensureState(sceneId);
 
                 const panel = document.createElement('div');
@@ -3348,10 +3348,13 @@
                 ($select.val() || []).forEach(id => {
                     const $option = $select.find(`option[value="${id}"]`);
 
+                    // Use attr() not data() — Select2 clones options and loses .data() cache
+                    const imageUrl = $option.attr('data-image-url') || $option.data('image-url') || '';
+
                     scenes.push({
                         id,
                         label: $option.text().trim() || `Scene #${id}`,
-                        imageUrl: $option.data('image-url') || ''
+                        imageUrl: imageUrl
                     });
                 });
 
