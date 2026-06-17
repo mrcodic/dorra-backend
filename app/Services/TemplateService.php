@@ -229,14 +229,7 @@ class TemplateService extends BaseService
             $model = $this->repository->create($validatedData);
             if (!empty($validatedData['tableau_scene_ids'])) {
                 $scenes = json_decode($validatedData['tableau_scene_ids'], true);
-                $syncData = [];
-                foreach ($scenes as $sceneId => $data) {
-                    $syncData[$sceneId] = [
-                        'positions' => $data['positions'] ?? [],
-                    ];
-                }
-
-                $model->tableauScenes()->syncWithoutDetaching($syncData);
+                $model->tableauScenes()->sync($scenes);
             }
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->industries()->sync($validatedData['industry_ids'] ?? []);
