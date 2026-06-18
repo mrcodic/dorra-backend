@@ -2632,6 +2632,7 @@
                 data?.name_en ||
                 data?.title ||
                 data?.label ||
+                data?.name ||
                 ('Scene #' + (data?.id || ''));
         }
 
@@ -3330,19 +3331,26 @@
                 ($select.val() || []).forEach(id => {
                     const $option = $select.find(`option[value="${id}"]`);
 
-                    // Use attr() not data() — Select2 clones options and loses .data() cache
-                    const imageUrl = $option.attr('data-image-url') || $option.data('image-url') || '';
-console.log("imageUrl",imageUrl)
+                    const imageUrl =
+                        $option.attr('data-image-url') ||
+                        $option.data('image-url') ||
+                        '';
+
+                    const label =
+                        $option.attr('data-label') ||
+                        $option.attr('data-name') ||
+                        $option.text().trim() ||
+                        `Scene #${id}`;
+
                     scenes.push({
                         id,
-                        label: $option.text().trim() || `Scene #${id}`,
-                        imageUrl: imageUrl
+                        label,
+                        imageUrl
                     });
                 });
 
                 return scenes;
-            }
-            function syncAllScenePositionInputs() {
+            }            function syncAllScenePositionInputs() {
                 let count = 0;
                 const activeIds = [];
 
