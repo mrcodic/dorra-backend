@@ -2181,7 +2181,18 @@
                 return;
             }
 
-            $btn.prop('disabled', true).data('old-text', $btn.text()).text('Creating...');
+            const oldText = $btn.text();
+
+            $btn
+                .prop('disabled', true)
+                .data('old-text', oldText)
+                .text('Creating...');
+
+            function resetCreateSceneButton() {
+                $btn
+                    .prop('disabled', false)
+                    .text($btn.data('old-text') || 'Create Scene');
+            }
 
             $.ajax({
                 url: url,
@@ -2203,6 +2214,7 @@
 
                     if (!sceneId) {
                         notifyTableau('Scene created, but response does not contain scene id.', 'error');
+                        resetCreateSceneButton();
                         return;
                     }
 
@@ -2211,8 +2223,6 @@
                         getSceneTextFromResponse(response),
                         getSceneImageUrlFromResponse(response)
                     );
-                    // addAndSelectTableauScene triggers 'change' on #tableauSceneSelect,
-                    // which fires triggerRebuild() and reveals the Scene Position Editor now.
 
                     $('#newTableauSceneNameEn').val('');
                     $('#newTableauSceneNameAr').val('');
@@ -2228,9 +2238,10 @@
 
                     notifyTableau('Scene created and selected successfully.');
                 },
-                error: function (xhr) {
+                error(xhr) {
                     if (xhr.responseJSON && xhr.responseJSON.errors) {
                         const errors = xhr.responseJSON.errors;
+
                         for (const key in errors) {
                             Toastify({
                                 text: errors[key][0],
@@ -2241,12 +2252,25 @@
                                 close: true,
                             }).showToast();
                         }
+                    } else {
+                        Toastify({
+                            text: xhr.responseJSON?.message || 'Failed to create scene.',
+                            duration: 4000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#EA5455",
+                            close: true,
+                        }).showToast();
                     }
 
-                    if (options.onError) options.onError(xhr, $form);
+                    resetCreateSceneButton();
+
+                    if (typeof options !== 'undefined' && options?.onError) {
+                        options.onError(xhr, typeof $form !== 'undefined' ? $form : null);
+                    }
                 },
                 complete() {
-                    $btn.prop('disabled', false).text($btn.data('old-text') || 'Create Scene');
+                    resetCreateSceneButton();
                 }
             });
         });
