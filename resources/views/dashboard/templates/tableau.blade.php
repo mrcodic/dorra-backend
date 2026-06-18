@@ -142,20 +142,20 @@
                                             <label class="label-text mb-1">Template Type</label>
                                             <div class="row">
                                                 @php $type = \App\Models\Type::whereValue(\App\Enums\Template\TypeEnum::FRONT)->first();  @endphp
-                                                    <div class="col-md-4 mb-1">
-                                                        <label class="radio-box">
-                                                            <input class="form-check-input type-checkbox" type="checkbox"
-                                                                   name="types[]"
-                                                                   value="{{ $type->value }}"
-                                                                   data-type-name="{{ strtolower($type->value->name) }}"
-                                                                @checked(
-       $HasMockupCategory?->has_mockup == false ? $type->value === \App\Enums\Template\TypeEnum::FRONT
-               || $type->value === \App\Enums\Template\TypeEnum::BACK :$type->value === \App\Enums\Template\TypeEnum::FRONT
-           )
-                                                            >
-                                                            <span>{{ $type->value->label() }}</span>
-                                                        </label>
-                                                    </div>
+                                                <div class="col-md-4 mb-1">
+                                                    <label class="radio-box">
+                                                        <input class="form-check-input type-checkbox" type="checkbox"
+                                                               name="types[]"
+                                                               value="{{ $type->value }}"
+                                                               data-type-name="{{ strtolower($type->value->name) }}"
+                                                            @checked(
+   $HasMockupCategory?->has_mockup == false ? $type->value === \App\Enums\Template\TypeEnum::FRONT
+           || $type->value === \App\Enums\Template\TypeEnum::BACK :$type->value === \App\Enums\Template\TypeEnum::FRONT
+       )
+                                                        >
+                                                        <span>{{ $type->value->label() }}</span>
+                                                    </label>
+                                                </div>
 
                                             </div>
 
@@ -381,300 +381,300 @@
                                                                class="form-control"
                                                                placeholder="مثال: مشهد غرفة معيشة">
                                                     </div>
-                                                    </div>
+                                                </div>
                                                 <input type="hidden" name="tableau_scene_ids" id="tableauScenePositionsInput">
-                                                </div>
-
-                                                {{-- New scene image --}}
-                                                <div id="tableau-scene-dropzone"
-                                                     class="dropzone border rounded p-3"
-                                                     style="cursor:pointer; min-height:150px;">
-                                                    <div class="dz-message">
-                                                        <span>Drop tableau scene image here or click</span>
-                                                    </div>
-
-                                                    <input type="hidden"
-                                                           id="uploadedTableauSceneImage">
-                                                </div>
-
-                                                <div class="d-flex justify-content-end mt-1">
-                                                    <button type="button"
-                                                            id="createTableauSceneBtn"
-                                                            class="btn btn-outline-primary btn-sm"
-                                                            data-create-url="{{ url('/tableau-scenes') }}">
-                                                        Create Scene
-                                                    </button>
-                                                </div>
-
-                                                <small class="form-text text-muted">
-                                                    Upload the scene image, then click Create Scene. The created scene will be selected automatically.
-                                                </small>
-                                            </div>
-                                        </div>
-                                        {{-- SCENE POSITION EDITOR --}}
-                                        <div class="form-group mb-2 col-md-12 d-none" id="dz-scene-position-editor">
-                                            <div class="position-relative mt-3 text-center mb-2">
-                                                <hr class="opacity-75" style="border: 1px solid #24B094;">
-                                                <span class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
-                                                      style="color: #24B094;">
-            Scene Position Editor
-        </span>
                                             </div>
 
-                                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-1 mb-2">
-                                                {{-- Tabs --}}
-                                                <div id="scenePosTabs" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+                                            {{-- New scene image --}}
+                                            <div id="tableau-scene-dropzone"
+                                                 class="dropzone border rounded p-3"
+                                                 style="cursor:pointer; min-height:150px;">
+                                                <div class="dz-message">
+                                                    <span>Drop tableau scene image here or click</span>
+                                                </div>
 
+                                                <input type="hidden"
+                                                       id="uploadedTableauSceneImage">
+                                            </div>
+
+                                            <div class="d-flex justify-content-end mt-1">
                                                 <button type="button"
-                                                        id="saveScenePositionsBtn"
-                                                        class="btn btn-primary btn-sm">
-                                                    Save Positions
+                                                        id="createTableauSceneBtn"
+                                                        class="btn btn-outline-primary btn-sm"
+                                                        data-create-url="{{ url('/tableau-scenes') }}">
+                                                    Create Scene
                                                 </button>
                                             </div>
 
-                                            {{-- Panels --}}
-                                            <div id="scenePosPanels"></div>
-
-                                            <p class="text-muted mt-1" style="font-size:12px;">
-                                                Drag the template overlay on each scene, then click Save Positions before submitting the template.
-                                            </p>
+                                            <small class="form-text text-muted">
+                                                Upload the scene image, then click Create Scene. The created scene will be selected automatically.
+                                            </small>
                                         </div>
+                                    </div>
+                                    {{-- SCENE POSITION EDITOR --}}
+                                    <div class="form-group mb-2 col-md-12 d-none" id="dz-scene-position-editor">
+                                        <div class="position-relative mt-3 text-center mb-2">
+                                            <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                            <span class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                                  style="color: #24B094;">
+            Scene Position Editor
+        </span>
+                                        </div>
+
+                                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-1 mb-2">
+                                            {{-- Tabs --}}
+                                            <div id="scenePosTabs" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+
+                                            <button type="button"
+                                                    id="saveScenePositionsBtn"
+                                                    class="btn btn-primary btn-sm">
+                                                Save Positions
+                                            </button>
+                                        </div>
+
+                                        {{-- Panels --}}
+                                        <div id="scenePosPanels"></div>
+
+                                        <p class="text-muted mt-1" style="font-size:12px;">
+                                            Drag the template overlay on each scene, then click Save Positions before submitting the template.
+                                        </p>
+                                    </div>
+                                    <div class="position-relative mt-3 text-center">
+                                        <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                        <span
+                                            class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                            style="color: #24B094;">
+                                    Industry
+                                </span>
+                                    </div>
+
+                                    <div class="row mb-2">
+                                        <div class="col-md-6 form-group mb-2">
+                                            <label for="industriesSelect" class="label-text mb-1">Industries</label>
+                                            <select id="industriesSelect" class="form-select select2"
+                                                    name="industry_ids[]"
+                                                    multiple>
+                                                @foreach($associatedData['industries'] as $industry)
+                                                    <option value="{{ $industry->id }}">
+                                                        {{ $industry->getTranslation('name', 'en').
+                        "({$industry->getTranslation('name', 'ar')})" }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 form-group mb-2">
+                                            <label for="subIndustriesSelect" class="label-text mb-1">Sub
+                                                Industries</label>
+                                            <select id="subIndustriesSelect" class="form-select select2"
+                                                    name="industry_ids[]"
+                                                    multiple>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row align-items-end">
+                                        <div class="col-md-9 form-group mb-2">
+                                            <label for="tagsSelect" class="label-text mb-1">Tags</label>
+                                            <select id="tagsSelect" class="form-select select2" name="tags[]" multiple>
+                                                @foreach($associatedData['tags'] as $tag)
+                                                    <option value="{{ $tag->id }}">
+                                                        {{ $tag->getTranslation('name', app()->getLocale()) }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        @can("tags_create")
+                                            <div class="col-3 col-md-3 mb-2 text-md-end">
+                                                <a class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-1"
+                                                   data-bs-toggle="modal" data-bs-target="#addTagModal">
+                                                    <i data-feather="plus"></i>
+                                                    Add New Tag
+                                                </a>
+                                            </div>
+                                        @endcan
+                                    </div>
+
+                                    @if(request()->query('q') == 'with')
+
                                         <div class="position-relative mt-3 text-center">
                                             <hr class="opacity-75" style="border: 1px solid #24B094;">
                                             <span
                                                 class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
                                                 style="color: #24B094;">
-                                    Industry
-                                </span>
-                                        </div>
-
-                                        <div class="row mb-2">
-                                            <div class="col-md-6 form-group mb-2">
-                                                <label for="industriesSelect" class="label-text mb-1">Industries</label>
-                                                <select id="industriesSelect" class="form-select select2"
-                                                        name="industry_ids[]"
-                                                        multiple>
-                                                    @foreach($associatedData['industries'] as $industry)
-                                                        <option value="{{ $industry->id }}">
-                                                            {{ $industry->getTranslation('name', 'en').
-                            "({$industry->getTranslation('name', 'ar')})" }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="col-md-6 form-group mb-2">
-                                                <label for="subIndustriesSelect" class="label-text mb-1">Sub
-                                                    Industries</label>
-                                                <select id="subIndustriesSelect" class="form-select select2"
-                                                        name="industry_ids[]"
-                                                        multiple>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="row align-items-end">
-                                            <div class="col-md-9 form-group mb-2">
-                                                <label for="tagsSelect" class="label-text mb-1">Tags</label>
-                                                <select id="tagsSelect" class="form-select select2" name="tags[]" multiple>
-                                                    @foreach($associatedData['tags'] as $tag)
-                                                        <option value="{{ $tag->id }}">
-                                                            {{ $tag->getTranslation('name', app()->getLocale()) }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            @can("tags_create")
-                                                <div class="col-3 col-md-3 mb-2 text-md-end">
-                                                    <a class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-1"
-                                                       data-bs-toggle="modal" data-bs-target="#addTagModal">
-                                                        <i data-feather="plus"></i>
-                                                        Add New Tag
-                                                    </a>
-                                                </div>
-                                            @endcan
-                                        </div>
-
-                                        @if(request()->query('q') == 'with')
-
-                                            <div class="position-relative mt-3 text-center">
-                                                <hr class="opacity-75" style="border: 1px solid #24B094;">
-                                                <span
-                                                    class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
-                                                    style="color: #24B094;">
                                     Design Specifications
                                 </span>
-                                            </div>
-                                            <div class="form-group mb-2">
-                                                <label for="orientation" class="label-text mb-1">Orientation</label>
-                                                <select id="orientation" class="form-select" name="orientation">
-                                                    <option value="" selected disabled>
-                                                        chooese orientation
+                                        </div>
+                                        <div class="form-group mb-2">
+                                            <label for="orientation" class="label-text mb-1">Orientation</label>
+                                            <select id="orientation" class="form-select" name="orientation">
+                                                <option value="" selected disabled>
+                                                    chooese orientation
+                                                </option>
+                                                @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
+
+                                                    <option value="{{ $orientation->value }}" selected>
+                                                        {{$orientation->label()}}
                                                     </option>
-                                                    @foreach(\App\Enums\OrientationEnum::cases() as $orientation)
+                                                @endforeach
+                                            </select>
+                                        </div>
 
-                                                        <option value="{{ $orientation->value }}" selected>
-                                                            {{$orientation->label()}}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-
-                                            <div class="position-relative mt-3 text-center">
-                                                <hr class="opacity-75" style="border: 1px solid #24B094;">
-                                                <span
-                                                    class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
-                                                    style="color: #24B094;">
+                                        <div class="position-relative mt-3 text-center">
+                                            <hr class="opacity-75" style="border: 1px solid #24B094;">
+                                            <span
+                                                class="position-absolute top-50 start-50 translate-middle px-1 bg-white fs-4 d-none d-md-flex"
+                                                style="color: #24B094;">
                                     Guides Settings
                                 </span>
-                                            </div>
-                                            {{-- Persisted resources (used on submit) --}}
-                                            <input type="hidden" name="dimension_resource_ids" id="dimensionResourceIds">
-                                            <input type="hidden" name="dimension_resource_types"
-                                                   id="dimensionResourceTypes">
-                                            <label class="label-text mb-1">Shape</label>
-                                            <div class="row mb-2">
-                                                {{-- Shape (col-6) --}}
-                                                <div class="col-md-4">
-                                                    <div class="form-group mb-2">
-                                                        <input type="hidden" name="has_corner" id="has_corner_hidden"
-                                                               value="{{ old('has_corner') }}">
-                                                        <div class="d-flex gap-3">
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox"
-                                                                       name="has_corner"
-                                                                       id="shape_circle" value="0">
-                                                                <label class="form-check-label"
-                                                                       for="shape_circle">Circle</label>
-                                                            </div>
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox"
-                                                                       name="has_corner"
-                                                                       id="shape_other" value="1" checked>
-                                                                <label class="form-check-label"
-                                                                       for="shape_other">Other</label>
-                                                            </div>
+                                        </div>
+                                        {{-- Persisted resources (used on submit) --}}
+                                        <input type="hidden" name="dimension_resource_ids" id="dimensionResourceIds">
+                                        <input type="hidden" name="dimension_resource_types"
+                                               id="dimensionResourceTypes">
+                                        <label class="label-text mb-1">Shape</label>
+                                        <div class="row mb-2">
+                                            {{-- Shape (col-6) --}}
+                                            <div class="col-md-4">
+                                                <div class="form-group mb-2">
+                                                    <input type="hidden" name="has_corner" id="has_corner_hidden"
+                                                           value="{{ old('has_corner') }}">
+                                                    <div class="d-flex gap-3">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                   name="has_corner"
+                                                                   id="shape_circle" value="0">
+                                                            <label class="form-check-label"
+                                                                   for="shape_circle">Circle</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                   name="has_corner"
+                                                                   id="shape_other" value="1" checked>
+                                                            <label class="form-check-label"
+                                                                   for="shape_other">Other</label>
                                                         </div>
                                                     </div>
-                                                    <div class="form-group mb-2 d-none" id="cornersBox">
-                                                        <label for="cornersSelect" class="label-text mb-1">Corners</label>
-                                                        <select id="cornersSelect" class="form-select select2"
-                                                                name="border">
-                                                            <option value="" selected disabled>Choose
-                                                                Corner
-                                                            </option>
-                                                            @foreach(\App\Enums\CornerEnum::cases() as $border)
-                                                                <option
-                                                                    value="{{ $border->value }}"
-                                                                    selected
-                                                                >{{$border->label()}}</option>
+                                                </div>
+                                                <div class="form-group mb-2 d-none" id="cornersBox">
+                                                    <label for="cornersSelect" class="label-text mb-1">Corners</label>
+                                                    <select id="cornersSelect" class="form-select select2"
+                                                            name="border">
+                                                        <option value="" selected disabled>Choose
+                                                            Corner
+                                                        </option>
+                                                        @foreach(\App\Enums\CornerEnum::cases() as $border)
+                                                            <option
+                                                                value="{{ $border->value }}"
+                                                                selected
+                                                            >{{$border->label()}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            {{-- Safety Area (col-6) --}}
+                                            <div class="col-md-4">
+                                                <div class="form-group mb-2">
+                                                    <div class="form-check mb-2">
+                                                        {{-- send 0 when unchecked --}}
+                                                        <input type="hidden" name="has_safety_area" value="0">
+                                                        <input class="form-check-input" type="checkbox"
+                                                               id="hasSafetyArea"
+                                                               name="has_safety_area" value="1" checked>
+                                                        <label class="form-check-label" for="hasSafetyArea">Enable
+                                                            Safety
+                                                            Area</label>
+                                                    </div>
+
+                                                    <div id="safetyAreaBox"
+                                                         class="{{ old('has_safety_area') ? '' : 'd-none' }}">
+                                                        <label for="safetyAreaSelect" class="label-text mb-1">Safety
+                                                            Area</label>
+                                                        <select id="safetyAreaSelect" class="form-select select2"
+                                                                name="safety_area">
+                                                            @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
+                                                                <option value="{{ $area }}" @selected($area === \App\Enums\SafetyAreaEnum::R15)>
+                                                                    {{ $area->label() }}
+                                                                </option>
                                                             @endforeach
                                                         </select>
+                                                        <small class="form-text text-muted">Padding inside the design
+                                                            area.</small>
                                                     </div>
                                                 </div>
-
-                                                {{-- Safety Area (col-6) --}}
-                                                <div class="col-md-4">
-                                                    <div class="form-group mb-2">
-                                                        <div class="form-check mb-2">
-                                                            {{-- send 0 when unchecked --}}
-                                                            <input type="hidden" name="has_safety_area" value="0">
-                                                            <input class="form-check-input" type="checkbox"
-                                                                   id="hasSafetyArea"
-                                                                   name="has_safety_area" value="1" checked>
-                                                            <label class="form-check-label" for="hasSafetyArea">Enable
-                                                                Safety
-                                                                Area</label>
-                                                        </div>
-
-                                                        <div id="safetyAreaBox"
-                                                             class="{{ old('has_safety_area') ? '' : 'd-none' }}">
-                                                            <label for="safetyAreaSelect" class="label-text mb-1">Safety
-                                                                Area</label>
-                                                            <select id="safetyAreaSelect" class="form-select select2"
-                                                                    name="safety_area">
-                                                                @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
-                                                                    <option value="{{ $area }}" @selected($area === \App\Enums\SafetyAreaEnum::R15)>
-                                                                        {{ $area->label() }}
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
-                                                            <small class="form-text text-muted">Padding inside the design
-                                                                area.</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {{-- Cut Margin (col-6) --}}
-                                                <div class="col-md-4">
-                                                    <div class="form-group mb-2">
-                                                        <div class="form-check mb-2">
-                                                            {{-- send 0 when unchecked --}}
-                                                            <input type="hidden" value="0">
-                                                            <input class="form-check-input" type="checkbox"
-                                                                   id="hasCutMargin" value="1"
-                                                                   checked>
-                                                            <label class="form-check-label" for="hasCutMargin">Enable Cut
-                                                                Margin</label>
-                                                        </div>
-
-                                                        <div id="cutMarginBox"
-                                                             class="{{ old('cut_margin') ? '' : 'd-none' }}">
-                                                            <label for="cutMarginSelect" class="label-text mb-1">Cut
-                                                                Margin</label>
-                                                            <select id="cutMarginSelect" class="form-select select2"
-                                                                    name="cut_margin">
-                                                                @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
-                                                                    <option value="{{ $area->value }}"
-                                                                        @selected($area === \App\Enums\SafetyAreaEnum::R10)>
-
-                                                                        {{ $area->label() }}
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
-                                                            {{-- <small class="form-text text-muted">Padding inside the design--}}
-                                                            {{-- area.</small>--}}
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-
                                             </div>
 
-                                            <div class="form-group mb-2">
-                                                <label for="sizesSelect" class="label-text mb-1">Sizes</label>
-                                                <select id="sizesSelect" class="form-select" name="dimension_id">
-                                                    <option value="" selected disabled>Select Size</option>
-                                                </select>
-                                                <small class="form-text text-muted">
-                                                    If no size is selected, the default 650×650 will be applied.
-                                                </small>
+                                            {{-- Cut Margin (col-6) --}}
+                                            <div class="col-md-4">
+                                                <div class="form-group mb-2">
+                                                    <div class="form-check mb-2">
+                                                        {{-- send 0 when unchecked --}}
+                                                        <input type="hidden" value="0">
+                                                        <input class="form-check-input" type="checkbox"
+                                                               id="hasCutMargin" value="1"
+                                                               checked>
+                                                        <label class="form-check-label" for="hasCutMargin">Enable Cut
+                                                            Margin</label>
+                                                    </div>
+
+                                                    <div id="cutMarginBox"
+                                                         class="{{ old('cut_margin') ? '' : 'd-none' }}">
+                                                        <label for="cutMarginSelect" class="label-text mb-1">Cut
+                                                            Margin</label>
+                                                        <select id="cutMarginSelect" class="form-select select2"
+                                                                name="cut_margin">
+                                                            @foreach(\App\Enums\SafetyAreaEnum::cases() as $area)
+                                                                <option value="{{ $area->value }}"
+                                                                    @selected($area === \App\Enums\SafetyAreaEnum::R10)>
+
+                                                                    {{ $area->label() }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                        {{-- <small class="form-text text-muted">Padding inside the design--}}
+                                                        {{-- area.</small>--}}
+                                                    </div>
+                                                </div>
                                             </div>
 
-                                    </div>
-                                    @endif
-                                </div>
 
+                                        </div>
 
-                                <div class="d-flex flex-wrap-reverse gap-1 justify-content-between pt-2">
-                                    <button type="button" class="btn btn-outline-secondary" id="cancelButton">Cancel
-                                    </button>
-                                    <div class="d-flex gap-1">
-
-                                        <button type="submit" class="btn btn-outline-secondary fs-5 saveChangesButton"
-                                                data-action="draft">
-                                            <span>Add Template as Draft</span>
-                                            <span id="saveLoader"
-                                                  class="spinner-border spinner-border-sm d-none saveLoader"
-                                                  role="status" aria-hidden="true"></span>
-                                        </button>
-                                    </div>
+                                        <div class="form-group mb-2">
+                                            <label for="sizesSelect" class="label-text mb-1">Sizes</label>
+                                            <select id="sizesSelect" class="form-select" name="dimension_id">
+                                                <option value="" selected disabled>Select Size</option>
+                                            </select>
+                                            <small class="form-text text-muted">
+                                                If no size is selected, the default 650×650 will be applied.
+                                            </small>
+                                        </div>
 
                                 </div>
+                                @endif
                             </div>
-                        </form>
+
+
+                            <div class="d-flex flex-wrap-reverse gap-1 justify-content-between pt-2">
+                                <button type="button" class="btn btn-outline-secondary" id="cancelButton">Cancel
+                                </button>
+                                <div class="d-flex gap-1">
+
+                                    <button type="submit" class="btn btn-outline-secondary fs-5 saveChangesButton"
+                                            data-action="draft">
+                                        <span>Add Template as Draft</span>
+                                        <span id="saveLoader"
+                                              class="spinner-border spinner-border-sm d-none saveLoader"
+                                              role="status" aria-hidden="true"></span>
+                                    </button>
+                                </div>
+
+                            </div>
                     </div>
+                    </form>
                 </div>
             </div>
+        </div>
         </div>
 
         <!-- Back Design Modal -->
@@ -1555,13 +1555,16 @@
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedTemplateImage").value = response.data.id;
-                        setTableauTemplateUrl(response);
+
+                        // Do not update Scene Position Editor canvas from model image.
+                        // The canvas overlay is controlled by the Front print file only.
                     }
                 });
 
                 this.on("removedfile", function (file) {
                     document.getElementById("uploadedTemplateImage").value = "";
-                    clearTableauTemplateUrl();
+
+                    // Removing model image must not clear the Front canvas overlay.
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
@@ -1615,6 +1618,9 @@
                     const dzRef = this;
 
                     reader.onload = function (e) {
+                        // Keep a local fallback preview for the Scene Position Editor canvas.
+                        file._fullDataUrl = e.target.result;
+
                         const img = new Image();
                         img.onload = function () {
                             if (img.width < 1000 || img.height < 1000) {
@@ -1639,7 +1645,9 @@
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedFrontTemplateImage").value = response.data.id;
-                        setTableauTemplateUrl(response);
+
+                        // Canvas overlay must use the FRONT image.
+                        setTableauTemplateUrl(response, file._fullDataUrl);
                     }
                 });
 
@@ -1715,13 +1723,13 @@
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedBackTemplateImage").value = response.data.id;
-                        setTableauTemplateUrl(response);
+                        // Do not update Scene Position Editor canvas from this upload. Front image only.
                     }
                 });
 
                 this.on("removedfile", function (file) {
                     document.getElementById("uploadedBackTemplateImage").value = "";
-                    clearTableauTemplateUrl();
+                    // Do not clear Scene Position Editor canvas from this upload. Front image only.
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
@@ -1791,13 +1799,13 @@
                     if (response.success && response.data) {
                         file._hiddenInputId = response.data.id;
                         document.getElementById("uploadedNoneTemplateImage").value = response.data.id;
-                        setTableauTemplateUrl(response);
+                        // Do not update Scene Position Editor canvas from this upload. Front image only.
                     }
                 });
 
                 this.on("removedfile", function (file) {
                     document.getElementById("uploadedNoneTemplateImage").value = "";
-                    clearTableauTemplateUrl();
+                    // Do not clear Scene Position Editor canvas from this upload. Front image only.
                     if (file._hiddenInputId) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
@@ -2383,13 +2391,15 @@
                     return;
                 }
 
+                /*
+                 * IMPORTANT:
+                 * The draggable image shown on the Scene Position Editor canvas
+                 * must come from the uploaded FRONT print file only.
+                 * Do not fall back to model/back/none previews here.
+                 */
                 const preview = document.querySelector(
                     '#front-template-dropzone .dz-image img, ' +
-                    '#front-template-dropzone .dz-preview img, ' +
-                    '#template-dropzone .dz-image img, ' +
-                    '#template-dropzone .dz-preview img, ' +
-                    '#back-template-dropzone .dz-image img, ' +
-                    '#back-template-dropzone .dz-preview img, '
+                    '#front-template-dropzone .dz-preview img'
                 );
 
                 if (preview && preview.src && !preview.src.includes('placeholder')) {
@@ -2404,8 +2414,6 @@
 
             [
                 'front-template-dropzone',
-                'template-dropzone',
-                'back-template-dropzone',
             ].forEach(id => {
                 const el = document.getElementById(id);
 
