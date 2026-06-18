@@ -2228,12 +2228,22 @@
 
                     notifyTableau('Scene created and selected successfully.');
                 },
-                error(xhr) {
-                    const message = xhr?.responseJSON?.message ||
-                        xhr?.responseJSON?.errors ||
-                        'Failed to create scene.';
+                error: function (xhr) {
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        const errors = xhr.responseJSON.errors;
+                        for (const key in errors) {
+                            Toastify({
+                                text: errors[key][0],
+                                duration: 4000,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "#EA5455",
+                                close: true,
+                            }).showToast();
+                        }
+                    }
 
-                    notifyTableau(typeof message === 'string' ? message : JSON.stringify(message), 'error');
+                    if (options.onError) options.onError(xhr, $form);
                 },
                 complete() {
                     $btn.prop('disabled', false).text($btn.data('old-text') || 'Create Scene');
