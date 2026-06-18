@@ -814,6 +814,15 @@
                                                                                                    class="form-control"
                                                                                                    placeholder="Price"/>
                                                                                         </div>
+                                                                                        <!-- Frame Model Padding Value (Tableau only) -->
+                                                                                        <div class="col option-frame-model-padding-wrapper"
+                                                                                             style="{{ ($model->is_tableau && $specification->fixed_key === 'frame_model') ? '' : 'display:none;' }}">
+                                                                                            <label class="form-label label-text">Padding Value (Optional)</label>
+                                                                                            <input type="text" name="padding"
+                                                                                                   value="{{ $option->padding }}"
+                                                                                                   class="form-control option-padding-value"
+                                                                                                   placeholder="Padding Value"/>
+                                                                                        </div>
                                                                                     </div>
                                                                                     <div
                                                                                         class="row d-flex align-items-end mt-2">
@@ -960,6 +969,12 @@
                                                                                         <input type="text" name="price"
                                                                                                class="form-control"
                                                                                                placeholder="Price"/>
+                                                                                    </div>
+                                                                                    <div class="col option-frame-model-padding-wrapper" style="display: none;">
+                                                                                        <label class="form-label label-text">Padding Value (Optional)</label>
+                                                                                        <input type="text" name="padding"
+                                                                                               class="form-control option-padding-value"
+                                                                                               placeholder="Padding Value"/>
                                                                                     </div>
                                                                                 </div>
 
@@ -1534,6 +1549,31 @@
 
 
     <script>
+        function syncOptionPaddingVisibility() {
+            const isTableau = $('#is_tableau').is(':checked');
+
+            $('.option-frame-model-padding-wrapper').hide();
+
+            if (!isTableau) {
+                $('.option-padding-value').val('');
+                return;
+            }
+
+            const $frameModelSpec = findSpecItemByKey('frame_model');
+            if (!$frameModelSpec.length) {
+                $('.option-padding-value').val('');
+                return;
+            }
+
+            // Only frame_model can submit padding. Clear hidden values in all other specs.
+            getSpecListEl()
+                .children('[data-repeater-item]')
+                .not($frameModelSpec)
+                .find('.option-padding-value')
+                .val('');
+
+            $frameModelSpec.find('.option-frame-model-padding-wrapper').show();
+        }
         function resetDropzoneElement(element, message) {
             if (!element) return;
 
@@ -2967,6 +3007,150 @@
 
             $(document).ready(function () {
                 window.refreshTableauFrameUploaders(document);
+            });
+        })();
+    </script>
+
+
+
+    <script>
+        /*
+         * Tableau padding for Edit pages:
+         * Show "Padding Value" only for the Frame Model spec options.
+         * Do not depend on #is_tableau only, because Edit Categories uses the selected Product option.
+         */
+        (function () {
+            function getSpecListForPadding() {
+                return $('.outer-repeater').find('[data-repeater-list="specifications"]').first();
+            }
+
+            function normalizePaddingSpecName(value) {
+                return String(value || '')
+                    .toLowerCase()
+                    .replace(/[\u064B-\u065F\u0670]/g, '')
+                    .replace(/[أإآ]/g, 'ا')
+                    .replace(/ة/g, 'ه')
+                    .replace(/ـ/g, '')
+                    .replace(/[_-]+/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            }
+
+            function isCurrentPageTableauForPadding() {
+                const selectedOption = $('.category-select option:selected');
+
+                const selectedOptionIsTableau =
+                    Number(selectedOption.attr('data-is-tableau')) === 1 ||
+                    Number(selectedOption.data('is-tableau')) === 1;
+
+                const hasTableauSwitch =
+                    $('#is_tableau').length > 0 &&
+                    $('#is_tableau').is(':checked');
+
+                return Boolean(
+                    hasTableauSwitch ||
+                    selectedOptionIsTableau ||
+                    window.selectedProductIsTableau === true ||
+                    window.modelIsTableau === true
+                );
+            }
+
+            function getSpecItemFromPaddingWrapper(wrapper) {
+                const $innerRepeater = $(wrapper).closest('.inner-repeater');
+
+                if ($innerRepeater.length) {
+                    return $innerRepeater.closest('[data-repeater-item]');
+                }
+
+                return $(wrapper).closest('[data-repeater-list="specifications"] > [data-repeater-item]');
+            }
+
+            function isFrameModelSpecItem($specItem) {
+                if (!$specItem || !$specItem.length) {
+                    return false;
+                }
+
+                const key =
+                    String($specItem.attr('data-spec-key') || '').trim() ||
+                    String($specItem.find('.spec-fixed-key').first().val() || '').trim();
+
+                if (key === 'frame_model') {
+                    return true;
+                }
+
+                const nameEn = normalizePaddingSpecName($specItem.find('.spec-name-en').first().val());
+                const nameAr = normalizePaddingSpecName($specItem.find('.spec-name-ar').first().val());
+
+                const englishMatches = [
+                    'frame model',
+                    'framemodel',
+                    'frame type',
+                    'model frame'
+                ];
+
+                const arabicMatches = [
+                    'موديل البرواز',
+                    'موديل الاطار',
+                    'نموذج البرواز',
+                    'نموذج الاطار',
+                    'نوع البرواز',
+                    'نوع الاطار'
+                ];
+
+                return englishMatches.includes(nameEn)
+                    || englishMatches.some(function (name) { return nameEn.includes(name); })
+                    || arabicMatches.includes(nameAr)
+                    || arabicMatches.some(function (name) { return nameAr.includes(name); });
+            }
+
+            window.syncOptionPaddingVisibility = function (context) {
+                const isTableau = isCurrentPageTableauForPadding();
+                const $scope = context ? $(context) : $(document);
+
+                let $wrappers = $();
+
+                if ($scope.is('.option-frame-model-padding-wrapper')) {
+                    $wrappers = $wrappers.add($scope);
+                }
+
+                $wrappers = $wrappers.add($scope.find('.option-frame-model-padding-wrapper'));
+
+                // If the passed context does not contain wrappers, refresh all wrappers.
+                if (!$wrappers.length) {
+                    $wrappers = $('.option-frame-model-padding-wrapper');
+                }
+
+                $wrappers.each(function () {
+                    const $wrapper = $(this);
+                    const $input = $wrapper.find('.option-padding-value');
+                    const $specItem = getSpecItemFromPaddingWrapper(this);
+
+                    const shouldShow = isTableau && isFrameModelSpecItem($specItem);
+
+                    $wrapper.toggle(shouldShow);
+                    $input.prop('disabled', !shouldShow);
+                });
+            };
+
+            $(document).ready(function () {
+                window.syncOptionPaddingVisibility(document);
+            });
+
+            $(document).on('change', '#is_tableau, .category-select', function () {
+                window.syncOptionPaddingVisibility(document);
+            });
+
+            $(document).on('keyup change', '.spec-name-en, .spec-name-ar, .spec-fixed-key', function () {
+                window.syncOptionPaddingVisibility(document);
+            });
+
+            $(document).on('click', '[data-repeater-create], [data-repeater-delete]', function () {
+                const button = this;
+
+                setTimeout(function () {
+                    const $scope = $(button).closest('.inner-repeater, .outer-repeater, #step3');
+                    window.syncOptionPaddingVisibility($scope.length ? $scope : document);
+                }, 450);
             });
         })();
     </script>
