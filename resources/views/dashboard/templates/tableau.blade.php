@@ -2123,6 +2123,7 @@
                 data?.name_en ||
                 data?.title ||
                 data?.label ||
+                data?.name ||
                 ('Scene #' + (data?.id || ''));
         }
 
