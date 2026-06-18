@@ -2809,10 +2809,13 @@
                 ($select.val() || []).forEach(id => {
                     const $option = $select.find(`option[value="${id}"]`);
 
+                    // Use attr() not data() — Select2 clones options and loses .data() cache
+                    const imageUrl = $option.attr('data-image-url') || $option.data('image-url') || '';
+                    console.log("imageUrl",imageUrl)
                     scenes.push({
                         id,
                         label: $option.text().trim() || `Scene #${id}`,
-                        imageUrl: $option.data('image-url') || ''
+                        imageUrl: imageUrl
                     });
                 });
 
