@@ -439,7 +439,13 @@ class ProductService extends BaseService
                                 'collection_name' => 'productSpecificationOptions',
                             ]);
                         }
-
+                        if (isset($option['option_frame_image'])) {
+                            Media::where('id', $option['option_frame_image'])->update([
+                                'model_type' => get_class($productOption),
+                                'model_id' => $productOption->id,
+                                'collection_name' => 'option_frame_image',
+                            ]);
+                        }
                         return $productOption->id;
                     })->toArray();
 
