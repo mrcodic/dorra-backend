@@ -355,7 +355,7 @@
                                                     multiple>
                                                 @foreach(\App\Models\TableauScene::where('is_active', true)->latest()->get() as $scene)
                                                     <option value="{{ $scene->id }}"
-                                                            data-image-url="{{ $scene->getFirstMediaUrl() }}">
+                                                            data-image-url="{{ $scene->getFirstMediaUrl('tableau_scene_image') }}">
                                                         {{ $scene->getTranslation('name', app()->getLocale(), false) ?: 'Scene #' . $scene->id }}
                                                     </option>
                                                 @endforeach
