@@ -2353,7 +2353,7 @@
                     });
 
                     if (missingFrame) {
-                        showTableauToastError("Please upload frame image for every option.");
+                        showTableauToastError("Please upload frame image for every Frame Color option.");
                         return;
                     }
                 }
@@ -2688,8 +2688,8 @@
         function resetClonedOptionFrameUploader(context) {
             const $context = $(context);
 
-            $context.find(".option-frame-wrapper").show();
-            $context.find(".option-frame-image-hidden").val("");
+            $context.find(".option-frame-wrapper").hide();
+            $context.find(".option-frame-image-hidden").prop("disabled", true).val("");
 
             $context.find(".option-frame-dropzone").each(function () {
                 if (this.dropzone) {
@@ -2697,9 +2697,13 @@
                 }
 
                 this.dataset.existingFrameMedia = 'null';
-                this.classList.remove('dz-started', 'dz-max-files-reached');
+                this.classList.remove('dz-started', 'dz-max-files-reached', 'dz-clickable');
                 this.innerHTML = '<div class="dz-message" data-dz-message><span>Drop frame image here or click to upload</span></div>';
             });
+
+            if (typeof window.refreshTableauFrameUploaders === 'function') {
+                window.refreshTableauFrameUploaders(context || document);
+            }
         }
 
         function clearOptionFrameImages() {
@@ -2722,14 +2726,12 @@
                 showVariants();
             }
 
-            $(".option-frame-wrapper").toggle(isTableau);
-
-            // In edit mode, do not delete existing media just because the product was switched.
-            // Disable hidden inputs instead so non-tableau products do not submit these values.
-            $(".option-frame-image-hidden").prop("disabled", !isTableau);
-
-            if (isTableau) {
-                initOptionFrameDropzones();
+            // Show frame uploaders only for the Frame Color spec, never for all specs.
+            if (typeof window.refreshTableauFrameUploaders === 'function') {
+                window.refreshTableauFrameUploaders(document);
+            } else {
+                $(".option-frame-wrapper").hide();
+                $(".option-frame-image-hidden").prop("disabled", true);
             }
 
             setTimeout(function () {
@@ -2767,10 +2769,8 @@
                         }
                     });
 
-                    $(".option-frame-wrapper").toggle(window.selectedProductIsTableau);
-
-                    if (window.selectedProductIsTableau) {
-                        initOptionFrameDropzones();
+                    if (typeof window.refreshTableauFrameUploaders === 'function') {
+                        window.refreshTableauFrameUploaders(document);
                     }
                 }, 300);
             });
@@ -2778,7 +2778,7 @@
     </script>
 
 
-    {{-- Tableau frame dropzone repeater fix --}}
+    {{-- Tableau frame dropzone repeater fix: only show frame upload under Frame Color spec --}}
     <script>
         (function () {
             function frameUploaderHtml() {
@@ -2795,9 +2795,63 @@
                         <span class="image-hint small text-end">
                             Max size: 1MB | Dimensions: 200x200 px
                         </span>
-                        <input type="hidden" name="option_frame_image" class="option-frame-image-hidden">
+                        <input type="hidden" name="option_frame_image" class="option-frame-image-hidden" disabled>
                     </div>
                 `;
+            }
+
+            function normalizeFrameSpecName(value) {
+                return String(value || '')
+                    .toLowerCase()
+                    .replace(/[\u064B-\u065F\u0670]/g, '') // Arabic diacritics
+                    .replace(/[أإآ]/g, 'ا')
+                    .replace(/ة/g, 'ه')
+                    .replace(/ـ/g, '')
+                    .replace(/[_-]+/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            }
+
+            function isFrameColorSpecItem($specItem) {
+                if (!$specItem || !$specItem.length) return false;
+
+                const nameEn = normalizeFrameSpecName($specItem.find('.spec-name-en').first().val());
+                const nameAr = normalizeFrameSpecName($specItem.find('.spec-name-ar').first().val());
+
+                const englishMatches = [
+                    'frame color',
+                    'frame colour',
+                    'framecolor',
+                    'framecolour'
+                ];
+
+                const arabicMatches = [
+                    'لون الاطار',
+                    'لون البرواز',
+                    'لون الفريم'
+                ];
+
+                return englishMatches.includes(nameEn)
+                    || englishMatches.some(function (name) { return nameEn.includes(name); })
+                    || arabicMatches.includes(nameAr)
+                    || arabicMatches.some(function (name) { return nameAr.includes(name); });
+            }
+
+            function getSpecItemFromFrameWrapper(wrapper) {
+                const $innerRepeater = $(wrapper).closest('.inner-repeater');
+
+                if (!$innerRepeater.length) return $();
+
+                // The .inner-repeater lives directly inside the outer specification item.
+                return $innerRepeater.closest('[data-repeater-item]');
+            }
+
+            function shouldShowFrameUploader(wrapper) {
+                if (!window.selectedProductIsTableau) return false;
+
+                const $specItem = getSpecItemFromFrameWrapper(wrapper);
+
+                return isFrameColorSpecItem($specItem);
             }
 
             function optionItemsInside(context) {
@@ -2811,6 +2865,17 @@
                 return $items.add(
                     $context.find('[data-repeater-list="specification_options"] > [data-repeater-item]')
                 );
+            }
+
+            function wrappersInside(context) {
+                const $context = $(context || document);
+                let $wrappers = $();
+
+                if ($context.is('.option-frame-wrapper')) {
+                    $wrappers = $wrappers.add($context);
+                }
+
+                return $wrappers.add($context.find('.option-frame-wrapper'));
             }
 
             window.ensureOptionFrameWrappers = function (context) {
@@ -2832,10 +2897,7 @@
 
                 const $context = $(context || document);
 
-                $context.find('.option-frame-wrapper').toggle(!!window.selectedProductIsTableau);
-                $context.find('.option-frame-image-hidden')
-                    .prop('disabled', !window.selectedProductIsTableau)
-                    .val('');
+                $context.find('.option-frame-image-hidden').val('');
 
                 $context.find('.option-frame-dropzone').each(function () {
                     if (this.dropzone) {
@@ -2843,23 +2905,30 @@
                     }
 
                     this.dataset.existingFrameMedia = 'null';
-                    this.classList.remove('dz-started', 'dz-max-files-reached');
+                    this.classList.remove('dz-started', 'dz-max-files-reached', 'dz-clickable');
                     this.innerHTML = '<div class="dz-message" data-dz-message><span>Drop frame image here or click to upload</span></div>';
                 });
+
+                window.refreshTableauFrameUploaders(context || document);
             };
 
             window.initOptionFrameDropzones = function (context) {
                 window.ensureOptionFrameWrappers(context || document);
 
-                $(context || document).find('.option-frame-dropzone').each(function () {
-                    const wrapper = this.closest('.option-frame-wrapper');
-                    const hiddenInput = wrapper ? wrapper.querySelector('.option-frame-image-hidden') : null;
-                    const existingMedia = (hiddenInput && hiddenInput.value && typeof parseTableauMediaDataset === 'function')
-                        ? parseTableauMediaDataset(this.dataset.existingFrameMedia)
+                wrappersInside(context || document).each(function () {
+                    if (!shouldShowFrameUploader(this)) return;
+
+                    const dropzoneElement = this.querySelector('.option-frame-dropzone');
+                    const hiddenInput = this.querySelector('.option-frame-image-hidden');
+
+                    if (!dropzoneElement || !hiddenInput || dropzoneElement.dropzone) return;
+
+                    const existingMedia = (hiddenInput.value && typeof parseTableauMediaDataset === 'function')
+                        ? parseTableauMediaDataset(dropzoneElement.dataset.existingFrameMedia)
                         : null;
 
                     if (typeof initOptionFrameDropzone === 'function') {
-                        initOptionFrameDropzone(this, existingMedia);
+                        initOptionFrameDropzone(dropzoneElement, existingMedia);
                     }
                 });
             };
@@ -2867,21 +2936,33 @@
             window.refreshTableauFrameUploaders = function (context) {
                 window.ensureOptionFrameWrappers(context || document);
 
-                $('.option-frame-wrapper').toggle(!!window.selectedProductIsTableau);
-                $('.option-frame-image-hidden').prop('disabled', !window.selectedProductIsTableau);
+                wrappersInside(context || document).each(function () {
+                    const shouldShow = shouldShowFrameUploader(this);
+                    const hiddenInput = this.querySelector('.option-frame-image-hidden');
+
+                    $(this).toggle(shouldShow);
+
+                    if (hiddenInput) {
+                        hiddenInput.disabled = !shouldShow;
+                    }
+                });
 
                 if (window.selectedProductIsTableau) {
                     window.initOptionFrameDropzones(context || document);
                 }
             };
 
-            $(document).on('click', '[data-repeater-create]', function () {
+            $(document).on('keyup change', '.spec-name-en, .spec-name-ar', function () {
+                window.refreshTableauFrameUploaders(document);
+            });
+
+            $(document).on('click', '[data-repeater-create], [data-repeater-delete]', function () {
                 const button = this;
 
                 setTimeout(function () {
                     const $scope = $(button).closest('.inner-repeater, .outer-repeater, #step3');
                     window.refreshTableauFrameUploaders($scope.length ? $scope : document);
-                }, 400);
+                }, 450);
             });
 
             $(document).ready(function () {
