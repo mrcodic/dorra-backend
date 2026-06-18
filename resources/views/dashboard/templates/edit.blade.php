@@ -2564,7 +2564,7 @@
                         if (response.success && response.data) {
                             file._hiddenInputId = response.data.id;
                             document.getElementById("uploadedTableauSceneImage").value = response.data.id;
-                            setTableauSceneImageUrl(file, response);
+                            // setTableauSceneImageUrl(file, response);
                         }
                     });
 
