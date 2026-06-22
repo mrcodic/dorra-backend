@@ -1621,6 +1621,245 @@
             // Let `handleAjaxFormSubmit()` take care of the actual submission
         });
 
+
+
+        /**
+         * Latest Scene -> Template Model Image
+         *
+         * Business rule:
+         * When the latest scene position is saved, the image generated/returned from
+         * that scene must become the template model image submitted as template_image_id.
+         *
+         * How to use from any Save Position AJAX success:
+         *     window.setLatestSceneForTemplateModel(response);
+         *
+         * This block also auto-detects common save-position AJAX responses and syncs
+         * the latest scene before the template form is submitted.
+         */
+        window.latestSceneForTemplateModel = window.latestSceneForTemplateModel || null;
+
+        function getTemplateModelCsrfToken() {
+            return document.querySelector('meta[name="csrf-token"]')?.content || "{{ csrf_token() }}";
+        }
+
+        function normalizeLatestScenePayload(payload) {
+            const data =
+                payload?.data?.scene ||
+                payload?.data?.tableau_scene ||
+                payload?.data?.latest_scene ||
+                payload?.data ||
+                payload?.scene ||
+                payload?.tableau_scene ||
+                payload?.latest_scene ||
+                payload ||
+                {};
+
+            const $selectedScene = $('#tableauSceneSelect option:selected');
+
+            const mediaId =
+                data.template_image_id ||
+                data.template_model_image_id ||
+                data.latest_scene_image_id ||
+                data.scene_image_id ||
+                data.image_id ||
+                data.media_id ||
+                data.media?.id ||
+                data.image?.id ||
+                data.scene_image?.id ||
+                $selectedScene.data('image-id') ||
+                $selectedScene.data('media-id') ||
+                '';
+
+            const imageUrl =
+                data.template_image_url ||
+                data.template_model_image_url ||
+                data.latest_scene_image_url ||
+                data.scene_image_url ||
+                data.image_url ||
+                data.base_url ||
+                data.url ||
+                data.media?.base_url ||
+                data.media?.url ||
+                data.image?.base_url ||
+                data.image?.url ||
+                data.scene_image?.base_url ||
+                data.scene_image?.url ||
+                $selectedScene.data('image-url') ||
+                $selectedScene.data('base-url') ||
+                '';
+
+            return {
+                mediaId: mediaId ? String(mediaId) : '',
+                imageUrl: imageUrl ? String(imageUrl) : ''
+            };
+        }
+
+        async function uploadLatestSceneUrlToMedia(imageUrl) {
+            const imageResponse = await fetch(imageUrl, {
+                credentials: 'same-origin'
+            });
+
+            if (!imageResponse.ok) {
+                throw new Error('Failed to download latest scene image.');
+            }
+
+            const blob = await imageResponse.blob();
+            const mimeType = blob.type || 'image/png';
+            const extension = (mimeType.split('/')[1] || 'png').replace('jpeg', 'jpg');
+
+            const formData = new FormData();
+            formData.append(
+                'file',
+                new File([blob], `latest-scene-${Date.now()}.${extension}`, {type: mimeType})
+            );
+
+            const uploadResponse = await fetch("{{ route('media.store') }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': getTemplateModelCsrfToken()
+                },
+                body: formData,
+                credentials: 'same-origin'
+            });
+
+            let json = {};
+
+            try {
+                json = await uploadResponse.json();
+            } catch (error) {
+                json = {};
+            }
+
+            const uploadedId = json?.data?.id || json?.id;
+
+            if (!uploadResponse.ok || !uploadedId) {
+                throw new Error(json?.message || 'Failed to upload latest scene image.');
+            }
+
+            return uploadedId;
+        }
+
+        window.setLatestSceneForTemplateModel = function (payload) {
+            const latest = normalizeLatestScenePayload(payload);
+
+            if (!latest.mediaId && !latest.imageUrl) {
+                return null;
+            }
+
+            window.latestSceneForTemplateModel = latest;
+
+            if (latest.mediaId) {
+                $('#uploadedTemplateImage').val(latest.mediaId).trigger('change');
+            }
+
+            return latest;
+        };
+
+        window.syncLatestSceneToTemplateModelImage = async function () {
+            const latest = window.latestSceneForTemplateModel || normalizeLatestScenePayload({});
+
+            if (!latest.mediaId && !latest.imageUrl) {
+                return false;
+            }
+
+            let mediaId = latest.mediaId;
+
+            if (!mediaId && latest.imageUrl) {
+                mediaId = await uploadLatestSceneUrlToMedia(latest.imageUrl);
+                window.latestSceneForTemplateModel = {
+                    mediaId: String(mediaId),
+                    imageUrl: latest.imageUrl
+                };
+            }
+
+            if (mediaId) {
+                $('#uploadedTemplateImage').val(mediaId).trigger('change');
+                return true;
+            }
+
+            return false;
+        };
+
+        /*
+         * Optional event hook for Save Position code:
+         * document.dispatchEvent(new CustomEvent('latest-scene-position-saved', {detail: response}));
+         */
+        document.addEventListener('latest-scene-position-saved', function (event) {
+            window.setLatestSceneForTemplateModel(event.detail || {});
+            window.syncLatestSceneToTemplateModelImage().catch(console.error);
+        });
+
+        /* Auto-detect common Save Position AJAX responses on the same page. */
+        $(document).ajaxSuccess(function (event, xhr, settings) {
+            const url = String(settings?.url || '');
+            const looksLikeSavePositionRequest = /(save[-_]?position|position|placement|scene)/i.test(url);
+
+            if (!looksLikeSavePositionRequest) {
+                return;
+            }
+
+            let response = xhr.responseJSON;
+
+            if (!response && xhr.responseText) {
+                try {
+                    response = JSON.parse(xhr.responseText);
+                } catch (error) {
+                    response = null;
+                }
+            }
+
+            const latest = normalizeLatestScenePayload(response || {});
+
+            if (latest.mediaId || latest.imageUrl) {
+                window.setLatestSceneForTemplateModel(response);
+                window.syncLatestSceneToTemplateModelImage().catch(console.error);
+            }
+        });
+
+        /* Before creating the template, make sure latest scene image is submitted. */
+        document.getElementById('addTemplateForm')?.addEventListener('submit', async function (event) {
+            const form = this;
+
+            if (form.dataset.latestSceneSynced === '1') {
+                return;
+            }
+
+            if (!window.latestSceneForTemplateModel) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            try {
+                await window.syncLatestSceneToTemplateModelImage();
+
+                form.dataset.latestSceneSynced = '1';
+                $(form).trigger('submit');
+
+                setTimeout(function () {
+                    delete form.dataset.latestSceneSynced;
+                }, 0);
+            } catch (error) {
+                console.error(error);
+
+                Toastify({
+                    text: error.message || 'Failed to upload latest scene image.',
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#EA5455",
+                    close: true,
+                }).showToast();
+
+                $('.saveChangesButton')
+                    .prop('disabled', false)
+                    .find('.saveLoader')
+                    .addClass('d-none');
+            }
+        }, true);
+
+
         handleAjaxFormSubmit("#addTemplateForm", {
             successMessage: "Template created successfully",
             onSuccess: function (response, $form) {
