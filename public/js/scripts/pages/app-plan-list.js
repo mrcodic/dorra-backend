@@ -307,7 +307,10 @@ $(document).ready(function () {
     }
     $(document).on('click', '.edit-details', function (e) {
         e.preventDefault();
-
+        
+        if (typeof window.setEditPlanIcon === 'function') {
+            window.setEditPlanIcon(icon);
+        }
         const modal = $('#editPlanModal');
 
         const id = $(this).data('id');

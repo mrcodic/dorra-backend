@@ -60,7 +60,7 @@ class PlanService extends BaseService
     {
         return $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
             $resource = parent::storeResource($validatedData, $relationsToStore, $relationsToLoad);
-            attachMediaToModel($validatedData['icon_id'],$resource,'icon');
+            attachMediaToModel($validatedData['icon_id'],$resource,'plan-icon');
             $resource->features()->createMany($validatedData['features']);
             return $resource;
         });
@@ -84,10 +84,8 @@ class PlanService extends BaseService
 
             $keptIds = $features->pluck('id')->filter()->values()->all();
             $resource->features()->whereNotIn('id', $keptIds)->delete();
-            if (!empty($validatedData['remove_icon'])) {
-                $resource->clearMediaCollection(getMediaCollectionName('icon'));
-            }
-            attachMediaToModel($validatedData['icon_id'],$resource, 'icon',clearExisting: true);
+
+            attachMediaToModel($validatedData['icon_id'],$resource, 'plan-icon',clearExisting: true);
             return $resource;
         });
         return $resource->load($relationsToLoad);
@@ -135,7 +133,7 @@ class PlanService extends BaseService
                 ];
             })
             ->addColumn('icon', function ($plan) {
-                $media = $plan->getFirstMedia('icon');
+                $media = $plan->getFirstMedia('plan-icon');
 
                 if (!$media) {
                     return null;

@@ -461,6 +461,8 @@ $(document).ready(function() {
 <script>
     Dropzone.autoDiscover = false;
 
+    window.__settingEditPlanIcon = false;
+
     function getCsrfToken() {
         return document.querySelector('meta[name="csrf-token"]')?.content || "{{ csrf_token() }}";
     }
@@ -494,6 +496,8 @@ $(document).ready(function() {
                         dropzone.removeFile(dropzone.files[0]);
                     }
 
+                    hiddenInput.value = "";
+
                     if (removeInput) {
                         removeInput.value = "0";
                     }
@@ -525,9 +529,9 @@ $(document).ready(function() {
                     }
 
                     /*
-                     * Existing icon from edit preview:
-                     * do not delete media immediately.
-                     * send remove_icon=1 with the edit form.
+                     * Previous icon preview on edit:
+                     * don't delete media by ajax.
+                     * just send remove_icon=1 on form submit.
                      */
                     if (removeInput && file._isMock) {
                         removeInput.value = "1";
@@ -536,8 +540,8 @@ $(document).ready(function() {
                     }
 
                     /*
-                     * New uploaded icon before submit:
-                     * delete it immediately because it is temporary.
+                     * New uploaded temp icon:
+                     * delete immediately if user removes before submit.
                      */
                     if (file._hiddenInputId && !file._isMock) {
                         fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
@@ -573,13 +577,15 @@ $(document).ready(function() {
         }
     }
 
-    function setEditPlanIcon(media) {
+    window.setEditPlanIcon = function (media) {
         $('#editPlanIconId').val(media?.id || '');
         $('#editRemoveIcon').val('0');
 
         if (!editPlanIconDropzone) return;
 
+        window.__settingEditPlanIcon = true;
         editPlanIconDropzone.removeAllFiles(true);
+        window.__settingEditPlanIcon = false;
 
         if (!media || !media.id || !media.url) return;
 
@@ -594,6 +600,6 @@ $(document).ready(function() {
         editPlanIconDropzone.emit("thumbnail", mockFile, media.url);
         editPlanIconDropzone.emit("complete", mockFile);
         editPlanIconDropzone.files.push(mockFile);
-    }
+    };
 </script>
 @endsection

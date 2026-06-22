@@ -22,7 +22,7 @@ class PlanResource extends JsonResource
             'price' => $this->price,
             'credits' => $this->credits,
             'is_popular' => $this->is_popular,
-            'icon_url' => $this->getFirstMediaUrl('icon'),
+            'icon_url' => $this->getFirstMediaUrl('plan-icon'),
             'features' => FeatureResource::collection($this->whenLoaded('features')),
         ];
     }
