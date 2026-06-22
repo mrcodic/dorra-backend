@@ -16,10 +16,6 @@ if (!function_exists('getMediaCollectionName')) {
     }
 }
 
-
-
-<?php
-
 if (!function_exists('handleMediaUploads')) {
     function handleMediaUploads(
         $files,
