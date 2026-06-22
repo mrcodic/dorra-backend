@@ -16,6 +16,8 @@ if (!function_exists('getMediaCollectionName')) {
     }
 }
 
+
+
 if (!function_exists('handleMediaUploads')) {
     function handleMediaUploads(
         $files,
@@ -23,7 +25,10 @@ if (!function_exists('handleMediaUploads')) {
         string $collectionName = null,
         array $customProperties = [],
         bool $clearExisting = false,
-        $columns = null
+        $columns = null,
+        bool $makeTransparent = false,
+        string $transparentColor = '#FFFFFF',
+        float $fuzzPercent = 10
     ) {
         if (empty($files)) {
             return null;
@@ -97,13 +102,66 @@ if (!function_exists('handleMediaUploads')) {
             }
         };
 
+        // makes the background of an image transparent and converts it to PNG.
+        // skips svg (vector) and non-image files. falls back to original file on any failure.
+        $applyTransparency = static function ($file) use ($makeTransparent, $transparentColor, $fuzzPercent) {
+            if (!$makeTransparent) {
+                return $file;
+            }
+
+            if (!($file instanceof \Illuminate\Http\UploadedFile) || !$file->isValid()) {
+                return $file;
+            }
+
+            $mimeType = $file->getClientMimeType();
+
+            if (!in_array($mimeType, ['image/jpeg', 'image/png'])) {
+                return $file;
+            }
+
+            if (!class_exists(\Imagick::class)) {
+                return $file;
+            }
+
+            try {
+                $imagick = new \Imagick($file->getPathname());
+                $imagick->setImageFormat('png');
+
+                $quantumRange = \Imagick::getQuantumRange()['quantumRangeLong'];
+                $fuzzAbs = ($fuzzPercent / 100) * $quantumRange;
+
+                // alpha = 0 -> fully transparent
+                $imagick->transparentPaintImage($transparentColor, 0, $fuzzAbs, false);
+
+                $originalBase = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $tempPath = tempnam(sys_get_temp_dir(), 'transparent_') . '.png';
+
+                $imagick->writeImage($tempPath);
+                $imagick->clear();
+                $imagick->destroy();
+
+                return new \Illuminate\Http\UploadedFile(
+                    $tempPath,
+                    $originalBase . '.png',
+                    'image/png',
+                    null,
+                    true // mark as test so it's not rejected for not being a real HTTP upload
+                );
+            } catch (\Throwable $e) {
+                return $file;
+            }
+        };
+
         $uploaded = collect($files)->map(function ($file) use (
             $modelData,
             $collectionName,
             $customProperties,
             $makeNames,
-            $getImageDimensions
+            $getImageDimensions,
+            $applyTransparency
         ) {
+            $file = $applyTransparency($file);
+
             [$humanName, $safeFileName, $ext] = $makeNames($file->getClientOriginalName());
 
             $imageDimensions = $getImageDimensions($file);
