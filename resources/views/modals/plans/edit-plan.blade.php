@@ -153,7 +153,7 @@
     $('#editIsPopularToggle').on('change', function () {
         const isActive = $(this).is(':checked');
         $('#edit-popular').val(isActive ? 1 : 0);
-        $(this).next('label').text(isActive ? 'Active' : 'Inactive');
+        $(this).next('label').text(isActive ? 'Popular' : 'UnPopular');
     });
 
 

@@ -21,6 +21,7 @@ class PlanResource extends JsonResource
             'recommended_for' => $this->recommended_for,
             'price' => $this->price,
             'credits' => $this->credits,
+            'is_popular' => $this->is_popular,
             'features' => FeatureResource::collection($this->whenLoaded('features')),
         ];
     }

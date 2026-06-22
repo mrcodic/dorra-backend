@@ -62,6 +62,7 @@ const dt_user_table = $(".plan-list-table").DataTable({
       data-price="${row.price || ""}"
       data-credits="${row.credits || ""}"
       data-status="${row.is_active}"
+      data-popular="${row.is_popular}"
       data-recommended_for="${recommendedFor}"
       data-features="${featuresEncoded}">
       <i data-feather="edit-3"></i>
@@ -259,6 +260,7 @@ $(document).ready(function () {
         const price = $(this).data('price');
         const credits = $(this).data('credits');
         const status = $(this).data('status');
+        const popular = $(this).data('popular');
         const recommendedFor = $(this).data('recommended_for');
 
         // ✅ decode features
@@ -286,11 +288,21 @@ $(document).ready(function () {
         const toggle = modal.find('#editStatusToggle');
         const hiddenStatus = modal.find('#status');
         const label = toggle.next('label');
-
         const active = String(status) === '1';
         toggle.prop('checked', active);
         hiddenStatus.val(active ? 1 : 0);
         label.text(active ? 'Active' : 'Inactive');
+
+        // status
+        const togglePopular = modal.find('#editIsPopularToggle');
+        const hiddenPopular = modal.find('#edit-popular');
+        const labelPopular = toggle.next('label');
+
+        const Popular   = String(popular) === '1';
+        togglePopular.prop('checked', Popular);
+        hiddenPopular.val(Popular ? 1 : 0);
+        labelPopular.text(Popular ? 'Popular' : 'UnPopular');
+
 
         // ✅ init repeater ONCE (important: this must not re-init multiple times)
         window.initEditRepeater();
