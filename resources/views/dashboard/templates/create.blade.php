@@ -28,6 +28,8 @@
                             <div class="flex-grow-1">
                                 <div class="">
                                     <input type="hidden" name="use_front_as_back" id="useFrontAsBack" value="0">
+                                    {{-- Always submit template model image, even when model dropzone is hidden for mockup categories --}}
+                                    <input type="hidden" name="template_image_id" id="uploadedTemplateImage" value="">
 
                                     {{-- @if(request()->query('q') == 'without')--}}
                                     {{--
@@ -229,8 +231,7 @@
                                                             <div class="dz-message" data-dz-message>
                                                                 <span>Drop image here or click to upload</span>
                                                             </div>
-                                                            <input type="hidden" name="template_image_id"
-                                                                   id="uploadedTemplateImage">
+                                                            {{-- template_image_id is kept as a global hidden input above so it exists even when this dropzone is hidden --}}
                                                         </div>
                                                         <small class="form-text text-muted">
                                                             Upload an image with an 8:9 aspect ratio (for example, 618 × 700 px).
@@ -975,6 +976,10 @@
                     }
                 });
             }
+
+            // Expose for other scripts. Without this, later code calling fetchMockups() can throw ReferenceError.
+            window.fetchMockups = fetchMockups;
+
             $('#categoriesSelect').on('change', function () {
                 loadCategoriesForSelectedProducts(function () {
                     fetchMockups();
@@ -1057,7 +1062,12 @@
                 visibleDZ.push(dzModel);
             }
             @if(request()->query('q') == 'with')
-            dzModel.classList.remove("d-none");
+            if (dzModel) {
+                dzModel.classList.remove("d-none");
+                if (!visibleDZ.includes(dzModel)) {
+                    visibleDZ.push(dzModel);
+                }
+            }
 
             @endif
 
@@ -1622,71 +1632,87 @@
         });
 
 
-
         /**
-         * Latest Scene -> Template Model Image
+         * Latest Scene -> Template Model Image bridge.
          *
-         * Business rule:
-         * When the latest scene position is saved, the image generated/returned from
-         * that scene must become the template model image submitted as template_image_id.
+         * IMPORTANT:
+         * The real Save Position AJAX may live in another Blade/JS file.
+         * In that success callback call:
+         *     window.useLatestSceneAsTemplateModelImage(response);
          *
-         * How to use from any Save Position AJAX success:
-         *     window.setLatestSceneForTemplateModel(response);
-         *
-         * This block also auto-detects common save-position AJAX responses and syncs
-         * the latest scene before the template form is submitted.
+         * This file also auto-detects common save-position AJAX responses.
          */
         window.latestSceneForTemplateModel = window.latestSceneForTemplateModel || null;
+        window.latestSceneUploadPromise = window.latestSceneUploadPromise || null;
 
-        function getTemplateModelCsrfToken() {
+        function templateModelToast(message, type = 'error') {
+            if (window.Toastify) {
+                Toastify({
+                    text: message,
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: type === 'success' ? "#24B094" : "#EA5455",
+                    close: true,
+                }).showToast();
+            } else {
+                console[type === 'success' ? 'log' : 'error'](message);
+            }
+        }
+
+        function templateModelCsrfToken() {
             return document.querySelector('meta[name="csrf-token"]')?.content || "{{ csrf_token() }}";
         }
 
-        function normalizeLatestScenePayload(payload) {
-            console.log("payload",payload)
-            const data =
-                payload?.data?.scene ||
-                payload?.data?.tableau_scene ||
-                payload?.data?.latest_scene ||
-                payload?.data ||
-                payload?.scene ||
-                payload?.tableau_scene ||
-                payload?.latest_scene ||
-                payload ||
-                {};
+        function findValueDeep(source, keys) {
+            if (!source || typeof source !== 'object') return '';
 
-            const $selectedScene = $('#tableauSceneSelect option:selected');
+            for (const key of keys) {
+                if (source[key]) return source[key];
+            }
+
+            for (const value of Object.values(source)) {
+                if (value && typeof value === 'object') {
+                    const found = findValueDeep(value, keys);
+                    if (found) return found;
+                }
+            }
+
+            return '';
+        }
+
+        function normalizeLatestScenePayload(payload = {}) {
+            const selectedScene = $('#tableauSceneSelect option:selected');
 
             const mediaId =
-                data.template_image_id ||
-                data.template_model_image_id ||
-                data.latest_scene_image_id ||
-                data.scene_image_id ||
-                data.image_id ||
-                data.media_id ||
-                data.media?.id ||
-                data.image?.id ||
-                data.scene_image?.id ||
-                $selectedScene.data('image-id') ||
-                $selectedScene.data('media-id') ||
+                findValueDeep(payload, [
+                    'template_image_id',
+                    'template_model_image_id',
+                    'latest_scene_image_id',
+                    'scene_image_id',
+                    'new_tableau_scene_image_id',
+                    'image_id',
+                    'media_id',
+                    'id'
+                ]) ||
+                selectedScene.data('image-id') ||
+                selectedScene.data('media-id') ||
                 '';
 
             const imageUrl =
-                data.template_image_url ||
-                data.template_model_image_url ||
-                data.latest_scene_image_url ||
-                data.scene_image_url ||
-                data.image_url ||
-                data.base_url ||
-                data.url ||
-                data.media?.base_url ||
-                data.media?.url ||
-                data.image?.base_url ||
-                data.image?.url ||
-                data.scene_image?.base_url ||
-                data.scene_image?.url ||
-                $selectedScene.data('image-url') ||
-                $selectedScene.data('base-url') ||
+                findValueDeep(payload, [
+                    'template_image_url',
+                    'template_model_image_url',
+                    'latest_scene_image_url',
+                    'scene_image_url',
+                    'new_tableau_scene_image_url',
+                    'image_url',
+                    'base_url',
+                    'full_url',
+                    'url'
+                ]) ||
+                selectedScene.data('image-url') ||
+                selectedScene.data('base-url') ||
                 '';
 
             return {
@@ -1695,55 +1721,50 @@
             };
         }
 
-        async function uploadLatestSceneUrlToMedia(imageUrl) {
-            const imageResponse = await fetch(imageUrl, {
-                credentials: 'same-origin'
-            });
+        async function uploadLatestSceneUrlToTemplateMedia(imageUrl) {
+            const response = await fetch(imageUrl, {credentials: 'same-origin'});
 
-            if (!imageResponse.ok) {
-                throw new Error('Failed to download latest scene image.');
+            if (!response.ok) {
+                throw new Error('Could not read latest scene image.');
             }
 
-            const blob = await imageResponse.blob();
+            const blob = await response.blob();
             const mimeType = blob.type || 'image/png';
             const extension = (mimeType.split('/')[1] || 'png').replace('jpeg', 'jpg');
 
             const formData = new FormData();
-            formData.append(
-                'file',
-                new File([blob], `latest-scene-${Date.now()}.${extension}`, {type: mimeType})
-            );
+            formData.append('file', new File([blob], `template-model-scene-${Date.now()}.${extension}`, {type: mimeType}));
 
-            const uploadResponse = await fetch("{{ route('media.store') }}", {
+            const upload = await fetch("{{ route('media.store') }}", {
                 method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': getTemplateModelCsrfToken()
+                    'X-CSRF-TOKEN': templateModelCsrfToken()
                 },
                 body: formData,
                 credentials: 'same-origin'
             });
 
             let json = {};
-
             try {
-                json = await uploadResponse.json();
+                json = await upload.json();
             } catch (error) {
                 json = {};
             }
 
             const uploadedId = json?.data?.id || json?.id;
 
-            if (!uploadResponse.ok || !uploadedId) {
-                throw new Error(json?.message || 'Failed to upload latest scene image.');
+            if (!upload.ok || !uploadedId) {
+                throw new Error(json?.message || 'Could not upload latest scene image.');
             }
 
-            return uploadedId;
+            return String(uploadedId);
         }
 
-        window.setLatestSceneForTemplateModel = function (payload) {
+        window.useLatestSceneAsTemplateModelImage = function (payload = {}) {
             const latest = normalizeLatestScenePayload(payload);
 
             if (!latest.mediaId && !latest.imageUrl) {
+                console.warn('Latest scene response has no image id/url to use as template model image.', payload);
                 return null;
             }
 
@@ -1751,51 +1772,37 @@
 
             if (latest.mediaId) {
                 $('#uploadedTemplateImage').val(latest.mediaId).trigger('change');
+                return Promise.resolve(latest.mediaId);
             }
 
-            return latest;
+            window.latestSceneUploadPromise = uploadLatestSceneUrlToTemplateMedia(latest.imageUrl)
+                .then(function (uploadedId) {
+                    $('#uploadedTemplateImage').val(uploadedId).trigger('change');
+                    window.latestSceneForTemplateModel = {
+                        mediaId: uploadedId,
+                        imageUrl: latest.imageUrl
+                    };
+                    return uploadedId;
+                })
+                .catch(function (error) {
+                    console.error(error);
+                    templateModelToast(error.message || 'Could not upload latest scene image.');
+                    throw error;
+                });
+
+            return window.latestSceneUploadPromise;
         };
 
-        window.syncLatestSceneToTemplateModelImage = async function () {
-            const latest = window.latestSceneForTemplateModel || normalizeLatestScenePayload({});
-
-            if (!latest.mediaId && !latest.imageUrl) {
-                return false;
-            }
-
-            let mediaId = latest.mediaId;
-
-            if (!mediaId && latest.imageUrl) {
-                mediaId = await uploadLatestSceneUrlToMedia(latest.imageUrl);
-                window.latestSceneForTemplateModel = {
-                    mediaId: String(mediaId),
-                    imageUrl: latest.imageUrl
-                };
-            }
-
-            if (mediaId) {
-                $('#uploadedTemplateImage').val(mediaId).trigger('change');
-                return true;
-            }
-
-            return false;
-        };
-
-        /*
-         * Optional event hook for Save Position code:
-         * document.dispatchEvent(new CustomEvent('latest-scene-position-saved', {detail: response}));
-         */
+        // Optional explicit hook from any Save Position file.
         document.addEventListener('latest-scene-position-saved', function (event) {
-            window.setLatestSceneForTemplateModel(event.detail || {});
-            window.syncLatestSceneToTemplateModelImage().catch(console.error);
+            window.useLatestSceneAsTemplateModelImage(event.detail || {});
         });
 
-        /* Auto-detect common Save Position AJAX responses on the same page. */
+        // Auto-detect common Save Position AJAX responses if they happen on this page.
         $(document).ajaxSuccess(function (event, xhr, settings) {
             const url = String(settings?.url || '');
-            const looksLikeSavePositionRequest = /(save[-_]?position|position|placement|scene)/i.test(url);
 
-            if (!looksLikeSavePositionRequest) {
+            if (!/(save[-_]?position|position|placement|tableau|scene)/i.test(url)) {
                 return;
             }
 
@@ -1809,23 +1816,23 @@
                 }
             }
 
-            const latest = normalizeLatestScenePayload(response || {});
-
-            if (latest.mediaId || latest.imageUrl) {
-                window.setLatestSceneForTemplateModel(response);
-                window.syncLatestSceneToTemplateModelImage().catch(console.error);
+            if (response) {
+                const latest = normalizeLatestScenePayload(response);
+                if (latest.mediaId || latest.imageUrl) {
+                    window.useLatestSceneAsTemplateModelImage(response);
+                }
             }
         });
 
-        /* Before creating the template, make sure latest scene image is submitted. */
+        // If latest scene is still uploading from URL, wait before Ajax form submit.
         document.getElementById('addTemplateForm')?.addEventListener('submit', async function (event) {
             const form = this;
 
-            if (form.dataset.latestSceneSynced === '1') {
+            if (form.dataset.waitedForLatestScene === '1') {
                 return;
             }
 
-            if (!window.latestSceneForTemplateModel) {
+            if (!window.latestSceneUploadPromise) {
                 return;
             }
 
@@ -1833,33 +1840,19 @@
             event.stopImmediatePropagation();
 
             try {
-                await window.syncLatestSceneToTemplateModelImage();
-
-                form.dataset.latestSceneSynced = '1';
+                await window.latestSceneUploadPromise;
+                form.dataset.waitedForLatestScene = '1';
                 $(form).trigger('submit');
-
                 setTimeout(function () {
-                    delete form.dataset.latestSceneSynced;
+                    delete form.dataset.waitedForLatestScene;
                 }, 0);
             } catch (error) {
-                console.error(error);
-
-                Toastify({
-                    text: error.message || 'Failed to upload latest scene image.',
-                    duration: 3000,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: "#EA5455",
-                    close: true,
-                }).showToast();
-
                 $('.saveChangesButton')
                     .prop('disabled', false)
                     .find('.saveLoader')
                     .addClass('d-none');
             }
         }, true);
-
 
         handleAjaxFormSubmit("#addTemplateForm", {
             successMessage: "Template created successfully",
@@ -1918,38 +1911,43 @@
     <script>
         Dropzone.autoDiscover = false;
 
-        const templateDropzone = new Dropzone("#template-dropzone", {
-            url: "{{ route('media.store') }}",
-            paramName: "file",
-            maxFiles: 1,
-            maxFilesize: 1, // MB
-            acceptedFiles: "image/*",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-            },
-            addRemoveLinks: true,
-            dictDefaultMessage: "Drop image here or click to upload",
-            init: function () {
-                this.on("success", function (file, response) {
-                    if (response.success && response.data) {
-                        file._hiddenInputId = response.data.id;
-                        document.getElementById("uploadedTemplateImage").value = response.data.id;
-                    }
-                });
+        const templateDropzoneElement = document.querySelector("#template-dropzone");
 
-                this.on("removedfile", function (file) {
-                    document.getElementById("uploadedTemplateImage").value = "";
-                    if (file._hiddenInputId) {
-                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
-                            method: "DELETE",
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            }
-                        });
-                    }
-                });
-            }
-        });
+        if (templateDropzoneElement) {
+            const templateDropzone = new Dropzone(templateDropzoneElement, {
+                url: "{{ route('media.store') }}",
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 1, // MB
+                acceptedFiles: "image/*",
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                addRemoveLinks: true,
+                dictDefaultMessage: "Drop image here or click to upload",
+                init: function () {
+                    this.on("success", function (file, response) {
+                        if (response.success && response.data) {
+                            file._hiddenInputId = response.data.id;
+                            document.getElementById("uploadedTemplateImage").value = response.data.id;
+                        }
+                    });
+
+                    this.on("removedfile", function (file) {
+                        document.getElementById("uploadedTemplateImage").value = "";
+                        if (file._hiddenInputId) {
+                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                method: "DELETE",
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
 
 
     </script>
@@ -2216,7 +2214,9 @@
 
                 // Re-sync dropzone visibility and re-fetch mockups after state change
                 updateTemplateTypeDropzones();
-                fetchMockups();
+                if (typeof window.fetchMockups === 'function') {
+                    window.fetchMockups();
+                }
             }
 
             checkboxes.forEach(checkbox => {
