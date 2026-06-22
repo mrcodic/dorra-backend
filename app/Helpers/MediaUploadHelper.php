@@ -18,6 +18,8 @@ if (!function_exists('getMediaCollectionName')) {
 
 
 
+<?php
+
 if (!function_exists('handleMediaUploads')) {
     function handleMediaUploads(
         $files,
@@ -27,7 +29,7 @@ if (!function_exists('handleMediaUploads')) {
         bool $clearExisting = false,
         $columns = null,
         bool $makeTransparent = false,
-        string $transparentColor = '#FFFFFF',
+        ?string $transparentColor = null,
         float $fuzzPercent = 10
     ) {
         if (empty($files)) {
@@ -102,9 +104,37 @@ if (!function_exists('handleMediaUploads')) {
             }
         };
 
+        // reads the 4 corner pixels of the image and returns the most common one as a hex color.
+        // corners are the most reliable signal for "background color" without knowing the image upfront.
+        $detectBackgroundColor = static function (\Imagick $imagick) {
+            $width = $imagick->getImageWidth();
+            $height = $imagick->getImageHeight();
+
+            $corners = [
+                [0, 0],
+                [$width - 1, 0],
+                [0, $height - 1],
+                [$width - 1, $height - 1],
+            ];
+
+            $hexes = [];
+
+            foreach ($corners as [$x, $y]) {
+                $pixel = $imagick->getImagePixelColor($x, $y);
+                $color = $pixel->getColor();
+                $hexes[] = sprintf('#%02X%02X%02X', $color['r'], $color['g'], $color['b']);
+            }
+
+            $counts = array_count_values($hexes);
+            arsort($counts);
+
+            return array_key_first($counts);
+        };
+
         // makes the background of an image transparent and converts it to PNG.
+        // if no color is given, it auto-detects it from the image corners.
         // skips svg (vector) and non-image files. falls back to original file on any failure.
-        $applyTransparency = static function ($file) use ($makeTransparent, $transparentColor, $fuzzPercent) {
+        $applyTransparency = static function ($file) use ($makeTransparent, $transparentColor, $fuzzPercent, $detectBackgroundColor) {
             if (!$makeTransparent) {
                 return $file;
             }
@@ -127,11 +157,13 @@ if (!function_exists('handleMediaUploads')) {
                 $imagick = new \Imagick($file->getPathname());
                 $imagick->setImageFormat('png');
 
+                $colorToRemove = $transparentColor ?: $detectBackgroundColor($imagick);
+
                 $quantumRange = \Imagick::getQuantumRange()['quantumRangeLong'];
                 $fuzzAbs = ($fuzzPercent / 100) * $quantumRange;
 
                 // alpha = 0 -> fully transparent
-                $imagick->transparentPaintImage($transparentColor, 0, $fuzzAbs, false);
+                $imagick->transparentPaintImage($colorToRemove, 0, $fuzzAbs, false);
 
                 $originalBase = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                 $tempPath = tempnam(sys_get_temp_dir(), 'transparent_') . '.png';
@@ -215,7 +247,6 @@ if (!function_exists('handleMediaUploads')) {
         return count($uploaded) === 1 ? $uploaded->first() : $uploaded;
     }
 }
-
 if (!function_exists('clearMediaCollections')) {
     function clearMediaCollections($modelData, ?array $collections = []): void
     {
