@@ -58,14 +58,18 @@ class PlanService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        $resource = parent::storeResource($validatedData, $relationsToStore, $relationsToLoad);
-        $resource->features()->createMany($validatedData['features']);
-        return $resource;
+        return $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad) {
+            $resource = parent::storeResource($validatedData, $relationsToStore, $relationsToLoad);
+            attachMediaToModel($validatedData['icon_id'],$resource,'icon');
+            $resource->features()->createMany($validatedData['features']);
+            return $resource;
+        });
     }
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
-        $resource = parent::updateResource($validatedData, $id, $relationsToLoad);
+        $resource = $this->handleTransaction(function () use ($validatedData, $id, $relationsToLoad) {
+            $resource = parent::updateResource($validatedData, $id, $relationsToLoad);
 
             $features = collect($validatedData['features']);
 
@@ -80,10 +84,8 @@ class PlanService extends BaseService
 
             $keptIds = $features->pluck('id')->filter()->values()->all();
             $resource->features()->whereNotIn('id', $keptIds)->delete();
-
-
-
-
+            attachMediaToModel($validatedData['icon_id'],$resource, 'icon',clearExisting: true);
+        });
         return $resource->load($relationsToLoad);
     }
 

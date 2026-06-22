@@ -31,7 +31,22 @@
                         <textarea class="form-control" name="recommended_for" id="edit_recommended_for" cols="10" rows="6"></textarea>
                     </div>
 
+                    <div class="mb-2">
+                        <label class="form-label">Plan Icon</label>
 
+                        <div id="edit-plan-icon-dropzone"
+                             class="dropzone border rounded p-2"
+                             style="cursor:pointer; min-height:120px;">
+                            <div class="dz-message" data-dz-message>
+                                <span>Drop icon here or click to upload</span>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="icon_id" id="editPlanIconId">
+                        <input type="hidden" name="remove_icon" id="editRemoveIcon" value="0">
+
+                        <small class="text-muted">Allowed: PNG, JPG, JPEG, SVG. Max 2MB.</small>
+                    </div>
                     <div class="row mb-2">
                         <div class="col-12 col-md-6">
                             <label for="credits" class="form-label">Credits</label>

@@ -458,4 +458,128 @@ $(document).ready(function() {
     });
 });
 </script>
+<script>
+    Dropzone.autoDiscover = false;
+
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.content || "{{ csrf_token() }}";
+    }
+
+    function initPlanIconDropzone(options) {
+        const element = document.querySelector(options.selector);
+        const hiddenInput = document.querySelector(options.hiddenInput);
+        const removeInput = options.removeInput ? document.querySelector(options.removeInput) : null;
+
+        if (!element || !hiddenInput) return null;
+        if (element.dropzone) return element.dropzone;
+
+        const dz = new Dropzone(element, {
+            url: "{{ route('media.store') }}",
+            paramName: "file",
+            maxFiles: 1,
+            maxFilesize: 2,
+            acceptedFiles: "image/png,image/jpeg,image/jpg,image/svg+xml",
+            addRemoveLinks: true,
+            headers: {
+                "X-CSRF-TOKEN": getCsrfToken()
+            },
+            dictDefaultMessage: "Drop icon here or click to upload",
+            init: function () {
+                const dropzone = this;
+
+                dropzone.on("addedfile", function (file) {
+                    if (file._isMock) return;
+
+                    if (dropzone.files.length > 1) {
+                        dropzone.removeFile(dropzone.files[0]);
+                    }
+
+                    if (removeInput) {
+                        removeInput.value = "0";
+                    }
+                });
+
+                dropzone.on("success", function (file, response) {
+                    const mediaId =
+                        response?.data?.id ||
+                        response?.id ||
+                        response?.data?.data?.id;
+
+                    if (mediaId) {
+                        file._hiddenInputId = mediaId;
+                        hiddenInput.value = mediaId;
+
+                        if (removeInput) {
+                            removeInput.value = "0";
+                        }
+                    }
+                });
+
+                dropzone.on("removedfile", function (file) {
+                    if (hiddenInput.value == file._hiddenInputId) {
+                        hiddenInput.value = "";
+                    }
+
+                    if (removeInput && file._isMock) {
+                        removeInput.value = "1";
+                        return;
+                    }
+
+                    if (file._hiddenInputId && !file._isMock) {
+                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                            method: "DELETE",
+                            headers: {
+                                "X-CSRF-TOKEN": getCsrfToken()
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        return dz;
+    }
+
+    const addPlanIconDropzone = initPlanIconDropzone({
+        selector: "#add-plan-icon-dropzone",
+        hiddenInput: "#addPlanIconId"
+    });
+
+    const editPlanIconDropzone = initPlanIconDropzone({
+        selector: "#edit-plan-icon-dropzone",
+        hiddenInput: "#editPlanIconId",
+        removeInput: "#editRemoveIcon"
+    });
+
+    function resetAddPlanIconDropzone() {
+        $('#addPlanIconId').val('');
+
+        if (addPlanIconDropzone) {
+            addPlanIconDropzone.removeAllFiles(true);
+        }
+    }
+
+    function setEditPlanIcon(media) {
+        $('#editPlanIconId').val(media?.id || '');
+        $('#editRemoveIcon').val('0');
+
+        if (!editPlanIconDropzone) return;
+
+        editPlanIconDropzone.removeAllFiles(true);
+
+        if (!media || !media.id || !media.url) return;
+
+        const mockFile = {
+            name: media.file_name || 'plan-icon',
+            size: media.size || 12345,
+            _hiddenInputId: media.id,
+            _isMock: true
+        };
+
+        editPlanIconDropzone.emit("addedfile", mockFile);
+        editPlanIconDropzone.emit("thumbnail", mockFile, media.url);
+        editPlanIconDropzone.emit("complete", mockFile);
+        editPlanIconDropzone.files.push(mockFile);
+    }
+</script>
 @endsection

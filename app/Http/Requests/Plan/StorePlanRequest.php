@@ -30,6 +30,7 @@ class StorePlanRequest extends BaseRequest
             'credits' => ['required', 'integer', 'min:1'],
             'is_active' => ['required', 'boolean'],
             'is_popular' => ['required', 'boolean'],
+            'icon_id' => ['required', 'integer', 'exists:media,id'],
             'features' => ['required', 'array'],
             'features.*.description' => ['required', 'string', 'max:4000'],
 

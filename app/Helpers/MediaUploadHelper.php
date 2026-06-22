@@ -364,8 +364,16 @@ if (!function_exists('addMediaToResource')) {
     }
 
     if (!function_exists('attachMediaToModel')) {
-        function attachMediaToModel(int $mediaId, $model, string $collectionName = null): ?Media
-        {
+        function attachMediaToModel(
+            ?int $mediaId,
+                 $model,
+            string $collectionName = null,
+            bool $clearExisting = false
+        ): ?Media {
+            if (!$mediaId) {
+                return null;
+            }
+
             $media = Media::find($mediaId);
 
             if (!$media) {
@@ -376,8 +384,19 @@ if (!function_exists('addMediaToResource')) {
                 ? getMediaCollectionName($collectionName)
                 : getMediaCollectionName($model);
 
-            $media->model_type      = get_class($model);
-            $media->model_id        = $model->getKey();
+
+            if ($clearExisting && method_exists($model, 'getFirstMedia')) {
+                $currentMedia = $model->getFirstMedia($collectionName);
+
+                if ($currentMedia && (int) $currentMedia->id !== (int) $mediaId) {
+                    $model->clearMediaCollection($collectionName);
+                }
+            } elseif ($clearExisting && method_exists($model, 'clearMediaCollection')) {
+                $model->clearMediaCollection($collectionName);
+            }
+
+            $media->model_type = get_class($model);
+            $media->model_id = $model->getKey();
             $media->collection_name = $collectionName;
             $media->save();
 
