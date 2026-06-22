@@ -84,6 +84,16 @@
                         <!-- hidden input sent to backend -->
                         <input type="hidden" name="is_active" id="edit-status" value="1">
                     </div>
+                    <div class="mb-2">
+                        <label class="form-label d-block">Popular</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="editIsPopularToggle" checked>
+                            <label class="form-check-label" for="editIsPopularToggle">Active</label>
+                        </div>
+
+                        <!-- hidden input sent to backend -->
+                        <input type="hidden" name="is_popular" id="edit-popular" value="1">
+                    </div>
 
                 </div>
 
@@ -138,6 +148,11 @@
     $('#editStatusToggle').on('change', function () {
         const isActive = $(this).is(':checked');
         $('#edit-status').val(isActive ? 1 : 0);
+        $(this).next('label').text(isActive ? 'Active' : 'Inactive');
+    });
+    $('#editIsPopularToggle').on('change', function () {
+        const isActive = $(this).is(':checked');
+        $('#edit-popular').val(isActive ? 1 : 0);
         $(this).next('label').text(isActive ? 'Active' : 'Inactive');
     });
 

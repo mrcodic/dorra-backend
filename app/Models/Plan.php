@@ -14,6 +14,7 @@ class Plan extends Model
         'description',
         'recommended_for',
         'is_active',
+        'is_popular',
     ];
     public function scopeActive($query)
     {

@@ -80,6 +80,16 @@
                         <!-- hidden input sent to backend -->
                         <input type="hidden" name="is_active" id="status" value="1">
                     </div>
+                    <div class="mb-2">
+                        <label class="form-label d-block">Popular</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="isPopularToggle" checked>
+                            <label class="form-check-label" for="isPopularToggle">Active</label>
+                        </div>
+
+                        <!-- hidden input sent to backend -->
+                        <input type="hidden" name="is_popular" id="is_popular" value="1">
+                    </div>
 
                 </div>
 
@@ -156,6 +166,11 @@
         const isActive = $(this).is(':checked');
         $('#status').val(isActive ? 1 : 0);
         $(this).next('label').text(isActive ? 'Active' : 'Inactive');
+    });
+    $('#isPopularToggle').on('change', function () {
+        const isActive = $(this).is(':checked');
+        $('#is_popular').val(isActive ? 1 : 0);
+        $(this).next('label').text(isActive ? 'Popular' : 'UnPopular');
     });
 
     $(document).ready(function () {
