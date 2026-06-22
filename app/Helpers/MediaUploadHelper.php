@@ -394,7 +394,7 @@ if (!function_exists('addMediaToResource')) {
             } elseif ($clearExisting && method_exists($model, 'clearMediaCollection')) {
                 $model->clearMediaCollection($collectionName);
             }
-
+dd($media);
             $media->model_type = get_class($model);
             $media->model_id = $model->getKey();
             $media->collection_name = $collectionName;
