@@ -40,6 +40,8 @@
                                 <div class="">
                                     <input type="hidden" name="use_front_as_back" id="useFrontAsBack"
                                            value="{{ $model->use_front_as_back }}">
+                                    <input type="hidden" name="template_image_id" id="uploadedTemplateImage"
+                                           value="{{ $model->getFirstMedia('template_model_image')?->id ?? '' }}">
 
                                     @php
                                         $colors = collect($model->colors) ?? collect();
@@ -272,24 +274,24 @@
                                                         </small>
                                                     </div>
                                                     <!-- NONE -->
-{{--                                                    <div class="form-group mb-2 col-md-6 d-none" id="dz-none">--}}
-{{--                                                        <label class="label-text mb-1">Upload Print File--}}
-{{--                                                            (General)</label>--}}
-{{--                                                        <div id="none-template-dropzone"--}}
-{{--                                                             class="dropzone border rounded p-3"--}}
-{{--                                                             style="cursor:pointer; min-height:150px;">--}}
-{{--                                                            <div class="dz-message">--}}
-{{--                                                                <span>Drop general image here or click</span>--}}
-{{--                                                            </div>--}}
-{{--                                                            <input type="hidden" name="template_image_none_id"--}}
-{{--                                                                   id="uploadedNoneTemplateImage">--}}
-{{--                                                        </div>--}}
-{{--                                                        <small class="form-text text-muted">--}}
-{{--                                                            Allowed formats: PNG, JPG, JPEG, WEBP.--}}
-{{--                                                            Maximum file size: 30 MB.--}}
-{{--                                                            Minimum dimensions: 1000 × 1000 px.--}}
-{{--                                                        </small>--}}
-{{--                                                    </div>--}}
+                                                    {{--                                                    <div class="form-group mb-2 col-md-6 d-none" id="dz-none">--}}
+                                                    {{--                                                        <label class="label-text mb-1">Upload Print File--}}
+                                                    {{--                                                            (General)</label>--}}
+                                                    {{--                                                        <div id="none-template-dropzone"--}}
+                                                    {{--                                                             class="dropzone border rounded p-3"--}}
+                                                    {{--                                                             style="cursor:pointer; min-height:150px;">--}}
+                                                    {{--                                                            <div class="dz-message">--}}
+                                                    {{--                                                                <span>Drop general image here or click</span>--}}
+                                                    {{--                                                            </div>--}}
+                                                    {{--                                                            <input type="hidden" name="template_image_none_id"--}}
+                                                    {{--                                                                   id="uploadedNoneTemplateImage">--}}
+                                                    {{--                                                        </div>--}}
+                                                    {{--                                                        <small class="form-text text-muted">--}}
+                                                    {{--                                                            Allowed formats: PNG, JPG, JPEG, WEBP.--}}
+                                                    {{--                                                            Maximum file size: 30 MB.--}}
+                                                    {{--                                                            Minimum dimensions: 1000 × 1000 px.--}}
+                                                    {{--                                                        </small>--}}
+                                                    {{--                                                    </div>--}}
                                                 @endif
 
                                                 @if(($category && !$category->has_mockup) || !$category )
@@ -301,8 +303,6 @@
                                                             <div class="dz-message" data-dz-message>
                                                                 <span>Drop image here or click to upload</span>
                                                             </div>
-                                                            <input type="hidden" name="template_image_id"
-                                                                   id="uploadedTemplateImage">
                                                         </div>
                                                         <small class="form-text text-muted">
                                                             Upload an image with an 8:9 aspect ratio (for example, 618 × 700 px).
@@ -445,6 +445,7 @@
                                                 multiple>
                                             @foreach(\App\Models\TableauScene::where('is_active', true)->latest()->get() as $scene)
                                                 <option value="{{ $scene->id }}"
+                                                        data-image-id="{{ $scene->getFirstMedia('tableau_scene_image')?->id }}"
                                                         data-image-url="{{ $scene->getFirstMediaUrl('tableau_scene_image') }}"
                                                     @selected(in_array((string) $scene->id, $selectedTableauSceneIds, true))>
                                                     {{ $scene->getTranslation('name', app()->getLocale(), false) ?: 'Scene #' . $scene->id }}
@@ -2206,60 +2207,64 @@
     </script>
 
     <script>
-        const modelDropzone = new Dropzone("#template-dropzone", {
-            url: "{{ route('media.store') }}",
-            paramName: "file",
-            maxFiles: 1,
-            maxFilesize: 1, // MB
-            acceptedFiles: "image/*",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-            },
-            addRemoveLinks: true,
-            dictDefaultMessage: "Drop image here or click to upload",
-            init: function () {
-                let dz = this;
+        let modelDropzone = null;
 
-                // ✅ Show existing image if editing
-                @if(!empty($media = $model->getFirstMedia('template_model_image')))
-                let modelMockFile = {
-                    name: "{{ $media->file_name }}",
-                    size: {{ $media->size ?? 12345 }},
-                    _hiddenInputId: "{{ $media->id }}"
-                };
-                document.getElementById("uploadedTemplateImage").value = "{{ $media->id }}";
+        if (document.getElementById("template-dropzone")) {
+            modelDropzone = new Dropzone("#template-dropzone", {
+                url: "{{ route('media.store') }}",
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 1, // MB
+                acceptedFiles: "image/*",
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                addRemoveLinks: true,
+                dictDefaultMessage: "Drop image here or click to upload",
+                init: function () {
+                    let dz = this;
+
+                    // ✅ Show existing image if editing
+                    @if(!empty($media = $model->getFirstMedia('template_model_image')))
+                    let modelMockFile = {
+                        name: "{{ $media->file_name }}",
+                        size: {{ $media->size ?? 12345 }},
+                        _hiddenInputId: "{{ $media->id }}"
+                    };
+                    document.getElementById("uploadedTemplateImage").value = "{{ $media->id }}";
 
 
-                dz.emit("addedfile", modelMockFile);
-                dz.emit("thumbnail", modelMockFile, "{{ $media->getUrl() }}");
-                dz.emit("complete", modelMockFile);
-                dz.files.push(modelMockFile);
-                @endif
+                    dz.emit("addedfile", modelMockFile);
+                    dz.emit("thumbnail", modelMockFile, "{{ $media->getUrl() }}");
+                    dz.emit("complete", modelMockFile);
+                    dz.files.push(modelMockFile);
+                    @endif
 
-                dz.on("success", function (file, response) {
-                    if (response?.data?.id) {
-                        file._hiddenInputId = response.data.id;
-                        document.getElementById("uploadedTemplateImage").value = response.data.id;
-                    }
-                });
-
-                dz.on("removedfile", function (file) {
-                    if (file._hiddenInputId) {
-                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
-                            method: "DELETE",
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            }
-                        });
-                        let hiddenInput = document.getElementById("uploadedTemplateImage");
-                        if (hiddenInput.value == file._hiddenInputId) {
-                            hiddenInput.value = "";
+                    dz.on("success", function (file, response) {
+                        if (response?.data?.id) {
+                            file._hiddenInputId = response.data.id;
+                            document.getElementById("uploadedTemplateImage").value = response.data.id;
                         }
-                    }
-                });
-            }
-        });
+                    });
 
+                    dz.on("removedfile", function (file) {
+                        if (file._hiddenInputId) {
+                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                method: "DELETE",
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+                            let hiddenInput = document.getElementById("uploadedTemplateImage");
+                            if (hiddenInput.value == file._hiddenInputId) {
+                                hiddenInput.value = "";
+                            }
+                        }
+                    });
+                }
+            });
+
+        }
 
         // store initial values when page loads
         const originalProducts = $('#productsSelect').val();
@@ -2367,6 +2372,16 @@
 
 
     <script !src="">
+        $('#editTemplateForm').on('submit', function () {
+            if (typeof window.syncTableauScenePositions === 'function') {
+                window.syncTableauScenePositions();
+            }
+
+            if (typeof window.syncLatestSceneAsTemplateModelImage === 'function') {
+                window.syncLatestSceneAsTemplateModelImage();
+            }
+        });
+
         handleAjaxFormSubmit("#editTemplateForm", {
             successMessage: "Template updated successfully",
             onSuccess: function (response, $form) {
@@ -2563,6 +2578,7 @@
                     this.on("success", function (file, response) {
                         if (response.success && response.data) {
                             file._hiddenInputId = response.data.id;
+                            window.lastTableauSceneImageId = response.data.id;
                             document.getElementById("uploadedTableauSceneImage").value = response.data.id;
                             // setTableauSceneImageUrl(file, response);
                         }
@@ -2571,6 +2587,7 @@
                     this.on("removedfile", function (file) {
                         document.getElementById("uploadedTableauSceneImage").value = "";
                         window.newTableauSceneImageUrl = null;
+                        window.lastTableauSceneImageId = null;
 
                         if (file._hiddenInputId) {
                             fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
@@ -2654,7 +2671,20 @@
                 '';
         }
 
-        function addAndSelectTableauScene(sceneId, sceneText, imageUrl) {
+        function getSceneImageIdFromResponse(response, fallbackImageId = '') {
+            const data = response?.data || response?.scene || response || {};
+
+            return data?.image_id ||
+                data?.media_id ||
+                data?.new_tableau_scene_image_id ||
+                data?.media?.id ||
+                data?.image?.id ||
+                fallbackImageId ||
+                window.lastTableauSceneImageId ||
+                '';
+        }
+
+        function addAndSelectTableauScene(sceneId, sceneText, imageUrl, imageId = '') {
             const $select = $('#tableauSceneSelect');
 
             if (!$select.length || !sceneId) return;
@@ -2668,6 +2698,7 @@
 
             $(option)
                 .attr('data-image-url', imageUrl || '')
+                .attr('data-image-id', imageId || '')
                 .prop('selected', true);
 
             $select.trigger('change');
@@ -2730,7 +2761,8 @@
                     addAndSelectTableauScene(
                         sceneId,
                         getSceneTextFromResponse(response),
-                        getSceneImageUrlFromResponse(response)
+                        getSceneImageUrlFromResponse(response),
+                        getSceneImageIdFromResponse(response, imageId)
                     );
 
                     $('#newTableauSceneNameEn').val('');
@@ -3370,6 +3402,11 @@
                         $option.data('image-url') ||
                         '';
 
+                    const imageId =
+                        $option.attr('data-image-id') ||
+                        $option.data('image-id') ||
+                        '';
+
                     const label =
                         $option.attr('data-label') ||
                         $option.attr('data-name') ||
@@ -3379,7 +3416,8 @@
                     scenes.push({
                         id,
                         label,
-                        imageUrl
+                        imageUrl,
+                        imageId
                     });
                 });
 
@@ -3410,6 +3448,78 @@
 
             window.syncTableauScenePositions = syncAllScenePositionInputs;
 
+            function ensureTemplateModelInput() {
+                let input = document.getElementById('uploadedTemplateImage');
+
+                if (input) {
+                    input.name = 'template_image_id';
+                    return input;
+                }
+
+                const form = document.getElementById('editTemplateForm');
+
+                if (!form) {
+                    return null;
+                }
+
+                input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'template_image_id';
+                input.id = 'uploadedTemplateImage';
+                form.appendChild(input);
+
+                return input;
+            }
+
+            function getActiveOrLatestSceneId() {
+                const activeTab = document.querySelector('.spe-tab.active');
+
+                if (activeTab?.dataset?.sceneId) {
+                    return String(activeTab.dataset.sceneId);
+                }
+
+                const canvases = Array.from(document.querySelectorAll('.spe-canvas[data-scene-id]'));
+                const latestCanvas = canvases.length ? canvases[canvases.length - 1] : null;
+
+                return latestCanvas?.dataset?.sceneId ? String(latestCanvas.dataset.sceneId) : '';
+            }
+
+            function getSceneMediaId(sceneId) {
+                if (!sceneId) {
+                    return '';
+                }
+
+                const $option = $('#tableauSceneSelect').find(`option[value="${sceneId}"]`);
+
+                return String(
+                    $option.attr('data-image-id') ||
+                    $option.data('image-id') ||
+                    ''
+                );
+            }
+
+            function syncLatestSceneAsTemplateModelImage() {
+                const sceneId = getActiveOrLatestSceneId();
+                const mediaId = getSceneMediaId(sceneId);
+
+                if (!sceneId || !mediaId) {
+                    return '';
+                }
+
+                const input = ensureTemplateModelInput();
+
+                if (!input) {
+                    return '';
+                }
+
+                input.value = mediaId;
+                window.latestTableauTemplateModelMediaId = mediaId;
+
+                return mediaId;
+            }
+
+            window.syncLatestSceneAsTemplateModelImage = syncLatestSceneAsTemplateModelImage;
+
             $(document).on('click', '#saveScenePositionsBtn', function () {
                 const count = syncAllScenePositionInputs();
 
@@ -3418,7 +3528,14 @@
                     return;
                 }
 
-                notifyTableau('Scene positions saved.');
+                const mediaId = syncLatestSceneAsTemplateModelImage();
+
+                if (!mediaId) {
+                    notifyTableau('Scene positions saved, but scene image id was not found. Please recreate/select the scene and try again.', 'error');
+                    return;
+                }
+
+                notifyTableau('Scene positions saved and latest scene set as Template Model Image.');
             });
 
             function triggerRebuild() {
@@ -3470,7 +3587,7 @@
             });
         })();
     </script>
-        })();
+    })();
     </script>
 
 
