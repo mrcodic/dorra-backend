@@ -1643,6 +1643,7 @@
         }
 
         function normalizeLatestScenePayload(payload) {
+            console.log("payload",payload)
             const data =
                 payload?.data?.scene ||
                 payload?.data?.tableau_scene ||
