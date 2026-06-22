@@ -28,8 +28,6 @@
                             <div class="flex-grow-1">
                                 <div class="">
                                     <input type="hidden" name="use_front_as_back" id="useFrontAsBack" value="0">
-                                    {{-- Always submit template model image, even when model dropzone is hidden for mockup categories --}}
-                                    <input type="hidden" name="template_image_id" id="uploadedTemplateImage" value="">
 
                                     {{-- @if(request()->query('q') == 'without')--}}
                                     {{--
@@ -231,7 +229,8 @@
                                                             <div class="dz-message" data-dz-message>
                                                                 <span>Drop image here or click to upload</span>
                                                             </div>
-                                                            {{-- template_image_id is kept as a global hidden input above so it exists even when this dropzone is hidden --}}
+                                                            <input type="hidden" name="template_image_id"
+                                                                   id="uploadedTemplateImage">
                                                         </div>
                                                         <small class="form-text text-muted">
                                                             Upload an image with an 8:9 aspect ratio (for example, 618 × 700 px).
@@ -976,10 +975,6 @@
                     }
                 });
             }
-
-            // Expose for other scripts. Without this, later code calling fetchMockups() can throw ReferenceError.
-            window.fetchMockups = fetchMockups;
-
             $('#categoriesSelect').on('change', function () {
                 loadCategoriesForSelectedProducts(function () {
                     fetchMockups();
@@ -1062,12 +1057,7 @@
                 visibleDZ.push(dzModel);
             }
             @if(request()->query('q') == 'with')
-            if (dzModel) {
-                dzModel.classList.remove("d-none");
-                if (!visibleDZ.includes(dzModel)) {
-                    visibleDZ.push(dzModel);
-                }
-            }
+            dzModel.classList.remove("d-none");
 
             @endif
 
@@ -1631,229 +1621,6 @@
             // Let `handleAjaxFormSubmit()` take care of the actual submission
         });
 
-
-        /**
-         * Latest Scene -> Template Model Image bridge.
-         *
-         * IMPORTANT:
-         * The real Save Position AJAX may live in another Blade/JS file.
-         * In that success callback call:
-         *     window.useLatestSceneAsTemplateModelImage(response);
-         *
-         * This file also auto-detects common save-position AJAX responses.
-         */
-        window.latestSceneForTemplateModel = window.latestSceneForTemplateModel || null;
-        window.latestSceneUploadPromise = window.latestSceneUploadPromise || null;
-
-        function templateModelToast(message, type = 'error') {
-            if (window.Toastify) {
-                Toastify({
-                    text: message,
-                    duration: 3000,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: type === 'success' ? "#24B094" : "#EA5455",
-                    close: true,
-                }).showToast();
-            } else {
-                console[type === 'success' ? 'log' : 'error'](message);
-            }
-        }
-
-        function templateModelCsrfToken() {
-            return document.querySelector('meta[name="csrf-token"]')?.content || "{{ csrf_token() }}";
-        }
-
-        function findValueDeep(source, keys) {
-            if (!source || typeof source !== 'object') return '';
-
-            for (const key of keys) {
-                if (source[key]) return source[key];
-            }
-
-            for (const value of Object.values(source)) {
-                if (value && typeof value === 'object') {
-                    const found = findValueDeep(value, keys);
-                    if (found) return found;
-                }
-            }
-
-            return '';
-        }
-
-        function normalizeLatestScenePayload(payload = {}) {
-            const selectedScene = $('#tableauSceneSelect option:selected');
-
-            const mediaId =
-                findValueDeep(payload, [
-                    'template_image_id',
-                    'template_model_image_id',
-                    'latest_scene_image_id',
-                    'scene_image_id',
-                    'new_tableau_scene_image_id',
-                    'image_id',
-                    'media_id',
-                    'id'
-                ]) ||
-                selectedScene.data('image-id') ||
-                selectedScene.data('media-id') ||
-                '';
-
-            const imageUrl =
-                findValueDeep(payload, [
-                    'template_image_url',
-                    'template_model_image_url',
-                    'latest_scene_image_url',
-                    'scene_image_url',
-                    'new_tableau_scene_image_url',
-                    'image_url',
-                    'base_url',
-                    'full_url',
-                    'url'
-                ]) ||
-                selectedScene.data('image-url') ||
-                selectedScene.data('base-url') ||
-                '';
-
-            return {
-                mediaId: mediaId ? String(mediaId) : '',
-                imageUrl: imageUrl ? String(imageUrl) : ''
-            };
-        }
-
-        async function uploadLatestSceneUrlToTemplateMedia(imageUrl) {
-            const response = await fetch(imageUrl, {credentials: 'same-origin'});
-
-            if (!response.ok) {
-                throw new Error('Could not read latest scene image.');
-            }
-
-            const blob = await response.blob();
-            const mimeType = blob.type || 'image/png';
-            const extension = (mimeType.split('/')[1] || 'png').replace('jpeg', 'jpg');
-
-            const formData = new FormData();
-            formData.append('file', new File([blob], `template-model-scene-${Date.now()}.${extension}`, {type: mimeType}));
-
-            const upload = await fetch("{{ route('media.store') }}", {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': templateModelCsrfToken()
-                },
-                body: formData,
-                credentials: 'same-origin'
-            });
-
-            let json = {};
-            try {
-                json = await upload.json();
-            } catch (error) {
-                json = {};
-            }
-
-            const uploadedId = json?.data?.id || json?.id;
-
-            if (!upload.ok || !uploadedId) {
-                throw new Error(json?.message || 'Could not upload latest scene image.');
-            }
-
-            return String(uploadedId);
-        }
-
-        window.useLatestSceneAsTemplateModelImage = function (payload = {}) {
-            const latest = normalizeLatestScenePayload(payload);
-
-            if (!latest.mediaId && !latest.imageUrl) {
-                console.warn('Latest scene response has no image id/url to use as template model image.', payload);
-                return null;
-            }
-
-            window.latestSceneForTemplateModel = latest;
-
-            if (latest.mediaId) {
-                $('#uploadedTemplateImage').val(latest.mediaId).trigger('change');
-                return Promise.resolve(latest.mediaId);
-            }
-
-            window.latestSceneUploadPromise = uploadLatestSceneUrlToTemplateMedia(latest.imageUrl)
-                .then(function (uploadedId) {
-                    $('#uploadedTemplateImage').val(uploadedId).trigger('change');
-                    window.latestSceneForTemplateModel = {
-                        mediaId: uploadedId,
-                        imageUrl: latest.imageUrl
-                    };
-                    return uploadedId;
-                })
-                .catch(function (error) {
-                    console.error(error);
-                    templateModelToast(error.message || 'Could not upload latest scene image.');
-                    throw error;
-                });
-
-            return window.latestSceneUploadPromise;
-        };
-
-        // Optional explicit hook from any Save Position file.
-        document.addEventListener('latest-scene-position-saved', function (event) {
-            window.useLatestSceneAsTemplateModelImage(event.detail || {});
-        });
-
-        // Auto-detect common Save Position AJAX responses if they happen on this page.
-        $(document).ajaxSuccess(function (event, xhr, settings) {
-            const url = String(settings?.url || '');
-
-            if (!/(save[-_]?position|position|placement|tableau|scene)/i.test(url)) {
-                return;
-            }
-
-            let response = xhr.responseJSON;
-
-            if (!response && xhr.responseText) {
-                try {
-                    response = JSON.parse(xhr.responseText);
-                } catch (error) {
-                    response = null;
-                }
-            }
-
-            if (response) {
-                const latest = normalizeLatestScenePayload(response);
-                if (latest.mediaId || latest.imageUrl) {
-                    window.useLatestSceneAsTemplateModelImage(response);
-                }
-            }
-        });
-
-        // If latest scene is still uploading from URL, wait before Ajax form submit.
-        document.getElementById('addTemplateForm')?.addEventListener('submit', async function (event) {
-            const form = this;
-
-            if (form.dataset.waitedForLatestScene === '1') {
-                return;
-            }
-
-            if (!window.latestSceneUploadPromise) {
-                return;
-            }
-
-            event.preventDefault();
-            event.stopImmediatePropagation();
-
-            try {
-                await window.latestSceneUploadPromise;
-                form.dataset.waitedForLatestScene = '1';
-                $(form).trigger('submit');
-                setTimeout(function () {
-                    delete form.dataset.waitedForLatestScene;
-                }, 0);
-            } catch (error) {
-                $('.saveChangesButton')
-                    .prop('disabled', false)
-                    .find('.saveLoader')
-                    .addClass('d-none');
-            }
-        }, true);
-
         handleAjaxFormSubmit("#addTemplateForm", {
             successMessage: "Template created successfully",
             onSuccess: function (response, $form) {
@@ -1911,43 +1678,38 @@
     <script>
         Dropzone.autoDiscover = false;
 
-        const templateDropzoneElement = document.querySelector("#template-dropzone");
+        const templateDropzone = new Dropzone("#template-dropzone", {
+            url: "{{ route('media.store') }}",
+            paramName: "file",
+            maxFiles: 1,
+            maxFilesize: 1, // MB
+            acceptedFiles: "image/*",
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            addRemoveLinks: true,
+            dictDefaultMessage: "Drop image here or click to upload",
+            init: function () {
+                this.on("success", function (file, response) {
+                    if (response.success && response.data) {
+                        file._hiddenInputId = response.data.id;
+                        document.getElementById("uploadedTemplateImage").value = response.data.id;
+                    }
+                });
 
-        if (templateDropzoneElement) {
-            const templateDropzone = new Dropzone(templateDropzoneElement, {
-                url: "{{ route('media.store') }}",
-                paramName: "file",
-                maxFiles: 1,
-                maxFilesize: 1, // MB
-                acceptedFiles: "image/*",
-                headers: {
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                },
-                addRemoveLinks: true,
-                dictDefaultMessage: "Drop image here or click to upload",
-                init: function () {
-                    this.on("success", function (file, response) {
-                        if (response.success && response.data) {
-                            file._hiddenInputId = response.data.id;
-                            document.getElementById("uploadedTemplateImage").value = response.data.id;
-                        }
-                    });
-
-                    this.on("removedfile", function (file) {
-                        document.getElementById("uploadedTemplateImage").value = "";
-                        if (file._hiddenInputId) {
-                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
-                                method: "DELETE",
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        }
-
+                this.on("removedfile", function (file) {
+                    document.getElementById("uploadedTemplateImage").value = "";
+                    if (file._hiddenInputId) {
+                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                            method: "DELETE",
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+                    }
+                });
+            }
+        });
 
 
     </script>
@@ -2214,9 +1976,7 @@
 
                 // Re-sync dropzone visibility and re-fetch mockups after state change
                 updateTemplateTypeDropzones();
-                if (typeof window.fetchMockups === 'function') {
-                    window.fetchMockups();
-                }
+                fetchMockups();
             }
 
             checkboxes.forEach(checkbox => {

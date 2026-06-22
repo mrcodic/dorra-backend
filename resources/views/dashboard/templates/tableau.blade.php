@@ -27,10 +27,11 @@
                               action="{{ route('templates.redirect.store') }}">
                             @csrf
                             <input type="hidden" name="approach"
-                                   value="{{ request()->query('q') == 'without' || 'tableau'? 'without_editor' : 'with_editor' }}">
+                                   value="{{ request()->query('q') == 'without' || request()->query('q') == 'tableau' ? 'without_editor' : 'with_editor' }}">
                             <div class="flex-grow-1">
                                 <div class="">
                                     <input type="hidden" name="use_front_as_back" id="useFrontAsBack" value="0">
+                                    <input type="hidden" name="template_image_id" id="uploadedTemplateImage" value="">
 
                                     {{-- @if(request()->query('q') == 'without')--}}
                                     {{--
@@ -163,7 +164,7 @@
                                         <div class="row">
 
                                             <div class="row" id="templateTypeDropzones">
-                                                @if(request()->query('q') == 'without' || 'tableau')
+                                                @if(request()->query('q') == 'without' || request()->query('q') == 'tableau')
                                                     <!-- FRONT -->
                                                     <div class="form-group mb-2 col-md-6 d-none" id="dz-front">
                                                         <label class="label-text mb-1">Upload Print File (Front)</label>
@@ -231,8 +232,6 @@
                                                             <div class="dz-message" data-dz-message>
                                                                 <span>Drop image here or click to upload</span>
                                                             </div>
-                                                            <input type="hidden" name="template_image_id"
-                                                                   id="uploadedTemplateImage">
                                                         </div>
                                                         <small class="form-text text-muted">
                                                             Upload an image with an 8:9 aspect ratio (for example, 618 × 700 px).
@@ -1539,43 +1538,47 @@
             window.newTableauSceneImageUrl = url;
         }
 
-        const templateDropzone = new Dropzone("#template-dropzone", {
-            url: "{{ route('media.store') }}",
-            paramName: "file",
-            maxFiles: 1,
-            maxFilesize: 1, // MB
-            acceptedFiles: "image/*",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-            },
-            addRemoveLinks: true,
-            dictDefaultMessage: "Drop image here or click to upload",
-            init: function () {
-                this.on("success", function (file, response) {
-                    if (response.success && response.data) {
-                        file._hiddenInputId = response.data.id;
-                        document.getElementById("uploadedTemplateImage").value = response.data.id;
+        let templateDropzone = null;
 
-                        // Do not update Scene Position Editor canvas from model image.
-                        // The canvas overlay is controlled by the Front print file only.
-                    }
-                });
+        if (document.getElementById("template-dropzone")) {
+            templateDropzone = new Dropzone("#template-dropzone", {
+                url: "{{ route('media.store') }}",
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 1, // MB
+                acceptedFiles: "image/*",
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                addRemoveLinks: true,
+                dictDefaultMessage: "Drop image here or click to upload",
+                init: function () {
+                    this.on("success", function (file, response) {
+                        if (response.success && response.data) {
+                            file._hiddenInputId = response.data.id;
+                            document.getElementById("uploadedTemplateImage").value = response.data.id;
 
-                this.on("removedfile", function (file) {
-                    document.getElementById("uploadedTemplateImage").value = "";
+                            // Do not update Scene Position Editor canvas from model image.
+                            // The canvas overlay is controlled by the Front print file only.
+                        }
+                    });
 
-                    // Removing model image must not clear the Front canvas overlay.
-                    if (file._hiddenInputId) {
-                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
-                            method: "DELETE",
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            }
-                        });
-                    }
-                });
-            }
-        });
+                    this.on("removedfile", function (file) {
+                        document.getElementById("uploadedTemplateImage").value = "";
+
+                        // Removing model image must not clear the Front canvas overlay.
+                        if (file._hiddenInputId) {
+                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                method: "DELETE",
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
 
 
     </script>
@@ -2882,7 +2885,183 @@
 
             window.syncTableauScenePositions = syncAllScenePositionInputs;
 
-            $(document).on('click', '#saveScenePositionsBtn', function () {
+            function ensureTemplateModelInput() {
+                let input = document.getElementById('uploadedTemplateImage');
+
+                if (input) {
+                    input.name = 'template_image_id';
+                    return input;
+                }
+
+                const form = document.getElementById('addTemplateForm');
+
+                if (!form) {
+                    return null;
+                }
+
+                input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'template_image_id';
+                input.id = 'uploadedTemplateImage';
+                form.appendChild(input);
+
+                return input;
+            }
+
+            function getLatestSceneCanvas() {
+                const activeTab = document.querySelector('.spe-tab.active');
+
+                if (activeTab?.dataset?.sceneId) {
+                    const activeCanvas = document.querySelector(`.spe-canvas[data-scene-id="${activeTab.dataset.sceneId}"]`);
+
+                    if (activeCanvas) {
+                        return activeCanvas;
+                    }
+                }
+
+                const canvases = Array.from(document.querySelectorAll('.spe-canvas[data-scene-id]'));
+
+                return canvases.length ? canvases[canvases.length - 1] : null;
+            }
+
+            function loadImageForExport(src) {
+                return new Promise((resolve, reject) => {
+                    if (!src) {
+                        reject(new Error('Missing image source.'));
+                        return;
+                    }
+
+                    const img = new Image();
+
+                    if (!src.startsWith('data:') && !src.startsWith('blob:')) {
+                        img.crossOrigin = 'anonymous';
+                    }
+
+                    img.onload = () => resolve(img);
+                    img.onerror = () => reject(new Error('Failed to load image for export.'));
+                    img.src = src;
+                });
+            }
+
+            function canvasToBlob(canvas, type = 'image/png', quality = 0.95) {
+                return new Promise((resolve, reject) => {
+                    canvas.toBlob(blob => {
+                        if (blob) {
+                            resolve(blob);
+                        } else {
+                            reject(new Error('Failed to create image blob.'));
+                        }
+                    }, type, quality);
+                });
+            }
+
+            async function renderLatestSceneToBlob() {
+                const editorCanvas = getLatestSceneCanvas();
+
+                if (!editorCanvas) {
+                    throw new Error('Please select or create a scene first.');
+                }
+
+                if (!templateSrc) {
+                    refreshTemplateSrc();
+                }
+
+                const sceneImgEl = editorCanvas.querySelector('img:not(.spe-dragger)');
+                const sceneSrc = sceneImgEl?.currentSrc || sceneImgEl?.src || '';
+                const overlaySrc = templateSrc || document.querySelector('#front-template-dropzone .dz-image img, #front-template-dropzone .dz-preview img')?.src || '';
+
+                if (!sceneSrc) {
+                    throw new Error('Scene image is missing.');
+                }
+
+                if (!overlaySrc) {
+                    throw new Error('Front template image is missing.');
+                }
+
+                const [sceneImg, overlayImg] = await Promise.all([
+                    loadImageForExport(sceneSrc),
+                    loadImageForExport(overlaySrc)
+                ]);
+
+                const maxSide = 1600;
+                const naturalWidth = sceneImg.naturalWidth || 1200;
+                const naturalHeight = sceneImg.naturalHeight || 900;
+                const ratio = Math.min(1, maxSide / Math.max(naturalWidth, naturalHeight));
+                const outputWidth = Math.max(1, Math.round(naturalWidth * ratio));
+                const outputHeight = Math.max(1, Math.round(naturalHeight * ratio));
+
+                const exportCanvas = document.createElement('canvas');
+                exportCanvas.width = outputWidth;
+                exportCanvas.height = outputHeight;
+
+                const ctx = exportCanvas.getContext('2d');
+
+                ctx.clearRect(0, 0, outputWidth, outputHeight);
+                ctx.drawImage(sceneImg, 0, 0, outputWidth, outputHeight);
+
+                const box = getBox(editorCanvas, editorCanvas.dataset.sceneId);
+                const x = (box.left / 100) * outputWidth;
+                const y = (box.top / 100) * outputHeight;
+                const w = (box.width / 100) * outputWidth;
+                const h = (box.height / 100) * outputHeight;
+
+                ctx.drawImage(overlayImg, x, y, w, h);
+
+                return canvasToBlob(exportCanvas, 'image/png');
+            }
+
+            async function uploadLatestSceneToTemplateModelImage() {
+                const blob = await renderLatestSceneToBlob();
+
+                const formData = new FormData();
+                formData.append('file', new File([blob], `tableau-template-model-${Date.now()}.png`, {
+                    type: 'image/png'
+                }));
+
+                const response = await fetch("{{ route('media.store') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || "{{ csrf_token() }}"
+                    },
+                    body: formData,
+                    credentials: 'same-origin'
+                });
+
+                let json = {};
+
+                try {
+                    json = await response.json();
+                } catch (error) {
+                    // Keep json empty and use the generic error below.
+                }
+
+                const mediaId =
+                    json?.data?.id ||
+                    json?.id ||
+                    json?.media?.id ||
+                    json?.file?.id;
+
+                if (!response.ok || !mediaId) {
+                    throw new Error(json?.message || 'Failed to upload latest scene as template model image.');
+                }
+
+                const input = ensureTemplateModelInput();
+
+                if (!input) {
+                    throw new Error('template_image_id input was not found.');
+                }
+
+                input.value = mediaId;
+
+                window.latestTableauTemplateModelMediaId = mediaId;
+
+                return mediaId;
+            }
+
+            window.uploadLatestSceneToTemplateModelImage = uploadLatestSceneToTemplateModelImage;
+
+            $(document).on('click', '#saveScenePositionsBtn', async function () {
+                const button = this;
                 const count = syncAllScenePositionInputs();
 
                 if (!count) {
@@ -2890,7 +3069,23 @@
                     return;
                 }
 
-                notifyTableau('Scene positions saved.');
+                button.disabled = true;
+                const oldText = button.textContent;
+                button.textContent = 'Saving...';
+
+                try {
+                    const mediaId = await uploadLatestSceneToTemplateModelImage();
+
+                    notifyTableau('Scene positions saved and latest scene uploaded as Template Model Image.');
+
+                    console.log('Template model image media id:', mediaId);
+                } catch (error) {
+                    console.error(error);
+                    notifyTableau(error.message || 'Failed to save latest scene image.', 'error');
+                } finally {
+                    button.disabled = false;
+                    button.textContent = oldText;
+                }
             });
 
             function triggerRebuild() {
