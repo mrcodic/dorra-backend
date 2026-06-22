@@ -130,7 +130,7 @@ if (!function_exists('handleMediaUploads')) {
         // makes the background of an image transparent and converts it to PNG.
         // if no color is given, it auto-detects it from the image corners.
         // skips svg (vector) and non-image files. falls back to original file on any failure.
-        $applyTransparency = static function ($file) use ($makeTransparent, $transparentColor, $fuzzPercent) {
+        $applyTransparency = static function ($file) use ($makeTransparent, $transparentColor, $fuzzPercent, $detectBackgroundColor) {
             if (!$makeTransparent) {
                 return $file;
             }
@@ -149,54 +149,31 @@ if (!function_exists('handleMediaUploads')) {
                 return $file;
             }
 
-            if (!extension_loaded('gd')) {
+            if (!class_exists(\Imagick::class)) {
                 return $file;
             }
 
             try {
-                $path = $file->getPathname();
+                $imagick = new \Imagick($file->getPathname());
 
-                if ($mimeType === 'image/png') {
-                    $img = imagecreatefrompng($path);
-                } else {
-                    $img = imagecreatefromjpeg($path);
-                }
+                // Important for JPG/flat PNG
+                $imagick->setImageFormat('png');
+                $imagick->setImageColorspace(\Imagick::COLORSPACE_SRGB);
+                $imagick->setImageAlphaChannel(\Imagick::ALPHACHANNEL_SET);
 
-                if (!$img) {
-                    return $file;
-                }
+                $width = $imagick->getImageWidth();
+                $height = $imagick->getImageHeight();
 
-                imagepalettetotruecolor($img);
-                imagealphablending($img, false);
-                imagesavealpha($img, true);
+                $quantumRange = \Imagick::getQuantumRange()['quantumRangeLong'];
+                $fuzzPercent = max(0, min(100, $fuzzPercent));
+                $fuzzAbs = ($fuzzPercent / 100) * $quantumRange;
 
-                $width = imagesx($img);
-                $height = imagesy($img);
+                $transparent = new \ImagickPixel('transparent');
 
-                $rgbAt = static function ($x, $y) use ($img) {
-                    $rgba = imagecolorat($img, $x, $y);
-
-                    return [
-                        'r' => ($rgba >> 16) & 0xFF,
-                        'g' => ($rgba >> 8) & 0xFF,
-                        'b' => $rgba & 0xFF,
-                    ];
-                };
-
-                $hexToRgb = static function ($hex) {
-                    $hex = ltrim((string) $hex, '#');
-
-                    if (strlen($hex) !== 6) {
-                        return null;
-                    }
-
-                    return [
-                        'r' => hexdec(substr($hex, 0, 2)),
-                        'g' => hexdec(substr($hex, 2, 2)),
-                        'b' => hexdec(substr($hex, 4, 2)),
-                    ];
-                };
-
+                /*
+                 * Remove background connected to image corners only.
+                 * This keeps white details inside the logo safe.
+                 */
                 $corners = [
                     [0, 0],
                     [$width - 1, 0],
@@ -204,81 +181,37 @@ if (!function_exists('handleMediaUploads')) {
                     [$width - 1, $height - 1],
                 ];
 
-                if ($transparentColor) {
-                    $target = $hexToRgb($transparentColor) ?: ['r' => 255, 'g' => 255, 'b' => 255];
-                } else {
-                    // detect background from top-left corner
-                    $target = $rgbAt(0, 0);
-                }
-
-                /*
-                 * fuzzPercent:
-                 * 5  = strict white only
-                 * 10 = normal
-                 * 15 = removes more off-white edges
-                 */
-                $maxDistance = 441.67295593 * (max(0, min(100, $fuzzPercent)) / 100);
-                $maxDistanceSq = $maxDistance * $maxDistance;
-
-                $isCloseToTarget = static function ($rgb) use ($target, $maxDistanceSq) {
-                    $dr = $rgb['r'] - $target['r'];
-                    $dg = $rgb['g'] - $target['g'];
-                    $db = $rgb['b'] - $target['b'];
-
-                    return (($dr * $dr) + ($dg * $dg) + ($db * $db)) <= $maxDistanceSq;
-                };
-
-                $transparent = imagecolorallocatealpha($img, 255, 255, 255, 127);
-
-                $visited = [];
-                $queue = [];
-
                 foreach ($corners as [$x, $y]) {
-                    $queue[] = [$x, $y];
+                    $targetColor = $transparentColor
+                        ? new \ImagickPixel($transparentColor)
+                        : $imagick->getImagePixelColor($x, $y);
+
+                    $imagick->floodFillPaintImage(
+                        $transparent,
+                        $fuzzAbs,
+                        $targetColor,
+                        $x,
+                        $y,
+                        false
+                    );
                 }
 
-                while (!empty($queue)) {
-                    [$x, $y] = array_pop($queue);
-
-                    if ($x < 0 || $y < 0 || $x >= $width || $y >= $height) {
-                        continue;
-                    }
-
-                    $key = $x . ':' . $y;
-
-                    if (isset($visited[$key])) {
-                        continue;
-                    }
-
-                    $visited[$key] = true;
-
-                    $rgb = $rgbAt($x, $y);
-
-                    if (!$isCloseToTarget($rgb)) {
-                        continue;
-                    }
-
-                    imagesetpixel($img, $x, $y, $transparent);
-
-                    $queue[] = [$x + 1, $y];
-                    $queue[] = [$x - 1, $y];
-                    $queue[] = [$x, $y + 1];
-                    $queue[] = [$x, $y - 1];
-                }
+                // Clean alpha and force PNG output
+                $imagick->setImageFormat('png');
 
                 $originalBase = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                 $originalBase = $originalBase ?: (string) Str::uuid();
 
-                $tmpDir = storage_path('app/tmp-transparent');
+                $tempPath = storage_path('app/tmp-transparent/' . Str::uuid() . '.png');
 
-                if (!is_dir($tmpDir)) {
-                    mkdir($tmpDir, 0755, true);
+                if (!is_dir(dirname($tempPath))) {
+                    mkdir(dirname($tempPath), 0755, true);
                 }
 
-                $tempPath = $tmpDir . '/' . Str::uuid() . '.png';
+                $imagick->writeImage($tempPath);
 
-                imagepng($img, $tempPath);
-                imagedestroy($img);
+                $imagick->clear();
+                $imagick->destroy();
 
                 return new \Illuminate\Http\UploadedFile(
                     $tempPath,
