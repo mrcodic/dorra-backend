@@ -153,6 +153,10 @@ if (!function_exists('handleMediaUploads')) {
                 $imagick = new \Imagick($file->getPathname());
                 $imagick->setImageFormat('png');
 
+                // the source file may have no alpha channel at all (e.g. jpeg, or a flat png).
+                // without activating it first, transparentPaintImage's alpha changes won't persist on write.
+                $imagick->setImageAlphaChannel(\Imagick::ALPHACHANNEL_ACTIVATE);
+
                 $colorToRemove = $transparentColor ?: $detectBackgroundColor($imagick);
 
                 $quantumRange = \Imagick::getQuantumRange()['quantumRangeLong'];
