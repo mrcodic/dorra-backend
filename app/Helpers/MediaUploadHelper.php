@@ -141,7 +141,11 @@ if (!function_exists('handleMediaUploads')) {
 
             $mimeType = $file->getClientMimeType();
 
-            if (!in_array($mimeType, ['image/jpeg', 'image/png'])) {
+            if ($mimeType === 'image/svg+xml') {
+                return $file;
+            }
+
+            if (!in_array($mimeType, ['image/jpeg', 'image/png'], true)) {
                 return $file;
             }
 
@@ -151,24 +155,61 @@ if (!function_exists('handleMediaUploads')) {
 
             try {
                 $imagick = new \Imagick($file->getPathname());
+
+                // Important for JPG/flat PNG
                 $imagick->setImageFormat('png');
+                $imagick->setImageColorspace(\Imagick::COLORSPACE_SRGB);
+                $imagick->setImageAlphaChannel(\Imagick::ALPHACHANNEL_SET);
 
-                // the source file may have no alpha channel at all (e.g. jpeg, or a flat png).
-                // without activating it first, transparentPaintImage's alpha changes won't persist on write.
-                $imagick->setImageAlphaChannel(\Imagick::ALPHACHANNEL_ACTIVATE);
-
-                $colorToRemove = $transparentColor ?: $detectBackgroundColor($imagick);
+                $width = $imagick->getImageWidth();
+                $height = $imagick->getImageHeight();
 
                 $quantumRange = \Imagick::getQuantumRange()['quantumRangeLong'];
+                $fuzzPercent = max(0, min(100, $fuzzPercent));
                 $fuzzAbs = ($fuzzPercent / 100) * $quantumRange;
 
-                // alpha = 0 -> fully transparent
-                $imagick->transparentPaintImage($colorToRemove, 0, $fuzzAbs, false);
+                $transparent = new \ImagickPixel('transparent');
+
+                /*
+                 * Remove background connected to image corners only.
+                 * This keeps white details inside the logo safe.
+                 */
+                $corners = [
+                    [0, 0],
+                    [$width - 1, 0],
+                    [0, $height - 1],
+                    [$width - 1, $height - 1],
+                ];
+
+                foreach ($corners as [$x, $y]) {
+                    $targetColor = $transparentColor
+                        ? new \ImagickPixel($transparentColor)
+                        : $imagick->getImagePixelColor($x, $y);
+
+                    $imagick->floodFillPaintImage(
+                        $transparent,
+                        $fuzzAbs,
+                        $targetColor,
+                        $x,
+                        $y,
+                        false
+                    );
+                }
+
+                // Clean alpha and force PNG output
+                $imagick->setImageFormat('png');
 
                 $originalBase = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-                $tempPath = tempnam(sys_get_temp_dir(), 'transparent_') . '.png';
+                $originalBase = $originalBase ?: (string) Str::uuid();
+
+                $tempPath = storage_path('app/tmp-transparent/' . Str::uuid() . '.png');
+
+                if (!is_dir(dirname($tempPath))) {
+                    mkdir(dirname($tempPath), 0755, true);
+                }
 
                 $imagick->writeImage($tempPath);
+
                 $imagick->clear();
                 $imagick->destroy();
 
@@ -177,9 +218,10 @@ if (!function_exists('handleMediaUploads')) {
                     $originalBase . '.png',
                     'image/png',
                     null,
-                    true // mark as test so it's not rejected for not being a real HTTP upload
+                    true
                 );
             } catch (\Throwable $e) {
+                report($e);
                 return $file;
             }
         };
