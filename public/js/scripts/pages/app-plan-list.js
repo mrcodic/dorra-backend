@@ -23,22 +23,14 @@ function setEditPlanIcon(media) {
     $('#editPlanIconId').val(media?.id || '');
     $('#editRemoveIcon').val('0');
 
-    const dzElement = document.querySelector('#edit-plan-icon-dropzone');
+    if (!editPlanIconDropzone) return;
 
-    if (!dzElement || !dzElement.dropzone) {
-        return;
-    }
-
-    const dz = dzElement.dropzone;
-
-    // clear previous preview silently
+    // clear old preview without triggering remove logic
     window.__settingEditPlanIcon = true;
-    dz.removeAllFiles(true);
+    editPlanIconDropzone.removeAllFiles(true);
     window.__settingEditPlanIcon = false;
 
-    if (!media || !media.id || !media.url) {
-        return;
-    }
+    if (!media || !media.id || !media.url) return;
 
     const mockFile = {
         name: media.file_name || 'plan-icon',
@@ -47,10 +39,10 @@ function setEditPlanIcon(media) {
         _isMock: true
     };
 
-    dz.emit('addedfile', mockFile);
-    dz.emit('thumbnail', mockFile, media.url);
-    dz.emit('complete', mockFile);
-    dz.files.push(mockFile);
+    editPlanIconDropzone.emit("addedfile", mockFile);
+    editPlanIconDropzone.emit("thumbnail", mockFile, media.url);
+    editPlanIconDropzone.emit("complete", mockFile);
+    editPlanIconDropzone.files.push(mockFile);
 }
 $.ajaxSetup({
     headers: {

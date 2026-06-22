@@ -524,16 +524,26 @@ $(document).ready(function() {
                         hiddenInput.value = "";
                     }
 
+                    /*
+                     * Existing icon from edit preview:
+                     * do not delete media immediately.
+                     * send remove_icon=1 with the edit form.
+                     */
                     if (removeInput && file._isMock) {
                         removeInput.value = "1";
+                        hiddenInput.value = "";
                         return;
                     }
 
+                    /*
+                     * New uploaded icon before submit:
+                     * delete it immediately because it is temporary.
+                     */
                     if (file._hiddenInputId && !file._isMock) {
-                        fetch("/api/v1/media/" + file._hiddenInputId, {
+                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
                             method: "DELETE",
                             headers: {
-                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
+                                "X-CSRF-TOKEN": getCsrfToken()
                             }
                         });
                     }
