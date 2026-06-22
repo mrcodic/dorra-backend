@@ -131,6 +131,7 @@ class PlanService extends BaseService
                     'can_delete' => (bool)auth()->user()->hasPermissionTo('plans_delete'),
                 ];
             })
+            ->addColumn('icon',fn($plan) => $plan->getFirstMedia('icon') )
             ->make();
     }
 

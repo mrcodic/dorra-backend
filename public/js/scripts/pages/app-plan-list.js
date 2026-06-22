@@ -1,3 +1,57 @@
+function escapeAttr(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
+}
+
+function encodeDataJson(value) {
+    return encodeURIComponent(JSON.stringify(value || null));
+}
+
+function decodeDataJson(value, fallback = null) {
+    try {
+        return JSON.parse(decodeURIComponent(value || ''));
+    } catch (e) {
+        return fallback;
+    }
+}
+
+function setEditPlanIcon(media) {
+    $('#editPlanIconId').val(media?.id || '');
+    $('#editRemoveIcon').val('0');
+
+    const dzElement = document.querySelector('#edit-plan-icon-dropzone');
+
+    if (!dzElement || !dzElement.dropzone) {
+        return;
+    }
+
+    const dz = dzElement.dropzone;
+
+    // clear previous preview silently
+    window.__settingEditPlanIcon = true;
+    dz.removeAllFiles(true);
+    window.__settingEditPlanIcon = false;
+
+    if (!media || !media.id || !media.url) {
+        return;
+    }
+
+    const mockFile = {
+        name: media.file_name || 'plan-icon',
+        size: media.size || 12345,
+        _hiddenInputId: media.id,
+        _isMock: true
+    };
+
+    dz.emit('addedfile', mockFile);
+    dz.emit('thumbnail', mockFile, media.url);
+    dz.emit('complete', mockFile);
+    dz.files.push(mockFile);
+}
 $.ajaxSetup({
     headers: {
         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
@@ -52,31 +106,41 @@ const dt_user_table = $(".plan-list-table").DataTable({
                 const recommendedFor = row.recommended_for || "";
                 const featuresEncoded = encodeURIComponent(JSON.stringify(row.features || []));
 
+                const icon = row.icon || {
+                    id: row.icon_id || '',
+                    url: row.icon_url || '',
+                    file_name: row.icon_file_name || 'plan-icon',
+                    size: row.icon_size || 12345
+                };
+
+                const iconEncoded = encodeDataJson(icon);
+
                 const editBtn = canEdit ? `
-    <a href="#" class="edit-details"
-      data-bs-toggle="modal"
-      data-bs-target="#editPlanModal"
-      data-id="${data}"
-      data-name="${row.name || ""}"
-      data-description="${row.description || ""}"
-      data-price="${row.price || ""}"
-      data-credits="${row.credits || ""}"
-      data-status="${row.is_active}"
-      data-popular="${row.is_popular}"
-      data-recommended_for="${recommendedFor}"
-      data-features="${featuresEncoded}">
-      <i data-feather="edit-3"></i>
-    </a>` : "";
+            <a href="#" class="edit-details"
+              data-bs-toggle="modal"
+              data-bs-target="#editPlanModal"
+              data-id="${escapeAttr(data)}"
+              data-name="${escapeAttr(row.name || '')}"
+              data-description="${escapeAttr(row.description || '')}"
+              data-price="${escapeAttr(row.price || '')}"
+              data-credits="${escapeAttr(row.credits || '')}"
+              data-status="${escapeAttr(row.is_active)}"
+              data-popular="${escapeAttr(row.is_popular)}"
+              data-recommended_for="${escapeAttr(recommendedFor)}"
+              data-features="${featuresEncoded}"
+              data-icon="${iconEncoded}">
+              <i data-feather="edit-3"></i>
+            </a>` : "";
 
                 const delBtn = canDelete ? `
-    <a href="#" class="text-danger open-delete-admin-modal" data-id="${data}"
-      data-bs-toggle="modal" data-bs-target="#deletePlanModal">
-      <i data-feather="trash-2"></i>
-    </a>` : "";
+            <a href="#" class="text-danger open-delete-admin-modal" data-id="${escapeAttr(data)}"
+              data-bs-toggle="modal" data-bs-target="#deletePlanModal">
+              <i data-feather="trash-2"></i>
+            </a>` : "";
 
                 return `${editBtn} ${delBtn}`;
             },
-        },
+        }
     ],
     order: [[1, "asc"]],
     dom:
@@ -263,8 +327,10 @@ $(document).ready(function () {
         const popular = $(this).data('popular');
         const recommendedFor = $(this).data('recommended_for');
 
-        // ✅ decode features
+        const icon = decodeDataJson($(this).attr('data-icon'), null);
+
         let features = [];
+
         try {
             const encoded = $(this).attr('data-features') || '';
             const json = decodeURIComponent(encoded);
@@ -274,42 +340,38 @@ $(document).ready(function () {
             features = [];
         }
 
-        // form action
         modal.find('form').attr('action', `/plans/${id}`);
 
-        // fill fields
         modal.find('input[name="name"]').val(name);
         modal.find('textarea[name="description"]').val(description);
         modal.find('textarea[name="recommended_for"]').val(recommendedFor || '');
         modal.find('input[name="price"]').val(price);
         modal.find('input[name="credits"]').val(credits);
 
-        // status
         const toggle = modal.find('#editStatusToggle');
-        const hiddenStatus = modal.find('#status');
+        const hiddenStatus = modal.find('#edit-status');
         const label = toggle.next('label');
+
         const active = String(status) === '1';
+
         toggle.prop('checked', active);
         hiddenStatus.val(active ? 1 : 0);
         label.text(active ? 'Active' : 'Inactive');
 
-        // status
         const togglePopular = modal.find('#editIsPopularToggle');
         const hiddenPopular = modal.find('#edit-popular');
         const labelPopular = togglePopular.next('label');
 
-        const Popular   = String(popular) === '1';
-        togglePopular.prop('checked', Popular);
-        hiddenPopular.val(Popular ? 1 : 0);
-        labelPopular.text(Popular ? 'Popular' : 'UnPopular');
+        const isPopular = String(popular) === '1';
 
+        togglePopular.prop('checked', isPopular);
+        hiddenPopular.val(isPopular ? 1 : 0);
+        labelPopular.text(isPopular ? 'Popular' : 'UnPopular');
 
-        // ✅ init repeater ONCE (important: this must not re-init multiple times)
         window.initEditRepeater();
-
-        // ✅ DO NOT empty before setList (breaks cloning in many repeater builds)
-        // Instead: render rows directly (always works)
         renderFeaturesRows(features);
+
+        setEditPlanIcon(icon);
     });
 
 
