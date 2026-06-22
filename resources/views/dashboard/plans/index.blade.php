@@ -516,6 +516,10 @@ $(document).ready(function() {
                 });
 
                 dropzone.on("removedfile", function (file) {
+                    if (window.__settingEditPlanIcon) {
+                        return;
+                    }
+
                     if (hiddenInput.value == file._hiddenInputId) {
                         hiddenInput.value = "";
                     }
@@ -526,10 +530,10 @@ $(document).ready(function() {
                     }
 
                     if (file._hiddenInputId && !file._isMock) {
-                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                        fetch("/api/v1/media/" + file._hiddenInputId, {
                             method: "DELETE",
                             headers: {
-                                "X-CSRF-TOKEN": getCsrfToken()
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                             }
                         });
                     }
