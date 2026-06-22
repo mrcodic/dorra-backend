@@ -1238,15 +1238,21 @@
         }
 
         function resetTableauSceneFields() {
-            $('#tableauSceneSelect').val(null).trigger('change.select2');
+            /*
+             * EDIT SAFE:
+             * Do not clear #tableauSceneSelect here.
+             * updateTemplateTypeDropzones() can run on page load / product ajax changes.
+             * Clearing the select here removes already attached scenes from the edit form.
+             *
+             * Also do not call removeAllFiles(true), because Dropzone's removedfile
+             * handler deletes uploaded media from the server.
+             */
             $('#newTableauSceneNameEn').val('');
             $('#newTableauSceneNameAr').val('');
             $('#uploadedTableauSceneImage').val('');
             $('#newTableauSceneFields').show();
-
-            if (window.tableauSceneDropzone) {
-                window.tableauSceneDropzone.removeAllFiles(true);
-            }
+            window.newTableauSceneImageUrl = null;
+            window.lastTableauSceneImageId = null;
         }
 
         function updateTemplateTypeDropzones() {
@@ -2377,9 +2383,11 @@
                 window.syncTableauScenePositions();
             }
 
-            if (typeof window.syncLatestSceneAsTemplateModelImage === 'function') {
-                window.syncLatestSceneAsTemplateModelImage();
-            }
+            /*
+             * Do not copy/upload scene image on submit here.
+             * The upload is intentionally done by Save Positions so it can be async
+             * and so we never reuse the original tableau scene media id.
+             */
         });
 
         handleAjaxFormSubmit("#editTemplateForm", {
@@ -3484,12 +3492,16 @@
                 return latestCanvas?.dataset?.sceneId ? String(latestCanvas.dataset.sceneId) : '';
             }
 
-            function getSceneMediaId(sceneId) {
+            function getSceneOption(sceneId) {
                 if (!sceneId) {
-                    return '';
+                    return $();
                 }
 
-                const $option = $('#tableauSceneSelect').find(`option[value="${sceneId}"]`);
+                return $('#tableauSceneSelect').find(`option[value="${sceneId}"]`);
+            }
+
+            function getSceneMediaId(sceneId) {
+                const $option = getSceneOption(sceneId);
 
                 return String(
                     $option.attr('data-image-id') ||
@@ -3498,29 +3510,91 @@
                 );
             }
 
-            function syncLatestSceneAsTemplateModelImage() {
-                const sceneId = getActiveOrLatestSceneId();
-                const mediaId = getSceneMediaId(sceneId);
+            function getSceneImageUrl(sceneId) {
+                const $option = getSceneOption(sceneId);
 
-                if (!sceneId || !mediaId) {
-                    return '';
-                }
-
-                const input = ensureTemplateModelInput();
-
-                if (!input) {
-                    return '';
-                }
-
-                input.value = mediaId;
-                window.latestTableauTemplateModelMediaId = mediaId;
-
-                return mediaId;
+                return String(
+                    $option.attr('data-image-url') ||
+                    $option.data('image-url') ||
+                    ''
+                );
             }
 
-            window.syncLatestSceneAsTemplateModelImage = syncLatestSceneAsTemplateModelImage;
+            function blobExtension(blob) {
+                const type = String(blob?.type || '').toLowerCase();
 
-            $(document).on('click', '#saveScenePositionsBtn', function () {
+                if (type.includes('jpeg') || type.includes('jpg')) return 'jpg';
+                if (type.includes('webp')) return 'webp';
+                if (type.includes('png')) return 'png';
+
+                return 'png';
+            }
+
+            async function uploadSceneCopyAsTemplateModelImage() {
+                const sceneId = getActiveOrLatestSceneId();
+                const sourceMediaId = getSceneMediaId(sceneId);
+                const imageUrl = getSceneImageUrl(sceneId);
+                const input = ensureTemplateModelInput();
+
+                if (!sceneId || !sourceMediaId || !imageUrl || !input) {
+                    return '';
+                }
+
+                /*
+                 * IMPORTANT:
+                 * Do NOT submit the original tableau_scene_image media id as template_image_id.
+                 * Reusing the same Spatie media id can move/detach the image from TableauScene
+                 * when the template update controller attaches it to template_model_image.
+                 * So we upload a NEW copy and submit the copied media id.
+                 */
+                const imageResponse = await fetch(imageUrl, {
+                    credentials: 'same-origin'
+                });
+
+                if (!imageResponse.ok) {
+                    throw new Error('Could not read the scene image to create a template model copy.');
+                }
+
+                const blob = await imageResponse.blob();
+                const extension = blobExtension(blob);
+
+                const formData = new FormData();
+                formData.append(
+                    'file',
+                    new File([blob], `template-model-from-scene-${sceneId}-${Date.now()}.${extension}`, {
+                        type: blob.type || 'image/png'
+                    })
+                );
+
+                const uploadResponse = await fetch("{{ route('media.store') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: formData,
+                    credentials: 'same-origin'
+                });
+
+                const json = await uploadResponse.json().catch(() => ({}));
+                const copiedMediaId = json?.data?.id || json?.id || '';
+
+                if (!uploadResponse.ok || !copiedMediaId) {
+                    throw new Error(json?.message || 'Could not upload a copy of the scene image.');
+                }
+
+                input.value = copiedMediaId;
+                input.dataset.sourceSceneId = sceneId;
+                input.dataset.sourceSceneMediaId = sourceMediaId;
+                window.latestTableauTemplateModelMediaId = copiedMediaId;
+
+                return copiedMediaId;
+            }
+
+            window.uploadSceneCopyAsTemplateModelImage = uploadSceneCopyAsTemplateModelImage;
+
+            $(document).on('click', '#saveScenePositionsBtn', async function () {
+                const button = this;
+                const oldText = button.textContent;
                 const count = syncAllScenePositionInputs();
 
                 if (!count) {
@@ -3528,14 +3602,25 @@
                     return;
                 }
 
-                const mediaId = syncLatestSceneAsTemplateModelImage();
+                button.disabled = true;
+                button.textContent = 'Saving...';
 
-                if (!mediaId) {
-                    notifyTableau('Scene positions saved, but scene image id was not found. Please recreate/select the scene and try again.', 'error');
-                    return;
+                try {
+                    const copiedMediaId = await uploadSceneCopyAsTemplateModelImage();
+
+                    if (!copiedMediaId) {
+                        notifyTableau('Scene positions saved, but scene image was not found. Please select a scene and try again.', 'error');
+                        return;
+                    }
+
+                    notifyTableau('Scene positions saved and a COPY was uploaded as Template Model Image.');
+                } catch (error) {
+                    console.error(error);
+                    notifyTableau(error.message || 'Failed to upload template model image copy.', 'error');
+                } finally {
+                    button.disabled = false;
+                    button.textContent = oldText;
                 }
-
-                notifyTableau('Scene positions saved and latest scene set as Template Model Image.');
             });
 
             function triggerRebuild() {
@@ -3586,8 +3671,6 @@
                 syncAllScenePositionInputs();
             });
         })();
-    </script>
-    })();
     </script>
 
 
