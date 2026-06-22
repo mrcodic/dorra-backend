@@ -2384,13 +2384,6 @@
             if (typeof window.syncTableauScenePositions === 'function') {
                 window.syncTableauScenePositions();
             }
-
-            // Only store selected scene info on submit.
-            // Template model copy is done when clicking Save Positions.
-            // This prevents submitting the original tableau_scene_image media id as template_image_id.
-            if (typeof window.syncSelectedSceneImageHiddenFields === 'function') {
-                window.syncSelectedSceneImageHiddenFields();
-            }
         });
 
         handleAjaxFormSubmit("#editTemplateForm", {
@@ -3482,132 +3475,160 @@
                 return input;
             }
 
-            function getActiveOrLatestSceneId() {
+            function getLatestSceneCanvas() {
                 const activeTab = document.querySelector('.spe-tab.active');
 
                 if (activeTab?.dataset?.sceneId) {
-                    return String(activeTab.dataset.sceneId);
+                    const activeCanvas = document.querySelector(`.spe-canvas[data-scene-id="${activeTab.dataset.sceneId}"]`);
+
+                    if (activeCanvas) {
+                        return activeCanvas;
+                    }
                 }
 
                 const canvases = Array.from(document.querySelectorAll('.spe-canvas[data-scene-id]'));
-                const latestCanvas = canvases.length ? canvases[canvases.length - 1] : null;
 
-                return latestCanvas?.dataset?.sceneId ? String(latestCanvas.dataset.sceneId) : '';
+                return canvases.length ? canvases[canvases.length - 1] : null;
             }
 
-            function getSceneMediaData(sceneId) {
-                if (!sceneId) {
-                    return { sceneId: '', imageId: '', imageUrl: '' };
-                }
+            function loadImageForExport(src) {
+                return new Promise((resolve, reject) => {
+                    if (!src) {
+                        reject(new Error('Missing image source.'));
+                        return;
+                    }
 
-                const $option = $('#tableauSceneSelect').find(`option[value="${sceneId}"]`);
+                    const img = new Image();
 
-                return {
-                    sceneId: String(sceneId),
-                    imageId: String(
-                        $option.attr('data-image-id') ||
-                        $option.data('image-id') ||
-                        ''
-                    ),
-                    imageUrl: String(
-                        $option.attr('data-image-url') ||
-                        $option.data('image-url') ||
-                        ''
-                    )
-                };
-            }
+                    if (!src.startsWith('data:') && !src.startsWith('blob:')) {
+                        img.crossOrigin = 'anonymous';
+                    }
 
-            function syncSelectedSceneImageHiddenFields() {
-                const sceneId = getActiveOrLatestSceneId();
-                const scene = getSceneMediaData(sceneId);
-
-                $('#selectedSceneImageId').val(scene.imageId || '');
-                $('#selectedSceneImageUrl').val(scene.imageUrl || '');
-
-                return scene;
-            }
-
-            function getCsrfToken() {
-                return document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
-            }
-
-            async function uploadSceneImageCopyAsTemplateModel(scene) {
-                if (!scene?.imageUrl) {
-                    throw new Error('Selected scene image URL was not found.');
-                }
-
-                const imageResponse = await fetch(scene.imageUrl, {
-                    credentials: 'same-origin'
+                    img.onload = () => resolve(img);
+                    img.onerror = () => reject(new Error('Failed to load image for export.'));
+                    img.src = src;
                 });
+            }
 
-                if (!imageResponse.ok) {
-                    throw new Error('Could not read selected scene image.');
+            function canvasToBlob(canvas, type = 'image/png', quality = 0.95) {
+                return new Promise((resolve, reject) => {
+                    canvas.toBlob(blob => {
+                        if (blob) {
+                            resolve(blob);
+                        } else {
+                            reject(new Error('Failed to create image blob.'));
+                        }
+                    }, type, quality);
+                });
+            }
+
+            async function renderLatestSceneToBlob() {
+                const editorCanvas = getLatestSceneCanvas();
+
+                if (!editorCanvas) {
+                    throw new Error('Please select or create a scene first.');
                 }
 
-                const blob = await imageResponse.blob();
-                const extension = (blob.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+                if (!templateSrc) {
+                    refreshTemplateSrc();
+                }
+
+                const sceneImgEl = editorCanvas.querySelector('img:not(.spe-dragger)');
+                const sceneSrc = sceneImgEl?.currentSrc || sceneImgEl?.src || '';
+                const overlaySrc = templateSrc || document.querySelector('#front-template-dropzone .dz-image img, #front-template-dropzone .dz-preview img')?.src || '';
+
+                if (!sceneSrc) {
+                    throw new Error('Scene image is missing.');
+                }
+
+                if (!overlaySrc) {
+                    throw new Error('Front template image is missing.');
+                }
+
+                const [sceneImg, overlayImg] = await Promise.all([
+                    loadImageForExport(sceneSrc),
+                    loadImageForExport(overlaySrc)
+                ]);
+
+                const maxSide = 1600;
+                const naturalWidth = sceneImg.naturalWidth || 1200;
+                const naturalHeight = sceneImg.naturalHeight || 900;
+                const ratio = Math.min(1, maxSide / Math.max(naturalWidth, naturalHeight));
+                const outputWidth = Math.max(1, Math.round(naturalWidth * ratio));
+                const outputHeight = Math.max(1, Math.round(naturalHeight * ratio));
+
+                const exportCanvas = document.createElement('canvas');
+                exportCanvas.width = outputWidth;
+                exportCanvas.height = outputHeight;
+
+                const ctx = exportCanvas.getContext('2d');
+
+                ctx.clearRect(0, 0, outputWidth, outputHeight);
+                ctx.drawImage(sceneImg, 0, 0, outputWidth, outputHeight);
+
+                const box = getBox(editorCanvas, editorCanvas.dataset.sceneId);
+                const x = (box.left / 100) * outputWidth;
+                const y = (box.top / 100) * outputHeight;
+                const w = (box.width / 100) * outputWidth;
+                const h = (box.height / 100) * outputHeight;
+
+                ctx.drawImage(overlayImg, x, y, w, h);
+
+                return canvasToBlob(exportCanvas, 'image/png');
+            }
+
+            async function uploadLatestSceneToTemplateModelImage() {
+                const blob = await renderLatestSceneToBlob();
+
                 const formData = new FormData();
+                formData.append('file', new File([blob], `tableau-template-model-${Date.now()}.png`, {
+                    type: 'image/png'
+                }));
 
-                formData.append(
-                    'file',
-                    new File([blob], `template-model-scene-${scene.sceneId || Date.now()}.${extension}`, {
-                        type: blob.type || 'image/png'
-                    })
-                );
-
-                const uploadResponse = await fetch("{{ route('media.store') }}", {
+                const response = await fetch("{{ route('media.store') }}", {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': getCsrfToken()
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || "{{ csrf_token() }}"
                     },
                     body: formData,
                     credentials: 'same-origin'
                 });
 
-                const json = await uploadResponse.json().catch(() => ({}));
-                const uploadedId = json?.data?.id || json?.id || '';
+                let json = {};
 
-                if (!uploadResponse.ok || !uploadedId) {
-                    throw new Error(json?.message || 'Could not upload selected scene image as Template Model Image.');
+                try {
+                    json = await response.json();
+                } catch (error) {
+                    // Keep json empty and use the generic error below.
                 }
 
-                return uploadedId;
-            }
+                const mediaId =
+                    json?.data?.id ||
+                    json?.id ||
+                    json?.media?.id ||
+                    json?.file?.id;
 
-            async function syncLatestSceneAsTemplateModelImage() {
-                const scene = syncSelectedSceneImageHiddenFields();
-
-                if (!scene.sceneId || (!scene.imageId && !scene.imageUrl)) {
-                    return '';
+                if (!response.ok || !mediaId) {
+                    throw new Error(json?.message || 'Failed to upload latest scene as template model image.');
                 }
 
                 const input = ensureTemplateModelInput();
 
                 if (!input) {
-                    return '';
+                    throw new Error('template_image_id input was not found.');
                 }
 
-                /*
-                 * Important:
-                 * Do NOT put the original scene media id into template_image_id.
-                 * Some backend implementations move that media to template_model_image,
-                 * which removes the original tableau_scene_image.
-                 * Instead, upload a COPY of the scene image and use the new media id.
-                 */
-                const copiedMediaId = await uploadSceneImageCopyAsTemplateModel(scene);
+                input.value = mediaId;
 
-                input.value = copiedMediaId;
-                window.latestTableauTemplateModelMediaId = copiedMediaId;
+                window.latestTableauTemplateModelMediaId = mediaId;
 
-                return copiedMediaId;
+                return mediaId;
             }
 
-            window.syncLatestSceneAsTemplateModelImage = syncLatestSceneAsTemplateModelImage;
-            window.syncSelectedSceneImageHiddenFields = syncSelectedSceneImageHiddenFields;
+            window.uploadLatestSceneToTemplateModelImage = uploadLatestSceneToTemplateModelImage;
 
             $(document).on('click', '#saveScenePositionsBtn', async function () {
                 const button = this;
-                const oldText = button.textContent;
                 const count = syncAllScenePositionInputs();
 
                 if (!count) {
@@ -3616,26 +3637,18 @@
                 }
 
                 button.disabled = true;
+                const oldText = button.textContent;
                 button.textContent = 'Saving...';
 
                 try {
-                    const mediaId = await syncLatestSceneAsTemplateModelImage();
+                    const mediaId = await uploadLatestSceneToTemplateModelImage();
 
-                    if (!mediaId) {
-                        notifyTableau('Scene positions saved, but scene image was not found. Please recreate/select the scene and try again.', 'error');
-                        return;
-                    }
+                    notifyTableau('Scene positions saved and latest scene uploaded as Template Model Image.');
 
-                    notifyTableau('Scene positions saved and scene image copied as Template Model Image.');
+                    console.log('Template model image media id:', mediaId);
                 } catch (error) {
                     console.error(error);
-
-                    /*
-                     * Keep scene image data in hidden fields as a safe fallback.
-                     * If the controller supports selected_scene_image_id, it can copy it server-side.
-                     */
-                    syncSelectedSceneImageHiddenFields();
-                    notifyTableau(error.message || 'Failed to copy selected scene image.', 'error');
+                    notifyTableau(error.message || 'Failed to save latest scene image.', 'error');
                 } finally {
                     button.disabled = false;
                     button.textContent = oldText;
