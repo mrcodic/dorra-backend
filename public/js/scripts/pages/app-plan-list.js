@@ -23,14 +23,22 @@ function setEditPlanIcon(media) {
     $('#editPlanIconId').val(media?.id || '');
     $('#editRemoveIcon').val('0');
 
-    if (!editPlanIconDropzone) return;
+    const dzElement = document.querySelector('#edit-plan-icon-dropzone');
 
-    // clear old preview without triggering remove logic
+    if (!dzElement || !dzElement.dropzone) {
+        return;
+    }
+
+    const dz = dzElement.dropzone;
+
+    // clear previous preview silently
     window.__settingEditPlanIcon = true;
-    editPlanIconDropzone.removeAllFiles(true);
+    dz.removeAllFiles(true);
     window.__settingEditPlanIcon = false;
 
-    if (!media || !media.id || !media.url) return;
+    if (!media || !media.id || !media.url) {
+        return;
+    }
 
     const mockFile = {
         name: media.file_name || 'plan-icon',
@@ -39,10 +47,10 @@ function setEditPlanIcon(media) {
         _isMock: true
     };
 
-    editPlanIconDropzone.emit("addedfile", mockFile);
-    editPlanIconDropzone.emit("thumbnail", mockFile, media.url);
-    editPlanIconDropzone.emit("complete", mockFile);
-    editPlanIconDropzone.files.push(mockFile);
+    dz.emit('addedfile', mockFile);
+    dz.emit('thumbnail', mockFile, media.url);
+    dz.emit('complete', mockFile);
+    dz.files.push(mockFile);
 }
 $.ajaxSetup({
     headers: {
@@ -307,10 +315,7 @@ $(document).ready(function () {
     }
     $(document).on('click', '.edit-details', function (e) {
         e.preventDefault();
-        
-        if (typeof window.setEditPlanIcon === 'function') {
-            window.setEditPlanIcon(icon);
-        }
+
         const modal = $('#editPlanModal');
 
         const id = $(this).data('id');
