@@ -296,7 +296,7 @@ $(document).ready(function () {
         // status
         const togglePopular = modal.find('#editIsPopularToggle');
         const hiddenPopular = modal.find('#edit-popular');
-        const labelPopular = labelPopular.next('label');
+        const labelPopular = togglePopular.next('label');
 
         const Popular   = String(popular) === '1';
         togglePopular.prop('checked', Popular);
