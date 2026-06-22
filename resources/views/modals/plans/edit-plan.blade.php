@@ -88,7 +88,7 @@
                         <label class="form-label d-block">Popular</label>
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="editIsPopularToggle" checked>
-                            <label class="form-check-label" for="editIsPopularToggle">Active</label>
+                            <label class="form-check-label" for="editIsPopularToggle">Popular</label>
                         </div>
 
                         <!-- hidden input sent to backend -->
