@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Dimension\StoreDimensionRequest;
 use App\Models\Admin;
 use App\Models\Category;
+use App\Models\Media as ModelsMedia;
 use App\Models\Product;
 use App\Repositories\Implementations\StationStatusRepository;
 use App\Services\FlagService;
@@ -59,6 +60,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -526,5 +528,17 @@ class MainController extends Controller
     {
         return Response::api(data: SocialLinkResource::collection($this->socialLinkRepository->query()
             ->get(['id', 'platform', 'url'])));
+    }
+
+    public function downloadMedia(ModelsMedia $media)
+    {
+        if (!Storage::disk($media->disk)->exists($media->getPathRelativeToRoot())) {
+            abort(404, 'File not found');
+        }
+
+        return Storage::disk($media->disk)->download(
+            $media->getPathRelativeToRoot(),
+            $media->file_name
+        );
     }
 }
