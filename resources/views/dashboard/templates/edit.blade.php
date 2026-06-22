@@ -42,6 +42,8 @@
                                            value="{{ $model->use_front_as_back }}">
                                     <input type="hidden" name="template_image_id" id="uploadedTemplateImage"
                                            value="{{ $model->getFirstMedia('template_model_image')?->id ?? '' }}">
+                                    <input type="hidden" name="selected_scene_image_id" id="selectedSceneImageId" value="">
+                                    <input type="hidden" name="selected_scene_image_url" id="selectedSceneImageUrl" value="">
 
                                     @php
                                         $colors = collect($model->colors) ?? collect();
@@ -1239,18 +1241,15 @@
 
         function resetTableauSceneFields() {
             /*
-             * EDIT SAFE:
-             * Do not clear #tableauSceneSelect here.
-             * updateTemplateTypeDropzones() can run on page load / product ajax changes.
-             * Clearing the select here removes already attached scenes from the edit form.
-             *
-             * Also do not call removeAllFiles(true), because Dropzone's removedfile
-             * handler deletes uploaded media from the server.
+             * Edit page safety:
+             * Do NOT clear #tableauSceneSelect here and do NOT call removeAllFiles(true).
+             * Clearing/removing on edit can detach/delete the saved tableau scene image.
              */
             $('#newTableauSceneNameEn').val('');
             $('#newTableauSceneNameAr').val('');
             $('#uploadedTableauSceneImage').val('');
             $('#newTableauSceneFields').show();
+
             window.newTableauSceneImageUrl = null;
             window.lastTableauSceneImageId = null;
         }
@@ -2319,59 +2318,62 @@
         });
     </script>
     <script>
-        const modelMainDropzone = new Dropzone("#template-main-dropzone", {
-            url: "{{ route('media.store') }}",
-            paramName: "file",
-            maxFiles: 1,
-            maxFilesize: 1, // MB
-            acceptedFiles: "image/*",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-            },
-            addRemoveLinks: true,
-            dictDefaultMessage: "Drop image here or click to upload",
-            init: function () {
-                let dz = this;
+        let modelMainDropzone = null;
+        if (document.getElementById("template-main-dropzone")) {
+            modelMainDropzone = new Dropzone("#template-main-dropzone", {
+                url: "{{ route('media.store') }}",
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 1, // MB
+                acceptedFiles: "image/*",
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                addRemoveLinks: true,
+                dictDefaultMessage: "Drop image here or click to upload",
+                init: function () {
+                    let dz = this;
 
-                // ✅ Show existing image if editing
-                @if(!empty($media = $model->getFirstMedia('templates')))
-                let modelMockFile = {
-                    name: "{{ $media->file_name }}",
-                    size: {{ $media->size ?? 12345 }},
-                    _hiddenInputId: "{{ $media->id }}"
-                };
-                document.getElementById("uploadedMainTemplateImage").value = "{{ $media->id }}";
+                    // ✅ Show existing image if editing
+                    @if(!empty($media = $model->getFirstMedia('templates')))
+                    let modelMockFile = {
+                        name: "{{ $media->file_name }}",
+                        size: {{ $media->size ?? 12345 }},
+                        _hiddenInputId: "{{ $media->id }}"
+                    };
+                    document.getElementById("uploadedMainTemplateImage").value = "{{ $media->id }}";
 
 
-                dz.emit("addedfile", modelMockFile);
-                dz.emit("thumbnail", modelMockFile, "{{ $media->getUrl() }}");
-                dz.emit("complete", modelMockFile);
-                dz.files.push(modelMockFile);
-                @endif
+                    dz.emit("addedfile", modelMockFile);
+                    dz.emit("thumbnail", modelMockFile, "{{ $media->getUrl() }}");
+                    dz.emit("complete", modelMockFile);
+                    dz.files.push(modelMockFile);
+                    @endif
 
-                dz.on("success", function (file, response) {
-                    if (response?.data?.id) {
-                        file._hiddenInputId = response.data.id;
-                        document.getElementById("uploadedMainTemplateImage").value = response.data.id;
-                    }
-                });
-
-                dz.on("removedfile", function (file) {
-                    if (file._hiddenInputId) {
-                        fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
-                            method: "DELETE",
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            }
-                        });
-                        let hiddenInput = document.getElementById("uploadedMainTemplateImage");
-                        if (hiddenInput.value == file._hiddenInputId) {
-                            hiddenInput.value = "";
+                    dz.on("success", function (file, response) {
+                        if (response?.data?.id) {
+                            file._hiddenInputId = response.data.id;
+                            document.getElementById("uploadedMainTemplateImage").value = response.data.id;
                         }
-                    }
-                });
-            }
-        });
+                    });
+
+                    dz.on("removedfile", function (file) {
+                        if (file._hiddenInputId) {
+                            fetch("{{ url('api/v1/media') }}/" + file._hiddenInputId, {
+                                method: "DELETE",
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+                            let hiddenInput = document.getElementById("uploadedMainTemplateImage");
+                            if (hiddenInput.value == file._hiddenInputId) {
+                                hiddenInput.value = "";
+                            }
+                        }
+                    });
+                }
+            });
+        }
 
 
     </script>
@@ -2383,11 +2385,12 @@
                 window.syncTableauScenePositions();
             }
 
-            /*
-             * Do not copy/upload scene image on submit here.
-             * The upload is intentionally done by Save Positions so it can be async
-             * and so we never reuse the original tableau scene media id.
-             */
+            // Only store selected scene info on submit.
+            // Template model copy is done when clicking Save Positions.
+            // This prevents submitting the original tableau_scene_image media id as template_image_id.
+            if (typeof window.syncSelectedSceneImageHiddenFields === 'function') {
+                window.syncSelectedSceneImageHiddenFields();
+            }
         });
 
         handleAjaxFormSubmit("#editTemplateForm", {
@@ -3492,76 +3495,62 @@
                 return latestCanvas?.dataset?.sceneId ? String(latestCanvas.dataset.sceneId) : '';
             }
 
-            function getSceneOption(sceneId) {
+            function getSceneMediaData(sceneId) {
                 if (!sceneId) {
-                    return $();
+                    return { sceneId: '', imageId: '', imageUrl: '' };
                 }
 
-                return $('#tableauSceneSelect').find(`option[value="${sceneId}"]`);
+                const $option = $('#tableauSceneSelect').find(`option[value="${sceneId}"]`);
+
+                return {
+                    sceneId: String(sceneId),
+                    imageId: String(
+                        $option.attr('data-image-id') ||
+                        $option.data('image-id') ||
+                        ''
+                    ),
+                    imageUrl: String(
+                        $option.attr('data-image-url') ||
+                        $option.data('image-url') ||
+                        ''
+                    )
+                };
             }
 
-            function getSceneMediaId(sceneId) {
-                const $option = getSceneOption(sceneId);
-
-                return String(
-                    $option.attr('data-image-id') ||
-                    $option.data('image-id') ||
-                    ''
-                );
-            }
-
-            function getSceneImageUrl(sceneId) {
-                const $option = getSceneOption(sceneId);
-
-                return String(
-                    $option.attr('data-image-url') ||
-                    $option.data('image-url') ||
-                    ''
-                );
-            }
-
-            function blobExtension(blob) {
-                const type = String(blob?.type || '').toLowerCase();
-
-                if (type.includes('jpeg') || type.includes('jpg')) return 'jpg';
-                if (type.includes('webp')) return 'webp';
-                if (type.includes('png')) return 'png';
-
-                return 'png';
-            }
-
-            async function uploadSceneCopyAsTemplateModelImage() {
+            function syncSelectedSceneImageHiddenFields() {
                 const sceneId = getActiveOrLatestSceneId();
-                const sourceMediaId = getSceneMediaId(sceneId);
-                const imageUrl = getSceneImageUrl(sceneId);
-                const input = ensureTemplateModelInput();
+                const scene = getSceneMediaData(sceneId);
 
-                if (!sceneId || !sourceMediaId || !imageUrl || !input) {
-                    return '';
+                $('#selectedSceneImageId').val(scene.imageId || '');
+                $('#selectedSceneImageUrl').val(scene.imageUrl || '');
+
+                return scene;
+            }
+
+            function getCsrfToken() {
+                return document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+            }
+
+            async function uploadSceneImageCopyAsTemplateModel(scene) {
+                if (!scene?.imageUrl) {
+                    throw new Error('Selected scene image URL was not found.');
                 }
 
-                /*
-                 * IMPORTANT:
-                 * Do NOT submit the original tableau_scene_image media id as template_image_id.
-                 * Reusing the same Spatie media id can move/detach the image from TableauScene
-                 * when the template update controller attaches it to template_model_image.
-                 * So we upload a NEW copy and submit the copied media id.
-                 */
-                const imageResponse = await fetch(imageUrl, {
+                const imageResponse = await fetch(scene.imageUrl, {
                     credentials: 'same-origin'
                 });
 
                 if (!imageResponse.ok) {
-                    throw new Error('Could not read the scene image to create a template model copy.');
+                    throw new Error('Could not read selected scene image.');
                 }
 
                 const blob = await imageResponse.blob();
-                const extension = blobExtension(blob);
-
+                const extension = (blob.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
                 const formData = new FormData();
+
                 formData.append(
                     'file',
-                    new File([blob], `template-model-from-scene-${sceneId}-${Date.now()}.${extension}`, {
+                    new File([blob], `template-model-scene-${scene.sceneId || Date.now()}.${extension}`, {
                         type: blob.type || 'image/png'
                     })
                 );
@@ -3569,28 +3558,52 @@
                 const uploadResponse = await fetch("{{ route('media.store') }}", {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        'X-CSRF-TOKEN': getCsrfToken()
                     },
                     body: formData,
                     credentials: 'same-origin'
                 });
 
                 const json = await uploadResponse.json().catch(() => ({}));
-                const copiedMediaId = json?.data?.id || json?.id || '';
+                const uploadedId = json?.data?.id || json?.id || '';
 
-                if (!uploadResponse.ok || !copiedMediaId) {
-                    throw new Error(json?.message || 'Could not upload a copy of the scene image.');
+                if (!uploadResponse.ok || !uploadedId) {
+                    throw new Error(json?.message || 'Could not upload selected scene image as Template Model Image.');
                 }
 
+                return uploadedId;
+            }
+
+            async function syncLatestSceneAsTemplateModelImage() {
+                const scene = syncSelectedSceneImageHiddenFields();
+
+                if (!scene.sceneId || (!scene.imageId && !scene.imageUrl)) {
+                    return '';
+                }
+
+                const input = ensureTemplateModelInput();
+
+                if (!input) {
+                    return '';
+                }
+
+                /*
+                 * Important:
+                 * Do NOT put the original scene media id into template_image_id.
+                 * Some backend implementations move that media to template_model_image,
+                 * which removes the original tableau_scene_image.
+                 * Instead, upload a COPY of the scene image and use the new media id.
+                 */
+                const copiedMediaId = await uploadSceneImageCopyAsTemplateModel(scene);
+
                 input.value = copiedMediaId;
-                input.dataset.sourceSceneId = sceneId;
-                input.dataset.sourceSceneMediaId = sourceMediaId;
                 window.latestTableauTemplateModelMediaId = copiedMediaId;
 
                 return copiedMediaId;
             }
 
-            window.uploadSceneCopyAsTemplateModelImage = uploadSceneCopyAsTemplateModelImage;
+            window.syncLatestSceneAsTemplateModelImage = syncLatestSceneAsTemplateModelImage;
+            window.syncSelectedSceneImageHiddenFields = syncSelectedSceneImageHiddenFields;
 
             $(document).on('click', '#saveScenePositionsBtn', async function () {
                 const button = this;
@@ -3606,17 +3619,23 @@
                 button.textContent = 'Saving...';
 
                 try {
-                    const copiedMediaId = await uploadSceneCopyAsTemplateModelImage();
+                    const mediaId = await syncLatestSceneAsTemplateModelImage();
 
-                    if (!copiedMediaId) {
-                        notifyTableau('Scene positions saved, but scene image was not found. Please select a scene and try again.', 'error');
+                    if (!mediaId) {
+                        notifyTableau('Scene positions saved, but scene image was not found. Please recreate/select the scene and try again.', 'error');
                         return;
                     }
 
-                    notifyTableau('Scene positions saved and a COPY was uploaded as Template Model Image.');
+                    notifyTableau('Scene positions saved and scene image copied as Template Model Image.');
                 } catch (error) {
                     console.error(error);
-                    notifyTableau(error.message || 'Failed to upload template model image copy.', 'error');
+
+                    /*
+                     * Keep scene image data in hidden fields as a safe fallback.
+                     * If the controller supports selected_scene_image_id, it can copy it server-side.
+                     */
+                    syncSelectedSceneImageHiddenFields();
+                    notifyTableau(error.message || 'Failed to copy selected scene image.', 'error');
                 } finally {
                     button.disabled = false;
                     button.textContent = oldText;
