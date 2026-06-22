@@ -84,6 +84,9 @@ class PlanService extends BaseService
 
             $keptIds = $features->pluck('id')->filter()->values()->all();
             $resource->features()->whereNotIn('id', $keptIds)->delete();
+            if (!empty($validatedData['remove_icon'])) {
+                $resource->clearMediaCollection(getMediaCollectionName('icon'));
+            }
             attachMediaToModel($validatedData['icon_id'],$resource, 'icon',clearExisting: true);
             return $resource;
         });
