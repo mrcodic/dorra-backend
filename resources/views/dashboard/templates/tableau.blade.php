@@ -26,7 +26,7 @@
                         <form id="addTemplateForm" enctype="multipart/form-data" method="post"
                               action="{{ route('templates.redirect.store') }}">
                             @csrf
-                            <input type="hidden" name="tableau_size_specification_id" id="tableauSizeSpecificationId">
+
                             <input type="hidden" name="approach"
                                    value="{{ request()->query('q') == 'without' || request()->query('q') == 'tableau' ? 'without_editor' : 'with_editor' }}">
                             <div class="flex-grow-1">
@@ -342,6 +342,24 @@
                                             </div>
 
 
+                                        </div>
+                                        <div class="row mb-2 d-none" id="tableauSizeSpecWrapper">
+                                            <div class="col-md-12 form-group mb-2">
+                                                <label for="tableauSizeSpecificationSelect" class="label-text mb-1">
+                                                    Tableau Size
+                                                </label>
+
+                                                <select
+                                                    id="tableauSizeSpecificationSelect"
+                                                    name="tableau_size_specification_id"
+                                                    class="form-select select2">
+                                                    <option value="" selected disabled>Select Tableau Size</option>
+                                                </select>
+
+                                                <small class="form-text text-muted">
+                                                    This size is loaded from the selected product/category tableau_size specification.
+                                                </small>
+                                            </div>
                                         </div>
                                         {{-- TABLEAU SCENE IMAGE --}}
                                         {{-- TABLEAU SCENE --}}
@@ -1950,30 +1968,53 @@
             return value ? [String(value)] : [];
         }
 
+        function getSpecLabel(spec) {
+            if (!spec) return '';
+
+            if (spec.label) return spec.label;
+
+            if (typeof spec.name === 'string') {
+                try {
+                    const parsed = JSON.parse(spec.name);
+                    return parsed.en || parsed.ar || spec.name;
+                } catch (e) {
+                    return spec.name;
+                }
+            }
+
+            if (typeof spec.name === 'object' && spec.name !== null) {
+                return spec.name.en || spec.name.ar || ('Specification #' + spec.id);
+            }
+
+            return 'Specification #' + spec.id;
+        }
+
         function fetchTableauSizeSpecification() {
+            const $wrapper = $('#tableauSizeSpecWrapper');
+            const $select = $('#tableauSizeSpecificationSelect');
+
             if (typeof selectedProductIsTableau === 'function' && !selectedProductIsTableau()) {
-                $('#tableauSizeSpecificationId').val('');
+                $wrapper.addClass('d-none');
+                $select.empty().append('<option value="" selected disabled>Select Tableau Size</option>').trigger('change');
                 return;
             }
 
             /*
-             * In this page:
-             * #categoriesSelect = products with categories
-             * #productsSelect = categories loaded from selected product
-             * #productsWithoutCategoriesSelect = products/categories without category depending on your project naming
-             *
-             * Because your DB has tableau_size for both Product and Category,
-             * we send both arrays.
+             * If your naming is:
+             * #categoriesSelect = Product
+             * #productsSelect = Category
+             * #productsWithoutCategoriesSelect = Category/Product depending on project
              */
-            const productIds = [
-                ...getSelectedIds('#categoriesSelect'),
+            const productIds = getSelectedIds('#categoriesSelect');
+
+            const categoryIds = [
+                ...getSelectedIds('#productsSelect'),
                 ...getSelectedIds('#productsWithoutCategoriesSelect')
             ];
 
-            const categoryIds = getSelectedIds('#productsSelect');
-
             if (!productIds.length && !categoryIds.length) {
-                $('#tableauSizeSpecificationId').val('');
+                $wrapper.addClass('d-none');
+                $select.empty().append('<option value="" selected disabled>Select Tableau Size</option>').trigger('change');
                 return;
             }
 
@@ -1987,15 +2028,36 @@
                 },
                 success(response) {
                     const specs = response?.data || [];
-                    const firstSpec = specs[0] || null;
 
-                    $('#tableauSizeSpecificationId').val(firstSpec?.id || '');
+                    $select.empty();
+                    $select.append('<option value="" selected disabled>Select Tableau Size</option>');
 
-                    console.log('tableau_size specification:', firstSpec);
+                    if (!specs.length) {
+                        $wrapper.addClass('d-none');
+                        $select.trigger('change');
+                        return;
+                    }
+
+                    specs.forEach(function (spec, index) {
+                        const label = getSpecLabel(spec);
+                        const option = new Option(label, spec.id, false, index === 0);
+
+                        $(option)
+                            .attr('data-fixed-key', spec.fixed_key || '')
+                            .attr('data-specifiable-type', spec.specifiable_type || '')
+                            .attr('data-specifiable-id', spec.specifiable_id || '');
+
+                        $select.append(option);
+                    });
+
+                    $wrapper.removeClass('d-none');
+                    $select.trigger('change');
                 },
                 error(xhr) {
                     console.error('Failed to load tableau_size specification:', xhr.responseText);
-                    $('#tableauSizeSpecificationId').val('');
+
+                    $wrapper.addClass('d-none');
+                    $select.empty().append('<option value="" selected disabled>Select Tableau Size</option>').trigger('change');
                 }
             });
         }
@@ -2005,7 +2067,15 @@
         });
 
         $(document).ready(function () {
-            setTimeout(fetchTableauSizeSpecification, 300);
+            if ($('#tableauSizeSpecificationSelect').length && !$('#tableauSizeSpecificationSelect').data('select2')) {
+                $('#tableauSizeSpecificationSelect').select2({
+                    width: '100%',
+                    placeholder: 'Select Tableau Size',
+                    allowClear: true
+                });
+            }
+
+            setTimeout(fetchTableauSizeSpecification, 500);
         });
     </script>
     <script !src="">

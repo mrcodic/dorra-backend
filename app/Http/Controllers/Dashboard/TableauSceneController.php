@@ -67,6 +67,7 @@ class TableauSceneController extends DashboardController
                 return [
                     'id' => $spec->id,
                     'name' => $spec->name,
+                    'label' => $spec->name,
                     'fixed_key' => $spec->fixed_key,
                     'type' => $spec->type,
                     'specifiable_id' => $spec->specifiable_id,
