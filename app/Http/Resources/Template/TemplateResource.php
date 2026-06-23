@@ -12,7 +12,6 @@ use App\Http\Resources\TableauSceneResource;
 use App\Http\Resources\TagResource;
 use App\Models\Category;
 use App\Models\Guest;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Models\Mockup;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -28,29 +27,6 @@ class TemplateResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $sourceDesignMedia = $this->approach == 'without_editor'
-            ? $this->getFirstMedia('templates-preview')
-            : $this->getFirstMedia('templates');
-
-        $getPreviewUrl = function (?Media $media): ?string {
-            if (!$media) {
-                return null;
-            }
-
-            return $media->hasGeneratedConversion('preview')
-                ? $media->getUrl('preview')
-                : null;
-        };
-
-        $getPreviewFullUrl = function (?Media $media): ?string {
-            if (!$media) {
-                return null;
-            }
-
-            return $media->hasGeneratedConversion('preview')
-                ? $media->getFullUrl('preview')
-                : null;
-        };
         $templateId = $this->id;
 
         $categoryId = (int)(request('product_without_category_id') ?? Product::find(request('product_id'))?->category_id);
@@ -92,8 +68,7 @@ class TemplateResource extends JsonResource
                 ? $this->getFirstMedia('back-templates-preview')
                 : $this->getFirstMedia('back_templates'));
 
-        $backPreviewImageUrl = $getPreviewFullUrl($backPreviewImage);
-        $hasSourceDesign = (bool) $sourceDesignMedia;
+        $backPreviewImageUrl = $backPreviewImage?->getFullUrl();
 
         $templateImageMedia = $this->getFirstMedia('templates-preview')
             ?: $this->getFirstMedia('templates')
@@ -144,11 +119,11 @@ class TemplateResource extends JsonResource
                 ];
             })->values()->all()
             ),
-            'show_back' => (function () use ($media, $backPreviewImageUrl, $hasSourceDesign) {
-                if (!$hasSourceDesign && !empty($backPreviewImageUrl)) {
+            'show_back' => (function () use ($media, $backPreviewImageUrl) {
+                if (empty($this->image) && !empty($backPreviewImageUrl)) {
                     return true;
                 }
-                if ($hasSourceDesign && !empty($backPreviewImageUrl)) {
+                if (!empty($this->image) && !empty($backPreviewImageUrl)) {
                     if ($media) {
                         return $media->getCustomProperty('side') === 'back';
                     }
@@ -156,7 +131,7 @@ class TemplateResource extends JsonResource
                 }
                 return false;
             })(),
-            'source_design_svg' => $getPreviewUrl($sourceDesignMedia) ?: '',
+            'source_design_svg' => $this->when(isset($this->image), $this->image),
             'back_base64_preview_image' => $backPreviewImageUrl,
             'template_image_height' => $templateImageHeight !== null
                 ? (int) $templateImageHeight

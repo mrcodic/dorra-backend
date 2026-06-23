@@ -236,9 +236,6 @@ class Template extends Model implements HasMedia
             ->format('jpg')
             ->performOnCollections('back_templates')
             ->nonQueued();
-
-        $this->addMediaConversion('preview')
-            ->fit(Fit::Contain, 518,518)
-            ->nonQueued();
+        
     }
 }
