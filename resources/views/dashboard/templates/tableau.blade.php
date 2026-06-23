@@ -349,12 +349,17 @@
                                                     Tableau Size
                                                 </label>
 
-                                                <select
-                                                    id="tableauSizeSpecificationSelect"
-                                                    name="tableau_size_specification_id"
-                                                    class="form-select select2">
-                                                    <option value="" selected disabled>Select Tableau Size</option>
-                                                </select>
+                                                <div class="row mb-2 d-none" id="tableauSizeSpecWrapper">
+                                                    <div class="col-md-12 form-group mb-2">
+                                                        <label class="label-text mb-1">Tableau Size Options</label>
+
+                                                        <div id="tableauSizeSpecOptionsContainer"></div>
+
+                                                        <small class="form-text text-muted">
+                                                            Select one or more options from each tableau_size specification.
+                                                        </small>
+                                                    </div>
+                                                </div>
 
                                                 <small class="form-text text-muted">
                                                     This size is loaded from the selected product/category tableau_size specification.
@@ -1968,42 +1973,110 @@
             return value ? [String(value)] : [];
         }
 
-        function getSpecLabel(spec) {
-            if (!spec) return '';
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;');
+        }
 
-            if (spec.label) return spec.label;
+        function renderTableauSizeSpecOptions(specs) {
+            const $wrapper = $('#tableauSizeSpecWrapper');
+            const $container = $('#tableauSizeSpecOptionsContainer');
 
-            if (typeof spec.name === 'string') {
-                try {
-                    const parsed = JSON.parse(spec.name);
-                    return parsed.en || parsed.ar || spec.name;
-                } catch (e) {
-                    return spec.name;
+            $container.empty();
+
+            if (!specs.length) {
+                $wrapper.addClass('d-none');
+                return;
+            }
+
+            specs.forEach(function (spec) {
+                const specId = spec.id;
+                const specLabel = spec.label || spec.name || ('Tableau Size #' + specId);
+                const options = spec.options || [];
+
+                if (!options.length) {
+                    return;
                 }
+
+                const selectId = 'tableau_size_options_' + specId;
+
+                let html = `
+                <div class="mb-2 border rounded p-1">
+                    <input type="hidden" name="tableau_size_specification_ids[]" value="${escapeHtml(specId)}">
+
+                    <label class="form-label mb-1" for="${escapeHtml(selectId)}">
+                        ${escapeHtml(specLabel)}
+                    </label>
+
+                    <select
+                        id="${escapeHtml(selectId)}"
+                        name="tableau_size_options[${escapeHtml(specId)}][]"
+                        class="form-select tableau-size-options-select"
+                        multiple>
+            `;
+
+                options.forEach(function (option) {
+                    const optionLabel = option.label || option.name || option.value || ('Option #' + option.id);
+
+                    html += `
+                    <option
+                        value="${escapeHtml(option.id)}"
+                        data-value="${escapeHtml(option.value || '')}"
+                        data-price="${escapeHtml(option.price || '')}"
+                        data-image-url="${escapeHtml(option.image_url || '')}">
+                        ${escapeHtml(optionLabel)}
+                    </option>
+                `;
+                });
+
+                html += `
+                    </select>
+                </div>
+            `;
+
+                $container.append(html);
+            });
+
+            if (!$container.children().length) {
+                $wrapper.addClass('d-none');
+                return;
             }
 
-            if (typeof spec.name === 'object' && spec.name !== null) {
-                return spec.name.en || spec.name.ar || ('Specification #' + spec.id);
-            }
+            $wrapper.removeClass('d-none');
 
-            return 'Specification #' + spec.id;
+            $('.tableau-size-options-select').each(function () {
+                const $select = $(this);
+
+                if ($select.data('select2')) {
+                    $select.select2('destroy');
+                }
+
+                $select.select2({
+                    width: '100%',
+                    placeholder: 'Choose Tableau Size Options',
+                    closeOnSelect: false,
+                    allowClear: true
+                });
+            });
         }
 
         function fetchTableauSizeSpecification() {
             const $wrapper = $('#tableauSizeSpecWrapper');
-            const $select = $('#tableauSizeSpecificationSelect');
 
             if (typeof selectedProductIsTableau === 'function' && !selectedProductIsTableau()) {
+                $('#tableauSizeSpecOptionsContainer').empty();
                 $wrapper.addClass('d-none');
-                $select.empty().append('<option value="" selected disabled>Select Tableau Size</option>').trigger('change');
                 return;
             }
 
             /*
-             * If your naming is:
-             * #categoriesSelect = Product
-             * #productsSelect = Category
-             * #productsWithoutCategoriesSelect = Category/Product depending on project
+             * #categoriesSelect = Product ids
+             * #productsSelect = Category ids
+             * #productsWithoutCategoriesSelect = Category ids in your current form naming
              */
             const productIds = getSelectedIds('#categoriesSelect');
 
@@ -2013,8 +2086,8 @@
             ];
 
             if (!productIds.length && !categoryIds.length) {
+                $('#tableauSizeSpecOptionsContainer').empty();
                 $wrapper.addClass('d-none');
-                $select.empty().append('<option value="" selected disabled>Select Tableau Size</option>').trigger('change');
                 return;
             }
 
@@ -2027,37 +2100,17 @@
                     category_ids: categoryIds
                 },
                 success(response) {
-                    const specs = response?.data || [];
+                    const specs =
+                        response?.data?.data ||
+                        response?.data ||
+                        [];
 
-                    $select.empty();
-                    $select.append('<option value="" selected disabled>Select Tableau Size</option>');
-
-                    if (!specs.length) {
-                        $wrapper.addClass('d-none');
-                        $select.trigger('change');
-                        return;
-                    }
-
-                    specs.forEach(function (spec, index) {
-                        const label = getSpecLabel(spec);
-                        const option = new Option(label, spec.id, false, index === 0);
-
-                        $(option)
-                            .attr('data-fixed-key', spec.fixed_key || '')
-                            .attr('data-specifiable-type', spec.specifiable_type || '')
-                            .attr('data-specifiable-id', spec.specifiable_id || '');
-
-                        $select.append(option);
-                    });
-
-                    $wrapper.removeClass('d-none');
-                    $select.trigger('change');
+                    renderTableauSizeSpecOptions(specs);
                 },
                 error(xhr) {
-                    console.error('Failed to load tableau_size specification:', xhr.responseText);
-
+                    console.error('Failed to load tableau_size options:', xhr.responseText);
+                    $('#tableauSizeSpecOptionsContainer').empty();
                     $wrapper.addClass('d-none');
-                    $select.empty().append('<option value="" selected disabled>Select Tableau Size</option>').trigger('change');
                 }
             });
         }
@@ -2067,14 +2120,6 @@
         });
 
         $(document).ready(function () {
-            if ($('#tableauSizeSpecificationSelect').length && !$('#tableauSizeSpecificationSelect').data('select2')) {
-                $('#tableauSizeSpecificationSelect').select2({
-                    width: '100%',
-                    placeholder: 'Select Tableau Size',
-                    allowClear: true
-                });
-            }
-
             setTimeout(fetchTableauSizeSpecification, 500);
         });
     </script>

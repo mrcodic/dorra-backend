@@ -60,14 +60,41 @@ class TableauSceneController extends DashboardController
                 }
             });
 
-        $specifications = $query
+        $specifications = ProductSpecification::query()
+            ->with(['options'])
+            ->where('fixed_key', 'tableau_size')
+            ->where(function ($q) use ($productIds, $categoryIds) {
+                if ($productIds->isNotEmpty()) {
+                    $q->orWhere(function ($qq) use ($productIds) {
+                        $qq->where('specifiable_type', Product::class)
+                            ->whereIn('specifiable_id', $productIds);
+                    });
+                }
+
+                if ($categoryIds->isNotEmpty()) {
+                    $q->orWhere(function ($qq) use ($categoryIds) {
+                        $qq->where('specifiable_type', Category::class)
+                            ->whereIn('specifiable_id', $categoryIds);
+                    });
+                }
+            })
             ->orderByRaw("CASE WHEN specifiable_type = ? THEN 0 ELSE 1 END", [Product::class])
             ->get()
-            ->map(function ($spec) {
-                    $spec->options->map(function ($option) {
+            ->map(function ($spec)  {
+                return [
+                    'id' => $spec->id,
+                    'name' => $spec->name,
+                    'label' =>$spec->name,
+                    'fixed_key' => $spec->fixed_key,
+                    'type' => $spec->type,
+                    'specifiable_id' => $spec->specifiable_id,
+                    'specifiable_type' => $spec->specifiable_type,
+
+                    'options' => $spec->options->map(function ($option) {
                         return [
                             'id' => $option->id,
                             'name' => $option->name ?? null,
+                            'label' => $option->name,
                             'value' => $option->value ?? null,
                             'price' => $option->price ?? null,
                             'image_id' => $option->image_id ?? null,
@@ -75,8 +102,8 @@ class TableauSceneController extends DashboardController
                                 ? $option->getFirstMediaUrl('image')
                                 : null,
                         ];
-                    })->values();
-
+                    })->values(),
+                ];
             })
             ->values();
 
