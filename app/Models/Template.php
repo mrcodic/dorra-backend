@@ -239,7 +239,7 @@ class Template extends Model implements HasMedia
 
         $this->addMediaConversion('preview')
             ->fit(Fit::Contain, 298, 338)
-            ->quality(40)
+            
             ->nonQueued();
     }
 }
