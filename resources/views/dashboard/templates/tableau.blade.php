@@ -26,6 +26,7 @@
                         <form id="addTemplateForm" enctype="multipart/form-data" method="post"
                               action="{{ route('templates.redirect.store') }}">
                             @csrf
+                            <input type="hidden" name="tableau_size_specification_id" id="tableauSizeSpecificationId">
                             <input type="hidden" name="approach"
                                    value="{{ request()->query('q') == 'without' || request()->query('q') == 'tableau' ? 'without_editor' : 'with_editor' }}">
                             <div class="flex-grow-1">
@@ -1936,6 +1937,75 @@
             window.initTableauSceneSelect();
 
             $('#tableauSceneSelect').trigger('change');
+        });
+    </script>
+    <script>
+        function getSelectedIds(selector) {
+            const value = $(selector).val();
+
+            if (Array.isArray(value)) {
+                return value.filter(Boolean).map(String);
+            }
+
+            return value ? [String(value)] : [];
+        }
+
+        function fetchTableauSizeSpecification() {
+            if (typeof selectedProductIsTableau === 'function' && !selectedProductIsTableau()) {
+                $('#tableauSizeSpecificationId').val('');
+                return;
+            }
+
+            /*
+             * In this page:
+             * #categoriesSelect = products with categories
+             * #productsSelect = categories loaded from selected product
+             * #productsWithoutCategoriesSelect = products/categories without category depending on your project naming
+             *
+             * Because your DB has tableau_size for both Product and Category,
+             * we send both arrays.
+             */
+            const productIds = [
+                ...getSelectedIds('#categoriesSelect'),
+                ...getSelectedIds('#productsWithoutCategoriesSelect')
+            ];
+
+            const categoryIds = getSelectedIds('#productsSelect');
+
+            if (!productIds.length && !categoryIds.length) {
+                $('#tableauSizeSpecificationId').val('');
+                return;
+            }
+
+            $.ajax({
+                url: "{{ route('tableau.specifications.size') }}",
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    product_ids: productIds,
+                    category_ids: categoryIds
+                },
+                success(response) {
+                    const specs = response?.data || [];
+                    const firstSpec = specs[0] || null;
+
+                    $('#tableauSizeSpecificationId').val(firstSpec?.id || '');
+
+                    console.log('tableau_size specification:', firstSpec);
+                },
+                error(xhr) {
+                    console.error('Failed to load tableau_size specification:', xhr.responseText);
+                    $('#tableauSizeSpecificationId').val('');
+                }
+            });
+        }
+
+        $(document).on('change', '#categoriesSelect, #productsSelect, #productsWithoutCategoriesSelect', function () {
+            fetchTableauSizeSpecification();
+        });
+
+        $(document).ready(function () {
+            setTimeout(fetchTableauSizeSpecification, 300);
         });
     </script>
     <script !src="">
