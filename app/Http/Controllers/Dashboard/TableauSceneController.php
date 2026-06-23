@@ -66,19 +66,19 @@ class TableauSceneController extends DashboardController
             ->where(function ($q) use ($productIds, $categoryIds) {
                 if ($productIds->isNotEmpty()) {
                     $q->orWhere(function ($qq) use ($productIds) {
-                        $qq->where('specifiable_type', Product::class)
+                        $qq->where('specifiable_type', Category::class)
                             ->whereIn('specifiable_id', $productIds);
                     });
                 }
 
                 if ($categoryIds->isNotEmpty()) {
                     $q->orWhere(function ($qq) use ($categoryIds) {
-                        $qq->where('specifiable_type', Category::class)
+                        $qq->where('specifiable_type', Product::class)
                             ->whereIn('specifiable_id', $categoryIds);
                     });
                 }
             })
-            ->orderByRaw("CASE WHEN specifiable_type = ? THEN 0 ELSE 1 END", [Product::class])
+            ->orderByRaw("CASE WHEN specifiable_type = ? THEN 0 ELSE 1 END", [Category::class])
             ->get()
             ->map(function ($spec)  {
                 return [
