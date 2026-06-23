@@ -314,6 +314,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
         Route::post('tableau-scenes', [TableauSceneController::class, 'store'])
             ->name('tableau-scenes.store');
+        Route::post('tableau-scenes/specifications', [TableauSceneController::class, 'tableauSize'])->name('tableau.specifications.size');
+
     });
 
     Route::prefix('api/v1/')->group(function () {
