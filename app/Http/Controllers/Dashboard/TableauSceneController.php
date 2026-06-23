@@ -93,14 +93,14 @@ class TableauSceneController extends DashboardController
                     'options' => $spec->options->map(function ($option) {
                         return [
                             'id' => $option->id,
-                            'name' => $option->name ?? null,
-                            'label' => $option->name,
+                            'name' => $option->value ?? null,
+                            'label' => $option->value,
                             'value' => $option->value ?? null,
                             'price' => $option->price ?? null,
                             'image_id' => $option->image_id ?? null,
                             'image_url' => method_exists($option, 'getFirstMediaUrl')
-                                ? $option->getFirstMediaUrl('image')
-                                : null,
+                                ? $option->getFirstMediaUrl('productSpecificationOptions')
+                                : $option->getFirstMediaUrl('categorySpecificationOptions'),
                         ];
                     })->values(),
                 ];
