@@ -355,9 +355,6 @@
 
                                                         <div id="tableauSizeSpecOptionsContainer"></div>
 
-                                                        <small class="form-text text-muted">
-                                                            Select one or more options from each tableau_size specification.
-                                                        </small>
                                                     </div>
                                                 </div>
 
@@ -1983,6 +1980,7 @@
         }
 
         function renderTableauSizeSpecOptions(specs) {
+            console.log(specs)
             const $wrapper = $('#tableauSizeSpecWrapper');
             const $container = $('#tableauSizeSpecOptionsContainer');
 
