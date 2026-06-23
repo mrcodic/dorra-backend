@@ -61,18 +61,22 @@ class TableauSceneController extends DashboardController
             });
 
         $specifications = $query
-            ->orderByRaw("CASE WHEN specifiable_type = ? THEN 0 ELSE 1 END", [Category::class])
+            ->orderByRaw("CASE WHEN specifiable_type = ? THEN 0 ELSE 1 END", [Product::class])
             ->get()
             ->map(function ($spec) {
-                return [
-                    'id' => $spec->id,
-                    'name' => $spec->name,
-                    'label' => $spec->name,
-                    'fixed_key' => $spec->fixed_key,
-                    'type' => $spec->type,
-                    'specifiable_id' => $spec->specifiable_id,
-                    'specifiable_type' => $spec->specifiable_type,
-                ];
+                    $spec->options->map(function ($option) {
+                        return [
+                            'id' => $option->id,
+                            'name' => $option->name ?? null,
+                            'value' => $option->value ?? null,
+                            'price' => $option->price ?? null,
+                            'image_id' => $option->image_id ?? null,
+                            'image_url' => method_exists($option, 'getFirstMediaUrl')
+                                ? $option->getFirstMediaUrl('image')
+                                : null,
+                        ];
+                    })->values();
+
             })
             ->values();
 
