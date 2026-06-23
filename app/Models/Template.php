@@ -237,8 +237,8 @@ class Template extends Model implements HasMedia
             ->performOnCollections('back_templates')
             ->nonQueued();
 
-//        $this->addMediaConversion('preview')
-//            ->fit(Fit::Contain, 382, 433)
-//            ->nonQueued();
+        $this->addMediaConversion('preview')
+            ->fit(Fit::Contain, 382, 433)
+            ->nonQueued();
     }
 }
