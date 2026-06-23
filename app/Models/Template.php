@@ -236,6 +236,6 @@ class Template extends Model implements HasMedia
             ->format('jpg')
             ->performOnCollections('back_templates')
             ->nonQueued();
-        
+
     }
 }
