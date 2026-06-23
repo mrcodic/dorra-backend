@@ -238,7 +238,7 @@ class Template extends Model implements HasMedia
             ->nonQueued();
 
         $this->addMediaConversion('preview')
-            ->fit(Fit::Contain, 518)
+            ->fit(Fit::Contain, 518,518)
             ->nonQueued();
     }
 }
