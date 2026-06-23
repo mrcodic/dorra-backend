@@ -12,6 +12,7 @@ use App\Http\Resources\TableauSceneResource;
 use App\Http\Resources\TagResource;
 use App\Models\Category;
 use App\Models\Guest;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Models\Mockup;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -27,6 +28,38 @@ class TemplateResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $sourceDesignMedia = $this->approach == 'without_editor'
+            ? $this->getFirstMedia('templates-preview')
+            : $this->getFirstMedia('templates');
+
+        $getPreviewUrl = function ($media): ?string {
+            if (!$media) {
+                return null;
+            }
+
+            return $media->hasGeneratedConversion('preview')
+                ? $media->getUrl('preview')
+                : $media->getUrl();
+        };
+        $getPreviewUrl = function (?Media $media): ?string {
+            if (!$media) {
+                return null;
+            }
+
+            return $media->hasGeneratedConversion('preview')
+                ? $media->getUrl('preview')
+                : null;
+        };
+
+        $getPreviewFullUrl = function (?Media $media): ?string {
+            if (!$media) {
+                return null;
+            }
+
+            return $media->hasGeneratedConversion('preview')
+                ? $media->getFullUrl('preview')
+                : null;
+        };
         $templateId = $this->id;
 
         $categoryId = (int)(request('product_without_category_id') ?? Product::find(request('product_id'))?->category_id);
@@ -68,7 +101,7 @@ class TemplateResource extends JsonResource
                 ? $this->getFirstMedia('back-templates-preview')
                 : $this->getFirstMedia('back_templates'));
 
-        $backPreviewImageUrl = $backPreviewImage?->getFullUrl();
+        $backPreviewImageUrl = $getPreviewFullUrl($backPreviewImage);
 
         $templateImageMedia = $this->getFirstMedia('templates-preview')
             ?: $this->getFirstMedia('templates')
@@ -131,7 +164,7 @@ class TemplateResource extends JsonResource
                 }
                 return false;
             })(),
-            'source_design_svg' => $this->when(isset($this->image), $this->image),
+            'source_design_svg' => $getPreviewUrl($sourceDesignMedia) ?: '',
             'back_base64_preview_image' => $backPreviewImageUrl,
             'template_image_height' => $templateImageHeight !== null
                 ? (int) $templateImageHeight
@@ -143,8 +176,9 @@ class TemplateResource extends JsonResource
             'has_mockup' => (boolean)$this->products->contains('has_mockup', true),
             'last_saved' => $this->when(isset($this->updated_at), $this->updated_at?->format('d/m/Y, g:i A')),
             'template_model_image' => $media
-                ?->getUrl() ?: $this->getFirstMediaUrl('template_model_image'),
-            'mockup_template_image' => (function () use ($categoryId) {
+                ? $getPreviewUrl($media)
+                : $getPreviewUrl($this->getFirstMedia('template_model_image')),
+            'mockup_template_image' => (function () use ($categoryId, $getPreviewUrl) {
                 $cartItemId = $this->additional['cart_item_id'] ?? null;
                 $catId = $this->additional['category_id'] ?? $categoryId ?? null;
 
@@ -152,7 +186,7 @@ class TemplateResource extends JsonResource
                     return null;
                 }
 
-                return \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
+                $mockupTemplateMedia = \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
                     ->where('model_type', \App\Models\Mockup::class)
                     ->where('collection_name', 'generated_mockups')
                     ->where('custom_properties->template_id', (string)$this->id)
@@ -164,8 +198,9 @@ class TemplateResource extends JsonResource
                             ->whereColumn('mockups.id', 'media.model_id')
                             ->whereNull('mockups.deleted_at');
                     })
-                    ->first()
-                    ?->getUrl();
+                    ->first();
+
+                return $getPreviewUrl($mockupTemplateMedia);
             })(),
             'orientation' => [
                 'value' => $this->orientation?->value,

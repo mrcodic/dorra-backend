@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\App;
+use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -62,7 +63,6 @@ class Template extends Model implements HasMedia
     protected $attributes = [
         'status' => StatusEnum::DRAFTED,
     ];
-
     public function tableauScenes(): BelongsToMany
     {
         return $this->belongsToMany(TableauScene::class,)
@@ -235,6 +235,11 @@ class Template extends Model implements HasMedia
         $this->addMediaConversion('back_jpg')
             ->format('jpg')
             ->performOnCollections('back_templates')
+            ->nonQueued();
+
+        $this->addMediaConversion('preview')
+            ->fit(Fit::Contain, 298, 338)
+            ->quality(40)
             ->nonQueued();
     }
 }
