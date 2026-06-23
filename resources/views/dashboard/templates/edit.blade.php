@@ -2830,6 +2830,8 @@
             const DEFAULT_TOP = 35;
             const DEFAULT_LEFT = 35;
             const DEFAULT_OVERLAY_WIDTH = 28;
+            const MIN_OVERLAY_WIDTH = 5;
+            const MAX_OVERLAY_WIDTH = 95;
 
 // Positions already saved in DB, keyed by scene id (string) — edit page only
             const existingScenePositions = @json($existingScenePositions ?? []);
@@ -2889,6 +2891,28 @@
                 return 4 / 3;
             }
 
+            function clampOverlayWidth(canvas, sceneId, width) {
+                const dimension = getSelectedDimension();
+                const canvasAspect = getCanvasAspect(canvas);
+                const overlayAspect = dimension.aspect || templateAspect || 1;
+
+                /*
+                 * Width is stored as percentage of the scene canvas width.
+                 * Height is calculated from aspect ratio, so max width must also
+                 * keep the calculated height inside the scene.
+                 */
+                const maxByHeight = overlayAspect && canvasAspect
+                    ? (100 * overlayAspect / canvasAspect)
+                    : 100;
+
+                const maxWidth = Math.max(
+                    MIN_OVERLAY_WIDTH,
+                    Math.min(MAX_OVERLAY_WIDTH, maxByHeight)
+                );
+
+                return pct(Math.min(maxWidth, Math.max(MIN_OVERLAY_WIDTH, num(width, DEFAULT_OVERLAY_WIDTH))));
+            }
+
             function ensureState(sceneId) {
                 if (!positionState[sceneId]) {
                     const saved = existingScenePositions[String(sceneId)];
@@ -2915,7 +2939,9 @@
                 const st = ensureState(sceneId);
                 const dimension = getSelectedDimension();
 
-                const width = pct(st.width || DEFAULT_OVERLAY_WIDTH);
+                st.width = clampOverlayWidth(canvas, sceneId, st.width || DEFAULT_OVERLAY_WIDTH);
+
+                const width = st.width;
                 const canvasAspect = getCanvasAspect(canvas);
                 const overlayAspect = dimension.aspect || templateAspect || 1;
 
@@ -3058,13 +3084,19 @@
                 const box = getBox(canvas, sceneId);
                 const dimension = getSelectedDimension();
 
-                ['top', 'right', 'left', 'bottom'].forEach(axis => {
+                ['top', 'right', 'left', 'bottom', 'width', 'height'].forEach(axis => {
                     const textEl = document.getElementById(`spe-${axis}-${id}`);
 
                     if (textEl) {
                         textEl.textContent = box[axis] + '%';
                     }
                 });
+
+                const widthInput = document.getElementById(`spe-input-width-${id}`);
+
+                if (widthInput && document.activeElement !== widthInput) {
+                    widthInput.value = box.width;
+                }
 
                 const dimEl = document.getElementById(`spe-dim-${id}`);
 
@@ -3079,13 +3111,10 @@
                 canvas.querySelectorAll('.spe-dragger').forEach(el => el.remove());
 
                 const box = getBox(canvas, sceneId);
-                let dragger;
 
-                if (templateSrc) {
-                    dragger = document.createElement('img');
-                    dragger.src = templateSrc;
-                    dragger.className = 'spe-dragger';
-                    dragger.style.cssText = `
+                const dragger = document.createElement('div');
+                dragger.className = 'spe-dragger';
+                dragger.style.cssText = `
                             position:absolute;
                             width:${box.width}%;
                             aspect-ratio:${box.aspect};
@@ -3093,44 +3122,144 @@
                             left:${box.left}%;
                             cursor:grab;
                             touch-action:none;
-                            border:2px dashed rgba(255,255,255,.85);
+                            border:2px dashed rgba(255,255,255,.9);
                             border-radius:4px;
                             box-sizing:border-box;
+                            overflow:visible;
+                            user-select:none;
+                            z-index:5;
+                        `;
+
+                if (templateSrc) {
+                    const img = document.createElement('img');
+                    img.src = templateSrc;
+                    img.draggable = false;
+                    img.style.cssText = `
+                            width:100%;
+                            height:100%;
+                            display:block;
                             object-fit:contain;
                             opacity:1;
                             filter:none;
+                            pointer-events:none;
                             user-select:none;
                         `;
+                    dragger.appendChild(img);
                 } else {
-                    dragger = document.createElement('div');
-                    dragger.className = 'spe-dragger';
                     dragger.textContent = 'Canvas';
-                    dragger.style.cssText = `
-                            position:absolute;
-                            width:${box.width}%;
-                            aspect-ratio:${box.aspect};
-                            top:${box.top}%;
-                            left:${box.left}%;
-                            cursor:grab;
-                            touch-action:none;
-                            background:rgba(36,176,148,.18);
-                            border:2px dashed #24B094;
-                            border-radius:4px;
-                            box-sizing:border-box;
-                            display:flex;
-                            align-items:center;
-                            justify-content:center;
-                            font-size:11px;
-                            color:#24B094;
-                            user-select:none;
-                        `;
+                    dragger.style.background = 'rgba(36,176,148,.18)';
+                    dragger.style.borderColor = '#24B094';
+                    dragger.style.display = 'flex';
+                    dragger.style.alignItems = 'center';
+                    dragger.style.justifyContent = 'center';
+                    dragger.style.fontSize = '11px';
+                    dragger.style.color = '#24B094';
                 }
+
+                const resizeHandle = document.createElement('span');
+                resizeHandle.className = 'spe-resize-handle';
+                resizeHandle.title = 'Resize design';
+                resizeHandle.style.cssText = `
+                            position:absolute;
+                            right:-8px;
+                            bottom:-8px;
+                            width:16px;
+                            height:16px;
+                            border-radius:50%;
+                            background:#24B094;
+                            border:2px solid #fff;
+                            box-shadow:0 1px 4px rgba(0,0,0,.25);
+                            cursor:nwse-resize;
+                            touch-action:none;
+                            z-index:10;
+                        `;
+
+                dragger.appendChild(resizeHandle);
 
                 canvas.appendChild(dragger);
                 attachDrag(dragger, canvas, sceneId);
+                attachResize(resizeHandle, dragger, canvas, sceneId);
                 updateCoordsDisplay(sceneId);
             }
 
+            function attachResize(handle, el, canvas, sceneId) {
+                let resizing = false;
+                let startX = 0;
+                let startY = 0;
+                let startWidth = 0;
+
+                function xy(e) {
+                    return e.touches
+                        ? {x: e.touches[0].clientX, y: e.touches[0].clientY}
+                        : {x: e.clientX, y: e.clientY};
+                }
+
+                function onStart(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    resizing = true;
+
+                    const point = xy(e);
+                    const box = getBox(canvas, sceneId);
+
+                    startX = point.x;
+                    startY = point.y;
+                    startWidth = box.width;
+
+                    el.style.cursor = 'nwse-resize';
+                }
+
+                function onMove(e) {
+                    if (!resizing) return;
+
+                    e.preventDefault();
+
+                    const point = xy(e);
+                    const cRect = canvas.getBoundingClientRect();
+                    const canvasAspect = getCanvasAspect(canvas);
+                    const overlayAspect = getOverlaySize(canvas, sceneId).aspect || 1;
+
+                    const deltaWidthFromX = ((point.x - startX) / cRect.width) * 100;
+                    const deltaWidthFromY = ((point.y - startY) / cRect.height) * 100 * (overlayAspect / canvasAspect);
+                    const deltaWidth = Math.abs(deltaWidthFromX) >= Math.abs(deltaWidthFromY)
+                        ? deltaWidthFromX
+                        : deltaWidthFromY;
+
+                    const state = ensureState(sceneId);
+                    state.width = clampOverlayWidth(canvas, sceneId, startWidth + deltaWidth);
+
+                    const clamped = clampPosition(canvas, sceneId, state.top, state.left);
+                    state.top = clamped.top;
+                    state.left = clamped.left;
+
+                    const box = getBox(canvas, sceneId);
+
+                    el.style.width = box.width + '%';
+                    el.style.aspectRatio = String(box.aspect);
+                    el.style.top = box.top + '%';
+                    el.style.left = box.left + '%';
+
+                    updateCoordsDisplay(sceneId);
+                }
+
+                function onEnd() {
+                    if (!resizing) return;
+
+                    resizing = false;
+                    el.style.cursor = 'grab';
+                    updateCoordsDisplay(sceneId);
+                }
+
+                handle.addEventListener('mousedown', onStart);
+                handle.addEventListener('touchstart', onStart, {passive: false});
+
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('touchmove', onMove, {passive: false});
+
+                window.addEventListener('mouseup', onEnd);
+                window.addEventListener('touchend', onEnd);
+            }
             function refreshAllDraggables() {
                 document.querySelectorAll('.spe-canvas').forEach(canvas => {
                     renderDraggable(canvas, canvas.dataset.sceneId);
@@ -3151,6 +3280,10 @@
                 }
 
                 function onStart(e) {
+                    if (e.target?.closest?.('.spe-resize-handle')) {
+                        return;
+                    }
+
                     e.preventDefault();
 
                     dragging = true;
@@ -3209,31 +3342,44 @@
 
                 if (!canvas) return;
 
+                const state = ensureState(sceneId);
                 const current = getBox(canvas, sceneId);
 
-                let top = num(document.getElementById(`spe-input-top-${id}`)?.value, current.top);
-                let left = num(document.getElementById(`spe-input-left-${id}`)?.value, current.left);
-                const right = num(document.getElementById(`spe-input-right-${id}`)?.value, current.right);
-                const bottom = num(document.getElementById(`spe-input-bottom-${id}`)?.value, current.bottom);
+                if (axis === 'width') {
+                    const width = num(document.getElementById(`spe-input-width-${id}`)?.value, current.width);
+                    state.width = clampOverlayWidth(canvas, sceneId, width);
 
-                if (axis === 'right') {
-                    left = 100 - right - current.width;
+                    const clamped = clampPosition(canvas, sceneId, state.top, state.left);
+                    state.top = clamped.top;
+                    state.left = clamped.left;
+                } else {
+                    let top = num(document.getElementById(`spe-input-top-${id}`)?.value, current.top);
+                    let left = num(document.getElementById(`spe-input-left-${id}`)?.value, current.left);
+                    const right = num(document.getElementById(`spe-input-right-${id}`)?.value, current.right);
+                    const bottom = num(document.getElementById(`spe-input-bottom-${id}`)?.value, current.bottom);
+
+                    if (axis === 'right') {
+                        left = 100 - right - current.width;
+                    }
+
+                    if (axis === 'bottom') {
+                        top = 100 - bottom - current.height;
+                    }
+
+                    const clamped = clampPosition(canvas, sceneId, top, left);
+
+                    state.top = clamped.top;
+                    state.left = clamped.left;
                 }
 
-                if (axis === 'bottom') {
-                    top = 100 - bottom - current.height;
-                }
-
-                const clamped = clampPosition(canvas, sceneId, top, left);
-
-                positionState[sceneId].top = clamped.top;
-                positionState[sceneId].left = clamped.left;
-
+                const box = getBox(canvas, sceneId);
                 const dragger = canvas.querySelector('.spe-dragger');
 
                 if (dragger) {
-                    dragger.style.top = clamped.top + '%';
-                    dragger.style.left = clamped.left + '%';
+                    dragger.style.top = box.top + '%';
+                    dragger.style.left = box.left + '%';
+                    dragger.style.width = box.width + '%';
+                    dragger.style.aspectRatio = String(box.aspect);
                 }
 
                 updateCoordsDisplay(sceneId);
@@ -3314,8 +3460,24 @@
                         <span class="badge bg-light text-dark border">Right: <strong id="spe-right-${id}">0%</strong></span>
                         <span class="badge bg-light text-dark border">Left: <strong id="spe-left-${id}">0%</strong></span>
                         <span class="badge bg-light text-dark border">Bottom: <strong id="spe-bottom-${id}">0%</strong></span>
+                        <span class="badge bg-light text-dark border">Width: <strong id="spe-width-${id}">0%</strong></span>
+                        <span class="badge bg-light text-dark border">Height: <strong id="spe-height-${id}">0%</strong></span>
+                        <label class="d-flex align-items-center gap-50 mb-0 ms-1" style="font-size:12px;">
+                            Width %
+                            <input type="number"
+                                   min="${MIN_OVERLAY_WIDTH}"
+                                   max="${MAX_OVERLAY_WIDTH}"
+                                   step="0.1"
+                                   id="spe-input-width-${id}"
+                                   class="form-control form-control-sm"
+                                   style="width:90px;">
+                        </label>
                         <small class="text-muted ms-1" id="spe-dim-${id}"></small>
                     `;
+
+                controls
+                    .querySelector(`#spe-input-width-${id}`)
+                    ?.addEventListener('input', () => applyManualInput(sceneId, 'width'));
 
                 panel.appendChild(canvasWrap);
                 panel.appendChild(controls);
