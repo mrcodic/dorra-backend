@@ -17,7 +17,7 @@ class Media extends \Spatie\MediaLibrary\MediaCollections\Models\Media
             }
 
             $preview = Media::find($previewId);
-            
+
             if ($preview && $preview->id !== $media->id) {
                 $preview->delete();
             }
