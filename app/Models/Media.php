@@ -22,7 +22,7 @@ class Media extends \Spatie\MediaLibrary\MediaCollections\Models\Media
             if ($preview && $preview->id !== $media->id) {
 
                 Storage::disk($preview->disk)->delete($preview->getPathRelativeToRoot());
-                
+
                 foreach ($preview->generated_conversions ?? [] as $conversion => $generated) {
                     if ($generated) {
                         Storage::disk($preview->conversions_disk ?? $preview->disk)
