@@ -349,14 +349,7 @@
                                                     Tableau Size
                                                 </label>
 
-                                                <div class="row mb-2 d-none" id="tableauSizeSpecWrapper">
-                                                    <div class="col-md-12 form-group mb-2">
-                                                        <label class="label-text mb-1">Tableau Size Options</label>
-
-                                                        <div id="tableauSizeSpecOptionsContainer"></div>
-
-                                                    </div>
-                                                </div>
+                                                <div id="tableauSizeSpecOptionsContainer"></div>
 
                                                 <small class="form-text text-muted">
                                                     This size is loaded from the selected product/category tableau_size specification.
