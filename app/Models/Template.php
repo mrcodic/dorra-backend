@@ -236,6 +236,10 @@ class Template extends Model implements HasMedia
             ->format('jpg')
             ->performOnCollections('back_templates')
             ->nonQueued();
+        $this
+            ->addMediaConversion('preview')
+            ->fit(Fit::Crop, 300, 300)
+            ->nonQueued();
 
     }
     public function specificationOptions(): BelongsToMany
