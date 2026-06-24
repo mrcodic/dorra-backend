@@ -345,15 +345,10 @@
                                         </div>
                                         <div class="row mb-2 d-none" id="tableauSizeSpecWrapper">
                                             <div class="col-md-12 form-group mb-2">
-                                                <label for="tableauSizeSpecificationSelect" class="label-text mb-1">
-                                                    Tableau Size
-                                                </label>
+
 
                                                 <div id="tableauSizeSpecOptionsContainer"></div>
 
-                                                <small class="form-text text-muted">
-                                                    This size is loaded from the selected product/category tableau_size specification.
-                                                </small>
                                             </div>
                                         </div>
                                         {{-- TABLEAU SCENE IMAGE --}}
@@ -2069,12 +2064,9 @@
              * #productsSelect = Category ids
              * #productsWithoutCategoriesSelect = Category ids in your current form naming
              */
-            const productIds = getSelectedIds('#categoriesSelect');
+            const productIds = getSelectedIds('#productsSelect');
 
-            const categoryIds = [
-                ...getSelectedIds('#productsSelect'),
-                ...getSelectedIds('#productsWithoutCategoriesSelect')
-            ];
+            const categoryIds = getSelectedIds('#productsWithoutCategoriesSelect');
 
             if (!productIds.length && !categoryIds.length) {
                 $('#tableauSizeSpecOptionsContainer').empty();

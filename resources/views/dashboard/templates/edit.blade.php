@@ -436,6 +436,15 @@
                                             @endforeach
                                         </select>
                                     </div>
+
+                                    <div class="row mb-2 d-none" id="tableauSizeSpecWrapper">
+                                        <div class="col-md-12 form-group mb-2">
+                                            <label class="label-text mb-1">Tableau Size</label>
+
+                                            <div id="tableauSizeSpecOptionsContainer"></div>
+
+                                        </div>
+                                    </div>
                                     {{-- TABLEAU SCENE --}}
                                     <div class="form-group mb-2 col-md-6 d-none" id="dz-tableau-scene">
                                         <label class="label-text mb-1">Tableau Scene</label>
@@ -1348,7 +1357,172 @@
             syncTableauSceneFields();
         });
     </script>
+    <script>
+        // Already-attached tableau_size option ids for this template (from pivot)
+        window.preselectedTableauSizeOptionIds = @json(
+        $model->specificationOptions->pluck('id')->map(fn ($id) => (string) $id)->values()
+    );
 
+        function getSelectedIdsForSpec(selector) {
+            const value = $(selector).val();
+            if (Array.isArray(value)) return value.filter(Boolean).map(String);
+            return value ? [String(value)] : [];
+        }
+
+        function escapeHtmlForSpec(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;');
+        }
+
+        function renderTableauSizeSpecOptions(specs) {
+            const $wrapper = $('#tableauSizeSpecWrapper');
+            const $container = $('#tableauSizeSpecOptionsContainer');
+            const preselected = window.preselectedTableauSizeOptionIds || [];
+
+            $container.empty();
+
+            if (!specs.length) {
+                $wrapper.addClass('d-none');
+                return;
+            }
+
+            specs.forEach(function (spec) {
+                const specId = spec.id;
+                const specLabel = spec.label || spec.name || ('Tableau Size #' + specId);
+                const options = spec.options || [];
+
+                if (!options.length) return;
+
+                const selectId = 'tableau_size_options_' + specId;
+
+                let html = `
+                <div class="mb-2 border rounded p-1">
+                    <input type="hidden" name="tableau_size_specification_ids[]" value="${escapeHtmlForSpec(specId)}">
+
+                    <label class="form-label mb-1" for="${escapeHtmlForSpec(selectId)}">
+                        ${escapeHtmlForSpec(specLabel)}
+                    </label>
+
+                    <select
+                        id="${escapeHtmlForSpec(selectId)}"
+                        name="tableau_size_options[${escapeHtmlForSpec(specId)}][]"
+                        class="form-select tableau-size-options-select"
+                        multiple>
+            `;
+
+                options.forEach(function (option) {
+                    const optionLabel = option.label || option.name || option.value || ('Option #' + option.id);
+                    const isSelected = preselected.includes(String(option.id));
+
+                    html += `
+                    <option
+                        value="${escapeHtmlForSpec(option.id)}"
+                        data-value="${escapeHtmlForSpec(option.value || '')}"
+                        data-price="${escapeHtmlForSpec(option.price || '')}"
+                        data-image-url="${escapeHtmlForSpec(option.image_url || '')}"
+                        ${isSelected ? 'selected' : ''}>
+                        ${escapeHtmlForSpec(optionLabel)}
+                    </option>
+                `;
+                });
+
+                html += `</select></div>`;
+
+                $container.append(html);
+            });
+
+            if (!$container.children().length) {
+                $wrapper.addClass('d-none');
+                return;
+            }
+
+            $wrapper.removeClass('d-none');
+
+            $('.tableau-size-options-select').each(function () {
+                const $select = $(this);
+
+                if ($select.data('select2')) {
+                    $select.select2('destroy');
+                }
+
+                $select.select2({
+                    width: '100%',
+                    placeholder: 'Choose Tableau Size Options',
+                    closeOnSelect: false,
+                    allowClear: true
+                });
+            });
+        }
+
+        function fetchTableauSizeSpecification() {
+            const $wrapper = $('#tableauSizeSpecWrapper');
+
+            if (typeof selectedProductIsTableau === 'function' && !selectedProductIsTableau()) {
+                $('#tableauSizeSpecOptionsContainer').empty();
+                $wrapper.addClass('d-none');
+                return;
+            }
+
+            const productIds = getSelectedIdsForSpec('#productsSelect');
+            const categoryIds = getSelectedIdsForSpec('#productsWithoutCategoriesSelect');
+
+            if (!productIds.length && !categoryIds.length) {
+                $('#tableauSizeSpecOptionsContainer').empty();
+                $wrapper.addClass('d-none');
+                return;
+            }
+
+            $.ajax({
+                url: "{{ route('tableau.specifications.size') }}",
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    product_ids: productIds,
+                    category_ids: categoryIds
+                },
+                success(response) {
+                    const specs = response?.data?.data || response?.data || [];
+                    renderTableauSizeSpecOptions(specs);
+                },
+                error(xhr) {
+                    console.error('Failed to load tableau_size options:', xhr.responseText);
+                    $('#tableauSizeSpecOptionsContainer').empty();
+                    $wrapper.addClass('d-none');
+                }
+            });
+        }
+
+        $(document).on('change', '#categoriesSelect, #productsSelect, #productsWithoutCategoriesSelect', function () {
+            fetchTableauSizeSpecification();
+        });
+
+        // Edit page loads #productsSelect asynchronously (via AJAX), so retry
+        // until it has settled instead of firing once on a fixed timeout.
+        $(document).ready(function () {
+            let attempts = 0;
+
+            function attemptFetch() {
+                const hasAnySelection =
+                    getSelectedIdsForSpec('#categoriesSelect').length ||
+                    getSelectedIdsForSpec('#productsSelect').length ||
+                    getSelectedIdsForSpec('#productsWithoutCategoriesSelect').length;
+
+                if (hasAnySelection || attempts > 10) {
+                    fetchTableauSizeSpecification();
+                    return;
+                }
+
+                attempts++;
+                setTimeout(attemptFetch, 200);
+            }
+
+            setTimeout(attemptFetch, 300);
+        });
+    </script>
     <script>
         Dropzone.autoDiscover = false;
         const templateDropzones = {

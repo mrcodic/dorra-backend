@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -72,5 +73,15 @@ class ProductSpecificationOption extends Model implements HasMedia
             return fmod($value, 1) == 0.0 ? (int)$value : $value;
 
         });
+    }
+    public function templates(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Template::class,
+            'product_specification_option_template',
+            'option_id',
+            'template_id',
+
+        );
     }
 }

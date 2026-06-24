@@ -238,4 +238,13 @@ class Template extends Model implements HasMedia
             ->nonQueued();
 
     }
+    public function specificationOptions(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            ProductSpecificationOption::class,
+            'product_specification_option_template',
+            'template_id',
+            'option_id',
+        );
+    }
 }

@@ -117,7 +117,31 @@ class ProductResource extends JsonResource
 
             'dimensions' => DimensionResource::collection($this->whenLoaded('dimensions')),
             'offer' => OfferResource::make($this->whenLoaded('lastOffer')),
-            'specs' => ProductSpecificationResource::collection($this->whenLoaded('specifications')),
+
+        'specs' => $this->whenLoaded('specifications', function () use ($request) {
+        $templateId = $request->get('template_id');
+        $tableauSizeOptionIds = $this->resolveTemplateSpecOptionIds($templateId);
+
+        $specifications = $this->specifications->map(function ($specification) use ($tableauSizeOptionIds) {
+            if (
+                $specification->fixed_key === 'tableau_size'
+                && !empty($tableauSizeOptionIds)
+                && $specification->relationLoaded('options')
+            ) {
+                $specification = clone $specification;
+                $specification->setRelation(
+                    'options',
+                    $specification->options
+                        ->filter(fn ($option) => in_array((int) $option->id, $tableauSizeOptionIds, true))
+                        ->values()
+                );
+            }
+
+            return $specification;
+        });
+
+        return ProductSpecificationResource::collection($specifications);
+    }),
             'is_saved' => $this->when(
                 $this->relationLoaded('saves') && is_null($this->deleted_at),
                 fn() => $this->saves->contains(fn($save) => $save->user_id === auth('sanctum')->id())
@@ -210,5 +234,28 @@ class ProductResource extends JsonResource
             'back_base64_preview_image' => $backPreviewImage,
             'template_model_image' => $media?->getUrl() ?: $template->getFirstMediaUrl('template_model_image'),
         ];
+    }
+
+    private function resolveTemplateSpecOptionIds(?string $templateId): array
+    {
+        if (!$templateId) {
+            return [];
+        }
+
+        static $cache = [];
+
+        if (array_key_exists($templateId, $cache)) {
+            return $cache[$templateId];
+        }
+
+        $ids = Template::query()
+            ->with('specificationOptions:id')
+            ->find($templateId)
+            ?->specificationOptions
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all() ?? [];
+
+        return $cache[$templateId] = $ids;
     }
 }

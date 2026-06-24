@@ -99,6 +99,9 @@ class StoreTemplateRequest extends BaseRequest
             'cut_margin' => ['sometimes', 'in:' . SafetyAreaEnum::getValuesAsString()],
 
             'tableau_scene_ids' => ['nullable', 'json'],
+            'tableau_size_options' => 'array',
+            'tableau_size_options.*' => 'array',
+            'tableau_size_options.*.*' => 'exists:product_specification_options,id',
         ];
     }
     public function messages(): array

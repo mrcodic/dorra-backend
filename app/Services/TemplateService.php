@@ -231,6 +231,14 @@ class TemplateService extends BaseService
                 $scenes = json_decode($validatedData['tableau_scene_ids'], true);
                 $model->tableauScenes()->sync($scenes);
             }
+            if (!empty($validatedData['tableau_size_options'])) {
+                $selectedOptionIds = collect($validatedData['tableau_size_options'])
+                    ->flatten()
+                    ->unique()
+                    ->values()
+                    ->all();
+                $model->specificationOptions()->sync($selectedOptionIds);
+            }
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->industries()->sync($validatedData['industry_ids'] ?? []);
             $model->categories()->sync($validatedData['category_ids'] ?? []);
@@ -247,8 +255,8 @@ class TemplateService extends BaseService
                     ]);
             }
 
-            if (isset($validatedData['template_image_front_id']) ) {
-            Media::where(function ($query) use ($validatedData) {
+            if (isset($validatedData['template_image_front_id'])) {
+                Media::where(function ($query) use ($validatedData) {
                     $query->whereKey($validatedData['template_image_front_id']);
                 })
                     ->update([
@@ -276,7 +284,7 @@ class TemplateService extends BaseService
             $model->types()->sync($validatedData['types']);
 
             if (!empty($mockupIds)) {
-                $pivotData = collect($mockupIds)->mapWithKeys(function ($mockupId)  {
+                $pivotData = collect($mockupIds)->mapWithKeys(function ($mockupId) {
                     return [
                         (int)$mockupId => [
                             'positions' => [],
@@ -347,7 +355,14 @@ class TemplateService extends BaseService
                 $scenes = json_decode($validatedData['tableau_scene_ids'], true);
                 $model->tableauScenes()->sync($scenes);
             }
-
+            if (!empty($validatedData['tableau_size_options'])) {
+                $selectedOptionIds = collect($validatedData['tableau_size_options'])
+                    ->flatten()
+                    ->unique()
+                    ->values()
+                    ->all();
+                $model->specificationOptions()->sync($selectedOptionIds);
+            }
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
             $modelTypesValues = $model->types->pluck('value.value')->toArray();
 
@@ -437,7 +452,7 @@ class TemplateService extends BaseService
                 }
             }
 
-            $mockupIds = collect($validatedData['mockup_ids'] ?? [])->map(fn ($id) => (int) $id);
+            $mockupIds = collect($validatedData['mockup_ids'] ?? [])->map(fn($id) => (int)$id);
             $existingMockupIds = $model->mockups->pluck('id');
 
             $newMockupIds = $mockupIds->diff($existingMockupIds);
@@ -496,27 +511,29 @@ class TemplateService extends BaseService
 
         return $model->load($relationsToLoad);
     }
+
     protected function buildMockupAttachPayload($mockupIds): array
     {
         return collect($mockupIds)
-            ->mapWithKeys(fn ($id) => [
-                (int) $id => [
+            ->mapWithKeys(fn($id) => [
+                (int)$id => [
                     'positions' => [],
                     'colors' => [],
                 ],
             ])
             ->toArray();
     }
-    protected function deleteGeneratedMockupMedia(Mockup $mockup,  $templateId): void
+
+    protected function deleteGeneratedMockupMedia(Mockup $mockup, $templateId): void
     {
         $mockup->getMedia('generated_mockups')
-            ->filter(fn ($media) =>
-                $media->getCustomProperty('template_id') == $templateId &&
+            ->filter(fn($media) => $media->getCustomProperty('template_id') == $templateId &&
                 $media->getCustomProperty('category_id') == $mockup->category_id
             )
             ->each
             ->delete();
     }
+
     public function updateEditorData($validatedData, $id, $relationsToLoad = [])
     {
         $model = $this->repository->update($validatedData, $id);
@@ -580,22 +597,23 @@ class TemplateService extends BaseService
         return $model->load($relationsToLoad);
     }
 
-    public function changeStatus($validatedData,$id)
+    public function changeStatus($validatedData, $id)
     {
         return $this->repository->update($validatedData, $id);
     }
+
     public function getProductTemplates($categoryId)
     {
-        $search = trim((string) request()->input('search', ''));
-        $tags   = array_filter((array) request()->input('tags'));
-        $types  = array_filter((array) request()->input('types'));
-        $productType  = request()->input('product_type');
-        $productIds  = array_filter((array) request()->input('product_ids'));
+        $search = trim((string)request()->input('search', ''));
+        $tags = array_filter((array)request()->input('tags'));
+        $types = array_filter((array)request()->input('types'));
+        $productType = request()->input('product_type');
+        $productIds = array_filter((array)request()->input('product_ids'));
 
         $recent = request()->boolean('recent');
         $templateOrderId = request()->input('template_order_id');
 
-        $categoryId = $categoryId ? (int) $categoryId : null;
+        $categoryId = $categoryId ? (int)$categoryId : null;
 
         return $this->repository->query()
             ->with([
@@ -652,13 +670,13 @@ class TemplateService extends BaseService
 //                            $sub->where('mockups.category_id', $categoryId);
 //                        });
                 });
-            })->when(!empty($productIds), function ($query) use ($productIds,$productType) {
+            })->when(!empty($productIds), function ($query) use ($productIds, $productType) {
                 if ($productType == 'product') {
 
                     $query->whereHas('products', function ($sub) use ($productIds) {
                         $sub->whereIn('products.id', $productIds);
                     });
-                }else{
+                } else {
                     $query->whereHas('categories', function ($sub) use ($productIds) {
                         $sub->whereIn('categories.id', $productIds);
                     });
@@ -955,11 +973,11 @@ class TemplateService extends BaseService
 
     public function searchTemplates($request)
     {
-        $search           = trim((string) ($request->search ?? ''));
+        $search = trim((string)($request->search ?? ''));
         $search = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], mb_strtolower($search));
 
         $filterCategoryId = request('category_id');
-        $filterProductId  = request('product_id');
+        $filterProductId = request('product_id');
 
         // Pre-check: does the requested category expand into products?
         $categoryHasProducts = false;
@@ -972,10 +990,10 @@ class TemplateService extends BaseService
         }
 
         $templates = Template::query()->
-            orderBy('name')->live()
+        orderBy('name')->live()
             ->select('id', 'name', 'use_front_as_back', 'approach')
             ->with([
-                'products' => function ($q) use ($filterProductId, $filterCategoryId, $categoryHasProducts,$cat) {
+                'products' => function ($q) use ($filterProductId, $filterCategoryId, $categoryHasProducts, $cat) {
                     $q->select('products.id', 'products.name', 'products.category_id');
 
                     if ($filterProductId) {
@@ -1005,12 +1023,12 @@ class TemplateService extends BaseService
                     $q->whereIn('tags.id', is_array($tags) ? $tags : [$tags]);
                 });
             })
-            ->when($filterCategoryId, function ($q) use ($filterCategoryId,$categoryHasProducts,$cat) {
+            ->when($filterCategoryId, function ($q) use ($filterCategoryId, $categoryHasProducts, $cat) {
                 if ($categoryHasProducts && $filterCategoryId) {
-                    $q->whereHas('products',function ($q)use ($cat){
+                    $q->whereHas('products', function ($q) use ($cat) {
                         $q->whereIn('products.id', $cat?->products->pluck('id')->toArray());
                     });
-                }else{
+                } else {
                     $q->whereHas('categories', function ($q) use ($filterCategoryId) {
                         $q->where('categories.id', $filterCategoryId);
                     });
@@ -1051,7 +1069,7 @@ class TemplateService extends BaseService
                 return \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
                     ->where('model_type', \App\Models\Mockup::class)
                     ->where('collection_name', 'generated_mockups')
-                    ->where('custom_properties->template_id', (string) $template->id)
+                    ->where('custom_properties->template_id', (string)$template->id)
                     ->where('custom_properties->model_image', 1)
                     ->whereExists(function ($query) use ($id, $type) {
                         $query->selectRaw(1)
@@ -1100,15 +1118,15 @@ class TemplateService extends BaseService
 
                     $media = $getMedia($product->id, 'product');
                     $rows->push([
-                        'template_id'          => $template->id,
-                        'template_name'        => $template->name,
-                        'template_image'       => $templateImage,
+                        'template_id' => $template->id,
+                        'template_name' => $template->name,
+                        'template_image' => $templateImage,
                         'template_model_image' => $media?->getUrl() ?: $template->getFirstMediaUrl('template_model_image'),
-                        'type'                 => 'product',
-                        'product_id'           => $product->id,
-                        'name'                 => $product->name,
-                        'is_has_category'      => 1,
-                        'category'             => $product->category?->only('id', 'name'),
+                        'type' => 'product',
+                        'product_id' => $product->id,
+                        'name' => $product->name,
+                        'is_has_category' => 1,
+                        'category' => $product->category?->only('id', 'name'),
                     ]);
                 }
             }
@@ -1123,15 +1141,15 @@ class TemplateService extends BaseService
 
                     $media = $getMedia($category->id, 'category');
                     $rows->push([
-                        'template_id'          => $template->id,
-                        'template_name'        => $template->name,
-                        'template_image'       => $templateImage,
+                        'template_id' => $template->id,
+                        'template_name' => $template->name,
+                        'template_image' => $templateImage,
                         'template_model_image' => $media?->getUrl() ?: $template->getFirstMediaUrl('template_model_image'),
-                        'type'                 => 'category',
-                        'product_id'           => $category->id,
-                        'name'                 => $category->name,
-                        'is_has_category'      => $category->is_has_category,
-                        'category'             => null,
+                        'type' => 'category',
+                        'product_id' => $category->id,
+                        'name' => $category->name,
+                        'is_has_category' => $category->is_has_category,
+                        'category' => null,
                     ]);
                 }
             }
@@ -1139,7 +1157,7 @@ class TemplateService extends BaseService
             return $rows;
         });
 
-        $page    = request()->input('page', 1);
+        $page = request()->input('page', 1);
         $perPage = $request->input('per_page', 15);
 
         return new \Illuminate\Pagination\LengthAwarePaginator(

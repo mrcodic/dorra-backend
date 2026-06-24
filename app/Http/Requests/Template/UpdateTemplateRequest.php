@@ -103,6 +103,9 @@ class UpdateTemplateRequest extends BaseRequest
 //            'colors.*.value' => ['sometimes','string'],
 //            'colors.*.image_id' => ['sometimes', 'integer', 'exists:media,id'],
             'tableau_scene_ids' => ['nullable', 'json'],
+            'tableau_size_options' => 'array',
+            'tableau_size_options.*' => 'array',
+            'tableau_size_options.*.*' => 'exists:product_specification_options,id',
 
         ];
     }
