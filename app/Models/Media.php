@@ -4,6 +4,7 @@ namespace App\Models;
 
 
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\Facades\Storage;
 
 class Media extends \Spatie\MediaLibrary\MediaCollections\Models\Media
 {
@@ -19,9 +20,20 @@ class Media extends \Spatie\MediaLibrary\MediaCollections\Models\Media
             $preview = Media::find($previewId);
 
             if ($preview && $preview->id !== $media->id) {
+
+                Storage::disk($preview->disk)->delete($preview->getPathRelativeToRoot());
+                
+                foreach ($preview->generated_conversions ?? [] as $conversion => $generated) {
+                    if ($generated) {
+                        Storage::disk($preview->conversions_disk ?? $preview->disk)
+                            ->delete($preview->getPath($conversion));
+                    }
+                }
+
                 $preview->delete();
             }
         });
+
         parent::booted();
     }
 
