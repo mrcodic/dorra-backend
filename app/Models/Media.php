@@ -3,9 +3,11 @@
 namespace App\Models;
 
 
+use App\Observers\MediaObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Facades\Storage;
-
+#[ObservedBy(MediaObserver::class)]
 class Media extends \Spatie\MediaLibrary\MediaCollections\Models\Media
 {
     protected static function booted()
