@@ -32,7 +32,24 @@ class StoreTemplateRequest extends BaseRequest
             'supported_languages.*' => ['nullable','in:en,ar'],
             'type' => ['sometimes', 'in:' . TypeEnum::getValuesAsString()],
             'product_ids' => ['nullable','required_with:product_with_category', 'array'],
-            'industry_ids' => ['nullable', 'array'],
+            'industry_ids' => [
+                'nullable',
+                'array',
+                function ($attribute, $value, $fail) {
+                    if (empty($value)) return;
+                    $submittedIds = array_map('intval', $value);
+                    $violatingParents = \App\Models\Industry::whereIn('id', $submittedIds)
+                        ->whereHas('children')
+                        ->whereDoesntHave('children', function ($q) use ($submittedIds) {
+                            $q->whereIn('id', $submittedIds); 
+                        })
+                        ->pluck('name', 'id');
+
+                    foreach ($violatingParents as $id => $name) {
+                        $fail("Industry \"{$name}\" requires at least one sub-industry to be selected.");
+                    }
+                },
+            ],
             'industry_ids.*' => ['integer', 'exists:industries,id'],
             'product_ids.*' => ['integer', 'exists:products,id'],
             'category_ids' => ['nullable', 'array'],
