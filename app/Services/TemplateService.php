@@ -151,9 +151,14 @@ class TemplateService extends BaseService
                 });
             })->when(request()->filled('industries'), function ($q) {
                 $industries = request('industries');
+                $industries = is_array($industries) ? $industries : [$industries];
+
                 $q->whereHas('industries', function ($q) use ($industries) {
-                    $q->whereIn('industries.id', is_array($industries) ? $industries : [$industries]);
-                });
+                    $q->whereIn('industries.id', $industries);
+                })
+                    ->whereDoesntHave('industries', function ($q) use ($industries) {
+                        $q->whereNotIn('industries.id', $industries);
+                    });
             })
             ->when(request()->filled('orientation'), function ($q) {
                 $q->whereOrientation(OrientationEnum::tryFrom(request('orientation')));
