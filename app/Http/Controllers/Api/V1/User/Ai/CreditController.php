@@ -228,9 +228,8 @@ class CreditController extends Controller
 
         if (!$tokensPerCredit || $tokensPerCredit <= 0) {
             return Response::api(
-                HttpEnum::UNPROCESSABLE_ENTITY,
-                null,
-                'tokens_per_credit setting is not configured'
+                statusCode: HttpEnum::UNPROCESSABLE_ENTITY,
+                message:'tokens_per_credit setting is not configured'
             );
         }
 
@@ -251,7 +250,7 @@ class CreditController extends Controller
             ];
         });
 
-        return Response::api(HttpEnum::OK, [
+        return Response::api(data: [
             'resolutions'       => $pricing,
             'tokens_per_credit' => $tokensPerCredit,
             'note'              => 'Points are deducted only after successful generation',
