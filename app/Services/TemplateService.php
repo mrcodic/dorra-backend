@@ -1012,7 +1012,10 @@ class TemplateService extends BaseService
                 'media',
             ])
             ->when(request()->filled('industries') || request()->filled('subindustries'), function ($q) {
-                $industries = request('industries') || request('subindustries');
+                $industries = array_merge(
+                    (array) request('industries', []),
+                    (array) request('subindustries', [])
+                );
                 $q->whereHas('industries', function ($q) use ($industries) {
                     $q->whereIn('industries.id', is_array($industries) ? $industries : [$industries]);
                 });
