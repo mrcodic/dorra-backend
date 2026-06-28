@@ -1013,24 +1013,9 @@ class TemplateService extends BaseService
             ])
             ->when(request()->filled('industries'), function ($q) {
                 $industries = request('industries');
-                $industries = is_array($industries) ? $industries : [$industries];
-                
-                $parentIds = \App\Models\Industry::whereIn('id', $industries)
-                    ->has('children')
-                    ->pluck('id')
-                    ->toArray();
-
-                $leafIds = array_diff($industries, $parentIds);
-
-                if (!empty($leafIds)) {
-                    $q->whereHas('industries', function ($q) use ($leafIds) {
-                        $q->whereIn('industries.id', $leafIds);
-                    });
-                } elseif (!empty($parentIds)) {
-                    $q->whereHas('industries', function ($q) use ($parentIds) {
-                        $q->whereIn('industries.parent_id', $parentIds);
-                    });
-                }
+                $q->whereHas('industries', function ($q) use ($industries) {
+                    $q->whereIn('industries.id', is_array($industries) ? $industries : [$industries]);
+                });
             })
             ->when(request()->filled('tags'), function ($q) {
                 $tags = request('tags');
