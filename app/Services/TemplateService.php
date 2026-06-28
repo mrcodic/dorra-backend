@@ -151,8 +151,22 @@ class TemplateService extends BaseService
                 });
             })->when(request()->filled('industries'), function ($q) {
                 $industries = request('industries');
-                $q->whereHas('industries', function ($q) use ($industries) {
-                    $q->whereIn('industries.id', is_array($industries) ? $industries : [$industries]);
+                $industries = is_array($industries) ? $industries : [$industries];
+                $expanded = \App\Models\Industry::where(function ($q) use ($industries) {
+                    $q->whereIn('parent_id', $industries)
+                    ->orWhereIn('id', $industries);
+                })
+                    ->whereNotIn('id', function ($sub) use ($industries) {
+                        $sub->select('parent_id')
+                            ->from('industries')
+                            ->whereNotNull('parent_id')
+                            ->whereIn('parent_id', $industries);
+                    })
+                    ->pluck('id')
+                    ->toArray();
+
+                $q->whereHas('industries', function ($q) use ($expanded) {
+                    $q->whereIn('industries.id', $expanded);
                 });
             })
             ->when(request()->filled('orientation'), function ($q) {
