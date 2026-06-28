@@ -13,6 +13,23 @@ use Illuminate\Support\Facades\Response;
 
 class CreditController extends Controller
 {
+    const RESOLUTIONS = [
+        [
+            'key'        => '1k_preview',
+            'label'      => '1K preview',
+            'tokens'     => 1120,
+        ],
+        [
+            'key'        => '2k_print',
+            'label'      => '2K print',
+            'tokens'     => 1120,
+        ],
+        [
+            'key'        => '4k_print',
+            'label'      => '4K print',
+            'tokens'     => 2000,
+        ],
+    ];
     public function status(Request $request)
     {
         $user = $request->user();
@@ -222,5 +239,33 @@ class CreditController extends Controller
         ]);
     }
 
+    public function imagePricing()
+    {
+        $tokensPerCredit = (float) setting('tokens_per_credit');
 
+        if (!$tokensPerCredit || $tokensPerCredit <= 0) {
+            return Response::api(
+                HttpEnum::UNPROCESSABLE_ENTITY,
+                null,
+                'tokens_per_credit setting is not configured'
+            );
+        }
+
+        $pricing = collect(self::RESOLUTIONS)->map(function ($resolution) use ($tokensPerCredit) {
+            $credits = (int) ceil($resolution['tokens'] / $tokensPerCredit);
+
+            return [
+                'key'        => $resolution['key'],
+                'label'      => $resolution['label'],
+                'tokens'     => $resolution['tokens'],
+                'credits'     => $credits,
+            ];
+        });
+
+        return Response::api(HttpEnum::OK, [
+            'resolutions'              => $pricing,
+            'tokens_per_credit'        => $tokensPerCredit,
+            'note'                     => 'Points are deducted only after successful generation',
+        ]);
+}
 }

@@ -210,6 +210,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
 
         Route::get('credits', [CreditController::class, 'status']);
         Route::post('credits/consume', [CreditController::class, 'generateImage']);
+        Route::get('image-generation/pricing', [CreditController::class, 'imagePricing']);
 
         Route::get('plans', PlanController::class);
         Route::post('plans/subscribe', [PlanController::class,'subscribe']);

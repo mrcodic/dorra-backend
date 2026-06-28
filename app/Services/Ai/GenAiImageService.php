@@ -8,13 +8,12 @@ use Illuminate\Support\Str;
 
 class GenAiImageService
 {
-    public const PRIMARY_MODEL = 'gemini-3-pro-image-preview';
+    public const PRIMARY_MODEL = 'gemini-3-pro-image';
 
     public const MODEL_CHAIN = [
         self::PRIMARY_MODEL,
+        'gemini-3.1-flash-image',
         'gemini-2.5-flash-image',
-        'gemini-1.5-flash',
-        'gemini-1.5-pro-latest',
     ];
 
     private int $perRequestCount = 1; // one image
