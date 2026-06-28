@@ -240,7 +240,7 @@ class CreditController extends Controller
         ];
 
         $pricing = collect($resolutions)->map(function ($resolution) use ($tokensPerCredit) {
-            $credits = (int) ceil($resolution['tokens'] / $tokensPerCredit);
+            $credits = (int) round($resolution['tokens'] / $tokensPerCredit);
 
             return [
                 'key'     => $resolution['key'],
