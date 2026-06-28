@@ -38,56 +38,19 @@ class BulkMockupController extends Controller
         ]);
 
         // -----------------------------------------------------------------------
-        // Check if mockup files changed since last job — force regenerate if so
+        // If mockup files changed since last job — wipe generated media so
+        // normal diff logic below re-renders everything fresh
         // -----------------------------------------------------------------------
         $lastJob = MockupGenerationJob::where('mockup_id', $mockup->id)
             ->whereIn('status', ['completed', 'completed_with_errors'])
             ->latest()
             ->first();
 
-        $mockupFilesChanged = $lastJob && $mockup->updated_at->gt($lastJob->created_at);
-
-        if ($mockupFilesChanged && $lastJob) {
-            $previousItems = BulkJobItem::where('bulk_job_id', $lastJob->id)
-                ->where('status', 'completed')
-                ->get();
-
-            if ($previousItems->isNotEmpty()) {
-                // Delete all existing generated mockups
-                $mockup->media()
-                    ->where('collection_name', 'generated_mockups')
-                    ->get()
-                    ->each(fn($media) => $media->delete());
-
-                $newJob = MockupGenerationJob::create([
-                    'mockup_id'       => $mockup->id,
-                    'status'          => 'processing',
-                    'total_count'     => $previousItems->count(),
-                    'completed_count' => 0,
-                    'failed_count'    => 0,
-                    'started_at'      => now(),
-                ]);
-
-                foreach ($previousItems as $item) {
-                    $newItem = BulkJobItem::create([
-                        'bulk_job_id' => $newJob->id,
-                        'template_id' => $item->template_id,
-                        'color'       => $item->color,
-                        'side'        => $item->side,
-                        'points'      => $item->points,
-                        'status'      => 'pending',
-                    ]);
-
-                    RenderMockupJob::dispatch($newJob, $newItem, $mockup);
-                }
-
-                return Response::api(data: [
-                    'success'     => true,
-                    'bulk_job_id' => $newJob->id,
-                    'total_count' => $previousItems->count(),
-                    'message'     => 'Mockup files changed. Full regeneration started.',
-                ]);
-            }
+        if ($lastJob && $mockup->updated_at->gt($lastJob->created_at)) {
+            $mockup->media()
+                ->where('collection_name', 'generated_mockups')
+                ->get()
+                ->each(fn($media) => $media->delete());
         }
 
         $templateIds = $request->input('template_ids');
@@ -205,7 +168,6 @@ class BulkMockupController extends Controller
                 $mergedPivotColors[$templateId] = [];
 
                 if ($positionsChanged) {
-                    // Delete existing model image for this template
                     $mockup->media()
                         ->where('collection_name', 'generated_mockups')
                         ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
@@ -265,7 +227,6 @@ class BulkMockupController extends Controller
                 'type'      => 'bulk',
             ];
 
-            // only store colors in pivot if sent
             if ($hasColors) {
                 $pivotEntry['colors'] = $mergedPivotColors[$templateId] ?? $colors;
             }
@@ -294,7 +255,7 @@ class BulkMockupController extends Controller
             ]);
         }
 
-        if ($totalCount === 0 && count($removedTemplateIds) > 0 ) {
+        if ($totalCount === 0 && count($removedTemplateIds) > 0) {
             return Response::api(data: [
                 'success'              => true,
                 'bulk_job_id'          => null,
