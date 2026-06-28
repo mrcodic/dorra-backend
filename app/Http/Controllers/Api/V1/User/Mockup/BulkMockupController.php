@@ -37,6 +37,59 @@ class BulkMockupController extends Controller
             'positions.*.p4y'  => ['required', 'numeric'],
         ]);
 
+        // -----------------------------------------------------------------------
+        // Check if mockup files changed since last job — force regenerate if so
+        // -----------------------------------------------------------------------
+        $lastJob = MockupGenerationJob::where('mockup_id', $mockup->id)
+            ->whereIn('status', ['completed', 'completed_with_errors'])
+            ->latest()
+            ->first();
+
+        $mockupFilesChanged = $lastJob && $mockup->updated_at->gt($lastJob->created_at);
+
+        if ($mockupFilesChanged && $lastJob) {
+            $previousItems = BulkJobItem::where('bulk_job_id', $lastJob->id)
+                ->where('status', 'completed')
+                ->get();
+
+            if ($previousItems->isNotEmpty()) {
+                // Delete all existing generated mockups
+                $mockup->media()
+                    ->where('collection_name', 'generated_mockups')
+                    ->get()
+                    ->each(fn($media) => $media->delete());
+
+                $newJob = MockupGenerationJob::create([
+                    'mockup_id'       => $mockup->id,
+                    'status'          => 'processing',
+                    'total_count'     => $previousItems->count(),
+                    'completed_count' => 0,
+                    'failed_count'    => 0,
+                    'started_at'      => now(),
+                ]);
+
+                foreach ($previousItems as $item) {
+                    $newItem = BulkJobItem::create([
+                        'bulk_job_id' => $newJob->id,
+                        'template_id' => $item->template_id,
+                        'color'       => $item->color,
+                        'side'        => $item->side,
+                        'points'      => $item->points,
+                        'status'      => 'pending',
+                    ]);
+
+                    RenderMockupJob::dispatch($newJob, $newItem, $mockup);
+                }
+
+                return Response::api(data: [
+                    'success'     => true,
+                    'bulk_job_id' => $newJob->id,
+                    'total_count' => $previousItems->count(),
+                    'message'     => 'Mockup files changed. Full regeneration started.',
+                ]);
+            }
+        }
+
         $templateIds = $request->input('template_ids');
 
         $positions = collect($request->input('positions'))
@@ -241,7 +294,7 @@ class BulkMockupController extends Controller
             ]);
         }
 
-        if ($totalCount === 0 && count($removedTemplateIds) > 0) {
+        if ($totalCount === 0 && count($removedTemplateIds) > 0 ) {
             return Response::api(data: [
                 'success'              => true,
                 'bulk_job_id'          => null,

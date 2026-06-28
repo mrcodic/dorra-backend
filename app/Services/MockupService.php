@@ -462,6 +462,7 @@ class MockupService extends BaseService
                     mediaId: request()->input($inputName),
                     model: $model,
                     collectionName: 'mockups');
+                $model->touch();
             }
 
         });
@@ -564,6 +565,8 @@ class MockupService extends BaseService
                         mediaId: request()->input($inputName),
                         model: $model,
                         collectionName: 'mockups');
+                    $model->touch();
+
                 }
 
 
