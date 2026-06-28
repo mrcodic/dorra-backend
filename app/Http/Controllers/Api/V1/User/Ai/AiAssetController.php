@@ -34,7 +34,7 @@ class AiAssetController extends Controller
             ]]);
         $media = handleMediaUploads($request->file('file'),$request->user(),'ai_assets',
             makeTransparent: true,
-            fuzzPercent: 12);
+            fuzzPercent: 25);
         return Response::api(data: MediaResource::make($media)->response()->getData(true));
 
    }

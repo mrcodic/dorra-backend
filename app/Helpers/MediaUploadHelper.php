@@ -25,7 +25,7 @@ if (!function_exists('handleMediaUploads')) {
         bool $clearExisting = false,
         $columns = null,
         bool $makeTransparent = false,
-        ?string $transparentColor = null,
+        ?string $transparentColor = '#FFFFFF',
         float $fuzzPercent = 10
     ) {
         if (empty($files)) {
