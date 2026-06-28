@@ -145,7 +145,7 @@ if (!function_exists('handleMediaUploads')) {
                 return $file;
             }
 
-            if (!in_array($mimeType, ['image/jpeg', 'image/png'], true)) {
+            if (!in_array($mimeType, ['image/jpg','image/jpeg', 'image/png'], true)) {
                 return $file;
             }
 
