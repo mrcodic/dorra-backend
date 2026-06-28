@@ -152,21 +152,14 @@ class TemplateService extends BaseService
             })->when(request()->filled('industries'), function ($q) {
                 $industries = request('industries');
                 $industries = is_array($industries) ? $industries : [$industries];
-                $expanded = \App\Models\Industry::where(function ($q) use ($industries) {
-                    $q->whereIn('parent_id', $industries)
-                    ->orWhereIn('id', $industries);
-                })
-                    ->whereNotIn('id', function ($sub) use ($industries) {
-                        $sub->select('parent_id')
-                            ->from('industries')
-                            ->whereNotNull('parent_id')
-                            ->whereIn('parent_id', $industries);
-                    })
+
+                $leafIds = \App\Models\Industry::whereIn('id', $industries)
+                    ->whereDoesntHave('children')
                     ->pluck('id')
                     ->toArray();
 
-                $q->whereHas('industries', function ($q) use ($expanded) {
-                    $q->whereIn('industries.id', $expanded);
+                $q->whereHas('industries', function ($q) use ($leafIds) {
+                    $q->whereIn('industries.id', $leafIds);
                 });
             })
             ->when(request()->filled('orientation'), function ($q) {
