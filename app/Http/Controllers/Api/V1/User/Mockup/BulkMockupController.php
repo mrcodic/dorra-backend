@@ -249,11 +249,11 @@ class BulkMockupController extends Controller
 
         $totalCount = count($renderJobs) * count($sides);
 
-        if ($totalCount === 0 && count($removedTemplateIds) === 0) {
-            throw ValidationException::withMessages([
-                'changes' => ['Please change position or add color.'],
-            ]);
-        }
+//        if ($totalCount === 0 && count($removedTemplateIds) === 0) {
+//            throw ValidationException::withMessages([
+//                'changes' => ['Please change position or add color.'],
+//            ]);
+//        }
 
         if ($totalCount === 0 && count($removedTemplateIds) > 0) {
             return Response::api(data: [
