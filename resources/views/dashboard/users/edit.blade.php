@@ -30,6 +30,14 @@
 {{-- Page Css files --}}
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/extensions/ext-component-sweet-alerts.css')) }}">
+<style>
+    .app-user-view-account .card-body {
+        min-height: auto;
+    }
+    .app-user-view-account .tab-pane {
+        height: auto;
+    }
+</style>
 @endsection
 
 @section('content')
@@ -38,7 +46,7 @@
         <!-- User Sidebar -->
         <div class="col-xl-4 col-lg-5 col-md-5 order-1 order-md-0 h-100">
             <!-- User Card -->
-            <div class="card h-100">
+            <div class="card">
                 <div class="card-body">
                     <div class="d-flex flex-column gap-1 my-1">
                         <div class="d-flex align-items-center gap-1">
@@ -547,6 +555,16 @@
 
 @section('page-script')
 <script>
+    // when switching tabs
+    $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+        const target = $(e.target).attr('href');
+        const $card = $('.app-user-view-account .col-xl-8 .card');
+        if (target === '#tab1') {
+            $card.addClass('h-100');
+        } else {
+            $card.removeClass('h-100');
+        }
+    });
     handleAjaxFormSubmit(".addExtraCredits", {
         closeModal: true,
         successMessage: "Extra credits added successfully.",
