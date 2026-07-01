@@ -32,10 +32,9 @@ class CreditOrderService extends BaseService
                     $query->whereRaw('1 = 0');
                 }
             })->when(request()->filled('created_at'), function ($query) {
-                $query->whereDate('credit_orders.created_at', request('created_at'));
+                $query->orderBy('created_at', request('created_at'));
             })
-            ->orderBy('credit_orders.created_at', 'desc');
-
+            ->latest();
 
         return DataTables::of($creditOrders)
             ->addColumn('added_date', function ($creditOrder) {
