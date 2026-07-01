@@ -343,7 +343,7 @@
                                          @foreach(\App\Enums\Template\StatusEnum::cases() as $status)
                                          <option value="{{ $status->value }}" @selected($status==$model->
                                             status)>}}
-                                         $status->label() }}</option>
+                                        {{ $status->label() }}</option>
                                          @endforeach
                                          </select>
                                          </div>
