@@ -16,6 +16,11 @@ class GenAiImageService
         'gemini-2.5-flash-image',
     ];
 
+    // Appended to the prompt when a transparent background is requested.
+    // The Gemini image API has no dedicated "transparent background" config
+    // parameter, so this is enforced via explicit prompt instruction instead.
+    private const TRANSPARENT_BG_INSTRUCTION = "Generate the subject isolated on a fully transparent background (alpha channel, PNG). Do not add any background color, backdrop, canvas fill, shadow, or reflection behind the subject — only the subject itself should be opaque.";
+
     private int $perRequestCount = 1; // one image
     private int $chunk = 1;
 
@@ -32,7 +37,7 @@ class GenAiImageService
     {
     }
 
-    public function generate(string $prompt, ?string $negativePrompt = null): array
+    public function generate(string $prompt, ?string $negativePrompt = null, bool $transparentBackground = false): array
     {
         if (config('app.ai_fake_mode')) {
             return $this->fakeGenerate($prompt, $negativePrompt);
@@ -43,6 +48,10 @@ class GenAiImageService
         $instruction = $neg !== ''
             ? $prompt . "\n\nNegative prompt: " . $neg
             : $prompt;
+
+        if ($transparentBackground) {
+            $instruction .= "\n\n" . self::TRANSPARENT_BG_INSTRUCTION;
+        }
 
         $images = [];
         $usedModel = null;
