@@ -402,7 +402,7 @@
     </div>
 
     <!--/ User Content -->
-    </div>
+   
 
 
     <div class="modal fade" id="teamAccessModal" tabindex="-1" aria-labelledby="teamAccessModalLabel"
