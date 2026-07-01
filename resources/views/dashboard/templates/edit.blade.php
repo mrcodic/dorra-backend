@@ -341,9 +341,9 @@
                                          <select id="statusSelect" name="status" class="form-select select2">
                                          <option value="" disabled selected>Choose status</option>
                                          @foreach(\App\Enums\Template\StatusEnum::cases() as $status)
-                                         <option value="{{ $status->value }}" @selected($status==$model->
-                                            status)>}}
-                                        {{ $status->label() }}</option>
+                                         <option value="{{ $status->value }}"
+                                             @selected($status==$model->status)> {{ $status->label() }}
+                                         </option>
                                          @endforeach
                                          </select>
                                          </div>
