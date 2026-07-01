@@ -2574,10 +2574,10 @@
                     window.open(response.data.mockup_redirect_url);
 
                 }
-                setTimeout(function () {
-                    const params = new URLSearchParams(window.location.search);
-                    window.location.href = '/product-templates?' + params.toString();
-                }, 1000);
+                // setTimeout(function () {
+                //     const params = new URLSearchParams(window.location.search);
+                //     window.location.href = '/product-templates?' + params.toString();
+                // }, 1000);
             }
         });
 

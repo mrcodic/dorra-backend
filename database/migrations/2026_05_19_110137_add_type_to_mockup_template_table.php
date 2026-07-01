@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('mockup_template', function (Blueprint $table) {
-            $table->enum('type', ['single', 'bulk'])->default('single');
+            $table->enum('type', ['single', 'bulk'])->nullable()->default('single');
         });
     }
 
