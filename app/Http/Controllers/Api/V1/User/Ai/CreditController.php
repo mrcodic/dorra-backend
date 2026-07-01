@@ -114,7 +114,7 @@ class CreditController extends Controller
 
         /** ================= AI CALL ================= */
         try {
-            $res = $genAiImageService->generate($data['prompt'], $data['negative_prompt'] ?? null);
+            $res = $genAiImageService->generate($data['prompt'], $data['negative_prompt'] ?? null,true);
         } catch (\Throwable $e) {
             DB::transaction(function () use ($user, $reserved,$data) {
                 $lockedUser = $user->newQuery()->lockForUpdate()->findOrFail($user->id);
