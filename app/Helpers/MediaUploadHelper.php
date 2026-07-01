@@ -15,6 +15,7 @@ if (!function_exists('getMediaCollectionName')) {
 
     }
 }
+
 if (!function_exists('handleMediaUploads')) {
     function handleMediaUploads(
         $files,
@@ -199,6 +200,30 @@ if (!function_exists('handleMediaUploads')) {
                     );
                 }
 
+                /*
+                 * Flood fill only removes background connected to the corners.
+                 * Enclosed regions (e.g. the holes inside letters like "d", "o", "a")
+                 * are topologically sealed off and never get touched by flood fill,
+                 * no matter how many corners are seeded. Do a second, global pass:
+                 * paint any pixel still matching a target background color transparent,
+                 * regardless of connectivity. Dedup target colors first to avoid
+                 * redundant passes over the whole image.
+                 */
+                $uniqueTargets = [];
+
+                foreach ($targetColors as $color) {
+                    $uniqueTargets[$color->getColorAsString()] = $color;
+                }
+
+                foreach ($uniqueTargets as $color) {
+                    $imagick->transparentPaintImage(
+                        $color,
+                        0,
+                        $fuzzAbs,
+                        false
+                    );
+                }
+
                 // Clean alpha and force PNG output
                 $imagick->setImageFormat('png');
 
@@ -292,6 +317,7 @@ if (!function_exists('handleMediaUploads')) {
         return count($uploaded) === 1 ? $uploaded->first() : $uploaded;
     }
 }
+
 if (!function_exists('clearMediaCollections')) {
     function clearMediaCollections($modelData, ?array $collections = []): void
     {
