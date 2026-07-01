@@ -16,10 +16,13 @@ class GenAiImageService
         'gemini-2.5-flash-image',
     ];
 
-    // Appended to the prompt when a transparent background is requested.
-    // The Gemini image API has no dedicated "transparent background" config
-    // parameter, so this is enforced via explicit prompt instruction instead.
-    private const TRANSPARENT_BG_INSTRUCTION = "Generate the subject isolated on a fully transparent background (alpha channel, PNG). Do not add any background color, backdrop, canvas fill, shadow, or reflection behind the subject — only the subject itself should be opaque.";
+    // Gemini's image models do not reliably output a real alpha channel — when asked
+    // for a "transparent background" they sometimes paint a literal gray/black
+    // checkerboard pattern into the RGB pixels instead (mimicking how editors *display*
+    // transparency, rather than actually emitting alpha). Asking for a solid, known
+    // background color is far more reliable, and we convert that to real transparency
+    // afterward via handleMediaUploads()'s Imagick-based post-processing.
+    private const SOLID_BG_INSTRUCTION = "Generate the subject centered on a single flat solid white background (#FFFFFF), completely uniform with no gradient, no shadow, no texture, and no pattern of any kind behind the subject.";
 
     private int $perRequestCount = 1; // one image
     private int $chunk = 1;
@@ -50,7 +53,7 @@ class GenAiImageService
             : $prompt;
 
         if ($transparentBackground) {
-            $instruction .= "\n\n" . self::TRANSPARENT_BG_INSTRUCTION;
+            $instruction .= "\n\n" . self::SOLID_BG_INSTRUCTION;
         }
 
         $images = [];
