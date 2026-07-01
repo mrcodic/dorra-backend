@@ -346,7 +346,7 @@
                             @endforelse
                         </div>
 
-                        <div class="tab-pane fade" id="tab5">
+                        <div class="tab-pane fade d-flex flex-column align-items-center gap-1" id="tab5">
 
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h5 class="mb-0">Extra Credits History</h5>
