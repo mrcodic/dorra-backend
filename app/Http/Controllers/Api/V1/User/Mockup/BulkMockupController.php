@@ -255,17 +255,17 @@ class BulkMockupController extends Controller
 //            ]);
 //        }
 
-        if ($totalCount === 0 && count($removedTemplateIds) > 0) {
-            return Response::api(data: [
-                'success'              => true,
-                'bulk_job_id'          => null,
-                'total_count'          => 0,
-                'rendered_jobs'        => 0,
-                'sync_only'            => true,
-                'removed_template_ids' => array_values($removedTemplateIds),
-                'message'              => 'Templates updated successfully. No rendering needed.',
-            ]);
-        }
+//        if ($totalCount === 0 && count($removedTemplateIds) > 0) {
+//            return Response::api(data: [
+//                'success'              => true,
+//                'bulk_job_id'          => null,
+//                'total_count'          => 0,
+//                'rendered_jobs'        => 0,
+//                'sync_only'            => true,
+//                'removed_template_ids' => array_values($removedTemplateIds),
+//                'message'              => 'Templates updated successfully. No rendering needed.',
+//            ]);
+//        }
 
         $bulkJob = MockupGenerationJob::create([
             'mockup_id'       => $mockup->id,
