@@ -15,7 +15,6 @@ if (!function_exists('getMediaCollectionName')) {
 
     }
 }
-
 if (!function_exists('handleMediaUploads')) {
     function handleMediaUploads(
         $files,
@@ -100,37 +99,34 @@ if (!function_exists('handleMediaUploads')) {
             }
         };
 
-        // reads the 4 corner pixels of the image and returns the most common one as a hex color.
-        // corners are the most reliable signal for "background color" without knowing the image upfront.
-        $detectBackgroundColor = static function (\Imagick $imagick) {
-            $width = $imagick->getImageWidth();
-            $height = $imagick->getImageHeight();
+        // Samples a small patch of pixels around a point and averages it down to one color.
+        // More resistant to JPEG noise / anti-aliasing than reading a single raw pixel.
+        // IMPORTANT: must always be called on an image that has NOT yet been flood-filled,
+        // otherwise it can read back an already-transparent/painted pixel instead of the
+        // real original background color.
+        $sampleColor = static function (\Imagick $img, int $cx, int $cy, int $w, int $h) {
+            $size = 5;
+            $x0 = max(0, min($cx - intdiv($size, 2), max($w - 1, 0)));
+            $y0 = max(0, min($cy - intdiv($size, 2), max($h - 1, 0)));
+            $sw = max(1, min($size, $w - $x0));
+            $sh = max(1, min($size, $h - $y0));
 
-            $corners = [
-                [0, 0],
-                [$width - 1, 0],
-                [0, $height - 1],
-                [$width - 1, $height - 1],
-            ];
+            $clone = clone $img;
+            $clone->cropImage($sw, $sh, $x0, $y0);
+            $clone->resizeImage(1, 1, \Imagick::FILTER_BOX, 1);
 
-            $hexes = [];
+            $pixel = $clone->getImagePixelColor(0, 0);
 
-            foreach ($corners as [$x, $y]) {
-                $pixel = $imagick->getImagePixelColor($x, $y);
-                $color = $pixel->getColor();
-                $hexes[] = sprintf('#%02X%02X%02X', $color['r'], $color['g'], $color['b']);
-            }
+            $clone->clear();
+            $clone->destroy();
 
-            $counts = array_count_values($hexes);
-            arsort($counts);
-
-            return array_key_first($counts);
+            return $pixel;
         };
 
         // makes the background of an image transparent and converts it to PNG.
         // if no color is given, it auto-detects it from the image corners.
         // skips svg (vector) and non-image files. falls back to original file on any failure.
-        $applyTransparency = static function ($file) use ($makeTransparent, $transparentColor, $fuzzPercent, $detectBackgroundColor) {
+        $applyTransparency = static function ($file) use ($makeTransparent, $transparentColor, $fuzzPercent, $sampleColor) {
             if (!$makeTransparent) {
                 return $file;
             }
@@ -145,7 +141,7 @@ if (!function_exists('handleMediaUploads')) {
                 return $file;
             }
 
-            if (!in_array($mimeType, ['image/jpg','image/jpeg', 'image/png'], true)) {
+            if (!in_array($mimeType, ['image/jpg', 'image/jpeg', 'image/png'], true)) {
                 return $file;
             }
 
@@ -181,15 +177,22 @@ if (!function_exists('handleMediaUploads')) {
                     [$width - 1, $height - 1],
                 ];
 
-                foreach ($corners as [$x, $y]) {
-                    $targetColor = $transparentColor
-                        ? new \ImagickPixel($transparentColor)
-                        : $imagick->getImagePixelColor($x, $y);
+                // Capture ALL target colors up front, from the untouched original image.
+                // Doing this before any flood fill prevents later corners from sampling
+                // pixels that earlier corners already painted transparent.
+                $targetColors = [];
 
+                foreach ($corners as $i => [$x, $y]) {
+                    $targetColors[$i] = $transparentColor
+                        ? new \ImagickPixel($transparentColor)
+                        : $sampleColor($imagick, $x, $y, $width, $height);
+                }
+
+                foreach ($corners as $i => [$x, $y]) {
                     $imagick->floodFillPaintImage(
                         $transparent,
                         $fuzzAbs,
-                        $targetColor,
+                        $targetColors[$i],
                         $x,
                         $y,
                         false
