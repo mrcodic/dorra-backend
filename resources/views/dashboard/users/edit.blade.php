@@ -319,7 +319,7 @@
 
                         </div>
                         <!-- tab 4 content -->
-                        <div class="tab-pane fade d-flex flex-column align-items-center gap-1" id="tab4">
+                        <div class="tab-pane fade " id="tab4">
                             <!-- Total Reviews Section -->
                             @forelse($model->ownerTeams as $team)
                             <!-- left: Icon and Info -->
@@ -356,7 +356,7 @@
 
                         <div class="tab-pane fade" id="tab5">
 
-                            <div class="d-flex justify-content-between align-items-center ">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h5 class="mb-0">Extra Credits History</h5>
 
                                 <button type="button"
