@@ -46,7 +46,7 @@
         <!-- User Sidebar -->
         <div class="col-xl-4 col-lg-5 col-md-5 order-1 order-md-0 h-100">
             <!-- User Card -->
-            <div class="card">
+            <div class="card h-100">
                 <div class="card-body">
                     <div class="d-flex flex-column gap-1 my-1">
                         <div class="d-flex align-items-center gap-1">
@@ -87,7 +87,7 @@
 
         <!-- User Content -->
         <div class="col-xl-8 col-lg-7 col-md-7 order-0 order-md-1 h-100">
-            <div class="card h-100">
+            <div class="card">
                 <div class="card-body">
                     <ul class="nav nav-tabs border-bottom-0">
                         <li class="nav-item">
