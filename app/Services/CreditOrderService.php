@@ -20,7 +20,6 @@ class CreditOrderService extends BaseService
 
     public function getData(): JsonResponse
     {
-
         $creditOrders = $this->repository
             ->query()
             ->with(['plan', 'user'])
@@ -31,10 +30,11 @@ class CreditOrderService extends BaseService
                 } else {
                     $query->whereRaw('1 = 0');
                 }
-            })->when(request()->filled('created_at'), function ($query) {
-                $query->orderBy('created_at', request('created_at'));
             })
-            ->latest();
+            ->when(request()->filled('created_at'), function ($query) {
+                $query->whereDate('credit_orders.created_at', request('created_at'));
+            })
+            ->orderBy('credit_orders.created_at', 'desc');
 
         return DataTables::of($creditOrders)
             ->addColumn('added_date', function ($creditOrder) {
@@ -53,7 +53,6 @@ class CreditOrderService extends BaseService
             })
             ->make(true);
     }
-
     /**
      * @throws \Exception
      */
