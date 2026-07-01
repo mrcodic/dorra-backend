@@ -35,6 +35,8 @@ const dt_user_table = $(".credit-order-list-table").DataTable({
         {
             data: "plan.name",
             name: "plan.name",
+            orderable: false,
+            searchable: false,
             render: function (data, type, row) {
                 return data ?? "-";
             }
@@ -42,18 +44,26 @@ const dt_user_table = $(".credit-order-list-table").DataTable({
         {
             data: "amount",
             name: "amount",
+            orderable: false,
+            searchable: false,
         },
         {
             data: "credits",
             name: "credits",
+            orderable: false,
+            searchable: false,
         },
         {
             data: "user.name",
             name: "user.name",
+            orderable: false,
+            searchable: false,
         },
 
         {
             data: "status",
+            orderable: false,
+            searchable: false,
             render: function (data, type, row) {
                 if (!data) return "-";
 

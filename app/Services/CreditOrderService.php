@@ -35,7 +35,7 @@ class CreditOrderService extends BaseService
                 $query->whereDate('credit_orders.created_at', request('created_at'));
             })
             ->orderBy('credit_orders.created_at', 'desc');
-           
+
 
         return DataTables::of($creditOrders)
             ->addColumn('added_date', function ($creditOrder) {
