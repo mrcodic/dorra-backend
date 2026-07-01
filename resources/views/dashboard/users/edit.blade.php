@@ -87,7 +87,7 @@
 
         <!-- User Content -->
         <div class="col-xl-8 col-lg-7 col-md-7 order-0 order-md-1 h-100">
-            <div class="card">
+            <div class="card h-100">
                 <div class="card-body">
                     <ul class="nav nav-tabs border-bottom-0">
                         <li class="nav-item">
@@ -356,6 +356,9 @@
 
                         <div class="tab-pane fade" id="tab5">
 
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0">Extra Credits History</h5>
+
                                 <button type="button"
                                         class="btn btn-primary"
                                         data-bs-toggle="modal"
@@ -398,6 +401,10 @@
                             </div>
 
                         </div>
+
+
+                    </div>
+                </div>
             </div>
         </div>
     </div>
