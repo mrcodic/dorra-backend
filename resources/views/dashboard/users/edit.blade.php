@@ -97,6 +97,12 @@
                             <a class="nav-link custom-tab" data-bs-toggle="tab" href="#tab4"
                                 style="font-size: 14px;">Teams</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link custom-tab" data-bs-toggle="tab" href="#tab5"
+                               style="font-size: 14px;">
+                                Extra Credits
+                            </a>
+                        </li>
 
                     </ul>
                     <div class="tab-content mt-3">
@@ -340,6 +346,55 @@
                             @endforelse
                         </div>
 
+                        <div class="tab-pane fade" id="tab5">
+
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0">Extra Credits History</h5>
+
+                                <button type="button"
+                                        class="btn btn-primary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#addExtraCreditModal">
+                                    Add Extra Credits
+                                </button>
+                            </div>
+
+                            <div class="card border rounded-3 p-1">
+                                @if($model->extraCredits->count())
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Amount</th>
+                                                <th>Added By</th>
+                                                <th>Date</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @foreach($model->extraCredits as $i => $credit)
+                                                <tr>
+                                                    <td>{{ $i + 1 }}</td>
+                                                    <td class="fw-bold">{{ $credit->amount }}</td>
+                                                    <td>
+                                                        {{ $credit->admin?->name ?? 'System' }}
+                                                    </td>
+                                                    <td>{{ $credit->created_at?->format('d/m/Y') }}</td>
+                                                </tr>
+                                            @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @else
+                                    <div class="text-center p-3 text-muted">
+                                        No extra credits history yet.
+                                    </div>
+                                @endif
+                            </div>
+
+                        </div>
+
+
                     </div>
                 </div>
             </div>
@@ -424,6 +479,44 @@
         </div>
     </div>
 
+    <div class="modal fade" id="addExtraCreditModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Extra Credits</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+                </div>
+
+                <form method="POST" action="{{ route("users.extra-credits",$model->id) }}" class="addExtraCredits">
+                    @csrf
+
+                    <div class="modal-body">
+                        <div class="mb-2">
+                            <label class="form-label">Amount</label>
+                            <input type="number"
+                                   name="amount"
+                                   class="form-control"
+                                   min="1"
+                                   step="1"
+                                   required
+                                   value="1">
+                            <small class="text-muted">This will be added as extra credits for the user.</small>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
 </section>
 
 
@@ -454,6 +547,13 @@
 
 @section('page-script')
 <script>
+    handleAjaxFormSubmit(".addExtraCredits", {
+        closeModal: true,
+        successMessage: "Extra credits added successfully.",
+        onSuccess:function () {
+            location.reload()
+        }
+    })
     Dropzone.autoDiscover = false;
 
         const editDropzone = new Dropzone("#edit-user-dropzone", {
