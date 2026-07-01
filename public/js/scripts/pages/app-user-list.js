@@ -70,8 +70,18 @@ var dt_user_table = $(".user-list-table").DataTable({
         },
         { data: "joined_date" },
         { data: "orders_count" },
-        { data: "used_credits" },
-        { data: "available_credits" },
+        {
+            data: "used_credits",
+            orderable: false,
+            searchable: false,
+        }
+
+        ,
+        {
+            data: "available_credits",
+            orderable: false,
+            searchable: false,
+        },
         {
             data: "id",
             orderable: false,
