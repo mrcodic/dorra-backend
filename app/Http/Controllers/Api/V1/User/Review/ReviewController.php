@@ -38,7 +38,7 @@ class ReviewController extends Controller
     }
     public function statistics($id)
     {
-        return Response::api(data: $this->reviewService->statistics($id));
+        return Response::api(data: $this->reviewService->statistics((int) $id));
 
     }
 
