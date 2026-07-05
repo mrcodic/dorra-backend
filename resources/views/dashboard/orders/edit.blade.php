@@ -201,7 +201,7 @@
                                 filled($orderItemPreview) =>
                                     $orderItemPreview,
 
-                                $isDesign && $orderItem->itemable->linked_to_mockup =>
+                                $isDesign && $orderItem->itemable->mockup_id =>
                                     $orderItem->itemable->getFirstMediaUrl('front-mockup-designs')
                                     ?: $orderItem->itemable->getFirstMediaUrl('none-mockup-designs')
                                     ?: $orderItem->itemable->getFirstMediaUrl('back-mockup-designs'),
