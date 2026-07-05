@@ -181,15 +181,11 @@ class ProductResource extends JsonResource
             ];
         }
 
-        $categoryId = (int) (
-        $request->get('product_without_category_id')
-            ?: $this->category_id
-            ?: Product::query()->find($request->get('product_id'))?->category_id
-        );
+        $categoryId = (int) $this->category_id;
 
-        $productId = (int) $request->get('product_id') ?? $this->id;
+        $productId = (int)  $this->id;
 
-        $baseQuery = Media::query()
+        $media = Media::query()
             ->where('model_type', \App\Models\Mockup::class)
             ->where('collection_name', 'generated_mockups')
             ->where('custom_properties->template_id', (string) $template->id)
@@ -201,6 +197,15 @@ class ProductResource extends JsonResource
                     ->whereNull('mockups.deleted_at')
                     ->when($categoryId, fn ($q) => $q->where('mockups.category_id', $categoryId));
             })
+            ->where(function ($query) use ($categoryId, $productId) {
+                if ($categoryId) {
+                    $query->where('custom_properties->category_id', $categoryId);
+                }
+
+                if ($productId) {
+                    $query->orWhereJsonContains('custom_properties->product_ids', $productId);
+                }
+            })
             ->when($productId, function ($query) use ($productId) {
                 $query->whereExists(function ($query) use ($productId) {
                     $query->selectRaw(1)
@@ -208,23 +213,9 @@ class ProductResource extends JsonResource
                         ->whereColumn('mockup_product.mockup_id', 'media.model_id')
                         ->where('mockup_product.product_id', $productId);
                 });
-            });
-
-// 1. Prefer a mockup image tied specifically to this product
-        $media = $productId
-            ? (clone $baseQuery)
-                ->whereJsonContains('custom_properties->product_ids', $productId)
-                ->latest('id')
-                ->first()
-            : null;
-
-// 2. Fall back to the category-generic image only if no product-specific one exists
-        if (!$media && $categoryId) {
-            $media = (clone $baseQuery)
-                ->where('custom_properties->category_id', $categoryId)
-                ->latest('id')
-                ->first();
-        }
+            })
+            ->latest('id')
+            ->first();
 
         $backPreviewImage = $template->use_front_as_back
             ? $template->getFirstMediaUrl('templates-preview')
