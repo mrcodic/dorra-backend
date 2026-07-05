@@ -235,8 +235,8 @@
                     <div class="row mb-2">
                         <div class="col-md-12">
                             <label for="amount" class="form-label">Amount</label>
-                            <input type="number" name="amount" id="amount" value="{{ setting('tax') }}"
-                                   class="form-control" placeholder="e.g. 10"/>
+                            <input type="text" name="amount" id="amount" value="{{ setting('tax') }}"
+                                   class="form-control" placeholder="e.g. 0.1"/>
                         </div>
                     </div>
 
