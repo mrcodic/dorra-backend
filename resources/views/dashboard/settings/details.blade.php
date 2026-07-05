@@ -48,6 +48,7 @@
             <button class="btn profile-tab" data-target="tab2">Social Media Platforms</button>
             <button class="btn profile-tab" data-target="tab4">Order Format</button>
             <button class="btn profile-tab" data-target="tab5">Ai Credits</button>
+            <button class="btn profile-tab" data-target="tab6">Tax Amount</button>
         </div>
 
         {{-- Right Side: Tab Content --}}
@@ -218,6 +219,24 @@
                             <label for="prefix" class="form-label">Free Credits Limit</label>
                             <input type="text" name="free_credits_limit" id="prefix" value="{{ setting('free_credits_limit') }}"
                                    class="form-control" placeholder="e.g. 50"/>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-2">
+                        <button class="btn btn-outline-secondary me-1" type="reset">Discard Changes</button>
+                        <button class="btn btn-primary" type="submit">Save</button>
+                    </div>
+                </form>
+            </div>
+            <div id="tab6" class="tab-section">
+                <form class="profileSettingsForm" method="post" action="{{ route('settings-edit-details') }}">
+                    @csrf
+                    <h4 class="mb-2">Tax Amount</h4>
+                    <div class="row mb-2">
+                        <div class="col-md-12">
+                            <label for="amount" class="form-label">Amount</label>
+                            <input type="number" name="amount" id="amount" value="{{ setting('tax') }}"
+                                   class="form-control" placeholder="e.g. 10"/>
                         </div>
                     </div>
 

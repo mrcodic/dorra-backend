@@ -42,6 +42,7 @@ class SettingController extends Controller
             'phone' => ['sometimes','string','max:20','regex:/^\+?[0-9\s().-]{7,20}$/'],
             'store_email' => ['sometimes','string','max:254','email:rfc'],
             'order_format' => ['sometimes','string','max:5'],
+            'tax' => ['sometimes','numeric','min:0','max:100'],
             'free_credits_limit' => ['sometimes','numeric','min:0'],
             'tokens_per_credit' => ['sometimes','numeric','min:0'],
         ], [
@@ -49,7 +50,7 @@ class SettingController extends Controller
             'store_email.email'  => 'Enter a valid email address (e.g. support@example.com).',
         ]);
 
-        $keys = ['phone','store_email','order_format','free_credits_limit','tokens_per_credit'];
+        $keys = ['phone','store_email','order_format','free_credits_limit','tokens_per_credit','tax'];
 
 
         $payload = collect($keys)
