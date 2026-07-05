@@ -30,6 +30,7 @@ class TemplateResource extends JsonResource
         $templateId = $this->id;
 
         $categoryId = (int)(request('product_without_category_id') ?? Product::find(request('product_id'))?->category_id);
+        $productId = Product::find(request('product_id'));
         $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::query()
             ->where('model_type', \App\Models\Mockup::class)
             ->where('collection_name', 'generated_mockups')
@@ -198,6 +199,11 @@ class TemplateResource extends JsonResource
             }),
             'template_colors' => $this->mockups()
                 ->whereCategoryId($categoryId)
+                ->when($productId,function ($q)use ($productId){
+                    $q->whereHas('products', function ($productQuery) use ($productId) {
+                        $productQuery->whereKey((int) $productId);
+                    });
+                })
                 ->whereNull('mockups.deleted_at')
                 ->with('templates:id')
                 ->get()
