@@ -145,7 +145,7 @@
                                 ?: $orderItem->getFirstMediaUrl('order_item_previews');
 
                             $previewImage = match (true) {
-                                filled($orderItemPreview) =>
+                                filled($orderItemPreview)  && !$isDesign =>
                                     $orderItemPreview,
 
                                 $isDesign && $orderItem->itemable->linked_to_mockup =>
