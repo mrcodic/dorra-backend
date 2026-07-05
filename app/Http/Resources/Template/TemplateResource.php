@@ -59,7 +59,7 @@ class TemplateResource extends JsonResource
                         ->whereColumn('mockup_product.mockup_id', 'media.model_id')
                         ->where('mockup_product.product_id', (int)request('product_id'));
                 })
-            )
+            )->latest()
             ->first();
 
         $categoryId = Product::find(request('product_id'))?->category?->id ?? request('product_without_category_id');
