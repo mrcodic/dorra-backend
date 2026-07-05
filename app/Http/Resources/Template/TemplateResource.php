@@ -202,7 +202,7 @@ class TemplateResource extends JsonResource
                 ->when($productId,function ($q)use ($productId){
                     $q->whereHas('products', function ($productQuery) use ($productId) {
                         $productQuery->whereKey((int) $productId);
-                    })
+                    });
                 })
                 ->whereNull('mockups.deleted_at')
                 ->with('templates:id')
