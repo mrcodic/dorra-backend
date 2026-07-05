@@ -234,8 +234,8 @@
                     <h4 class="mb-2">Tax Amount</h4>
                     <div class="row mb-2">
                         <div class="col-md-12">
-                            <label for="amount" class="form-label">Amount</label>
-                            <input type="text" name="amount" id="amount" value="{{ setting('tax') }}"
+                            <label for="tax" class="form-label">Amount</label>
+                            <input type="text" name="tax" id="tax" value="{{ setting('tax') }}"
                                    class="form-control" placeholder="e.g. 0.1"/>
                         </div>
                     </div>
