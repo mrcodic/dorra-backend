@@ -34,7 +34,7 @@ class OrderItemResource extends JsonResource
                 $isTemplate  = $this->itemable && $this->itemable instanceof \App\Models\Template;
 
                 return match (true) {
-                    filled($orderItemPreview) =>
+                    filled($orderItemPreview)  && !$isDesign =>
                     $orderItemPreview,
 
                     $isDesign && $this->itemable->linked_to_mockup =>
