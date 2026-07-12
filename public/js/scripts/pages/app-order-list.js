@@ -38,10 +38,29 @@ var dt_user_table = $(".order-list-table").DataTable({
             orderable: false,
             searchable: false,
             render: (row) =>
-                `<div style="display:flex;align-items:center;gap:6px;">
+                `<div style="position:relative;display:inline-block;width:40px;height:40px;">
             <img src="${row.first_order_item_image}" alt="Product Image"
                  style="width:40px;height:40px;object-fit:cover;border-radius:50%;border:1px solid #ccc;" />
-            ${row.order_items_count > 1 ? `<span class="badge bg-secondary">${row.order_items_count}</span>` : ''}
+            ${row.order_items_count > 1
+                    ? `<span style="
+                    position:absolute;
+                    top:-6px;
+                    right:-6px;
+                    background:#dc3545;
+                    color:#fff;
+                    font-size:11px;
+                    font-weight:600;
+                    min-width:18px;
+                    height:18px;
+                    line-height:18px;
+                    text-align:center;
+                    border-radius:50%;
+                    padding:0 4px;
+                    border:2px solid #fff;
+                    box-shadow:0 0 2px rgba(0,0,0,0.3);
+                ">${row.order_items_count}</span>`
+                    : ''
+                }
         </div>`,
         },
         { data: "order_number" },
