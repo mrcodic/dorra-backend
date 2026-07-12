@@ -311,6 +311,7 @@
                                 <input type="checkbox" id="select-all-checkbox" class="form-check-input">
                             </th>
 
+                            <th>Order Image</th>
                             <th>Order Number</th>
                             <th>Customer</th>
                             <th>Items</th>

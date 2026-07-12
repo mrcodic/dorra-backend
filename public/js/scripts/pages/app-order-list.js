@@ -33,6 +33,11 @@ var dt_user_table = $(".order-list-table").DataTable({
                  data-shipment-status="${shipStatus}">`;
             }
         },
+        {
+            data: "first_order_item_image",
+            render: (src) =>
+                `<img src="${src}" alt="Product Image" style="width:40px;height:40px;object-fit:cover;border-radius:50%;border:1px solid #ccc;" />`,
+        },
         { data: "order_number" },
         { data: "user_name" },
         { data: "items" },

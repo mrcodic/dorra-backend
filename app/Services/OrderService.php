@@ -114,6 +114,9 @@ class OrderService extends BaseService
             ->latest();
 
         return DataTables::of($orders)
+            ->addColumn('first_order_item_image', function ($order) {
+                return $order->orderItems()->first()->orderable?->getMainImageUrl() ?? '-';
+            })
             ->addColumn('order_number', function ($order) {
                 return $order->order_number ?? '-';
             })
