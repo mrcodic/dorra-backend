@@ -37,11 +37,11 @@ var dt_user_table = $(".order-list-table").DataTable({
             data: null,
             render: (row) =>
                 `<div style="display:flex;align-items:center;gap:6px;">
-        <img src="${row.first_order_item_image}" alt="Product Image"
-             style="width:40px;height:40px;object-fit:cover;border-radius:50%;border:1px solid #ccc;" />
-        ${row.order_items_count > 1 ? `<span class="badge bg-secondary">${row.order_items_count}</span>` : ''}
-    </div>`
-        },
+            <img src="${row.first_order_item_image}" alt="Product Image"
+                 style="width:40px;height:40px;object-fit:cover;border-radius:50%;border:1px solid #ccc;" />
+            <span class="badge bg-secondary">${row.order_items_count}</span>
+        </div>`,
+        }
         { data: "order_number" },
         { data: "user_name" },
         { data: "items" },
