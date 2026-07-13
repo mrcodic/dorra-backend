@@ -26,17 +26,27 @@ class FortifyServiceProvider extends ServiceProvider
             return new class implements LoginResponseContract {
                 public function toResponse($request)
                 {
-                    $nav   = app(AclNavigator::class);
-                    $user  = $request->user();
-                    $target = $nav->firstAllowedUrl($user) ?? route('dashboard');
+                    $nav  = app(AclNavigator::class);
+                    $user = $request->user();
+
+                    $intendedUrl = session()->pull('url.intended');
+
+                    $target = null;
+
+                    if ($intendedUrl && $nav->userCanAccessUrl($user, $intendedUrl)) {
+                        $target = $intendedUrl;
+                    }
+
+                    $target = $target ?? $nav->firstAllowedUrl($user) ?? route('dashboard');
+
                     if ($request->wantsJson() || $request->expectsJson()) {
                         return response()->json(['redirect' => $target], 200);
                     }
-                    return redirect()->intended($target);
+
+                    return redirect()->to($target);
                 }
             };
         });
-
     }
 
     /**
