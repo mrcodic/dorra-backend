@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Models\Location;
+use App\Models\OrderItem;
 use App\Repositories\Interfaces\InventoryRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Services\OrderService;
@@ -226,5 +228,9 @@ class OrderController extends DashboardController
         return response()->json(['html' => $html]);
     }
 
+    public function downloadProductionFile(OrderItem $orderItem)
+    {
+        return $this->orderService->downloadProductionFile($orderItem);
+    }
 
 }

@@ -148,6 +148,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::get('/data', [OrderController::class, 'getData'])->name('data');
             Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
             Route::get('/pdf', 'downloadPDF')->name('pdf');
+            Route::get('/order-items/{orderItem}/production-file', 'downloadProductionFile')
+                ->name('order-items.production-file.download');
         });
         Route::resource('/orders', OrderController::class);
 

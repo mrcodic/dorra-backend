@@ -29,7 +29,10 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\{Auth, Cache, DB, Log};
 use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\Facades\DataTables;
-
+use Milon\Barcode\Facades\DNS2DFacade as DNS2D;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use ZipArchive;
 
 class OrderService extends BaseService
 {
@@ -89,7 +92,7 @@ class OrderService extends BaseService
             ->when(request('status'), function ($query) {
                 $query->where('status', request('status'));
             })
-            ->with(['orderItems', 'orderItems.specs','orderItems.itemable.media'])
+            ->with(['orderItems', 'orderItems.specs', 'orderItems.itemable.media'])
             ->firstOrFail();
     }
 
@@ -665,8 +668,7 @@ class OrderService extends BaseService
             ]);
         }
 
-        if ($selectedPaymentMethod->code == 'cash_on_delivery' && $allDownload)
-        {
+        if ($selectedPaymentMethod->code == 'cash_on_delivery' && $allDownload) {
             throw ValidationException::withMessages([
                 'paymentMethod' => 'You cannot use this payment method because all items with type download.',
             ]);
@@ -692,23 +694,23 @@ class OrderService extends BaseService
         }
         $subTotal = round(
             $cart->items->sum(function ($item) {
-                $hasOffer = (float) optional($item->cartable?->lastOffer)->getRawOriginal('value') > 0;
+                $hasOffer = (float)optional($item->cartable?->lastOffer)->getRawOriginal('value') > 0;
 
                 if ($hasOffer) {
-                    return (float) $item->sub_total_after_offer;
+                    return (float)$item->sub_total_after_offer;
                 }
 
-                return max(0, (float) $item->sub_total - (float) ($item->discount_amount ?? 0));
+                return max(0, (float)$item->sub_total - (float)($item->discount_amount ?? 0));
             }),
             2
         );
         $isGeneralDiscount = $discountCode?->scope === \App\Enums\DiscountCode\ScopeEnum::GENERAL;
 
-        $orderLevelDiscountCode   = $isGeneralDiscount ? $discountCode : null;
+        $orderLevelDiscountCode = $isGeneralDiscount ? $discountCode : null;
         // create order + items + address inside transaction
         $order = $this->handleTransaction(
             function () use (
-                $cart, $orderLevelDiscountCode ,
+                $cart, $orderLevelDiscountCode,
                 $subTotal, $request, $idempotencyKey, $allDownload
             ) {
                 return $this->createOrderFromCart(
@@ -762,16 +764,15 @@ class OrderService extends BaseService
 
         foreach ($cart->items as $cartItem) {
             $orderItem = $order->orderItems
-                ->first(fn ($item) =>
-                    isset($item->cart_item_id)
-                    && (int) $item->cart_item_id === (int) $cartItem->id
+                ->first(fn($item) => isset($item->cart_item_id)
+                    && (int)$item->cart_item_id === (int)$cartItem->id
                 );
 
             if (!$orderItem) {
                 $orderItem = $order->orderItems
                     ->where('itemable_type', $cartItem->itemable_type)
                     ->where('itemable_id', $cartItem->itemable_id)
-                    ->reject(fn ($item) => in_array($item->id, $usedOrderItemIds, true))
+                    ->reject(fn($item) => in_array($item->id, $usedOrderItemIds, true))
                     ->first();
             }
 
@@ -786,8 +787,8 @@ class OrderService extends BaseService
                 ->where('collection_name', 'generated_mockups')
                 ->where(function ($query) use ($cartItem) {
                     $query
-                        ->where('custom_properties->cart_item_id', (string) $cartItem->id)
-                        ->orWhere('custom_properties->cart_item_id', (int) $cartItem->id);
+                        ->where('custom_properties->cart_item_id', (string)$cartItem->id)
+                        ->orWhere('custom_properties->cart_item_id', (int)$cartItem->id);
                 })
                 ->latest('id')
                 ->first();
@@ -797,27 +798,29 @@ class OrderService extends BaseService
             }
 
             $orderItem->getMedia('order_item_mockups')
-                ->filter(fn ($m) =>
-                    (string) $m->getCustomProperty('cart_item_id') === (string) $cartItem->id
+                ->filter(fn($m) => (string)$m->getCustomProperty('cart_item_id') === (string)$cartItem->id
                 )
-                ->each(fn ($m) => $m->delete());
+                ->each(fn($m) => $m->delete());
 
             $newMedia = $media->copy($orderItem, 'order_item_mockups');
 
-            $newMedia->setCustomProperty('template_id',   $media->getCustomProperty('template_id'));
-            $newMedia->setCustomProperty('category_id',   $media->getCustomProperty('category_id'));
-            $newMedia->setCustomProperty('cart_item_id',  $cartItem->id);
+            $newMedia->setCustomProperty('template_id', $media->getCustomProperty('template_id'));
+            $newMedia->setCustomProperty('category_id', $media->getCustomProperty('category_id'));
+            $newMedia->setCustomProperty('cart_item_id', $cartItem->id);
             $newMedia->setCustomProperty('order_item_id', $orderItem->id);
-            $newMedia->setCustomProperty('order_id',      $order->id);
+            $newMedia->setCustomProperty('order_id', $order->id);
 
             $newMedia->save();
         }
-    }    /**
+    }
+
+    /**
      * Creates order + items + specs + address/pickup from the cart.
      */
     protected function createOrderFromCart(
         $cart, $discountCode, $subTotal, $request, string $idempotencyKey, $allDownload
-    ) {
+    )
+    {
         $order = $this->repository->query()->create(
             array_merge(
                 OrderData::fromCart($subTotal, $discountCode, $cart),
@@ -826,12 +829,12 @@ class OrderService extends BaseService
         );
         // order items
         $orderItems = $order->orderItems()->createMany(
-            $cart->items->map(function ($item) use($cart){
-                $hasOffer   = $item->hasActiveOffer();
+            $cart->items->map(function ($item) use ($cart) {
+                $hasOffer = $item->hasActiveOffer();
                 $hasDiscount = !$hasOffer && $item->discount_code_id !== null;
 
                 if ($hasOffer) {
-                    $subTotal       = (float) $item->sub_total;
+                    $subTotal = (float)$item->sub_total;
                     $discountCodeId = null;
                     $cart->load('items.discountCode');
 
@@ -839,32 +842,32 @@ class OrderService extends BaseService
                         || $cart->items->contains(fn($item) => $item->discountCode()->exists());
 
                     $discountAmount = $cartHasDiscount ? null : $item->offerAmount;
-                    Log::info("offer",[$discountAmount]);
+                    Log::info("offer", [$discountAmount]);
                 } elseif ($hasDiscount) {
-                    $subTotal       = max(0, (float) $item->sub_total);
+                    $subTotal = max(0, (float)$item->sub_total);
                     $discountCodeId = $item->discount_code_id;
-                    $discountAmount = (float) ($item->discount_amount ?? 0);
+                    $discountAmount = (float)($item->discount_amount ?? 0);
 
                 } else {
-                    $subTotal       = (float) $item->sub_total;
+                    $subTotal = (float)$item->sub_total;
                     $discountCodeId = null;
                     $discountAmount = 0;
                 }
 
                 return [
-                    'orderable_id'     => $item->cartable_id,
-                    'orderable_type'   => $item->cartable_type,
-                    'quantity'         => $item->quantity,
-                    'product_price'    => $item->product_price,
-                    'itemable_id'      => $item->itemable_id,
-                    'itemable_type'    => $item->itemable_type,
-                    'specs_price'      => $item->specs_price,
-                    'sub_total'        => $subTotal,
+                    'orderable_id' => $item->cartable_id,
+                    'orderable_type' => $item->cartable_type,
+                    'quantity' => $item->quantity,
+                    'product_price' => $item->product_price,
+                    'itemable_id' => $item->itemable_id,
+                    'itemable_type' => $item->itemable_type,
+                    'specs_price' => $item->specs_price,
+                    'sub_total' => $subTotal,
                     'discount_code_id' => $discountCodeId,
-                    'discount_amount'  => $discountAmount,
+                    'discount_amount' => $discountAmount,
                     'product_price_id' => $item->product_price_id,
-                    'color'            => $item->color,
-                    'type'             => $item->type,
+                    'color' => $item->color,
+                    'type' => $item->type,
                 ];
             })->toArray()
         );
@@ -890,7 +893,7 @@ class OrderService extends BaseService
                 });
             }
         });
-        if (!$allDownload){
+        if (!$allDownload) {
             // address / pickup
             $order->orderAddress()->create(
                 OrderAddressData::fromRequest($request)
@@ -922,10 +925,10 @@ class OrderService extends BaseService
                 $items->first()->discountCode?->increment('used', $items->count());
             });
         $cart->items()->delete();
-        if ($cart->discountCode ) {
+        if ($cart->discountCode) {
             $cart->discountCode?->increment('used');
         }
-        if ($cart->discountCode?->show_for_new_registered_users){
+        if ($cart->discountCode?->show_for_new_registered_users) {
             auth('sanctum')->user()->update(['discount_code_id' => null]);
         }
 
@@ -1048,4 +1051,125 @@ class OrderService extends BaseService
         }
     }
 
+
+    public function downloadProductionFile($orderItem)
+    {
+        $itemable = $orderItem->itemable;
+
+        if (!$itemable || !$itemable->types) {
+            abort(404, 'No design types found for this item.');
+        }
+
+        $isDesign = get_class($itemable) === \App\Models\Design::class;
+
+        $generatedPaths = [];
+
+        foreach ($itemable->types as $type) {
+            $label = $type->value->label();
+
+            $useTemplate = $isDesign && $itemable->template?->approach === 'without_editor';
+            $downloadUrl = ($useTemplate ? $itemable->template : $itemable)->getImageUrlForType($label);
+
+            if (!$downloadUrl) {
+                continue;
+            }
+
+            // 2. load original print file
+            $imageContents = @file_get_contents($downloadUrl);
+
+            if (!$imageContents) {
+                continue;
+            }
+
+            // 3. QR points directly to order show page
+            $qrUrl = route('orders.show', $orderItem->order_id);
+            $qrBase64 = DNS2D::getBarcodePNG($qrUrl, 'QRCODE', 6, 6);
+            $qrBlob = base64_decode($qrBase64);
+
+            // 4. build canvas: same width, original height + footer
+            $original = new \Imagick();
+            $original->readImageBlob($imageContents);
+            $original->setImageFormat('png');
+
+            $width = $original->getImageWidth();
+            $height = $original->getImageHeight();
+            $footerHeight = 160;
+
+            $canvas = new \Imagick();
+            $canvas->newImage($width, $height + $footerHeight, new \ImagickPixel('white'));
+            $canvas->setImageFormat('png');
+
+            // 5. place original design at top
+            $canvas->compositeImage($original, \Imagick::COMPOSITE_OVER, 0, 0);
+
+            // 6. QR on footer strip
+            $qr = new \Imagick();
+            $qr->readImageBlob($qrBlob);
+            $qrSize = 130;
+            $qr->resizeImage($qrSize, $qrSize, \Imagick::FILTER_LANCZOS, 1);
+            $qrX = 30;
+            $qrY = $height + (int)(($footerHeight - $qrSize) / 2);
+            $canvas->compositeImage($qr, \Imagick::COMPOSITE_OVER, $qrX, $qrY);
+
+            // 7. order info text next to QR
+            $draw = new \ImagickDraw();
+            $draw->setFillColor(new \ImagickPixel('black'));
+            $draw->setFontSize(22);
+
+            $lines = [
+                'Order #: ' . $orderItem->order->order_number,
+                'Item: ' . ($itemable->name ?? 'N/A'),
+                'Type: ' . $label,
+                'Qty: ' . $orderItem->quantity,
+            ];
+
+            $textX = $qrX + $qrSize + 40;
+            $textY = $height + 35;
+            foreach ($lines as $i => $line) {
+                $canvas->annotateImage($draw, $textX, $textY + ($i * 28), 0, $line);
+            }
+
+            // 9. save generated file to a temp working dir
+            $filename = "{$label}_" . Str::random(6) . '.png';
+            $tempDir = storage_path('app/temp_production_files');
+            if (!is_dir($tempDir)) {
+                mkdir($tempDir, 0755, true);
+            }
+            $fullPath = $tempDir . '/' . $filename;
+            $canvas->writeImage($fullPath);
+
+            $generatedPaths[$label] = $fullPath;
+
+            $canvas->clear();
+            $original->clear();
+            $qr->clear();
+        }
+
+        if (empty($generatedPaths)) {
+            abort(404, 'No production files could be generated.');
+        }
+
+        // 10. direct download — single file or zip if multiple types
+        if (count($generatedPaths) === 1) {
+            $path = array_values($generatedPaths)[0];
+            return response()->download($path, "order_{$orderItem->order_id}_item_{$orderItem->id}.png")
+                ->deleteFileAfterSend(true);
+        }
+
+        $zipName = "order_{$orderItem->order_id}_item_{$orderItem->id}_production.zip";
+        $zipPath = storage_path("app/temp_production_files/{$zipName}");
+
+        $zip = new ZipArchive();
+        $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+        foreach ($generatedPaths as $label => $path) {
+            $zip->addFile($path, "{$label}.png");
+        }
+        $zip->close();
+
+        return response()->download($zipPath, $zipName)->deleteFileAfterSend(true)->deleteFileCallback(function () use ($generatedPaths) {
+            foreach ($generatedPaths as $path) {
+                @unlink($path);
+            }
+        });
+    }
 }

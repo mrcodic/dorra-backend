@@ -274,8 +274,15 @@
                                                         Download with Color
                                                     </a>
                                                 @endif
+
+                                                <a href="{{ route('orders.order-items.production-file.download', $orderItem->id) }}"
+                                                   class="btn btn-sm btn-outline-dark mt-1">
+                                                    <i data-feather="printer" class="me-25"></i>
+                                                    Download Production File with QR
+                                                </a>
                                             </div>
-                                        @endforeach                                    </div>
+                                        @endforeach
+                                    </div>
                                 </div>
                             @endif
                         </div>
