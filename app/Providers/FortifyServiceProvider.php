@@ -38,10 +38,10 @@ class FortifyServiceProvider extends ServiceProvider
                     }
 
                     $target = $target ?? $nav->firstAllowedUrl($user) ?? route('dashboard');
+//                    if ($request->wantsJson() || $request->expectsJson()) {
+//                        return response()->json(['redirect' => $target], 200);
+//                    }
 
-                    if ($request->wantsJson() || $request->expectsJson()) {
-                        return response()->json(['redirect' => $target], 200);
-                    }
 
                     return redirect()->to($target);
                 }
