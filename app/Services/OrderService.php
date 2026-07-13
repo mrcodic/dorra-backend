@@ -1081,7 +1081,7 @@ class OrderService extends BaseService
             }
 
             // 3. QR points directly to order show page
-            $qrUrl = route('orders.show', $orderItem->order_id);
+            $qrUrl = route('orders.show', $orderItem->jobTickets()->first()?->id);
             $qrBase64 = DNS2D::getBarcodePNG($qrUrl, 'QRCODE', 6, 6);
             $qrBlob = base64_decode($qrBase64);
 

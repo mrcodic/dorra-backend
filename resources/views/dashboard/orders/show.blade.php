@@ -222,7 +222,8 @@
                             @if($orderItem->itemable?->types)
                                 <div class="d-flex flex-column mt-1">
                                     <p style="color: #424746; margin: 0; font-size: 16px">Designs:</p>
-                                    <div class="d-flex flex-wrap align-items-center gap-1 justify-content-between mt-50">
+                                    <div
+                                        class="d-flex flex-wrap align-items-center gap-1 justify-content-between mt-50">
                                         @foreach($orderItem->itemable->types as $type)
                                             @php
                                                 $itemable      = $orderItem->itemable;
@@ -275,12 +276,15 @@
                                                     </a>
                                                 @endif
 
+
+                                            </div>
+                                            @if($model->status == \App\Enums\Order\StatusEnum::CONFIRMED)
                                                 <a href="{{ route('orders.order-items.production-file.download', $orderItem->id) }}"
                                                    class="btn btn-sm btn-outline-dark mt-1">
                                                     <i data-feather="printer" class="me-25"></i>
                                                     Download Production File with QR
                                                 </a>
-                                            </div>
+                                            @endif
                                         @endforeach
                                     </div>
                                 </div>
