@@ -169,6 +169,7 @@
     handleAjaxFormSubmit(".auth-login-form",{
         successMessage: "You are Logged in Successfully",
         onSuccess:function (res) {
+            console.log("res",res)
             if (res && res.redirect) {
                 window.location.href = res.redirect;
             } else {
