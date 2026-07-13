@@ -1050,14 +1050,17 @@ class OrderService extends BaseService
             $order->orderItems()->attach($pivotData);
         }
     }
-
-
-    public function downloadProductionFile($orderItem)
+    
+    public function downloadProductionFile(OrderItem $orderItem, string $variant = 'original')
     {
         $itemable = $orderItem->itemable;
 
         if (!$itemable || !$itemable->types) {
             abort(404, 'No design types found for this item.');
+        }
+
+        if ($variant === 'colored' && !$orderItem->color) {
+            abort(404, 'This item has no color assigned.');
         }
 
         $isDesign = get_class($itemable) === \App\Models\Design::class;
@@ -1068,24 +1071,37 @@ class OrderService extends BaseService
             $label = $type->value->label();
 
             $useTemplate = $isDesign && $itemable->template?->approach === 'without_editor';
-            $downloadUrl = ($useTemplate ? $itemable->template : $itemable)->getImageUrlForType($label);
-            if (!$downloadUrl) {
+            $plainUrl = ($useTemplate ? $itemable->template : $itemable)->getImageUrlForType($label);
+
+            // Admin explicitly chose which source to use
+            $sourceUrl = $plainUrl;
+
+            if ($variant === 'colored') {
+                $coloredUrl = $orderItem->getMedia('order_item_previews')
+                    ->first(fn($m) => $m->getCustomProperty('type') == $label)
+                    ?->getUrl();
+
+                if (!$coloredUrl) {
+                    continue; // no colored version for this type, skip it
+                }
+
+                $sourceUrl = $coloredUrl;
+            }
+
+            if (!$sourceUrl) {
                 continue;
             }
 
-            // 2. load original print file
-            $imageContents = @file_get_contents($downloadUrl);
+            $imageContents = @file_get_contents($sourceUrl);
 
             if (!$imageContents) {
                 continue;
             }
 
-            // 3. QR points directly to order show page
-            $qrUrl = route('jobs.show', $orderItem->jobTickets()->first()?->id);
+            $qrUrl = route('orders.show', $orderItem->order_id);
             $qrBase64 = DNS2D::getBarcodePNG($qrUrl, 'QRCODE', 6, 6);
             $qrBlob = base64_decode($qrBase64);
 
-            // 4. build canvas: same width, original height + footer
             $original = new \Imagick();
             $original->readImageBlob($imageContents);
             $original->setImageFormat('png');
@@ -1097,11 +1113,8 @@ class OrderService extends BaseService
             $canvas = new \Imagick();
             $canvas->newImage($width, $height + $footerHeight, new \ImagickPixel('white'));
             $canvas->setImageFormat('png');
-
-            // 5. place original design at top
             $canvas->compositeImage($original, \Imagick::COMPOSITE_OVER, 0, 0);
 
-            // 6. QR on footer strip
             $qr = new \Imagick();
             $qr->readImageBlob($qrBlob);
             $qrSize = 130;
@@ -1110,7 +1123,6 @@ class OrderService extends BaseService
             $qrY = $height + (int)(($footerHeight - $qrSize) / 2);
             $canvas->compositeImage($qr, \Imagick::COMPOSITE_OVER, $qrX, $qrY);
 
-            // 7. order info text next to QR
             $draw = new \ImagickDraw();
             $draw->setFillColor(new \ImagickPixel('black'));
             $draw->setFontSize(22);
@@ -1122,13 +1134,16 @@ class OrderService extends BaseService
                 'Qty: ' . $orderItem->quantity,
             ];
 
+            if ($variant === 'colored') {
+                $lines[] = 'Color: ' . $orderItem->color;
+            }
+
             $textX = $qrX + $qrSize + 40;
             $textY = $height + 35;
             foreach ($lines as $i => $line) {
                 $canvas->annotateImage($draw, $textX, $textY + ($i * 28), 0, $line);
             }
 
-            // 9. save generated file to a temp working dir
             $filename = "{$label}_" . Str::random(6) . '.png';
             $tempDir = storage_path('app/temp_production_files');
             if (!is_dir($tempDir)) {
@@ -1145,17 +1160,16 @@ class OrderService extends BaseService
         }
 
         if (empty($generatedPaths)) {
-            abort(404, 'No production files could be generated.');
+            abort(404, 'No production files could be generated for this variant.');
         }
 
-        // 10. direct download — single file or zip if multiple types
         if (count($generatedPaths) === 1) {
             $path = array_values($generatedPaths)[0];
-            return response()->download($path, "order_{$orderItem->order_id}_item_{$orderItem->id}.png")
+            return response()->download($path, "order_{$orderItem->order_id}_item_{$orderItem->id}_{$variant}.png")
                 ->deleteFileAfterSend(true);
         }
 
-        $zipName = "order_{$orderItem->order_id}_item_{$orderItem->id}_production.zip";
+        $zipName = "order_{$orderItem->order_id}_item_{$orderItem->id}_{$variant}_production.zip";
         $zipPath = storage_path("app/temp_production_files/{$zipName}");
 
         $zip = new ZipArchive();
@@ -1165,10 +1179,10 @@ class OrderService extends BaseService
         }
         $zip->close();
 
-        return response()->download($zipPath, $zipName)->deleteFileAfterSend(true)->deleteFileCallback(function () use ($generatedPaths) {
-            foreach ($generatedPaths as $path) {
-                @unlink($path);
-            }
-        });
+        foreach ($generatedPaths as $path) {
+            @unlink($path);
+        }
+
+        return response()->download($zipPath, $zipName)->deleteFileAfterSend(true);
     }
 }

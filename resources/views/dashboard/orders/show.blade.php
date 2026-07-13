@@ -279,11 +279,24 @@
 
                                             </div>
                                             @if($model->status == \App\Enums\Order\StatusEnum::CONFIRMED)
-                                                <a href="{{ route('orders.order-items.production-file.download', $orderItem->id) }}"
-                                                   class="btn btn-sm btn-outline-dark mt-1">
-                                                    <i data-feather="printer" class="me-25"></i>
-                                                    Download Production File with QR
-                                                </a>
+                                                <div class="d-flex gap-1 mt-2">
+                                                    <a href="{{ route('orders.order-items.production-file.download', ['orderItem' => $orderItem->id, 'variant' => 'original']) }}"
+                                                       class="btn btn-sm btn-outline-dark">
+                                                        <i data-feather="printer" class="me-25"></i>
+                                                        Production File (Original)
+                                                    </a>
+
+                                                    @if($orderItem->color)
+                                                        <a href="{{ route('orders.order-items.production-file.download', ['orderItem' => $orderItem->id, 'variant' => 'colored']) }}"
+                                                           class="btn btn-sm btn-outline-dark">
+                <span
+                    class="rounded-circle border me-1"
+                    style="width: 12px; height: 12px; display:inline-block; background-color: {{ $orderItem->color }};"
+                ></span>
+                                                            Production File (Colored)
+                                                        </a>
+                                                    @endif
+                                                </div>
                                             @endif
                                         @endforeach
                                     </div>
