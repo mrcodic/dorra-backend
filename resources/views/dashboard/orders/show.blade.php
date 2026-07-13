@@ -278,6 +278,7 @@
 
 
                                             </div>
+                                        @endforeach
                                             @if($model->status == \App\Enums\Order\StatusEnum::CONFIRMED)
                                                 <div class="d-flex gap-1 mt-2">
                                                     <a href="{{ route('orders.order-items.production-file.download', ['orderItem' => $orderItem->id, 'variant' => 'original']) }}"
@@ -298,7 +299,7 @@
                                                     @endif
                                                 </div>
                                             @endif
-                                        @endforeach
+
                                     </div>
                                 </div>
                             @endif
