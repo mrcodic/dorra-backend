@@ -357,7 +357,7 @@
                                         @endif
                                     </div>
                                 @endif
-                                
+
                             @endif
 
                             {{-- Design Mockup Area --}}
@@ -599,8 +599,7 @@
                     contentType: false,
                     success: function (res) {
                         if (res.success) {
-                            sessionStorage.setItem('order_updated', 'true');
-                            window.location.href = '/orders';
+                            location.reload()
                         }
                     },
                     error: function (xhr) {
