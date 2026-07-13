@@ -1098,7 +1098,7 @@ class OrderService extends BaseService
                 continue;
             }
 
-            $qrUrl = route('orders.show', $orderItem->order_id);
+            $qrUrl = route('jobs.show', $orderItem->jobTickets()->first()?->id);
             $qrBase64 = DNS2D::getBarcodePNG($qrUrl, 'QRCODE', 6, 6);
             $qrBlob = base64_decode($qrBase64);
 
