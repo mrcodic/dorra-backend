@@ -1050,8 +1050,8 @@ class OrderService extends BaseService
             $order->orderItems()->attach($pivotData);
         }
     }
-    
-    public function downloadProductionFile(OrderItem $orderItem, string $variant = 'original')
+
+    public function downloadProductionFile($orderItem, $variant)
     {
         $itemable = $orderItem->itemable;
 

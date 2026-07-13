@@ -228,9 +228,9 @@ class OrderController extends DashboardController
         return response()->json(['html' => $html]);
     }
 
-    public function downloadProductionFile(OrderItem $orderItem)
+    public function downloadProductionFile(OrderItem $orderItem,string $variant = 'original')
     {
-        return $this->orderService->downloadProductionFile($orderItem);
+        return $this->orderService->downloadProductionFile($orderItem,$variant);
     }
 
 }
