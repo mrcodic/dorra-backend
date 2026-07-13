@@ -1129,7 +1129,7 @@ class OrderService extends BaseService
 
             $lines = [
                 'Order #: ' . $orderItem->order->order_number,
-                'Item: ' . ($orderItem->orderable->name ?? 'N/A'),
+                'Item: ' . ($orderItem->orderable->category ?$orderItem->orderable->category->name :$orderItem->orderable->name ?? 'N/A'),
                 'Type: ' . $label,
                 'Qty: ' . $orderItem->quantity,
             ];
