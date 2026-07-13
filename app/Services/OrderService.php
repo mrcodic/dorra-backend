@@ -1059,7 +1059,6 @@ class OrderService extends BaseService
         if (!$itemable || !$itemable->types) {
             abort(404, 'No design types found for this item.');
         }
-        dd($itemable->types);
 
         $isDesign = get_class($itemable) === \App\Models\Design::class;
 
@@ -1070,7 +1069,6 @@ class OrderService extends BaseService
 
             $useTemplate = $isDesign && $itemable->template?->approach === 'without_editor';
             $downloadUrl = ($useTemplate ? $itemable->template : $itemable)->getImageUrlForType($label);
-
             if (!$downloadUrl) {
                 continue;
             }
