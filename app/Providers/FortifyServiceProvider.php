@@ -31,17 +31,24 @@ class FortifyServiceProvider extends ServiceProvider
 
                     $intendedUrl = session()->pull('url.intended');
 
+                    \Log::info('LOGIN DEBUG', [
+                        'intended' => $intendedUrl,
+                        'session_all' => session()->all(),
+                    ]);
+
                     $target = null;
 
                     if ($intendedUrl && $nav->userCanAccessUrl($user, $intendedUrl)) {
                         $target = $intendedUrl;
                     }
 
+                    \Log::info('LOGIN DEBUG target', ['target' => $target, 'can_access' => $intendedUrl ? $nav->userCanAccessUrl($user, $intendedUrl) : null]);
+
                     $target = $target ?? $nav->firstAllowedUrl($user) ?? route('dashboard');
+
                     if ($request->wantsJson() || $request->expectsJson()) {
                         return response()->json(['redirect' => $target], 200);
                     }
-
 
                     return redirect()->to($target);
                 }
