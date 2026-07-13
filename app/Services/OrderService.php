@@ -1059,6 +1059,7 @@ class OrderService extends BaseService
         if (!$itemable || !$itemable->types) {
             abort(404, 'No design types found for this item.');
         }
+        dd($itemable->types);
 
         $isDesign = get_class($itemable) === \App\Models\Design::class;
 
