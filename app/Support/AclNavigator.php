@@ -4,11 +4,34 @@ namespace App\Support;
 
 class AclNavigator
 {
-    public function firstAllowedUrl($user): ?string
+    /**
+     * Flatten menu_acl into a single ['/url' => [permissions]] map,
+     * handling both leaf entries and 'children' nested entries.
+     */
+    protected function flattenMap(): array
     {
         $map = config('menu_acl', []);
+        $flat = [];
 
-        foreach ($map as $url => $permissions) {
+        foreach ($map as $key => $value) {
+            // Nested parent with children
+            if (is_array($value) && array_key_exists('children', $value)) {
+                foreach ($value['children'] as $childUrl => $childPermissions) {
+                    $flat[$childUrl] = (array) $childPermissions;
+                }
+                continue;
+            }
+
+            // Leaf entry, e.g. '/orders' => [...]
+            $flat[$key] = (array) $value;
+        }
+
+        return $flat;
+    }
+
+    public function firstAllowedUrl($user): ?string
+    {
+        foreach ($this->flattenMap() as $url => $permissions) {
             $permissions = collect($permissions)->filter()->values();
 
             if ($permissions->isEmpty()) {
@@ -31,17 +54,14 @@ class AclNavigator
 
     /**
      * Check whether the given user has access to a specific URL,
-     * based on the same menu_acl map.
+     * based on the flattened menu_acl map.
      */
     public function userCanAccessUrl($user, string $targetUrl): bool
     {
-        $map = config('menu_acl', []);
+        $targetPath = '/' . ltrim(parse_url($targetUrl, PHP_URL_PATH) ?? '', '/');
 
-        // Normalize both sides to compare paths only (ignore domain/query string)
-        $targetPath = ltrim(parse_url($targetUrl, PHP_URL_PATH) ?? '', '/');
-
-        foreach ($map as $url => $permissions) {
-            $mapPath = ltrim(parse_url(url($url), PHP_URL_PATH) ?? '', '/');
+        foreach ($this->flattenMap() as $url => $permissions) {
+            $mapPath = '/' . ltrim($url, '/');
 
             if ($mapPath !== $targetPath) {
                 continue;
@@ -50,14 +70,12 @@ class AclNavigator
             $permissions = collect($permissions)->filter()->values();
 
             if ($permissions->isEmpty()) {
-                return true; // no permissions required for this route
+                return true;
             }
 
             return $permissions->contains(fn($p) => $user->can($p));
         }
 
-        // URL not found in the ACL map at all — decide default behavior.
-        // Returning false is safer (deny access to unmapped intended URLs).
         return false;
     }
 }
