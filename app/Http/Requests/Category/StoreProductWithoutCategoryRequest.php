@@ -123,6 +123,7 @@ class StoreProductWithoutCategoryRequest extends BaseRequest
             'has_mockup' => ['required', 'boolean'],
             'has_orientation' => ['required', 'boolean'],
             'show_customize_design_btn' => ['required', 'boolean'],
+            'download_production_file' => ['required', 'boolean'],
 
         ];
 

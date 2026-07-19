@@ -127,6 +127,7 @@ class UpdateProductWithoutCategoryRequest extends BaseRequest
             'show_customize_design_btn' => ['required', 'boolean'],
             'has_mockup' => ['required', 'boolean'],
             'has_orientation' => ['required', 'boolean'],
+            'download_production_file' => ['required', 'boolean'],
         ];
 
 

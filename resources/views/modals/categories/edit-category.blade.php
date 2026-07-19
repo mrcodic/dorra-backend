@@ -147,6 +147,16 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="mb-2 d-flex align-items-center gap-2">
+                                    <label class="form-label label-text">Allow production file download with orders</label>
+                                    <div class="form-check form-switch">
+                                        <input type="hidden" name="download_production_file" value="0"/>
+                                        <input class="form-check-input" type="checkbox" id="download_production_file"
+                                               name="download_production_file" value="1"/>
+                                    </div>
+                                </div>
+                            </div>
 
                         </div>
 

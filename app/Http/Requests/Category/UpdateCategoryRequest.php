@@ -48,6 +48,7 @@ class UpdateCategoryRequest extends BaseRequest
             'mobile_banner_id' => ['required', 'exists:media,id'],
             'has_mockup' => ['required', 'boolean'],
             'has_orientation' => ['required', 'boolean'],
+            'download_production_file' => ['required', 'boolean'],
         ];
     }
 

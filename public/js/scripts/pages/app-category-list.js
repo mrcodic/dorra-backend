@@ -120,6 +120,7 @@ const dt_user_table = $(".category-list-table").DataTable({
    data-name_en="${row.name_en}"
    data-has_mockup="${row.has_mockup}"
    data-is_tableau="${row.is_tableau}"
+   data-download_production_file="${row.download_production_file}"
    data-has_orientation="${row.has_orientation}"
    data-image="${row.image}"
  data-website_image="${row.website_banner}"
@@ -429,6 +430,7 @@ $(document).ready(function () {
                 id: "#category-id",
                 has_mockup: "#has_mockup",
                 is_tableau: "#is_tableau",
+                download_production_file: "#download_production_file",
                 has_orientation: "#has_orientation",
                 imgId: "#image-id",
                 subs: "#subcategories-container",
@@ -444,6 +446,7 @@ $(document).ready(function () {
                 descEn: "#edit-category-description-en",
                 has_mockup: "#has_mockup",
                 is_tableau: "#is_tableau",
+                download_production_file: "#download_production_file",
                 has_orientation: "#has_orientation",
                 img: "#edit-preview-image",
                 id: "#edit-category-id",
@@ -469,6 +472,7 @@ $(document).ready(function () {
         $scope.find(m.has_mockup).prop('checked', !!data.has_mockup);
         $scope.find(m.is_tableau).prop('checked', !!data.is_tableau);
         $scope.find(m.has_orientation).prop('checked', !!data.has_orientation);
+        $scope.find(m.download_production_file).prop('checked', !!data.download_production_file);
         $scope.find(m.img).attr("src", data.image || "");
         if (m.imgId) $scope.find(m.imgId).val(data.image_id || "");
         $scope.find(m.id).val(data.id || "");
@@ -492,6 +496,7 @@ $(document).ready(function () {
         var hasMockup = $("#has_mockup").val();
         var hasTableau = $("#is_tableau").val();
         var hasOrientation = $("#has_orientation").val();
+        var downloadProductionFile = $("#download_production_file").val();
         console.log(hasOrientation)
         var image = $("#imagePreview").attr("src");
         var id = $("#category-id").val();
@@ -500,6 +505,7 @@ $(document).ready(function () {
         $("#edit-category-description-en").val(descEN);
         $("#edit-category-description-ar").val(descAR);
         $("#has_mockup").prop('checked', !!hasMockup);
+        $("#download_production_file").prop('checked', !!downloadProductionFile);
         $("#is_tableau").prop('checked', !!hasTableau);
         $("#has_orientation").prop('checked', !!hasOrientation);
         $("#edit-category-id").val(id);

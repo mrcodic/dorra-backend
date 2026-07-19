@@ -157,6 +157,16 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="mb-2 d-flex align-items-center gap-2">
+                                <label class="form-label label-text">Allow production file download with orders</label>
+                                <div class="form-check form-switch">
+                                    <input type="hidden" name="download_production_file" value="0"/>
+                                    <input class="form-check-input" type="checkbox" id="modal_download_production_file"
+                                           name="download_production_file" value="1"/>
+                                </div>
+                            </div>
+                        </div>
                         <div class="col-12">
                             <div id="modalTableauFixedSpecsBox" class="alert alert-info d-none mt-1 mb-0">
                                 <div class="fw-bold mb-1">Tableau fixed specs will be added automatically:</div>
