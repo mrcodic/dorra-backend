@@ -569,7 +569,7 @@ class CategoryService extends BaseService
         $locale = app()->getLocale();
         $categories = $this->repository
             ->query(['id', 'name', 'description', 'created_at', 'is_has_category', 'has_mockup'
-                ,'has_orientation','sort'])
+                ,'has_orientation','sort','download_production_file'])
             ->with(['products', 'children'])
             ->withCount(['children', 'products'])
             ->when(request()->filled('search_value'), function ($query) use ($locale) {
