@@ -88,7 +88,7 @@ class CartService extends BaseService
                     \App\Enums\Item\TypeEnum::tryFrom($request->type),
                     Arr::get($priceDetails, 'quantity') ?? $request->quantity,
                     $priceDetails['specs_sum'],
-                    $priceDetails['product_price'],
+                    $request->type == \App\Enums\Item\TypeEnum::DOWNLOAD ? $design?->price :$priceDetails['product_price'],
                     $priceDetails['product_price_id'],
                     $priceDetails['sub_total'],
                     $request->cartable_id,
