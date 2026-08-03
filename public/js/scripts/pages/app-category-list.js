@@ -466,7 +466,7 @@ $(document).ready(function () {
         $scope.find(m.sort).val(data.sort || "");
         $scope.find(m.nameEn).val(data.name_en || "");
         $scope.find(m.products).val(data.products ?? "");
-        
+
         $scope.find(m.date).val(data.showdate || "");
         $scope.find(m.descAr).val(data.description_ar || "");
         $scope.find(m.descEn).val(data.description_en || "");
