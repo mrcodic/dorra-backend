@@ -46,7 +46,7 @@ class CartItemResource extends JsonResource
                     ? new ProductResource($cartable->load('lastOffer'))
                     : new CategoryResource($cartable->load('lastOffer'));
             }),
-            'price'              => $this->sub_total && $cartable ? $this->sub_total : $item?->price,
+            'price'              => $this->sub_total && $cartable ? $this->sub_total : $item?->template?->price,
             'product_price'      => $this->product_price,
 
             'price_after_offer'  => $this->discount_amount > 0
