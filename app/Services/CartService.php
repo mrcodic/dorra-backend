@@ -79,7 +79,7 @@ class CartService extends BaseService
                             'option' => $specification->pivot->option_id,
                         ];
                     })->toArray();
-                    $request->quantity =  $design?->quantity;
+                    $request->quantity = $design?->quantity;
                 }
                 $priceDetails = $this->calculatePriceDetails($validatedData, $product, $design);
 
@@ -88,7 +88,7 @@ class CartService extends BaseService
                     \App\Enums\Item\TypeEnum::tryFrom($request->type),
                     Arr::get($priceDetails, 'quantity') ?? $request->quantity,
                     $priceDetails['specs_sum'],
-                    $request->type == \App\Enums\Item\TypeEnum::DOWNLOAD ? $design?->price :$priceDetails['product_price'],
+                    $priceDetails['product_price'],
                     $priceDetails['product_price_id'],
                     $priceDetails['sub_total'],
                     $request->cartable_id,
@@ -98,6 +98,15 @@ class CartService extends BaseService
                 $specs = Arr::get($validatedData, 'specs', []);
                 $this->handleSpecs($specs ?: $designSpecs, $cartItem);
                 $this->applyExistingItemDiscount($cart, $cartItem);
+            } elseif ($request->type == \App\Enums\Item\TypeEnum::DOWNLOAD->value) {
+                $cartItem = $cart->addItem(
+                    $design ?? $template,
+                    type: \App\Enums\Item\TypeEnum::tryFrom($request->type),
+                    subTotal: $design?->price,
+                    productPrice: $design?->price,
+                    color: $validatedData['color'] ?? null,
+                );
+                $this->applyExistingItemDiscount($cart, $cartItem);
             } else {
                 $cartItem = $cart->addItem(
                     $design ?? $template,
@@ -106,7 +115,6 @@ class CartService extends BaseService
                     color: $validatedData['color'] ?? null,
                 );
                 $this->applyExistingItemDiscount($cart, $cartItem);
-
             }
             if ($template) {
                 $categoryId = $product->category_id ?? $product->id;
