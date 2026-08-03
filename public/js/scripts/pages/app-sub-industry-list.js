@@ -66,7 +66,7 @@ var dt_user_table = $('.sub-industry-list-table').DataTable({
                              data-id="${data}"
                              data-name_ar="${row.name_ar}"
                              data-name_en="${row.name_en}"
-                             data-parent_id="${row.parent.id}"
+                             data-parent_id="${row.parent?.id}"
                             >
                             <i data-feather="edit-3"></i>
                        </a>`);
