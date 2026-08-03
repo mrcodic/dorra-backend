@@ -102,8 +102,8 @@ class CartService extends BaseService
                 $cartItem = $cart->addItem(
                     $design ?? $template,
                     type: \App\Enums\Item\TypeEnum::tryFrom($request->type),
-                    subTotal: $design?->price,
-                    productPrice: $design?->price,
+                    subTotal: $design?->template?->price,
+                    productPrice: $design?->template?->price,
                     color: $validatedData['color'] ?? null,
                 );
                 $this->applyExistingItemDiscount($cart, $cartItem);
