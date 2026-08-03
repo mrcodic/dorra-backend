@@ -684,7 +684,7 @@ class CategoryService extends BaseService
                 return $admin->getFirstMediaUrl('categories') ?: asset("images/default-user.png");
             })
             ->addColumn('parent_name', function ($category) {
-                return $category->parent->getTranslation('name', app()->getLocale());
+                return $category->parent?->getTranslation('name', app()->getLocale());
             })
             ->addColumn('added_date', function ($category) {
                 return $category->created_at?->format('d/n/Y');

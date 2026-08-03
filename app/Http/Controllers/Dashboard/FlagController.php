@@ -29,7 +29,9 @@ class FlagController extends DashboardController
 
            'index' => [
                'products' => $this->productRepository->query()->get(),
-               'templates' => $this->templateRepository->query()->whereStatus(StatusEnum::LIVE)->get(),
+               'templates' => $this->templateRepository->query()
+                   ->select('id','name')
+                   ->whereStatus(StatusEnum::LIVE)->get(),
            ],
 
        ];

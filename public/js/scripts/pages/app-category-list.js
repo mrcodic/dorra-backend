@@ -469,10 +469,10 @@ $(document).ready(function () {
         $scope.find(m.date).val(data.showdate || "");
         $scope.find(m.descAr).val(data.description_ar || "");
         $scope.find(m.descEn).val(data.description_en || "");
-        $scope.find(m.has_mockup).prop('checked', !!data.has_mockup);
-        $scope.find(m.is_tableau).prop('checked', !!data.is_tableau);
-        $scope.find(m.has_orientation).prop('checked', !!data.has_orientation);
-        $scope.find(m.download_production_file).prop('checked', !!data.download_production_file);
+        $scope.find(m.has_mockup).prop('checked', String(data.has_mockup) === '1');
+        $scope.find(m.is_tableau).prop('checked', String(data.is_tableau) === '1');
+        $scope.find(m.has_orientation).prop('checked', String(data.has_orientation) === '1');
+        $scope.find(m.download_production_file).prop('checked', String(data.download_production_file) === '1');
         $scope.find(m.img).attr("src", data.image || "");
         if (m.imgId) $scope.find(m.imgId).val(data.image_id || "");
         $scope.find(m.id).val(data.id || "");

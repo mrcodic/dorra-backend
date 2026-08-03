@@ -28,11 +28,13 @@ var dt_user_table = $('.sub-industry-list-table').DataTable({
             },
         },
         {data: 'name', orderable: false},
-        {data: 'industry',
-            render:function (data, type, row) {
-                return row.parent?.name[locale] ?? '';
+        {
+            data: 'industry',
+            render: function (data, type, row) {
+                return row.parent?.name?.[locale] ?? '';
             },
-            orderable: false},
+            orderable: false
+        },
         {data: 'templates_count', orderable: false},
         {data: 'added_date', orderable: false},
 
