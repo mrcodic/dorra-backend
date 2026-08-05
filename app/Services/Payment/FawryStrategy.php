@@ -37,6 +37,8 @@ use Illuminate\Support\Facades\Log;
     public function pay(array $payload, ?array $data = null): false|array
     {
         $method = $payload['paymentMethod'];
+        Log::info("payload",[$payload,'method'=>$method]);
+
 
         $url = rtrim($this->baseUrl, '/') . '/fawrypay-api/api/payments/init';
         // ---------- PURE cURL CALL ----------
