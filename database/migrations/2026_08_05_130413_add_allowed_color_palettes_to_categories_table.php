@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('categories', function (Blueprint $table) {
-            $table->binary('allowed_color_palettes')->nullable()->after('has_orientation');
+            $table->boolean('allowed_color_palettes')->nullable()->after('has_orientation');
         });
     }
 
