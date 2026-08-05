@@ -124,6 +124,7 @@ class StoreProductWithoutCategoryRequest extends BaseRequest
             'has_orientation' => ['required', 'boolean'],
             'show_customize_design_btn' => ['required', 'boolean'],
             'download_production_file' => ['required', 'boolean'],
+            'allowed_color_palettes' => ['required', 'boolean'],
 
         ];
 

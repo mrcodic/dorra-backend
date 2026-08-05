@@ -33,6 +33,7 @@ class Category extends Model implements HasMedia
         'has_orientation',
         'is_tableau',
         'download_production_file',
+        'allowed_color_palettes',
     ];
     protected $attributes = ['is_has_category' => 1];
     protected $casts = [

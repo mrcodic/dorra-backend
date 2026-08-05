@@ -413,6 +413,15 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-2 d-flex align-items-center gap-2">
+                                                    <label class="form-label label-text">Allow color pallets</label>                                                    <div class="form-check form-switch">
+                                                        <input type="hidden" name="allowed_color_palettes" value="0"/>
+                                                        <input class="form-check-input" type="checkbox" id="allowed_color_palettes"
+                                                               name="allowed_color_palettes" value="1"/>
+                                                    </div>
+                                                </div>
+                                            </div>
 
                                         </div>
 

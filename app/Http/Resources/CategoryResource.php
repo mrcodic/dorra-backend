@@ -156,6 +156,7 @@ class CategoryResource extends JsonResource
             'colors' => $this->colors,
             'has_mockup' => (boolean)$this->has_mockup,
             'has_orientation' => (boolean)$this->has_orientation,
+            'allowed_color_palettes' => (boolean)$this->allowed_color_palettes,
             'source_design_svg' => $templatePreviewData['source_design_svg'],
             'back_base64_preview_image' => $templatePreviewData['back_base64_preview_image'],
             'template_model_image' => $templatePreviewData['template_model_image'],

@@ -128,6 +128,7 @@ class UpdateProductWithoutCategoryRequest extends BaseRequest
             'has_mockup' => ['required', 'boolean'],
             'has_orientation' => ['required', 'boolean'],
             'download_production_file' => ['required', 'boolean'],
+            'allowed_color_palettes' => ['required', 'boolean'],
         ];
 
 

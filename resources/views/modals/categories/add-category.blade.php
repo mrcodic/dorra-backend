@@ -167,6 +167,16 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="mb-2 d-flex align-items-center gap-2">
+                                <label class="form-label label-text">Allow color pallets</label>
+                                <div class="form-check form-switch">
+                                    <input type="hidden" name="allowed_color_palettes" value="0"/>
+                                    <input class="form-check-input" type="checkbox" id="modal_allowed_color_palettes"
+                                           name="allowed_color_palettes" value="1"/>
+                                </div>
+                            </div>
+                        </div>
                         <div class="col-12">
                             <div id="modalTableauFixedSpecsBox" class="alert alert-info d-none mt-1 mb-0">
                                 <div class="fw-bold mb-1">Tableau fixed specs will be added automatically:</div>

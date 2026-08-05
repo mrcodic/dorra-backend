@@ -46,6 +46,7 @@ class StoreCategoryRequest extends BaseRequest
             'has_mockup' => ['required', 'boolean'],
             'has_orientation' => ['required', 'boolean'],
             'is_tableau' => ['required', 'boolean'],
+            'allowed_color_palettes' => ['required', 'boolean'],
             'download_production_file' => ['required', 'boolean'],
 
         ];

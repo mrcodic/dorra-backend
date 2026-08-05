@@ -119,6 +119,7 @@ const dt_user_table = $(".category-list-table").DataTable({
    data-sort="${row.sort}"
    data-name_en="${row.name_en}"
    data-has_mockup="${row.has_mockup}"
+   data-allowed_color_palettes="${row.allowed_color_palettes}"
    data-is_tableau="${row.is_tableau}"
    data-download_production_file="${row.download_production_file}"
    data-has_orientation="${row.has_orientation}"
@@ -429,6 +430,7 @@ $(document).ready(function () {
                 img: "#imagePreview",
                 id: "#category-id",
                 has_mockup: "#has_mockup",
+                allowed_color_palettes: "#allowed_color_palettes",
                 is_tableau: "#is_tableau",
                 download_production_file: "#download_production_file",
                 has_orientation: "#has_orientation",
@@ -445,6 +447,7 @@ $(document).ready(function () {
                 descAr: "#edit-category-description-ar",
                 descEn: "#edit-category-description-en",
                 has_mockup: "#has_mockup",
+                allowed_color_palettes: "#allowed_color_palettes",
                 is_tableau: "#is_tableau",
                 download_production_file: "#download_production_file",
                 has_orientation: "#has_orientation",
@@ -471,6 +474,7 @@ $(document).ready(function () {
         $scope.find(m.descAr).val(data.description_ar || "");
         $scope.find(m.descEn).val(data.description_en || "");
         $scope.find(m.has_mockup).prop('checked', String(data.has_mockup) === '1');
+        $scope.find(m.allowed_color_palettes).prop('checked', String(data.allowed_color_palettes) === '1');
         $scope.find(m.is_tableau).prop('checked', String(data.is_tableau) === '1');
         $scope.find(m.has_orientation).prop('checked', String(data.has_orientation) === '1');
         $scope.find(m.download_production_file).prop('checked', String(data.download_production_file) === '1');
@@ -495,6 +499,7 @@ $(document).ready(function () {
         var descAR = $("#category-description-ar").val();
         var imageId = $("#image-id").val();
         var hasMockup = $("#has_mockup").val();
+        var allowedColorPalettes = $("#allowed_color_palettes").val();
         var hasTableau = $("#is_tableau").val();
         var hasOrientation = $("#has_orientation").val();
         var downloadProductionFile = $("#download_production_file").val();
@@ -506,6 +511,7 @@ $(document).ready(function () {
         $("#edit-category-description-en").val(descEN);
         $("#edit-category-description-ar").val(descAR);
         $("#has_mockup").prop('checked', !!hasMockup);
+        $("#allowed_color_palettes").prop('checked', !!allowedColorPalettes);
         $("#download_production_file").prop('checked', !!downloadProductionFile);
         $("#is_tableau").prop('checked', !!hasTableau);
         $("#has_orientation").prop('checked', !!hasOrientation);
