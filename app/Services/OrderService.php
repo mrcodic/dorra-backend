@@ -118,7 +118,7 @@ class OrderService extends BaseService
 
         return DataTables::of($orders)
             ->addColumn('first_order_item_image', function ($order) {
-                return $order->orderItems()->first()->orderable?->getMainImageUrl() ?:
+                return $order->orderItems()->first()?->orderable?->getMainImageUrl() ?:
                     asset('images/default-product.png');
             })
             ->addColumn('order_number', function ($order) {
