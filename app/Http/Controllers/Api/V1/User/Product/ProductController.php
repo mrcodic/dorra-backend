@@ -34,7 +34,7 @@ class ProductController extends Controller
     public function show(Product $product, Request $request)
     {
         return Response::api(data: ProductResource::make($this->productService->showResource($product->id, [
-            'category:id,name,is_has_category,has_orientation,is_tableau',
+            'category:id,name,is_has_category,has_orientation,is_tableau,allowed_color_palettes',
 //            'templates.industries.children',
             'media',
             'specifications.options',
