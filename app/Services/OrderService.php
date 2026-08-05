@@ -964,6 +964,7 @@ class OrderService extends BaseService
                 'guest' => $order->orderAddress ?? $order->pickupContact,
                 'method' => $paymentMethod,
             ]);
+        Log::info("payment request data", [$dto]);
 
         // Extra context for some gateways (only available for new orders flow)
         $meta = array_filter([
