@@ -933,7 +933,9 @@
     <script>
         // Pre-selected mockup IDs from the server (already attached to this template)
         const attachedMockupIds = new Set(
-            @json(($model?->mockups?->whereNotNull('pivot.type')->pluck('id') ?? collect())->values()));
+        @json(($model?->mockups?->whereNotNull('pivot.type')->pluck('id') ?? collect())->values())
+            .map(String)
+        );
         $(function () {
             const $cardsWrap = $('#mockupsCards');
             const $hiddenWrap = $('#mockupsHiddenInputs');
