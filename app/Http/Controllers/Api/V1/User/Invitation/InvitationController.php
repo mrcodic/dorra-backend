@@ -77,7 +77,7 @@ class InvitationController extends Controller
             name: 'token',
             value: auth('sanctum')->user()?->currentAccessToken(),
             path: '/',
-            domain: '.dorraprint.com',
+            domain: config('session.domain'),
             secure: false,
             httpOnly: false,
             sameSite: 'Lax'

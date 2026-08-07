@@ -45,7 +45,7 @@ class LoginController extends Controller
             value: $data['user']->token,
             minutes: 60 * 24 * 30,
             path: '/',
-            domain: '.dorraprint.com',
+            domain: config('session.domain'),
             secure: app()->environment('production'),
             httpOnly: false,
             sameSite: 'Lax'
