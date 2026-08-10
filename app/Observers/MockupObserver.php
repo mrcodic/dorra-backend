@@ -12,11 +12,11 @@ class MockupObserver
 {
     public function updated(Mockup $mockup)
     {
-        if (!$mockup->wasChanged('colors')) {
+        if (!$mockup->wasChanged('pre_fill_colors')) {
             return;
         }
 
-        $oldColorsRaw = $mockup->getOriginal('colors');
+        $oldColorsRaw = $mockup->getOriginal('pre_fill_colors');
         if (is_string($oldColorsRaw)) {
             $oldColorsRaw = json_decode($oldColorsRaw, true) ?? [];
         }
@@ -25,7 +25,7 @@ class MockupObserver
             ->map(fn($c) => $this->normalizeHex($c))
             ->all();
 
-        $newHexes = collect($mockup->colors ?? [])
+        $newHexes = collect($mockup->pre_fill_colors ?? [])
             ->map(fn($c) => $this->normalizeHex($c))
             ->all();
 
@@ -40,7 +40,7 @@ class MockupObserver
 
     protected function generateForNewColors(Mockup $mockup, array $addedHexes)
     {
-        $hexToOriginalColor = collect($mockup->colors ?? [])
+        $hexToOriginalColor = collect($mockup->pre_fill_colors ?? [])
             ->keyBy(fn($c) => $this->normalizeHex($c))
             ->all();
 
