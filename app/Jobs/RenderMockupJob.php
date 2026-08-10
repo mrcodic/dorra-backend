@@ -46,7 +46,11 @@ class RenderMockupJob implements ShouldQueue
                 ->keyBy(function ($media) {
                     return $media->getCustomProperty('role');
                 });
-
+            Log::info('render_debug', [
+                'side' => $side,
+                'available_sides' => $mockup->getMedia('mockups')->pluck('custom_properties.side')->unique()->values(),
+                'available_roles_for_side' => $mediaByRole->keys(),
+            ]);
             $config = [
                 'mockupConfig' => [
                     'scene'             => optional($mediaByRole->get('base'))->getFullUrl(),
