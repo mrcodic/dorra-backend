@@ -16,19 +16,19 @@ class MockupObserver
             return;
         }
 
-        $oldColors = $mockup->getOriginal('pre_fill_colors');
+        $oldColors = $this->toArray(
+            $mockup->getOriginal('pre_fill_colors')
+        );
 
-        if (is_string($oldColors)) {
-            $oldColors = json_decode($oldColors, true) ?? [];
-        }
+        $newColors = $mockup->pre_fill_colors ?? [];
 
-        $oldHexes = collect($oldColors ?? [])
+        $oldHexes = collect($oldColors)
             ->filter()
             ->map(fn ($color) => $this->normalizeHex($color))
             ->unique()
             ->all();
 
-        $newHexes = collect($mockup->pre_fill_colors ?? [])
+        $newHexes = collect($newColors)
             ->filter()
             ->map(fn ($color) => $this->normalizeHex($color))
             ->unique()
@@ -52,208 +52,235 @@ class MockupObserver
         Mockup $mockup,
         array $addedHexes
     ): void {
-        $mockup->load([
-            'templates',
-            'sideSettings',
-            'media',
-        ]);
-
-        if ($mockup->templates->isEmpty()) {
-            return;
-        }
+        /*
+         * Get default positions without loading
+         * sideSettings relation into Mockup.
+         */
+        $defaultPositions = $this->getDefaultPositions($mockup);
 
         $hexToOriginalColor = collect(
             $mockup->pre_fill_colors ?? []
         )
-            ->keyBy(fn ($color) => $this->normalizeHex($color))
+            ->keyBy(
+                fn ($color) => $this->normalizeHex($color)
+            )
             ->all();
 
-        $renderJobs = [];
+        /*
+         * Create job first as pending.
+         *
+         * We don't dispatch anything until all BulkJobItems
+         * are created and total_count is known.
+         */
+        $bulkJob = MockupGenerationJob::create([
+            'mockup_id' => $mockup->id,
+            'status' => 'pending',
+            'total_count' => 0,
+            'completed_count' => 0,
+            'failed_count' => 0,
+        ]);
 
-        foreach ($mockup->templates as $template) {
+        $totalCount = 0;
 
-            /*
-             * Try template custom positions first.
-             */
-            $positions = $this->getTemplatePositions($template);
+        /*
+         * Do NOT:
+         *
+         * $mockup->load('templates')
+         *
+         * Process templates in chunks instead.
+         */
+        $mockup->templates()
+            ->orderBy('templates.id')
+            ->lazy(100)
+            ->each(function ($template) use (
+                $mockup,
+                $bulkJob,
+                $addedHexes,
+                $defaultPositions,
+                $hexToOriginalColor,
+                &$totalCount
+            ) {
+                /*
+                 * 1. Template custom position.
+                 */
+                $positions = $this->getTemplatePositions(
+                    $template
+                );
 
-            $usedDefaultPositions = false;
-
-            /*
-             * No custom positions?
-             * Use MockupSideSetting.
-             */
-            if (empty($positions)) {
-                $positions = $this->getDefaultPositions($mockup);
-                $usedDefaultPositions = !empty($positions);
-            }
-
-            /*
-             * No positions anywhere.
-             */
-            if (empty($positions)) {
-                continue;
-            }
-
-            /*
-             * Existing template colors.
-             */
-            $pivotColors = $template->pivot->colors ?? [];
-
-            if (is_string($pivotColors)) {
-                $pivotColors = json_decode(
-                    $pivotColors,
-                    true
-                ) ?? [];
-            }
-
-            $colorsToAdd = collect($addedHexes)
-                ->map(
-                    fn ($hex) =>
-                        $hexToOriginalColor[$hex] ?? $hex
-                )
-                ->all();
-
-            $mergedColors = collect([
-                ...($pivotColors ?? []),
-                ...$colorsToAdd,
-            ])
-                ->unique(
-                    fn ($color) =>
-                    $this->normalizeHex($color)
-                )
-                ->values()
-                ->all();
-
-            /*
-             * Update pivot.
-             */
-            $pivotData = [
-                'colors' => $mergedColors,
-            ];
-
-            /*
-             * Important:
-             *
-             * Template had [] positions,
-             * so save the fallback positions
-             * from MockupSideSetting.
-             */
-            if ($usedDefaultPositions) {
-                $pivotData['positions'] =
-                    $this->positionsToPivot($positions);
-            }
-
-            $mockup->templates()->updateExistingPivot(
-                $template->id,
-                $pivotData
-            );
-
-            /*
-             * Generate only newly added colors.
-             */
-            foreach ($addedHexes as $hex) {
-
-                foreach ($positions as $side => $points) {
-
-                    if (
-                        $this->alreadyGenerated(
-                            $mockup,
-                            $template->id,
-                            $hex,
-                            $side
-                        )
-                    ) {
-                        continue;
-                    }
-
-                    $renderJobs[] = [
-                        'template_id' => $template->id,
-                        'hex' => $hex,
-                        'side' => $side,
-                        'points' => $points,
-                    ];
+                /*
+                 * 2. No custom position?
+                 *
+                 * Use sideSetting defaults.
+                 *
+                 * IMPORTANT:
+                 * We DON'T save these into pivot.positions.
+                 *
+                 * positions = [] still means:
+                 * "use mockup defaults".
+                 */
+                if (empty($positions)) {
+                    $positions = $defaultPositions;
                 }
-            }
-        }
 
-        if (empty($renderJobs)) {
+                /*
+                 * No custom position + no default position.
+                 */
+                if (empty($positions)) {
+                    return;
+                }
+
+                /*
+                 * Update template colors only.
+                 */
+                $pivotColors = $this->toArray(
+                    $template->pivot->colors ?? []
+                );
+
+                $colorsToAdd = collect($addedHexes)
+                    ->map(
+                        fn ($hex) =>
+                            $hexToOriginalColor[$hex] ?? $hex
+                    )
+                    ->all();
+
+                $mergedColors = collect([
+                    ...$pivotColors,
+                    ...$colorsToAdd,
+                ])
+                    ->filter()
+                    ->unique(
+                        fn ($color) =>
+                        $this->normalizeHex($color)
+                    )
+                    ->values()
+                    ->all();
+
+                $mockup->templates()
+                    ->updateExistingPivot(
+                        $template->id,
+                        [
+                            'colors' => $mergedColors,
+
+                            // Do NOT write positions here.
+                        ]
+                    );
+
+                /*
+                 * Create BulkJobItems directly.
+                 *
+                 * No big $renderJobs array in memory.
+                 */
+                collect($addedHexes)
+                    ->each(function ($hex) use (
+                        $positions,
+                        $mockup,
+                        $template,
+                        $bulkJob,
+                        $hexToOriginalColor,
+                        &$totalCount
+                    ) {
+                        collect($positions)
+                            ->each(function ($points, $side) use (
+                                $mockup,
+                                $template,
+                                $bulkJob,
+                                $hex,
+                                $hexToOriginalColor,
+                                &$totalCount
+                            ) {
+                                if (
+                                    $this->alreadyGenerated(
+                                        $mockup,
+                                        $template->id,
+                                        $hex,
+                                        $side
+                                    )
+                                ) {
+                                    return;
+                                }
+
+                                BulkJobItem::create([
+                                    'bulk_job_id' => $bulkJob->id,
+
+                                    'template_id' =>
+                                        $template->id,
+
+                                    'color' =>
+                                        $hexToOriginalColor[$hex]
+                                        ?? $hex,
+
+                                    'side' =>
+                                        $side,
+
+                                    'points' =>
+                                        $points,
+
+                                    'status' =>
+                                        'pending',
+                                ]);
+
+                                $totalCount++;
+                            });
+                    });
+            });
+
+        /*
+         * Nothing needs rendering.
+         */
+        if ($totalCount === 0) {
+            $bulkJob->update([
+                'status' => 'completed',
+                'total_count' => 0,
+                'started_at' => now(),
+                'completed_at' => now(),
+            ]);
+
             return;
         }
 
-        $bulkJob = MockupGenerationJob::create([
-            'mockup_id' => $mockup->id,
+        /*
+         * Set total BEFORE dispatching jobs.
+         *
+         * This prevents jobs finishing before
+         * total_count is correctly known.
+         */
+        $bulkJob->update([
             'status' => 'processing',
-            'total_count' => count($renderJobs),
-            'completed_count' => 0,
-            'failed_count' => 0,
+            'total_count' => $totalCount,
             'started_at' => now(),
         ]);
 
-        foreach ($renderJobs as $job) {
-
-            $item = BulkJobItem::create([
-                'bulk_job_id' => $bulkJob->id,
-
-                'template_id' =>
-                    $job['template_id'],
-
-                'color' =>
-                    $hexToOriginalColor[$job['hex']]
-                    ?? $job['hex'],
-
-                'side' =>
-                    $job['side'],
-
-                'points' =>
-                    $job['points'],
-
-                'status' =>
-                    'pending',
-            ]);
-
-            RenderMockupJob::dispatch(
-                $bulkJob,
-                $item,
-                $mockup
+        /*
+         * Dispatch items in chunks.
+         *
+         * Don't load all BulkJobItems into memory.
+         */
+        BulkJobItem::query()
+            ->where('bulk_job_id', $bulkJob->id)
+            ->where('status', 'pending')
+            ->lazyById(100)
+            ->each(
+                fn ($item) =>
+                RenderMockupJob::dispatch(
+                    $bulkJob,
+                    $item,
+                    $mockup
+                )
             );
-        }
     }
 
     /**
-     * Get positions already stored
-     * in mockup_template pivot.
+     * Get custom template positions.
      *
-     * Stored format:
-     *
-     * [
-     *   {
-     *      "name": "front",
-     *      "p1x": ...,
-     *      ...
-     *   }
-     * ]
-     *
-     * Returned format:
-     *
-     * [
-     *   "front" => [
-     *      "p1x" => ...,
-     *      ...
-     *   ]
-     * ]
+     * [] means template doesn't override
+     * the MockupSideSetting position.
      */
     protected function getTemplatePositions(
         $template
     ): array {
-        $positions = $template->pivot->positions ?? [];
-
-        if (is_string($positions)) {
-            $positions = json_decode(
-                $positions,
-                true
-            ) ?? [];
-        }
+        $positions = $this->toArray(
+            $template->pivot->positions ?? []
+        );
 
         if (empty($positions)) {
             return [];
@@ -262,10 +289,10 @@ class MockupObserver
         return collect($positions)
             ->filter(
                 fn ($position) =>
-                !empty($position['name'])
+                    is_array($position)
+                    && !empty($position['name'])
             )
             ->mapWithKeys(function ($position) {
-
                 $side = $position['name'];
 
                 unset($position['name']);
@@ -278,39 +305,35 @@ class MockupObserver
     }
 
     /**
-     * Default positions from MockupSideSetting.
+     * Get MockupSideSetting defaults without:
      *
-     * IMPORTANT:
-     * Keep coordinates exactly as stored.
+     * $mockup->load('sideSettings')
      *
-     * No * 1200 here.
+     * warp_points are kept exactly in their
+     * warp_points are kept exactly in their
+     * stored coordinate system.
      */
     protected function getDefaultPositions(
         Mockup $mockup
     ): array {
-        return $mockup->sideSettings
-            ->filter(
-                fn ($setting) =>
-                    $setting->is_active
-                    && !empty($setting->warp_points)
-            )
-            ->mapWithKeys(function ($setting) {
+        return $mockup->sideSettings()
+            ->where('is_active', true)
+            ->whereNotNull('warp_points')
+            ->cursor()
+            ->reduce(
+                function (
+                    array $positions,
+                          $setting
+                ) {
+                    $points = $this->toArray(
+                        $setting->warp_points
+                    );
 
-                $points = $setting->warp_points;
+                    if (empty($points)) {
+                        return $positions;
+                    }
 
-                if (is_string($points)) {
-                    $points = json_decode(
-                        $points,
-                        true
-                    ) ?? [];
-                }
-
-                if (empty($points)) {
-                    return [];
-                }
-
-                return [
-                    $setting->side => [
+                    $positions[$setting->side] = [
                         'p1x' => (float) ($points['p1x'] ?? 0),
                         'p1y' => (float) ($points['p1y'] ?? 0),
 
@@ -321,121 +344,119 @@ class MockupObserver
                         'p3y' => (float) ($points['p3y'] ?? 0),
 
                         'p4x' => (float) ($points['p4x'] ?? 0),
+                        'p4y' => (float => (float) ($points['p4x'] ?? 0),
                         'p4y' => (float) ($points['p4y'] ?? 0),
-                    ],
-                ];
-            })
-            ->all();
+                    ];
+
+                    return $positions;
+                },
+                []
+            );
     }
 
     /**
-     * Convert:
+     * Check database directly.
      *
-     * [
-     *   'front' => [...]
-     * ]
+     * Don't load:
      *
-     * to pivot format:
+     * $mockup->media
      *
-     * [
-     *   [
-     *      'name' => 'front',
-     *      ...
-     *   ]
-     * ]
+     * into memory.
      */
-    protected function positionsToPivot(
-        array $positions
-    ): array {
-        return collect($positions)
-            ->map(function ($points, $side) {
-
-                return [
-                    'name' => $side,
-
-                    'p1x' => $points['p1x'],
-                    'p1y' => $points['p1y'],
-
-                    'p2x' => $points['p2x'],
-                    'p2y' => $points['p2y'],
-
-                    'p3x' => $points['p3x'],
-                    'p3y' => $points['p3y'],
-
-                    'p4x' => $points['p4x'],
-                    'p4y' => $points['p4y'],
-                ];
-            })
-            ->values()
-            ->all();
-    }
-
     protected function alreadyGenerated(
         Mockup $mockup,
                $templateId,
         string $hex,
         string $side
     ): bool {
-        return $mockup->media
+        return $mockup->media()
             ->where(
                 'collection_name',
                 'generated_mockups'
             )
-            ->contains(function ($media) use (
-                $templateId,
-                $hex,
-                $side
-            ) {
-                return
-                    (string) $media->getCustomProperty(
-                        'template_id'
-                    ) === (string) $templateId
-
-                    &&
-
-                    (string) $media->getCustomProperty(
-                        'side'
-                    ) === (string) $side
-
-                    &&
-
-                    $this->normalizeHex(
-                        (string) $media->getCustomProperty(
-                            'hex',
-                            ''
-                        )
-                    ) === $hex;
-            });
-    }
-
-    protected function normalizeHex(
-        string $color
-    ): string {
-        return strtolower(
-            ltrim(
-                trim($color),
-                '#'
+            ->whereRaw(
+                "JSON_UNQUOTE(
+                    JSON_EXTRACT(
+                        custom_properties,
+                        '$.template_id'
+                    )
+                ) = ?",
+                [(string) $templateId]
             )
-        );
+            ->whereRaw(
+                "JSON_UNQUOTE(
+                    JSON_EXTRACT(
+                        custom_properties,
+                        '$.side'
+                    )
+                ) = ?",
+                [$side]
+            )
+            ->whereRaw(
+                "LOWER(
+                    JSON_UNQUOTE(
+                        JSON_EXTRACT(
+                            custom_properties,
+                            '$.hex'
+                        )
+                    )
+                ) = ?",
+                [$hex]
+            )
+            ->exists();
     }
 
-    public function deleted(
-        Mockup $mockup
-    ): void {
-        $templateIds = $mockup
-            ->templates
-            ->pluck('id');
+    protected function toArray(
+        mixed $value
+    ): array {
+        if (is_array($value)) {
+            return $value;
+        }
 
-        Design::whereIn(
-            'template_id',
-            $templateIds
-        )
-            ->get()
-            ->each(function ($design) {
-                $design->clearMediaCollection();
-                $design->forceDelete();
-            });
+        if (is_string($value)) {
+            return)) {
+                return $value;
+            }
 
-        $mockup->clearMediaCollection();
+        if (is_string($value)) {
+            return json_decode(
+                $value,
+                true
+            ) ?? [];
+        }
+
+        return [];
     }
-}
+
+        protected function normalizeHex(
+            string $color
+        ): string {
+            return strtolower(
+                ltrim(
+                    trim($color),
+                    '#'
+                )
+            );
+        }
+
+        public function deleted(
+            Mockup $mockup
+        ): void {
+            $templateIds = $mockup
+                ->templates()
+                ->pluck('templates.id');
+
+            Design::query()
+                ->whereIn(
+                    'template_id',
+                    $templateIds
+                )
+                ->lazyById(100)
+                ->each(function ($design) {
+                    $design->clearMediaCollection();
+                    $design->forceDelete();
+                });
+
+            $mockup->clearMediaCollection();
+        }
+    }
