@@ -35,7 +35,7 @@ class MockupObserver
         if (empty($addedHexes)) {
             return;
         }
-
+        $mockup->refresh();
         $this->generateForNewColors($mockup, $addedHexes);
     }
 
@@ -64,9 +64,9 @@ class MockupObserver
                 foreach (array_keys($positions) as $side) {
                     $renderJobs[] = [
                         'template_id' => $template->id,
-                        'hex'         => $hex,
-                        'side'        => $side,
-                        'points'      => $positions[$side],
+                        'hex' => $hex,
+                        'side' => $side,
+                        'points' => $positions[$side],
                     ];
                 }
             }
@@ -77,24 +77,24 @@ class MockupObserver
         }
 
         $bulkJob = MockupGenerationJob::create([
-            'mockup_id'       => $mockup->id,
-            'status'          => 'processing',
-            'total_count'     => count($renderJobs),
+            'mockup_id' => $mockup->id,
+            'status' => 'processing',
+            'total_count' => count($renderJobs),
             'completed_count' => 0,
-            'failed_count'    => 0,
-            'started_at'      => now(),
+            'failed_count' => 0,
+            'started_at' => now(),
         ]);
 
         foreach ($renderJobs as $job) {
             $item = BulkJobItem::create([
                 'bulk_job_id' => $bulkJob->id,
                 'template_id' => $job['template_id'],
-                'color'       => $hexToOriginalColor[$job['hex']] ?? $job['hex'],
-                'side'        => $job['side'],
-                'points'      => $job['points'],
-                'status'      => 'pending',
+                'color' => $hexToOriginalColor[$job['hex']] ?? $job['hex'],
+                'side' => $job['side'],
+                'points' => $job['points'],
+                'status' => 'pending',
             ]);
-Log::info("mockup",[$mockup->media]);
+            Log::info("mockup", [$mockup->media]);
             RenderMockupJob::dispatch($bulkJob, $item, $mockup);
         }
     }
