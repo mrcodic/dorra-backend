@@ -234,7 +234,7 @@ class MockupObserver
      */
     protected function alreadyGenerated(
         Mockup $mockup,
-        int $templateId,
+         $templateId,
         string $hex,
         string $side
     ): bool {
