@@ -94,7 +94,7 @@ class MockupObserver
                 'points' => $job['points'],
                 'status' => 'pending',
             ]);
-            Log::info("mockup", [$mockup->media]);
+            Log::info("mockup", [$mockup->load('media')->media]);
             RenderMockupJob::dispatch($bulkJob, $item, $mockup);
         }
     }
