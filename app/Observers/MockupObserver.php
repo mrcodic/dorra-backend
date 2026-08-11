@@ -215,20 +215,36 @@ class MockupObserver
      */
     protected function getDefaultPositions(Mockup $mockup): array
     {
+        $canvasSize = 1200;
+
         return $mockup->sideSettings
             ->filter(
                 fn ($setting) =>
                     $setting->is_active
                     && !empty($setting->warp_points)
             )
-            ->mapWithKeys(
-                fn ($setting) => [
-                    $setting->side => $setting->warp_points,
-                ]
-            )
+            ->mapWithKeys(function ($setting) use ($canvasSize) {
+
+                $points = $setting->warp_points;
+
+                return [
+                    $setting->side => [
+                        'p1x' => (float) $points['p1x'] * $canvasSize,
+                        'p1y' => (float) $points['p1y'] * $canvasSize,
+
+                        'p2x' => (float) $points['p2x'] * $canvasSize,
+                        'p2y' => (float) $points['p2y'] * $canvasSize,
+
+                        'p3x' => (float) $points['p3x'] * $canvasSize,
+                        'p3y' => (float) $points['p3y'] * $canvasSize,
+
+                        'p4x' => (float) $points['p4x'] * $canvasSize,
+                        'p4y' => (float) $points['p4y'] * $canvasSize,
+                    ],
+                ];
+            })
             ->all();
     }
-
     /**
      * Prevent generating duplicate image.
      */
