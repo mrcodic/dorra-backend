@@ -656,7 +656,7 @@ class TemplateController extends DashboardController
     public function detachMockup(Template $template, Mockup $mockup)
     {
         DB::transaction(function () use ($template, $mockup) {
-            $template->mockups()->updateExistingPivot($mockup->id, ['type' => null,'colors'=> null]);
+            $template->mockups()->updateExistingPivot($mockup->id, ['type' => null]);
             $mockup->media()
                 ->where('collection_name', 'generated_mockups')
                 ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $template->id])
