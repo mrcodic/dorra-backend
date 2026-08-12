@@ -10,43 +10,43 @@ use App\Models\MockupGenerationJob;
 
 class MockupObserver
 {
-//    public function updated(Mockup $mockup): void
-//    {
-//        if (!$mockup->wasChanged('pre_fill_colors')) {
-//            return;
-//        }
-//
-//        $oldColors = $this->toArray(
-//            $mockup->getOriginal('pre_fill_colors')
-//        );
-//
-//        $newColors = $mockup->pre_fill_colors ?? [];
-//
-//        $oldHexes = collect($oldColors)
-//            ->filter()
-//            ->map(fn ($color) => $this->normalizeHex($color))
-//            ->unique()
-//            ->all();
-//
-//        $newHexes = collect($newColors)
-//            ->filter()
-//            ->map(fn ($color) => $this->normalizeHex($color))
-//            ->unique()
-//            ->all();
-//
-//        $addedHexes = array_values(
-//            array_diff($newHexes, $oldHexes)
-//        );
-//
-//        if (empty($addedHexes)) {
-//            return;
-//        }
-//
-//        $this->generateForNewColors(
-//            $mockup,
-//            $addedHexes
-//        );
-//    }
+    public function updated(Mockup $mockup): void
+    {
+        if (!$mockup->wasChanged('pre_fill_colors')) {
+            return;
+        }
+
+        $oldColors = $this->toArray(
+            $mockup->getOriginal('pre_fill_colors')
+        );
+
+        $newColors = $mockup->pre_fill_colors ?? [];
+
+        $oldHexes = collect($oldColors)
+            ->filter()
+            ->map(fn ($color) => $this->normalizeHex($color))
+            ->unique()
+            ->all();
+
+        $newHexes = collect($newColors)
+            ->filter()
+            ->map(fn ($color) => $this->normalizeHex($color))
+            ->unique()
+            ->all();
+
+        $addedHexes = array_values(
+            array_diff($newHexes, $oldHexes)
+        );
+
+        if (empty($addedHexes)) {
+            return;
+        }
+
+        $this->generateForNewColors(
+            $mockup,
+            $addedHexes
+        );
+    }
 
     protected function generateForNewColors(
         Mockup $mockup,
