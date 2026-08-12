@@ -12,8 +12,8 @@ class MockupObserver
 {
     public function updated(Mockup $mockup): void
     {
-        if ($mockup->id == 234)
-        {
+      //  if ($mockup->id == 234)
+        //{
             if (!$mockup->wasChanged('pre_fill_colors')) {
                 return;
             }
@@ -48,7 +48,7 @@ class MockupObserver
                 $mockup,
                 $addedHexes
             );
-        }
+//        }
 
     }
 
