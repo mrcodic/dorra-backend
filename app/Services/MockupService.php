@@ -566,7 +566,7 @@ class MockupService extends BaseService
                         mediaId: request()->input($inputName),
                         model: $model,
                         collectionName: 'mockups');
-                    $model->touch();
+                    $model->update(['assets_updated_at'=> now()]);
 
                 }
 

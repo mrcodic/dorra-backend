@@ -33,6 +33,7 @@ class Mockup extends Model implements HasMedia
         'shadow_strength',
         'displacement_scale',
         'pre_fill_colors',
+        'assets_updated_at',
     ];
     protected $appends = [
         'front_base_image_url',
@@ -49,6 +50,7 @@ class Mockup extends Model implements HasMedia
     protected $casts = [
         'colors' => 'array',
         'pre_fill_colors' => 'array',
+        'assets_updated_at' => 'datetime',
         'type' => TypeEnum::class,
     ];
     protected $attributes = [
