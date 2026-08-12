@@ -46,12 +46,12 @@ class BulkMockupController extends Controller
             ->latest()
             ->first();
 
-        if ($lastJob && $mockup->assets_updated_at->gt($lastJob->created_at)) {
-            $mockup->media()
-                ->where('collection_name', 'generated_mockups')
-                ->get()
-                ->each(fn($media) => $media->delete());
-        }
+//        if ($lastJob && $mockup->assets_updated_at->gt($lastJob->created_at)) {
+//            $mockup->media()
+//                ->where('collection_name', 'generated_mockups')
+//                ->get()
+//                ->each(fn($media) => $media->delete());
+//        }
 
         $templateIds = $request->input('template_ids');
 
