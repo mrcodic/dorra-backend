@@ -99,12 +99,6 @@ if (!function_exists('handleMediaUploads')) {
                 return [];
             }
         };
-
-        // Samples a small patch of pixels around a point and averages it down to one color.
-        // More resistant to JPEG noise / anti-aliasing than reading a single raw pixel.
-        // IMPORTANT: must always be called on an image that has NOT yet been flood-filled,
-        // otherwise it can read back an already-transparent/painted pixel instead of the
-        // real original background color.
         $sampleColor = static function (\Imagick $img, int $cx, int $cy, int $w, int $h) {
             $size = 5;
             $x0 = max(0, min($cx - intdiv($size, 2), max($w - 1, 0)));
@@ -123,10 +117,6 @@ if (!function_exists('handleMediaUploads')) {
 
             return $pixel;
         };
-
-        // makes the background of an image transparent and converts it to PNG.
-        // if no color is given, it auto-detects it from the image corners.
-        // skips svg (vector) and non-image files. falls back to original file on any failure.
         $applyTransparency = static function ($file) use ($makeTransparent, $transparentColor, $fuzzPercent, $sampleColor) {
             if (!$makeTransparent) {
                 return $file;
@@ -152,8 +142,6 @@ if (!function_exists('handleMediaUploads')) {
 
             try {
                 $imagick = new \Imagick($file->getPathname());
-
-                // Important for JPG/flat PNG
                 $imagick->setImageFormat('png');
                 $imagick->setImageColorspace(\Imagick::COLORSPACE_SRGB);
                 $imagick->setImageAlphaChannel(\Imagick::ALPHACHANNEL_SET);
@@ -167,20 +155,13 @@ if (!function_exists('handleMediaUploads')) {
 
                 $transparent = new \ImagickPixel('transparent');
 
-                /*
-                 * Remove background connected to image corners only.
-                 * This keeps white details inside the logo safe.
-                 */
+
                 $corners = [
                     [0, 0],
                     [$width - 1, 0],
                     [0, $height - 1],
                     [$width - 1, $height - 1],
                 ];
-
-                // Capture ALL target colors up front, from the untouched original image.
-                // Doing this before any flood fill prevents later corners from sampling
-                // pixels that earlier corners already painted transparent.
                 $targetColors = [];
 
                 foreach ($corners as $i => [$x, $y]) {
@@ -200,15 +181,7 @@ if (!function_exists('handleMediaUploads')) {
                     );
                 }
 
-                /*
-                 * Flood fill only removes background connected to the corners.
-                 * Enclosed regions (e.g. the holes inside letters like "d", "o", "a")
-                 * are topologically sealed off and never get touched by flood fill,
-                 * no matter how many corners are seeded. Do a second, global pass:
-                 * paint any pixel still matching a target background color transparent,
-                 * regardless of connectivity. Dedup target colors first to avoid
-                 * redundant passes over the whole image.
-                 */
+
                 $uniqueTargets = [];
 
                 foreach ($targetColors as $color) {
@@ -223,8 +196,6 @@ if (!function_exists('handleMediaUploads')) {
                         false
                     );
                 }
-
-                // Clean alpha and force PNG output
                 $imagick->setImageFormat('png');
 
                 $originalBase = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
@@ -291,7 +262,7 @@ if (!function_exists('handleMediaUploads')) {
                 $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::create([
                     'collection_name'       => $collectionName,
                     'name'                  => $humanName,
-                    'file_name'             => $file->getClientOriginalName(),
+                    'file_name'             => $safeFileName,
                     'mime_type'             => $file->getClientMimeType(),
                     'disk'                  => 'public',
                     'conversions_disk'      => 'public',
@@ -304,7 +275,7 @@ if (!function_exists('handleMediaUploads')) {
 
                 $directory = (string) $media->id;
 
-                $path = $file->storeAs($directory, $file->getClientOriginalName(), 'public');
+                $path = $file->storeAs($directory, $safeFileName, 'public');
 
                 $media->update([
                     'file_name' => basename($path),
@@ -355,7 +326,6 @@ if (!function_exists('deleteMediaByCustomProperty')) {
 
         }
 
-
     }
 }
 
@@ -388,7 +358,6 @@ if (!function_exists('addMediaToResource')) {
             return $mediaAdder->toMediaCollection($collectionName);
         })->filter();
 
-
         return count($uploaded) === 1 ? $uploaded->first() : $uploaded->all();
     }
 
@@ -413,7 +382,6 @@ if (!function_exists('addMediaToResource')) {
                 ? getMediaCollectionName($collectionName)
                 : getMediaCollectionName($model);
 
-
             if ($clearExisting && method_exists($model, 'getFirstMedia')) {
                 $currentMedia = $model->getFirstMedia($collectionName);
 
@@ -432,5 +400,3 @@ if (!function_exists('addMediaToResource')) {
         }
     }
 }
-
-
