@@ -352,25 +352,16 @@ class TemplateController extends DashboardController
     /**
      * Save mockup positions, colors, and upload generated mockup files
      */
-    public function savePositionsAndUploadMockups(
-        Template $template,
-        Mockup $mockup,
-        Request $request
-    ) {
+    public function savePositionsAndUploadMockups(Template $template, Mockup $mockup, Request $request)
+    {
+        $hasColors = $request->filled('colors');
+
         $request->validate([
             'positions'        => ['required', 'array'],
-
             'positions.*.name' => [
-                'required',
-                'string',
-                'max:100',
-                Rule::in(
-                    $mockup->types
-                        ->map(fn($type) => $type->value->key())
-                        ->toArray()
-                ),
+                'required', 'string', 'max:100',
+                Rule::in($mockup->types->map(fn($type) => $type->value->key())->toArray()),
             ],
-
             'positions.*.p1x' => ['required', 'numeric'],
             'positions.*.p1y' => ['required', 'numeric'],
             'positions.*.p2x' => ['required', 'numeric'],
@@ -380,102 +371,54 @@ class TemplateController extends DashboardController
             'positions.*.p4x' => ['required', 'numeric'],
             'positions.*.p4y' => ['required', 'numeric'],
 
-            'colors' => ['nullable', 'array'],
+            'colors'   => ['nullable', 'array'],
 
-            'files' => ['required', 'array'],
-
-            'files.*.side' => [
-                'string',
-                'max:100',
-                Rule::in(
-                    $mockup->types
-                        ->map(fn($type) => $type->value->key())
-                        ->toArray()
-                ),
+            'files'         => ['required', 'array'],
+            'files.*.side'  => [
+                'string', 'max:100',
+                Rule::in($mockup->types->map(fn($type) => $type->value->key())->toArray()),
             ],
-
             'files.*.color' => [
                 'nullable',
                 'string',
                 function ($attribute, $value, $fail) use ($request) {
-                    /*
-                     * If no colors were sent, files without colors are allowed.
-                     */
-                    if (!$request->filled('colors')) {
-                        return;
-                    }
-
+                    if (!$request->filled('colors')) return; // skip if no colors sent
                     $colors = $request->input('colors', []);
-
-                    $normalizedColors = array_map(
-                        fn($color) => strtolower(
-                            ltrim($color, '#')
-                        ),
-                        $colors
-                    );
-
-                    $normalizedValue = strtolower(
-                        ltrim($value, '#')
-                    );
-
-                    if (!in_array(
-                        $normalizedValue,
-                        $normalizedColors,
-                        true
-                    )) {
-                        $fail(
-                            "The $attribute must be one of the provided colors."
-                        );
+                    $normalizedColors = array_map(fn($c) => strtolower(ltrim($c, '#')), $colors);
+                    $normalizedValue  = strtolower(ltrim($value, '#'));
+                    if (!in_array($normalizedValue, $normalizedColors)) {
+                        $fail("The $attribute must be one of the provided colors.");
                     }
                 },
             ],
-
             'files.*.file' => ['image'],
         ]);
 
-
-        $existingPivot = $template->mockups()
+        $oldColors = $template->mockups()
             ->where('mockup_id', $mockup->id)
-            ->first();
-
-        $oldColors = $existingPivot?->pivot->colors ?? [];
-
-        $newColors = $request->input('colors', []);
-
-        if (!is_array($newColors)) {
-            $newColors = [];
-        }
+            ->first()?->pivot->colors ?? [];
 
         $pivotData = [
             'positions' => $request->input('positions'),
-            'colors'    => $newColors,
             'type'      => 'single',
         ];
 
-        if ($existingPivot) {
-            $template->mockups()
-                ->updateExistingPivot(
-                    $mockup->id,
-                    $pivotData
-                );
-        } else {
-            $template->mockups()
-                ->attach(
-                    $mockup->id,
-                    $pivotData
-                );
+        // only store colors if sent
+        if ($hasColors) {
+            $pivotData['colors'] = $request->input('colors');
         }
 
-        $this->uploadMockupFiles(
-            $template,
-            $mockup,
-            $request,
-            $oldColors,
-            true
-        );
+        if ($template->mockups()->where('mockup_id', $mockup->id)->exists()) {
+            $template->mockups()->updateExistingPivot($mockup->id, $pivotData);
+        } else {
+            $template->mockups()->attach($mockup->id, $pivotData);
+        }
+
+        $this->uploadMockupFiles($template, $mockup, $request, $oldColors, $hasColors);
 
         return Response::api();
     }
+
     private function uploadMockupFiles(Template $template, Mockup $mockup, Request $request, array $oldColors, bool $hasColors): void
     {
         $pivotMockup = $template->mockups()->where('mockup_id', $mockup->id)->first();
