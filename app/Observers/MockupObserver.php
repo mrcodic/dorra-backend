@@ -162,20 +162,8 @@ class MockupObserver
         Mockup $mockup,
         array $addedHexes
     ): void {
-        /*
-         * Job format:
-         *
-         * [
-         *     'front' => [p1x, p1y, ...],
-         *     'back'  => [p1x, p1y, ...],
-         * ]
-         */
-        $defaultPositions = $this->getDefaultPositions($mockup);
 
-        Log::info('Mockup default positions', [
-            'mockup_id' => $mockup->id,
-            'positions' => $defaultPositions,
-        ]);
+        $defaultPositions = $this->getDefaultPositions($mockup);
 
         $hexToOriginalColor = collect(
             $mockup->pre_fill_colors ?? []
@@ -206,23 +194,6 @@ class MockupObserver
                 $hexToOriginalColor,
                 &$totalCount
             ) {
-                /*
-                 |--------------------------------------------------------------------------
-                 | Resolve positions
-                 |--------------------------------------------------------------------------
-                 |
-                 | If this template already has positions on mockup_template, use them.
-                 | Otherwise use the mockup side-settings defaults and persist those
-                 | defaults into mockup_template.positions.
-                 |
-                 */
-
-                /*
-                 * This relation only returns templates that already have a
-                 * mockup_template pivot row. Check the RAW pivot positions
-                 * value so an existing row with [] / null / empty JSON
-                 * receives the default positions.
-                 */
                 $pivotPositions = $this->toArray(
                     $template->pivot->positions ?? []
                 );
@@ -444,14 +415,14 @@ class MockupObserver
 
                 return [
                     $side => [
-                        'p1x' => (float) $position['p1x'],
-                        'p1y' => (float) $position['p1y'],
-                        'p2x' => (float) $position['p2x'],
-                        'p2y' => (float) $position['p2y'],
-                        'p3x' => (float) $position['p3x'],
-                        'p3y' => (float) $position['p3y'],
-                        'p4x' => (float) $position['p4x'],
-                        'p4y' => (float) $position['p4y'],
+                        'p1x' => $position['p1x'],
+                        'p1y' => $position['p1y'],
+                        'p2x' => $position['p2x'],
+                        'p2y' => $position['p2y'],
+                        'p3x' => $position['p3x'],
+                        'p3y' => $position['p3y'],
+                        'p4x' => $position['p4x'],
+                        'p4y' => $position['p4y'],
                     ],
                 ];
             })
@@ -479,12 +450,6 @@ class MockupObserver
                     $points = $this->toArray(
                         $setting->warp_points
                     );
-
-                    /*
-                     * Never silently replace a missing point with 0.
-                     * An incomplete warp point set can create a completely wrong
-                     * render position.
-                     */
                     if (!$this->hasValidWarpPoints($points)) {
                         Log::warning('Invalid default warp points', [
                             'side_setting_id' => $setting->id ?? null,
