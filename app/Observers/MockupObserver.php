@@ -217,18 +217,29 @@ class MockupObserver
                  |
                  */
 
-                $positions = $this->getTemplatePositions($template);
+                /*
+                 * This relation only returns templates that already have a
+                 * mockup_template pivot row. Check the RAW pivot positions
+                 * value so an existing row with [] / null / empty JSON
+                 * receives the default positions.
+                 */
+                $pivotPositions = $this->toArray(
+                    $template->pivot->positions ?? []
+                );
 
-                $isUsingDefaultPositions = empty($positions);
+                $isPivotPositionsEmpty = empty($pivotPositions);
 
-                if ($isUsingDefaultPositions) {
+                if ($isPivotPositionsEmpty) {
                     $positions = $defaultPositions;
+                } else {
+                    $positions = $this->getTemplatePositions($template);
                 }
 
                 if (empty($positions)) {
                     Log::warning('No valid positions found for template', [
                         'mockup_id' => $mockup->id,
                         'template_id' => $template->id,
+                        'pivot_positions_empty' => $isPivotPositionsEmpty,
                     ]);
 
                     return;
@@ -287,7 +298,7 @@ class MockupObserver
                  *     ]
                  * ]
                  */
-                if ($isUsingDefaultPositions) {
+                if ($isPivotPositionsEmpty) {
                     $pivotUpdateData['positions'] =
                         $this->positionsForPivot($positions);
                 }
