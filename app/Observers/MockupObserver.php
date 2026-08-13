@@ -490,14 +490,14 @@ class MockupObserver
 
                 return [
                     'name' => $side,
-                    'p1x' => (float) $points['p1x'],
-                    'p1y' => (float) $points['p1y'],
-                    'p2x' => (float) $points['p2x'],
-                    'p2y' => (float) $points['p2y'],
-                    'p3x' => (float) $points['p3x'],
-                    'p3y' => (float) $points['p3y'],
-                    'p4x' => (float) $points['p4x'],
-                    'p4y' => (float) $points['p4y'],
+                    'p1x' => $points['p1x'],
+                    'p1y' => $points['p1y'],
+                    'p2x' => $points['p2x'],
+                    'p2y' => $points['p2y'],
+                    'p3x' => $points['p3x'],
+                    'p3y' => $points['p3y'],
+                    'p4x' => $points['p4x'],
+                    'p4y' => $points['p4y'],
                 ];
             })
             ->filter()
