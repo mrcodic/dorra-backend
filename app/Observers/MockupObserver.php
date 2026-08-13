@@ -7,6 +7,7 @@ use App\Models\BulkJobItem;
 use App\Models\Design;
 use App\Models\Mockup;
 use App\Models\MockupGenerationJob;
+use Illuminate\Support\Facades\Log;
 
 class MockupObserver
 {
@@ -14,14 +15,11 @@ class MockupObserver
     {
           if ($mockup->id == 234)
         {
-        if (!$mockup->
-        wasChanged('pre_fill_colors')) {
+        if (!$mockup->wasChanged('pre_fill_colors')) {
             return;
         }
 
-        $oldColors = $this->toArray(
-            $mockup->getOriginal('pre_fill_colors')
-        );
+        $oldColors = $this->toArray($mockup->getOriginal('pre_fill_colors'));
 
         $newColors = $mockup->pre_fill_colors ?? [];
 
@@ -90,21 +88,6 @@ class MockupObserver
             return;
         }
 
-        /*
-         |--------------------------------------------------------------------------
-         | 1. Remove colors from mockup_template pivot
-         |--------------------------------------------------------------------------
-         |
-         | For every template:
-         |
-         | - remove deleted colors from pivot.colors
-         | - if model_color is one of the deleted colors:
-         |      use the first remaining color as model_color
-         | - if there are no remaining colors:
-         |      model_color becomes null
-         |
-         */
-
         $mockup->templates()
             ->orderBy('templates.id')
             ->lazy(100)
@@ -134,10 +117,7 @@ class MockupObserver
                     'colors' => $remainingColors,
                 ];
 
-                /*
-                 * Check if the removed color is currently
-                 * being used as model_color.
-                 */
+
                 $modelColor = $pivot->model_color;
 
                 if (
@@ -148,30 +128,6 @@ class MockupObserver
                         true
                     )
                 ) {
-                    /*
-                     * Apply another available color.
-                     *
-                     * Example:
-                     *
-                     * colors:
-                     * [
-                     *     "#ff0000",
-                     *     "#000000",
-                     *     "#ffffff"
-                     * ]
-                     *
-                     * model_color = "#ff0000"
-                     *
-                     * remove "#ff0000"
-                     *
-                     * result:
-                     * colors = [
-                     *     "#000000",
-                     *     "#ffffff"
-                     * ]
-                     *
-                     * model_color = "#000000"
-                     */
 
                     $updateData['model_color']
                         = $remainingColors[0] ?? null;
@@ -233,6 +189,7 @@ class MockupObserver
         array $addedHexes
     ): void {
         $defaultPositions = $this->getDefaultPositions($mockup);
+        Log::info("defaultPositions",$this->getDefaultPositions($mockup));
 
         $hexToOriginalColor = collect(
             $mockup->pre_fill_colors ?? []
