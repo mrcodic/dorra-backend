@@ -403,10 +403,9 @@ class TemplateController extends DashboardController
             'type'      => 'single',
         ];
 
-        // only store colors if sent
-        if ($hasColors) {
-            $pivotData['colors'] = $request->input('colors');
-        }
+
+            $pivotData['colors'] = $request->input('colors',[]);
+
 
         if ($template->mockups()->where('mockup_id', $mockup->id)->exists()) {
             $template->mockups()->updateExistingPivot($mockup->id, $pivotData);
