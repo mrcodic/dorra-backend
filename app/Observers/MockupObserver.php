@@ -12,46 +12,222 @@ class MockupObserver
 {
     public function updated(Mockup $mockup): void
     {
-      //  if ($mockup->id == 234)
-        //{
-            if (!$mockup->wasChanged('pre_fill_colors')) {
-                return;
-            }
+          if ($mockup->id == 234)
+        {
+        if (!$mockup->
+        wasChanged('pre_fill_colors')) {
+            return;
+        }
 
-            $oldColors = $this->toArray(
-                $mockup->getOriginal('pre_fill_colors')
+        $oldColors = $this->toArray(
+            $mockup->getOriginal('pre_fill_colors')
+        );
+
+        $newColors = $mockup->pre_fill_colors ?? [];
+
+        $oldHexes = collect($oldColors)
+            ->filter()
+            ->map(fn ($color) => $this->normalizeHex($color))
+            ->unique()
+            ->values()
+            ->all();
+
+        $newHexes = collect($newColors)
+            ->filter()
+            ->map(fn ($color) => $this->normalizeHex($color))
+            ->unique()
+            ->values()
+            ->all();
+
+        /*
+         * Colors newly added to the mockup.
+         */
+        $addedHexes = array_values(
+            array_diff($newHexes, $oldHexes)
+        );
+
+        /*
+         * Colors removed from the mockup.
+         */
+        $removedHexes = array_values(
+            array_diff($oldHexes, $newHexes)
+        );
+
+        /*
+         * First clean removed colors.
+         */
+        if (!empty($removedHexes)) {
+            $this->removeDeletedColors(
+                $mockup,
+                $removedHexes
             );
+        }
 
-            $newColors = $mockup->pre_fill_colors ?? [];
-
-            $oldHexes = collect($oldColors)
-                ->filter()
-                ->map(fn ($color) => $this->normalizeHex($color))
-                ->unique()
-                ->all();
-
-            $newHexes = collect($newColors)
-                ->filter()
-                ->map(fn ($color) => $this->normalizeHex($color))
-                ->unique()
-                ->all();
-
-            $addedHexes = array_values(
-                array_diff($newHexes, $oldHexes)
-            );
-
-            if (empty($addedHexes)) {
-                return;
-            }
-
+        /*
+         * Then generate newly added colors.
+         */
+        if (!empty($addedHexes)) {
             $this->generateForNewColors(
                 $mockup,
                 $addedHexes
             );
-//        }
+        }
+                }
 
     }
+    protected function removeDeletedColors(
+        Mockup $mockup,
+        array $removedHexes
+    ): void {
+        $removedHexes = collect($removedHexes)
+            ->filter()
+            ->map(fn ($color) => $this->normalizeHex($color))
+            ->unique()
+            ->values()
+            ->all();
 
+        if (empty($removedHexes)) {
+            return;
+        }
+
+        /*
+         |--------------------------------------------------------------------------
+         | 1. Remove colors from mockup_template pivot
+         |--------------------------------------------------------------------------
+         |
+         | For every template:
+         |
+         | - remove deleted colors from pivot.colors
+         | - if model_color is one of the deleted colors:
+         |      use the first remaining color as model_color
+         | - if there are no remaining colors:
+         |      model_color becomes null
+         |
+         */
+
+        $mockup->templates()
+            ->orderBy('templates.id')
+            ->lazy(100)
+            ->each(function ($template) use (
+                $mockup,
+                $removedHexes
+            ) {
+                $pivot = $template->pivot;
+
+                $pivotColors = $this->toArray(
+                    $pivot->colors ?? []
+                );
+
+                $remainingColors = collect($pivotColors)
+                    ->filter()
+                    ->reject(function ($color) use ($removedHexes) {
+                        return in_array(
+                            $this->normalizeHex($color),
+                            $removedHexes,
+                            true
+                        );
+                    })
+                    ->values()
+                    ->all();
+
+                $updateData = [
+                    'colors' => $remainingColors,
+                ];
+
+                /*
+                 * Check if the removed color is currently
+                 * being used as model_color.
+                 */
+                $modelColor = $pivot->model_color;
+
+                if (
+                    !empty($modelColor)
+                    && in_array(
+                        $this->normalizeHex($modelColor),
+                        $removedHexes,
+                        true
+                    )
+                ) {
+                    /*
+                     * Apply another available color.
+                     *
+                     * Example:
+                     *
+                     * colors:
+                     * [
+                     *     "#ff0000",
+                     *     "#000000",
+                     *     "#ffffff"
+                     * ]
+                     *
+                     * model_color = "#ff0000"
+                     *
+                     * remove "#ff0000"
+                     *
+                     * result:
+                     * colors = [
+                     *     "#000000",
+                     *     "#ffffff"
+                     * ]
+                     *
+                     * model_color = "#000000"
+                     */
+
+                    $updateData['model_color']
+                        = $remainingColors[0] ?? null;
+                }
+
+                $mockup->templates()
+                    ->updateExistingPivot(
+                        $template->id,
+                        $updateData
+                    );
+            });
+
+        /*
+         |--------------------------------------------------------------------------
+         | 2. Delete generated media/files for removed colors
+         |--------------------------------------------------------------------------
+         |
+         | Spatie Media Library ->delete() removes:
+         |
+         | - media database row
+         | - physical generated file
+         | - conversions related to that media
+         |
+         */
+
+        $mockup->media()
+            ->where(
+                'collection_name',
+                'generated_mockups'
+            )
+            ->where(function ($query) use ($removedHexes) {
+                foreach ($removedHexes as $hex) {
+                    $query->orWhereRaw(
+                        "
+                    LOWER(
+                        REPLACE(
+                            JSON_UNQUOTE(
+                                JSON_EXTRACT(
+                                    custom_properties,
+                                    '$.hex'
+                                )
+                            ),
+                            '#',
+                            ''
+                        )
+                    ) = ?
+                    ",
+                        [$hex]
+                    );
+                }
+            })
+            ->lazyById(100)
+            ->each(function ($media) {
+                $media->delete();
+            });
+    }
     protected function generateForNewColors(
         Mockup $mockup,
         array $addedHexes
