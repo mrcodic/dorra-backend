@@ -426,6 +426,8 @@ class TemplateController extends DashboardController
             ? $this->normalizeHex($pivotMockup->pivot->model_color)
             : null;
 
+        $wasColorless = empty($oldColors);
+
         if ($hasColors) {
             $newColors = collect($pivotMockup?->pivot?->colors ?? [])
                 ->map(fn($c) => $this->normalizeHex($c))
@@ -454,18 +456,30 @@ class TemplateController extends DashboardController
 
             /*
             |--------------------------------------------------------------------------
-            | 2) Delete old model image if model color changed
+            | 2) Delete old model image(s) — ONLY when this update transitions the
+            |    template from "no colors" to "has colors". If colors already
+            |    existed before this request, leave model_image rows alone.
             |--------------------------------------------------------------------------
             */
-            $mockup->media()
-                ->where('collection_name', 'generated_mockups')
-                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$template->id])
-                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])
-                ->when($modelColor, fn($q) =>
-                $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) != ?", [$modelColor])
-                )
-                ->cursor()
-                ->each->delete();
+
+            if ($wasColorless) {
+                $mockup->media()
+                    ->where('collection_name', 'generated_mockups')
+                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$template->id])
+                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])
+                    ->cursor()
+                    ->each->delete();
+            }else{
+                $mockup->media()
+                    ->where('collection_name', 'generated_mockups')
+                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$template->id])
+                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])
+                    ->when($modelColor, fn($q) =>
+                    $q->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) != ?", [$modelColor])
+                    )
+                    ->cursor()
+                    ->each->delete();
+            }
         }
 
         /*
@@ -510,7 +524,6 @@ class TemplateController extends DashboardController
                 ->toMediaCollection('generated_mockups');
         }
     }
-
     private function normalizeHex(?string $hex): string
     {
         return strtolower(ltrim(trim((string)$hex), '#'));
