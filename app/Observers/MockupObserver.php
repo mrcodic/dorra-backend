@@ -415,20 +415,19 @@ class MockupObserver
 
                 return [
                     $side => [
-                        'p1x' => $position['p1x'],
-                        'p1y' => $position['p1y'],
-                        'p2x' => $position['p2x'],
-                        'p2y' => $position['p2y'],
-                        'p3x' => $position['p3x'],
-                        'p3y' => $position['p3y'],
-                        'p4x' => $position['p4x'],
-                        'p4y' => $position['p4y'],
+                        'p1x' => (string) $position['p1x'],
+                        'p1y' => (string) $position['p1y'],
+                        'p2x' => (string) $position['p2x'],
+                        'p2y' => (string) $position['p2y'],
+                        'p3x' => (string) $position['p3x'],
+                        'p3y' => (string) $position['p3y'],
+                        'p4x' => (string) $position['p4x'],
+                        'p4y' => (string) $position['p4y'],
                     ],
                 ];
             })
             ->all();
     }
-
     /**
      * Get default active positions from mockup side settings.
      *
@@ -450,6 +449,7 @@ class MockupObserver
                     $points = $this->toArray(
                         $setting->warp_points
                     );
+
                     if (!$this->hasValidWarpPoints($points)) {
                         Log::warning('Invalid default warp points', [
                             'side_setting_id' => $setting->id ?? null,
@@ -460,15 +460,16 @@ class MockupObserver
                         return $positions;
                     }
 
+                    // DO NOT CAST TO FLOAT
                     $positions[$setting->side] = [
-                        'p1x' => (float) $points['p1x'],
-                        'p1y' => (float) $points['p1y'],
-                        'p2x' => (float) $points['p2x'],
-                        'p2y' => (float) $points['p2y'],
-                        'p3x' => (float) $points['p3x'],
-                        'p3y' => (float) $points['p3y'],
-                        'p4x' => (float) $points['p4x'],
-                        'p4y' => (float) $points['p4y'],
+                        'p1x' => (string) $points['p1x'],
+                        'p1y' => (string) $points['p1y'],
+                        'p2x' => (string) $points['p2x'],
+                        'p2y' => (string) $points['p2y'],
+                        'p3x' => (string) $points['p3x'],
+                        'p3y' => (string) $points['p3y'],
+                        'p4x' => (string) $points['p4x'],
+                        'p4y' => (string) $points['p4y'],
                     ];
 
                     return $positions;
@@ -490,21 +491,22 @@ class MockupObserver
 
                 return [
                     'name' => $side,
-                    'p1x' => $points['p1x'],
-                    'p1y' => $points['p1y'],
-                    'p2x' => $points['p2x'],
-                    'p2y' => $points['p2y'],
-                    'p3x' => $points['p3x'],
-                    'p3y' => $points['p3y'],
-                    'p4x' => $points['p4x'],
-                    'p4y' => $points['p4y'],
+
+                    // Keep EXACT original decimal representation
+                    'p1x' => (string) $points['p1x'],
+                    'p1y' => (string) $points['p1y'],
+                    'p2x' => (string) $points['p2x'],
+                    'p2y' => (string) $points['p2y'],
+                    'p3x' => (string) $points['p3x'],
+                    'p3y' => (string) $points['p3y'],
+                    'p4x' => (string) $points['p4x'],
+                    'p4y' => (string) $points['p4y'],
                 ];
             })
             ->filter()
             ->values()
             ->all();
     }
-
     protected function hasValidWarpPoints(array $points): bool
     {
         $required = [
