@@ -460,16 +460,36 @@ class MockupObserver
                         return $positions;
                     }
 
-                    // DO NOT CAST TO FLOAT
+                    /*
+                     * TEST:
+                     * Swap p3 and p4 ONLY for default positions.
+                     *
+                     * Original:
+                     * p1 = top-left
+                     * p2 = top-right
+                     * p3 = bottom-right
+                     * p4 = bottom-left
+                     *
+                     * Sent:
+                     * p1 = original p1
+                     * p2 = original p2
+                     * p3 = original p4
+                     * p4 = original p3
+                     */
                     $positions[$setting->side] = [
                         'p1x' => (string) $points['p1x'],
                         'p1y' => (string) $points['p1y'],
+
                         'p2x' => (string) $points['p2x'],
                         'p2y' => (string) $points['p2y'],
-                        'p3x' => (string) $points['p3x'],
-                        'p3y' => (string) $points['p3y'],
-                        'p4x' => (string) $points['p4x'],
-                        'p4y' => (string) $points['p4y'],
+
+                        // SWAP: p3 gets original p4
+                        'p3x' => (string) $points['p4x'],
+                        'p3y' => (string) $points['p4y'],
+
+                        // SWAP: p4 gets original p3
+                        'p4x' => (string) $points['p3x'],
+                        'p4y' => (string) $points['p3y'],
                     ];
 
                     return $positions;
@@ -477,7 +497,6 @@ class MockupObserver
                 []
             );
     }
-
     /**
      * Convert the map/job position format into mockup_template.positions format.
      */
