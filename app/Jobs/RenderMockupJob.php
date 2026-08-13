@@ -72,30 +72,20 @@ class RenderMockupJob implements ShouldQueue
 
             Log::error("configFront", $config);
 
-            $hex      = strtolower(ltrim(trim($this->item->color), '#'));
-            $template = $this->item->template;
-
-            $tempPath = sys_get_temp_dir()
-                . "/mockup_{$this->mockup->id}_{$template->id}_{$side}_{$hex}.png";
-
-            $response = Http::withOptions([
-                'sink' => $tempPath,
-            ])
-                ->timeout(30)
-                ->post(
-                    config('services.node_render_url') . '/api/render',
-                    $config
-                );
+            $response = Http::timeout(30)->post(
+                config('services.node_render_url') . '/api/render',
+                $config
+            );
 
             if (!$response->successful()) {
-                $error = file_exists($tempPath)
-                    ? file_get_contents($tempPath)
-                    : '';
-
-                throw new \Exception(
-                    "Render service returned: " . $error
-                );
+                throw new \Exception("Render service returned: " . $response->body());
             }
+
+            $hex      = strtolower(ltrim(trim($this->item->color), '#'));
+            $template = $this->item->template;
+            $tempPath = sys_get_temp_dir() . "/mockup_{$this->mockup->id}_{$template->id}_{$side}_{$hex}.png";
+            file_put_contents($tempPath, $response->body());
+
             $protectedHexes = $this->mockup->templates()
                 ->wherePivotNotNull('model_color')
                 ->get()
