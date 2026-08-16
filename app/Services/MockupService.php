@@ -488,10 +488,7 @@ class MockupService extends BaseService
             $oldCategoryId = $before->category_id;
             $validatedData['pre_fill_colors'] ??= [];
             $model = $this->repository->update($validatedData, $id);
-            if ($model->category->is_has_category) {
-                $model->products()->sync($validatedData['product_ids'] ?? $model->category->products->pluck('id'));
-                app(MockupObserver::class)->syncTemplateDefaults($model);
-            }
+
 //            if (!empty($positions = $validatedData['positions'])) {
 //                foreach ($positions as $side => $points) {
 //                    $model->sideSettings()->updateOrCreate(
@@ -577,7 +574,10 @@ class MockupService extends BaseService
 
             });
 
-
+            if ($model->category->is_has_category) {
+                $model->products()->sync($validatedData['product_ids'] ?? $model->category->products->pluck('id'));
+                app(MockupObserver::class)->syncTemplateDefaults($model);
+            }
             $model->load(['templates', 'types', 'category', 'media']);
 //            if (!empty($validatedData['templates'])) {
 //                $templateIds = collect($validatedData['templates'])->pluck('template_id')->filter();

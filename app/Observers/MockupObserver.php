@@ -44,60 +44,80 @@ class MockupObserver
             return;
         }
 
-        $templates = $this->getAttachableTemplates($mockup);
+        $templatesQuery = $this->getAttachableTemplates($mockup);
 
-        if ($templates->isEmpty()) {
+        if (!$templatesQuery) {
             return;
         }
 
-        $alreadyAttachedIds = $mockup
-            ->templates()
-            ->pluck('templates.id')
-            ->all();
-
-        $templatesToAttach = $templates->reject(
-            fn ($template) => in_array(
-                $template->id,
-                $alreadyAttachedIds,
-                true
+        $templatesQuery
+            ->whereDoesntHave(
+                'mockups',
+                fn ($query) =>
+                $query->where(
+                    'mockups.id',
+                    $mockup->id
+                )
             )
-        );
+            ->orderBy('templates.id')
+            ->lazy(100)
+            ->chunk(100)
+            ->each(function ($templates) use ($mockup) {
+                $ids = $templates
+                    ->pluck('id')
+                    ->all();
 
-        if ($templatesToAttach->isNotEmpty()) {
-            $mockup->templates()->attach(
-                $templatesToAttach->pluck('id')->all(),
-                [
-                    'colors' => [],
-                    'positions' => [],
-                ]
-            );
-        }
+                if (empty($ids)) {
+                    return;
+                }
+
+                $mockup->templates()->attach(
+                    $ids,
+                    [
+                        'colors' => [],
+                        'positions' => [],
+                    ]
+                );
+            });
 
         $hexes = $colors
-            ->map(fn ($color) => $this->normalizeHex($color))
+            ->map(
+                fn ($color) =>
+                $this->normalizeHex($color)
+            )
             ->unique()
             ->values()
             ->all();
 
-        $this->generateForNewColors($mockup, $hexes);
+        $this->generateForNewColors(
+            $mockup,
+            $hexes
+        );
     }
-
-    protected function getAttachableTemplates(Mockup $mockup)
-    {
+    protected function getAttachableTemplates(
+        Mockup $mockup
+    ): ?\Illuminate\Database\Eloquent\Builder {
         $productIds = $mockup
             ->products()
             ->pluck('products.id');
 
-        if (!$mockup->category_id && $productIds->isEmpty()) {
-            return collect();
+        if (
+            !$mockup->category_id
+            && $productIds->isEmpty()
+        ) {
+            return null;
         }
 
         return Template::query()
-            ->where(function ($query) use ($mockup, $productIds) {
+            ->where(function ($query) use (
+                $mockup,
+                $productIds
+            ) {
                 if ($mockup->category_id) {
                     $query->orWhereHas(
                         'categories',
-                        fn ($q) => $q->where(
+                        fn ($q) =>
+                        $q->where(
                             'categories.id',
                             $mockup->category_id
                         )
@@ -107,14 +127,14 @@ class MockupObserver
                 if ($productIds->isNotEmpty()) {
                     $query->orWhereHas(
                         'products',
-                        fn ($q) => $q->whereIn(
+                        fn ($q) =>
+                        $q->whereIn(
                             'products.id',
                             $productIds
                         )
                     );
                 }
-            })
-            ->get();
+            });
     }
 
     public function updated(Mockup $mockup): void
