@@ -407,10 +407,7 @@ class MockupService extends BaseService
     {
         $model = $this->handleTransaction(function () use ($validatedData) {
             $model = $this->repository->create($validatedData);
-            if ($model->category->is_has_category) {
-                $model->products()->sync($validatedData['product_ids'] ?? $model->category->products->pluck('id'));
-                app(MockupObserver::class)->syncTemplateDefaults($model);
-            }
+
 //            if (!empty($warpPoints = $validatedData['warp_points'])) {
 //                foreach ($warpPoints as $side => $points) {
 //                    $model->sideSettings()->updateOrCreate(
@@ -468,6 +465,10 @@ class MockupService extends BaseService
             }
 
         });
+        if ($model->category->is_has_category) {
+            $model->products()->sync($validatedData['product_ids'] ?? $model->category->products->pluck('id'));
+            app(MockupObserver::class)->syncTemplateDefaults($model);
+        }
         $model->load(['templates', 'types', 'category', 'media']);
 //        if (!empty($validatedData['templates'])) {
 //            $templateIds = collect($validatedData['templates'])->pluck('template_id')->filter();
