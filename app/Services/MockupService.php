@@ -8,6 +8,7 @@ use App\Jobs\HandleMockupFilesJob;
 use App\Models\Design;
 use App\Models\Product;
 use App\Models\Template;
+use App\Observers\MockupObserver;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\MockupRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
@@ -487,6 +488,7 @@ class MockupService extends BaseService
             $model = $this->repository->update($validatedData, $id);
             if ($model->category->is_has_category) {
                 $model->products()->sync($validatedData['product_ids'] ?? $model->category->products->pluck('id'));
+                app(MockupObserver::class)->syncTemplateDefaults($model);
             }
 //            if (!empty($positions = $validatedData['positions'])) {
 //                foreach ($positions as $side => $points) {

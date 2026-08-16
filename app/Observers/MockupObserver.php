@@ -7,10 +7,96 @@ use App\Models\BulkJobItem;
 use App\Models\Design;
 use App\Models\Mockup;
 use App\Models\MockupGenerationJob;
+use App\Models\Template;
 use Illuminate\Support\Facades\Log;
 
 class MockupObserver
 {
+    protected const STATIC_DEFAULT_POINTS = [
+        0.35, 0.25,
+        0.65, 0.25,
+        0.35, 0.55,
+        0.65, 0.55,
+    ];
+
+    public function created(Mockup $mockup): void
+    {
+        $colors = collect($mockup->pre_fill_colors ?? [])->filter()->values();
+
+        if ($colors->isEmpty()) {
+            return;
+        }
+
+        $this->syncTemplateDefaults($mockup, $colors);
+    }
+
+
+    public function syncTemplateDefaults(Mockup $mockup, ?\Illuminate\Support\Collection $colors = null): void
+    {
+        $colors ??= collect($mockup->pre_fill_colors ?? [])->filter()->values();
+
+        if ($colors->isEmpty()) {
+            return;
+        }
+
+        $templates = $this->getAttachableTemplates($mockup);
+
+        if ($templates->isEmpty()) {
+            return;
+        }
+
+        $alreadyAttachedIds = $mockup->templates()->pluck('templates.id')->all();
+
+        $templatesToAttach = $templates->reject(
+            fn ($template) => in_array($template->id, $alreadyAttachedIds, true)
+        );
+
+        if ($templatesToAttach->isNotEmpty()) {
+            $mockup->templates()->attach(
+                $templatesToAttach->pluck('id')->all(),
+                [
+                    'colors' => [],
+                    'positions' => [],
+                ]
+            );
+        }
+
+        $hexes = $colors
+            ->map(fn ($color) => $this->normalizeHex($color))
+            ->unique()
+            ->values()
+            ->all();
+
+        $this->generateForNewColors($mockup, $hexes);
+    }
+
+    protected function getAttachableTemplates(Mockup $mockup)
+    {
+        $productIds = $mockup->products()->pluck('products.id');
+
+        if (!$mockup->category_id && $productIds->isEmpty()) {
+            return collect();
+        }
+
+        return Template::query()
+            ->where(function ($query) use ($mockup, $productIds) {
+                if ($mockup->category_id) {
+                    $query->orWhereHas(
+                        'categories',
+                        fn ($q) => $q->where('categories.id', $mockup->category_id)
+                    );
+                }
+
+                if ($productIds->isNotEmpty()) {
+                    $query->orWhereHas(
+                        'products',
+                        fn ($q) => $q->whereIn('products.id', $productIds)
+                    );
+                }
+            })
+            ->get();
+    }
+
     public function updated(Mockup $mockup): void
     {
         if ($mockup->id == 234) {
@@ -373,26 +459,7 @@ class MockupObserver
             );
     }
 
-    /**
-     * Convert stored pivot positions into the map format used by jobs.
-     *
-     * Pivot:
-     * [
-     *     [
-     *         'name' => 'front',
-     *         'p1x' => ...,
-     *         ...
-     *     ]
-     * ]
-     *
-     * Returns:
-     * [
-     *     'front' => [
-     *         'p1x' => ...,
-     *         ...
-     *     ]
-     * ]
-     */
+
     protected function getTemplatePositions($template): array
     {
         $positions = $this->toArray(
@@ -431,7 +498,7 @@ class MockupObserver
 
     protected function getDefaultPositions(Mockup $mockup): array
     {
-        return $mockup->sideSettings()
+        $positions = $mockup->sideSettings()
             ->where('is_active', true)
             ->whereNotNull('warp_points')
             ->get()
@@ -450,6 +517,7 @@ class MockupObserver
 
                         return $positions;
                     }
+
                     $positions[$setting->side] = [
                         'p1x' => (string) $points['p1x'],
                         'p1y' => (string) $points['p1y'],
@@ -467,6 +535,41 @@ class MockupObserver
                 },
                 []
             );
+
+        if (!empty($positions)) {
+            return $positions;
+        }
+
+        $sides = $mockup->types
+            ->map(fn ($type) => $type->value?->key())
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($sides->isEmpty()) {
+            $sides = collect(['front']);
+        }
+
+        return $sides
+            ->mapWithKeys(
+                fn ($side) => [$side => $this->staticDefaultPositions()]
+            )
+            ->all();
+    }
+    protected function staticDefaultPositions(): array
+    {
+        [$p1x, $p1y, $p2x, $p2y, $p3x, $p3y, $p4x, $p4y] = self::STATIC_DEFAULT_POINTS;
+
+        return [
+            'p1x' => (string) $p1x,
+            'p1y' => (string) $p1y,
+            'p2x' => (string) $p2x,
+            'p2y' => (string) $p2y,
+            'p3x' => (string) $p3x,
+            'p3y' => (string) $p3y,
+            'p4x' => (string) $p4x,
+            'p4y' => (string) $p4y,
+        ];
     }
 
     protected function positionsForPivot(array $positions): array
