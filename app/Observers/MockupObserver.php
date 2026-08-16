@@ -138,7 +138,7 @@ class MockupObserver
 
     public function updated(Mockup $mockup): void
     {
-        if ($mockup->id == 235) {
+//        if ($mockup->id == 235) {
             if (!$mockup->wasChanged('pre_fill_colors')) {
                 return;
             }
@@ -184,7 +184,7 @@ class MockupObserver
                     $addedHexes
                 );
             }
-        }
+//        }
     }
 
     protected function removeDeletedColors(
