@@ -1033,4 +1033,196 @@ class MockupObserver
                 ]
             );
     }
+    public function generateTemplateFiles(
+        Mockup $mockup,
+        Template $template,
+        bool $force = false
+    ): void {
+        $attachedTemplate = $mockup
+            ->templates()
+            ->where(
+                'templates.id',
+                $template->id
+            )
+            ->first();
+
+        if (!$attachedTemplate) {
+            return;
+        }
+
+        $pivotColors = $this->toArray(
+            $attachedTemplate->pivot->colors ?? []
+        );
+
+        $colors = collect(
+            !empty($pivotColors)
+                ? $pivotColors
+                : ($mockup->pre_fill_colors ?? [])
+        )
+            ->filter(
+                fn ($color) =>
+                    is_string($color)
+                    && trim($color) !== ''
+            )
+            ->unique(
+                fn ($color) =>
+                $this->normalizeHex($color)
+            )
+            ->values()
+            ->all();
+
+        if (empty($colors)) {
+            return;
+        }
+
+        $pivotPositions = $this->toArray(
+            $attachedTemplate->pivot->positions ?? []
+        );
+
+        if (empty($pivotPositions)) {
+            $positions = $this->getDefaultPositions(
+                $mockup,
+                $template
+            );
+        } else {
+            $positions = $this->getTemplatePositions(
+                $attachedTemplate
+            );
+        }
+
+        if (empty($positions)) {
+            return;
+        }
+
+        $pivotUpdate = [
+            'colors' => $colors,
+        ];
+
+        if (empty($pivotPositions)) {
+            $pivotUpdate['positions'] =
+                $this->positionsForPivot(
+                    $positions
+                );
+        }
+
+        $mockup
+            ->templates()
+            ->updateExistingPivot(
+                $template->id,
+                $pivotUpdate
+            );
+
+        if ($force) {
+            $this->deleteGeneratedFilesForTemplate(
+                $mockup,
+                $template->id
+            );
+        }
+
+        $bulkJob = MockupGenerationJob::create([
+            'mockup_id' => $mockup->id,
+            'status' => 'pending',
+            'total_count' => 0,
+            'completed_count' => 0,
+            'failed_count' => 0,
+        ]);
+
+        $totalCount = 0;
+
+        foreach ($colors as $color) {
+            $hex = $this->normalizeHex(
+                $color
+            );
+
+            foreach ($positions as $side => $points) {
+                if (
+                    $this->alreadyGenerated(
+                        $mockup,
+                        $template->id,
+                        $hex,
+                        $side
+                    )
+                ) {
+                    continue;
+                }
+
+                BulkJobItem::create([
+                    'bulk_job_id' => $bulkJob->id,
+                    'template_id' => $template->id,
+                    'color' => $color,
+                    'side' => $side,
+                    'points' => $points,
+                    'status' => 'pending',
+                ]);
+
+                $totalCount++;
+            }
+        }
+
+        if ($totalCount === 0) {
+            $bulkJob->update([
+                'status' => 'completed',
+                'total_count' => 0,
+                'started_at' => now(),
+                'completed_at' => now(),
+            ]);
+
+            return;
+        }
+
+        $bulkJob->update([
+            'status' => 'processing',
+            'total_count' => $totalCount,
+            'started_at' => now(),
+        ]);
+
+        BulkJobItem::query()
+            ->where(
+                'bulk_job_id',
+                $bulkJob->id
+            )
+            ->where(
+                'status',
+                'pending'
+            )
+            ->lazyById(100)
+            ->each(
+                fn ($item) =>
+                RenderMockupJob::dispatch(
+                    $bulkJob,
+                    $item,
+                    $mockup
+                )
+            );
+    }
+
+    protected function deleteGeneratedFilesForTemplate(
+        Mockup $mockup,
+               $templateId
+    ): void {
+        $mockup
+            ->media()
+            ->where(
+                'collection_name',
+                'generated_mockups'
+            )
+            ->whereRaw(
+                "
+            JSON_UNQUOTE(
+                JSON_EXTRACT(
+                    custom_properties,
+                    '$.template_id'
+                )
+            ) = ?
+            ",
+                [
+                    (string) $templateId,
+                ]
+            )
+            ->lazyById(100)
+            ->each(
+                fn ($media) =>
+                $media->delete()
+            );
+    }
 }

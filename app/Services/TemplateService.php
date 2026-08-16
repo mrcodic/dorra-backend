@@ -6,6 +6,7 @@ namespace App\Services;
 use App\Enums\OrientationEnum;
 use App\Enums\Template\StatusEnum;
 use App\Enums\Template\TypeEnum;
+use App\Jobs\GenerateTemplateMockupsJob;
 use App\Jobs\HandleMockupFilesJob;
 use App\Jobs\ProcessBase64Image;
 use App\Models\Admin;
@@ -313,7 +314,10 @@ class TemplateService extends BaseService
         if (isset($validatedData['back_base64_preview_image'])) {
             ProcessBase64Image::dispatch($validatedData['back_base64_preview_image'], $model, 'back_templates');
         }
-
+        GenerateTemplateMockupsJob::dispatch(
+            (string) $model->id,
+            false
+        );
         return $model->load($relationsToLoad);
     }
 
@@ -523,7 +527,10 @@ class TemplateService extends BaseService
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model, clearExisting: true);
         }
-
+        GenerateTemplateMockupsJob::dispatch(
+            (string) $model->id,
+            false
+        );
         return $model->load($relationsToLoad);
     }
     protected function attachMockupsLazily(
