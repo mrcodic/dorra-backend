@@ -552,11 +552,6 @@ class MockupObserver
             return $positions;
         }
 
-        [$designWidth, $designHeight] =
-            $this->getTemplateDesignDimensions(
-                $template
-            );
-
         $sides = $mockup->types
             ->map(
                 fn ($type) =>
@@ -571,15 +566,23 @@ class MockupObserver
         }
 
         return $sides
-            ->mapWithKeys(
-                fn ($side) => [
+            ->mapWithKeys(function ($side) use (
+                $template
+            ) {
+                [$designWidth, $designHeight] =
+                    $this->getTemplateDesignDimensions(
+                        $template,
+                        $side
+                    );
+
+                return [
                     $side =>
                         $this->computeDefaultPoints(
                             $designWidth,
                             $designHeight
                         ),
-                ]
-            )
+                ];
+            })
             ->all();
     }
 
@@ -691,50 +694,60 @@ class MockupObserver
     }
 
     protected function getTemplateDesignDimensions(
-        Template $template
+        Template $template,
+        string $side = 'front'
     ): array {
-        $pairs = [
-            [
-                'design_width',
-                'design_height',
-            ],
-            [
-                'image_width',
-                'image_height',
-            ],
-            [
-                'source_width',
-                'source_height',
-            ],
-            [
-                'width',
-                'height',
-            ],
-        ];
+        $side = strtolower($side);
 
-        foreach ($pairs as [$widthKey, $heightKey]) {
-            $width = $template->getAttribute(
-                $widthKey
-            );
+        $isWithoutEditor =
+            $template->approach === 'without_editor';
 
-            $height = $template->getAttribute(
-                $heightKey
-            );
+        $collection = match ($side) {
+            'back' =>
+            $template->use_front_as_back
+                ? (
+            $isWithoutEditor
+                ? 'templates-preview'
+                : 'templates'
+            )
+                : (
+            $isWithoutEditor
+                ? 'back-templates-preview'
+                : 'back_templates'
+            ),
 
-            if (
-                is_numeric($width)
-                && is_numeric($height)
-                && (float) $width > 0
-                && (float) $height > 0
-            ) {
-                return [
-                    (float) $width,
-                    (float) $height,
-                ];
-            }
+            default =>
+            $isWithoutEditor
+                ? 'templates-preview'
+                : 'templates',
+        };
+
+        $media = $template
+            ->getFirstMedia($collection);
+
+        if (!$media) {
+            return [1.0, 1.0];
         }
 
-        return [1.0, 1.0];
+        $width = $media
+            ->getCustomProperty('width');
+
+        $height = $media
+            ->getCustomProperty('height');
+
+        if (
+            !is_numeric($width)
+            || !is_numeric($height)
+            || (float) $width <= 0
+            || (float) $height <= 0
+        ) {
+            return [1.0, 1.0];
+        }
+
+        return [
+            (float) $width,
+            (float) $height,
+        ];
     }
 
     protected function decimalString(
