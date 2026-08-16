@@ -14,6 +14,7 @@ use App\Models\Mockup;
 use App\Models\TableauScene;
 use App\Models\Template;
 use App\Models\Type;
+use App\Observers\MockupObserver;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Traits\RendersTemplateMockups;
 use Illuminate\Database\Eloquent\Builder;
@@ -279,21 +280,24 @@ class TemplateService extends BaseService
                 $this->imageService->processUploaded($validatedData['template_image_back_id'], 'back-templates');
 
             }
-            $mockupIds = $validatedData['mockup_ids'] ?? [];
-            $selectedTypeValues = Arr::get($validatedData, 'types', []);
-            $model->types()->sync($validatedData['types']);
+            $mockupIds = array_values(
+                array_unique(
+                    array_filter(
+                        array_map(
+                            'intval',
+                            $validatedData['mockup_ids'] ?? []
+                        )
+                    )
+                )
+            );
+
+            $model->types()->sync($validatedData['types'] ?? []);
 
             if (!empty($mockupIds)) {
-                $pivotData = collect($mockupIds)->mapWithKeys(function ($mockupId) {
-                    return [
-                        (int)$mockupId => [
-                            'positions' => [],
-                            'colors' => []
-                        ],
-                    ];
-                })->toArray();
-
-                $model->mockups()->syncWithoutDetaching($pivotData);
+                $this->attachMockupsLazily(
+                    $model,
+                    $mockupIds
+                );
             }
 
             $model->tags()->sync($validatedData['tags'] ?? []);
@@ -452,43 +456,54 @@ class TemplateService extends BaseService
                 }
             }
 
-            $mockupIds = collect($validatedData['mockup_ids'] ?? [])->map(fn($id) => (int)$id);
-            $existingMockupIds = $model->mockups->pluck('id');
+            $mockupIds = array_values(
+                array_unique(
+                    array_filter(
+                        array_map(
+                            'intval',
+                            $validatedData['mockup_ids'] ?? []
+                        )
+                    )
+                )
+            );
 
-            $newMockupIds = $mockupIds->diff($existingMockupIds);
-            $removedMockupIds = $existingMockupIds->diff($mockupIds);
+            if (!empty($mockupIds)) {
+                $this->attachMockupsLazily(
+                    $model,
+                    $mockupIds
+                );
 
-            if ($mockupIds->isNotEmpty()) {
-                if ($newMockupIds->isNotEmpty()) {
-                    $model->mockups()->syncWithoutDetaching(
-                        $this->buildMockupAttachPayload($newMockupIds)
-                    );
-                }
+                $model->mockups()
+                    ->whereNotIn(
+                        'mockups.id',
+                        $mockupIds
+                    )
+                    ->orderBy('mockups.id')
+                    ->lazy(100)
+                    ->each(function ($mockup) use ($model) {
+                        $this->deleteGeneratedMockupMedia(
+                            $mockup,
+                            $model->id
+                        );
+
+                        $model->mockups()->detach(
+                            $mockup->id
+                        );
+                    });
             } else {
-                $attachedMockupIds = $model->mockups()->pluck('mockups.id');
+                $model->mockups()
+                    ->orderBy('mockups.id')
+                    ->lazy(100)
+                    ->each(function ($mockup) use ($model) {
+                        $this->deleteGeneratedMockupMedia(
+                            $mockup,
+                            $model->id
+                        );
 
-                foreach ($attachedMockupIds as $mockupId) {
-                    $mockup = Mockup::find($mockupId);
-
-                    if (!$mockup) {
-                        continue;
-                    }
-
-                    $this->deleteGeneratedMockupMedia($mockup, $model->id);
-                }
-
-                $model->mockups()->detach();
-            }
-
-            foreach ($removedMockupIds as $removedId) {
-                $removedMockup = Mockup::find($removedId);
-
-                if (!$removedMockup) {
-                    continue;
-                }
-
-                $this->deleteGeneratedMockupMedia($removedMockup, $model->id);
-                $model->mockups()->detach($removedId);
+                        $model->mockups()->detach(
+                            $mockup->id
+                        );
+                    });
             }
 
             $model->products()->sync($validatedData['product_ids'] ?? []);
@@ -511,7 +526,76 @@ class TemplateService extends BaseService
 
         return $model->load($relationsToLoad);
     }
+    protected function attachMockupsLazily(
+        Template $template,
+        array $mockupIds
+    ): void {
+        $mockupIds = array_values(
+            array_unique(
+                array_filter(
+                    array_map(
+                        'intval',
+                        $mockupIds
+                    )
+                )
+            )
+        );
 
+        if (empty($mockupIds)) {
+            return;
+        }
+
+        $observer = app(
+            MockupObserver::class
+        );
+
+        Mockup::query()
+            ->whereIntegerInRaw(
+                'id',
+                $mockupIds
+            )
+            ->whereDoesntHave(
+                'templates',
+                fn ($query) =>
+                $query->where(
+                    'templates.id',
+                    $template->id
+                )
+            )
+            ->orderBy('id')
+            ->lazyById(100)
+            ->chunk(100)
+            ->each(function ($mockups) use (
+                $template,
+                $observer
+            ) {
+                $pivotData = [];
+
+                foreach ($mockups as $mockup) {
+                    $pivotData[$mockup->id] = [
+                        'positions' => [],
+                        'colors' => [],
+                    ];
+                }
+
+                if (empty($pivotData)) {
+                    return;
+                }
+
+                $template
+                    ->mockups()
+                    ->syncWithoutDetaching(
+                        $pivotData
+                    );
+
+                foreach ($mockups as $mockup) {
+                    $observer->syncTemplateForMockup(
+                        $mockup,
+                        $template
+                    );
+                }
+            });
+    }
     protected function buildMockupAttachPayload($mockupIds): array
     {
         return collect($mockupIds)

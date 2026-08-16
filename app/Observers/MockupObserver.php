@@ -33,9 +33,10 @@ class MockupObserver
     }
 
     public function syncTemplateDefaults(
-        Mockup $mockup,
+        Mockup                          $mockup,
         ?\Illuminate\Support\Collection $colors = null
-    ): void {
+    ): void
+    {
         $colors ??= collect($mockup->pre_fill_colors ?? [])
             ->filter()
             ->values();
@@ -53,8 +54,7 @@ class MockupObserver
         $templatesQuery
             ->whereDoesntHave(
                 'mockups',
-                fn ($query) =>
-                $query->where(
+                fn($query) => $query->where(
                     'mockups.id',
                     $mockup->id
                 )
@@ -82,8 +82,7 @@ class MockupObserver
 
         $hexes = $colors
             ->map(
-                fn ($color) =>
-                $this->normalizeHex($color)
+                fn($color) => $this->normalizeHex($color)
             )
             ->unique()
             ->values()
@@ -94,9 +93,11 @@ class MockupObserver
             $hexes
         );
     }
+
     protected function getAttachableTemplates(
         Mockup $mockup
-    ): ?\Illuminate\Database\Eloquent\Builder {
+    ): ?\Illuminate\Database\Eloquent\Builder
+    {
         $productIds = $mockup
             ->products()
             ->pluck('products.id');
@@ -116,8 +117,7 @@ class MockupObserver
                 if ($mockup->category_id) {
                     $query->orWhereHas(
                         'categories',
-                        fn ($q) =>
-                        $q->where(
+                        fn($q) => $q->where(
                             'categories.id',
                             $mockup->category_id
                         )
@@ -127,8 +127,7 @@ class MockupObserver
                 if ($productIds->isNotEmpty()) {
                     $query->orWhereHas(
                         'products',
-                        fn ($q) =>
-                        $q->whereIn(
+                        fn($q) => $q->whereIn(
                             'products.id',
                             $productIds
                         )
@@ -152,14 +151,14 @@ class MockupObserver
 
             $oldHexes = collect($oldColors)
                 ->filter()
-                ->map(fn ($color) => $this->normalizeHex($color))
+                ->map(fn($color) => $this->normalizeHex($color))
                 ->unique()
                 ->values()
                 ->all();
 
             $newHexes = collect($newColors)
                 ->filter()
-                ->map(fn ($color) => $this->normalizeHex($color))
+                ->map(fn($color) => $this->normalizeHex($color))
                 ->unique()
                 ->values()
                 ->all();
@@ -190,11 +189,12 @@ class MockupObserver
 
     protected function removeDeletedColors(
         Mockup $mockup,
-        array $removedHexes
-    ): void {
+        array  $removedHexes
+    ): void
+    {
         $removedHexes = collect($removedHexes)
             ->filter()
-            ->map(fn ($color) => $this->normalizeHex($color))
+            ->map(fn($color) => $this->normalizeHex($color))
             ->unique()
             ->values()
             ->all();
@@ -287,13 +287,14 @@ class MockupObserver
 
     protected function generateForNewColors(
         Mockup $mockup,
-        array $addedHexes
-    ): void {
+        array  $addedHexes
+    ): void
+    {
         $hexToOriginalColor = collect(
             $mockup->pre_fill_colors ?? []
         )
             ->keyBy(
-                fn ($color) => $this->normalizeHex($color)
+                fn($color) => $this->normalizeHex($color)
             )
             ->all();
 
@@ -353,8 +354,7 @@ class MockupObserver
 
                 $colorsToAdd = collect($addedHexes)
                     ->map(
-                        fn ($hex) =>
-                            $hexToOriginalColor[$hex] ?? $hex
+                        fn($hex) => $hexToOriginalColor[$hex] ?? $hex
                     )
                     ->all();
 
@@ -364,8 +364,7 @@ class MockupObserver
                 ])
                     ->filter()
                     ->unique(
-                        fn ($color) =>
-                        $this->normalizeHex($color)
+                        fn($color) => $this->normalizeHex($color)
                     )
                     ->values()
                     ->all();
@@ -473,8 +472,7 @@ class MockupObserver
             )
             ->lazyById(100)
             ->each(
-                fn ($item) =>
-                RenderMockupJob::dispatch(
+                fn($item) => RenderMockupJob::dispatch(
                     $bulkJob,
                     $item,
                     $mockup
@@ -484,7 +482,8 @@ class MockupObserver
 
     protected function getTemplatePositions(
         $template
-    ): array {
+    ): array
+    {
         $positions = $this->toArray(
             $template->pivot->positions ?? []
         );
@@ -495,26 +494,25 @@ class MockupObserver
 
         return collect($positions)
             ->filter(
-                fn ($position) =>
-                    is_array($position)
+                fn($position) => is_array($position)
                     && !empty($position['name'])
                     && $this->hasValidWarpPoints(
                         $position
                     )
             )
             ->mapWithKeys(function ($position) {
-                $side = (string) $position['name'];
+                $side = (string)$position['name'];
 
                 return [
                     $side => [
-                        'p1x' => (string) $position['p1x'],
-                        'p1y' => (string) $position['p1y'],
-                        'p2x' => (string) $position['p2x'],
-                        'p2y' => (string) $position['p2y'],
-                        'p3x' => (string) $position['p3x'],
-                        'p3y' => (string) $position['p3y'],
-                        'p4x' => (string) $position['p4x'],
-                        'p4y' => (string) $position['p4y'],
+                        'p1x' => (string)$position['p1x'],
+                        'p1y' => (string)$position['p1y'],
+                        'p2x' => (string)$position['p2x'],
+                        'p2y' => (string)$position['p2y'],
+                        'p3x' => (string)$position['p3x'],
+                        'p3y' => (string)$position['p3y'],
+                        'p4x' => (string)$position['p4x'],
+                        'p4y' => (string)$position['p4y'],
                     ],
                 ];
             })
@@ -522,9 +520,10 @@ class MockupObserver
     }
 
     protected function getDefaultPositions(
-        Mockup $mockup,
+        Mockup   $mockup,
         Template $template
-    ): array {
+    ): array
+    {
         $positions = $mockup
             ->sideSettings()
             ->where(
@@ -553,14 +552,14 @@ class MockupObserver
                     }
 
                     $positions[$setting->side] = [
-                        'p1x' => (string) $points['p1x'],
-                        'p1y' => (string) $points['p1y'],
-                        'p2x' => (string) $points['p2x'],
-                        'p2y' => (string) $points['p2y'],
-                        'p3x' => (string) $points['p4x'],
-                        'p3y' => (string) $points['p4y'],
-                        'p4x' => (string) $points['p3x'],
-                        'p4y' => (string) $points['p3y'],
+                        'p1x' => (string)$points['p1x'],
+                        'p1y' => (string)$points['p1y'],
+                        'p2x' => (string)$points['p2x'],
+                        'p2y' => (string)$points['p2y'],
+                        'p3x' => (string)$points['p4x'],
+                        'p3y' => (string)$points['p4y'],
+                        'p4x' => (string)$points['p3x'],
+                        'p4y' => (string)$points['p3y'],
                     ];
 
                     return $positions;
@@ -574,8 +573,7 @@ class MockupObserver
 
         $sides = $mockup->types
             ->map(
-                fn ($type) =>
-                $type->value?->key()
+                fn($type) => $type->value?->key()
             )
             ->filter()
             ->unique()
@@ -609,7 +607,8 @@ class MockupObserver
     protected function computeDefaultPoints(
         float $designWidth,
         float $designHeight
-    ): array {
+    ): array
+    {
         [
             $tlX,
             $tlY,
@@ -715,8 +714,9 @@ class MockupObserver
 
     protected function getTemplateDesignDimensions(
         Template $template,
-        string $side = 'front'
-    ): array {
+        string   $side = 'front'
+    ): array
+    {
         $side = strtolower($side);
 
         $isWithoutEditor =
@@ -758,21 +758,22 @@ class MockupObserver
         if (
             !is_numeric($width)
             || !is_numeric($height)
-            || (float) $width <= 0
-            || (float) $height <= 0
+            || (float)$width <= 0
+            || (float)$height <= 0
         ) {
             return [1.0, 1.0];
         }
 
         return [
-            (float) $width,
-            (float) $height,
+            (float)$width,
+            (float)$height,
         ];
     }
 
     protected function decimalString(
         float $value
-    ): string {
+    ): string
+    {
         return rtrim(
             rtrim(
                 number_format(
@@ -789,7 +790,8 @@ class MockupObserver
 
     protected function positionsForPivot(
         array $positions
-    ): array {
+    ): array
+    {
         return collect($positions)
             ->map(function (
                 $points,
@@ -805,14 +807,14 @@ class MockupObserver
 
                 return [
                     'name' => $side,
-                    'p1x' => (string) $points['p1x'],
-                    'p1y' => (string) $points['p1y'],
-                    'p2x' => (string) $points['p2x'],
-                    'p2y' => (string) $points['p2y'],
-                    'p3x' => (string) $points['p3x'],
-                    'p3y' => (string) $points['p3y'],
-                    'p4x' => (string) $points['p4x'],
-                    'p4y' => (string) $points['p4y'],
+                    'p1x' => (string)$points['p1x'],
+                    'p1y' => (string)$points['p1y'],
+                    'p2x' => (string)$points['p2x'],
+                    'p2y' => (string)$points['p2y'],
+                    'p3x' => (string)$points['p3x'],
+                    'p3y' => (string)$points['p3y'],
+                    'p4x' => (string)$points['p4x'],
+                    'p4y' => (string)$points['p4y'],
                 ];
             })
             ->filter()
@@ -822,7 +824,8 @@ class MockupObserver
 
     protected function hasValidWarpPoints(
         array $points
-    ): bool {
+    ): bool
+    {
         $required = [
             'p1x',
             'p1y',
@@ -861,7 +864,8 @@ class MockupObserver
                $templateId,
         string $hex,
         string $side
-    ): bool {
+    ): bool
+    {
         return $mockup->media()
             ->where(
                 'collection_name',
@@ -874,7 +878,7 @@ class MockupObserver
                         '$.template_id'
                     )
                 ) = ?",
-                [(string) $templateId]
+                [(string)$templateId]
             )
             ->whereRaw(
                 "JSON_UNQUOTE(
@@ -909,7 +913,8 @@ class MockupObserver
 
     protected function toArray(
         mixed $value
-    ): array {
+    ): array
+    {
         if (is_array($value)) {
             return $value;
         }
@@ -926,7 +931,8 @@ class MockupObserver
 
     protected function normalizeHex(
         string $color
-    ): string {
+    ): string
+    {
         return strtolower(
             ltrim(
                 trim($color),
@@ -937,7 +943,8 @@ class MockupObserver
 
     public function deleted(
         Mockup $mockup
-    ): void {
+    ): void
+    {
         $templateIds = $mockup
             ->templates()
             ->pluck(
@@ -960,5 +967,70 @@ class MockupObserver
 
         $mockup
             ->clearMediaCollection();
+    }
+
+    public function syncTemplateForMockup(
+        Mockup   $mockup,
+        Template $template
+    ): void
+    {
+        $colors = collect(
+            $mockup->pre_fill_colors ?? []
+        )
+            ->filter()
+            ->unique(
+                fn($color) => $this->normalizeHex($color)
+            )
+            ->values()
+            ->all();
+
+        $pivot = $mockup
+            ->templates()
+            ->where(
+                'templates.id',
+                $template->id
+            )
+            ->first()?->pivot;
+
+        if (!$pivot) {
+            return;
+        }
+
+        $pivotPositions = $this->toArray(
+            $pivot->positions ?? []
+        );
+
+        if (empty($pivotPositions)) {
+            $positions = $this->getDefaultPositions(
+                $mockup,
+                $template
+            );
+        } else {
+            $positions = $this->getTemplatePositions(
+                $mockup
+                    ->templates()
+                    ->where(
+                        'templates.id',
+                        $template->id
+                    )
+                    ->first()
+            );
+        }
+
+        $mockup
+            ->templates()
+            ->updateExistingPivot(
+                $template->id,
+                [
+                    'colors' => $colors,
+
+                    'positions' =>
+                        empty($pivotPositions)
+                            ? $this->positionsForPivot(
+                            $positions
+                        )
+                            : $pivotPositions,
+                ]
+            );
     }
 }
