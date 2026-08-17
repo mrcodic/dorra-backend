@@ -2,17 +2,11 @@
 
 namespace App\Services;
 
-
-use App\Enums\Mockup\TypeEnum;
-use App\Jobs\HandleMockupFilesJob;
 use App\Models\Design;
 use App\Models\Product;
-use App\Models\Template;
-use App\Observers\MockupObserver;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\MockupRepositoryInterface;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
-use App\Services\BaseService;
 use App\Services\Mockup\MockupRenderer;
 use App\Traits\RendersTemplateMockups;
 use Illuminate\Support\Arr;
@@ -467,7 +461,6 @@ class MockupService extends BaseService
         });
         if ($model->category->is_has_category) {
             $model->products()->sync($validatedData['product_ids'] ?? $model->category->products->pluck('id'));
-//            app(MockupObserver::class)->syncTemplateDefaults($model);
         }
         $model->load(['templates', 'types', 'category', 'media']);
 //        if (!empty($validatedData['templates'])) {
@@ -576,7 +569,6 @@ class MockupService extends BaseService
 
             if ($model->category->is_has_category) {
                 $model->products()->sync($validatedData['product_ids'] ?? $model->category->products->pluck('id'));
-//                app(MockupObserver::class)->syncTemplateDefaults($model);
             }
             $model->load(['templates', 'types', 'category', 'media']);
 //            if (!empty($validatedData['templates'])) {
