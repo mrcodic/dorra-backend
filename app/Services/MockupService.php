@@ -467,7 +467,7 @@ class MockupService extends BaseService
         });
         if ($model->category->is_has_category) {
             $model->products()->sync($validatedData['product_ids'] ?? $model->category->products->pluck('id'));
-            app(MockupObserver::class)->syncTemplateDefaults($model);
+//            app(MockupObserver::class)->syncTemplateDefaults($model);
         }
         $model->load(['templates', 'types', 'category', 'media']);
 //        if (!empty($validatedData['templates'])) {
@@ -576,7 +576,7 @@ class MockupService extends BaseService
 
             if ($model->category->is_has_category) {
                 $model->products()->sync($validatedData['product_ids'] ?? $model->category->products->pluck('id'));
-                app(MockupObserver::class)->syncTemplateDefaults($model);
+//                app(MockupObserver::class)->syncTemplateDefaults($model);
             }
             $model->load(['templates', 'types', 'category', 'media']);
 //            if (!empty($validatedData['templates'])) {

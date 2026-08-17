@@ -314,10 +314,10 @@ class TemplateService extends BaseService
         if (isset($validatedData['back_base64_preview_image'])) {
             ProcessBase64Image::dispatch($validatedData['back_base64_preview_image'], $model, 'back_templates');
         }
-        GenerateTemplateMockupsJob::dispatch(
-            (string) $model->id,
-            false
-        );
+//        GenerateTemplateMockupsJob::dispatch(
+//            (string) $model->id,
+//            false
+//        );
         return $model->load($relationsToLoad);
     }
 
@@ -527,10 +527,10 @@ class TemplateService extends BaseService
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model, clearExisting: true);
         }
-        GenerateTemplateMockupsJob::dispatch(
-            (string) $model->id,
-            false
-        );
+//        GenerateTemplateMockupsJob::dispatch(
+//            (string) $model->id,
+//            false
+//        );
         return $model->load($relationsToLoad);
     }
     protected function attachMockupsLazily(
@@ -595,12 +595,12 @@ class TemplateService extends BaseService
                         $pivotData
                     );
 
-                foreach ($mockups as $mockup) {
-                    $observer->syncTemplateForMockup(
-                        $mockup,
-                        $template
-                    );
-                }
+//                foreach ($mockups as $mockup) {
+//                    $observer->syncTemplateForMockup(
+//                        $mockup,
+//                        $template
+//                    );
+//                }
             });
     }
     protected function buildMockupAttachPayload($mockupIds): array
