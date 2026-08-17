@@ -301,20 +301,43 @@
 
                         <div class="mb-2">
                             <label class="label-text mb-1 d-block">Colors</label>
-                            <div class="d-flex flex-wrap align-items-center gap-1">
-                                <button type="button" id="openColorPicker"
-                                        class="gradient-picker-trigger border openColorPicker"></button>
 
-                                <span id="selected-colors"
-                                      class="d-flex gap-1 flex-wrap align-items-center selected-colors"></span>
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <button
+                                    type="button"
+                                    id="openColorPicker"
+                                    class="gradient-picker-trigger border openColorPicker"
+                                ></button>
+
+                                <span
+                                    id="selected-colors"
+                                    class="d-flex gap-1 flex-wrap align-items-center selected-colors"
+                                ></span>
+                                <button
+                                    type="button"
+                                    class="btn btn-success btn-sm d-none px-2 py-1"
+                                    id="generateTemplateMockupFiles"
+                                    data-mockup-id=""
+                                    style="font-size: 13px; white-space: nowrap;"
+                                >
+    <span class="btn-text">
+        Generate Mockups
+    </span>
+
+                                    <span
+                                        class="spinner-border spinner-border-sm d-none ms-1"
+                                        id="generateTemplateMockupFilesLoader"
+                                    ></span>
+                                </button>
                             </div>
+
                             <div id="colorsInputContainer"></div>
                         </div>
-
 
                         <div class="modal-footer border-top-0">
                             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel
                             </button>
+
                             <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
                                 <span class="btn-text">Create</span>
                                 <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
@@ -322,6 +345,8 @@
                                       aria-hidden="true"></span>
                             </button>
                         </div>
+
+                    </div>
 
                 </form>
             </div>
@@ -357,6 +382,70 @@
 @endsection
 
 @section('page-script')
+    <script>
+        $(document).on('click', '#generateTemplateMockupFiles', function () {
+            const $button = $(this);
+            const mockupId = $button.attr('data-mockup-id');
+            const $loader = $('#generateTemplateMockupFilesLoader');
+            const $text = $button.find('.btn-text');
+
+            if (!mockupId) {
+                Toastify({
+                    text: 'Please save the mockup first',
+                    duration: 2500,
+                    gravity: 'top',
+                    position: 'right',
+                    backgroundColor: '#dc3545',
+                    close: true,
+                }).showToast();
+
+                return;
+            }
+
+            $button.prop('disabled', true);
+            $loader.removeClass('d-none');
+            $text.text('Generating...');
+
+            $.ajax({
+                url: `/mockups/${mockupId}/generate-template-files`,
+                type: 'POST',
+
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                },
+
+                success: function (response) {
+                    Toastify({
+                        text: response.message || 'Mockup generation started',
+                        duration: 3000,
+                        gravity: 'top',
+                        position: 'right',
+                        backgroundColor: '#28a745',
+                        close: true,
+                    }).showToast();
+                },
+
+                error: function (xhr) {
+                    Toastify({
+                        text:
+                            xhr.responseJSON?.message ||
+                            'Failed to generate mockup files',
+                        duration: 3000,
+                        gravity: 'top',
+                        position: 'right',
+                        backgroundColor: '#dc3545',
+                        close: true,
+                    }).showToast();
+                },
+
+                complete: function () {
+                    $button.prop('disabled', false);
+                    $loader.addClass('d-none');
+                    $text.text('Generate Mockups');
+                },
+            });
+        });
+    </script>
     <script>
         $('#productsSelect').select2({
             placeholder: 'Choose product',
@@ -1859,8 +1948,20 @@
         $(document).ready(function () {
             handleAjaxFormSubmit("#addMockupForm", {
                 successMessage: "Mockup Created Successfully",
-                onSuccess: function () {
-                    location.replace('/mockups');
+                onSuccess: function (response) {
+                    const mockupId = response?.data?.id;
+                    console.log("dsadsa", mockupId)
+
+                    if (!mockupId) {
+                        return;
+                    }
+
+                    $('#generateTemplateMockupFiles')
+                        .attr('data-mockup-id', mockupId)
+                        .removeClass('d-none');
+
+                    $('#SaveChangesButton')
+                        .prop('disabled', true);
                 }
             });
         });
