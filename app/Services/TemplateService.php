@@ -6,7 +6,6 @@ namespace App\Services;
 use App\Enums\OrientationEnum;
 use App\Enums\Template\StatusEnum;
 use App\Enums\Template\TypeEnum;
-use App\Jobs\GenerateTemplateMockupsJob;
 use App\Jobs\HandleMockupFilesJob;
 use App\Jobs\ProcessBase64Image;
 use App\Models\Admin;
@@ -15,7 +14,6 @@ use App\Models\Mockup;
 use App\Models\TableauScene;
 use App\Models\Template;
 use App\Models\Type;
-use App\Observers\MockupObserver;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Traits\RendersTemplateMockups;
 use Illuminate\Database\Eloquent\Builder;
@@ -281,24 +279,21 @@ class TemplateService extends BaseService
                 $this->imageService->processUploaded($validatedData['template_image_back_id'], 'back-templates');
 
             }
-            $mockupIds = array_values(
-                array_unique(
-                    array_filter(
-                        array_map(
-                            'intval',
-                            $validatedData['mockup_ids'] ?? []
-                        )
-                    )
-                )
-            );
-
-            $model->types()->sync($validatedData['types'] ?? []);
+            $mockupIds = $validatedData['mockup_ids'] ?? [];
+            $selectedTypeValues = Arr::get($validatedData, 'types', []);
+            $model->types()->sync($validatedData['types']);
 
             if (!empty($mockupIds)) {
-                $this->attachMockupsLazily(
-                    $model,
-                    $mockupIds
-                );
+                $pivotData = collect($mockupIds)->mapWithKeys(function ($mockupId) {
+                    return [
+                        (int)$mockupId => [
+                            'positions' => [],
+                            'colors' => []
+                        ],
+                    ];
+                })->toArray();
+
+                $model->mockups()->syncWithoutDetaching($pivotData);
             }
 
             $model->tags()->sync($validatedData['tags'] ?? []);
@@ -314,10 +309,7 @@ class TemplateService extends BaseService
         if (isset($validatedData['back_base64_preview_image'])) {
             ProcessBase64Image::dispatch($validatedData['back_base64_preview_image'], $model, 'back_templates');
         }
-//        GenerateTemplateMockupsJob::dispatch(
-//            (string) $model->id,
-//            false
-//        );
+
         return $model->load($relationsToLoad);
     }
 
@@ -460,54 +452,43 @@ class TemplateService extends BaseService
                 }
             }
 
-            $mockupIds = array_values(
-                array_unique(
-                    array_filter(
-                        array_map(
-                            'intval',
-                            $validatedData['mockup_ids'] ?? []
-                        )
-                    )
-                )
-            );
+            $mockupIds = collect($validatedData['mockup_ids'] ?? [])->map(fn($id) => (int)$id);
+            $existingMockupIds = $model->mockups->pluck('id');
 
-            if (!empty($mockupIds)) {
-                $this->attachMockupsLazily(
-                    $model,
-                    $mockupIds
-                );
+            $newMockupIds = $mockupIds->diff($existingMockupIds);
+            $removedMockupIds = $existingMockupIds->diff($mockupIds);
 
-                $model->mockups()
-                    ->whereNotIn(
-                        'mockups.id',
-                        $mockupIds
-                    )
-                    ->orderBy('mockups.id')
-                    ->lazy(100)
-                    ->each(function ($mockup) use ($model) {
-                        $this->deleteGeneratedMockupMedia(
-                            $mockup,
-                            $model->id
-                        );
-
-                        $model->mockups()->detach(
-                            $mockup->id
-                        );
-                    });
+            if ($mockupIds->isNotEmpty()) {
+                if ($newMockupIds->isNotEmpty()) {
+                    $model->mockups()->syncWithoutDetaching(
+                        $this->buildMockupAttachPayload($newMockupIds)
+                    );
+                }
             } else {
-                $model->mockups()
-                    ->orderBy('mockups.id')
-                    ->lazy(100)
-                    ->each(function ($mockup) use ($model) {
-                        $this->deleteGeneratedMockupMedia(
-                            $mockup,
-                            $model->id
-                        );
+                $attachedMockupIds = $model->mockups()->pluck('mockups.id');
 
-                        $model->mockups()->detach(
-                            $mockup->id
-                        );
-                    });
+                foreach ($attachedMockupIds as $mockupId) {
+                    $mockup = Mockup::find($mockupId);
+
+                    if (!$mockup) {
+                        continue;
+                    }
+
+                    $this->deleteGeneratedMockupMedia($mockup, $model->id);
+                }
+
+                $model->mockups()->detach();
+            }
+
+            foreach ($removedMockupIds as $removedId) {
+                $removedMockup = Mockup::find($removedId);
+
+                if (!$removedMockup) {
+                    continue;
+                }
+
+                $this->deleteGeneratedMockupMedia($removedMockup, $model->id);
+                $model->mockups()->detach($removedId);
             }
 
             $model->products()->sync($validatedData['product_ids'] ?? []);
@@ -527,82 +508,10 @@ class TemplateService extends BaseService
         if (request()->allFiles()) {
             handleMediaUploads(request()->allFiles(), $model, clearExisting: true);
         }
-//        GenerateTemplateMockupsJob::dispatch(
-//            (string) $model->id,
-//            false
-//        );
+
         return $model->load($relationsToLoad);
     }
-    protected function attachMockupsLazily(
-        Template $template,
-        array $mockupIds
-    ): void {
-        $mockupIds = array_values(
-            array_unique(
-                array_filter(
-                    array_map(
-                        'intval',
-                        $mockupIds
-                    )
-                )
-            )
-        );
 
-        if (empty($mockupIds)) {
-            return;
-        }
-
-        $observer = app(
-            MockupObserver::class
-        );
-
-        Mockup::query()
-            ->whereIntegerInRaw(
-                'id',
-                $mockupIds
-            )
-            ->whereDoesntHave(
-                'templates',
-                fn ($query) =>
-                $query->where(
-                    'templates.id',
-                    $template->id
-                )
-            )
-            ->orderBy('id')
-            ->lazyById(100)
-            ->chunk(100)
-            ->each(function ($mockups) use (
-                $template,
-                $observer
-            ) {
-                $pivotData = [];
-
-                foreach ($mockups as $mockup) {
-                    $pivotData[$mockup->id] = [
-                        'positions' => [],
-                        'colors' => [],
-                    ];
-                }
-
-                if (empty($pivotData)) {
-                    return;
-                }
-
-                $template
-                    ->mockups()
-                    ->syncWithoutDetaching(
-                        $pivotData
-                    );
-
-//                foreach ($mockups as $mockup) {
-//                    $observer->syncTemplateForMockup(
-//                        $mockup,
-//                        $template
-//                    );
-//                }
-            });
-    }
     protected function buildMockupAttachPayload($mockupIds): array
     {
         return collect($mockupIds)
