@@ -16,6 +16,7 @@ use App\Models\Mockup;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class TemplateResource extends JsonResource
@@ -27,6 +28,7 @@ class TemplateResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
         $templateId = $this->id;
 
         $categoryId = (int)(request('product_without_category_id') ?? Product::find(request('product_id'))?->category_id);
@@ -81,7 +83,26 @@ class TemplateResource extends JsonResource
 
         $templateImageWidth = $getMediaProperty($templateImageMedia, 'width');
         $templateImageHeight = $getMediaProperty($templateImageMedia, 'height');
+        $mockups = $this->mockups()
+            ->whereCategoryId($categoryId)
+            ->when($productId, function ($q) use ($productId) {
+                $q->whereHas('products', function ($productQuery) use ($productId) {
+                    $productQuery->whereKey((int) $productId);
+                });
+            })
+            ->whereNull('mockups.deleted_at')
+            ->with('templates:id')
+            ->get();
 
+        $hexesByMockup = DB::table('media')
+            ->where('model_type', Mockup::class)
+            ->whereIn('model_id', $mockups->pluck('id'))
+            ->where('collection_name', 'generated_mockups')
+            ->where('custom_properties->template_id', $templateId)
+            ->select('model_id', DB::raw("LOWER(TRIM(LEADING '#' FROM JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex')))) as hex"))
+            ->get()
+            ->groupBy('model_id')
+            ->map(fn($rows) => $rows->pluck('hex')->filter()->unique());
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
@@ -197,25 +218,18 @@ class TemplateResource extends JsonResource
                     ? $colors
                     : json_decode($colors ?: '[]', true);
             }),
-            'template_colors' => $this->mockups()
-                ->whereCategoryId($categoryId)
-                ->when($productId,function ($q)use ($productId){
-                    $q->whereHas('products', function ($productQuery) use ($productId) {
-                        $productQuery->whereKey((int) $productId);
-                    });
-                })
-                ->whereNull('mockups.deleted_at')
-                ->with('templates:id')
-                ->get()
-                ->sortByDesc(function ($mockup) use($templateId){
+            'template_colors' => $mockups
+                ->sortByDesc(function ($mockup) use ($templateId) {
                     return $mockup->templates
                         ->first(fn($tpl) => $tpl->id == $templateId)
                         ?->pivot->model_color ? 1 : 0;
                 })
-                ->flatMap(function ($mockup) use ($templateId) {
+                ->flatMap(function ($mockup) use ($templateId, $hexesByMockup) {
+                    $mockupHexes = $hexesByMockup->get($mockup->id, collect());
+
                     return $mockup->templates
                         ->filter(fn($tpl) => $tpl->id == $templateId)
-                        ->flatMap(function ($tpl) {
+                        ->flatMap(function ($tpl) use ($mockupHexes) {
                             $colors = $tpl->pivot->colors ?? [];
                             if (is_string($colors)) {
                                 $colors = json_decode($colors, true) ?: [];
@@ -229,7 +243,9 @@ class TemplateResource extends JsonResource
                                 );
                             }
 
-                            return $colors;
+                            return array_values(array_filter($colors, function ($color) use ($mockupHexes) {
+                                return $mockupHexes->contains(strtolower(ltrim($color, '#')));
+                            }));
                         });
                 })
                 ->filter()
