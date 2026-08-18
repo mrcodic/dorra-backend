@@ -536,9 +536,49 @@ class MainController extends Controller
             abort(404, 'File not found');
         }
 
-        return Storage::disk($media->disk)->download(
-            $media->getPathRelativeToRoot(),
-            $media->file_name
-        );
+        $format = strtolower(request('format', ''));
+
+        if (!in_array($format, ['png', 'jpg', 'jpeg', ''])) {
+            abort(422, 'Unsupported format');
+        }
+
+        $originalExtension = strtolower(pathinfo($media->file_name, PATHINFO_EXTENSION));
+        $targetExtension = $format ?: $originalExtension;
+
+        if ($targetExtension === 'jpeg') {
+            $targetExtension = 'jpg';
+        }
+
+        if ($targetExtension === $originalExtension || !in_array($targetExtension, ['png', 'jpg'])) {
+            return Storage::disk($media->disk)->download(
+                $media->getPathRelativeToRoot(),
+                $media->file_name
+            );
+        }
+
+        $imagick = new \Imagick($media->getPath());
+
+        if ($targetExtension === 'jpg') {
+            $imagick->setImageBackgroundColor('white');
+            $imagick = $imagick->flattenImages();
+            $imagick->setImageFormat('jpeg');
+            $imagick->setImageCompressionQuality(90);
+            $mime = 'image/jpeg';
+        } else {
+            $imagick->setImageFormat('png');
+            $mime = 'image/png';
+        }
+
+        $binary = $imagick->getImageBlob();
+        $imagick->clear();
+        $imagick->destroy();
+
+        $downloadName = pathinfo($media->file_name, PATHINFO_FILENAME) . '.' . $targetExtension;
+
+        return response($binary, 200, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'attachment; filename="' . $downloadName . '"',
+            'Content-Length' => strlen($binary),
+        ]);
     }
 }
