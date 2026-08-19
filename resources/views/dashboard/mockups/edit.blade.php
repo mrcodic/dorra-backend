@@ -373,15 +373,44 @@
                 </div>
 {{--                @if($model->approach == 'with_editor')--}}
 
-                    <div class="mb-2">
-                    <label class="label-text mb-1 d-block">Colors</label>
-                    <div class="d-flex flex-wrap align-items-center gap-1">
-                        <button type="button" id="openColorPicker" class="gradient-picker-trigger border"></button>
 
-                        <span id="selected-colors" class="d-flex gap-1 flex-wrap align-items-center"></span>
+                    <div class="mb-2">
+                        <label class="label-text mb-1 d-block">Colors</label>
+
+                        <div class="d-flex flex-wrap align-items-center gap-1">
+                            <button
+                                type="button"
+                                id="openColorPicker"
+                                class="gradient-picker-trigger border"
+                            ></button>
+
+                            <span
+                                id="selected-colors"
+                                class="d-flex gap-1 flex-wrap align-items-center"
+                            ></span>
+
+                            <button
+                                type="button"
+                                class="btn btn-success btn-sm px-2 py-1 ms-1"
+                                id="generateTemplateMockupFiles"
+                                data-mockup-id="{{ $model->id }}"
+                                style="font-size: 13px; white-space: nowrap;"
+                            >
+            <span class="btn-text">
+                Generate Mockups
+            </span>
+
+                                <span
+                                    class="spinner-border spinner-border-sm d-none ms-1"
+                                    id="generateTemplateMockupFilesLoader"
+                                    role="status"
+                                ></span>
+                            </button>
+                        </div>
+
+                        <div id="colorsInputContainer"></div>
                     </div>
-                    <div id="colorsInputContainer"></div>
-                </div>
+                        </div>
 {{--                @endif--}}
 
                 <div class="modal-footer border-top-0">
@@ -2583,19 +2612,150 @@
 
         checkboxes.forEach(cb => cb.addEventListener('change', toggleCheckboxes));
 </script>
+    <script>
+        let generateMockupsAfterSave = false;
 
+        const generateMockupsUrl = @json(
+        route(
+            'mockups.generate-template-files',
+            ['mockup' => $model->id]
+        )
+    );
+
+        function resetGenerateButton() {
+            const $button = $('#generateTemplateMockupFiles');
+
+            $button.prop('disabled', false);
+
+            $('#generateTemplateMockupFilesLoader')
+                .addClass('d-none');
+
+            $button
+                .find('.btn-text')
+                .text('Generate Mockups');
+        }
+
+        function generateTemplateMockupFiles() {
+            const $button = $('#generateTemplateMockupFiles');
+
+            $.ajax({
+                url: generateMockupsUrl,
+                type: 'POST',
+
+                data: {
+                    force: 1,
+                },
+
+                headers: {
+                    'X-CSRF-TOKEN':
+                        $('meta[name="csrf-token"]').attr('content'),
+
+                    'Accept':
+                        'application/json',
+                },
+
+                success: function (response) {
+                    Toastify({
+                        text:
+                            response.message ||
+                            'Mockup generation started successfully',
+                        duration: 3000,
+                        gravity: 'top',
+                        position: 'right',
+                        backgroundColor: '#28a745',
+                        close: true,
+                    }).showToast();
+
+                    setTimeout(function () {
+                        location.reload();
+                    }, 500);
+                },
+
+                error: function (xhr) {
+                    console.error(
+                        'Generate mockups error:',
+                        xhr.responseJSON || xhr.responseText
+                    );
+
+                    Toastify({
+                        text:
+                            xhr.responseJSON?.message ||
+                            'Failed to generate mockups',
+                        duration: 3000,
+                        gravity: 'top',
+                        position: 'right',
+                        backgroundColor: '#dc3545',
+                        close: true,
+                    }).showToast();
+
+                    resetGenerateButton();
+                },
+
+                complete: function () {
+                    generateMockupsAfterSave = false;
+                },
+            });
+        }
+
+        $(document).on(
+            'click',
+            '#generateTemplateMockupFiles',
+            function () {
+                const $button = $(this);
+
+                generateMockupsAfterSave = true;
+
+                $button.prop('disabled', true);
+
+                $('#generateTemplateMockupFilesLoader')
+                    .removeClass('d-none');
+
+                $button
+                    .find('.btn-text')
+                    .text('Saving...');
+
+                if (
+                    typeof buildHiddenTemplateInputs ===
+                    'function'
+                ) {
+                    buildHiddenTemplateInputs();
+                }
+
+                $('#editMockupForm')
+                    .trigger('submit');
+            }
+        );
+
+        $(document).ready(function () {
+            handleAjaxFormSubmit(
+                "#editMockupForm",
+                {
+                    successMessage:
+                        "Mockup Updated Successfully",
+
+                    onSuccess: function () {
+                        if (
+                            generateMockupsAfterSave
+                        ) {
+                            $('#generateTemplateMockupFiles')
+                                .find('.btn-text')
+                                .text('Generating...');
+
+                            generateTemplateMockupFiles();
+
+                            return;
+                        }
+
+                        location.reload();
+                    }
+                }
+            );
+        });
+    </script>
 <script>
     // =========================
         // MAIN IMAGE UPLOAD + FORM SUBMIT
         // =========================
-        $(document).ready(function () {
-            handleAjaxFormSubmit("#editMockupForm", {
-                successMessage: "Mockup Updated Successfully",
-                onSuccess: function () {
-                    location.replace('/mockups');
-                }
-            });
-        });
 
         $(document).ready(function () {
             let input = $('#product-image-main');

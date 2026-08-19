@@ -123,8 +123,8 @@ class MockupController extends DashboardController
         return Response::api();
     }
 
-    public function generateTemplateFiles(Mockup $mockup, TemplateMockupGenerator $generator
-    ) {
+    public function generateTemplateFiles(Request $request,
+        Mockup $mockup, TemplateMockupGenerator $generator) {
         $colors = collect(
             $mockup->pre_fill_colors ?? []
         )
@@ -138,9 +138,7 @@ class MockupController extends DashboardController
             );
         }
 
-        $generator->generate(
-            $mockup,
-            $colors
+        $generator->generate($mockup, $colors, force: $request->boolean('force')
         );
 
         return Response::api(
