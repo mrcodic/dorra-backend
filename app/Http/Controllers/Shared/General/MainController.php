@@ -532,53 +532,112 @@ class MainController extends Controller
 
     public function downloadMedia(ModelsMedia $media)
     {
-        if (!Storage::disk($media->disk)->exists($media->getPathRelativeToRoot())) {
+        $disk = Storage::disk($media->disk);
+        $relativePath = $media->getPathRelativeToRoot();
+
+        if (!$disk->exists($relativePath)) {
             abort(404, 'File not found');
         }
 
-        $format = strtolower(request('format', ''));
+        $format = strtolower((string) request('format', ''));
 
-        if (!in_array($format, ['png', 'jpg', 'jpeg', ''])) {
+        if (!in_array($format, ['', 'png', 'jpg', 'jpeg'], true)) {
             abort(422, 'Unsupported format');
         }
 
-        $originalExtension = strtolower(pathinfo($media->file_name, PATHINFO_EXTENSION));
-        $targetExtension = $format ?: $originalExtension;
+        $originalExtension = strtolower(
+            pathinfo($media->file_name, PATHINFO_EXTENSION)
+        );
+
+        $normalizedOriginalExtension = $originalExtension === 'jpeg'
+            ? 'jpg'
+            : $originalExtension;
+
+        $targetExtension = $format !== ''
+            ? $format
+            : $normalizedOriginalExtension;
 
         if ($targetExtension === 'jpeg') {
             $targetExtension = 'jpg';
         }
 
-        if ($targetExtension === $originalExtension || !in_array($targetExtension, ['png', 'jpg'])) {
-            return Storage::disk($media->disk)->download(
-                $media->getPathRelativeToRoot(),
+        if (
+            $targetExtension === $normalizedOriginalExtension ||
+            !in_array($targetExtension, ['png', 'jpg'], true)
+        ) {
+            return $disk->download(
+                $relativePath,
                 $media->file_name
             );
         }
 
-        $imagick = new \Imagick($media->getPath());
+        $absolutePath = $media->getPath();
 
-        if ($targetExtension === 'jpg') {
-            $imagick->setImageBackgroundColor('white');
-            $imagick = $imagick->flattenImages();
-            $imagick->setImageFormat('jpeg');
-            $imagick->setImageCompressionQuality(90);
-            $mime = 'image/jpeg';
-        } else {
-            $imagick->setImageFormat('png');
-            $mime = 'image/png';
+        if (
+            !is_file($absolutePath) ||
+            !is_readable($absolutePath) ||
+            filesize($absolutePath) === 0
+        ) {
+            abort(422, 'Stored media file is invalid or unreadable.');
         }
 
-        $binary = $imagick->getImageBlob();
-        $imagick->clear();
-        $imagick->destroy();
+        $imagick = null;
 
-        $downloadName = pathinfo($media->file_name, PATHINFO_FILENAME) . '.' . $targetExtension;
+        try {
+            $imagick = new \Imagick();
+            $imagick->readImage($absolutePath);
+
+            if ($targetExtension === 'jpg') {
+                $imagick->setImageBackgroundColor(
+                    new \ImagickPixel('white')
+                );
+
+                $flattened = $imagick->mergeImageLayers(
+                    \Imagick::LAYERMETHOD_FLATTEN
+                );
+
+                $imagick->clear();
+                $imagick->destroy();
+
+                $imagick = $flattened;
+
+                $imagick->setImageFormat('jpeg');
+                $imagick->setImageCompression(
+                    \Imagick::COMPRESSION_JPEG
+                );
+                $imagick->setImageCompressionQuality(90);
+
+                $mime = 'image/jpeg';
+            } else {
+                $imagick->setImageFormat('png');
+
+                $mime = 'image/png';
+            }
+
+            $binary = $imagick->getImagesBlob();
+        } catch (\ImagickException $e) {
+            report($e);
+
+            abort(
+                422,
+                'The stored image is corrupted or cannot be processed.'
+            );
+        } finally {
+            if ($imagick instanceof \Imagick) {
+                $imagick->clear();
+                $imagick->destroy();
+            }
+        }
+
+        $downloadName =
+            pathinfo($media->file_name, PATHINFO_FILENAME)
+            . '.'
+            . $targetExtension;
 
         return response($binary, 200, [
             'Content-Type' => $mime,
-            'Content-Disposition' => 'attachment; filename="' . $downloadName . '"',
+            'Content-Disposition' =>
+                'attachment; filename="' . addslashes($downloadName) . '"',
             'Content-Length' => strlen($binary),
         ]);
-    }
-}
+    }}
