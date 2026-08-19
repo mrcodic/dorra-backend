@@ -163,11 +163,13 @@ class TemplateMockupGenerator
             ->chunk(100)
             ->each(function ($templates) use ($mockup, $colors) {
                 $pivotData = [];
+                $primaryColor = $colors[0] ?? null;
 
                 foreach ($templates as $template) {
                     $pivotData[$template->id] = [
                         'colors' => $colors,
                         'positions' => [],
+                        'model_color' => $primaryColor,
                     ];
                 }
 
@@ -294,6 +296,12 @@ class TemplateMockupGenerator
 
                 if ($isPivotPositionsEmpty) {
                     $pivotUpdateData['positions'] = $this->positionsForPivot($positions);
+                }
+
+                $currentModelColor = $template->pivot->model_color ?? null;
+
+                if (empty($currentModelColor) && !empty($mergedColors)) {
+                    $pivotUpdateData['model_color'] = $mergedColors[0];
                 }
 
                 $mockup->templates()->updateExistingPivot($template->id, $pivotUpdateData);
