@@ -28,6 +28,15 @@ class TemplateMockupGenerator
             return;
         }
 
+        $this->attachMatchingTemplates(
+            $mockup,
+            $colors
+        );
+
+        if (!$mockup->templates()->exists()) {
+            return;
+        }
+
         $bulkJob = MockupGenerationJob::create([
             'mockup_id' => $mockup->id,
             'status' => 'pending',
@@ -38,9 +47,13 @@ class TemplateMockupGenerator
 
         $totalCount = 0;
 
-        $mockup->templates()
-            ->orderBy('templates.id')
-            ->lazy(100)
+        $mockup
+            ->templates()
+            ->lazyById(
+                100,
+                'templates.id',
+                'id'
+            )
             ->each(function ($template) use (
                 $mockup,
                 $colors,
@@ -56,6 +69,31 @@ class TemplateMockupGenerator
                     return;
                 }
 
+                $pivotColors = $this->toArray(
+                    $template->pivot->colors ?? []
+                );
+
+                $mergedColors = collect([
+                    ...$pivotColors,
+                    ...$colors,
+                ])
+                    ->filter()
+                    ->unique(
+                        fn ($color) =>
+                        $this->normalizeHex($color)
+                    )
+                    ->values()
+                    ->all();
+
+                $mockup
+                    ->templates()
+                    ->updateExistingPivot(
+                        $template->id,
+                        [
+                            'colors' => $mergedColors,
+                        ]
+                    );
+
                 foreach ($colors as $hex) {
                     foreach ($positions as $side => $points) {
                         if (
@@ -70,12 +108,23 @@ class TemplateMockupGenerator
                         }
 
                         BulkJobItem::create([
-                            'bulk_job_id' => $bulkJob->id,
-                            'template_id' => $template->id,
-                            'color' => $hex,
-                            'side' => $side,
-                            'points' => $points,
-                            'status' => 'pending',
+                            'bulk_job_id' =>
+                                $bulkJob->id,
+
+                            'template_id' =>
+                                $template->id,
+
+                            'color' =>
+                                $hex,
+
+                            'side' =>
+                                $side,
+
+                            'points' =>
+                                $points,
+
+                            'status' =>
+                                'pending',
                         ]);
 
                         $totalCount++;
@@ -289,5 +338,81 @@ class TemplateMockupGenerator
         }
 
         return [];
+    }
+    protected function attachMatchingTemplates(
+        Mockup $mockup,
+        array $colors
+    ): void {
+        Template::query()
+            ->select('templates.id')
+            ->where(function ($query) use ($mockup) {
+                if ($mockup->category_id) {
+                    $query->whereHas(
+                        'categories',
+                        function ($categoryQuery) use (
+                            $mockup
+                        ) {
+                            $categoryQuery->where(
+                                'categories.id',
+                                $mockup->category_id
+                            );
+                        }
+                    );
+                }
+
+                $query->orWhereHas(
+                    'products',
+                    function ($productQuery) use (
+                        $mockup
+                    ) {
+                        $productQuery->whereIn(
+                            'products.id',
+                            $mockup
+                                ->products()
+                                ->select(
+                                    'products.id'
+                                )
+                        );
+                    }
+                );
+            })
+            ->whereDoesntHave(
+                'mockups',
+                function ($query) use ($mockup) {
+                    $query->where(
+                        'mockups.id',
+                        $mockup->id
+                    );
+                }
+            )
+            ->lazyById(
+                100,
+                'templates.id',
+                'id'
+            )
+            ->chunk(100)
+            ->each(function ($templates) use (
+                $mockup,
+                $colors
+            ) {
+                $pivotData = [];
+
+                foreach ($templates as $template) {
+                    $pivotData[$template->id] = [
+                        'colors' => $colors,
+                        'positions' => [],
+                    ];
+                }
+
+                if (empty($pivotData)) {
+                    return;
+                }
+
+                $mockup
+                    ->templates()
+                    ->syncWithoutDetaching(
+                        $pivotData
+                    );
+            });
     }
 }
