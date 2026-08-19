@@ -16,27 +16,27 @@ class BulkMockupController extends Controller
 {
     public function generateBulk(Request $request, Mockup $mockup)
     {
-        $type = $request->input('type', 'bulk'); 
+        $type = $request->input('type', 'bulk');
         $hasColors = $request->filled('colors');
 
         $request->validate([
-            'type'              => ['sometimes', 'string', Rule::in(['bulk', 'single'])],
-            'template_ids'      => ['required', 'array', 'min:1', $type === 'single' ? 'max:1' : ''],
-            'template_ids.*'    => 'string|exists:templates,id',
-            'colors'            => 'nullable|array|min:1',
-            'colors.*'          => 'nullable|string',
-            'positions'         => ['required', 'array'],
-            'positions.*.name'  => ['required', 'string', 'max:100',
+            'type' => ['sometimes', 'string', Rule::in(['bulk', 'single'])],
+            'template_ids' => ['required', 'array', 'min:1', $type === 'single' ? 'max:1' : ''],
+            'template_ids.*' => 'string|exists:templates,id',
+            'colors' => 'nullable|array|min:1',
+            'colors.*' => 'nullable|string',
+            'positions' => ['required', 'array'],
+            'positions.*.name' => ['required', 'string', 'max:100',
                 Rule::in($mockup->types->map(fn($t) => $t->value->key())->toArray()),
             ],
-            'positions.*.p1x'   => ['required', 'numeric'],
-            'positions.*.p1y'   => ['required', 'numeric'],
-            'positions.*.p2x'   => ['required', 'numeric'],
-            'positions.*.p2y'   => ['required', 'numeric'],
-            'positions.*.p3x'   => ['required', 'numeric'],
-            'positions.*.p3y'   => ['required', 'numeric'],
-            'positions.*.p4x'   => ['required', 'numeric'],
-            'positions.*.p4y'   => ['required', 'numeric'],
+            'positions.*.p1x' => ['required', 'numeric'],
+            'positions.*.p1y' => ['required', 'numeric'],
+            'positions.*.p2x' => ['required', 'numeric'],
+            'positions.*.p2y' => ['required', 'numeric'],
+            'positions.*.p3x' => ['required', 'numeric'],
+            'positions.*.p3y' => ['required', 'numeric'],
+            'positions.*.p4x' => ['required', 'numeric'],
+            'positions.*.p4y' => ['required', 'numeric'],
         ]);
 
         $templateIds = $request->input('template_ids');
@@ -65,40 +65,25 @@ class BulkMockupController extends Controller
         $mergedPivotColors = [];
 
         // =========================================================================
-        // SINGLE — one template, pivot type "single", replaces any prior single
-        // =========================================================================
+// SINGLE — one template, pivot type "single". Does NOT detach/remove
+// previously attached single-type templates — only adds/updates this one.
+// =========================================================================
         if ($type === 'single') {
-            $templateId = (string) $templateIds[0];
+            $templateId = (string)$templateIds[0];
 
-            $existingSinglePivotRow = $mockup->templates()
+            $existingTemplate = $mockup->templates()
                 ->wherePivot('type', 'single')
+                ->where('templates.id', $templateId)
                 ->first();
 
-            $previousSingleTemplateId = $existingSinglePivotRow
-                ? (string) $existingSinglePivotRow->id
-                : null;
-
-            $templateChanged = $previousSingleTemplateId !== null
-                && $previousSingleTemplateId !== $templateId;
-
-            // If switching to a different template, wipe old single media entirely
-            if ($templateChanged) {
-                $mockup->media()
-                    ->where('collection_name', 'generated_mockups')
-                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [$previousSingleTemplateId])
-                    ->get()
-                    ->each(fn($media) => $media->delete());
-            }
-
-            $existingPivot = $templateChanged ? null : $existingSinglePivotRow?->pivot;
+            $existingPivot = $existingTemplate?->pivot;
             $previousPositions = $existingPivot->positions ?? [];
-            $positionsChanged = $templateChanged
-                || json_encode($previousPositions) !== json_encode($request->input('positions'));
+            $positionsChanged = json_encode($previousPositions) !== json_encode($request->input('positions'));
 
             if ($hasColors) {
                 $mergedPivotColors[$templateId] = $colors;
 
-                $existingMediaHexes = $templateChanged ? [] : $mockup->media()
+                $existingMediaHexes = $mockup->media()
                     ->where('collection_name', 'generated_mockups')
                     ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [$templateId])
                     ->get()
@@ -114,11 +99,11 @@ class BulkMockupController extends Controller
                         ->get()->each(fn($media) => $media->delete());
                 }
 
-                $hexesToRender  = array_diff($newColorsNormalized, $existingMediaHexes);
+                $hexesToRender = array_diff($newColorsNormalized, $existingMediaHexes);
                 $hexesWithMedia = array_intersect($newColorsNormalized, $existingMediaHexes);
 
                 $modelColorHex = $existingPivot?->model_color ? $this->normalizeHex($existingPivot->model_color) : null;
-                if ($modelColorHex && !in_array($modelColorHex, $newColorsNormalized) && !$templateChanged) {
+                if ($modelColorHex && !in_array($modelColorHex, $newColorsNormalized)) {
                     $mockup->templates()->updateExistingPivot($templateId, ['model_color' => null]);
                 }
 
@@ -162,24 +147,25 @@ class BulkMockupController extends Controller
                 }
             }
 
-            // Sync pivot — preserve existing bulk-type rows, replace the single row
-            $bulkTemplates = $mockup->templates()
-                ->wherePivot('type', 'bulk')
-                ->get()->keyBy('id');
+            // Sync pivot — preserve ALL existing templates (bulk + other singles),
+            // only add/update this one single template
+            $allExistingTemplates = $mockup->templates()->get()->keyBy('id');
 
             $syncData = [];
 
-            foreach ($bulkTemplates as $bulkTemplateId => $template) {
-                $syncData[(string) $bulkTemplateId] = [
-                    'colors'    => $template->pivot->colors,
+            foreach ($allExistingTemplates as $existingId => $template) {
+                if ((string)$existingId === $templateId) continue; // will be overwritten below
+
+                $syncData[(string)$existingId] = [
+                    'colors' => $template->pivot->colors,
                     'positions' => $template->pivot->positions,
-                    'type'      => 'bulk',
+                    'type' => $template->pivot->type,
                 ];
             }
 
             $singlePivotEntry = [
                 'positions' => $request->input('positions'),
-                'type'      => 'single',
+                'type' => 'single',
             ];
 
             if ($hasColors) {
@@ -204,43 +190,43 @@ class BulkMockupController extends Controller
                 ->latest()
                 ->first();
 
-            $existingTemplates          = $mockup->templates()->get()->keyBy('id');
-            $previouslyAttachedIds      = $existingTemplates->keys()->map(fn($id) => (string) $id)->toArray();
-            $incomingIds                = collect($templateIds)->map(fn($id) => (string) $id)->toArray();
+            $existingTemplates = $mockup->templates()->get()->keyBy('id');
+            $previouslyAttachedIds = $existingTemplates->keys()->map(fn($id) => (string)$id)->toArray();
+            $incomingIds = collect($templateIds)->map(fn($id) => (string)$id)->toArray();
 
-            $removedTemplateIds         = array_diff($previouslyAttachedIds, $incomingIds);
-            $newTemplateIds             = array_diff($incomingIds, $previouslyAttachedIds);
+            $removedTemplateIds = array_diff($previouslyAttachedIds, $incomingIds);
+            $newTemplateIds = array_diff($incomingIds, $previouslyAttachedIds);
             $alreadyAttachedTemplateIds = array_intersect($incomingIds, $previouslyAttachedIds);
 
             $singleTemplateIds = $mockup->templates()
                 ->wherePivot('type', 'single')
                 ->pluck('templates.id')
-                ->map(fn($id) => (string) $id)
+                ->map(fn($id) => (string)$id)
                 ->toArray();
 
             foreach ($removedTemplateIds as $removedTemplateId) {
-                if (in_array((string) $removedTemplateId, $singleTemplateIds)) continue;
+                if (in_array((string)$removedTemplateId, $singleTemplateIds)) continue;
 
                 $mockup->media()
                     ->where('collection_name', 'generated_mockups')
-                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $removedTemplateId])
+                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$removedTemplateId])
                     ->get()
                     ->each(fn($media) => $media->delete());
             }
 
             foreach ($alreadyAttachedTemplateIds as $templateId) {
-                $existingTemplate  = $existingTemplates->get($templateId);
-                $pivot             = $existingTemplate->pivot;
+                $existingTemplate = $existingTemplates->get($templateId);
+                $pivot = $existingTemplate->pivot;
                 $previousPositions = $pivot->positions ?? [];
-                $positionsChanged  = json_encode($previousPositions) !== json_encode($request->input('positions'));
+                $positionsChanged = json_encode($previousPositions) !== json_encode($request->input('positions'));
 
                 if ($hasColors) {
                     $mergedPivotColors[$templateId] = $colors;
-                    $mergedNormalizedHexes          = $newColorsNormalized;
+                    $mergedNormalizedHexes = $newColorsNormalized;
 
                     $existingMediaHexes = $mockup->media()
                         ->where('collection_name', 'generated_mockups')
-                        ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
+                        ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$templateId])
                         ->get()
                         ->map(fn($m) => $this->normalizeHex($m->getCustomProperty('hex') ?? ''))
                         ->filter()->unique()->values()->all();
@@ -249,12 +235,12 @@ class BulkMockupController extends Controller
                     foreach ($removedHexes as $hex) {
                         $mockup->media()
                             ->where('collection_name', 'generated_mockups')
-                            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
+                            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$templateId])
                             ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
                             ->get()->each(fn($media) => $media->delete());
                     }
 
-                    $hexesToRender  = array_diff($mergedNormalizedHexes, $existingMediaHexes);
+                    $hexesToRender = array_diff($mergedNormalizedHexes, $existingMediaHexes);
                     $hexesWithMedia = array_intersect($mergedNormalizedHexes, $existingMediaHexes);
 
                     $modelColorHex = $pivot?->model_color ? $this->normalizeHex($pivot->model_color) : null;
@@ -266,7 +252,7 @@ class BulkMockupController extends Controller
                         foreach ($hexesWithMedia as $hex) {
                             $mockup->media()
                                 ->where('collection_name', 'generated_mockups')
-                                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
+                                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$templateId])
                                 ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
                                 ->get()->each(fn($media) => $media->delete());
                         }
@@ -284,7 +270,7 @@ class BulkMockupController extends Controller
                     if ($positionsChanged) {
                         $mockup->media()
                             ->where('collection_name', 'generated_mockups')
-                            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
+                            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$templateId])
                             ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])
                             ->get()->each(fn($media) => $media->delete());
 
@@ -292,7 +278,7 @@ class BulkMockupController extends Controller
                     } else {
                         $hasModelImage = $mockup->media()
                             ->where('collection_name', 'generated_mockups')
-                            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
+                            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$templateId])
                             ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])
                             ->exists();
 
@@ -322,24 +308,24 @@ class BulkMockupController extends Controller
             $syncData = [];
 
             foreach ($singleTemplates as $templateId => $template) {
-                $syncData[(string) $templateId] = [
-                    'colors'    => $template->pivot->colors,
+                $syncData[(string)$templateId] = [
+                    'colors' => $template->pivot->colors,
                     'positions' => $template->pivot->positions,
-                    'type'      => 'single',
+                    'type' => 'single',
                 ];
             }
 
             foreach ($templateIds as $templateId) {
                 $pivotEntry = [
                     'positions' => $request->input('positions'),
-                    'type'      => 'bulk',
+                    'type' => 'bulk',
                 ];
 
                 if ($hasColors) {
                     $pivotEntry['colors'] = $mergedPivotColors[$templateId] ?? $colors;
                 }
 
-                $syncData[(string) $templateId] = $pivotEntry;
+                $syncData[(string)$templateId] = $pivotEntry;
             }
 
             $mockup->templates()->sync($syncData);
@@ -359,15 +345,15 @@ class BulkMockupController extends Controller
         $totalCount = count($renderJobs) * count($sides);
 
         $bulkJob = MockupGenerationJob::create([
-            'mockup_id'       => $mockup->id,
-            'status'          => 'pending',
-            'total_count'     => $totalCount,
+            'mockup_id' => $mockup->id,
+            'status' => 'pending',
+            'total_count' => $totalCount,
             'completed_count' => 0,
-            'failed_count'    => 0,
+            'failed_count' => 0,
         ]);
 
         foreach ($renderJobs as $job) {
-            $isModelOnly   = $job['model_only'] ?? false;
+            $isModelOnly = $job['model_only'] ?? false;
             $originalColor = $isModelOnly
                 ? 'model'
                 : ($hexToOriginalColor[$job['hex']] ?? $job['hex']);
@@ -376,10 +362,10 @@ class BulkMockupController extends Controller
                 $item = BulkJobItem::create([
                     'bulk_job_id' => $bulkJob->id,
                     'template_id' => $job['template_id'],
-                    'color'       => $originalColor,
-                    'side'        => $side,
-                    'points'      => $positions[$side],
-                    'status'      => 'pending',
+                    'color' => $originalColor,
+                    'side' => $side,
+                    'points' => $positions[$side],
+                    'status' => 'pending',
                 ]);
 
                 RenderMockupJob::dispatch($bulkJob, $item, $mockup);
@@ -387,35 +373,36 @@ class BulkMockupController extends Controller
         }
 
         $bulkJob->update([
-            'status'     => $totalCount > 0 ? 'processing' : 'completed',
+            'status' => $totalCount > 0 ? 'processing' : 'completed',
             'started_at' => now(),
         ]);
 
         return Response::api(data: [
-            'success'       => true,
-            'bulk_job_id'   => $bulkJob->id,
-            'total_count'   => $totalCount,
-            'sides'         => $sides,
-            'colors'        => $hasColors ? $colors : [],
+            'success' => true,
+            'bulk_job_id' => $bulkJob->id,
+            'total_count' => $totalCount,
+            'sides' => $sides,
+            'colors' => $hasColors ? $colors : [],
             'rendered_jobs' => count($renderJobs),
         ]);
     }
+
     public function status($id)
     {
-        $job     = MockupGenerationJob::findOrFail($id);
+        $job = MockupGenerationJob::findOrFail($id);
         $elapsed = now()->diffInSeconds($job->started_at);
-        $rate    = $job->completed_count / max($elapsed, 1);
+        $rate = $job->completed_count / max($elapsed, 1);
         $remaining = ($job->total_count - $job->completed_count) / max($rate, 0.01);
 
         return Response::api(data: [
-            'id'                          => $job->id,
-            'status'                      => $job->status,
-            'total_count'                 => $job->total_count,
-            'completed_count'             => $job->completed_count,
-            'failed_count'                => $job->failed_count,
-            'percent'                     => round(($job->completed_count / max($job->total_count, 1)) * 100, 1),
-            'estimated_remaining_seconds' => (int) $remaining,
-            'started_at'                  => $job->started_at,
+            'id' => $job->id,
+            'status' => $job->status,
+            'total_count' => $job->total_count,
+            'completed_count' => $job->completed_count,
+            'failed_count' => $job->failed_count,
+            'percent' => round(($job->completed_count / max($job->total_count, 1)) * 100, 1),
+            'estimated_remaining_seconds' => (int)$remaining,
+            'started_at' => $job->started_at,
         ]);
     }
 
@@ -439,7 +426,7 @@ class BulkMockupController extends Controller
 
             $mockup->media()
                 ->where('collection_name', 'generated_mockups')
-                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $item->template_id])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$item->template_id])
                 ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$item->side])
                 ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
                 ->get()
@@ -488,17 +475,17 @@ class BulkMockupController extends Controller
         BulkJobItem::where('bulk_job_id', $bulkJob->id)
             ->where('status', 'failed')
             ->update([
-                'status'        => 'pending',
+                'status' => 'pending',
                 'error_message' => null,
-                'output_path'   => null,
+                'output_path' => null,
             ]);
 
         $bulkJob->update([
-            'status'       => 'processing',
+            'status' => 'processing',
             'failed_count' => 0,
-            'total_count'  => $bulkJob->completed_count + $failedItems->count(),
+            'total_count' => $bulkJob->completed_count + $failedItems->count(),
             'completed_at' => null,
-            'started_at'   => now(),
+            'started_at' => now(),
         ]);
 
         foreach ($failedItems as $item) {
@@ -506,8 +493,8 @@ class BulkMockupController extends Controller
         }
 
         return Response::api(data: [
-            'success'     => true,
-            'retried'     => $failedItems->count(),
+            'success' => true,
+            'retried' => $failedItems->count(),
             'bulk_job_id' => $bulkJob->id,
         ]);
     }
