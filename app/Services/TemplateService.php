@@ -15,6 +15,7 @@ use App\Models\TableauScene;
 use App\Models\Template;
 use App\Models\Type;
 use App\Repositories\Base\BaseRepositoryInterface;
+use App\Services\Mockup\TemplateMockupGenerator;
 use App\Traits\RendersTemplateMockups;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
@@ -38,6 +39,7 @@ class TemplateService extends BaseService
         , public ProductRepositoryInterface                 $productRepository
         , public CategoryRepositoryInterface                $categoryRepository
         , public ImageService                               $imageService
+        , public TemplateMockupGenerator                    $templateMockupGenerator
     )
     {
         parent::__construct($repository);
@@ -242,6 +244,7 @@ class TemplateService extends BaseService
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->industries()->sync($validatedData['industry_ids'] ?? []);
             $model->categories()->sync($validatedData['category_ids'] ?? []);
+
             if (request()->allFiles()) {
                 handleMediaUploads(request()->allFiles(), $model);
             }
@@ -295,7 +298,9 @@ class TemplateService extends BaseService
 
                 $model->mockups()->syncWithoutDetaching($pivotData);
             }
-
+            $this->generateForUnlinkedMockups(
+                $model
+            );
             $model->tags()->sync($validatedData['tags'] ?? []);
             $model->flags()->sync($validatedData['flags'] ?? []);
 
@@ -313,27 +318,6 @@ class TemplateService extends BaseService
         return $model->load($relationsToLoad);
     }
 
-    private function defaultPositionsForTypes(array $typeIds): array
-    {
-        $sides = [];
-
-        if (in_array(1, $typeIds, true)) $sides[] = 'front';
-        if (in_array(2, $typeIds, true)) $sides[] = 'back';
-        if (in_array(3, $typeIds, true)) $sides[] = 'none';
-
-        if (!$sides) $sides = ['front', 'back', 'none'];
-
-        $pos = [];
-        foreach ($sides as $side) {
-            $pos["{$side}_x"] = 0.5;
-            $pos["{$side}_y"] = 0.507031;
-            $pos["{$side}_width"] = 0.264844;
-            $pos["{$side}_height"] = 0.176563;
-            $pos["{$side}_angle"] = 0;
-        }
-
-        return $pos;
-    }
 
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
@@ -493,6 +477,9 @@ class TemplateService extends BaseService
 
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->categories()->sync($validatedData['category_ids'] ?? []);
+            $this->generateForUnlinkedMockups(
+                $model
+            );
             $model->tags()->sync($validatedData['tags'] ?? []);
             $model->flags()->sync($validatedData['flags'] ?? []);
 
@@ -522,6 +509,45 @@ class TemplateService extends BaseService
                 ],
             ])
             ->toArray();
+    }
+
+    protected function generateForUnlinkedMockups(Template $template): void
+    {
+        $hasProducts = $template->products()->exists();
+        $hasCategories = $template->categories()->exists();
+
+        if (!$hasProducts && !$hasCategories) {
+            return;
+        }
+
+        $productIdsQuery = $template->products()->select('products.id');
+        $categoryIdsQuery = $template->categories()->select('categories.id');
+
+        Mockup::query()
+            ->where(function ($query) use ($hasProducts, $hasCategories, $productIdsQuery, $categoryIdsQuery) {
+                if ($hasCategories) {
+                    $query->whereIn('mockups.category_id', $categoryIdsQuery);
+                }
+
+                if ($hasProducts) {
+                    $method = $hasCategories ? 'orWhereHas' : 'whereHas';
+
+                    $query->{$method}('products', function ($query) use ($productIdsQuery) {
+                        $query->whereIn('products.id', $productIdsQuery);
+                    });
+                }
+            })
+            ->whereDoesntHave('templates', function ($query) use ($template) {
+                $query->where('templates.id', $template->id);
+            })
+            ->lazyById(100)
+            ->each(function ($mockup) use ($template) {
+                $this->templateMockupGenerator->generate(
+                    mockup: $mockup,
+                    colors: $mockup->pre_fill_colors ?? [],
+                    template: $template
+                );
+            });
     }
 
     protected function deleteGeneratedMockupMedia(Mockup $mockup, $templateId): void
