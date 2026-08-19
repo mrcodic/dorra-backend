@@ -96,114 +96,42 @@ class TemplateMockupGenerator
         );
     }
 
-    public function generateForUnlinkedMockups(
-        Template $template,
-        array $excludeMockupIds = []
-    ): void {
-        $hasProducts = $template
-            ->products()
-            ->exists();
+    public function generateForUnlinkedMockups(Template $template, array $excludeMockupIds = []): void
+    {
+        $hasProducts = $template->products()->exists();
+        $hasCategories = $template->categories()->exists();
 
-        $hasCategories = $template
-            ->categories()
-            ->exists();
-
-        if (
-            !$hasProducts
-            && !$hasCategories
-        ) {
+        if (!$hasProducts && !$hasCategories) {
             return;
         }
 
-        $excludeMockupIds = collect(
-            $excludeMockupIds
-        )
-            ->filter()
-            ->map(
-                fn ($id) =>
-                (int) $id
-            )
-            ->unique()
-            ->values()
-            ->all();
-
-        $productIdsQuery = $template
-            ->products()
-            ->select(
-                'products.id'
-            );
-
-        $categoryIdsQuery = $template
-            ->categories()
-            ->select(
-                'categories.id'
-            );
+        $excludeMockupIds = collect($excludeMockupIds)->filter()->map(fn ($id) => (int) $id)->unique()->values()->all();
+        $productIdsQuery = $template->products()->select('products.id');
+        $categoryIdsQuery = $template->categories()->select('categories.id');
 
         Mockup::query()
-            ->where(function ($query) use (
-                $hasProducts,
-                $hasCategories,
-                $productIdsQuery,
-                $categoryIdsQuery
-            ) {
+            ->where(function ($query) use ($hasProducts, $hasCategories, $productIdsQuery, $categoryIdsQuery) {
                 if ($hasCategories) {
-                    $query->whereIn(
-                        'mockups.category_id',
-                        $categoryIdsQuery
-                    );
+                    $query->whereIn('mockups.category_id', $categoryIdsQuery);
                 }
 
                 if ($hasProducts) {
-                    $method = $hasCategories
-                        ? 'orWhereHas'
-                        : 'whereHas';
+                    $method = $hasCategories ? 'orWhereHas' : 'whereHas';
 
-                    $query->{$method}(
-                        'products',
-                        function ($productQuery) use (
-                            $productIdsQuery
-                        ) {
-                            $productQuery->whereIn(
-                                'products.id',
-                                $productIdsQuery
-                            );
-                        }
-                    );
+                    $query->{$method}('products', function ($query) use ($productIdsQuery) {
+                        $query->whereIn('products.id', $productIdsQuery);
+                    });
                 }
             })
-            ->whereDoesntHave(
-                'templates',
-                function ($query) use (
-                    $template
-                ) {
-                    $query->where(
-                        'templates.id',
-                        $template->id
-                    );
-                }
-            )
-            ->when(
-                !empty($excludeMockupIds),
-                function ($query) use (
-                    $excludeMockupIds
-                ) {
-                    $query->whereIntegerNotInRaw(
-                        'mockups.id',
-                        $excludeMockupIds
-                    );
-                }
-            )
-            ->lazyById(
-                100,
-                'mockups.id',
-                'id'
-            )
-            ->each(function ($mockup) use (
-                $template
-            ) {
-                $colors =
-                    $mockup->pre_fill_colors
-                    ?? [];
+            ->whereDoesntHave('templates', function ($query) use ($template) {
+                $query->where('templates.id', $template->id);
+            })
+            ->when(!empty($excludeMockupIds), function ($query) use ($excludeMockupIds) {
+                $query->whereIntegerNotInRaw('mockups.id', $excludeMockupIds);
+            })
+            ->lazyById(100)
+            ->each(function ($mockup) use ($template) {
+                $colors = $mockup->pre_fill_colors ?? [];
 
                 if (empty($colors)) {
                     return;
@@ -1741,4 +1669,5 @@ class TemplateMockupGenerator
                 $media->delete()
             );
     }
+
 }
