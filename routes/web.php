@@ -385,7 +385,6 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
 
         Route::controller(MockupController::class)->group(function () {
-            // routes/web.php
             Route::post('mockups/remove-color', 'removeColor')
                 ->name('mockups.remove-color');
 
@@ -396,6 +395,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::get('mockup-types', 'mockupTypes');
             Route::patch('mockups/{mockup}', 'updateEditorData');
             Route::delete('recent-mockups/{mockup}', 'destroyRecentMockup');
+            Route::post('mockups/{mockup}/generate-template-files', 'generateTemplateFiles')
+                ->name('mockups.generate-template-files');
         });
 
         Route::post('check-product-type', [TemplateController::class, 'checkProductTypeInEditor']);

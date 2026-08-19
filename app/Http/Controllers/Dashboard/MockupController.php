@@ -8,9 +8,11 @@ use App\Http\Controllers\Base\DashboardController;
 
 use App\Http\Resources\MockupResource;
 
+use App\Models\Mockup;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Repositories\Interfaces\TypeRepositoryInterface;
+use App\Services\Mockup\TemplateMockupGenerator;
 use App\Services\MockupService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
@@ -120,4 +122,30 @@ class MockupController extends DashboardController
         $this->mockupService->removeColor($data);
         return Response::api();
     }
+
+    public function generateTemplateFiles(Mockup $mockup, TemplateMockupGenerator $generator
+    ) {
+        $colors = collect(
+            $mockup->pre_fill_colors ?? []
+        )
+            ->filter()
+            ->values()
+            ->all();
+
+        if (empty($colors)) {
+            return Response::api(
+                message: "No pre-fill colors found."
+            );
+        }
+
+        $generator->generate(
+            $mockup,
+            $colors
+        );
+
+        return Response::api(
+            message: "Mockup generation started successfully"
+        );
+    }
+
 }

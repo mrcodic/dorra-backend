@@ -392,7 +392,7 @@
             if (!mockupId) {
                 Toastify({
                     text: 'Please save the mockup first',
-                    duration: 2500,
+                    duration: 3000,
                     gravity: 'top',
                     position: 'right',
                     backgroundColor: '#dc3545',
@@ -402,21 +402,31 @@
                 return;
             }
 
+            const url = @json(
+            route(
+                'mockups.generate-template-files',
+                ['mockup' => '__MOCKUP_ID__']
+            )
+        ).replace('__MOCKUP_ID__', mockupId);
+
             $button.prop('disabled', true);
             $loader.removeClass('d-none');
             $text.text('Generating...');
 
             $.ajax({
-                url: `/mockups/${mockupId}/generate-template-files`,
+                url: url,
                 type: 'POST',
 
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Accept': 'application/json',
                 },
 
                 success: function (response) {
                     Toastify({
-                        text: response.message || 'Mockup generation started',
+                        text:
+                            response.message ||
+                            'Mockup generation started',
                         duration: 3000,
                         gravity: 'top',
                         position: 'right',
@@ -426,6 +436,11 @@
                 },
 
                 error: function (xhr) {
+                    console.error(
+                        'Generate mockup error:',
+                        xhr.responseJSON || xhr.responseText
+                    );
+
                     Toastify({
                         text:
                             xhr.responseJSON?.message ||
