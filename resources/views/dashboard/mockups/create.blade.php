@@ -233,7 +233,7 @@
         }
 
         .palette-note-check {
-            font-size: 13px;
+            font-size: 16px;
             font-weight: 700;
         }
 
@@ -262,13 +262,10 @@
         }
 
         .palette-card .gradient-picker-trigger {
-            width: 24px;
-            height: 24px;
+            width: 34px;
+            height: 34px;
             min-width: 24px;
-            border-radius: 50%;
-            border: 1px solid #d6dadd !important;
-            background-color: #fff;
-            background-size: 14px 14px;
+
             box-shadow: none;
         }
 
