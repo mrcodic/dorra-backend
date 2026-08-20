@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Services\Mockup;
-
 use App\Jobs\RenderMockupJob;
 use App\Models\BulkJobItem;
 use App\Models\Design;
@@ -10,7 +8,6 @@ use App\Models\MockupGenerationJob;
 use App\Models\Template;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-
 class TemplateMockupGenerator
 {
     protected const STATIC_DEFAULT_POINTS = [
@@ -19,7 +16,6 @@ class TemplateMockupGenerator
         0.35, 0.55,
         0.65, 0.55,
     ];
-
     public function generate(
         Mockup $mockup,
         array $colors = [],
@@ -27,15 +23,12 @@ class TemplateMockupGenerator
         ?Template $template = null
     ): void {
         if (empty($colors)) {
-            $colors = $mockup->colors_across_templates ?? [];
+            $colors = $mockup->pre_fill_colors ?? [];
         }
-
         $colors = $this->cleanColors($colors);
-
         if (empty($colors)) {
             return;
         }
-
         if ($template) {
             $this->attachTemplateIfMissing(
                 $mockup,
@@ -48,7 +41,6 @@ class TemplateMockupGenerator
                 $colors
             );
         }
-
         if ($template) {
             $hasTemplate = $mockup
                 ->templates()
@@ -57,7 +49,6 @@ class TemplateMockupGenerator
                     $template->id
                 )
                 ->exists();
-
             if (!$hasTemplate) {
                 return;
             }
@@ -66,7 +57,6 @@ class TemplateMockupGenerator
         ) {
             return;
         }
-
         if ($force) {
             if ($template) {
                 $this->deleteGeneratedFilesForTemplate(
@@ -79,7 +69,6 @@ class TemplateMockupGenerator
                 );
             }
         }
-
         $hexes = collect($colors)
             ->map(
                 fn ($color) =>
@@ -88,55 +77,115 @@ class TemplateMockupGenerator
             ->unique()
             ->values()
             ->all();
-
         $this->generateForNewColors(
             $mockup,
             $hexes,
             $template?->id
         );
     }
-
-    public function generateForUnlinkedMockups(Template $template, array $excludeMockupIds = []): void
-    {
-        $hasProducts = $template->products()->exists();
-        $hasCategories = $template->categories()->exists();
-
-        if (!$hasProducts && !$hasCategories) {
+    public function generateForUnlinkedMockups(
+        Template $template,
+        array $excludeMockupIds = []
+    ): void {
+        $hasProducts = $template
+            ->products()
+            ->exists();
+        $hasCategories = $template
+            ->categories()
+            ->exists();
+        if (
+            !$hasProducts
+            && !$hasCategories
+        ) {
             return;
         }
-
-        $excludeMockupIds = collect($excludeMockupIds)->filter()->map(fn ($id) => (int) $id)->unique()->values()->all();
-        $productIdsQuery = $template->products()->select('products.id');
-        $categoryIdsQuery = $template->categories()->select('categories.id');
-
+        $excludeMockupIds = collect(
+            $excludeMockupIds
+        )
+            ->filter()
+            ->map(
+                fn ($id) =>
+                (int) $id
+            )
+            ->unique()
+            ->values()
+            ->all();
+        $productIdsQuery = $template
+            ->products()
+            ->select(
+                'products.id'
+            );
+        $categoryIdsQuery = $template
+            ->categories()
+            ->select(
+                'categories.id'
+            );
         Mockup::query()
-            ->where(function ($query) use ($hasProducts, $hasCategories, $productIdsQuery, $categoryIdsQuery) {
+            ->where(function ($query) use (
+                $hasProducts,
+                $hasCategories,
+                $productIdsQuery,
+                $categoryIdsQuery
+            ) {
                 if ($hasCategories) {
-                    $query->whereIn('mockups.category_id', $categoryIdsQuery);
+                    $query->whereIn(
+                        'mockups.category_id',
+                        $categoryIdsQuery
+                    );
                 }
-
                 if ($hasProducts) {
-                    $method = $hasCategories ? 'orWhereHas' : 'whereHas';
-
-                    $query->{$method}('products', function ($query) use ($productIdsQuery) {
-                        $query->whereIn('products.id', $productIdsQuery);
-                    });
+                    $method = $hasCategories
+                        ? 'orWhereHas'
+                        : 'whereHas';
+                    $query->{$method}(
+                        'products',
+                        function ($productQuery) use (
+                            $productIdsQuery
+                        ) {
+                            $productQuery->whereIn(
+                                'products.id',
+                                $productIdsQuery
+                            );
+                        }
+                    );
                 }
             })
-            ->whereDoesntHave('templates', function ($query) use ($template) {
-                $query->where('templates.id', $template->id);
-            })
-            ->when(!empty($excludeMockupIds), function ($query) use ($excludeMockupIds) {
-                $query->whereIntegerNotInRaw('mockups.id', $excludeMockupIds);
-            })
-            ->lazyById(100)
-            ->each(function ($mockup) use ($template) {
-                $colors = $mockup->colors_across_templates ?? [];
-
+            ->whereDoesntHave(
+                'templates',
+                function ($query) use (
+                    $template
+                ) {
+                    $query->where(
+                        'templates.id',
+                        $template->id
+                    );
+                }
+            )
+            ->when(
+                !empty($excludeMockupIds),
+                function ($query) use (
+                    $excludeMockupIds
+                ) {
+                    $query->whereIntegerNotInRaw(
+                        'mockups.id',
+                        $excludeMockupIds
+                    );
+                }
+            )
+            ->lazyById(
+                100,
+                'mockups.id',
+                'id'
+            )
+            ->each(function ($mockup) use (
+                $template
+            ) {
+                $colors =
+                    $mockup->pre_fill_colors
+                    ?? [];
                 if (empty($colors)) {
                     return;
                 }
-
                 $this->generate(
                     mockup: $mockup,
                     colors: $colors,
@@ -144,45 +193,38 @@ class TemplateMockupGenerator
                 );
             });
     }
-
     public function handleCreated(
         Mockup $mockup
     ): void {
         $colors = $this->cleanColors(
-            $mockup->colors_across_templates ?? []
+            $mockup->pre_fill_colors ?? []
         );
-
         if (empty($colors)) {
             return;
         }
-
         $this->generate(
             $mockup,
             $colors
         );
     }
-
     public function handleUpdated(
         Mockup $mockup
     ): void {
         if (
             !$mockup->wasChanged(
-                'colors_across_templates'
+                'pre_fill_colors'
             )
         ) {
             return;
         }
-
         $oldColors = $this->toArray(
             $mockup->getOriginal(
-                'colors_across_templates'
+                'pre_fill_colors'
             )
         );
-
         $newColors =
-            $mockup->colors_across_templates
+            $mockup->pre_fill_colors
             ?? [];
-
         $oldHexes = collect($oldColors)
             ->filter()
             ->map(
@@ -192,7 +234,6 @@ class TemplateMockupGenerator
             ->unique()
             ->values()
             ->all();
-
         $newHexes = collect($newColors)
             ->filter()
             ->map(
@@ -202,28 +243,24 @@ class TemplateMockupGenerator
             ->unique()
             ->values()
             ->all();
-
         $addedHexes = array_values(
             array_diff(
                 $newHexes,
                 $oldHexes
             )
         );
-
         $removedHexes = array_values(
             array_diff(
                 $oldHexes,
                 $newHexes
             )
         );
-
         if (!empty($removedHexes)) {
             $this->removeDeletedColors(
                 $mockup,
                 $removedHexes
             );
         }
-
         if (!empty($addedHexes)) {
             $this->attachMatchingTemplates(
                 $mockup,
@@ -231,35 +268,29 @@ class TemplateMockupGenerator
                     $newColors
                 )
             );
-
             $this->generateForNewColors(
                 $mockup,
                 $addedHexes
             );
         }
     }
-
     public function syncTemplateDefaults(
         Mockup $mockup,
         ?Collection $colors = null
     ): void {
         $colors ??= collect(
-            $mockup->colors_across_templates ?? []
+            $mockup->pre_fill_colors ?? []
         );
-
         $colors = $this->cleanColors(
             $colors->all()
         );
-
         if (empty($colors)) {
             return;
         }
-
         $this->attachMatchingTemplates(
             $mockup,
             $colors
         );
-
         if (
             !$mockup
                 ->templates()
@@ -267,7 +298,6 @@ class TemplateMockupGenerator
         ) {
             return;
         }
-
         $hexes = collect($colors)
             ->map(
                 fn ($color) =>
@@ -276,13 +306,11 @@ class TemplateMockupGenerator
             ->unique()
             ->values()
             ->all();
-
         $this->generateForNewColors(
             $mockup,
             $hexes
         );
     }
-
     protected function attachTemplateIfMissing(
         Mockup $mockup,
         Template $template,
@@ -295,32 +323,26 @@ class TemplateMockupGenerator
                 $template->id
             )
             ->exists();
-
         if ($alreadyAttached) {
             return;
         }
-
         $colors = $this->cleanColors(
             $colors
         );
-
         $mockup
             ->templates()
             ->syncWithoutDetaching([
                 $template->id => [
                     'colors' =>
                         $colors,
-
                     'positions' =>
                         [],
-
                     'model_color' =>
                         $colors[0]
                         ?? null,
                 ],
             ]);
     }
-
     protected function attachMatchingTemplates(
         Mockup $mockup,
         array $colors
@@ -328,33 +350,27 @@ class TemplateMockupGenerator
         $colors = $this->cleanColors(
             $colors
         );
-
         if (empty($colors)) {
             return;
         }
-
         $hasCategory =
             !empty(
             $mockup->category_id
             );
-
         $hasProducts = $mockup
             ->products()
             ->exists();
-
         if (
             !$hasCategory
             && !$hasProducts
         ) {
             return;
         }
-
         $productIdsQuery = $mockup
             ->products()
             ->select(
                 'products.id'
             );
-
         Template::query()
             ->select(
                 'templates.id'
@@ -378,12 +394,10 @@ class TemplateMockupGenerator
                         }
                     );
                 }
-
                 if ($hasProducts) {
                     $method = $hasCategory
                         ? 'orWhereHas'
                         : 'whereHas';
-
                     $query->{$method}(
                         'products',
                         function ($productQuery) use (
@@ -419,11 +433,9 @@ class TemplateMockupGenerator
                 $colors
             ) {
                 $pivotData = [];
-
                 $primaryColor =
                     $colors[0]
                     ?? null;
-
                 foreach (
                     $templates
                     as $template
@@ -433,19 +445,15 @@ class TemplateMockupGenerator
                     ] = [
                         'colors' =>
                             $colors,
-
                         'positions' =>
                             [],
-
                         'model_color' =>
                             $primaryColor,
                     ];
                 }
-
                 if (empty($pivotData)) {
                     return;
                 }
-
                 $mockup
                     ->templates()
                     ->syncWithoutDetaching(
@@ -453,7 +461,6 @@ class TemplateMockupGenerator
                     );
             });
     }
-
     public function removeDeletedColors(
         Mockup $mockup,
         array $removedHexes
@@ -469,11 +476,9 @@ class TemplateMockupGenerator
             ->unique()
             ->values()
             ->all();
-
         if (empty($removedHexes)) {
             return;
         }
-
         $mockup
             ->templates()
             ->lazyById(
@@ -492,7 +497,6 @@ class TemplateMockupGenerator
                             ->colors
                         ?? []
                     );
-
                 $remainingColors =
                     collect($pivotColors)
                         ->filter()
@@ -508,17 +512,14 @@ class TemplateMockupGenerator
                         )
                         ->values()
                         ->all();
-
                 $updateData = [
                     'colors' =>
                         $remainingColors,
                 ];
-
                 $modelColor =
                     $template
                         ->pivot
                         ->model_color;
-
                 if (
                     !empty($modelColor)
                     && in_array(
@@ -535,7 +536,6 @@ class TemplateMockupGenerator
                         $remainingColors[0]
                         ?? null;
                 }
-
                 $mockup
                     ->templates()
                     ->updateExistingPivot(
@@ -543,7 +543,6 @@ class TemplateMockupGenerator
                         $updateData
                     );
             });
-
         $mockup
             ->media()
             ->where(
@@ -584,7 +583,6 @@ class TemplateMockupGenerator
                 $media->delete()
             );
     }
-
     protected function generateForNewColors(
         Mockup $mockup,
         array $addedHexes,
@@ -601,15 +599,13 @@ class TemplateMockupGenerator
             ->unique()
             ->values()
             ->all();
-
         if (empty($addedHexes)) {
             return;
         }
-
         $hexToOriginalColor =
             collect(
                 $mockup
-                    ->colors_across_templates
+                    ->pre_fill_colors
                 ?? []
             )
                 ->filter()
@@ -620,37 +616,28 @@ class TemplateMockupGenerator
                     )
                 )
                 ->all();
-
         $bulkJob =
             MockupGenerationJob::create([
                 'mockup_id' =>
                     $mockup->id,
-
                 'status' =>
                     'pending',
-
                 'total_count' =>
                     0,
-
                 'completed_count' =>
                     0,
-
                 'failed_count' =>
                     0,
             ]);
-
         $totalCount = 0;
-
         $templatesQuery = $mockup
             ->templates();
-
         if ($templateId) {
             $templatesQuery->where(
                 'templates.id',
                 $templateId
             );
         }
-
         $templatesQuery
             ->lazyById(
                 100,
@@ -671,12 +658,10 @@ class TemplateMockupGenerator
                             ->positions
                         ?? []
                     );
-
                 $isPivotPositionsEmpty =
                     empty(
                     $pivotPositions
                     );
-
                 if (
                     $isPivotPositionsEmpty
                 ) {
@@ -691,25 +676,20 @@ class TemplateMockupGenerator
                             $template
                         );
                 }
-
                 if (empty($positions)) {
                     Log::warning(
                         'No valid positions found for template',
                         [
                             'mockup_id' =>
                                 $mockup->id,
-
                             'template_id' =>
                                 $template->id,
-
                             'pivot_positions_empty' =>
                                 $isPivotPositionsEmpty,
                         ]
                     );
-
                     return;
                 }
-
                 $pivotColors =
                     $this->toArray(
                         $template
@@ -717,7 +697,6 @@ class TemplateMockupGenerator
                             ->colors
                         ?? []
                     );
-
                 $colorsToAdd =
                     collect(
                         $addedHexes
@@ -730,7 +709,6 @@ class TemplateMockupGenerator
                                 ?? $hex
                         )
                         ->all();
-
                 $mergedColors =
                     collect([
                         ...$pivotColors,
@@ -745,12 +723,10 @@ class TemplateMockupGenerator
                         )
                         ->values()
                         ->all();
-
                 $pivotUpdateData = [
                     'colors' =>
                         $mergedColors,
                 ];
-
                 if (
                     $isPivotPositionsEmpty
                 ) {
@@ -761,13 +737,11 @@ class TemplateMockupGenerator
                             $positions
                         );
                 }
-
                 $currentModelColor =
                     $template
                         ->pivot
                         ->model_color
                     ?? null;
-
                 if (
                     empty(
                     $currentModelColor
@@ -781,14 +755,12 @@ class TemplateMockupGenerator
                     ] =
                         $mergedColors[0];
                 }
-
                 $mockup
                     ->templates()
                     ->updateExistingPivot(
                         $template->id,
                         $pivotUpdateData
                     );
-
                 foreach (
                     $addedHexes
                     as $hex
@@ -807,84 +779,63 @@ class TemplateMockupGenerator
                         ) {
                             continue;
                         }
-
                         Log::info(
                             'Creating mockup render item',
                             [
                                 'mockup_id' =>
                                     $mockup->id,
-
                                 'template_id' =>
                                     $template->id,
-
                                 'color' =>
                                     $hex,
-
                                 'side' =>
                                     $side,
-
                                 'points' =>
                                     $points,
                             ]
                         );
-
                         BulkJobItem::create([
                             'bulk_job_id' =>
                                 $bulkJob->id,
-
                             'template_id' =>
                                 $template->id,
-
                             'color' =>
                                 $hexToOriginalColor[
                                 $hex
                                 ]
                                 ?? $hex,
-
                             'side' =>
                                 $side,
-
                             'points' =>
                                 $points,
-
                             'status' =>
                                 'pending',
                         ]);
-
                         $totalCount++;
                     }
                 }
             });
-
         if ($totalCount === 0) {
             $bulkJob->update([
                 'status' =>
                     'completed',
-
                 'total_count' =>
                     0,
-
                 'started_at' =>
                     now(),
-
                 'completed_at' =>
                     now(),
             ]);
-
             return;
         }
-
         $bulkJob->update([
             'status' =>
                 'processing',
-
             'total_count' =>
                 $totalCount,
-
             'started_at' =>
                 now(),
         ]);
-
         BulkJobItem::query()
             ->where(
                 'bulk_job_id',
@@ -904,7 +855,6 @@ class TemplateMockupGenerator
                 )
             );
     }
-
     protected function getTemplatePositions(
         Template $template
     ): array {
@@ -914,11 +864,9 @@ class TemplateMockupGenerator
                 ->positions
             ?? []
         );
-
         if (empty($positions)) {
             return [];
         }
-
         return collect($positions)
             ->filter(
                 fn ($position) =>
@@ -935,37 +883,29 @@ class TemplateMockupGenerator
                     $side =
                         (string)
                         $position['name'];
-
                     return [
                         $side => [
                             'p1x' =>
                                 (string)
                                 $position['p1x'],
-
                             'p1y' =>
                                 (string)
                                 $position['p1y'],
-
                             'p2x' =>
                                 (string)
                                 $position['p2x'],
-
                             'p2y' =>
                                 (string)
                                 $position['p2y'],
-
                             'p3x' =>
                                 (string)
                                 $position['p3x'],
-
                             'p3y' =>
                                 (string)
                                 $position['p3y'],
-
                             'p4x' =>
                                 (string)
                                 $position['p4x'],
-
                             'p4y' =>
                                 (string)
                                 $position['p4y'],
@@ -975,7 +915,6 @@ class TemplateMockupGenerator
             )
             ->all();
     }
-
     protected function getDefaultPositions(
         Mockup $mockup,
         Template $template
@@ -1000,7 +939,6 @@ class TemplateMockupGenerator
                             $setting
                                 ->warp_points
                         );
-
                     if (
                         !$this->hasValidWarpPoints(
                             $points
@@ -1008,52 +946,41 @@ class TemplateMockupGenerator
                     ) {
                         return $positions;
                     }
-
                     $positions[
                     $setting->side
                     ] = [
                         'p1x' =>
                             (string)
                             $points['p1x'],
-
                         'p1y' =>
                             (string)
                             $points['p1y'],
-
                         'p2x' =>
                             (string)
                             $points['p2x'],
-
                         'p2y' =>
                             (string)
                             $points['p2y'],
-
                         'p3x' =>
                             (string)
                             $points['p4x'],
-
                         'p3y' =>
                             (string)
                             $points['p4y'],
-
                         'p4x' =>
                             (string)
                             $points['p3x'],
-
                         'p4y' =>
                             (string)
                             $points['p3y'],
                     ];
-
                     return $positions;
                 },
                 []
             );
-
         if (!empty($positions)) {
             return $positions;
         }
-
         [
             $designWidth,
             $designHeight
@@ -1062,7 +989,6 @@ class TemplateMockupGenerator
                 ->getTemplateDesignDimensions(
                     $template
                 );
-
         $sides = $mockup
             ->types
             ->map(
@@ -1074,13 +1000,11 @@ class TemplateMockupGenerator
             ->filter()
             ->unique()
             ->values();
-
         if ($sides->isEmpty()) {
             $sides = collect([
                 'front',
             ]);
         }
-
         return $sides
             ->mapWithKeys(
                 fn ($side) => [
@@ -1094,7 +1018,6 @@ class TemplateMockupGenerator
             )
             ->all();
     }
-
     protected function computeDefaultPoints(
         float $designWidth,
         float $designHeight
@@ -1109,76 +1032,61 @@ class TemplateMockupGenerator
             $brX,
             $brY,
         ] = self::STATIC_DEFAULT_POINTS;
-
         $minX = min(
             $tlX,
             $trX,
             $blX,
             $brX
         );
-
         $maxX = max(
             $tlX,
             $trX,
             $blX,
             $brX
         );
-
         $minY = min(
             $tlY,
             $trY,
             $blY,
             $brY
         );
-
         $maxY = max(
             $tlY,
             $trY,
             $blY,
             $brY
         );
-
         $boxWidth =
             $maxX - $minX;
-
         $boxHeight =
             $maxY - $minY;
-
         $centerX =
             ($minX + $maxX)
             / 2;
-
         $centerY =
             ($minY + $maxY)
             / 2;
-
         $safeDesignWidth = max(
             1,
             $designWidth
         );
-
         $safeDesignHeight = max(
             1,
             $designHeight
         );
-
         $designAspect =
             $safeDesignWidth
             / $safeDesignHeight;
-
         $boxAspect =
             $boxWidth
             / max(
                 $boxHeight,
                 0.000001
             );
-
         $finalWidth =
             $boxWidth;
-
         $finalHeight =
             $boxHeight;
-
         if (
             $designAspect
             > $boxAspect
@@ -1191,88 +1099,69 @@ class TemplateMockupGenerator
                 $boxHeight
                 * $designAspect;
         }
-
         $halfWidth =
             $finalWidth / 2;
-
         $halfHeight =
             $finalHeight / 2;
-
         $newTlX =
             $centerX
             - $halfWidth;
-
         $newTlY =
             $centerY
             - $halfHeight;
-
         $newTrX =
             $centerX
             + $halfWidth;
-
         $newTrY =
             $centerY
             - $halfHeight;
-
         $newBlX =
             $centerX
             - $halfWidth;
-
         $newBlY =
             $centerY
             + $halfHeight;
-
         $newBrX =
             $centerX
             + $halfWidth;
-
         $newBrY =
             $centerY
             + $halfHeight;
-
         return [
             'p1x' =>
                 $this->decimalString(
                     $newTlX
                 ),
-
             'p1y' =>
                 $this->decimalString(
                     $newTlY
                 ),
-
             'p2x' =>
                 $this->decimalString(
                     $newTrX
                 ),
-
             'p2y' =>
                 $this->decimalString(
                     $newTrY
                 ),
-
             'p3x' =>
                 $this->decimalString(
                     $newBlX
                 ),
-
             'p3y' =>
                 $this->decimalString(
                     $newBlY
                 ),
-
             'p4x' =>
                 $this->decimalString(
                     $newBrX
                 ),
-
             'p4y' =>
                 $this->decimalString(
                     $newBrY
                 ),
         ];
     }
-
     protected function getTemplateDesignDimensions(
         Template $template
     ): array {
@@ -1294,7 +1183,6 @@ class TemplateMockupGenerator
                 'height',
             ],
         ];
-
         foreach (
             $pairs
             as [
@@ -1306,12 +1194,10 @@ class TemplateMockupGenerator
                 $template->getAttribute(
                     $widthKey
                 );
-
             $height =
                 $template->getAttribute(
                     $heightKey
                 );
-
             if (
                 is_numeric($width)
                 && is_numeric($height)
@@ -1324,30 +1210,25 @@ class TemplateMockupGenerator
                 ];
             }
         }
-
         $media = $template
             ->getFirstMedia(
                 'templates'
             );
-
         if (!$media) {
             $media = $template
                 ->getFirstMedia(
                     'templates-preview'
                 );
         }
-
         if ($media) {
             $width =
                 $media->getCustomProperty(
                     'width'
                 );
-
             $height =
                 $media->getCustomProperty(
                     'height'
                 );
-
             if (
                 is_numeric($width)
                 && is_numeric($height)
@@ -1360,13 +1241,11 @@ class TemplateMockupGenerator
                 ];
             }
         }
-
         return [
             1.0,
             1.0,
         ];
     }
-
     protected function decimalString(
         float $value
     ): string {
@@ -1383,7 +1262,6 @@ class TemplateMockupGenerator
             '.'
         );
     }
-
     protected function positionsForPivot(
         array $positions
     ): array {
@@ -1400,39 +1278,30 @@ class TemplateMockupGenerator
                     ) {
                         return null;
                     }
-
                     return [
                         'name' =>
                             $side,
-
                         'p1x' =>
                             (string)
                             $points['p1x'],
-
                         'p1y' =>
                             (string)
                             $points['p1y'],
-
                         'p2x' =>
                             (string)
                             $points['p2x'],
-
                         'p2y' =>
                             (string)
                             $points['p2y'],
-
                         'p3x' =>
                             (string)
                             $points['p3x'],
-
                         'p3y' =>
                             (string)
                             $points['p3y'],
-
                         'p4x' =>
                             (string)
                             $points['p4x'],
-
                         'p4y' =>
                             (string)
                             $points['p4y'],
@@ -1443,7 +1312,6 @@ class TemplateMockupGenerator
             ->values()
             ->all();
     }
-
     protected function hasValidWarpPoints(
         array $points
     ): bool {
@@ -1457,7 +1325,6 @@ class TemplateMockupGenerator
             'p4x',
             'p4y',
         ];
-
         foreach ($required as $key) {
             if (
                 !array_key_exists(
@@ -1467,7 +1334,6 @@ class TemplateMockupGenerator
             ) {
                 return false;
             }
-
             if (
                 !is_numeric(
                     $points[$key]
@@ -1476,10 +1342,8 @@ class TemplateMockupGenerator
                 return false;
             }
         }
-
         return true;
     }
-
     protected function alreadyGenerated(
         Mockup $mockup,
                $templateId,
@@ -1541,7 +1405,6 @@ class TemplateMockupGenerator
             )
             ->exists();
     }
-
     public function handleDeleted(
         Mockup $mockup
     ): void {
@@ -1566,17 +1429,14 @@ class TemplateMockupGenerator
                         function ($design) {
                             $design
                                 ->clearMediaCollection();
-
                             $design
                                 ->forceDelete();
                         }
                     );
             });
-
         $mockup
             ->clearMediaCollection();
     }
-
     protected function cleanColors(
         array $colors
     ): array {
@@ -1595,24 +1455,20 @@ class TemplateMockupGenerator
             ->values()
             ->all();
     }
-
     protected function toArray(
         mixed $value
     ): array {
         if (is_array($value)) {
             return $value;
         }
-
         if (is_string($value)) {
             return json_decode(
                 $value,
                 true
             ) ?? [];
         }
-
         return [];
     }
-
     protected function normalizeHex(
         string $color
     ): string {
@@ -1623,7 +1479,6 @@ class TemplateMockupGenerator
             )
         );
     }
-
     protected function deleteGeneratedFiles(
         Mockup $mockup
     ): void {
@@ -1639,7 +1494,6 @@ class TemplateMockupGenerator
                 $media->delete()
             );
     }
-
     protected function deleteGeneratedFilesForTemplate(
         Mockup $mockup,
         int $templateId
@@ -1669,5 +1523,4 @@ class TemplateMockupGenerator
                 $media->delete()
             );
     }
-
 }
