@@ -596,7 +596,7 @@
                                     </div>
                                     <div id="colorsAcrossTemplatesInputContainer"></div>
                                     <div class="palette-footer"><span class="palette-footer-dot"></span><span>Optional · Can reuse base colors or include custom colors</span></div>
-                                    <button type="button" class="btn btn-success btn-sm d-none mt-2 px-2 py-1" id="generateTemplateMockupFiles" data-mockup-id="" style="font-size:13px;white-space:nowrap;">
+                                    <button type="button" class="btn btn-secondary btn-sm d-none mt-2 px-2 py-1" id="generateTemplateMockupFiles" data-mockup-id="" style="font-size:13px;white-space:nowrap;">
                                         <span class="btn-text">Generate Mockups</span>
                                         <span class="spinner-border spinner-border-sm d-none ms-1" id="generateTemplateMockupFilesLoader"></span>
                                     </button>
