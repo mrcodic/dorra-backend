@@ -96,6 +96,264 @@
             display: none !important;
         }
 
+
+        .color-settings-wrap {
+            background: #fff;
+            border-radius: 16px;
+            padding: 18px 16px 14px;
+            margin-top: 8px;
+        }
+
+        .color-settings-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 6px;
+        }
+
+        .color-settings-description {
+            font-size: 12px;
+            color: #686868;
+            margin-bottom: 16px;
+        }
+
+        .color-settings-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .palette-card {
+            min-height: 198px;
+            border-radius: 22px;
+            padding: 16px 20px 14px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .palette-card--base {
+            border: 1px solid #24B094;
+            background: #fbfffe;
+        }
+
+        .palette-card--across {
+            border: 1px solid #6f3aa6;
+            background: #fffafe;
+        }
+
+        .palette-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .palette-card-heading {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .palette-card-icon {
+            width: 40px;
+            height: 40px;
+            flex: 0 0 40px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 21px;
+            line-height: 1;
+        }
+
+        .palette-card--base .palette-card-icon {
+            color: #0a9e83;
+            background: #e3f7f2;
+        }
+
+        .palette-card--across .palette-card-icon {
+            color: #643091;
+            background: #f2e5f7;
+        }
+
+        .palette-card-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e1e1e;
+            margin: 2px 0 4px;
+        }
+
+        .palette-card-copy {
+            font-size: 11px;
+            color: #626262;
+            margin: 0;
+            line-height: 1.45;
+        }
+
+        .palette-badge {
+            flex: 0 0 auto;
+            padding: 6px 11px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .palette-card--base .palette-badge {
+            color: #24B094;
+            background: #e2f6f1;
+        }
+
+        .palette-card--across .palette-badge {
+            color: #6f3aa6;
+            background: #f2e4f6;
+        }
+
+        .palette-note {
+            display: inline-flex;
+            align-items: center;
+            align-self: flex-start;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            margin-top: 14px;
+            font-size: 10px;
+            line-height: 1.2;
+        }
+
+        .palette-card--base .palette-note {
+            background: #e5f7f3;
+            color: #128b75;
+        }
+
+        .palette-card--across .palette-note {
+            background: #f3e8f7;
+            color: #66308d;
+        }
+
+        .palette-note-check {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .palette-colors-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 18px;
+            min-height: 30px;
+        }
+
+        .palette-card .selected-color-wrapper {
+            width: 24px;
+            height: 24px;
+        }
+
+        .palette-card .selected-color-dot {
+            padding: 0;
+            border: 0;
+            background: transparent !important;
+        }
+
+        .palette-card .selected-color-inner {
+            border: 0;
+        }
+
+        .palette-card .gradient-picker-trigger {
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            border-radius: 50%;
+            border: 1px solid #d6dadd !important;
+            background-color: #fff;
+            background-size: 14px 14px;
+            box-shadow: none;
+        }
+
+        .palette-source-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 0;
+            padding: 0;
+            cursor: pointer;
+            position: relative;
+            transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+        }
+
+        .palette-source-color:hover {
+            transform: translateY(-1px);
+        }
+
+        .palette-source-color.is-selected {
+            box-shadow: 0 0 0 2px #fff, 0 0 0 4px #6f3aa6;
+            opacity: 1;
+        }
+
+        .palette-source-color:not(.is-selected) {
+            opacity: .7;
+        }
+
+        .palette-source-color-check {
+            position: absolute;
+            right: -4px;
+            top: -6px;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #6f3aa6;
+            color: #fff;
+            font-size: 9px;
+            line-height: 13px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .palette-footer {
+            margin-top: auto;
+            padding-top: 13px;
+            font-size: 9px;
+            color: #a0a0a0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .palette-footer-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex: 0 0 7px;
+        }
+
+        .palette-card--base .palette-footer-dot {
+            background: #24B094;
+        }
+
+        .palette-card--across .palette-footer-dot {
+            background: #6f3aa6;
+        }
+
+        #selected-colors,
+        #mockupColorsAcrossOptions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        #selected-colors-across-templates {
+            display: none !important;
+        }
+
+        @media (max-width: 991.98px) {
+            .color-settings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         /* كل بلوك ياخد سطر كامل ويتكدس عموديًا */
         .type-block {
             display: block !important;
@@ -299,39 +557,54 @@
                         </div>
 
 
-                        <div class="mb-2">
-                            <label class="label-text mb-1 d-block">Colors</label>
-
-                            <div class="d-flex flex-wrap align-items-center gap-2">
-                                <button
-                                    type="button"
-                                    id="openColorPicker"
-                                    class="gradient-picker-trigger border openColorPicker"
-                                ></button>
-
-                                <span
-                                    id="selected-colors"
-                                    class="d-flex gap-1 flex-wrap align-items-center selected-colors"
-                                ></span>
-                                <button
-                                    type="button"
-                                    class="btn btn-success btn-sm d-none px-2 py-1"
-                                    id="generateTemplateMockupFiles"
-                                    data-mockup-id=""
-                                    style="font-size: 13px; white-space: nowrap;"
-                                >
-    <span class="btn-text">
-        Generate Mockups
-    </span>
-
-                                    <span
-                                        class="spinner-border spinner-border-sm d-none ms-1"
-                                        id="generateTemplateMockupFilesLoader"
-                                    ></span>
-                                </button>
+                        <div class="color-settings-wrap mb-2">
+                            <div class="color-settings-title">Color settings</div>
+                            <div class="color-settings-description">Keep the colors used automatically by the mockup separate from the optional colors used across templates.</div>
+                            <div class="color-settings-grid">
+                                <div class="palette-card palette-card--base">
+                                    <div class="palette-card-header">
+                                        <div class="palette-card-heading">
+                                            <div class="palette-card-icon">&#128274;</div>
+                                            <div>
+                                                <div class="palette-card-name">Mockup Base Palette</div>
+                                                <p class="palette-card-copy">Fixed colors used automatically across all generated mockups.</p>
+                                            </div>
+                                        </div>
+                                        <span class="palette-badge">APPLIES TO ALL</span>
+                                    </div>
+                                    <div class="palette-note"><span class="palette-note-check">&#10003;</span><span>Customers don't choose these colors — they are part of the mockup setup.</span></div>
+                                    <div class="palette-colors-row">
+                                        <span id="selected-colors" class="selected-colors"></span>
+                                        <button type="button" id="openColorPicker" class="gradient-picker-trigger openColorPicker" data-color-target="pre_fill_colors" title="Add mockup color"></button>
+                                    </div>
+                                    <div id="colorsInputContainer"></div>
+                                    <div class="palette-footer"><span class="palette-footer-dot"></span><span>Automatic · Used in every mockup render</span></div>
+                                </div>
+                                <div class="palette-card palette-card--across">
+                                    <div class="palette-card-header">
+                                        <div class="palette-card-heading">
+                                            <div class="palette-card-icon">&#127912;</div>
+                                            <div>
+                                                <div class="palette-card-name">Colors Across Templates</div>
+                                                <p class="palette-card-copy">Select from Mockup Colors or add another color to use across templates.</p>
+                                            </div>
+                                        </div>
+                                        <span class="palette-badge">OPTIONAL</span>
+                                    </div>
+                                    <div class="palette-note"><span class="palette-note-check">&#10003;</span><span>Select any base color below, or add a custom color.</span></div>
+                                    <div class="palette-colors-row">
+                                        <div id="mockupColorsAcrossOptions"></div>
+                                        <button type="button" id="openAcrossTemplatesColorPicker" class="gradient-picker-trigger openColorPicker" data-color-target="colors_across_templates" title="Add custom color"></button>
+                                        <span id="selected-colors-across-templates"></span>
+                                    </div>
+                                    <div id="colorsAcrossTemplatesInputContainer"></div>
+                                    <div class="palette-footer"><span class="palette-footer-dot"></span><span>Optional · Can reuse base colors or include custom colors</span></div>
+                                </div>
                             </div>
-
-                            <div id="colorsInputContainer"></div>
+                            <button type="button" class="btn btn-success btn-sm d-none mt-2 px-2 py-1" id="generateTemplateMockupFiles" data-mockup-id="" style="font-size:13px;white-space:nowrap;">
+                                <span class="btn-text">Generate Mockups</span>
+                                <span class="spinner-border spinner-border-sm d-none ms-1" id="generateTemplateMockupFilesLoader"></span>
+                            </button>
                         </div>
 
                         <div class="modal-footer border-top-0">
@@ -2057,26 +2330,163 @@
         // =========================
         // COLOR PICKER
         // =========================
-        window.removeGlobalColor = function (hex, btn) {
+        let pickrInstance = null;
+        let currentCard = null;
+        let currentGlobalColorTarget = 'pre_fill_colors';
+
+        function getGlobalColorConfig(target) {
+            if (target === 'colors_across_templates') {
+                return {
+                    selectedId: 'selected-colors-across-templates',
+                    inputContainerId: 'colorsAcrossTemplatesInputContainer',
+                    inputName: 'colors_across_templates[]'
+                };
+            }
+
+            return {
+                selectedId: 'selected-colors',
+                inputContainerId: 'colorsInputContainer',
+                inputName: 'pre_fill_colors[]'
+            };
+        }
+
+        function getGlobalColors(target) {
+            const config = getGlobalColorConfig(target);
+            const container = document.getElementById(config.inputContainerId);
+            if (!container) return [];
+
+            return [...container.querySelectorAll(`input[name="${config.inputName}"]`)]
+                .map(input => input.value.toLowerCase());
+        }
+
+        function addGlobalColor(hex, target) {
+            hex = hex.toLowerCase();
+            const config = getGlobalColorConfig(target);
+            const selectedColors = document.getElementById(config.selectedId);
+            const inputContainer = document.getElementById(config.inputContainerId);
+
+            if (!selectedColors || !inputContainer) return false;
+
+            const exists = getGlobalColors(target).includes(hex);
+            if (exists) return false;
+
+            const li = document.createElement('li');
+            li.style.listStyle = 'none';
+            li.dataset.hex = hex;
+            li.innerHTML = `
+                <div class="selected-color-wrapper position-relative">
+                    <div class="selected-color-dot" style="background-color:#fff;">
+                        <div class="selected-color-inner" style="background-color:${hex};"></div>
+                    </div>
+                    <button type="button" onclick="removeGlobalColor('${hex}', this, '${target}')" class="remove-color-btn">×</button>
+                </div>`;
+            selectedColors.appendChild(li);
+
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = config.inputName;
+            input.value = hex;
+            inputContainer.appendChild(input);
+
+            syncAcrossTemplateSourceColors();
+            return true;
+        }
+
+        function removeGlobalColorByHex(hex, target) {
+            hex = hex.toLowerCase();
+            const config = getGlobalColorConfig(target);
+            const selectedColors = document.getElementById(config.selectedId);
+            const inputContainer = document.getElementById(config.inputContainerId);
+
+            if (selectedColors) {
+                [...selectedColors.querySelectorAll('li')].forEach(li => {
+                    if ((li.dataset.hex || '').toLowerCase() === hex) li.remove();
+                });
+            }
+
+            if (inputContainer) {
+                [...inputContainer.querySelectorAll(`input[name="${config.inputName}"]`)]
+                    .filter(input => input.value.toLowerCase() === hex)
+                    .forEach(input => input.remove());
+            }
+
+            syncAcrossTemplateSourceColors();
+        }
+
+        window.removeGlobalColor = function (hex, btn, target = 'pre_fill_colors') {
             const li = btn.closest('li');
             if (li) li.remove();
 
-            const inputContainer = document.getElementById('colorsInputContainer');
-            if (!inputContainer) return;
+            const config = getGlobalColorConfig(target);
+            const inputContainer = document.getElementById(config.inputContainerId);
 
-            [...inputContainer.querySelectorAll('input')]
-                .filter(i => i.value.toLowerCase() === hex.toLowerCase())
-                .forEach(i => i.remove());
+            if (inputContainer) {
+                [...inputContainer.querySelectorAll(`input[name="${config.inputName}"]`)]
+                    .filter(input => input.value.toLowerCase() === hex.toLowerCase())
+                    .forEach(input => input.remove());
+            }
+
+            syncAcrossTemplateSourceColors();
         };
-        let pickrInstance = null;
-        let currentCard = null; // card for current pickr session
+
+        function syncAcrossTemplateSourceColors() {
+            const optionsContainer = document.getElementById('mockupColorsAcrossOptions');
+            if (!optionsContainer) return;
+
+            const mockupColors = [...new Set(getGlobalColors('pre_fill_colors'))];
+            const acrossColors = [...new Set(getGlobalColors('colors_across_templates'))];
+            const acrossSet = new Set(acrossColors);
+            const customAcrossColors = acrossColors.filter(hex => !mockupColors.includes(hex));
+            optionsContainer.innerHTML = '';
+
+            if (!mockupColors.length && !customAcrossColors.length) {
+                const text = document.createElement('small');
+                text.className = 'text-muted';
+                text.textContent = 'Add Mockup Colors first or add a custom color';
+                optionsContainer.appendChild(text);
+                return;
+            }
+
+            mockupColors.forEach(hex => {
+                const selected = acrossSet.has(hex);
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = `js-toggle-across-color palette-source-color${selected ? ' is-selected' : ''}`;
+                button.style.backgroundColor = hex;
+                button.dataset.hex = hex;
+                button.title = selected ? 'Remove from Colors Across Templates' : 'Add to Colors Across Templates';
+                if (selected) {
+                    button.innerHTML = '<span class="palette-source-color-check">✓</span>';
+                }
+                optionsContainer.appendChild(button);
+            });
+
+            customAcrossColors.forEach(hex => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'js-toggle-across-color palette-source-color is-selected';
+                button.style.backgroundColor = hex;
+                button.dataset.hex = hex;
+                button.title = 'Remove custom color from Colors Across Templates';
+                button.innerHTML = '<span class="palette-source-color-check">✓</span>';
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        $(document).on('click', '.js-toggle-across-color', function () {
+            const hex = String(this.dataset.hex || '').toLowerCase();
+            if (!hex) return;
+
+            if (getGlobalColors('colors_across_templates').includes(hex)) {
+                removeGlobalColorByHex(hex, 'colors_across_templates');
+            } else {
+                addGlobalColor(hex, 'colors_across_templates');
+            }
+        });
 
         $(document).ready(function () {
-
-            // Destroy previous instance if exists
             if (pickrInstance) pickrInstance.destroyAndRemove();
 
-            // Dummy element for pickr
             const dummyElement = document.createElement('div');
             document.body.appendChild(dummyElement);
 
@@ -2095,49 +2505,20 @@
                 }
             });
 
-            // Handle save
             pickrInstance.on('save', (color) => {
-                const hex = color.toHEXA().toString().toLowerCase();
-
-                // ===== q=with mode: write directly to #selected-colors & #colorsInputContainer =====
-                if (!currentCard) {
-                    const selectedColors = document.getElementById('selected-colors');
-                    const inputContainer = document.getElementById('colorsInputContainer');
-                    if (!selectedColors || !inputContainer) {
-                        pickrInstance.hide();
-                        return;
-                    }
-
-                    // avoid duplicates
-                    if ([...inputContainer.querySelectorAll('input')].some(i => i.value === hex)) {
-                        pickrInstance.hide();
-                        return;
-                    }
-
-                    // color dot
-                    const li = document.createElement('li');
-                    li.style.listStyle = 'none';
-                    li.innerHTML = `
-            <div class="selected-color-wrapper position-relative">
-                <div class="selected-color-dot" style="background-color:#fff;">
-                    <div class="selected-color-inner" style="background-color:${hex};"></div>
-                </div>
-                <button type="button" onclick="removeGlobalColor('${hex}', this)" class="remove-color-btn">×</button>
-            </div>`;
-                    selectedColors.appendChild(li);
-
-                    // hidden input
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'pre_fill_colors[]';
-                    input.value = hex;
-                    inputContainer.appendChild(input);
-
+                if (!color) {
                     pickrInstance.hide();
                     return;
                 }
 
-                // ===== q=without mode: write to card =====
+                const hex = color.toHEXA().toString().toLowerCase();
+
+                if (!currentCard) {
+                    addGlobalColor(hex, currentGlobalColorTarget);
+                    pickrInstance.hide();
+                    return;
+                }
+
                 if (!currentCard.selectedColors) currentCard.selectedColors = [];
                 if (!currentCard.selectedColors.includes(hex)) {
                     currentCard.selectedColors.push(hex);
@@ -2147,37 +2528,36 @@
                 buildHiddenTemplateInputs();
                 pickrInstance.hide();
             });
-            // Handle clear
+
             pickrInstance.on('clear', () => {
-                // ===== q=with mode: clear global colors =====
                 if (!currentCard) {
-                    const selectedColors = document.getElementById('selected-colors');
-                    const inputContainer = document.getElementById('colorsInputContainer');
+                    const config = getGlobalColorConfig(currentGlobalColorTarget);
+                    const selectedColors = document.getElementById(config.selectedId);
+                    const inputContainer = document.getElementById(config.inputContainerId);
+
                     if (selectedColors) selectedColors.innerHTML = '';
                     if (inputContainer) inputContainer.innerHTML = '';
+                    syncAcrossTemplateSourceColors();
                     pickrInstance.hide();
                     return;
                 }
 
-                // ===== q=without mode: clear card colors =====
                 currentCard.selectedColors = [];
                 renderSelectedColors(currentCard);
                 buildHiddenTemplateInputs();
                 pickrInstance.hide();
             });
+
+            syncAcrossTemplateSourceColors();
         });
 
-        // Open color picker
-        // Open color picker
         $(document).on('click', '.openColorPicker', function () {
             const trigger = this;
+            const globalTarget = trigger.dataset.colorTarget;
 
-            // ===== q=with: single global color picker (no template card) =====
-            const isWithMode = trigger.id === 'openColorPicker'; // the static #openColorPicker button
-
-            if (isWithMode) {
-                currentCard = null; // no card context
-
+            if (globalTarget) {
+                currentCard = null;
+                currentGlobalColorTarget = globalTarget;
                 pickrInstance.show();
 
                 setTimeout(() => {
@@ -2190,12 +2570,12 @@
                         pickerPanel.style.zIndex = 9999;
                     }
                 }, 0);
-                return; // stop here, don't look for .template-card
+                return;
             }
 
-            // ===== q=without: per-template-card color picker =====
             const card = trigger.closest('.template-card');
             currentCard = card;
+            if (!card) return;
             if (!card.selectedColors) card.selectedColors = [];
 
             const rect = trigger.getBoundingClientRect();
@@ -2213,11 +2593,10 @@
                 }
             }, 0);
         });
-        // Remove color from current card
+
         window.removeColor = function (hex, btn) {
             const card = btn.closest('.template-card');
             if (!card) return;
-
             if (!card.selectedColors) card.selectedColors = [];
 
             card.selectedColors = card.selectedColors.filter(
@@ -2225,10 +2604,9 @@
             );
 
             renderSelectedColors(card);
-            buildHiddenTemplateInputs(); // نحدّث templates[..][colors][] بناءً على التغييرات
+            buildHiddenTemplateInputs();
         };
 
-        // Render colors inside a card
         function renderSelectedColors(card) {
             const ul = card.querySelector('.selected-colors');
             const container = card.querySelector('.colorsInputContainer');
@@ -2242,13 +2620,12 @@
             (card.selectedColors || []).forEach(c => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                <div class="selected-color-wrapper position-relative">
-                    <div class="selected-color-dot" style="background-color: #fff;">
-                        <div class="selected-color-inner" style="background-color: ${c};"></div>
-                    </div>
-                    <button type="button" onclick="removeColor('${c}', this)" class="remove-color-btn">×</button>
-                </div>
-            `;
+                    <div class="selected-color-wrapper position-relative">
+                        <div class="selected-color-dot" style="background-color: #fff;">
+                            <div class="selected-color-inner" style="background-color: ${c};"></div>
+                        </div>
+                        <button type="button" onclick="removeColor('${c}', this)" class="remove-color-btn">×</button>
+                    </div>`;
                 ul.appendChild(li);
 
                 const hiddenInput = document.createElement('input');
@@ -2269,16 +2646,17 @@
                 const input = document.createElement('input');
                 input.type = 'hidden';
                 input.name = `templates[${templateIndex}][colors][]`;
-                input.value = color.toLowerCase(); // توحيد اللون
+                input.value = color.toLowerCase();
+
                 const inputColors = document.createElement('input');
                 inputColors.type = 'hidden';
                 inputColors.name = 'pre_fill_colors[]';
                 inputColors.value = color.toLowerCase();
+
                 container.appendChild(input);
                 container.appendChild(inputColors);
             });
         }
-
     </script>
 
 @endsection

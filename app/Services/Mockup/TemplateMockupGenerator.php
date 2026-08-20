@@ -27,7 +27,7 @@ class TemplateMockupGenerator
         ?Template $template = null
     ): void {
         if (empty($colors)) {
-            $colors = $mockup->pre_fill_colors ?? [];
+            $colors = $mockup->colors_across_templates ?? [];
         }
 
         $colors = $this->cleanColors($colors);
@@ -131,7 +131,7 @@ class TemplateMockupGenerator
             })
             ->lazyById(100)
             ->each(function ($mockup) use ($template) {
-                $colors = $mockup->pre_fill_colors ?? [];
+                $colors = $mockup->colors_across_templates ?? [];
 
                 if (empty($colors)) {
                     return;
@@ -149,7 +149,7 @@ class TemplateMockupGenerator
         Mockup $mockup
     ): void {
         $colors = $this->cleanColors(
-            $mockup->pre_fill_colors ?? []
+            $mockup->colors_across_templates ?? []
         );
 
         if (empty($colors)) {
@@ -167,7 +167,7 @@ class TemplateMockupGenerator
     ): void {
         if (
             !$mockup->wasChanged(
-                'pre_fill_colors'
+                'colors_across_templates'
             )
         ) {
             return;
@@ -175,12 +175,12 @@ class TemplateMockupGenerator
 
         $oldColors = $this->toArray(
             $mockup->getOriginal(
-                'pre_fill_colors'
+                'colors_across_templates'
             )
         );
 
         $newColors =
-            $mockup->pre_fill_colors
+            $mockup->colors_across_templates
             ?? [];
 
         $oldHexes = collect($oldColors)
@@ -244,7 +244,7 @@ class TemplateMockupGenerator
         ?Collection $colors = null
     ): void {
         $colors ??= collect(
-            $mockup->pre_fill_colors ?? []
+            $mockup->colors_across_templates ?? []
         );
 
         $colors = $this->cleanColors(
@@ -609,7 +609,7 @@ class TemplateMockupGenerator
         $hexToOriginalColor =
             collect(
                 $mockup
-                    ->pre_fill_colors
+                    ->colors_across_templates
                 ?? []
             )
                 ->filter()
