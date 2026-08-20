@@ -85,9 +85,9 @@ Route::post('template-assets', [TemplateController::class, 'storeTemplateAssets'
 Route::apiResource('library-assets', LibraryAssetController::class)->only(['store', 'index']);
 Route::get('gallery', [LibraryAssetController::class,'gallery']);
 Route::delete('/media/{media}', [MainController::class, 'removeMedia']);
+Route::delete('/media/bulk', [MainController::class, 'removeMediaBulk']);
 Route::get('media/{media}/download', [MainController::class, 'downloadMedia']);
 Route::post('designs/{design}/fonts', [DesignController::class,'attachMultipleFonts']);
-
 
 Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::prefix('register')->group(function () {
