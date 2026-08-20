@@ -2237,9 +2237,9 @@
         $(document).ready(function () {
             handleAjaxFormSubmit("#addMockupForm", {
                 successMessage: "Mockup Created Successfully",
+                resetForm:false,
                 onSuccess: function (response) {
                     const mockupId = response?.data?.id;
-                    console.log("dsadsa", mockupId)
 
                     if (!mockupId) {
                         return;
