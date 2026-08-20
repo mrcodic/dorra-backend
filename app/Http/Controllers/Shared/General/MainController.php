@@ -641,4 +641,31 @@ class MainController extends Controller
             'Content-Length' => strlen($binary),
         ]);
     }
+
+    public function removeMediaBulk(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:media,id',
+        ]);
+
+        $notAuth = request()->is('api/v1/admin/*');
+        $user = $notAuth ? Admin::first() : getAuthOrGuest();
+
+        $mediaItems = Media::whereIn('id', $request->ids)->get();
+
+        foreach ($mediaItems as $media) {
+            abort_unless((int)$media->model_id === (int)$user->id, 403);
+        }
+
+        foreach ($mediaItems as $media) {
+            if (empty($media->model_type) && empty($media->model_id)) {
+                $media->deleteQuietly();
+            } else {
+                $media->delete();
+            }
+        }
+
+        return Response::api();
+    }
 }
