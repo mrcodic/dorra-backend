@@ -97,6 +97,7 @@
             display: none !important;
         }
 
+
         .color-settings-wrap {
             background: #fff;
             border-radius: 16px;
@@ -233,7 +234,7 @@
         }
 
         .palette-note-check {
-            font-size: 13px;
+            font-size: 16px;
             font-weight: 700;
         }
 
@@ -262,13 +263,10 @@
         }
 
         .palette-card .gradient-picker-trigger {
-            width: 24px;
-            height: 24px;
+            width: 34px;
+            height: 34px;
             min-width: 24px;
-            border-radius: 50%;
-            border: 1px solid #d6dadd !important;
-            background-color: #fff;
-            background-size: 14px 14px;
+
             box-shadow: none;
         }
 
@@ -354,7 +352,6 @@
             }
         }
 
-
         /* كل بلوك ياخد سطر كامل ويتكدس عموديًا */
         .type-block {
             display: block !important;
@@ -364,7 +361,7 @@
         }
 
         /* لو الـ inner d-flex موجود داخل البلوك فهو هعرض Base | Mask جنب بعض */
-        .type-block>.d-flex {
+        .type-block > .d-flex {
             display: flex;
             gap: 1rem;
             align-items: flex-start;
@@ -382,12 +379,11 @@
             box-sizing: border-box;
         }
 
-        /* إعدادات عامة للانيميشن */
+        /* show more button animation */
         :root {
             --anim-duration: 300ms;
             --anim-ease: cubic-bezier(.2, .9, .3, 1);
         }
-
 
         .show-more:hover {
             transform: translateY(-4px);
