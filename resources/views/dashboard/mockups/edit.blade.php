@@ -1,4 +1,3 @@
-
 @extends('layouts/contentLayoutMaster')
 
 @section('title', 'Edit Mockup')
@@ -459,7 +458,8 @@
     <section class="">
         <div class="card">
             <div class="card-body">
-                <form id="editMockupForm" enctype="multipart/form-data" action="{{ route('mockups.update',$model->id) }}">
+                <form id="editMockupForm" enctype="multipart/form-data"
+                      action="{{ route('mockups.update',$model->id) }}">
                     @csrf
                     @method('PUT')
                     {{--                <input type="hidden" name="approach" value="{{ $model->approach }}">--}}
@@ -487,7 +487,8 @@
                                     <select id="productsSelect" name="category_id" class="form-select">
                                         <option value="" disabled selected>Choose product</option>
                                         @foreach($associatedData['products'] as $product)
-                                            <option value="{{ $product->id }}" @selected($product->id == $model->category_id)>
+                                            <option
+                                                value="{{ $product->id }}" @selected($product->id == $model->category_id)>
                                                 {{ $product->getTranslation('name', app()->getLocale()) }}
                                             </option>
                                         @endforeach
@@ -514,7 +515,7 @@
                                         value="{{ old('fill_ratio', $model->fill_ratio) }}"
                                     >
                                     <small class="form-text text-muted">
-                                        ex:  t-shirt: 70
+                                        ex: t-shirt: 70
                                     </small>
                                 </div>
 
@@ -530,7 +531,7 @@
                                         value="{{ old('light_strength', $model->light_strength) }}"
                                     >
                                     <small class="form-text text-muted">
-                                        ex:  t-shirt: 35 ,scarf: 35-45
+                                        ex: t-shirt: 35 ,scarf: 35-45
                                     </small>
                                 </div>
 
@@ -546,7 +547,7 @@
                                         value="{{ old('shadow_strength', $model->shadow_strength) }}"
                                     >
                                     <small class="form-text text-muted">
-                                        ex:  t-shirt: 45% , scarf: 55-65%
+                                        ex: t-shirt: 45% , scarf: 55-65%
                                     </small>
                                 </div>
 
@@ -562,7 +563,7 @@
                                         value="{{ old('displacement_scale', $model->displacement_scale) }}"
                                     >
                                     <small class="form-text text-muted">
-                                        ex:  t-shirt: 8-10 ,scarf: 12-18
+                                        ex: t-shirt: 8-10 ,scarf: 12-18
                                     </small>
                                 </div>
                             </div>
@@ -571,8 +572,10 @@
                                     @foreach($associatedData['types'] as $type)
                                         <div class="col-md-4 mb-1">
                                             <label class="radio-box">
-                                                <input class="form-check-input type-checkbox" type="checkbox" name="types[]"
-                                                       value="{{ $type->value }}" @checked($model->types->contains($type))
+                                                <input class="form-check-input type-checkbox" type="checkbox"
+                                                       name="types[]"
+                                                       value="{{ $type->value }}"
+                                                       @checked($model->types->contains($type))
                                                        data-type-name="{{ strtolower($type->value->name) }}">
                                                 <span>{{ $type->value->label() }}</span>
                                             </label>
@@ -624,14 +627,15 @@
                             {{--                    @endif--}}
 
 
-
                         </div>
                         {{--                @if($model->approach == 'with_editor')--}}
 
 
                         <div class="color-settings-wrap mb-2">
                             <div class="color-settings-title">Color settings</div>
-                            <div class="color-settings-description">Keep the colors used automatically by the mockup separate from the optional colors used across templates.</div>
+                            <div class="color-settings-description">Keep the colors used automatically by the mockup
+                                separate from the optional colors used across templates.
+                            </div>
                             <div class="color-settings-grid">
                                 <div class="palette-card palette-card--base">
                                     <div class="palette-card-header">
@@ -639,18 +643,23 @@
                                             <div class="palette-card-icon">&#128274;</div>
                                             <div>
                                                 <div class="palette-card-name">Mockup Base Palette</div>
-                                                <p class="palette-card-copy">Fixed colors used automatically across all generated mockups.</p>
+                                                <p class="palette-card-copy">Fixed colors used automatically across all
+                                                    generated mockups.</p>
                                             </div>
                                         </div>
                                         <span class="palette-badge">APPLIES TO ALL</span>
                                     </div>
-                                    <div class="palette-note"><span class="palette-note-check">&#10003;</span><span>Customers don't choose these colors — they are part of the mockup setup.</span></div>
+                                    <div class="palette-note"><span class="palette-note-check">&#10003;</span><span>Customers don't choose these colors — they are part of the mockup setup.</span>
+                                    </div>
                                     <div class="palette-colors-row">
                                         <span id="selected-colors" class="selected-colors"></span>
-                                        <button type="button" id="openColorPicker" class="gradient-picker-trigger openColorPicker" data-color-target="pre_fill_colors" title="Add mockup color"></button>
+                                        <button type="button" id="openColorPicker"
+                                                class="gradient-picker-trigger openColorPicker"
+                                                data-color-target="pre_fill_colors" title="Add mockup color"></button>
                                     </div>
                                     <div id="colorsInputContainer"></div>
-                                    <div class="palette-footer"><span class="palette-footer-dot"></span><span>Automatic · Used in every mockup render</span></div>
+                                    <div class="palette-footer"><span class="palette-footer-dot"></span><span>Automatic · Used in every mockup render</span>
+                                    </div>
                                 </div>
                                 <div class="palette-card palette-card--across">
                                     <div class="palette-card-header">
@@ -658,22 +667,31 @@
                                             <div class="palette-card-icon">&#127912;</div>
                                             <div>
                                                 <div class="palette-card-name">Colors Across Templates</div>
-                                                <p class="palette-card-copy">Select from Mockup Colors or add another color to use across templates.</p>
+                                                <p class="palette-card-copy">Select from Mockup Colors or add another
+                                                    color to use across templates.</p>
                                             </div>
                                         </div>
                                         <span class="palette-badge">OPTIONAL</span>
                                     </div>
-                                    <div class="palette-note"><span class="palette-note-check">&#10003;</span><span>Select any base color below, or add a custom color.</span></div>
+                                    <div class="palette-note"><span class="palette-note-check">&#10003;</span><span>Select any base color below, or add a custom color.</span>
+                                    </div>
                                     <div class="palette-colors-row">
                                         <div id="mockupColorsAcrossOptions"></div>
-                                        <button type="button" id="openAcrossTemplatesColorPicker" class="gradient-picker-trigger openColorPicker" data-color-target="colors_across_templates" title="Add custom color"></button>
+                                        <button type="button" id="openAcrossTemplatesColorPicker"
+                                                class="gradient-picker-trigger openColorPicker"
+                                                data-color-target="colors_across_templates"
+                                                title="Add custom color"></button>
                                         <span id="selected-colors-across-templates"></span>
                                     </div>
                                     <div id="colorsAcrossTemplatesInputContainer"></div>
-                                    <div class="palette-footer"><span class="palette-footer-dot"></span><span>Optional · Can reuse base colors or include custom colors</span></div>
-                                    <button type="button" class="btn btn-secondary btn-sm mt-2 px-2 py-1" id="generateTemplateMockupFiles" data-mockup-id="{{ $model->id }}" style="font-size:13px;white-space:nowrap;">
+                                    <div class="palette-footer"><span class="palette-footer-dot"></span><span>Optional · Can reuse base colors or include custom colors</span>
+                                    </div>
+                                    <button type="button" class="btn btn-secondary btn-sm mt-2 px-2 py-1"
+                                            id="generateTemplateMockupFiles" data-mockup-id="{{ $model->id }}"
+                                            style="font-size:13px;white-space:nowrap;">
                                         <span class="btn-text">Generate Mockups</span>
-                                        <span class="spinner-border spinner-border-sm d-none ms-1" id="generateTemplateMockupFilesLoader" role="status"></span>
+                                        <span class="spinner-border spinner-border-sm d-none ms-1"
+                                              id="generateTemplateMockupFilesLoader" role="status"></span>
                                     </button>
                                 </div>
                             </div>
@@ -685,7 +703,8 @@
                     <div class="modal-footer border-top-0">
                         <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
                             <span class="btn-text">Save Changes</span>
-                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
+                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
+                                  role="status"
                                   aria-hidden="true"></span>
                         </button>
                     </div>
@@ -702,7 +721,8 @@
                 <div class="modal-header text-white">
                     <h5 class="modal-title">Remove Color from Mockups</h5>
                     <button type="button" class="btn-close d-flex align-items-start justify-content-center"
-                            data-bs-dismiss="modal" aria-label="Close" style="background-color: #24b094">x</button>
+                            data-bs-dismiss="modal" aria-label="Close" style="background-color: #24b094">x
+                    </button>
                 </div>
                 <div class="modal-body">
                     <p class="mb-1">This color exists in other mockups using the same template. Do you want to remove it
@@ -894,7 +914,7 @@
                             .then(res => res.blob())
                             .then(blob => {
                                 const dt = new DataTransfer();
-                                dt.items.add(new File([blob], 'base.png', { type: blob.type }));
+                                dt.items.add(new File([blob], 'base.png', {type: blob.type}));
                                 baseInput.files = dt.files;
                             });
                     }
@@ -914,7 +934,7 @@
                             .then(res => res.blob())
                             .then(blob => {
                                 const dt = new DataTransfer();
-                                dt.items.add(new File([blob], 'mask.png', { type: blob.type }));
+                                dt.items.add(new File([blob], 'mask.png', {type: blob.type}));
                                 maskInput.files = dt.files;
                             });
                     }
@@ -924,7 +944,7 @@
                 // Shadow image
                 // -----------------------------
                 if (shadowUrl && shadowPreview) {
-                    console.log("shadow",shadowUrl)
+                    console.log("shadow", shadowUrl)
                     shadowPreview.innerHTML = `<img src="${shadowUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
                     document.getElementById(wrapperId)?.classList.remove('d-none');
 
@@ -934,7 +954,7 @@
                             .then(res => res.blob())
                             .then(blob => {
                                 const dt = new DataTransfer();
-                                dt.items.add(new File([blob], 'shadow.png', { type: blob.type }));
+                                dt.items.add(new File([blob], 'shadow.png', {type: blob.type}));
                                 shadowInput.files = dt.files;
                             });
                     }
@@ -952,7 +972,7 @@
                             .then(res => res.blob())
                             .then(blob => {
                                 const dt = new DataTransfer();
-                                dt.items.add(new File([blob], 'displacement.png', { type: blob.type }));
+                                dt.items.add(new File([blob], 'displacement.png', {type: blob.type}));
                                 displacementInput.files = dt.files;
                             });
                     }
@@ -970,7 +990,7 @@
                             .then(res => res.blob())
                             .then(blob => {
                                 const dt = new DataTransfer();
-                                dt.items.add(new File([blob], 'light.png', { type: blob.type }));
+                                dt.items.add(new File([blob], 'light.png', {type: blob.type}));
                                 lightInput.files = dt.files;
                             });
                     }
@@ -1111,15 +1131,13 @@
             if (!optionsContainer) return;
 
             const mockupColors = [...new Set(getGlobalColors('pre_fill_colors'))];
-            const acrossColors = [...new Set(getGlobalColors('colors_across_templates'))];
-            const acrossSet = new Set(acrossColors);
-            const customAcrossColors = acrossColors.filter(hex => !mockupColors.includes(hex));
+            const acrossSet = new Set(getGlobalColors('colors_across_templates'));
             optionsContainer.innerHTML = '';
 
-            if (!mockupColors.length && !customAcrossColors.length) {
+            if (!mockupColors.length) {
                 const text = document.createElement('small');
                 text.className = 'text-muted';
-                text.textContent = 'Add Mockup Colors first or add a custom color';
+                text.textContent = 'Add Mockup Colors first to select them here';
                 optionsContainer.appendChild(text);
                 return;
             }
@@ -1133,17 +1151,6 @@
                 button.dataset.hex = hex;
                 button.title = selected ? 'Remove from Colors Across Templates' : 'Add to Colors Across Templates';
                 if (selected) button.innerHTML = '<span class="palette-source-color-check">✓</span>';
-                optionsContainer.appendChild(button);
-            });
-
-            customAcrossColors.forEach(hex => {
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = 'js-toggle-across-color palette-source-color is-selected';
-                button.style.backgroundColor = hex;
-                button.dataset.hex = hex;
-                button.title = 'Remove custom color from Colors Across Templates';
-                button.innerHTML = '<span class="palette-source-color-check">✓</span>';
                 optionsContainer.appendChild(button);
             });
         }
@@ -1323,7 +1330,7 @@
             // 🔸 اللون قديم → افتح المودال
             const mockupId = $('#mockupId').val() || '{{ $model->id ?? "" }}';
             const categoryId = '{{ $model->category->id ?? "" }}';
-            pendingColorData = { card, hex, templateId, mockupId };
+            pendingColorData = {card, hex, templateId, mockupId};
             $('#removeColorModal').modal('show');
 
             const $list = $('#relatedMockupsList');
@@ -1381,7 +1388,7 @@
         $('#confirmRemoveColor').on('click', function () {
 
             if (!pendingColorData) return;
-            const { card, hex, templateId } = pendingColorData;
+            const {card, hex, templateId} = pendingColorData;
             console.log(templateId)
             const categoryId = '{{ $model->category->id ?? "" }}';
             const $btn = $(this);
@@ -1397,7 +1404,7 @@
                     template_id: templateId,
                     color: hex,
                 },
-                success: function(res) {
+                success: function (res) {
                     // ✅ بعد نجاح السيرفر: احذف محليًا
                     card.selectedColors = (card.selectedColors || []).filter(c => c !== hex);
                     renderSelectedColors(card);
@@ -1414,7 +1421,7 @@
                     }).showToast();
                     pendingColorData = null;
                 },
-                error: function() {
+                error: function () {
                     Toastify({
                         text: "Failed to remove color.",
                         duration: 1000,
@@ -1424,7 +1431,7 @@
                         close: true,
                     }).showToast();
                 },
-                complete: function() {
+                complete: function () {
                     $btn.prop('disabled', false).text('Yes, remove from all');
                 }
             });
@@ -1437,7 +1444,11 @@
             (templatesData || []).map(t => {
                 let colors = t?.pivot?.pre_fill_colors ?? [];
                 if (typeof colors === 'string') {
-                    try { colors = JSON.parse(colors); } catch(e) { colors = []; }
+                    try {
+                        colors = JSON.parse(colors);
+                    } catch (e) {
+                        colors = [];
+                    }
                 }
                 if (!Array.isArray(colors)) colors = [];
                 return [String(t.id), colors]; // <-- important
@@ -1475,7 +1486,11 @@
                 if (v == null) return fallback;
                 if (typeof v === "object") return v;
                 if (typeof v === "string") {
-                    try { return JSON.parse(v) || fallback; } catch (e) { return fallback; }
+                    try {
+                        return JSON.parse(v) || fallback;
+                    } catch (e) {
+                        return fallback;
+                    }
                 }
                 return fallback;
             };
@@ -1524,7 +1539,8 @@
                     try {
                         const colors = JSON.parse(card.dataset.colors || "[]");
                         if (Array.isArray(colors)) return colors;
-                    } catch (e) {}
+                    } catch (e) {
+                    }
 
                     // Or legacy UI (selected swatches)
                     const nodes = card.querySelectorAll('[data-color].selected, .color-swatch.selected');
@@ -1572,7 +1588,7 @@
 
                 // 3) لو new template ومفيش obj/meta: ابعت defaults عشان backend مايبقاش فاضي
                 if (selectedTemplateId && String(templateId) === selectedTemplateId) {
-                    return { x: 0.5, y: 0.5, w: 0.4, h: 0.4, angle: 0 };
+                    return {x: 0.5, y: 0.5, w: 0.4, h: 0.4, angle: 0};
                 }
 
                 return null;
@@ -1642,7 +1658,6 @@
         // });
 
 
-
         document.addEventListener('DOMContentLoaded', function () {
             const $productSelect = $('#productsSelect');
             const $templatesWrapper = $('#templatesCardsWrapper');
@@ -1686,8 +1701,11 @@
                 const hasType3 = tpl.types?.some(t => t.value === 3);
 
                 let front = '', none = '';
-                if (hasType3) { none = tpl.source_design_svg || ''; }
-                else { front = tpl.source_design_svg || ''; }
+                if (hasType3) {
+                    none = tpl.source_design_svg || '';
+                } else {
+                    front = tpl.source_design_svg || '';
+                }
 
                 const back = tpl.back_base64_preview_image || '';
                 const img = front || back || none || "{{ asset('images/placeholder.svg') }}";
@@ -1821,11 +1839,11 @@
                     return;
                 }
 
-                templates.forEach(function (tpl , index) {
+                templates.forEach(function (tpl, index) {
 
                     const cardHtml = `
                     <div class="col-12 col-md-6 col-lg-4">
-                        ${buildTemplateInnerCard(tpl , index)}
+                        ${buildTemplateInnerCard(tpl, index)}
                     </div>
                 `;
                     $modalContainer.append(cardHtml);
@@ -1852,6 +1870,7 @@
                 `);
                 }
             }
+
             function hydrateColorsForCard(cardEl) {
                 if (!cardEl) return;
 
@@ -2003,8 +2022,8 @@
                 const $cardWrapper = $(this).closest('.template-card');
                 const idStr = String($cardWrapper.data('id'));
                 const front = $cardWrapper.data('front');
-                const back  = $cardWrapper.data('back');
-                const none  = $cardWrapper.data('none');
+                const back = $cardWrapper.data('back');
+                const none = $cardWrapper.data('none');
 
                 // highlight selected card
                 $('#templatesCardsContainer').find('.template-card .card')
@@ -2060,11 +2079,11 @@
 
                 // close modal if inside
                 if ($(this).closest('#templateModal').length) {
-                    const $mainContainer  = $('#templatesCardsContainer');
+                    const $mainContainer = $('#templatesCardsContainer');
                     const $modalContainer = $('#templates-modal-container');
 
                     const $modalCard = $(this).closest('.template-card');
-                    const $modalCol  = $modalCard.closest('[class*="col-"]');
+                    const $modalCol = $modalCard.closest('[class*="col-"]');
 
                     // placeholder مكان كارت المودال
                     const $ph = $('<div class="__swap_ph__"></div>');
@@ -2075,7 +2094,7 @@
                     if (!$mainCards.length) return;
 
                     const $lastMainCard = $mainCards.last();
-                    const $lastMainCol  = $lastMainCard.closest('[class*="col-"]');
+                    const $lastMainCol = $lastMainCard.closest('[class*="col-"]');
 
                     // 1) دخل آخر كارت برا إلى نفس مكان كارت المودال
                     $lastMainCol.detach()
@@ -2313,22 +2332,22 @@
                 });
 
                 img.templateType = type;
-                img.templateId   = templateId;
+                img.templateId = templateId;
 
                 const meta = canvas.__mockupMeta;
 
                 if (savedPositions && meta) {
                     const prefix = type + '_';
-                    const xPct  = parseFloat(savedPositions[prefix + 'x']      ?? 0.5);
-                    const yPct  = parseFloat(savedPositions[prefix + 'y']      ?? 0.5);
-                    const wPct  = parseFloat(savedPositions[prefix + 'width']  ?? 0.4);
-                    const hPct  = parseFloat(savedPositions[prefix + 'height'] ?? 0.4);
-                    const angle = parseFloat(savedPositions[prefix + 'angle']  ?? 0);
+                    const xPct = parseFloat(savedPositions[prefix + 'x'] ?? 0.5);
+                    const yPct = parseFloat(savedPositions[prefix + 'y'] ?? 0.5);
+                    const wPct = parseFloat(savedPositions[prefix + 'width'] ?? 0.4);
+                    const hPct = parseFloat(savedPositions[prefix + 'height'] ?? 0.4);
+                    const angle = parseFloat(savedPositions[prefix + 'angle'] ?? 0);
 
-                    img.left   = meta.offsetLeft + meta.scaledWidth  * xPct;
-                    img.top    = meta.offsetTop  + meta.scaledHeight * yPct;
+                    img.left = meta.offsetLeft + meta.scaledWidth * xPct;
+                    img.top = meta.offsetTop + meta.scaledHeight * yPct;
 
-                    const scaleX = (wPct * meta.scaledWidth)  / img.width;
+                    const scaleX = (wPct * meta.scaledWidth) / img.width;
                     const scaleY = (hPct * meta.scaledHeight) / img.height;
                     img.scaleX = img.scaleY = Math.min(scaleX, scaleY);
 
@@ -2480,6 +2499,7 @@
                 clearTemplateInputsForObject(type);
             }
         }
+
         // =========================
         // WARP POINTS EDITOR
         // =========================
@@ -2508,24 +2528,26 @@
                 saved.br && saved.bl
             ) {
                 return [
-                    { x: Number(saved.tl.x), y: Number(saved.tl.y) },
-                    { x: Number(saved.tr.x), y: Number(saved.tr.y) },
-                    { x: Number(saved.br.x), y: Number(saved.br.y) },
-                    { x: Number(saved.bl.x), y: Number(saved.bl.y) },
+                    {x: Number(saved.tl.x), y: Number(saved.tl.y)},
+                    {x: Number(saved.tr.x), y: Number(saved.tr.y)},
+                    {x: Number(saved.br.x), y: Number(saved.br.y)},
+                    {x: Number(saved.bl.x), y: Number(saved.bl.y)},
                 ];
             }
 
             return null;
         }
+
         const warpState = {};
 
         // ✅ Pre-load existing warp points from DB (per side)
         const existingWarpPoints = @json($existingWarpPoints);
         console.log(existingWarpPoints)
+
         function initWarpEditor(side, imageUrl) {
             const wrapper = document.getElementById(`warp-editor-${side}`);
-            const img     = document.getElementById(`warp-preview-${side}`);
-            const canvas  = document.getElementById(`warp-canvas-${side}`);
+            const img = document.getElementById(`warp-preview-${side}`);
+            const canvas = document.getElementById(`warp-canvas-${side}`);
             if (!wrapper || !img || !canvas) return;
 
             // ✅ Use saved warp points if available, else default corners
@@ -2533,10 +2555,10 @@
 
             warpState[side] = {
                 points: saved ?? [
-                    { x: 0.1, y: 0.1 },
-                    { x: 0.9, y: 0.1 },
-                    { x: 0.9, y: 0.9 },
-                    { x: 0.1, y: 0.9 },
+                    {x: 0.1, y: 0.1},
+                    {x: 0.9, y: 0.1},
+                    {x: 0.9, y: 0.9},
+                    {x: 0.1, y: 0.9},
                 ],
                 dragging: null,
             };
@@ -2545,10 +2567,10 @@
             wrapper.classList.remove('d-none');
 
             const LABELS = ['TL', 'TR', 'BR', 'BL'];
-            const RADIUS  = 10;
+            const RADIUS = 10;
 
             function pxOf(p) {
-                return { x: p.x * canvas.width, y: p.y * canvas.height };
+                return {x: p.x * canvas.width, y: p.y * canvas.height};
             }
 
             function draw() {
@@ -2559,12 +2581,15 @@
                 ctx.beginPath();
                 const f = pxOf(pts[0]);
                 ctx.moveTo(f.x, f.y);
-                pts.slice(1).forEach(p => { const px = pxOf(p); ctx.lineTo(px.x, px.y); });
+                pts.slice(1).forEach(p => {
+                    const px = pxOf(p);
+                    ctx.lineTo(px.x, px.y);
+                });
                 ctx.closePath();
                 ctx.fillStyle = 'rgba(36,176,148,0.08)';
                 ctx.fill();
                 ctx.strokeStyle = 'rgba(36,176,148,0.85)';
-                ctx.lineWidth   = 1.5;
+                ctx.lineWidth = 1.5;
                 ctx.setLineDash([6, 4]);
                 ctx.stroke();
                 ctx.setLineDash([]);
@@ -2572,31 +2597,33 @@
                 ctx.beginPath();
                 const tl = pxOf(pts[0]), br = pxOf(pts[2]);
                 const tr = pxOf(pts[1]), bl = pxOf(pts[3]);
-                ctx.moveTo(tl.x, tl.y); ctx.lineTo(br.x, br.y);
-                ctx.moveTo(tr.x, tr.y); ctx.lineTo(bl.x, bl.y);
+                ctx.moveTo(tl.x, tl.y);
+                ctx.lineTo(br.x, br.y);
+                ctx.moveTo(tr.x, tr.y);
+                ctx.lineTo(bl.x, bl.y);
                 ctx.strokeStyle = 'rgba(36,176,148,0.25)';
-                ctx.lineWidth   = 0.8;
+                ctx.lineWidth = 0.8;
                 ctx.stroke();
 
                 pts.forEach((p, i) => {
                     const px = pxOf(p);
                     ctx.beginPath();
                     ctx.arc(px.x, px.y, RADIUS, 0, Math.PI * 2);
-                    ctx.fillStyle   = '#24B094';
+                    ctx.fillStyle = '#24B094';
                     ctx.fill();
                     ctx.strokeStyle = '#fff';
-                    ctx.lineWidth   = 2;
+                    ctx.lineWidth = 2;
                     ctx.stroke();
-                    ctx.fillStyle    = '#fff';
-                    ctx.font         = 'bold 10px sans-serif';
-                    ctx.textAlign    = 'center';
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 10px sans-serif';
+                    ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(LABELS[i], px.x, px.y);
                 });
             }
 
             function resize() {
-                canvas.width  = img.clientWidth  || img.naturalWidth;
+                canvas.width = img.clientWidth || img.naturalWidth;
                 canvas.height = img.clientHeight || img.naturalHeight;
                 draw();
             }
@@ -2619,8 +2646,8 @@
                 if (warpState[side].dragging === null) return;
                 const rect = canvas.getBoundingClientRect();
                 warpState[side].points[warpState[side].dragging] = {
-                    x: Math.min(1, Math.max(0, (e.clientX - rect.left)  / canvas.width)),
-                    y: Math.min(1, Math.max(0, (e.clientY - rect.top)   / canvas.height)),
+                    x: Math.min(1, Math.max(0, (e.clientX - rect.left) / canvas.width)),
+                    y: Math.min(1, Math.max(0, (e.clientY - rect.top) / canvas.height)),
                 };
                 draw();
                 syncWarpInput(side);
@@ -2643,7 +2670,7 @@
             const form = document.getElementById('editMockupForm');
             const [tl, tr, br, bl] = warpState[side].points;
 
-            const points = { tl, tr, br, bl };
+            const points = {tl, tr, br, bl};
 
             // ✅ Remove old warp inputs for this side
             form.querySelectorAll(`[data-warp-side="${side}"]`).forEach(el => el.remove());
@@ -2651,10 +2678,10 @@
             // ✅ Write flat inputs — no JSON.stringify, no escaping
             Object.entries(points).forEach(([corner, coords]) => {
                 ['x', 'y'].forEach(axis => {
-                    const input       = document.createElement('input');
-                    input.type        = 'hidden';
-                    input.name        = `warp_points[${side}][${corner}][${axis}]`;
-                    input.value       = coords[axis];
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = `warp_points[${side}][${corner}][${axis}]`;
+                    input.value = coords[axis];
                     input.dataset.warpSide = side;   // for cleanup on re-sync
                     form.appendChild(input);
                 });
@@ -2662,14 +2689,13 @@
         }
 
 
-
         function resetWarp(side) {
             if (!warpState[side]) return;
             warpState[side].points = [
-                { x: 0.1, y: 0.1 },   // tl
-                { x: 0.9, y: 0.1 },   // tr
-                { x: 0.9, y: 0.9 },   // br
-                { x: 0.1, y: 0.9 },   // bl
+                {x: 0.1, y: 0.1},   // tl
+                {x: 0.9, y: 0.1},   // tr
+                {x: 0.9, y: 0.9},   // br
+                {x: 0.1, y: 0.9},   // bl
             ];
 
             // re-init editor with current image
@@ -2681,7 +2707,7 @@
 
         $(document).on('click', '.js-reset-warp', function () {
             resetWarp($(this).data('side'));
-            Toastify({ text: 'Reset to default corners', backgroundColor: '#6c757d', duration: 1200 }).showToast();
+            Toastify({text: 'Reset to default corners', backgroundColor: '#6c757d', duration: 1200}).showToast();
         });
 
 
@@ -2721,9 +2747,9 @@
                 if (document.getElementById(`${type}-file-block`)) return;
 
                 const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
-                const block     = document.createElement('div');
+                const block = document.createElement('div');
                 block.className = 'col-md-6';
-                block.id        = `${type}-file-block`;
+                block.id = `${type}-file-block`;
 
                 block.innerHTML = `
             <label class="label-text">${typeLabel}</label>
@@ -2816,9 +2842,9 @@
         }
 
         function initDropzone(type, part) {
-            const key       = `${type}-${part}`;
-            const elId      = `dz-${type}-${part}`;
-            const el        = document.getElementById(elId);
+            const key = `${type}-${part}`;
+            const elId = `dz-${type}-${part}`;
+            const el = document.getElementById(elId);
             const inputName = `${type}_${part}`;           // e.g. front_base_image
 
             if (!el || dropzoneInstances[key]) return;
@@ -2826,19 +2852,19 @@
             // Hidden input to store uploaded media ID
             let hiddenInput = document.querySelector(`input[name="${inputName}_id"]`);
             if (!hiddenInput) {
-                hiddenInput        = document.createElement('input');
-                hiddenInput.type   = 'hidden';
-                hiddenInput.name   = `${inputName}_id`;
+                hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = `${inputName}_id`;
                 document.getElementById('editMockupForm').appendChild(hiddenInput);
             }
 
             const dz = new Dropzone(`#${elId}`, {
-                url:           "{{ route('media.store') }}",
-                paramName:     "file",
-                maxFiles:      1,
-                maxFilesize:   12,
+                url: "{{ route('media.store') }}",
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 12,
                 acceptedFiles: "image/png",
-                headers:       { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+                headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
                 addRemoveLinks: true,
                 dictRemoveFile: '✕ Remove',
                 dictDefaultMessage: '',
@@ -2862,12 +2888,20 @@
                     // Upload success → store media ID
                     dzInstance.on('success', function (file, response) {
                         if (response.success && response.data) {
-                            file._mediaId     = response.data.id;
+                            file._mediaId = response.data.id;
                             hiddenInput.value = response.data.id;
 
                             if (part === 'base_image' && response.data.url) {
-                                const canvasMap  = { front: window.canvasFront, back: window.canvasBack, none: window.canvasNone };
-                                const wrapperMap = { front: 'editorFrontWrapper', back: 'editorBackWrapper', none: 'editorNoneWrapper' };
+                                const canvasMap = {
+                                    front: window.canvasFront,
+                                    back: window.canvasBack,
+                                    none: window.canvasNone
+                                };
+                                const wrapperMap = {
+                                    front: 'editorFrontWrapper',
+                                    back: 'editorBackWrapper',
+                                    none: 'editorNoneWrapper'
+                                };
 
                                 loadBaseImage(canvasMap[type], response.data.url);
                                 document.getElementById(wrapperMap[type])?.classList.remove('d-none');
@@ -2889,8 +2923,8 @@
 
                         if (file._mediaId) {
                             fetch("{{ url('api/v1/media') }}/" + file._mediaId, {
-                                method:  'DELETE',
-                                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                                method: 'DELETE',
+                                headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content}
                             }).catch(err => console.error('Media delete failed:', err));
                         }
 
@@ -2912,7 +2946,7 @@
 
         // ─── Preload existing media from server ──────────────────────────────────────
         // Pass existing URLs from blade to JS
-        const existingMedia   = @json($existingMedia);
+        const existingMedia = @json($existingMedia);
         const existingMediaIds = @json($existingMediaIds);
 
         function getExistingMediaUrl(type, part) {
@@ -2922,12 +2956,12 @@
         function preloadDropzoneFile(dz, url, type, part, hiddenInput) {
             const mediaId = existingMediaIds[type]?.[part] ?? null;
             if (mediaId) {
-                hiddenInput.value  = mediaId;
+                hiddenInput.value = mediaId;
                 hiddenInput.dataset.existingId = mediaId;
             }
 
             const fileName = url.split('/').pop();
-            const mockFile = { name: fileName, size: 0, _mediaId: mediaId, _isExisting: true };
+            const mockFile = {name: fileName, size: 0, _mediaId: mediaId, _isExisting: true};
 
             dz.emit('addedfile', mockFile);
             dz.emit('thumbnail', mockFile, url);
@@ -2935,8 +2969,8 @@
             dz.files.push(mockFile);
 
             if (part === 'base_image') {
-                const canvasMap  = { front: window.canvasFront, back: window.canvasBack, none: window.canvasNone };
-                const wrapperMap = { front: 'editorFrontWrapper', back: 'editorBackWrapper', none: 'editorNoneWrapper' };
+                const canvasMap = {front: window.canvasFront, back: window.canvasBack, none: window.canvasNone};
+                const wrapperMap = {front: 'editorFrontWrapper', back: 'editorBackWrapper', none: 'editorNoneWrapper'};
 
                 loadBaseImage(canvasMap[type], url);
                 document.getElementById(wrapperMap[type])?.classList.remove('d-none');
@@ -3163,7 +3197,7 @@
 
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('editMockupForm');
             if (!form) return;
 
@@ -3199,5 +3233,65 @@
             }, 500);
         });
     </script>
+    <script>
+        const mockupIdForColorSync = "{{ $model->id }}";
 
+        function notifyAcrossColorRemoved(hex) {
+            const url = @json(
+        route('mockups.colors-across-templates.remove', ['mockup' => '__MOCKUP_ID__', 'hex' => '__HEX__'])
+    ).
+            replace('__MOCKUP_ID__', mockupIdForColorSync).replace('__HEX__', hex.toLowerCase());
+
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                success: function () {
+                    Toastify({
+                        text: 'Color removed from templates and generated files cleaned up',
+                        backgroundColor: '#28a745',
+                        duration: 2000
+                    }).showToast();
+                },
+                error: function (xhr) {
+                    console.error('Failed to remove across-template color', xhr.responseJSON || xhr.responseText);
+                    Toastify({
+                        text: 'Failed to sync color removal with server',
+                        backgroundColor: '#dc3545',
+                        duration: 2000
+                    }).showToast();
+                }
+            });
+        }
+
+        window.removeGlobalColor = function (hex, btn, target = 'pre_fill_colors') {
+            const li = btn.closest('li');
+            if (li) li.remove();
+
+            const config = getGlobalColorConfig(target);
+            const inputContainer = document.getElementById(config.inputContainerId);
+            if (inputContainer) {
+                [...inputContainer.querySelectorAll(`input[name="${config.inputName}"]`)]
+                    .filter(input => String(input.value).toLowerCase() === String(hex).toLowerCase())
+                    .forEach(input => input.remove());
+            }
+
+            syncAcrossTemplateSourceColors();
+
+            if (target === 'colors_across_templates') {
+                notifyAcrossColorRemoved(hex);
+            }
+        };
+        $(document).on('click', '.js-toggle-across-color', function () {
+            const hex = String(this.dataset.hex || '').toLowerCase();
+            if (!hex) return;
+
+            if (getGlobalColors('colors_across_templates').includes(hex)) {
+                removeGlobalColorByHex(hex, 'colors_across_templates');
+                notifyAcrossColorRemoved(hex);
+            } else {
+                addGlobalColor(hex, 'colors_across_templates');
+            }
+        });
+    </script>
 @endsection

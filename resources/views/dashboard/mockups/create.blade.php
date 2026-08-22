@@ -601,7 +601,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Select from Mockup Base Palette</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
                     </div>
                     <div class="modal-body">
                         <div id="mockupColorsAcrossOptions"></div>
@@ -2290,15 +2290,13 @@
             if (!optionsContainer) return;
 
             const mockupColors = [...new Set(getGlobalColors('pre_fill_colors'))];
-            const acrossColors = [...new Set(getGlobalColors('colors_across_templates'))];
-            const acrossSet = new Set(acrossColors);
-            const customAcrossColors = acrossColors.filter(hex => !mockupColors.includes(hex));
+            const acrossSet = new Set(getGlobalColors('colors_across_templates'));
             optionsContainer.innerHTML = '';
 
-            if (!mockupColors.length && !customAcrossColors.length) {
+            if (!mockupColors.length) {
                 const text = document.createElement('small');
                 text.className = 'text-muted';
-                text.textContent = 'Add Mockup Colors first or add a custom color';
+                text.textContent = 'Add Mockup Colors first to select them here';
                 optionsContainer.appendChild(text);
                 return;
             }
@@ -2314,17 +2312,6 @@
                 if (selected) {
                     button.innerHTML = '<span class="palette-source-color-check">✓</span>';
                 }
-                optionsContainer.appendChild(button);
-            });
-
-            customAcrossColors.forEach(hex => {
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = 'js-toggle-across-color palette-source-color is-selected';
-                button.style.backgroundColor = hex;
-                button.dataset.hex = hex;
-                button.title = 'Remove custom color from Colors Across Templates';
-                button.innerHTML = '<span class="palette-source-color-check">✓</span>';
                 optionsContainer.appendChild(button);
             });
         }
@@ -2519,5 +2506,59 @@
             });
         }
     </script>
+    <script>
+        window.currentMockupId = "{{ $mockup->id ?? '' }}";
 
+        function notifyAcrossColorRemoved(hex) {
+            if (!window.currentMockupId) return; // not saved yet — nothing to sync server-side
+
+            const url = @json(
+        route('mockups.colors-across-templates.remove', ['mockup' => '__MOCKUP_ID__', 'hex' => '__HEX__'])
+    ).replace('__MOCKUP_ID__', window.currentMockupId).replace('__HEX__', hex.toLowerCase());
+
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                success: function () {
+                    Toastify({text: 'Color removed from templates and generated files cleaned up', backgroundColor: '#28a745', duration: 2000}).showToast();
+                },
+                error: function (xhr) {
+                    console.error('Failed to remove across-template color', xhr.responseJSON || xhr.responseText);
+                    Toastify({text: 'Failed to sync color removal with server', backgroundColor: '#dc3545', duration: 2000}).showToast();
+                }
+            });
+        }
+
+        window.removeGlobalColor = function (hex, btn, target = 'pre_fill_colors') {
+            const li = btn.closest('li');
+            if (li) li.remove();
+
+            const config = getGlobalColorConfig(target);
+            const inputContainer = document.getElementById(config.inputContainerId);
+
+            if (inputContainer) {
+                [...inputContainer.querySelectorAll(`input[name="${config.inputName}"]`)]
+                    .filter(input => input.value.toLowerCase() === hex.toLowerCase())
+                    .forEach(input => input.remove());
+            }
+
+            syncAcrossTemplateSourceColors();
+
+            if (target === 'colors_across_templates') {
+                notifyAcrossColorRemoved(hex);
+            }
+        };
+        $(document).on('click', '.js-toggle-across-color', function () {
+            const hex = String(this.dataset.hex || '').toLowerCase();
+            if (!hex) return;
+
+            if (getGlobalColors('colors_across_templates').includes(hex)) {
+                removeGlobalColorByHex(hex, 'colors_across_templates');
+                notifyAcrossColorRemoved(hex);
+            } else {
+                addGlobalColor(hex, 'colors_across_templates');
+            }
+        });
+    </script>
 @endsection
