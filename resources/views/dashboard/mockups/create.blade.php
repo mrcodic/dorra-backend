@@ -334,15 +334,12 @@
         }
 
         #selected-colors,
+        #selected-colors-across-templates,
         #mockupColorsAcrossOptions {
             display: flex;
             align-items: center;
             flex-wrap: wrap;
             gap: 5px;
-        }
-
-        #selected-colors-across-templates {
-            display: none !important;
         }
 
         @media (max-width: 991.98px) {
@@ -520,37 +517,6 @@
                                     <div id="fileInputsContainer" class="row g-1"></div>
                                 </div>
                             </div>
-                            <!-- العمود اليمين: الـ editor / preview -->
-                            {{--                        <div class="row">--}}
-                            {{--                            <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorFrontWrapper">--}}
-                            {{--                                <label class="label-text">Mockup Editor (Front)</label>--}}
-                            {{--                                <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="480"--}}
-                            {{--                                        width="480"></canvas>--}}
-                            {{--                            </div>--}}
-                            {{--                            <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorBackWrapper">--}}
-                            {{--                                <label class="label-text">Mockup Editor (Back)</label>--}}
-                            {{--                                <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="480"--}}
-                            {{--                                        width="480"></canvas>--}}
-                            {{--                            </div>--}}
-
-                            {{--                            <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorNoneWrapper">--}}
-                            {{--                                <label class="label-text">Mockup Editor (General)</label>--}}
-                            {{--                                <canvas id="mockupCanvasNone" class="w-100" height="480" width="480"--}}
-                            {{--                                        style="border:1px solid #ccc;"></canvas>--}}
-                            {{--                            </div>--}}
-                            {{--                        </div>--}}
-
-                            {{--                        @if(request('q') === 'without')--}}
-
-
-                            {{--                        <div class="form-group my-2 d-none" id="templatesCardsWrapper">--}}
-                            {{--                            <label class="form-label mb-2">Choose Template</label>--}}
-                            {{--                            <div id="templatesCardsContainer" class="row g-1 p-1 bg-white border rounded-3 shadow-sm">--}}
-                            {{--                            </div>--}}
-                            {{--                            <input type="hidden" name="template_id" id="selectedTemplateId" class="col-md-3">--}}
-                            {{--                            <div id="templatesHiddenContainer"></div>--}}
-                            {{--                        </div>--}}
-                            {{--                        @endif--}}
                         </div>
 
 
@@ -590,11 +556,16 @@
                                     </div>
                                     <div class="palette-note"><span class="palette-note-check">&#10003;</span><span>Select any base color below, or add a custom color.</span></div>
                                     <div class="palette-colors-row">
-                                        <div id="mockupColorsAcrossOptions"></div>
-                                        <button type="button" id="openAcrossTemplatesColorPicker" class="gradient-picker-trigger openColorPicker" data-color-target="colors_across_templates" title="Add custom color"></button>
                                         <span id="selected-colors-across-templates"></span>
+                                        <button type="button" id="openAcrossTemplatesColorPicker" class="gradient-picker-trigger openColorPicker"
+                                                data-color-target="colors_across_templates" title="Pick a custom color"></button>
                                     </div>
                                     <div id="colorsAcrossTemplatesInputContainer"></div>
+                                    <button type="button" id="toggleBasePaletteSelect" class="btn btn-link btn-sm p-0 mt-1"
+                                            data-bs-toggle="modal" data-bs-target="#basePaletteModal"
+                                            title="Select from Mockup Base Palette">
+                                        Select from Base Palette
+                                    </button>
                                     <div class="palette-footer"><span class="palette-footer-dot"></span><span>Optional · Can reuse base colors or include custom colors</span></div>
                                     <button type="button" class="btn btn-secondary btn-sm d-none mt-2 px-2 py-1" id="generateTemplateMockupFiles" data-mockup-id="" style="font-size:13px;white-space:nowrap;">
                                         <span class="btn-text">Generate Mockups</span>
@@ -624,6 +595,23 @@
 
         </div>
 
+        {{-- Select-from-Mockup-Base-Palette popup --}}
+        <div class="modal fade" id="basePaletteModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Select from Mockup Base Palette</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="mockupColorsAcrossOptions"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Done</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         @include("modals.templates.template-modal")
     </section>
@@ -1019,59 +1007,9 @@
                     .get(); // → [1, 2] مثلاً
             }
 
-            {{--function fetchTemplatesForProduct(productId) {--}}
-            {{--    if (!productId) {--}}
-            {{--        resetTemplatesUI();--}}
-            {{--        return;--}}
-            {{--    }--}}
-
-            {{--    resetTemplatesUI();--}}
-            {{--    currentProductId = productId;--}}
-
-            {{--    $templatesCardsContainer.html(`--}}
-            {{--    <div class="col-12 text-center py-2">--}}
-            {{--        Loading templates...--}}
-            {{--    </div>--}}
-            {{--`);--}}
-            {{--    $templatesWrapper.removeClass('d-none');--}}
-
-            {{--    $.ajax({--}}
-            {{--        url: "{{ route('product-templates.index') }}",--}}
-            {{--        method: "GET",--}}
-            {{--        data: {--}}
-            {{--            product_without_category_id: productId,--}}
-            {{--            request_type: "api",--}}
-            {{--            // approach: "without_editor",--}}
-            {{--            paginate: true,--}}
-            {{--            // has_not_mockups: true,--}}
-            {{--            per_page: 12,--}}
-            {{--            types: getSelectedTypesForRequest(),--}}
-            {{--        },--}}
-
-            {{--        success: function (response) {--}}
-            {{--            const data = response.data ?? {};--}}
-            {{--            const items = data.data ?? [];--}}
-            {{--            const links = data.links ?? {};--}}
-
-            {{--            firstPageTemplates = items;--}}
-            {{--            nextPageUrl = links.next || null;--}}
-
-            {{--            renderTemplateCards(firstPageTemplates);--}}
-            {{--        },--}}
-            {{--        error: function (xhr) {--}}
-            {{--            console.error("Error loading templates", xhr);--}}
-            {{--            resetTemplatesUI();--}}
-            {{--        }--}}
-            {{--    });--}}
-            {{--}--}}
-
             // =========================
             // Events: Product change
             // =========================
-            // $productSelect.on('change', function () {
-            //     const productId = $(this).val();
-            //     fetchTemplatesForProduct(productId);
-            // });
 
             // حالة edit: لو فيه value جاهزة
             if ($productSelect.val()) {
@@ -1283,11 +1221,6 @@
                 };
             };
 
-            // $('form').on('submit', function () {
-            //     buildHiddenTemplateInputs();
-            // });
-
-
             // حفظ أماكن Template واحد
             function savePositionsForTemplate(templateId) {
                 const id = String(templateId);
@@ -1393,46 +1326,6 @@
             canvas.renderAll();
         }
 
-        // function syncTemplateInputs(obj, type) {
-        //     const container = document.getElementById('templatesHiddenContainer');
-        //     if (!container) return;
-
-        //     const canvas = obj.canvas;
-        //     const meta = canvas && canvas.__mockupMeta;
-        //     if (!meta) return;
-
-        //     const templateId = obj.templateId;
-
-        //     const templateContainer = container.querySelector(`.template-inputs[data-template-id="${templateId}"]`);
-        //     if (!templateContainer) return;
-
-        //     const xInput = templateContainer.querySelector(`.template_x.${type}`);
-        //     const yInput = templateContainer.querySelector(`.template_y.${type}`);
-        //     const widthInput = templateContainer.querySelector(`.template_width.${type}`);
-        //     const heightInput = templateContainer.querySelector(`.template_height.${type}`);
-        //     const angleInput = templateContainer.querySelector(`.template_angle.${type}`);
-        //     if (!xInput || !yInput || !widthInput || !heightInput || !angleInput) return;
-
-        //     const center = obj.getCenterPoint();
-        //     const wReal  = (obj.width || 0) * (obj.scaleX || 1);
-        //     const hReal  = (obj.height || 0) * (obj.scaleY || 1);
-
-        //     let xPct = (center.x - meta.offsetLeft) / meta.scaledWidth;
-        //     let yPct = (center.y - meta.offsetTop)  / meta.scaledHeight;
-        //     let wPct = wReal / meta.scaledWidth;
-        //     let hPct = hReal / meta.scaledHeight;
-
-        //     if (!Number.isFinite(xPct)) xPct = 0;
-        //     if (!Number.isFinite(yPct)) yPct = 0;
-        //     if (!Number.isFinite(wPct)) wPct = 0;
-        //     if (!Number.isFinite(hPct)) hPct = 0;
-
-        //     xInput.value      = xPct.toFixed(6);
-        //     yInput.value      = yPct.toFixed(6);
-        //     widthInput.value  = wPct.toFixed(6);
-        //     heightInput.value = hPct.toFixed(6);
-        //     angleInput.value  = String(obj.angle || 0);
-        // }
         function updateTemplatePositionsFromObject(obj, type) {
             const canvas = obj.canvas;
             const meta = canvas && canvas.__mockupMeta;
@@ -1577,39 +1470,9 @@
             });
         }
 
-
-        // function saveAllTemplatePositions() {
-        //     if (window.canvasFront) {
-        //         window.canvasFront.getObjects().forEach(obj => {
-        //             if (obj.templateType === 'front') {
-        //                 syncTemplateInputs(obj, 'front');
-        //             }
-        //         });
-        //     }
-
-        //     if (window.canvasBack) {
-        //         console.log('Canvas', window.canvasBack.getObjects());
-
-        //         window.canvasBack.getObjects().forEach(obj => {
-        //             if (obj.templateType === 'back') {
-        //                 syncTemplateInputs(obj, 'back');
-        //             }
-        //         });
-        //     }
-
-        //     if (window.canvasNone) {
-        //         window.canvasNone.getObjects().forEach(obj => {
-        //             if (obj.templateType === 'none') {
-        //                 syncTemplateInputs(obj, 'none');
-        //             }
-        //         });
-        //     }
-        // }
-
         function bindCanvasUpdates(canvas, type) {
             canvas.on('object:modified', function (e) {
                 const obj = e.target;
-                // syncTemplateInputs(obj, type);
                 updateTemplatePositionsFromObject(obj, type);
                 buildHiddenTemplateInputs();
             });
@@ -1676,12 +1539,6 @@
             });
 
             renderFileInputs();
-            if (window.jQuery) {
-                // const $prod = $('#productsSelect');
-                // if ($prod.length && $prod.val()) {
-                //     $prod.trigger('change');
-                // }
-            }
         }
 
         function hideCanvasForType(type) {
@@ -2331,6 +2188,7 @@
         let pickrInstance = null;
         let currentCard = null;
         let currentGlobalColorTarget = 'pre_fill_colors';
+        let currentTrigger = null;
 
         function getGlobalColorConfig(target) {
             if (target === 'colors_across_templates') {
@@ -2482,10 +2340,21 @@
             }
         });
 
+        // Refresh the base-palette swatches every time the popup opens (colors may have
+        // changed since the panel was last built).
+        $(document).on('show.bs.modal', '#basePaletteModal', function () {
+            syncAcrossTemplateSourceColors();
+        });
+
         $(document).ready(function () {
             if (pickrInstance) pickrInstance.destroyAndRemove();
 
             const dummyElement = document.createElement('div');
+            dummyElement.style.position = 'fixed';
+            dummyElement.style.top = '0';
+            dummyElement.style.left = '0';
+            dummyElement.style.width = '0';
+            dummyElement.style.height = '0';
             document.body.appendChild(dummyElement);
 
             pickrInstance = Pickr.create({
@@ -2501,6 +2370,24 @@
                         clear: true
                     }
                 }
+            });
+
+            // Reposition the popover next to the button that actually opened it.
+            // We hook Pickr's own 'show' event instead of guessing with setTimeout(0):
+            // that guarantees the panel already has the 'visible' class in the DOM
+            // by the time we move it — this was the root cause of the picker
+            // silently opening off-screen / not appearing.
+            pickrInstance.on('show', () => {
+                if (!currentTrigger) return;
+
+                const pickerPanel = document.querySelector('.pcr-app.visible');
+                if (!pickerPanel) return;
+
+                const rect = currentTrigger.getBoundingClientRect();
+                pickerPanel.style.position = 'fixed';
+                pickerPanel.style.left = `${rect.left}px`;
+                pickerPanel.style.top = `${rect.bottom + 5}px`;
+                pickerPanel.style.zIndex = 9999;
             });
 
             pickrInstance.on('save', (color) => {
@@ -2550,46 +2437,22 @@
         });
 
         $(document).on('click', '.openColorPicker', function () {
-            const trigger = this;
-            const globalTarget = trigger.dataset.colorTarget;
+            currentTrigger = this;
+            const globalTarget = this.dataset.colorTarget;
 
             if (globalTarget) {
                 currentCard = null;
                 currentGlobalColorTarget = globalTarget;
                 pickrInstance.show();
-
-                setTimeout(() => {
-                    const pickerPanel = document.querySelector('.pcr-app.visible');
-                    if (pickerPanel) {
-                        const rect = trigger.getBoundingClientRect();
-                        pickerPanel.style.position = 'fixed';
-                        pickerPanel.style.left = `${rect.left}px`;
-                        pickerPanel.style.top = `${rect.bottom + 5}px`;
-                        pickerPanel.style.zIndex = 9999;
-                    }
-                }, 0);
                 return;
             }
 
-            const card = trigger.closest('.template-card');
+            const card = this.closest('.template-card');
             currentCard = card;
             if (!card) return;
             if (!card.selectedColors) card.selectedColors = [];
 
-            const rect = trigger.getBoundingClientRect();
-            const modalScrollTop = document.querySelector('#templateModal .modal-body')?.scrollTop || 0;
-
             pickrInstance.show();
-
-            setTimeout(() => {
-                const pickerPanel = document.querySelector('.pcr-app.visible');
-                if (pickerPanel) {
-                    pickerPanel.style.position = 'absolute';
-                    pickerPanel.style.left = `${rect.left + window.scrollX}px`;
-                    pickerPanel.style.top = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
-                    pickerPanel.style.zIndex = 9999;
-                }
-            }, 0);
         });
 
         window.removeColor = function (hex, btn) {
