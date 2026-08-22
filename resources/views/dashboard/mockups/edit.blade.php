@@ -2978,11 +2978,6 @@
             $.ajax({
                 url: generateMockupsUrl,
                 type: 'POST',
-
-                data: {
-                    force: 1,
-                },
-
                 headers: {
                     'X-CSRF-TOKEN':
                         $('meta[name="csrf-token"]').attr('content'),
