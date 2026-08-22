@@ -126,7 +126,7 @@ class MockupController extends DashboardController
     public function generateTemplateFiles(Request $request,
         Mockup $mockup, TemplateMockupGenerator $generator) {
         $colors = collect(
-            $mockup->pre_fill_colors ?? []
+            $mockup->colors_across_templates ?? []
         )
             ->filter()
             ->values()
@@ -134,7 +134,7 @@ class MockupController extends DashboardController
 
         if (empty($colors)) {
             return Response::api(
-                message: "No pre-fill colors found."
+                message: "No colors found."
             );
         }
 
