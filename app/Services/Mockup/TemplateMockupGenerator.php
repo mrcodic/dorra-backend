@@ -138,14 +138,14 @@ class TemplateMockupGenerator
 
         $oldHexes = collect($oldColors)
             ->filter()
-            ->map(fn ($color) => $this->normalizeHex($color))
+            ->map(fn ($color) => $this->formatHex($color))
             ->unique()
             ->values()
             ->all();
 
         $newHexes = collect($newColors)
             ->filter()
-            ->map(fn ($color) => $this->normalizeHex($color))
+            ->map(fn ($color) => $this->formatHex($color))
             ->unique()
             ->values()
             ->all();
