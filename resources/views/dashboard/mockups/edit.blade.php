@@ -625,14 +625,15 @@
                                             <div class="palette-card-icon">&#127912;</div>
                                             <div>
                                                 <div class="palette-card-name">Colors Across Templates</div>
-                                                <p class="palette-card-copy">Select which of your Mockup Colors should also be used across templates.</p>
+                                                <p class="palette-card-copy">Select from Base Palette or add custom colors to use across templates.</p>
                                             </div>
                                         </div>
                                         <span class="palette-badge">OPTIONAL</span>
                                     </div>
-                                    <div class="palette-note"><span class="palette-note-check">&#10003;</span><span>Only colors from your Mockup Base Palette can be selected here.</span></div>
+                                    <div class="palette-note"><span class="palette-note-check">&#10003;</span><span>Select any base color below, or add a custom color.</span></div>
                                     <div class="palette-colors-row">
                                         <span id="selected-colors-across-templates"></span>
+                                        <button type="button" id="openAcrossTemplatesColorPicker" class="gradient-picker-trigger openColorPicker" data-color-target="colors_across_templates" title="Pick a custom color"></button>
                                     </div>
                                     <div id="colorsAcrossTemplatesInputContainer"></div>
                                     <button type="button" id="toggleBasePaletteSelect" class="btn btn-link btn-sm p-0 mt-1"
@@ -678,6 +679,7 @@
                     <div id="mockupColorsAcrossOptions"></div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary me-auto" id="selectAllBasePaletteColors">Select All</button>
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Done</button>
                 </div>
             </div>
@@ -1139,9 +1141,21 @@
             }
         };
 
-        // Colors Across Templates can ONLY ever be a subset of the Mockup Base Palette
-        // (pre_fill_colors). There is no separate custom-color picker for this field —
-        // colors are toggled on/off from the base palette via the modal below.
+        // Colors Across Templates can reuse colors from the Mockup Base Palette
+        // and can also include custom colors added by its own picker.
+        // The modal below only manages selecting/deselecting base-palette colors.
+        function updateBasePaletteSelectAllButton() {
+            const button = document.getElementById('selectAllBasePaletteColors');
+            if (!button) return;
+
+            const baseColors = [...new Set(getGlobalColors('pre_fill_colors'))];
+            const acrossColors = new Set(getGlobalColors('colors_across_templates'));
+            const allSelected = baseColors.length > 0 && baseColors.every(hex => acrossColors.has(hex));
+
+            button.disabled = baseColors.length === 0;
+            button.textContent = allSelected ? 'Deselect All' : 'Select All';
+        }
+
         function syncAcrossTemplateSourceColors() {
             const optionsContainer = document.getElementById('mockupColorsAcrossOptions');
             if (!optionsContainer) return;
@@ -1155,6 +1169,7 @@
                 text.className = 'text-muted';
                 text.textContent = 'Add Mockup Colors first to select them here';
                 optionsContainer.appendChild(text);
+                updateBasePaletteSelectAllButton();
                 return;
             }
 
@@ -1169,6 +1184,8 @@
                 if (selected) button.innerHTML = '<span class="palette-source-color-check">✓</span>';
                 optionsContainer.appendChild(button);
             });
+
+            updateBasePaletteSelectAllButton();
         }
 
         $(document).on('click', '.js-toggle-across-color', function () {
@@ -1186,6 +1203,27 @@
         // Refresh the base-palette swatches every time the popup opens (colors may have
         // changed since the panel was last built).
         $(document).on('show.bs.modal', '#basePaletteModal', function () {
+            syncAcrossTemplateSourceColors();
+        });
+
+        $(document).on('click', '#selectAllBasePaletteColors', function () {
+            const baseColors = [...new Set(getGlobalColors('pre_fill_colors'))];
+            if (!baseColors.length) return;
+
+            const acrossColors = new Set(getGlobalColors('colors_across_templates'));
+            const allSelected = baseColors.every(hex => acrossColors.has(hex));
+
+            baseColors.forEach(hex => {
+                if (allSelected) {
+                    if (getGlobalColors('colors_across_templates').includes(hex)) {
+                        removeGlobalColorByHex(hex, 'colors_across_templates');
+                        notifyAcrossColorRemoved(hex);
+                    }
+                } else {
+                    addGlobalColor(hex, 'colors_across_templates');
+                }
+            });
+
             syncAcrossTemplateSourceColors();
         });
 
@@ -1255,9 +1293,8 @@
             });
         });
 
-        // NOTE: the "Colors Across Templates" card has no .openColorPicker trigger of its
-        // own anymore (no custom-color picker) — this handler now only ever fires for the
-        // Mockup Base Palette's #openColorPicker button and per-template-card triggers.
+        // This handler supports the Mockup Base Palette picker, the Colors Across Templates
+        // picker, and the per-template-card pickers.
         $(document).on('click', '.openColorPicker', function () {
             const trigger = this;
             const globalTarget = trigger.dataset.colorTarget;
