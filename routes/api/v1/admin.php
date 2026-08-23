@@ -43,7 +43,7 @@ Route::get('mockup-types', [MockupController::class, 'mockupTypes']);
 Route::delete('mockups/{mockup}', [MockupController::class, 'destroy']);
 Route::patch('mockups/{mockup}', [MockupController::class, 'updateEditorData']);
 Route::get('mockups/{mockup}', [MockupController::class, 'showAndUpdateRecent']);
-Route::delete('mockups/{mockup}/colors-across-templates/{hex}/{template?}', 'removeAcrossTemplateColor')
+Route::delete('mockups/{mockup}/colors-across-templates/{hex}/{template?}', [MockupController::class, 'removeAcrossTemplateColor'])
     ->where('hex', '[A-Fa-f0-9]{6,8}')
     ->name('mockups.colors-across-templates.remove');
 
