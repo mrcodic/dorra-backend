@@ -1083,41 +1083,40 @@
             syncAcrossTemplateSourceColors();
         }
 
-        // Notify the server that a color was removed from "Colors Across Templates" so the
-        // template pivot rows and any already-generated files for that color get cleaned up.
-        // See TemplateMockupGenerator::handleUpdated() / removeDeletedColors().
-        function notifyAcrossColorRemoved(hex) {
-            hex = String(hex || '').toLowerCase();
+        function notifyAcrossColorRemoved(hex, templateId = null) {
+            hex = String(hex || '').replace('#', '').toLowerCase();
+
             if (!hex || !mockupIdForColorSync) return;
 
-            const url = @json(
-                route('mockups.colors-across-templates.remove', ['mockup' => '__MOCKUP_ID__', 'hex' => '__HEX__'])
-            ).replace('__MOCKUP_ID__', mockupIdForColorSync).replace('__HEX__', hex);
+            let url = @json(
+        route('mockups.colors-across-templates.remove', [
+            'mockup' => '__MOCKUP_ID__',
+            'hex' => '__HEX__',
+        ])
+    );
+
+            url = url
+                .replace('__MOCKUP_ID__', mockupIdForColorSync)
+                .replace('__HEX__', hex);
 
             $.ajax({
-                url: url,
+                url,
                 type: 'DELETE',
-                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                success: function () {
-                    Toastify({
-                        text: 'Color removed from templates and generated files cleaned up',
-                        duration: 2000,
-                        gravity: 'top',
-                        position: 'right',
-                        backgroundColor: '#28a745',
-                        close: true,
-                    }).showToast();
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Accept': 'application/json',
                 },
-                error: function (xhr) {
-                    console.error('Failed to remove across-template color', xhr.responseJSON || xhr.responseText);
-                    Toastify({
-                        text: 'Failed to sync color removal with server',
-                        duration: 2000,
-                        gravity: 'top',
-                        position: 'right',
-                        backgroundColor: '#dc3545',
-                        close: true,
-                    }).showToast();
+                data: {
+                    template_id: templateId
+                },
+                success(response) {
+                    console.log(response);
+                },
+                error(xhr) {
+                    console.error(
+                        'Failed to remove across-template color',
+                        xhr.responseJSON || xhr.responseText
+                    );
                 }
             });
         }
