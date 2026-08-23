@@ -286,7 +286,6 @@ class TemplateMockupGenerator
     {
         $removedHexes = collect($removedHexes)
             ->filter()
-            ->map(fn ($color) => $this->normalizeHex($color))
             ->unique()
             ->values()
             ->all();
@@ -308,7 +307,7 @@ class TemplateMockupGenerator
 
                 $remainingColors = collect($pivotColors)
                     ->filter()
-                    ->reject(fn ($color) => in_array($this->normalizeHex($color), $removedHexes, true))
+                    ->reject(fn ($color) => in_array($color, $removedHexes, true))
                     ->values()
                     ->all();
 
@@ -316,7 +315,7 @@ class TemplateMockupGenerator
 
                 $modelColor = $currentTemplate->pivot->model_color;
 
-                if (!empty($modelColor) && in_array($this->normalizeHex($modelColor), $removedHexes, true)) {
+                if (!empty($modelColor) && in_array($modelColor, $removedHexes, true)) {
                     $updateData['model_color'] = $remainingColors[0] ?? null;
                 }
 
