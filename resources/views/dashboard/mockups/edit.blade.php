@@ -1088,14 +1088,9 @@
 
             if (!hex || !mockupIdForColorSync) return;
 
-            let url = @json(
-        route('mockups.colors-across-templates.remove', [
-            'mockup' => '__MOCKUP_ID__',
-            'hex' => '__HEX__',
-        ])
-    );
+            const urlTemplate = @json(route('mockups.colors-across-templates.remove', ['mockup' => '__MOCKUP_ID__', 'hex' => '__HEX__']));
 
-            url = url
+            const url = urlTemplate
                 .replace('__MOCKUP_ID__', mockupIdForColorSync)
                 .replace('__HEX__', hex);
 
@@ -1104,7 +1099,7 @@
                 type: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-                    'Accept': 'application/json',
+                    'Accept': 'application/json'
                 },
                 data: {
                     template_id: templateId
@@ -1113,10 +1108,7 @@
                     console.log(response);
                 },
                 error(xhr) {
-                    console.error(
-                        'Failed to remove across-template color',
-                        xhr.responseJSON || xhr.responseText
-                    );
+                    console.error(xhr.responseJSON || xhr.responseText);
                 }
             });
         }
