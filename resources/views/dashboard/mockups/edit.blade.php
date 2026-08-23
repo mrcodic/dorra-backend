@@ -1105,14 +1105,29 @@
                     template_id: templateId
                 },
                 success(response) {
-                    console.log(response);
+                    Toastify({
+                        text: response?.message || 'Color removed successfully',
+                        duration: 2500,
+                        gravity: 'top',
+                        position: 'right',
+                        backgroundColor: '#28a745',
+                        close: true
+                    }).showToast();
                 },
                 error(xhr) {
                     console.error(xhr.responseJSON || xhr.responseText);
+
+                    Toastify({
+                        text: xhr.responseJSON?.message || 'Failed to remove color',
+                        duration: 3000,
+                        gravity: 'top',
+                        position: 'right',
+                        backgroundColor: '#dc3545',
+                        close: true
+                    }).showToast();
                 }
             });
         }
-
         window.removeGlobalColor = function (hex, btn, target = 'pre_fill_colors') {
             const li = btn.closest('li');
             if (li) li.remove();
