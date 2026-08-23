@@ -607,6 +607,7 @@
                         <div id="mockupColorsAcrossOptions"></div>
                     </div>
                     <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-primary me-auto" id="selectAllBasePaletteColors">Select All</button>
                         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Done</button>
                     </div>
                 </div>
@@ -2285,6 +2286,18 @@
             syncAcrossTemplateSourceColors();
         };
 
+        function updateBasePaletteSelectAllButton() {
+            const button = document.getElementById('selectAllBasePaletteColors');
+            if (!button) return;
+
+            const baseColors = [...new Set(getGlobalColors('pre_fill_colors'))];
+            const acrossColors = new Set(getGlobalColors('colors_across_templates'));
+            const allSelected = baseColors.length > 0 && baseColors.every(hex => acrossColors.has(hex));
+
+            button.disabled = baseColors.length === 0;
+            button.textContent = allSelected ? 'Deselect All' : 'Select All';
+        }
+
         function syncAcrossTemplateSourceColors() {
             const optionsContainer = document.getElementById('mockupColorsAcrossOptions');
             if (!optionsContainer) return;
@@ -2298,6 +2311,7 @@
                 text.className = 'text-muted';
                 text.textContent = 'Add Mockup Colors first to select them here';
                 optionsContainer.appendChild(text);
+                updateBasePaletteSelectAllButton();
                 return;
             }
 
@@ -2314,22 +2328,34 @@
                 }
                 optionsContainer.appendChild(button);
             });
+
+            updateBasePaletteSelectAllButton();
         }
-
-        $(document).on('click', '.js-toggle-across-color', function () {
-            const hex = String(this.dataset.hex || '').toLowerCase();
-            if (!hex) return;
-
-            if (getGlobalColors('colors_across_templates').includes(hex)) {
-                removeGlobalColorByHex(hex, 'colors_across_templates');
-            } else {
-                addGlobalColor(hex, 'colors_across_templates');
-            }
-        });
 
         // Refresh the base-palette swatches every time the popup opens (colors may have
         // changed since the panel was last built).
         $(document).on('show.bs.modal', '#basePaletteModal', function () {
+            syncAcrossTemplateSourceColors();
+        });
+
+        $(document).on('click', '#selectAllBasePaletteColors', function () {
+            const baseColors = [...new Set(getGlobalColors('pre_fill_colors'))];
+            if (!baseColors.length) return;
+
+            const acrossColors = new Set(getGlobalColors('colors_across_templates'));
+            const allSelected = baseColors.every(hex => acrossColors.has(hex));
+
+            baseColors.forEach(hex => {
+                if (allSelected) {
+                    if (getGlobalColors('colors_across_templates').includes(hex)) {
+                        removeGlobalColorByHex(hex, 'colors_across_templates');
+                        if (typeof notifyAcrossColorRemoved === 'function') notifyAcrossColorRemoved(hex);
+                    }
+                } else {
+                    addGlobalColor(hex, 'colors_across_templates');
+                }
+            });
+
             syncAcrossTemplateSourceColors();
         });
 
@@ -2562,3 +2588,4 @@
         });
     </script>
 @endsection
+
