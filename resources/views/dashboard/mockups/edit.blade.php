@@ -636,7 +636,8 @@
                                         <button type="button" id="openAcrossTemplatesColorPicker" class="gradient-picker-trigger openColorPicker" data-color-target="colors_across_templates" title="Pick a custom color"></button>
                                     </div>
                                     <div id="colorsAcrossTemplatesInputContainer"></div>
-                                    <button type="button" id="toggleBasePaletteSelect" class="btn btn-link btn-sm p-0 mt-1"
+                                    <button type="button" id="toggleBasePaletteSelect"
+                                            class="btn btn-link btn-sm p-0 mt-1 ms-auto d-block text-decoration-underline"
                                             data-bs-toggle="modal" data-bs-target="#basePaletteModal"
                                             title="Select from Mockup Base Palette">
                                         Select from Base Palette
