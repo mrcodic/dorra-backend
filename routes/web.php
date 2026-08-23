@@ -397,8 +397,9 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::delete('recent-mockups/{mockup}', 'destroyRecentMockup');
             Route::post('mockups/{mockup}/generate-template-files', 'generateTemplateFiles')
                 ->name('mockups.generate-template-files');
-            Route::delete('mockups/{mockup}/colors-across-templates/{hex}', 'removeAcrossTemplateColor'
-            )->name('mockups.colors-across-templates.remove');
+            Route::delete('mockups/{mockup}/colors-across-templates/{hex}/{template?}', 'removeAcrossTemplateColor')
+                ->where('hex', '[A-Fa-f0-9]{6,8}')
+                ->name('mockups.colors-across-templates.remove');
         });
 
         Route::post('check-product-type', [TemplateController::class, 'checkProductTypeInEditor']);

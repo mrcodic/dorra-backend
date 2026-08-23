@@ -9,6 +9,7 @@ use App\Http\Controllers\Base\DashboardController;
 use App\Http\Resources\MockupResource;
 
 use App\Models\Mockup;
+use App\Models\Template;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Repositories\Interfaces\TypeRepositoryInterface;
@@ -146,19 +147,32 @@ class MockupController extends DashboardController
         );
     }
 
-    public function removeAcrossTemplateColor(Mockup $mockup, string $hex, TemplateMockupGenerator $generator)
-    {
+    public function removeAcrossTemplateColor(Mockup $mockup, string $hex, TemplateMockupGenerator $generator,
+                                              ?Template $template = null) {
         $hex = strtolower(ltrim(trim($hex), '#'));
 
-        $mockup->colors_across_templates = collect($mockup->colors_across_templates ?? [])
-            ->reject(fn ($color) => strtolower(ltrim(trim($color), '#')) === $hex)
+        $oldColors = collect($mockup->colors_across_templates ?? [])
+            ->filter()
+            ->map(fn ($color) => strtolower(ltrim(trim($color), '#')))
+            ->unique()
             ->values()
             ->all();
 
-        $mockup->save();
-        $generator->handleUpdated($mockup);
+        $newColors = collect($oldColors)
+            ->reject(fn ($color) => $color === $hex)
+            ->values()
+            ->all();
 
-        return Response::api('Color removed from templates and generated files cleaned up.',);
+        $mockup->colors_across_templates = $newColors;
+        $mockup->save();
+
+        $generator->handleUpdated(
+            mockup: $mockup,
+            oldColors: $oldColors,
+            template: $template
+        );
+
+        return Response::api(message: 'Color removed successfully.');
     }
 
 }
