@@ -150,7 +150,17 @@ class MockupController extends DashboardController
     public function removeAcrossTemplateColor(Mockup $mockup, string $hex, TemplateMockupGenerator $generator,
                                               ?Template $template = null) {
         $hex = strtolower(ltrim(trim($hex), '#'));
+        if ($template) {
+            $generator->removeDeletedColors(
+                mockup: $mockup,
+                removedHexes: [$hex],
+                template: $template
+            );
 
+            return Response::api(
+                message: 'Color removed from this template successfully.'
+            );
+        }
         $oldColors = collect($mockup->colors_across_templates ?? [])
             ->filter()
             ->map(fn ($color) => strtolower(ltrim(trim($color), '#')))

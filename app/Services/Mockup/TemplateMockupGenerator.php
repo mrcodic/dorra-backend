@@ -138,12 +138,14 @@ class TemplateMockupGenerator
 
         $oldHexes = collect($oldColors)
             ->filter()
+            ->map(fn ($color) => $this->normalizeHex($color))
             ->unique()
             ->values()
             ->all();
 
         $newHexes = collect($newColors)
             ->filter()
+            ->map(fn ($color) => $this->normalizeHex($color))
             ->unique()
             ->values()
             ->all();
@@ -286,6 +288,7 @@ class TemplateMockupGenerator
     {
         $removedHexes = collect($removedHexes)
             ->filter()
+            ->map(fn ($color) => $this->normalizeHex($color))
             ->unique()
             ->values()
             ->all();
@@ -307,7 +310,7 @@ class TemplateMockupGenerator
 
                 $remainingColors = collect($pivotColors)
                     ->filter()
-                    ->reject(fn ($color) => in_array($color, $removedHexes, true))
+                    ->reject(fn ($color) => in_array($this->normalizeHex($color), $removedHexes, true))
                     ->values()
                     ->all();
 
@@ -315,7 +318,7 @@ class TemplateMockupGenerator
 
                 $modelColor = $currentTemplate->pivot->model_color;
 
-                if (!empty($modelColor) && in_array($modelColor, $removedHexes, true)) {
+                if (!empty($modelColor) && in_array($this->normalizeHex($modelColor), $removedHexes, true)) {
                     $updateData['model_color'] = $remainingColors[0] ?? null;
                 }
 
@@ -716,9 +719,20 @@ class TemplateMockupGenerator
     {
         return collect($colors)
             ->filter(fn ($color) => is_string($color) && trim($color) !== '')
-            ->unique()
+            ->map(fn ($color) => $this->formatHex($color))
+            ->unique(fn ($color) => $this->normalizeHex($color))
             ->values()
             ->all();
+    }
+
+    protected function normalizeHex(string $color): string
+    {
+        return strtolower(ltrim(trim($color), '#'));
+    }
+
+    protected function formatHex(string $color): string
+    {
+        return '#' . $this->normalizeHex($color);
     }
 
     protected function toArray(mixed $value): array
@@ -734,10 +748,6 @@ class TemplateMockupGenerator
         return [];
     }
 
-    protected function normalizeHex(string $color): string
-    {
-        return strtolower(ltrim(trim($color), '#'));
-    }
 
     protected function deleteGeneratedFiles(Mockup $mockup): void
     {
