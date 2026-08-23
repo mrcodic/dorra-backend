@@ -133,7 +133,8 @@ class TemplateMockupGenerator
         }
 
         $oldColors ??= $this->toArray($mockup->getOriginal('colors_across_templates'));
-        $newColors = $this->cleanColors($this->toArray($mockup->colors_across_templates ?? []));
+
+        $newColors = $this->toArray($mockup->colors_across_templates ?? []);
 
         $oldHexes = collect($oldColors)
             ->filter()
@@ -143,35 +144,44 @@ class TemplateMockupGenerator
             ->all();
 
         $newHexes = collect($newColors)
+            ->filter()
             ->map(fn ($color) => $this->normalizeHex($color))
             ->unique()
             ->values()
             ->all();
 
         $addedHexes = array_values(array_diff($newHexes, $oldHexes));
+        $removedHexes = array_values(array_diff($oldHexes, $newHexes));
 
-        if (empty($addedHexes)) {
-            return;
-        }
-
-        if ($template) {
-            $this->attachTemplateIfMissing($mockup, $template, $newColors);
-
-            $this->generateForNewColors(
-                $mockup,
-                $addedHexes,
-                $template->id
+        if (!empty($removedHexes)) {
+            $this->removeDeletedColors(
+                mockup: $mockup,
+                removedHexes: $removedHexes,
+                template: $template
             );
-
-            return;
         }
 
-        $this->attachMatchingTemplates($mockup, $newColors);
+        if (!empty($addedHexes)) {
+            if ($template) {
+                $this->attachTemplateIfMissing(
+                    $mockup,
+                    $template,
+                    $this->cleanColors($newColors)
+                );
 
-        $this->generateForNewColors(
-            $mockup,
-            $addedHexes
-        );
+                $this->generateForNewColors(
+                    $mockup,
+                    $addedHexes,
+                    $template->id
+                );
+
+                return;
+            }
+
+            $this->attachMatchingTemplates($mockup, $this->cleanColors($newColors));
+
+            $this->generateForNewColors($mockup, $addedHexes);
+        }
     }
     public function syncTemplateDefaults(Mockup $mockup, ?Collection $colors = null): void
     {
