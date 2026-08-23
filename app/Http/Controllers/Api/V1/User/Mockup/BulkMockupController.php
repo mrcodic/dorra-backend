@@ -159,6 +159,7 @@ class BulkMockupController extends Controller
                 $syncData[(string)$existingId] = [
                     'colors' => $template->pivot->colors,
                     'positions' => $template->pivot->positions,
+                    'model_color' => $template->pivot->model_color,
                     'type' => $template->pivot->type,
                 ];
             }
@@ -166,6 +167,8 @@ class BulkMockupController extends Controller
             $singlePivotEntry = [
                 'positions' => $request->input('positions'),
                 'type' => 'single',
+                'colors' => $hasColors ? $colors : [],
+                'model_color' => $hasColors ? ($existingPivot?->model_color ?? null) : null,
             ];
 
             if ($hasColors) {
@@ -311,19 +314,21 @@ class BulkMockupController extends Controller
                 $syncData[(string)$templateId] = [
                     'colors' => $template->pivot->colors,
                     'positions' => $template->pivot->positions,
+                    'model_color' => $template->pivot->model_color,
                     'type' => 'single',
                 ];
             }
 
             foreach ($templateIds as $templateId) {
+                $existingTemplate = $existingTemplates->get((string) $templateId);
+                $existingModelColor = $existingTemplate?->pivot?->model_color;
+
                 $pivotEntry = [
                     'positions' => $request->input('positions'),
                     'type' => 'bulk',
+                    'colors' => $hasColors ? ($mergedPivotColors[$templateId] ?? $colors) : [],
+                    'model_color' => $hasColors ? $existingModelColor : null,
                 ];
-
-                if ($hasColors) {
-                    $pivotEntry['colors'] = $mergedPivotColors[$templateId] ?? $colors;
-                }
 
                 $syncData[(string)$templateId] = $pivotEntry;
             }
