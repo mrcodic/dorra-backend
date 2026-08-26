@@ -5,6 +5,7 @@ use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Api\V1\User\Mockup\BulkMockupController;
 use App\Http\Controllers\Api\V1\User\ShippingAddress\ShippingController;
 use App\Http\Controllers\Dashboard\{AdminController,
+    AiGuideQuestionController,
     BoardController,
     CategoryController,
     CreditOrderController,
@@ -318,6 +319,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::post('tableau-scenes', [TableauSceneController::class, 'store'])
             ->name('tableau-scenes.store');
         Route::post('tableau-scenes/specifications', [TableauSceneController::class, 'tableauSize'])->name('tableau.specifications.size');
+        Route::resource('ai-guide-questions', AiGuideQuestionController::class);
 
     });
 
@@ -383,6 +385,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::get('product-specifications/{product}', [ProductSpecificationController::class, 'getProductSpecs'])->name('products.specifications');
 
         Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
+
 
         Route::controller(MockupController::class)->group(function () {
             Route::post('mockups/remove-color', 'removeColor')

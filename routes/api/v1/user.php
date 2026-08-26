@@ -5,6 +5,7 @@ use App\Http\Controllers\Shared\LibraryAssetController;
 use App\Http\Middleware\LocalizationMiddleware;
 use App\Http\Middleware\TrackVisits;
 use App\Http\Controllers\Api\V1\User\{Ai\AiAssetController,
+    Ai\AiGuideQuestionController,
     Ai\CreditController,
     Auth\LoginController,
     Auth\LogoutController,
@@ -77,6 +78,7 @@ Route::prefix('ship-blu/')->controller(ShippingController::class)->group(functio
     Route::post('delivery-fee', 'deliveryFee');
     Route::get('webhook', 'handleWebhook');
 });
+Route::get('ai-guide-questions', AiGuideQuestionController::class);
 
 Route::get('/fonts', [MainController::Class, 'fonts']);
 Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
