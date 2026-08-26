@@ -17,7 +17,8 @@ class BulkMockupController extends Controller
     public function generateBulk(Request $request, Mockup $mockup)
     {
         $type = $request->input('type', 'bulk');
-        $hasColors = $request->filled('colors');
+        $colorsProvided = $request->has('colors');
+        $hasColors = $request->filled('colors');     
 
         $request->validate([
             'type' => ['sometimes', 'string', Rule::in(['bulk', 'single'])],
@@ -65,9 +66,9 @@ class BulkMockupController extends Controller
         $mergedPivotColors = [];
 
         // =========================================================================
-// SINGLE — one template, pivot type "single". Does NOT detach/remove
-// previously attached single-type templates — only adds/updates this one.
-// =========================================================================
+        // SINGLE — one template, pivot type "single". Does NOT detach/remove
+        // previously attached single-type templates — only adds/updates this one.
+        // =========================================================================
         if ($type === 'single') {
             $templateId = (string)$templateIds[0];
 
@@ -176,6 +177,9 @@ class BulkMockupController extends Controller
 
             if ($hasColors) {
                 $mockup->update(['colors' => $colors]);
+            } elseif ($colorsProvided) {
+                // colors explicitly sent as null/empty — treat as "clear all colors"
+                $mockup->update(['colors' => []]);
             }
         }
 
@@ -333,6 +337,9 @@ class BulkMockupController extends Controller
 
             if ($hasColors) {
                 $mockup->update(['colors' => $colors]);
+            } elseif ($colorsProvided) {
+                // colors explicitly sent as null/empty — treat as "clear all colors"
+                $mockup->update(['colors' => []]);
             }
         }
 
