@@ -66,9 +66,9 @@ class BulkMockupController extends Controller
                 }
             } else {
                 $mergedPivotColors[$templateId] = [];
-                if ($positionsChanged) {
+//                if ($positionsChanged) {
                     $mockup->media()->where('collection_name', 'generated_mockups')->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [$templateId])->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])->get()->each(fn($media) => $media->delete());
-                }
+//                }
                 $renderJobs[] = ['template_id' => $templateId, 'hex' => 'model', 'model_only' => true];
             }
             $allExistingTemplates = $mockup->templates()->get()->keyBy('id');
