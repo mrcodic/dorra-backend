@@ -17,8 +17,8 @@ class BulkMockupController extends Controller
     public function generateBulk(Request $request, Mockup $mockup)
     {
         $type = $request->input('type', 'bulk');
-        $colorsProvided = $request->has('colors');
-        $hasColors = $request->filled('colors');     
+        $colorsProvided = $request->has('colors');   // key present at all, even if null/empty
+        $hasColors = $request->filled('colors');     // key present AND non-empty
 
         $request->validate([
             'type' => ['sometimes', 'string', Rule::in(['bulk', 'single'])],
@@ -133,19 +133,12 @@ class BulkMockupController extends Controller
                         ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [$templateId])
                         ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])
                         ->get()->each(fn($media) => $media->delete());
-
-                    $renderJobs[] = ['template_id' => $templateId, 'hex' => 'model', 'model_only' => true];
-                } else {
-                    $hasModelImage = $mockup->media()
-                        ->where('collection_name', 'generated_mockups')
-                        ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [$templateId])
-                        ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])
-                        ->exists();
-
-                    if (!$hasModelImage) {
-                        $renderJobs[] = ['template_id' => $templateId, 'hex' => 'model', 'model_only' => true];
-                    }
                 }
+
+                // Always create a job for the model image, whether or not one
+                // already exists / positions changed — ensures generateBulk
+                // never returns an empty 0/0 job when no colors are sent.
+                $renderJobs[] = ['template_id' => $templateId, 'hex' => 'model', 'model_only' => true];
             }
 
             // Sync pivot — preserve ALL existing templates (bulk + other singles),
@@ -275,19 +268,11 @@ class BulkMockupController extends Controller
                             ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$templateId])
                             ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])
                             ->get()->each(fn($media) => $media->delete());
-
-                        $renderJobs[] = ['template_id' => $templateId, 'hex' => 'model', 'model_only' => true];
-                    } else {
-                        $hasModelImage = $mockup->media()
-                            ->where('collection_name', 'generated_mockups')
-                            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$templateId])
-                            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])
-                            ->exists();
-
-                        if (!$hasModelImage) {
-                            $renderJobs[] = ['template_id' => $templateId, 'hex' => 'model', 'model_only' => true];
-                        }
                     }
+
+                    // Always create a job for the model image — see single-branch
+                    // comment above; avoids ending up with an empty 0/0 bulk job.
+                    $renderJobs[] = ['template_id' => $templateId, 'hex' => 'model', 'model_only' => true];
                 }
             }
 
@@ -394,7 +379,6 @@ class BulkMockupController extends Controller
             'rendered_jobs' => count($renderJobs),
         ]);
     }
-
     public function status($id)
     {
         $job = MockupGenerationJob::findOrFail($id);
