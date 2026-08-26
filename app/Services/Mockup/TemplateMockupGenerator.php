@@ -352,7 +352,7 @@ class TemplateMockupGenerator
             })
             ->lazyById(100)
             ->each(fn ($media) => $media->delete());
-        
+
         foreach ($newModelColorsByTemplate as $templateId => $hex) {
             $this->generateForNewColors($mockup, [$hex], $templateId);
         }
@@ -370,7 +370,7 @@ class TemplateMockupGenerator
         return str_starts_with($color, '#') ? $color : '#' . $color;
     }
 
-    protected function generateForNewColors(Mockup $mockup, array $addedHexes, ?int $templateId = null): void
+    protected function generateForNewColors(Mockup $mockup, array $addedHexes, ?string $templateId = null): void
     {
         $addedHexes = collect($addedHexes)
             ->filter()
