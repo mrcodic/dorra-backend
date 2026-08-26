@@ -283,7 +283,6 @@ class TemplateMockupGenerator
                 $mockup->templates()->syncWithoutDetaching($pivotData);
             });
     }
-
     public function removeDeletedColors(Mockup $mockup, array $removedHexes, ?Template $template = null): void
     {
         $removedHexes = collect($removedHexes)
@@ -303,9 +302,11 @@ class TemplateMockupGenerator
             $templatesQuery->where('templates.id', $template->id);
         }
 
+        $newModelColorsByTemplate = [];
+
         $templatesQuery
             ->lazyById(100, 'templates.id', 'id')
-            ->each(function ($currentTemplate) use ($mockup, $removedHexes) {
+            ->each(function ($currentTemplate) use ($mockup, $removedHexes, &$newModelColorsByTemplate) {
                 $pivotColors = $this->toArray($currentTemplate->pivot->colors ?? []);
 
                 $remainingColors = collect($pivotColors)
@@ -319,7 +320,12 @@ class TemplateMockupGenerator
                 $modelColor = $currentTemplate->pivot->model_color;
 
                 if (!empty($modelColor) && in_array($this->normalizeHex($modelColor), $removedHexes, true)) {
-                    $updateData['model_color'] = $remainingColors[0] ?? null;
+                    $newModelColor = $remainingColors[0] ?? null;
+                    $updateData['model_color'] = $newModelColor;
+
+                    if (!empty($newModelColor)) {
+                        $newModelColorsByTemplate[$currentTemplate->id] = $newModelColor;
+                    }
                 }
 
                 $mockup->templates()->updateExistingPivot($currentTemplate->id, $updateData);
@@ -340,13 +346,30 @@ class TemplateMockupGenerator
                 foreach ($removedHexes as $hex) {
                     $query->orWhereRaw(
                         "LOWER(REPLACE(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex')), '#', '')) = ?",
-                        [$hex]
+                        [ltrim($hex, '#')]
                     );
                 }
             })
             ->lazyById(100)
             ->each(fn ($media) => $media->delete());
+        
+        foreach ($newModelColorsByTemplate as $templateId => $hex) {
+            $this->generateForNewColors($mockup, [$hex], $templateId);
+        }
     }
+
+    protected function normalizeHex(string $color): string
+    {
+        return strtolower(trim($color));
+    }
+
+    protected function formatHex(string $color): string
+    {
+        $color = strtolower(trim($color));
+
+        return str_starts_with($color, '#') ? $color : '#' . $color;
+    }
+
     protected function generateForNewColors(Mockup $mockup, array $addedHexes, ?int $templateId = null): void
     {
         $addedHexes = collect($addedHexes)
@@ -725,15 +748,6 @@ class TemplateMockupGenerator
             ->all();
     }
 
-    protected function normalizeHex(string $color): string
-    {
-        return strtolower(ltrim(trim($color), '#'));
-    }
-
-    protected function formatHex(string $color): string
-    {
-        return '#' . $this->normalizeHex($color);
-    }
 
     protected function toArray(mixed $value): array
     {
