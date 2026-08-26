@@ -308,10 +308,10 @@ class TemplateMockupGenerator
         $newModelColorsByTemplate = [];
         $templatesWithoutColors = [];
 
-        $templatesQuery
-            ->lazyById(100, 'templates.id', 'id')
+        $templatesQuery->lazyById(100, 'templates.id', 'id')
             ->each(function ($currentTemplate) use ($mockup, $removedHexes, &$newModelColorsByTemplate, &$templatesWithoutColors) {
                 $pivotColors = $this->toArray($currentTemplate->pivot->colors ?? []);
+
                 $remainingColors = collect($pivotColors)
                     ->filter()
                     ->reject(fn ($color) => in_array($this->normalizeHex($color), $removedHexes, true))
@@ -326,9 +326,7 @@ class TemplateMockupGenerator
                     $updateData['model_color'] = $newModelColor;
 
                     if ($newModelColor !== null) {
-                        $newModelColorsByTemplate[$currentTemplate->id] = $newModelColor;
-                    } else {
-                        $templatesWithoutColors[] = (string) $currentTemplate->id;
+                        $newModelColorsByTemplate[(string) $currentTemplate->id] = $newModelColor;
                     }
                 }
 
@@ -339,8 +337,6 @@ class TemplateMockupGenerator
 
                 $mockup->templates()->updateExistingPivot($currentTemplate->id, $updateData);
             });
-
-        $templatesWithoutColors = array_values(array_unique($templatesWithoutColors));
 
         $mediaQuery = $mockup->media()->where('collection_name', 'generated_mockups');
 
@@ -363,16 +359,74 @@ class TemplateMockupGenerator
             ->lazyById(100)
             ->each(fn ($media) => $media->delete());
 
-        foreach ($newModelColorsByTemplate as $templateId => $hex) {
-            $this->deleteGeneratedColorForTemplate($mockup, (int) $templateId, $hex);
-            $this->generateForNewColors($mockup, [$hex], (string) $templateId);
+        foreach ($newModelColorsByTemplate as $templateId => $color) {
+            $this->forceGenerateColorForTemplate($mockup, $templateId, $color);
         }
 
-        foreach ($templatesWithoutColors as $templateId) {
+        foreach (array_unique($templatesWithoutColors) as $templateId) {
             $this->generateWithoutColor($mockup, $templateId, true);
         }
     }
+    protected function forceGenerateColorForTemplate(Mockup $mockup, string $templateId, string $color): void
+    {
+        $template = $mockup->templates()
+            ->where('templates.id', $templateId)
+            ->first();
 
+        if (!$template) {
+            return;
+        }
+
+        $pivotPositions = $this->toArray($template->pivot->positions ?? []);
+
+        $positions = empty($pivotPositions)
+            ? $this->getDefaultPositions($mockup, $template)
+            : $this->getTemplatePositions($template);
+
+        if (empty($positions)) {
+            return;
+        }
+
+        $color = $this->formatHex($color);
+
+        $this->deleteGeneratedColorForTemplate($mockup, (int) $templateId, $color);
+
+        $mockup->media()
+            ->where('collection_name', 'generated_mockups')
+            ->whereRaw(
+                "JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?",
+                [$templateId]
+            )
+            ->get()
+            ->each(function ($media) {
+                $media->setCustomProperty('model_image', 0);
+                $media->save();
+            });
+
+        $bulkJob = MockupGenerationJob::create([
+            'mockup_id' => $mockup->id,
+            'status' => 'pending',
+            'total_count' => count($positions),
+            'completed_count' => 0,
+            'failed_count' => 0,
+            'started_at' => now(),
+        ]);
+
+        foreach ($positions as $side => $points) {
+            $item = BulkJobItem::create([
+                'bulk_job_id' => $bulkJob->id,
+                'template_id' => $templateId,
+                'color' => $color,
+                'side' => $side,
+                'points' => $points,
+                'status' => 'pending',
+            ]);
+
+            RenderMockupJob::dispatch($bulkJob, $item, $mockup);
+        }
+
+        $bulkJob->update(['status' => 'processing']);
+    }
     protected function normalizeHex(string $color): string
     {
         return strtolower(trim($color));
