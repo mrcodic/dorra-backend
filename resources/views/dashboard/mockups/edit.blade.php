@@ -1,7 +1,7 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Edit Mockup')
-@section('main-page', 'Edit Mockup')
+@section('title', 'Create Mockup')
+@section('main-page', 'Create Mockup')
 
 @section('vendor-style')
     {{-- Page Css files --}}
@@ -334,14 +334,8 @@
         }
 
         #selected-colors,
+        #selected-colors-across-templates,
         #mockupColorsAcrossOptions {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-
-        #selected-colors-across-templates {
             display: flex;
             align-items: center;
             flex-wrap: wrap;
@@ -399,72 +393,15 @@
     {{-- Page Css files --}}
     <link rel="stylesheet" href="{{ asset(mix('css/base/plugins/forms/form-validation.css')) }}">
 @endsection
-@php
-    $mediaCollection = $model->getMedia('mockups');
 
-    $existingMedia = [
-        'front' => [
-            'base_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'base')->first()?->getFullUrl(),
-            'mask_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'mask')->first()?->getFullUrl(),
-            'shadow_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'shadow')->first()?->getFullUrl(),
-            'displacement_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'displacement')->first()?->getFullUrl(),
-            'light_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'light')->first()?->getFullUrl(),
-        ],
-        'back' => [
-            'base_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'base')->first()?->getFullUrl(),
-            'mask_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'mask')->first()?->getFullUrl(),
-            'shadow_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'shadow')->first()?->getFullUrl(),
-            'displacement_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'displacement')->first()?->getFullUrl(),
-            'light_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'light')->first()?->getFullUrl(),
-        ],
-        'none' => [
-            'base_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'base')->first()?->getFullUrl(),
-            'mask_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'mask')->first()?->getFullUrl(),
-            'shadow_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'shadow')->first()?->getFullUrl(),
-            'displacement_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'displacement')->first()?->getFullUrl(),
-            'light_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'light')->first()?->getFullUrl(),
-        ],
-    ];
-
-    $existingMediaIds = [
-        'front' => [
-            'base_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'base')->first()?->id,
-            'mask_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'mask')->first()?->id,
-            'shadow_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'shadow')->first()?->id,
-            'displacement_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'displacement')->first()?->id,
-            'light_image' => $mediaCollection->where('custom_properties.side', 'front')->where('custom_properties.role', 'light')->first()?->id,
-        ],
-        'back' => [
-            'base_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'base')->first()?->id,
-            'mask_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'mask')->first()?->id,
-            'shadow_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'shadow')->first()?->id,
-            'displacement_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'displacement')->first()?->id,
-            'light_image' => $mediaCollection->where('custom_properties.side', 'back')->where('custom_properties.role', 'light')->first()?->id,
-        ],
-        'none' => [
-            'base_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'base')->first()?->id,
-            'mask_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'mask')->first()?->id,
-            'shadow_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'shadow')->first()?->id,
-            'displacement_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'displacement')->first()?->id,
-            'light_image' => $mediaCollection->where('custom_properties.side', 'none')->where('custom_properties.role', 'light')->first()?->id,
-        ],
-    ];
-
-    $existingWarpPoints = [
-        'front' => $model->sideSettings->firstWhere('side', 'front')?->warp_points ?? null,
-        'back'  => $model->sideSettings->firstWhere('side', 'back')?->warp_points  ?? null,
-        'none'  => $model->sideSettings->firstWhere('side', 'none')?->warp_points  ?? null,
-    ];
-@endphp
 @section('content')
     <!-- users list start -->
     <section class="">
         <div class="card">
             <div class="card-body">
-                <form id="editMockupForm" enctype="multipart/form-data" action="{{ route('mockups.update',$model->id) }}">
+                <form id="addMockupForm" enctype="multipart/form-data" action="{{ route('mockups.store') }}">
                     @csrf
-                    @method('PUT')
-                    {{--                <input type="hidden" name="approach" value="{{ $model->approach }}">--}}
+                    {{--                    <input type="hidden" name="approach" value="{{ request('q') === 'with' ? 'with_editor' : 'without_editor' }}">--}}
                     <div class="modal-body flex-grow-1">
                         <div class="position-relative text-center mb-2">
                             <hr class="opacity-75" style="border: 1px solid #24B094;">
@@ -476,11 +413,13 @@
                         </div>
                         <div class="row">
                             <div class="row">
+
                                 <div class="form-group mb-2 col-md-12">
                                     <label for="mockupName" class="label-text mb-1">Mockup Name</label>
                                     <input type="text" id="templateName" class="form-control" name="name"
-                                           placeholder="Mockup Name" value="{{ $model->name }}">
+                                           placeholder="Mockup Name">
                                 </div>
+
                             </div>
                             <div class="row">
 
@@ -489,7 +428,7 @@
                                     <select id="productsSelect" name="category_id" class="form-select">
                                         <option value="" disabled selected>Choose product</option>
                                         @foreach($associatedData['products'] as $product)
-                                            <option value="{{ $product->id }}" @selected($product->id == $model->category_id)>
+                                            <option value="{{ $product->id }}">
                                                 {{ $product->getTranslation('name', app()->getLocale()) }}
                                             </option>
                                         @endforeach
@@ -502,69 +441,53 @@
                                     </select>
                                 </div>
                             </div>
-
                             <div class="row">
                                 <div class="form-group mb-2 col-md-3">
-                                    <label for="fillRatio" class="label-text mb-1">Fill Ratio</label>
-
-                                    <input
-                                        type="number"
-                                        id="fillRatio"
-                                        class="form-control"
-                                        name="fill_ratio"
-                                        placeholder="ex: 70"
-                                        value="{{ old('fill_ratio', $model->fill_ratio) }}"
-                                    >
+                                    <label for="fillRatio" class="label-text mb-1 d-flex align-items-center gap-2">
+                                        Fill Ratio
+                                    </label>
+                                    <input type="number" id="fillRatio" class="form-control" name="fill_ratio"
+                                           placeholder="ex: 70">
                                     <small class="form-text text-muted">
-                                        ex:  t-shirt: 70
+                                        ex: t-shirt: 70
                                     </small>
                                 </div>
 
                                 <div class="form-group mb-2 col-md-3">
-                                    <label for="light_strength" class="label-text mb-1">Light Strength</label>
-
-                                    <input
-                                        type="number"
-                                        id="light_strength"
-                                        class="form-control"
-                                        name="light_strength"
-                                        placeholder="ex: 40"
-                                        value="{{ old('light_strength', $model->light_strength) }}"
-                                    >
+                                    <label for="light_strength"
+                                           class="label-text mb-1 d-flex align-items-center gap-2 flex-wrap">
+                                        Light Strength
+                                    </label>
+                                    <input type="number" id="light_strength" class="form-control" name="light_strength"
+                                           placeholder="ex: 40">
                                     <small class="form-text text-muted">
-                                        ex:  t-shirt: 35 ,scarf: 35-45
+                                        ex: t-shirt: 35 ,scarf: 35-45
                                     </small>
+
                                 </div>
 
                                 <div class="form-group mb-2 col-md-3">
-                                    <label for="shadow_strength" class="label-text mb-1">Shadow Strength</label>
-
-                                    <input
-                                        type="number"
-                                        id="shadow_strength"
-                                        class="form-control"
-                                        name="shadow_strength"
-                                        placeholder="ex: 60"
-                                        value="{{ old('shadow_strength', $model->shadow_strength) }}"
-                                    >
+                                    <label for="shadow_strength"
+                                           class="label-text mb-1 d-flex align-items-center gap-2 flex-wrap">
+                                        Shadow Strength
+                                    </label>
+                                    <input type="number" id="shadow_strength" class="form-control"
+                                           name="shadow_strength" placeholder="ex: 60">
                                     <small class="form-text text-muted">
-                                        ex:  t-shirt: 45% , scarf: 55-65%
+                                        ex: t-shirt: 45% , scarf: 55-65%
                                     </small>
+
                                 </div>
 
                                 <div class="form-group mb-2 col-md-3">
-                                    <label for="displacement_scale" class="label-text mb-1">Displacement Scale</label>
-
-                                    <input
-                                        type="number"
-                                        id="displacement_scale"
-                                        class="form-control"
-                                        name="displacement_scale"
-                                        placeholder="ex: 15"
-                                        value="{{ old('displacement_scale', $model->displacement_scale) }}"
-                                    >
+                                    <label for="displacement_scale"
+                                           class="label-text mb-1 d-flex align-items-center gap-2 flex-wrap">
+                                        Displacement Scale
+                                    </label>
+                                    <input type="number" id="displacement_scale" class="form-control"
+                                           name="displacement_scale" placeholder="ex: 15">
                                     <small class="form-text text-muted">
-                                        ex:  t-shirt: 8-10 ,scarf: 12-18
+                                        ex: t-shirt: 8-10 ,scarf: 12-18
                                     </small>
                                 </div>
                             </div>
@@ -573,8 +496,9 @@
                                     @foreach($associatedData['types'] as $type)
                                         <div class="col-md-4 mb-1">
                                             <label class="radio-box">
-                                                <input class="form-check-input type-checkbox" type="checkbox" name="types[]"
-                                                       value="{{ $type->value }}" @checked($model->types->contains($type))
+                                                <input class="form-check-input type-checkbox" type="checkbox"
+                                                       name="types[]"
+                                                       value="{{ $type->value }}"
                                                        data-type-name="{{ strtolower($type->value->name) }}">
                                                 <span>{{ $type->value->label() }}</span>
                                             </label>
@@ -625,7 +549,7 @@
                                             <div class="palette-card-icon">&#127912;</div>
                                             <div>
                                                 <div class="palette-card-name">Colors Across Templates</div>
-                                                <p class="palette-card-copy">Select from Base Palette or add custom colors to use across templates.</p>
+                                                <p class="palette-card-copy">Select from Mockup Colors or add another color to use across templates.</p>
                                             </div>
                                         </div>
                                         <span class="palette-badge">OPTIONAL</span>
@@ -633,7 +557,8 @@
                                     <div class="palette-note"><span class="palette-note-check">&#10003;</span><span>Select any base color below, or add a custom color.</span></div>
                                     <div class="palette-colors-row">
                                         <span id="selected-colors-across-templates"></span>
-                                        <button type="button" id="openAcrossTemplatesColorPicker" class="gradient-picker-trigger openColorPicker" data-color-target="colors_across_templates" title="Pick a custom color"></button>
+                                        <button type="button" id="openAcrossTemplatesColorPicker" class="gradient-picker-trigger openColorPicker"
+                                                data-color-target="colors_across_templates" title="Pick a custom color"></button>
                                     </div>
                                     <div id="colorsAcrossTemplatesInputContainer"></div>
                                     <button type="button" id="toggleBasePaletteSelect"
@@ -642,78 +567,107 @@
                                             title="Select from Mockup Base Palette">
                                         Select from Base Palette
                                     </button>
-                                    <div class="palette-footer"><span class="palette-footer-dot"></span><span>Optional · Reuses colors already defined in the Base Palette</span></div>
-                                    <button type="button" class="btn btn-secondary btn-sm mt-2 px-2 py-1" id="generateTemplateMockupFiles" data-mockup-id="{{ $model->id }}" style="font-size:13px;white-space:nowrap;">
+                                    <div class="palette-footer"><span class="palette-footer-dot"></span><span>Optional · Can reuse base colors or include custom colors</span></div>
+                                    <button type="button" class="btn btn-secondary btn-sm d-none mt-2 px-2 py-1" id="generateTemplateMockupFiles" data-mockup-id="" style="font-size:13px;white-space:nowrap;">
                                         <span class="btn-text">Generate Mockups</span>
-                                        <span class="spinner-border spinner-border-sm d-none ms-1" id="generateTemplateMockupFilesLoader" role="status"></span>
+                                        <span class="spinner-border spinner-border-sm d-none ms-1" id="generateTemplateMockupFilesLoader"></span>
                                     </button>
                                 </div>
                             </div>
 
                         </div>
-                    </div>
-                    {{--                @endif--}}
 
-                    <div class="modal-footer border-top-0">
-                        <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
-                            <span class="btn-text">Save Changes</span>
-                            <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader" role="status"
-                                  aria-hidden="true"></span>
-                        </button>
+                        <div class="modal-footer border-top-0">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel
+                            </button>
+
+                            <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
+                                <span class="btn-text">Create</span>
+                                <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
+                                      role="status"
+                                      aria-hidden="true"></span>
+                            </button>
+                        </div>
+
                     </div>
 
                 </form>
             </div>
+
         </div>
-        @include("modals.templates.template-modal")
-    </section>
 
-    {{-- Select-from-Mockup-Base-Palette popup --}}
-    <div class="modal fade" id="basePaletteModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Select from Mockup Base Palette</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
-                </div>
-                <div class="modal-body">
-                    <div id="mockupColorsAcrossOptions"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-primary me-auto" id="selectAllBasePaletteColors">Select All</button>
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Done</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Remove Color Modal -->
-    <div class="modal fade" id="removeColorModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content rounded-3 shadow">
-                <div class="modal-header text-white">
-                    <h5 class="modal-title">Remove Color from Mockups</h5>
-                    <button type="button" class="btn-close d-flex align-items-start justify-content-center"
-                            data-bs-dismiss="modal" aria-label="Close" style="background-color: #24b094">x</button>
-                </div>
-                <div class="modal-body">
-                    <p class="mb-1">This color exists in other mockups using the same template. Do you want to remove it
-                        from all of them?</p>
-
-                    <div id="relatedMockupsList" class="rounded p-1 bg-light d-flex flex-wrap gap-1"
-                         style="max-height:300px; overflow-y: auto;">
-                        <div class="text-center text-muted">Loading mockups...</div>
-                        <div id="relatedMockupsList"></div>
+        {{-- Select-from-Mockup-Base-Palette popup --}}
+        <div class="modal fade" id="basePaletteModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Select from Mockup Base Palette</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="mockupColorsAcrossOptions"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-primary me-auto" id="selectAllBasePaletteColors">Select All</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Done</button>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirmRemoveColor">Yes, remove from all</button>
+            </div>
+        </div>
+
+
+        <div class="modal fade" id="confirmColorDeleteModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-3 shadow">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Delete Color?</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2">Are you sure you want to delete this color?</p>
+                        <div class="d-flex align-items-center gap-1" id="confirmDeleteColorPreviewWrap">
+                            <span id="confirmDeleteColorPreview" style="width:28px;height:28px;border-radius:50%;border:1px solid #ddd;display:inline-block;"></span>
+                            <strong id="confirmDeleteColorValue"></strong>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirmDeleteColorAction">Yes, Delete</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
+
+        <div class="modal fade" id="generationProgressModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-3 shadow">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Generating Mockups</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span id="generationProgressStatus">Preparing...</span>
+                            <strong id="generationProgressPercent">0%</strong>
+                        </div>
+                        <div class="progress" style="height:12px;">
+                            <div id="generationProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width:0%" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1 small text-muted">
+                            <span id="generationProgressCount">0 / 0</span>
+                            <span id="generationProgressRemaining">Calculating...</span>
+                        </div>
+                        <div id="generationProgressError" class="alert alert-danger d-none mt-2 mb-0"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary d-none" id="generationProgressClose" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @include("modals.templates.template-modal")
+    </section>
     <!-- users list ends -->
 @endsection
 
@@ -740,29 +694,177 @@
 @endsection
 
 @section('page-script')
+    <script>
+        function resetGenerateButton() {
+            const $button = $('#generateTemplateMockupFiles');
+            $button.prop('disabled', false);
+            $('#generateTemplateMockupFilesLoader').addClass('d-none');
+            $button.find('.btn-text').text('Generate Mockups');
+        }
 
+
+        let generationPollTimer = null;
+        let generationReloadOnClose = false;
+        const bulkJobStatusUrlTemplate = @json(route('bulk-jobs.status', ['__JOB_ID__']));
+
+        function extractBulkJobId(response) {
+            return response?.data?.data?.bulk_job_id ?? response?.data?.bulk_job_id ?? response?.bulk_job_id ?? response?.data?.data?.id ?? response?.data?.id ?? null;
+        }
+
+        function formatRemainingSeconds(seconds) {
+            seconds = Math.max(0, parseInt(seconds || 0, 10));
+            if (!seconds) return 'Finishing...';
+            if (seconds < 60) return `${seconds}s remaining`;
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes}m ${secs}s remaining`;
+        }
+
+        function resetGenerationProgressModal() {
+            $('#generationProgressStatus').text('Preparing...');
+            $('#generationProgressPercent').text('0%');
+            $('#generationProgressBar').css('width', '0%').attr('aria-valuenow', 0).addClass('progress-bar-animated');
+            $('#generationProgressCount').text('0 / 0');
+            $('#generationProgressRemaining').text('Calculating...');
+            $('#generationProgressError').addClass('d-none').text('');
+            $('#generationProgressClose').addClass('d-none');
+        }
+
+        function startGenerationProgress(jobId, reloadOnClose = false) {
+            if (!jobId) return false;
+            clearTimeout(generationPollTimer);
+            generationReloadOnClose = reloadOnClose;
+            resetGenerationProgressModal();
+            $('#generationProgressModal').modal('show');
+            const statusUrl = bulkJobStatusUrlTemplate.replace('__JOB_ID__', jobId);
+
+            const poll = function () {
+                $.ajax({
+                    url: statusUrl,
+                    type: 'GET',
+                    headers: {'Accept': 'application/json'},
+                    success: function (response) {
+                        const job = response?.data?.data ?? response?.data ?? response ?? {};
+                        const status = String(job.status || 'processing');
+                        const percent = Math.max(0, Math.min(100, Number(job.percent) || 0));
+                        const completed = Number(job.completed_count) || 0;
+                        const failed = Number(job.failed_count) || 0;
+                        const total = Number(job.total_count) || 0;
+                        const terminal = ['completed', 'completed_with_errors', 'failed', 'cancelled'].includes(status);
+
+                        $('#generationProgressPercent').text(`${percent.toFixed(1)}%`);
+                        $('#generationProgressBar').css('width', `${percent}%`).attr('aria-valuenow', percent);
+                        $('#generationProgressCount').text(`${completed} / ${total}${failed ? ` • ${failed} failed` : ''}`);
+                        $('#generationProgressRemaining').text(terminal ? 'Finished' : formatRemainingSeconds(job.estimated_remaining_seconds));
+                        $('#generationProgressStatus').text(status.replaceAll('_', ' '));
+
+                        if (terminal) {
+                            $('#generationProgressBar').removeClass('progress-bar-animated');
+                            $('#generationProgressClose').removeClass('d-none');
+                            if (status === 'failed' || status === 'cancelled') {
+                                $('#generationProgressError').removeClass('d-none').text(status === 'failed' ? 'Mockup generation failed.' : 'Mockup generation was cancelled.');
+                            } else if (status === 'completed_with_errors') {
+                                $('#generationProgressError').removeClass('d-none').text('Generation completed with some failed items.');
+                            }
+                            if (typeof resetGenerateButton === 'function') resetGenerateButton();
+                            return;
+                        }
+
+                        generationPollTimer = setTimeout(poll, 1000);
+                    },
+                    error: function (xhr) {
+                        $('#generationProgressError').removeClass('d-none').text(xhr.responseJSON?.message || 'Unable to read generation progress. Retrying...');
+                        generationPollTimer = setTimeout(poll, 2000);
+                    }
+                });
+            };
+
+            poll();
+            return true;
+        }
+
+        $(document).on('hidden.bs.modal', '#generationProgressModal', function () {
+            clearTimeout(generationPollTimer);
+            if (generationReloadOnClose) location.reload();
+        });
+
+        $(document).on('click', '#generateTemplateMockupFiles', function () {
+            const $button = $(this);
+            const mockupId = $button.attr('data-mockup-id');
+            if (!mockupId) {
+                Toastify({
+                    text: 'Please save the mockup first',
+                    duration: 3000,
+                    gravity: 'top',
+                    position: 'right',
+                    backgroundColor: '#dc3545',
+                    close: true
+                }).showToast();
+                return;
+            }
+
+            const url = @json(route('mockups.generate-template-files', ['mockup' => '__MOCKUP_ID__'])).replace('__MOCKUP_ID__', mockupId);
+            $button.prop('disabled', true);
+            $('#generateTemplateMockupFilesLoader').removeClass('d-none');
+            $button.find('.btn-text').text('Generating...');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Accept': 'application/json'
+                },
+                success: function (response) {
+                    const jobId = extractBulkJobId(response);
+                    Toastify({
+                        text: response.message || 'Mockup generation started',
+                        duration: 2500,
+                        gravity: 'top',
+                        position: 'right',
+                        backgroundColor: '#28a745',
+                        close: true
+                    }).showToast();
+                    if (!startGenerationProgress(jobId, false)) {
+                        Toastify({
+                            text: 'Generation started but no bulk job id was returned.',
+                            duration: 3000,
+                            gravity: 'top',
+                            position: 'right',
+                            backgroundColor: '#dc3545',
+                            close: true
+                        }).showToast();
+                        resetGenerateButton();
+                    }
+                },
+                error: function (xhr) {
+                    Toastify({
+                        text: xhr.responseJSON?.message || 'Failed to generate mockup files',
+                        duration: 3000,
+                        gravity: 'top',
+                        position: 'right',
+                        backgroundColor: '#dc3545',
+                        close: true
+                    }).showToast();
+                    resetGenerateButton();
+                }
+            });
+        });
+    </script>
     <script>
         $('#productsSelect').select2({
             placeholder: 'Choose product',
             allowClear: true,
             width: '100%',
         });
-
         $('#categoriesSelect').select2({
             placeholder: 'Choose category',
             allowClear: true,
             width: '100%',
         });
 
-        const selectedCategoryIdsOnLoad = @json(
-        old('product_ids', isset($model) && method_exists($model, 'products')
-            ? $model->products->pluck('id')->map(fn($id) => (string) $id)->values()
-            : []
-        )
-    );
-
-        function loadCategoriesBySelectedProducts(preselectedIds = []) {
-            const selectedIds = $('#productsSelect').val();
+        $('#productsSelect').on('change', function () {
+            const selectedIds = $(this).val();
 
             const ids = Array.isArray(selectedIds)
                 ? selectedIds
@@ -770,955 +872,60 @@
 
             const $right = $('#categoriesSelect');
 
-            if (!ids.length) {
-                $right.empty().trigger('change');
-                return;
-            }
+            if (ids.length > 0) {
+                $.ajax({
+                    url: "{{ route('products.categories') }}",
+                    type: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        category_ids: ids
+                    },
+                    success(response) {
+                        $right.empty();
 
-            $.ajax({
-                url: "{{ route('products.categories') }}",
-                type: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    category_ids: ids
-                },
-                success(response) {
-                    $right.empty();
+                        (response.data || []).forEach(cat => {
+                            const opt = new Option(cat.name, cat.id, false, true);
+                            $(opt).attr('data-has-mockup', cat.has_mockup ? '1' : '0');
+                            $right.append(opt);
+                        });
 
-                    (response.data || []).forEach(cat => {
-                        const catId = String(cat.id);
-
-                        const isSelected = preselectedIds
-                            .map(String)
-                            .includes(catId);
-
-                        const opt = new Option(cat.name, cat.id, isSelected, isSelected);
-
-                        $(opt).attr('data-has-mockup', cat.has_mockup ? '1' : '0');
-
-                        $right.append(opt);
-                    });
-
-                    $right.trigger('change');
-                },
-                error(xhr) {
-                    console.error("Error fetching categories:", xhr.responseText);
-                }
-            });
-        }
-
-        $('#productsSelect').on('change', function () {
-            loadCategoriesBySelectedProducts([]);
-        });
-
-        $(document).ready(function () {
-            if ($('#productsSelect').val()) {
-                loadCategoriesBySelectedProducts(selectedCategoryIdsOnLoad);
-            }
-        });
-        @php
-            $preFillColors = old('pre_fill_colors', $model->pre_fill_colors ?? []);
-            if (is_string($preFillColors)) {
-                $preFillColors = json_decode($preFillColors, true) ?? [];
-            }
-            if (!is_array($preFillColors)) {
-                $preFillColors = [];
-            }
-
-            $colorsAcrossTemplates = old('colors_across_templates', $model->colors_across_templates ?? []);
-            if (is_string($colorsAcrossTemplates)) {
-                $colorsAcrossTemplates = json_decode($colorsAcrossTemplates, true) ?? [];
-            }
-            if (!is_array($colorsAcrossTemplates)) {
-                $colorsAcrossTemplates = [];
-            }
-        @endphp
-        const existingGlobalMockupColors = @json(array_values($preFillColors));
-        const existingAcrossTemplateColors = @json(array_values($colorsAcrossTemplates));
-        const mockupIdForColorSync = "{{ $model->id }}";
-    </script>
-    <script>
-        const attachedTemplateIdsRaw = @json(($model?->templates?->pluck('id') ?? collect())->values());
-        const attachedTemplateIds = new Set((attachedTemplateIdsRaw || []).map(id => String(id)));
-    </script>
-
-
-    <script>
-        function capitalize(str) {
-            return str.charAt(0).toUpperCase() + str.slice(1);
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-
-            function capitalize(str) {
-                return str.charAt(0).toUpperCase() + str.slice(1);
-            }
-
-            function preloadFile(type, baseUrl, maskUrl, shadowUrl, displacementUrl, lightUrl) {
-                const baseInput = document.getElementById(`${type}-base-input`);
-                const maskInput = document.getElementById(`${type}-mask-input`);
-                const shadowInput = document.getElementById(`${type}-shadow-input`);
-                const displacementInput = document.getElementById(`${type}-displacement-input`);
-                const lightInput = document.getElementById(`${type}-light-input`);
-
-                const block = document.getElementById(`${type}-file-block`);
-                if (!block) return;
-
-                const basePreview = block.querySelector(`.upload-area[data-input-id="${type}-base-input"] .preview`);
-                const maskPreview = block.querySelector(`.upload-area[data-input-id="${type}-mask-input"] .preview`);
-                const shadowPreview = block.querySelector(`.upload-area[data-input-id="${type}-shadow-input"] .preview`);
-                const displacementPreview = block.querySelector(`.upload-area[data-input-id="${type}-displacement-input"] .preview`);
-                const lightPreview = block.querySelector(`.upload-area[data-input-id="${type}-light-input"] .preview`);
-
-                const canvas = window[`canvas${capitalize(type)}`];
-                const wrapperId = `editor${capitalize(type)}Wrapper`;
-
-                // -----------------------------
-                // Base image
-                // -----------------------------
-                if (baseUrl && basePreview) {
-                    basePreview.innerHTML = `<img src="${baseUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
-                    if (canvas) loadBaseImage(canvas, baseUrl);
-                    document.getElementById(wrapperId)?.classList.remove('d-none');
-
-                    // set file input value (optional, if you want form submission)
-                    if (baseInput) {
-                        fetch(baseUrl)
-                            .then(res => res.blob())
-                            .then(blob => {
-                                const dt = new DataTransfer();
-                                dt.items.add(new File([blob], 'base.png', { type: blob.type }));
-                                baseInput.files = dt.files;
-                            });
+                        $right.trigger('change');
+                    },
+                    error(xhr) {
+                        console.error("Error fetching categories:", xhr.responseText);
                     }
-                }
-
-                // -----------------------------
-                // Mask image
-                // -----------------------------
-                if (maskUrl && maskPreview) {
-                    maskPreview.innerHTML = `<img src="${maskUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
-                    // if (canvas) loadMaskImage(canvas, maskUrl);
-                    document.getElementById(wrapperId)?.classList.remove('d-none');
-
-                    // set file input value
-                    if (maskInput) {
-                        fetch(maskUrl)
-                            .then(res => res.blob())
-                            .then(blob => {
-                                const dt = new DataTransfer();
-                                dt.items.add(new File([blob], 'mask.png', { type: blob.type }));
-                                maskInput.files = dt.files;
-                            });
-                    }
-                }
-
-                // -----------------------------
-                // Shadow image
-                // -----------------------------
-                if (shadowUrl && shadowPreview) {
-                    console.log("shadow",shadowUrl)
-                    shadowPreview.innerHTML = `<img src="${shadowUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
-                    document.getElementById(wrapperId)?.classList.remove('d-none');
-
-                    // set file input value
-                    if (shadowInput) {
-                        fetch(shadowUrl)
-                            .then(res => res.blob())
-                            .then(blob => {
-                                const dt = new DataTransfer();
-                                dt.items.add(new File([blob], 'shadow.png', { type: blob.type }));
-                                shadowInput.files = dt.files;
-                            });
-                    }
-                }
-
-                // -----------------------------
-                // Displacement image
-                // -----------------------------
-                if (displacementUrl && displacementPreview) {
-                    displacementPreview.innerHTML = `<img src="${displacementUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
-                    document.getElementById(wrapperId)?.classList.remove('d-none');
-
-                    if (displacementInput) {
-                        fetch(displacementUrl)
-                            .then(res => res.blob())
-                            .then(blob => {
-                                const dt = new DataTransfer();
-                                dt.items.add(new File([blob], 'displacement.png', { type: blob.type }));
-                                displacementInput.files = dt.files;
-                            });
-                    }
-                }
-
-                // -----------------------------
-                // Highlight image
-                // -----------------------------
-                if (lightUrl && lightPreview) {
-                    lightPreview.innerHTML = `<img src="${lightUrl}" class="img-fluid rounded border" style="max-height:120px;">`;
-                    document.getElementById(wrapperId)?.classList.remove('d-none');
-
-                    if (lightInput) {
-                        fetch(lightUrl)
-                            .then(res => res.blob())
-                            .then(blob => {
-                                const dt = new DataTransfer();
-                                dt.items.add(new File([blob], 'light.png', { type: blob.type }));
-                                lightInput.files = dt.files;
-                            });
-                    }
-                }
-            }
-
-
-            @if($model)
-                @foreach($model->types as $type)
-            (function () {
-                const typeName = "{{ strtolower($type->value->name) }}";
-                const checkbox = document.querySelector(`.type-checkbox[data-type-name="${typeName}"]`);
-
-                if (checkbox && !checkbox.checked) {
-                    checkbox.checked = true;
-                }
-                // Call toggleCheckboxes to render the block
-                toggleCheckboxes();
-                // Wait a tick to ensure the block exists in DOM
-                setTimeout(() => {
-                    preloadFile(
-                        "{{ strtolower($type->value->name) }}",
-                        "{{ $model->{ strtolower($type->value->name) . '_base_image_url' } ?? '' }}",
-                        "{{ $model->{ strtolower($type->value->name) . '_mask_image_url' } ?? '' }}",
-                        "{{ $model->{ strtolower($type->value->name) . '_shadow_image_url' } ?? '' }}",
-                        "{{ $existingMedia[strtolower($type->value->name)]['displacement_image'] ?? '' }}",
-                        "{{ $existingMedia[strtolower($type->value->name)]['light_image'] ?? '' }}"
-                    );
-                }, 50); // 50ms delay usually enough
-            })();
-            @endforeach
-            @endif
-        });
-
-    </script>
-    <script>
-        // =========================
-        // COLOR PICKER
-        // =========================
-        let pickrInstance = null;
-        let currentCard = null;
-        let currentGlobalColorTarget = 'pre_fill_colors';
-
-        function getGlobalColorConfig(target) {
-            if (target === 'colors_across_templates') {
-                return {
-                    selectedId: 'selected-colors-across-templates',
-                    inputContainerId: 'colorsAcrossTemplatesInputContainer',
-                    inputName: 'colors_across_templates[]'
-                };
-            }
-
-            return {
-                selectedId: 'selected-colors',
-                inputContainerId: 'colorsInputContainer',
-                inputName: 'pre_fill_colors[]'
-            };
-        }
-
-        function getGlobalColors(target) {
-            const config = getGlobalColorConfig(target);
-            const container = document.getElementById(config.inputContainerId);
-            if (!container) return [];
-
-            return [...container.querySelectorAll(`input[name="${config.inputName}"]`)]
-                .map(input => String(input.value).toLowerCase());
-        }
-
-        function addGlobalColor(hex, target) {
-            hex = String(hex || '').toLowerCase();
-            if (!hex) return false;
-
-            const config = getGlobalColorConfig(target);
-            const selectedColors = document.getElementById(config.selectedId);
-            const inputContainer = document.getElementById(config.inputContainerId);
-            if (!selectedColors || !inputContainer || getGlobalColors(target).includes(hex)) return false;
-
-            const li = document.createElement('li');
-            li.style.listStyle = 'none';
-            li.dataset.hex = hex;
-            li.innerHTML = `
-                <div class="selected-color-wrapper position-relative">
-                    <div class="selected-color-dot" style="background-color:#fff;">
-                        <div class="selected-color-inner" style="background-color:${hex};"></div>
-                    </div>
-                    <button type="button" onclick="removeGlobalColor('${hex}', this, '${target}')" class="remove-color-btn">×</button>
-                </div>`;
-            selectedColors.appendChild(li);
-
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = config.inputName;
-            input.value = hex;
-            inputContainer.appendChild(input);
-
-            syncAcrossTemplateSourceColors();
-            return true;
-        }
-
-        function removeGlobalColorByHex(hex, target) {
-            hex = String(hex || '').toLowerCase();
-            const config = getGlobalColorConfig(target);
-            const selectedColors = document.getElementById(config.selectedId);
-            const inputContainer = document.getElementById(config.inputContainerId);
-
-            if (selectedColors) {
-                [...selectedColors.querySelectorAll('li')].forEach(li => {
-                    if (String(li.dataset.hex || '').toLowerCase() === hex) li.remove();
                 });
-            }
-
-            if (inputContainer) {
-                [...inputContainer.querySelectorAll(`input[name="${config.inputName}"]`)]
-                    .filter(input => String(input.value).toLowerCase() === hex)
-                    .forEach(input => input.remove());
-            }
-
-            syncAcrossTemplateSourceColors();
-        }
-
-        function notifyAcrossColorRemoved(hex, templateId = null) {
-            hex = String(hex || '').replace('#', '').toLowerCase();
-
-            if (!hex || !mockupIdForColorSync) return;
-
-            const urlTemplate = @json(route('mockups.colors-across-templates.remove', ['mockup' => '__MOCKUP_ID__', 'hex' => '__HEX__']));
-
-            const url = urlTemplate
-                .replace('__MOCKUP_ID__', mockupIdForColorSync)
-                .replace('__HEX__', hex);
-
-            $.ajax({
-                url,
-                type: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-                    'Accept': 'application/json'
-                },
-                data: {
-                    template_id: templateId
-                },
-                success(response) {
-                    Toastify({
-                        text: response?.message || 'Color removed successfully',
-                        duration: 2500,
-                        gravity: 'top',
-                        position: 'right',
-                        backgroundColor: '#28a745',
-                        close: true
-                    }).showToast();
-                },
-                error(xhr) {
-                    console.error(xhr.responseJSON || xhr.responseText);
-
-                    Toastify({
-                        text: xhr.responseJSON?.message || 'Failed to remove color',
-                        duration: 3000,
-                        gravity: 'top',
-                        position: 'right',
-                        backgroundColor: '#dc3545',
-                        close: true
-                    }).showToast();
-                }
-            });
-        }
-        window.removeGlobalColor = function (hex, btn, target = 'pre_fill_colors') {
-            const li = btn.closest('li');
-            if (li) li.remove();
-
-            const config = getGlobalColorConfig(target);
-            const inputContainer = document.getElementById(config.inputContainerId);
-            if (inputContainer) {
-                [...inputContainer.querySelectorAll(`input[name="${config.inputName}"]`)]
-                    .filter(input => String(input.value).toLowerCase() === String(hex).toLowerCase())
-                    .forEach(input => input.remove());
-            }
-
-            syncAcrossTemplateSourceColors();
-
-            if (target === 'colors_across_templates') {
-                notifyAcrossColorRemoved(hex);
-            }
-        };
-
-        // Colors Across Templates can reuse colors from the Mockup Base Palette
-        // and can also include custom colors added by its own picker.
-        // The modal below only manages selecting/deselecting base-palette colors.
-        function updateBasePaletteSelectAllButton() {
-            const button = document.getElementById('selectAllBasePaletteColors');
-            if (!button) return;
-
-            const baseColors = [...new Set(getGlobalColors('pre_fill_colors'))];
-            const acrossColors = new Set(getGlobalColors('colors_across_templates'));
-            const allSelected = baseColors.length > 0 && baseColors.every(hex => acrossColors.has(hex));
-
-            button.disabled = baseColors.length === 0;
-            button.textContent = allSelected ? 'Deselect All' : 'Select All';
-        }
-
-        function syncAcrossTemplateSourceColors() {
-            const optionsContainer = document.getElementById('mockupColorsAcrossOptions');
-            if (!optionsContainer) return;
-
-            const mockupColors = [...new Set(getGlobalColors('pre_fill_colors'))];
-            const acrossSet = new Set(getGlobalColors('colors_across_templates'));
-            optionsContainer.innerHTML = '';
-
-            if (!mockupColors.length) {
-                const text = document.createElement('small');
-                text.className = 'text-muted';
-                text.textContent = 'Add Mockup Colors first to select them here';
-                optionsContainer.appendChild(text);
-                updateBasePaletteSelectAllButton();
-                return;
-            }
-
-            mockupColors.forEach(hex => {
-                const selected = acrossSet.has(hex);
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = `js-toggle-across-color palette-source-color${selected ? ' is-selected' : ''}`;
-                button.style.backgroundColor = hex;
-                button.dataset.hex = hex;
-                button.title = selected ? 'Remove from Colors Across Templates' : 'Add to Colors Across Templates';
-                if (selected) button.innerHTML = '<span class="palette-source-color-check">✓</span>';
-                optionsContainer.appendChild(button);
-            });
-
-            updateBasePaletteSelectAllButton();
-        }
-
-        $(document).on('click', '.js-toggle-across-color', function () {
-            const hex = String(this.dataset.hex || '').toLowerCase();
-            if (!hex) return;
-
-            if (getGlobalColors('colors_across_templates').includes(hex)) {
-                removeGlobalColorByHex(hex, 'colors_across_templates');
-                notifyAcrossColorRemoved(hex);
             } else {
-                addGlobalColor(hex, 'colors_across_templates');
+                $right.empty().trigger('change');
             }
         });
 
-        // Refresh the base-palette swatches every time the popup opens (colors may have
-        // changed since the panel was last built).
-        $(document).on('show.bs.modal', '#basePaletteModal', function () {
-            syncAcrossTemplateSourceColors();
-        });
 
-        $(document).on('click', '#selectAllBasePaletteColors', function () {
-            const baseColors = [...new Set(getGlobalColors('pre_fill_colors'))];
-            if (!baseColors.length) return;
+        window.templatePositions = window.templatePositions || {};
+        var buildHiddenTemplateInputs;
+        var calculateObjectPercents;
 
-            const acrossColors = new Set(getGlobalColors('colors_across_templates'));
-            const allSelected = baseColors.every(hex => acrossColors.has(hex));
+        function cacheCurrentTemplatePositions() {
+            window.savedTemplatePositions = window.savedTemplatePositions || {};
 
-            baseColors.forEach(hex => {
-                if (allSelected) {
-                    if (getGlobalColors('colors_across_templates').includes(hex)) {
-                        removeGlobalColorByHex(hex, 'colors_across_templates');
-                        notifyAcrossColorRemoved(hex);
+            document.querySelectorAll('#templatesHiddenContainer .template-inputs').forEach(div => {
+                const templateId = div.dataset.templateId;
+                const inputs = div.querySelectorAll('input');
+                const data = {};
+
+                inputs.forEach(inp => {
+                    const m = inp.name.match(/\[(front|back|none)_[a-z]+\]/);
+                    if (m) {
+                        const cleanKey = m[0].replace(/[\[\]]/g, ''); // front_x
+                        data[cleanKey] = parseFloat(inp.value) || 0;
                     }
-                } else {
-                    addGlobalColor(hex, 'colors_across_templates');
-                }
+                });
+
+                window.savedTemplatePositions[String(templateId)] = data;
             });
 
-            syncAcrossTemplateSourceColors();
-        });
-
-        $(document).ready(function () {
-            existingGlobalMockupColors.forEach(hex => addGlobalColor(hex, 'pre_fill_colors'));
-            existingAcrossTemplateColors.forEach(hex => addGlobalColor(hex, 'colors_across_templates'));
-            syncAcrossTemplateSourceColors();
-
-            if (pickrInstance) pickrInstance.destroyAndRemove();
-
-            const dummyElement = document.createElement('div');
-            document.body.appendChild(dummyElement);
-
-            pickrInstance = Pickr.create({
-                el: dummyElement,
-                theme: 'classic',
-                components: {
-                    preview: false,
-                    opacity: false,
-                    hue: true,
-                    interaction: {
-                        input: true,
-                        save: true,
-                        clear: true
-                    }
-                }
-            });
-
-            pickrInstance.on('save', color => {
-                if (!color) {
-                    pickrInstance.hide();
-                    return;
-                }
-
-                const hex = color.toHEXA().toString().toLowerCase();
-
-                if (!currentCard) {
-                    addGlobalColor(hex, currentGlobalColorTarget);
-                    pickrInstance.hide();
-                    return;
-                }
-
-                if (!Array.isArray(currentCard.selectedColors)) currentCard.selectedColors = [];
-                if (!currentCard.selectedColors.includes(hex)) currentCard.selectedColors.push(hex);
-
-                renderSelectedColors(currentCard);
-                buildHiddenTemplateInputs();
-                pickrInstance.hide();
-            });
-
-            pickrInstance.on('clear', () => {
-                if (!currentCard) {
-                    const config = getGlobalColorConfig(currentGlobalColorTarget);
-                    const selectedColors = document.getElementById(config.selectedId);
-                    const inputContainer = document.getElementById(config.inputContainerId);
-                    if (selectedColors) selectedColors.innerHTML = '';
-                    if (inputContainer) inputContainer.innerHTML = '';
-                    syncAcrossTemplateSourceColors();
-                    pickrInstance.hide();
-                    return;
-                }
-
-                currentCard.selectedColors = [];
-                renderSelectedColors(currentCard);
-                buildHiddenTemplateInputs();
-                pickrInstance.hide();
-            });
-        });
-
-        // This handler supports the Mockup Base Palette picker, the Colors Across Templates
-        // picker, and the per-template-card pickers.
-        $(document).on('click', '.openColorPicker', function () {
-            const trigger = this;
-            const globalTarget = trigger.dataset.colorTarget;
-
-            if (globalTarget) {
-                currentCard = null;
-                currentGlobalColorTarget = globalTarget;
-                pickrInstance.show();
-
-                setTimeout(() => {
-                    const pickerPanel = document.querySelector('.pcr-app.visible');
-                    if (pickerPanel) {
-                        const rect = trigger.getBoundingClientRect();
-                        pickerPanel.style.position = 'fixed';
-                        pickerPanel.style.left = `${rect.left}px`;
-                        pickerPanel.style.top = `${rect.bottom + 5}px`;
-                        pickerPanel.style.zIndex = 9999;
-                    }
-                }, 0);
-                return;
-            }
-
-            const card = trigger.closest('.template-card');
-            if (!card) return;
-
-            currentCard = card;
-            if (!Array.isArray(card.selectedColors)) card.selectedColors = [];
-
-            const rect = trigger.getBoundingClientRect();
-            const modalScrollTop = document.querySelector('#templateModal .modal-body')?.scrollTop || 0;
-            pickrInstance.show();
-
-            setTimeout(() => {
-                const pickerPanel = document.querySelector('.pcr-app.visible');
-                if (pickerPanel) {
-                    pickerPanel.style.position = 'absolute';
-                    pickerPanel.style.left = `${rect.left + window.scrollX}px`;
-                    pickerPanel.style.top = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
-                    pickerPanel.style.zIndex = 9999;
-                }
-            }, 0);
-        });
-
-        window.removeColor = function (hex) {
-            if (!currentCard || !Array.isArray(currentCard.selectedColors)) return;
-            currentCard.selectedColors = currentCard.selectedColors.filter(c => String(c).toLowerCase() !== String(hex).toLowerCase());
-            renderSelectedColors(currentCard);
-            buildHiddenTemplateInputs();
-        };
-
-        function renderSelectedColors(card) {
-            const ul = card.querySelector('.selected-colors');
-            const container = card.querySelector('.colorsInputContainer');
-            if (!ul || !container) return;
-
-            ul.innerHTML = '';
-            container.innerHTML = '';
-            ul.classList.add('list-unstyled', 'm-0', 'p-0');
-
-            (card.selectedColors || []).forEach(c => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <div class="selected-color-wrapper position-relative">
-                        <div class="selected-color-dot" style="background-color:#fff;">
-                            <div class="selected-color-inner" style="background-color:${c};"></div>
-                        </div>
-                        <button type="button" class="remove-color-btn" data-color="${c}">×</button>
-                    </div>`;
-                ul.appendChild(li);
-            });
-
-            card.dataset.colors = JSON.stringify(card.selectedColors || []);
+            console.log('✅ cached positions:', window.savedTemplatePositions);
         }
-
-        let pendingColorData = null;
-
-        $(document).on('click', '.remove-color-btn', function () {
-            const card = this.closest('.template-card');
-            const hex = this.dataset.color;
-            if (!card || !hex) return;
-
-            const templateId = card.dataset.id;
-            const savedColors = savedColorsById.get(String(templateId)) || [];
-
-            // 🔹 لو اللون مش من الألوان القديمة (يعني لسه المستخدم ضافه)
-            if (!savedColors.includes(hex)) {
-                // احذف اللون محليًا بدون مودال
-                card.selectedColors = (card.selectedColors || []).filter(c => c !== hex);
-                renderSelectedColors(card);
-                buildHiddenTemplateInputs();
-
-
-                return; // ❌ متفتحش المودال
-            }
-
-            // 🔸 اللون قديم → افتح المودال
-            const mockupId = $('#mockupId').val() || '{{ $model->id ?? "" }}';
-            const categoryId = '{{ $model->category->id ?? "" }}';
-            pendingColorData = { card, hex, templateId, mockupId };
-            $('#removeColorModal').modal('show');
-
-            const $list = $('#relatedMockupsList');
-            $list.html('<div class="text-center text-muted py-3">Loading mockups...</div>');
-
-            $.ajax({
-                url: `/mockups`,
-                type: 'GET',
-                data: {
-                    template_id: templateId,
-                    category_id: categoryId,
-                    mockup_id: mockupId,
-                    color: hex,
-                },
-                success: function (res) {
-                    const mockups = res?.data?.data || [];
-
-                    if (!mockups.length) {
-                        $list.html('<div class="text-center text-muted py-3">No other mockups found for this template.</div>');
-                        return;
-                    }
-
-                    const html = mockups.map(m => {
-                        const img = m.images?.front?.base_url || m.images?.back?.base_url || "{{ asset('images/placeholder.svg') }}";
-                        const colors = (m.colors || []).map(c => `
-                    <span class="d-inline-block me-1"
-                          style="width:18px;height:18px;border-radius:50%;background:${c};border:1px solid #ccc"></span>
-                `).join('');
-
-                        const types = (m.types || []).map(t => `<span class="badge me-1" style="background:#24b094;">${t.label}</span>`).join('');
-
-                        return `
-                            <div class="d-flex gap-1 rounded" style="width: 120px; border:1px solid #24b094;">
-                                <div class="d-flex flex-column gap-1 align-items-center">
-                                    <img src="${img}" alt="${m.name}" class="rounded" style="width:115px;height:100px;">
-                                    <div class="d-flex flex-column gap-1 align-items-center">
-                                        <div class="fw-bold">${m.name || 'Untitled Mockup'}</div>
-                                        <div class="text-muted small mb-1">${types}</div>
-                                    </div>
-                                </div>
-                            </div>
-                `;
-                    }).join('');
-
-                    $list.html(html);
-                },
-                error: function () {
-                    $list.html('<div class="text-danger text-center py-3">Failed to load mockups.</div>');
-                }
-            });
-        });
-
-
-        // عند تأكيد الحذف
-        $('#confirmRemoveColor').on('click', function () {
-
-            if (!pendingColorData) return;
-            const { card, hex, templateId } = pendingColorData;
-            console.log(templateId)
-            const categoryId = '{{ $model->category->id ?? "" }}';
-            const $btn = $(this);
-
-            $btn.prop('disabled', true).text('Updating...');
-
-            $.ajax({
-                url: "{{ route('mockups.remove-color') }}",
-                type: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    category_id: categoryId,
-                    template_id: templateId,
-                    color: hex,
-                },
-                success: function(res) {
-                    // ✅ بعد نجاح السيرفر: احذف محليًا
-                    card.selectedColors = (card.selectedColors || []).filter(c => c !== hex);
-                    renderSelectedColors(card);
-                    buildHiddenTemplateInputs();
-
-                    $('#removeColorModal').modal('hide');
-                    Toastify({
-                        text: "Color removed Successfully.",
-                        duration: 1000,
-                        gravity: "top",
-                        position: "right",
-                        backgroundColor: "#28a745",
-                        close: true,
-                    }).showToast();
-                    pendingColorData = null;
-                },
-                error: function() {
-                    Toastify({
-                        text: "Failed to remove color.",
-                        duration: 1000,
-                        gravity: "top",
-                        position: "right",
-                        backgroundColor: "#28a745",
-                        close: true,
-                    }).showToast();
-                },
-                complete: function() {
-                    $btn.prop('disabled', false).text('Yes, remove from all');
-                }
-            });
-        });
-
-        const templatesData = @json($model->templates ?? []);
-
-        // Map: template_id -> colors[]
-        const savedColorsById = new Map(
-            (templatesData || []).map(t => {
-                let colors = t?.pivot?.pre_fill_colors ?? [];
-                if (typeof colors === 'string') {
-                    try { colors = JSON.parse(colors); } catch(e) { colors = []; }
-                }
-                if (!Array.isArray(colors)) colors = [];
-                return [String(t.id), colors]; // <-- important
-            })
-        );
-
-
-    </script>
-    <script>
-        function calculateObjectPercents(obj, meta) {
-            const center = obj.getCenterPoint();
-            const wReal = obj.width * obj.scaleX;
-            const hReal = obj.height * obj.scaleY;
-
-            return {
-                xPct: ((center.x - meta.offsetLeft) / meta.scaledWidth).toFixed(6),
-                yPct: ((center.y - meta.offsetTop) / meta.scaledHeight).toFixed(6),
-                wPct: (wReal / meta.scaledWidth).toFixed(6),
-                hPct: (hReal / meta.scaledHeight).toFixed(6),
-                angle: obj.angle || 0
-            };
-        }
-
-        function buildHiddenTemplateInputs() {
-            const container = document.getElementById("templatesHiddenContainer");
-            if (!container) return;
-
-            container.innerHTML = "";
-
-            const previousTemplates = @json($model->templates ?? []);
-            const selectedTemplateIdRaw = $('#selectedTemplateId').val();
-            const selectedTemplateId = selectedTemplateIdRaw ? String(selectedTemplateIdRaw) : "";
-
-            const safeJson = (v, fallback = {}) => {
-                if (v == null) return fallback;
-                if (typeof v === "object") return v;
-                if (typeof v === "string") {
-                    try { return JSON.parse(v) || fallback; } catch (e) { return fallback; }
-                }
-                return fallback;
-            };
-
-            const getCanvas = (side) => window['canvas' + capitalize(side)];
-
-            const findObj = (side, templateId) => {
-                const canvas = getCanvas(side);
-                if (!canvas) return null;
-
-                const tid = String(templateId);
-
-                // ✅ match more than one possible property name
-                return canvas.getObjects()?.find(o => {
-                    const sameId = String(o.templateId ?? o.tplId ?? o.template_id ?? "") === tid;
-                    const sameSide =
-                        (o.templateType === side) ||
-                        (o.templateSide === side) ||
-                        (o.side === side) ||
-                        (o.mockupSide === side);
-
-                    return sameId && sameSide;
-                }) || null;
-            };
-
-            const readPivot = (tpl, side) => {
-                const pos = safeJson(tpl?.pivot?.positions, {});
-                return {
-                    x: pos[`${side}_x`] ?? null,
-                    y: pos[`${side}_y`] ?? null,
-                    w: pos[`${side}_width`] ?? null,
-                    h: pos[`${side}_height`] ?? null,
-                    angle: pos[`${side}_angle`] ?? null,
-                };
-            };
-
-            // ✅ colors: read from card.selectedColors OR from DOM OR pivot
-            const getSelectedColors = (templateId, tpl) => {
-                const card = document.querySelector(`.template-card[data-id="${templateId}"]`);
-
-                if (card) {
-                    // Try to read current selectedColors array
-                    if (Array.isArray(card.selectedColors)) return card.selectedColors;
-
-                    // Fallback: dataset (in case of rebuild)
-                    try {
-                        const colors = JSON.parse(card.dataset.colors || "[]");
-                        if (Array.isArray(colors)) return colors;
-                    } catch (e) {}
-
-                    // Or legacy UI (selected swatches)
-                    const nodes = card.querySelectorAll('[data-color].selected, .color-swatch.selected');
-                    return Array.from(nodes).map(n => n.dataset.color).filter(Boolean);
-                }
-
-                // Fallback to pivot data if UI not available
-                const pivotColors = safeJson(tpl?.pivot?.pre_fill_colors, []);
-                return Array.isArray(pivotColors) ? pivotColors : [];
-            };
-
-            const getPercents = (tpl, side, templateId) => {
-                // 1) لو هو selected template: حاول من canvas
-                if (selectedTemplateId && String(templateId) === selectedTemplateId) {
-                    const canvas = getCanvas(side);
-                    const obj = findObj(side, templateId) || canvas?.getActiveObject?.();
-                    const meta = canvas?.__mockupMeta;
-
-                    if (obj && meta) {
-                        const res = calculateObjectPercents(obj, meta) || {};
-                        const x = res.xPct, y = res.yPct, w = res.wPct, h = res.hPct, angle = res.angle;
-                        if ([x, y, w, h].every(v => v !== undefined && v !== null && v !== "")) {
-                            return {
-                                x: parseFloat(x),
-                                y: parseFloat(y),
-                                w: parseFloat(w),
-                                h: parseFloat(h),
-                                angle: parseFloat(angle ?? 0),
-                            };
-                        }
-                    }
-                }
-
-                // 2) fallback: pivot (مع parse لو string)
-                const pv = readPivot(tpl, side);
-                if (pv.x !== null) {
-                    return {
-                        x: parseFloat(pv.x),
-                        y: parseFloat(pv.y),
-                        w: parseFloat(pv.w),
-                        h: parseFloat(pv.h),
-                        angle: parseFloat(pv.angle ?? 0),
-                    };
-                }
-
-                // 3) لو new template ومفيش obj/meta: ابعت defaults عشان backend مايبقاش فاضي
-                if (selectedTemplateId && String(templateId) === selectedTemplateId) {
-                    return { x: 0.5, y: 0.5, w: 0.4, h: 0.4, angle: 0 };
-                }
-
-                return null;
-            };
-
-            const writeSideInputs = (htmlArr, index, side, p) => {
-                if (!p) return;
-                htmlArr.push(`<input type="hidden" name="templates[${index}][${side}_x]" value="${p.x}">`);
-                htmlArr.push(`<input type="hidden" name="templates[${index}][${side}_y]" value="${p.y}">`);
-                htmlArr.push(`<input type="hidden" name="templates[${index}][${side}_width]" value="${p.w}">`);
-                htmlArr.push(`<input type="hidden" name="templates[${index}][${side}_height]" value="${p.h}">`);
-                htmlArr.push(`<input type="hidden" name="templates[${index}][${side}_angle]" value="${p.angle ?? 0}">`);
-            };
-
-            const html = [];
-
-            // 1️⃣ include all previous templates (preserve old pivot + override selected from canvas)
-            previousTemplates.forEach((tpl, index) => {
-                const currentId = tpl.id;
-
-                html.push(`<input type="hidden" name="templates[${index}][template_id]" value="${currentId}">`);
-
-                ['front', 'back', 'none'].forEach(side => {
-                    const p = getPercents(tpl, side, currentId);
-                    writeSideInputs(html, index, side, p);
-                });
-
-                // ✅ ADD THIS BACK:
-                const colors = getSelectedColors(currentId, tpl);
-                colors.forEach(c => {
-                    html.push(
-                        `<input type="hidden" name="templates[${index}][colors][]" value="${String(c).toLowerCase()}">`
-                    );
-                });
-            });
-
-
-            // 2️⃣ if selected template is new → add it (always send defaults if canvas not ready)
-            const existsInPrevious = selectedTemplateId
-                ? previousTemplates.some(t => String(t.id) === String(selectedTemplateId))
-                : false;
-
-            if (selectedTemplateId && !existsInPrevious) {
-                const index = previousTemplates.length;
-
-                html.push(`<input type="hidden" name="templates[${index}][template_id]" value="${selectedTemplateId}">`);
-
-                ['front', 'back', 'none'].forEach(side => {
-                    const p = getPercents({}, side, selectedTemplateId);
-                    writeSideInputs(html, index, side, p);
-                });
-
-                const colors = getSelectedColors(selectedTemplateId, {});
-                colors.forEach(c => {
-                    html.push(
-                        `<input type="hidden" name="templates[${index}][colors][]" value="${String(c).toLowerCase()}">`
-                    );
-                });
-            }
-
-            container.innerHTML = html.join("");
-        }
-
-        // قبل حفظ الفورم:
-        // $('form').on('submit', function () {
-        //     buildHiddenTemplateInputs();
-        // });
-
-
 
         document.addEventListener('DOMContentLoaded', function () {
             const $productSelect = $('#productsSelect');
@@ -1751,27 +958,30 @@
                 $modalPagination.empty();
             }
 
-
             function buildTemplateInnerCard(tpl, index = 0) {
-                const id = String(tpl.id);
-                const isAttached = attachedTemplateIds.has(id);
-
+                const id = tpl.id;
                 const name = typeof tpl.name === 'object'
                     ? (tpl.name[locale] ?? Object.values(tpl.name)[0])
                     : (tpl.name || ('Template #' + id));
 
                 const hasType3 = tpl.types?.some(t => t.value === 3);
 
-                let front = '', none = '';
-                if (hasType3) { none = tpl.source_design_svg || ''; }
-                else { front = tpl.source_design_svg || ''; }
+                let front = '';
+                let none = '';
+
+                if (hasType3) {
+                    none = tpl.source_design_svg || '';
+                    front = '';
+                } else {
+                    front = tpl.source_design_svg || '';
+                    none = '';
+                }
 
                 const back = tpl.back_base64_preview_image || '';
                 const img = front || back || none || "{{ asset('images/placeholder.svg') }}";
-
                 const editorBaseUrl = "{{ rtrim(config('services.editor_url'), '/') }}/mokup/";
-                const mockupId = "{{ $model->id }}";
-                const productId = $('#productsSelect').val() || "{{ $model->category_id }}";
+                {{--const mockupId = "{{ $model->id }}";--}}
+                {{--const productId = $('#productsSelect').val() || "{{ $model->category_id }}";--}}
 
                 const editorUrl = `${editorBaseUrl}${mockupId}?${new URLSearchParams({
                     templateId: id,
@@ -1780,57 +990,55 @@
                 }).toString()}`;
 
                 return `
-                <div class="template-card h-100 position-relative"
-                    data-id="${id}"
-                    data-index="${index}"
-                    data-front="${front}"
-                    data-back="${back}"
-                    data-none="${none}">
+        <div class="template-card h-100"
+             data-id="${id}"
+             data-index="${index}"
+             data-front="${front}"
+             data-back="${back}"
+             data-none="${none}">
+            <div class="card rounded-3 shadow-sm" style="border:1px solid #24B094;">
+                <div class="d-flex justify-content-center align-items-center"
+                     style="background-color:#F4F6F6;height:200px;border-radius:12px;padding:10px;">
+                    <img
+                        src="${img}"
+                        class="mx-auto d-block"
+                        style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:5px;"
+                        alt="${name}">
+                </div>
 
-                    ${isAttached ? `
-                    <span class="badge bg-success position-absolute"
-                            style="top:10px;left:10px;z-index:10;">
-                        Attached
-                    </span>
-                    ` : ``}
+                <div class="card-body py-2">
+                    <h6 class="card-title mb-0 text-truncate fs-5">${name}</h6>
+                </div>
 
-                    <div class="card rounded-3 shadow-sm" style="border:1px solid #24B094;">
-                    <div class="d-flex justify-content-center align-items-center"
-                        style="background-color:#F4F6F6;height:200px;border-radius:12px;padding:10px;">
-                        <img src="${img}" class="mx-auto d-block"
-                            style="height:auto;width:auto;max-width:100%;max-height:100%;border-radius:5px;"
-                            alt="${name}">
-                    </div>
+                <div class="d-flex gap-1 px-1 pb-2">
+                    <button type="button"
+                            class="btn btn-sm btn-primary w-100 js-show-on-mockup">
+                        Show on Mockup
+                    </button>
 
-                    <div class="card-body py-2">
-                        <h6 class="card-title mb-0 text-truncate fs-5">${name}</h6>
-                    </div>
+                    <a href="${editorUrl}"
+                       target="_blank"
+                       class="btn btn-sm btn-primary w-100">
+                        Show with Editor
+                    </a>
 
-                    <div class="d-flex gap-1 px-1 pb-2">
-                        <button type="button" class="btn btn-sm btn-primary w-100 js-show-on-mockup">Show on Mockup</button>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-primary w-100 js-save-positions">
+                        Save Positions
+                    </button>
+                </div>
 
-                        <a href="${editorUrl}"
-                        target="_blank"
-                        class="btn btn-sm btn-primary w-100">
-                            Show with Editor
-                        </a>
-
-                        <button type="button" class="btn btn-sm btn-outline-primary w-100 js-save-positions">
-                            Save Positions
-                        </button>
-                    </div>
-
-                    <div class="mb-2" style="padding-left:10px">
-                        <label class="label-text mb-1 d-block">Colors</label>
-                        <div class="d-flex flex-wrap align-items-center gap-1">
+                <div class="mb-2" style="padding-left: 10px">
+                    <label class="label-text mb-1 d-block">Colors</label>
+                    <div class="d-flex flex-wrap align-items-center gap-1">
                         <button type="button" class="openColorPicker gradient-picker-trigger border"></button>
                         <span class="selected-colors d-flex gap-1 flex-wrap align-items-center"></span>
-                        </div>
-                        <div class="colorsInputContainer"></div>
                     </div>
-                    </div>
+                    <div class="colorsInputContainer"></div>
                 </div>
-                `;
+            </div>
+        </div>
+    `;
             }
 
             // =========================
@@ -1863,22 +1071,14 @@
                 // لو عندنا أكتر من 3 → زر Show Remaining
                 if (templates.length > maxInline) {
                     const showMoreHtml = `
-                     <div class="template-card cursor-pointer d-flex justify-content-center justify-content-md-end">
+                    <div class="template-card cursor-pointer d-flex justify-content-center justify-content-md-end">
                         <span class="template-card cursor-pointer show-more rounded-2 py-1 px-2 shadow-sm show-more-card js-open-templates-modal" tabindex="0" style="border:1px solid #24B094;">
                             Show more Templates</span>
                     </div>
                 `;
                     $templatesCardsContainer.append(showMoreHtml);
                 }
-
                 $templatesWrapper.removeClass('d-none');
-// بعد ما تبني كل الكروت
-                setTimeout(() => {
-                    document.querySelectorAll('.template-card').forEach(card => {
-                        hydrateColorsForCard(card);
-                    });
-                }, 50);
-
             }
 
             // =========================
@@ -1898,20 +1098,14 @@
                     return;
                 }
 
-                templates.forEach(function (tpl , index) {
-
+                templates.forEach(function (tpl, index) {
                     const cardHtml = `
                     <div class="col-12 col-md-6 col-lg-4">
-                        ${buildTemplateInnerCard(tpl , index)}
+                        ${buildTemplateInnerCard(tpl, index)}
                     </div>
                 `;
                     $modalContainer.append(cardHtml);
                 });
-                setTimeout(() => {
-                    $modalContainer.find('.template-card').each(function () {
-                        hydrateColorsForCard(this);
-                    });
-                }, 50);
             }
 
             function renderModalPagination() {
@@ -1929,24 +1123,6 @@
                 `);
                 }
             }
-            function hydrateColorsForCard(cardEl) {
-                if (!cardEl) return;
-
-                // ✅ hydrate مرة واحدة فقط
-                if (cardEl.__colorsHydrated) return;
-                cardEl.__colorsHydrated = true;
-
-                const id = String(cardEl.getAttribute('data-id'));
-                const saved = savedColorsById.get(id) || [];
-
-                // لو فيه ألوان موجودة بالفعل (اختيارات UI) دمجها مع المحفوظ
-                const existing = Array.isArray(cardEl.selectedColors) ? cardEl.selectedColors : [];
-                const merged = [...new Set([...saved, ...existing].map(c => String(c).toLowerCase()))];
-
-                cardEl.selectedColors = merged;
-                renderSelectedColors(cardEl);
-            }
-
 
             // =========================
             // Fetch templates (API)
@@ -1962,60 +1138,9 @@
                     .get(); // → [1, 2] مثلاً
             }
 
-            function fetchTemplatesForProduct(productId) {
-                if (!productId) {
-                    resetTemplatesUI();
-                    return;
-                }
-
-                resetTemplatesUI();
-                currentProductId = productId;
-
-                $templatesCardsContainer.html(`
-                <div class="col-12 text-center py-2">
-                    Loading templates...
-                </div>
-            `);
-                $templatesWrapper.removeClass('d-none');
-
-                $.ajax({
-                    url: "{{ route('product-templates.index') }}",
-                    method: "GET",
-                    data: {
-                        product_without_category_id: productId,
-                        request_type: "api",
-                        // approach: "without_editor",
-                        paginate: true,
-                        // has_not_mockups: false,
-                        {{--                        mockup_id: "{{ $model->id }}",--}}
-                        per_page: 12,
-                        types: getSelectedTypesForRequest(),
-                    },
-
-                    success: function (response) {
-                        const data = response.data ?? {};
-                        const items = data.data ?? [];
-                        const links = data.links ?? {};
-
-                        firstPageTemplates = items;
-                        nextPageUrl = links.next || null;
-
-                        renderTemplateCards(firstPageTemplates);
-                    },
-                    error: function (xhr) {
-                        console.error("Error loading templates", xhr);
-                        resetTemplatesUI();
-                    }
-                });
-            }
-
             // =========================
             // Events: Product change
             // =========================
-            $productSelect.on('change', function () {
-                const productId = $(this).val();
-                fetchTemplatesForProduct(productId);
-            });
 
             // حالة edit: لو فيه value جاهزة
             if ($productSelect.val()) {
@@ -2035,7 +1160,6 @@
 
                 $modal.modal('show');
             });
-
             // =========================
             // Modal: Load More
             // =========================
@@ -2078,70 +1202,36 @@
 
             $(document).on('click', '.js-show-on-mockup', function () {
                 const $cardWrapper = $(this).closest('.template-card');
-                const idStr = String($cardWrapper.data('id'));
+                const id = $cardWrapper.data('id');
                 const front = $cardWrapper.data('front');
-                const back  = $cardWrapper.data('back');
-                const none  = $cardWrapper.data('none');
+                const back = $cardWrapper.data('back');
+                const none = $cardWrapper.data('none');
+                const name = $cardWrapper.find('.card-title').text();
 
-                // highlight selected card
+                // Mark this template as selected
+                $cardWrapper.addClass('selected');
+
+                // Ensure it has a selectedColors array
+                if (!$cardWrapper[0].selectedColors) {
+                    $cardWrapper[0].selectedColors = [];
+                }
+
+                // Copy any existing selected colors from the card DOM inputs
+                const colorInputs = $cardWrapper.find('input[name="pre_fill_colors[]"]');
+                $cardWrapper[0].selectedColors = Array.from(colorInputs).map(input => input.value);
+
+                // Highlight the selected card in templatesCardsWrapper
                 $('#templatesCardsContainer').find('.template-card .card')
                     .removeClass('border-primary shadow-lg')
                     .css('border-color', '#24B094');
 
-                $cardWrapper.find('.card')
-                    .addClass('border-primary shadow-lg')
-                    .css('border-color', '#0d6efd');
-
-                // store template_id
-                $('#selectedTemplateId').val(idStr);
-
-                // find saved template positions from $model->templates
-                const savedTemplate = templatesData.find(t => String(t.id) === idStr);
-                const savedPositions = savedTemplate ? savedTemplate.pivot.positions : null;
-
-                // FRONT
-                if (front) {
-                    loadAndBind(
-                        window.canvasFront,
-                        front,
-                        'front',
-                        savedPositions,
-                        idStr
-                    );
-                    document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
-                }
-
-                // BACK
-                if (back) {
-                    loadAndBind(
-                        window.canvasBack,
-                        back,
-                        'back',
-                        savedPositions,
-                        idStr
-                    );
-                    document.getElementById('editorBackWrapper')?.classList.remove('d-none');
-                }
-
-                // NONE
-                if (none) {
-                    loadAndBind(
-                        window.canvasNone,
-                        none,
-                        'none',
-                        savedPositions,
-                        idStr
-                    );
-                    document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
-                }
-
-                // close modal if inside
+                // If clicked from the modal → swap with last card from main
                 if ($(this).closest('#templateModal').length) {
-                    const $mainContainer  = $('#templatesCardsContainer');
+                    const $mainContainer = $('#templatesCardsContainer');
                     const $modalContainer = $('#templates-modal-container');
 
                     const $modalCard = $(this).closest('.template-card');
-                    const $modalCol  = $modalCard.closest('[class*="col-"]');
+                    const $modalCol = $modalCard.closest('[class*="col-"]');
 
                     // placeholder مكان كارت المودال
                     const $ph = $('<div class="__swap_ph__"></div>');
@@ -2152,7 +1242,7 @@
                     if (!$mainCards.length) return;
 
                     const $lastMainCard = $mainCards.last();
-                    const $lastMainCol  = $lastMainCard.closest('[class*="col-"]');
+                    const $lastMainCol = $lastMainCard.closest('[class*="col-"]');
 
                     // 1) دخل آخر كارت برا إلى نفس مكان كارت المودال
                     $lastMainCol.detach()
@@ -2172,41 +1262,144 @@
                     $('#templateModal').modal('hide');
                 }
 
+                // Highlight newly added/existing card
+                $('#templatesCardsContainer').find(`.template-card[data-id="${id}"] .card`)
+                    .addClass('border-primary shadow-lg')
+                    .css('border-color', '#0d6efd');
+
+                // Save template_id for single selection fallback (optional)
+                $('#selectedTemplateId').val(id);
+
+                // Load template on canvas
+                if (typeof loadAndBind === 'function') {
+                    if (front) {
+                        loadAndBind(window.canvasFront, front, 'front', id);
+                        document.getElementById('editorFrontWrapper')?.classList.remove('d-none');
+                    }
+                    if (back) {
+                        loadAndBind(window.canvasBack, back, 'back', id);
+                        document.getElementById('editorBackWrapper')?.classList.remove('d-none');
+                    }
+                    if (none) {
+                        loadAndBind(window.canvasNone, none, 'none', id);
+                        document.getElementById('editorNoneWrapper')?.classList.remove('d-none');
+                    }
+                }
+
+                // Close modal
+                $('#templateModal').modal('hide');
             });
 
-            // =========================
-            // Save Positions (cards + modal)
-            // =========================
+// =========================
+// Save Positions (cards + modal)
+// =========================
+            buildHiddenTemplateInputs = function () {
+                const container = document.getElementById("templatesHiddenContainer");
+                if (!container) return;
 
-            $(document).on('click', '.js-save-positions', function () {
-                if (typeof saveAllTemplatePositions === 'function') {
-                    saveAllTemplatePositions();
-                }
+                container.innerHTML = "";
+
+                // بس التمبليتس اللي اتعلّم عليها selected من الكروت
+                const cards = document.querySelectorAll('.template-card.selected');
+
+                let index = 0;
+                cards.forEach(card => {
+                    const tplId = String(card.dataset.id);
+                    const positions = window.templatePositions[tplId] || {};
+                    const selectedColors = card.selectedColors || [];
+
+                    // لو مفيش أي side متحفظ ليه، نعدّي
+                    if (!positions.front && !positions.back && !positions.none) return;
+
+                    let html = `<div class="template-inputs" data-template-id="${tplId}">`;
+                    html += `<input type="hidden" name="templates[${index}][template_id]" value="${tplId}">`;
+
+                    ['front', 'back', 'none'].forEach(side => {
+                        const p = positions[side];
+                        if (!p) return;
+
+                        html += `<input type="hidden" class="template_x ${side}" name="templates[${index}][${side}_x]" value="${p.xPct}">`;
+                        html += `<input type="hidden" class="template_y ${side}" name="templates[${index}][${side}_y]" value="${p.yPct}">`;
+                        html += `<input type="hidden" class="template_width ${side}" name="templates[${index}][${side}_width]" value="${p.wPct}">`;
+                        html += `<input type="hidden" class="template_height ${side}" name="templates[${index}][${side}_height]" value="${p.hPct}">`;
+                        html += `<input type="hidden" class="template_angle ${side}" name="templates[${index}][${side}_angle]" value="${p.angle}">`;
+                    });
+
+                    (selectedColors || []).forEach(color => {
+                        html += `<input type="hidden" name="templates[${index}][colors][]" value="${color}">`;
+                    });
+
+                    html += `</div>`;
+
+                    container.insertAdjacentHTML('beforeend', html);
+                    index++;
+                });
+
+                console.log('📝 Hidden inputs rebuilt from templatePositions:', window.templatePositions);
+            };
+
+            calculateObjectPercents = function (obj, meta) {
+                const center = obj.getCenterPoint();
+                const wReal = (obj.width || 0) * (obj.scaleX || 1);
+                const hReal = (obj.height || 0) * (obj.scaleY || 1);
+
+                return {
+                    xPct: ((center.x - meta.offsetLeft) / meta.scaledWidth).toFixed(6),
+                    yPct: ((center.y - meta.offsetTop) / meta.scaledHeight).toFixed(6),
+                    wPct: (wReal / meta.scaledWidth).toFixed(6),
+                    hPct: (hReal / meta.scaledHeight).toFixed(6),
+                    angle: obj.angle || 0
+                };
+            };
+
+            // حفظ أماكن Template واحد
+            function savePositionsForTemplate(templateId) {
+                const id = String(templateId);
+                const canvases = {
+                    front: window.canvasFront,
+                    back: window.canvasBack,
+                    none: window.canvasNone,
+                };
+
+                Object.entries(canvases).forEach(([type, canvas]) => {
+                    if (!canvas || !canvas.__mockupMeta) return;
+
+                    const obj = canvas.getObjects().find(
+                        o => o.templateType === type && String(o.templateId) === id
+                    );
+                    if (!obj) return;
+
+                    updateTemplatePositionsFromObject(obj, type);
+                });
 
                 buildHiddenTemplateInputs();
+            }
 
-                if (window.Toastify) {
-                    Toastify({
-                        text: "Positions saved successfully",
-                        duration: 1500,
-                        gravity: "top",
-                        position: "right",
-                        backgroundColor: "#28a745",
-                        close: true,
-                    }).showToast();
-                } else {
-                    alert('Positions saved successfully');
-                }
+            $(document).on('click', '.js-save-positions', function () {
+                const card = this.closest('.template-card');
+                if (!card) return;
 
-                // 🔴 لو الزر جوّه المودال → اقفل المودال
-                if ($(this).closest('#templateModal').length) {
-                    $('#templateModal').modal('hide');
-                }
+                const templateId = card.dataset.id;
+                if (!templateId) return;
+
+                // اعتبر إن التمبليت ده داخل في الحفظ
+                card.classList.add('selected');
+
+                savePositionsForTemplate(templateId);
+
+                Toastify({
+                    text: "Positions saved successfully",
+                    duration: 1500,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    close: true,
+                }).showToast();
             });
+
 
         });
     </script>
-
 
     <script>
         // =========================
@@ -2264,36 +1457,19 @@
             canvas.renderAll();
         }
 
-        function syncTemplateInputs(obj, type) {
-            const wrapper = document.getElementById('templatesCardsWrapper');
-            if (!wrapper) return;
-
+        function updateTemplatePositionsFromObject(obj, type) {
             const canvas = obj.canvas;
             const meta = canvas && canvas.__mockupMeta;
-            if (!meta) return;
+            const tplId = obj.templateId;
+            if (!meta || !tplId) return;
 
-            const xInput = wrapper.querySelector(`.template_x.${type}`);
-            const yInput = wrapper.querySelector(`.template_y.${type}`);
-            const widthInput = wrapper.querySelector(`.template_width.${type}`);
-            const heightInput = wrapper.querySelector(`.template_height.${type}`);
-            const angleInput = wrapper.querySelector(`.template_angle.${type}`);
+            const pos = calculateObjectPercents(obj, meta);
 
-            if (!xInput || !yInput || !widthInput || !heightInput || !angleInput) return;
-
-            const center = obj.getCenterPoint();
-            const wReal = obj.width * obj.scaleX;
-            const hReal = obj.height * obj.scaleY;
-
-            const xPct = (center.x - meta.offsetLeft) / meta.scaledWidth;
-            const yPct = (center.y - meta.offsetTop) / meta.scaledHeight;
-            const wPct = wReal / meta.scaledWidth;
-            const hPct = hReal / meta.scaledHeight;
-
-            xInput.value = xPct.toFixed(6);
-            yInput.value = yPct.toFixed(6);
-            widthInput.value = wPct.toFixed(6);
-            heightInput.value = hPct.toFixed(6);
-            angleInput.value = obj.angle || 0;
+            const key = String(tplId);
+            if (!window.templatePositions[key]) {
+                window.templatePositions[key] = {};
+            }
+            window.templatePositions[key][type] = pos;
         }
 
         function clearTemplateInputsForObject(type) {
@@ -2358,7 +1534,6 @@
         function applyDefaultPlacement(img, canvas, meta) {
             const defaultWidthRatio = 0.35;
 
-
             if (meta) {
                 const targetW = meta.scaledWidth * defaultWidthRatio;
                 const scale = targetW / img.width;
@@ -2379,7 +1554,8 @@
             }
         }
 
-        function loadAndBind(canvas, designUrl, type, savedPositions, templateId) {
+        function loadAndBind(canvas, designUrl, type, templateId) {
+            // نمسح أي تصميم قديم لنفس الـ side
             clearTemplateDesigns(canvas, type);
 
             fabric.Image.fromURL(designUrl, function (img) {
@@ -2390,27 +1566,25 @@
                 });
 
                 img.templateType = type;
-                img.templateId   = templateId;
+                img.templateId = String(templateId);
 
                 const meta = canvas.__mockupMeta;
+                const stored = (window.templatePositions[img.templateId] || {})[type];
 
-                if (savedPositions && meta) {
-                    const prefix = type + '_';
-                    const xPct  = parseFloat(savedPositions[prefix + 'x']      ?? 0.5);
-                    const yPct  = parseFloat(savedPositions[prefix + 'y']      ?? 0.5);
-                    const wPct  = parseFloat(savedPositions[prefix + 'width']  ?? 0.4);
-                    const hPct  = parseFloat(savedPositions[prefix + 'height'] ?? 0.4);
-                    const angle = parseFloat(savedPositions[prefix + 'angle']  ?? 0);
+                if (meta && stored) {
+                    // 🟢 استخدم الإحداثيات المحفوظة
+                    const targetW = meta.scaledWidth * parseFloat(stored.wPct);
+                    const targetH = meta.scaledHeight * parseFloat(stored.hPct);
+                    const centerX = meta.offsetLeft + meta.scaledWidth * parseFloat(stored.xPct);
+                    const centerY = meta.offsetTop + meta.scaledHeight * parseFloat(stored.yPct);
 
-                    img.left   = meta.offsetLeft + meta.scaledWidth  * xPct;
-                    img.top    = meta.offsetTop  + meta.scaledHeight * yPct;
-
-                    const scaleX = (wPct * meta.scaledWidth)  / img.width;
-                    const scaleY = (hPct * meta.scaledHeight) / img.height;
-                    img.scaleX = img.scaleY = Math.min(scaleX, scaleY);
-
-                    img.angle = angle;
+                    img.scaleX = targetW / img.width;
+                    img.scaleY = targetH / img.height;
+                    img.left = centerX;
+                    img.top = centerY;
+                    img.angle = parseFloat(stored.angle) || 0;
                 } else {
+                    // أول مرة لهذا الـ template → مركز التيشيرت بحجم افتراضي
                     applyDefaultPlacement(img, canvas, meta);
                 }
 
@@ -2419,40 +1593,19 @@
                 canvas.setActiveObject(img);
                 canvas.renderAll();
 
-                syncTemplateInputs(img, type);
+                // أول sync → نخزن القيم
+                if (meta) {
+                    updateTemplatePositionsFromObject(img, type);
+                    buildHiddenTemplateInputs();
+                }
             });
-        }
-
-        function saveAllTemplatePositions() {
-            if (window.canvasFront) {
-                window.canvasFront.getObjects().forEach(obj => {
-                    if (obj.templateType === 'front') {
-                        syncTemplateInputs(obj, 'front');
-                    }
-                });
-            }
-
-            if (window.canvasBack) {
-                window.canvasBack.getObjects().forEach(obj => {
-                    if (obj.templateType === 'back') {
-                        syncTemplateInputs(obj, 'back');
-                    }
-                });
-            }
-
-            if (window.canvasNone) {
-                window.canvasNone.getObjects().forEach(obj => {
-                    if (obj.templateType === 'none') {
-                        syncTemplateInputs(obj, 'none');
-                    }
-                });
-            }
         }
 
         function bindCanvasUpdates(canvas, type) {
             canvas.on('object:modified', function (e) {
                 const obj = e.target;
-                syncTemplateInputs(obj, type);
+                updateTemplatePositionsFromObject(obj, type);
+                buildHiddenTemplateInputs();
             });
         }
 
@@ -2517,12 +1670,6 @@
             });
 
             renderFileInputs();
-            if (window.jQuery) {
-                // const $prod = $('#productsSelect');
-                // if ($prod.length && $prod.val()) {
-                //     $prod.trigger('change');
-                // }
-            }
         }
 
         function hideCanvasForType(type) {
@@ -2557,63 +1704,24 @@
                 clearTemplateInputsForObject(type);
             }
         }
+
         // =========================
         // WARP POINTS EDITOR
         // =========================
-        function normalizeWarpPoints(saved) {
-            if (!saved) return null;
-
-            if (typeof saved === 'string') {
-                try {
-                    saved = JSON.parse(saved);
-                } catch (e) {
-                    return null;
-                }
-            }
-
-            // لو جاي array بالفعل
-            if (Array.isArray(saved) && saved.length === 4) {
-                return saved.map((p) => ({
-                    x: Number(p.x),
-                    y: Number(p.y),
-                }));
-            }
-
-            // لو جاي object بالشكل tl,tr,br,bl
-            if (
-                saved.tl && saved.tr &&
-                saved.br && saved.bl
-            ) {
-                return [
-                    { x: Number(saved.tl.x), y: Number(saved.tl.y) },
-                    { x: Number(saved.tr.x), y: Number(saved.tr.y) },
-                    { x: Number(saved.br.x), y: Number(saved.br.y) },
-                    { x: Number(saved.bl.x), y: Number(saved.bl.y) },
-                ];
-            }
-
-            return null;
-        }
         const warpState = {};
 
-        // ✅ Pre-load existing warp points from DB (per side)
-        const existingWarpPoints = @json($existingWarpPoints);
-        console.log(existingWarpPoints)
         function initWarpEditor(side, imageUrl) {
             const wrapper = document.getElementById(`warp-editor-${side}`);
-            const img     = document.getElementById(`warp-preview-${side}`);
-            const canvas  = document.getElementById(`warp-canvas-${side}`);
+            const img = document.getElementById(`warp-preview-${side}`);
+            const canvas = document.getElementById(`warp-canvas-${side}`);
             if (!wrapper || !img || !canvas) return;
 
-            // ✅ Use saved warp points if available, else default corners
-            const saved = normalizeWarpPoints(existingWarpPoints[side]);
-
             warpState[side] = {
-                points: saved ?? [
-                    { x: 0.1, y: 0.1 },
-                    { x: 0.9, y: 0.1 },
-                    { x: 0.9, y: 0.9 },
-                    { x: 0.1, y: 0.9 },
+                points: [
+                    {x: 0.1, y: 0.1},
+                    {x: 0.9, y: 0.1},
+                    {x: 0.9, y: 0.9},
+                    {x: 0.1, y: 0.9},
                 ],
                 dragging: null,
             };
@@ -2622,10 +1730,10 @@
             wrapper.classList.remove('d-none');
 
             const LABELS = ['TL', 'TR', 'BR', 'BL'];
-            const RADIUS  = 10;
+            const RADIUS = 10;
 
             function pxOf(p) {
-                return { x: p.x * canvas.width, y: p.y * canvas.height };
+                return {x: p.x * canvas.width, y: p.y * canvas.height};
             }
 
             function draw() {
@@ -2633,54 +1741,65 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 const pts = warpState[side].points;
 
+                // Fill
                 ctx.beginPath();
                 const f = pxOf(pts[0]);
                 ctx.moveTo(f.x, f.y);
-                pts.slice(1).forEach(p => { const px = pxOf(p); ctx.lineTo(px.x, px.y); });
+                pts.slice(1).forEach(p => {
+                    const px = pxOf(p);
+                    ctx.lineTo(px.x, px.y);
+                });
                 ctx.closePath();
                 ctx.fillStyle = 'rgba(36,176,148,0.08)';
                 ctx.fill();
+
+                // Outline
                 ctx.strokeStyle = 'rgba(36,176,148,0.85)';
-                ctx.lineWidth   = 1.5;
+                ctx.lineWidth = 1.5;
                 ctx.setLineDash([6, 4]);
                 ctx.stroke();
                 ctx.setLineDash([]);
 
+                // Diagonal guides
                 ctx.beginPath();
                 const tl = pxOf(pts[0]), br = pxOf(pts[2]);
                 const tr = pxOf(pts[1]), bl = pxOf(pts[3]);
-                ctx.moveTo(tl.x, tl.y); ctx.lineTo(br.x, br.y);
-                ctx.moveTo(tr.x, tr.y); ctx.lineTo(bl.x, bl.y);
+                ctx.moveTo(tl.x, tl.y);
+                ctx.lineTo(br.x, br.y);
+                ctx.moveTo(tr.x, tr.y);
+                ctx.lineTo(bl.x, bl.y);
                 ctx.strokeStyle = 'rgba(36,176,148,0.25)';
-                ctx.lineWidth   = 0.8;
+                ctx.lineWidth = 0.8;
                 ctx.stroke();
 
+                // Handles
                 pts.forEach((p, i) => {
                     const px = pxOf(p);
                     ctx.beginPath();
                     ctx.arc(px.x, px.y, RADIUS, 0, Math.PI * 2);
-                    ctx.fillStyle   = '#24B094';
+                    ctx.fillStyle = '#24B094';
                     ctx.fill();
                     ctx.strokeStyle = '#fff';
-                    ctx.lineWidth   = 2;
+                    ctx.lineWidth = 2;
                     ctx.stroke();
-                    ctx.fillStyle    = '#fff';
-                    ctx.font         = 'bold 10px sans-serif';
-                    ctx.textAlign    = 'center';
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 10px sans-serif';
+                    ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(LABELS[i], px.x, px.y);
                 });
             }
 
             function resize() {
-                canvas.width  = img.clientWidth  || img.naturalWidth;
+                canvas.width = img.clientWidth || img.naturalWidth;
                 canvas.height = img.clientHeight || img.naturalHeight;
                 draw();
             }
 
             function nearestHandle(mx, my) {
-                for (let i = 0; i < warpState[side].points.length; i++) {
-                    const p = pxOf(warpState[side].points[i]);
+                const pts = warpState[side].points;
+                for (let i = 0; i < pts.length; i++) {
+                    const p = pxOf(pts[i]);
                     if (Math.hypot(p.x - mx, p.y - my) < RADIUS + 5) return i;
                 }
                 return null;
@@ -2688,7 +1807,9 @@
 
             canvas.addEventListener('pointerdown', e => {
                 const rect = canvas.getBoundingClientRect();
-                warpState[side].dragging = nearestHandle(e.clientX - rect.left, e.clientY - rect.top);
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+                warpState[side].dragging = nearestHandle(mx, my);
                 if (warpState[side].dragging !== null) canvas.setPointerCapture(e.pointerId);
             });
 
@@ -2696,8 +1817,8 @@
                 if (warpState[side].dragging === null) return;
                 const rect = canvas.getBoundingClientRect();
                 warpState[side].points[warpState[side].dragging] = {
-                    x: Math.min(1, Math.max(0, (e.clientX - rect.left)  / canvas.width)),
-                    y: Math.min(1, Math.max(0, (e.clientY - rect.top)   / canvas.height)),
+                    x: Math.min(1, Math.max(0, (e.clientX - rect.left) / canvas.width)),
+                    y: Math.min(1, Math.max(0, (e.clientY - rect.top) / canvas.height)),
                 };
                 draw();
                 syncWarpInput(side);
@@ -2715,55 +1836,104 @@
         }
 
         function syncWarpInput(side) {
-            if (!warpState[side]) return;
+            // احذف أي inputs قديمة لنفس side
+            document.querySelectorAll(`.warp-${side}`).forEach(el => el.remove());
 
-            const form = document.getElementById('editMockupForm');
-            const [tl, tr, br, bl] = warpState[side].points;
+            const state = warpState[side];
+            if (!state || !state.points || state.points.length < 4) {
+                return;
+            }
 
-            const points = { tl, tr, br, bl };
+            const pts = state.points;
 
-            // ✅ Remove old warp inputs for this side
-            form.querySelectorAll(`[data-warp-side="${side}"]`).forEach(el => el.remove());
+            const warpPoints = {
+                tl: pts[0],
+                tr: pts[1],
+                br: pts[2],
+                bl: pts[3],
+            };
 
-            // ✅ Write flat inputs — no JSON.stringify, no escaping
-            Object.entries(points).forEach(([corner, coords]) => {
+            const form = document.getElementById('addMockupForm');
+
+            Object.entries(warpPoints).forEach(([corner, point]) => {
                 ['x', 'y'].forEach(axis => {
-                    const input       = document.createElement('input');
-                    input.type        = 'hidden';
-                    input.name        = `warp_points[${side}][${corner}][${axis}]`;
-                    input.value       = coords[axis];
-                    input.dataset.warpSide = side;   // for cleanup on re-sync
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.className = `warp-${side}`;
+                    input.name = `warp_points[${side}][${corner}][${axis}]`;
+                    input.value = Number(point[axis].toFixed(6));
                     form.appendChild(input);
                 });
             });
         }
 
-
-
         function resetWarp(side) {
             if (!warpState[side]) return;
             warpState[side].points = [
-                { x: 0.1, y: 0.1 },   // tl
-                { x: 0.9, y: 0.1 },   // tr
-                { x: 0.9, y: 0.9 },   // br
-                { x: 0.1, y: 0.9 },   // bl
+                {x: 0.1, y: 0.1},
+                {x: 0.9, y: 0.1},
+                {x: 0.9, y: 0.9},
+                {x: 0.1, y: 0.9},
             ];
-
-            // re-init editor with current image
+            // Re-init draw by triggering resize
+            const img = document.getElementById(`warp-preview-${side}`);
+            const canvas = document.getElementById(`warp-canvas-${side}`);
+            if (canvas && img) {
+                canvas.width = img.clientWidth || img.naturalWidth;
+                canvas.height = img.clientHeight || img.naturalHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            syncWarpInput(side);
+            // Re-init to redraw handles
             const imgEl = document.getElementById(`warp-preview-${side}`);
-            if (imgEl?.src) initWarpEditor(side, imgEl.src);
-
-            syncWarpInput(side); // ✅ now sends {tl, tr, br, bl}
+            if (imgEl && imgEl.src) initWarpEditor(side, imgEl.src);
         }
 
         $(document).on('click', '.js-reset-warp', function () {
             resetWarp($(this).data('side'));
-            Toastify({ text: 'Reset to default corners', backgroundColor: '#6c757d', duration: 1200 }).showToast();
+            Toastify({text: 'Reset to default corners', backgroundColor: '#6c757d', duration: 1200}).showToast();
         });
 
+        $(document).on('click', '.js-save-warp', function () {
+            const side = $(this).data('side');
+            const mockupId = "{{ $mockup->id ?? 'null' }}";
 
+            syncWarpInput(side);
+
+            if (!mockupId || mockupId === 'null') {
+                Toastify({
+                    text: 'Warp points ready — will save with mockup',
+                    backgroundColor: '#17a2b8',
+                    duration: 2000
+                }).showToast();
+                return;
+            }
+
+            fetch(`/admin/mockups/${mockupId}/side-settings/${side}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({warp_points: warpState[side]?.points}),
+            })
+                .then(r => r.json())
+                .then(() => {
+                    Toastify({
+                        text: `Warp points saved for ${side}`,
+                        backgroundColor: '#28a745',
+                        duration: 1500
+                    }).showToast();
+                })
+                .catch(() => {
+                    Toastify({text: 'Save failed', backgroundColor: '#dc3545', duration: 1500}).showToast();
+                });
+        });
         // Disable Dropzone auto-discovery
         Dropzone.autoDiscover = false;
+
+        // Track Dropzone instances to avoid re-init
         const dropzoneInstances = {};
 
         function renderFileInputs() {
@@ -2773,13 +1943,14 @@
                 .filter(cb => cb.checked)
                 .map(cb => cb.dataset.typeName);
 
-            // Remove blocks + destroy dropzones for unchecked types
+            // Remove blocks + hide canvas for unchecked types
             ['front', 'back', 'none'].forEach(type => {
                 if (!selectedTypes.includes(type)) {
                     const block = document.getElementById(`${type}-file-block`);
                     if (block) block.remove();
 
-                    ['base_image', 'mask_image', 'shadow_image', 'displacement_image', 'light_image'].forEach(part => {
+                    // Destroy dropzone instances for this type
+                    ['base', 'mask', 'shadow', 'displacement', 'light'].forEach(part => {
                         const key = `${type}-${part}`;
                         if (dropzoneInstances[key]) {
                             dropzoneInstances[key].destroy();
@@ -2798,9 +1969,10 @@
                 if (document.getElementById(`${type}-file-block`)) return;
 
                 const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
-                const block     = document.createElement('div');
+
+                const block = document.createElement('div');
                 block.className = 'col-md-6';
-                block.id        = `${type}-file-block`;
+                block.id = `${type}-file-block`;
 
                 block.innerHTML = `
             <label class="label-text">${typeLabel}</label>
@@ -2808,11 +1980,11 @@
 
             <div class="mb-2">
                 <label class="form-label label-text">${typeLabel} Base Image</label>
-                <div id="dz-${type}-base_image" class="dropzone dropzone-area">
+                <div id="dz-${type}-base" class="dropzone dropzone-area">
                     <div class="dz-message">
                         <i data-feather="upload-cloud" style="width:28px;height:28px;stroke:#24B094;"></i>
                         <p class="mt-1 mb-0">Drag &amp; drop or <u>click to upload</u></p>
-                        <small class="text-muted">PNG only</small>
+                        <small class="text-muted">PNG accepted</small>
                     </div>
                 </div>
     <small class="form-text text-muted">
@@ -2822,11 +1994,11 @@
 
             <div class="mb-2">
                 <label class="form-label label-text">${typeLabel} Mask Image</label>
-                <div id="dz-${type}-mask_image" class="dropzone dropzone-area">
+                <div id="dz-${type}-mask" class="dropzone dropzone-area">
                     <div class="dz-message">
                         <i data-feather="upload-cloud" style="width:28px;height:28px;stroke:#24B094;"></i>
                         <p class="mt-1 mb-0">Drag &amp; drop or <u>click to upload</u></p>
-                        <small class="text-muted">PNG only</small>
+                        <small class="text-muted">PNG accepted</small>
                     </div>
                 </div>
     <small class="form-text text-muted">
@@ -2836,11 +2008,11 @@
 
             <div class="mb-2">
                 <label class="form-label label-text">${typeLabel} Shadow Image</label>
-                <div id="dz-${type}-shadow_image" class="dropzone dropzone-area">
+                <div id="dz-${type}-shadow" class="dropzone dropzone-area">
                     <div class="dz-message">
                         <i data-feather="upload-cloud" style="width:28px;height:28px;stroke:#24B094;"></i>
                         <p class="mt-1 mb-0">Drag &amp; drop or <u>click to upload</u></p>
-                        <small class="text-muted">PNG only</small>
+                        <small class="text-muted">PNG accepted</small>
                     </div>
                 </div>
     <small class="form-text text-muted">
@@ -2850,11 +2022,11 @@
 
             <div class="mb-2">
                 <label class="form-label label-text">${typeLabel} Displacement Image</label>
-                <div id="dz-${type}-displacement_image" class="dropzone dropzone-area">
+                <div id="dz-${type}-displacement" class="dropzone dropzone-area">
                     <div class="dz-message">
                         <i data-feather="upload-cloud" style="width:28px;height:28px;stroke:#24B094;"></i>
                         <p class="mt-1 mb-0">Drag &amp; drop or <u>click to upload</u></p>
-                        <small class="text-muted">PNG only</small>
+                        <small class="text-muted">PNG accepted</small>
                     </div>
                 </div>
     <small class="form-text text-muted">
@@ -2864,11 +2036,11 @@
 
             <div class="mb-2">
                 <label class="form-label label-text">${typeLabel} Highlight Image</label>
-                <div id="dz-${type}-light_image" class="dropzone dropzone-area">
+                <div id="dz-${type}-light" class="dropzone dropzone-area">
                     <div class="dz-message">
                         <i data-feather="upload-cloud" style="width:28px;height:28px;stroke:#24B094;"></i>
                         <p class="mt-1 mb-0">Drag &amp; drop or <u>click to upload</u></p>
-                        <small class="text-muted">PNG only</small>
+                        <small class="text-muted">PNG accepted</small>
                     </div>
                 </div>
     <small class="form-text text-muted">
@@ -2880,291 +2052,193 @@
         `;
 
                 document.getElementById('fileInputsContainer').appendChild(block);
+
                 feather.replace();
 
+                // Init Dropzone for each part after DOM is ready
                 setTimeout(() => {
-                    initDropzone(type, 'base_image');
-                    initDropzone(type, 'mask_image');
-                    initDropzone(type, 'shadow_image');
-                    initDropzone(type, 'displacement_image');
-                    initDropzone(type, 'light_image');
+                    initDropzone(type, 'base');
+                    initDropzone(type, 'mask');
+                    initDropzone(type, 'shadow');
+                    initDropzone(type, 'displacement');
+                    initDropzone(type, 'light');
                 }, 50);
             });
         }
 
         function initDropzone(type, part) {
-            const key       = `${type}-${part}`;
-            const elId      = `dz-${type}-${part}`;
-            const el        = document.getElementById(elId);
-            const inputName = `${type}_${part}`;           // e.g. front_base_image
+            const key = `${type}-${part}`;
+            const elId = `dz-${type}-${part}`;
+            const el = document.getElementById(elId);
+            const inputName = `${type}_${part}_image`;
 
             if (!el || dropzoneInstances[key]) return;
 
-            // Hidden input to store uploaded media ID
+            // Hidden input to store the uploaded media ID
             let hiddenInput = document.querySelector(`input[name="${inputName}_id"]`);
             if (!hiddenInput) {
-                hiddenInput        = document.createElement('input');
-                hiddenInput.type   = 'hidden';
-                hiddenInput.name   = `${inputName}_id`;
-                document.getElementById('editMockupForm').appendChild(hiddenInput);
+                hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = `${inputName}_id`;
+                document.getElementById('addMockupForm').appendChild(hiddenInput);
             }
 
             const dz = new Dropzone(`#${elId}`, {
-                url:           "{{ route('media.store') }}",
-                paramName:     "file",
-                maxFiles:      1,
-                maxFilesize:   12,
+                url: "{{ route('media.store') }}",
+                paramName: "file",
+                maxFiles: 1,
+                maxFilesize: 12,
                 acceptedFiles: "image/png",
-                headers:       { "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+                dictInvalidFileType: "Only PNG files are allowed.",
+                headers: {"X-CSRF-TOKEN": "{{ csrf_token() }}"},
                 addRemoveLinks: true,
                 dictRemoveFile: '✕ Remove',
                 dictDefaultMessage: '',
-                dictInvalidFileType: "Only PNG files are allowed.",
 
+                // Send custom properties with every upload
                 params: {
-                    "customProperties[role]": part.replace('_image', ''),  // base | mask | shadow | displacement | light
-                    "customProperties[side]": type,                         // front | back | none
+                    "customProperties[role]": part,   // base | mask | shadow | displacement | light
+                    "customProperties[side]": type,   // front | back | none
                 },
 
                 init: function () {
                     const dzInstance = this;
 
-                    // Only one file at a time
                     dzInstance.on('addedfile', function () {
                         if (dzInstance.files.length > 1) {
                             dzInstance.removeFile(dzInstance.files[0]);
                         }
                     });
 
-                    // Upload success → store media ID
                     dzInstance.on('success', function (file, response) {
                         if (response.success && response.data) {
-                            file._mediaId     = response.data.id;
+                            file._mediaId = response.data.id;
                             hiddenInput.value = response.data.id;
 
-                            if (part === 'base_image' && response.data.url) {
-                                const canvasMap  = { front: window.canvasFront, back: window.canvasBack, none: window.canvasNone };
-                                const wrapperMap = { front: 'editorFrontWrapper', back: 'editorBackWrapper', none: 'editorNoneWrapper' };
+                            if (part === 'base' && response.data.url) {
+                                const canvasMap = {
+                                    front: window.canvasFront,
+                                    back: window.canvasBack,
+                                    none: window.canvasNone
+                                };
+                                const wrapperMap = {
+                                    front: 'editorFrontWrapper',
+                                    back: 'editorBackWrapper',
+                                    none: 'editorNoneWrapper'
+                                };
 
                                 loadBaseImage(canvasMap[type], response.data.url);
                                 document.getElementById(wrapperMap[type])?.classList.remove('d-none');
 
-                                // ✅ show warp editor for newly uploaded base image
+                                // ✅ show warp editor for this side
                                 initWarpEditor(type, response.data.url);
                             }
                         }
                     });
 
                     dzInstance.on('error', function (file, message) {
-                        const msg = typeof message === 'object' ? (message.message ?? 'Upload failed') : message;
+                        const msg = (typeof message === 'object') ? (message.message ?? 'Upload failed') : message;
                         console.error(`Dropzone [${key}] error:`, msg);
                     });
 
-                    // Remove → delete from server + clear hidden input
                     dzInstance.on('removedfile', function (file) {
                         hiddenInput.value = '';
 
                         if (file._mediaId) {
                             fetch("{{ url('api/v1/media') }}/" + file._mediaId, {
-                                method:  'DELETE',
-                                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                }
                             }).catch(err => console.error('Media delete failed:', err));
                         }
 
-                        if (part === 'base_image' && typeof hideCanvasForType === 'function') {
-                            hideCanvasForType(type);
+                        if (part === 'base') {
+                            if (typeof hideCanvasForType === 'function') {
+                                hideCanvasForType(type);
+                            }
                         }
                     });
-
-                    // ✅ Preload existing file if available
-                    const existingUrl = getExistingMediaUrl(type, part);
-                    if (existingUrl) {
-                        preloadDropzoneFile(dzInstance, existingUrl, type, part, hiddenInput);
-                    }
                 }
             });
 
             dropzoneInstances[key] = dz;
         }
 
-        // ─── Preload existing media from server ──────────────────────────────────────
-        // Pass existing URLs from blade to JS
-        const existingMedia   = @json($existingMedia);
-        const existingMediaIds = @json($existingMediaIds);
+        // Attach a File object to a hidden <input type="file"> so the form submission picks it up
+        function attachFileToForm(inputName, file) {
+            let input = document.querySelector(`input[name="${inputName}"]`);
+            if (!input) {
+                input = document.createElement('input');
+                input.type = 'file';
+                input.name = inputName;
+                input.style.display = 'none';
+                document.getElementById('addMockupForm').appendChild(input);
+            }
 
-        function getExistingMediaUrl(type, part) {
-            return (existingMedia[type] && existingMedia[type][part]) || null;
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            input.files = dt.files;
         }
 
-        function preloadDropzoneFile(dz, url, type, part, hiddenInput) {
-            const mediaId = existingMediaIds[type]?.[part] ?? null;
-            if (mediaId) {
-                hiddenInput.value  = mediaId;
-                hiddenInput.dataset.existingId = mediaId;
-            }
-
-            const fileName = url.split('/').pop();
-            const mockFile = { name: fileName, size: 0, _mediaId: mediaId, _isExisting: true };
-
-            dz.emit('addedfile', mockFile);
-            dz.emit('thumbnail', mockFile, url);
-            dz.emit('complete', mockFile);
-            dz.files.push(mockFile);
-
-            if (part === 'base_image') {
-                const canvasMap  = { front: window.canvasFront, back: window.canvasBack, none: window.canvasNone };
-                const wrapperMap = { front: 'editorFrontWrapper', back: 'editorBackWrapper', none: 'editorNoneWrapper' };
-
-                loadBaseImage(canvasMap[type], url);
-                document.getElementById(wrapperMap[type])?.classList.remove('d-none');
-
-                // ✅ show warp editor with existing base image
-                // Delay slightly to let the block render in DOM first
-                setTimeout(() => initWarpEditor(type, url), 100);
-            }
+        function removeFormFile(inputName) {
+            const input = document.querySelector(`input[name="${inputName}"]`);
+            if (input) input.value = '';
         }
 
         checkboxes.forEach(cb => cb.addEventListener('change', toggleCheckboxes));
     </script>
+
     <script>
-        let generateMockupsAfterSave = false;
 
-        const generateMockupsUrl = @json(
-        route(
-            'mockups.generate-template-files',
-            ['mockup' => $model->id]
-        )
-    );
-
-        function resetGenerateButton() {
-            const $button = $('#generateTemplateMockupFiles');
-
-            $button.prop('disabled', false);
-
-            $('#generateTemplateMockupFilesLoader')
-                .addClass('d-none');
-
-            $button
-                .find('.btn-text')
-                .text('Generate Mockups');
-        }
-
-        function generateTemplateMockupFiles() {
-            const $button = $('#generateTemplateMockupFiles');
-
-            $.ajax({
-                url: generateMockupsUrl,
-                type: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN':
-                        $('meta[name="csrf-token"]').attr('content'),
-
-                    'Accept':
-                        'application/json',
-                },
-
-                success: function (response) {
-                    Toastify({
-                        text:
-                            response.message ||
-                            'Mockup generation started successfully',
-                        duration: 3000,
-                        gravity: 'top',
-                        position: 'right',
-                        backgroundColor: '#28a745',
-                        close: true,
-                    }).showToast();
-
-                    setTimeout(function () {
-                        location.reload();
-                    }, 500);
-                },
-
-                error: function (xhr) {
-                    console.error(
-                        'Generate mockups error:',
-                        xhr.responseJSON || xhr.responseText
-                    );
-
-                    Toastify({
-                        text:
-                            xhr.responseJSON?.message ||
-                            'Failed to generate mockups',
-                        duration: 3000,
-                        gravity: 'top',
-                        position: 'right',
-                        backgroundColor: '#dc3545',
-                        close: true,
-                    }).showToast();
-
-                    resetGenerateButton();
-                },
-
-                complete: function () {
-                    generateMockupsAfterSave = false;
-                },
-            });
-        }
-
-        $(document).on(
-            'click',
-            '#generateTemplateMockupFiles',
-            function () {
-                const $button = $(this);
-
-                generateMockupsAfterSave = true;
-
-                $button.prop('disabled', true);
-
-                $('#generateTemplateMockupFilesLoader')
-                    .removeClass('d-none');
-
-                $button
-                    .find('.btn-text')
-                    .text('Saving...');
-
-                if (
-                    typeof buildHiddenTemplateInputs ===
-                    'function'
-                ) {
-                    buildHiddenTemplateInputs();
-                }
-
-                $('#editMockupForm')
-                    .trigger('submit');
-            }
-        );
-
-        $(document).ready(function () {
-            handleAjaxFormSubmit(
-                "#editMockupForm",
-                {
-                    successMessage:
-                        "Mockup Updated Successfully",
-
-                    onSuccess: function () {
-                        if (
-                            generateMockupsAfterSave
-                        ) {
-                            $('#generateTemplateMockupFiles')
-                                .find('.btn-text')
-                                .text('Generating...');
-
-                            generateTemplateMockupFiles();
-
-                            return;
-                        }
-
-                        location.reload();
-                    }
-                }
-            );
-        });
-    </script>
-    <script>
         // =========================
         // MAIN IMAGE UPLOAD + FORM SUBMIT
         // =========================
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('addMockupForm');
+            if (!form) return;
+
+            form.addEventListener('submit', function () {
+                // لو في أي template ظاهر حاليًا اتحرك ولسه متسجلش بالزر
+                // هنحدّث templatePositions من الـ canvases
+                ['front', 'back', 'none'].forEach(type => {
+                    const canvas = (type === 'front') ? window.canvasFront :
+                        (type === 'back') ? window.canvasBack :
+                            window.canvasNone;
+
+                    if (!canvas || !canvas.__mockupMeta) return;
+
+                    canvas.getObjects().forEach(obj => {
+                        if (!obj.templateId || obj.templateType !== type) return;
+                        updateTemplatePositionsFromObject(obj, type);
+                    });
+                    syncWarpInput(type);
+                });
+
+                buildHiddenTemplateInputs();
+            });
+        });
+
+        $(document).ready(function () {
+            handleAjaxFormSubmit("#addMockupForm", {
+                successMessage: "Mockup Created Successfully",
+                resetForm:false,
+                onSuccess: function (response) {
+                    const mockupId = response?.data?.id;
+
+                    if (!mockupId) {
+                        return;
+                    }
+
+                    $('#generateTemplateMockupFiles')
+                        .attr('data-mockup-id', mockupId)
+                        .removeClass('d-none');
+
+                    $('#SaveChangesButton')
+                        .prop('disabled', true);
+                }
+            });
+        });
 
         $(document).ready(function () {
             let input = $('#product-image-main');
@@ -3238,43 +2312,429 @@
         });
     </script>
 
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('editMockupForm');
-            if (!form) return;
+        // =========================
+        // COLOR PICKER
+        // =========================
+        let pickrInstance = null;
+        let currentCard = null;
+        let currentGlobalColorTarget = 'pre_fill_colors';
+        let currentTrigger = null;
 
-            form.addEventListener('submit', function () {
-                if (typeof saveAllTemplatePositions === 'function') {
-                    saveAllTemplatePositions();
+        let pendingConfirmColorDelete = null;
+
+        function requestColorDeleteConfirmation(hex, callback, label = null) {
+            pendingConfirmColorDelete = callback;
+            const value = label || String(hex || '');
+            const hasColor = !!hex;
+            $('#confirmDeleteColorValue').text(value);
+            $('#confirmDeleteColorPreviewWrap').toggleClass('d-none', !hasColor && !label);
+            $('#confirmDeleteColorPreview').toggleClass('d-none', !hasColor).css('background-color', hasColor ? hex : 'transparent');
+            $('#confirmColorDeleteModal').modal('show');
+        }
+
+        $(document).on('click', '#confirmDeleteColorAction', function () {
+            if (typeof pendingConfirmColorDelete !== 'function') return;
+            const action = pendingConfirmColorDelete;
+            pendingConfirmColorDelete = null;
+            $('#confirmColorDeleteModal').modal('hide');
+            setTimeout(action, 120);
+        });
+
+        function getGlobalColorConfig(target) {
+            if (target === 'colors_across_templates') {
+                return {
+                    selectedId: 'selected-colors-across-templates',
+                    inputContainerId: 'colorsAcrossTemplatesInputContainer',
+                    inputName: 'colors_across_templates[]'
+                };
+            }
+
+            return {
+                selectedId: 'selected-colors',
+                inputContainerId: 'colorsInputContainer',
+                inputName: 'pre_fill_colors[]'
+            };
+        }
+
+        function getGlobalColors(target) {
+            const config = getGlobalColorConfig(target);
+            const container = document.getElementById(config.inputContainerId);
+            if (!container) return [];
+
+            return [...container.querySelectorAll(`input[name="${config.inputName}"]`)]
+                .map(input => input.value.toLowerCase());
+        }
+
+        function addGlobalColor(hex, target) {
+            hex = hex.toLowerCase();
+            const config = getGlobalColorConfig(target);
+            const selectedColors = document.getElementById(config.selectedId);
+            const inputContainer = document.getElementById(config.inputContainerId);
+
+            if (!selectedColors || !inputContainer) return false;
+
+            const exists = getGlobalColors(target).includes(hex);
+            if (exists) return false;
+
+            const li = document.createElement('li');
+            li.style.listStyle = 'none';
+            li.dataset.hex = hex;
+            li.innerHTML = `
+                <div class="selected-color-wrapper position-relative">
+                    <div class="selected-color-dot" style="background-color:#fff;">
+                        <div class="selected-color-inner" style="background-color:${hex};"></div>
+                    </div>
+                    <button type="button" onclick="removeGlobalColor('${hex}', this, '${target}')" class="remove-color-btn">×</button>
+                </div>`;
+            selectedColors.appendChild(li);
+
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = config.inputName;
+            input.value = hex;
+            inputContainer.appendChild(input);
+
+            syncAcrossTemplateSourceColors();
+            return true;
+        }
+
+        function removeGlobalColorByHex(hex, target) {
+            hex = hex.toLowerCase();
+            const config = getGlobalColorConfig(target);
+            const selectedColors = document.getElementById(config.selectedId);
+            const inputContainer = document.getElementById(config.inputContainerId);
+
+            if (selectedColors) {
+                [...selectedColors.querySelectorAll('li')].forEach(li => {
+                    if ((li.dataset.hex || '').toLowerCase() === hex) li.remove();
+                });
+            }
+
+            if (inputContainer) {
+                [...inputContainer.querySelectorAll(`input[name="${config.inputName}"]`)]
+                    .filter(input => input.value.toLowerCase() === hex)
+                    .forEach(input => input.remove());
+            }
+
+            syncAcrossTemplateSourceColors();
+        }
+
+        window.removeGlobalColor = function (hex, btn, target = 'pre_fill_colors') {
+            const li = btn.closest('li');
+            if (li) li.remove();
+
+            const config = getGlobalColorConfig(target);
+            const inputContainer = document.getElementById(config.inputContainerId);
+
+            if (inputContainer) {
+                [...inputContainer.querySelectorAll(`input[name="${config.inputName}"]`)]
+                    .filter(input => input.value.toLowerCase() === hex.toLowerCase())
+                    .forEach(input => input.remove());
+            }
+
+            syncAcrossTemplateSourceColors();
+        };
+
+        function updateBasePaletteSelectAllButton() {
+            const button = document.getElementById('selectAllBasePaletteColors');
+            if (!button) return;
+
+            const baseColors = [...new Set(getGlobalColors('pre_fill_colors'))];
+            const acrossColors = new Set(getGlobalColors('colors_across_templates'));
+            const allSelected = baseColors.length > 0 && baseColors.every(hex => acrossColors.has(hex));
+
+            button.disabled = baseColors.length === 0;
+            button.textContent = allSelected ? 'Deselect All' : 'Select All';
+        }
+
+        function syncAcrossTemplateSourceColors() {
+            const optionsContainer = document.getElementById('mockupColorsAcrossOptions');
+            if (!optionsContainer) return;
+
+            const mockupColors = [...new Set(getGlobalColors('pre_fill_colors'))];
+            const acrossSet = new Set(getGlobalColors('colors_across_templates'));
+            optionsContainer.innerHTML = '';
+
+            if (!mockupColors.length) {
+                const text = document.createElement('small');
+                text.className = 'text-muted';
+                text.textContent = 'Add Mockup Colors first to select them here';
+                optionsContainer.appendChild(text);
+                updateBasePaletteSelectAllButton();
+                return;
+            }
+
+            mockupColors.forEach(hex => {
+                const selected = acrossSet.has(hex);
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = `js-toggle-across-color palette-source-color${selected ? ' is-selected' : ''}`;
+                button.style.backgroundColor = hex;
+                button.dataset.hex = hex;
+                button.title = selected ? 'Remove from Colors Across Templates' : 'Add to Colors Across Templates';
+                if (selected) {
+                    button.innerHTML = '<span class="palette-source-color-check">✓</span>';
                 }
-
-                // ✅ sync warp points for all active sides before submit
-                ['front', 'back', 'none'].forEach(side => syncWarpInput(side));
-
-                buildHiddenTemplateInputs();
+                optionsContainer.appendChild(button);
             });
 
-            const params = new URLSearchParams(window.location.search);
-            const templateId = params.get('template_id');
-            if (!templateId) return;
+            updateBasePaletteSelectAllButton();
+        }
 
-            // 🕒 نحاول نلاقي الكارد كل نصف ثانية لمدة 10 ثواني
-            let attempts = 0;
-            const interval = setInterval(() => {
-                const card = document.querySelector(`.template-card[data-id="${templateId}"] .js-show-on-mockup`);
-                attempts++;
+        // Refresh the base-palette swatches every time the popup opens (colors may have
+        // changed since the panel was last built).
+        $(document).on('show.bs.modal', '#basePaletteModal', function () {
+            syncAcrossTemplateSourceColors();
+        });
 
-                if (card) {
-                    clearInterval(interval);
-                    console.log('✅ Auto-loading template', templateId);
-                    card.click();
-                } else if (attempts > 20) { // 20 محاولة × 500ms = 10 ثواني
-                    clearInterval(interval);
-                    console.warn('⚠️ Template card not found for ID:', templateId);
+        $(document).on('click', '#selectAllBasePaletteColors', function () {
+            const baseColors = [...new Set(getGlobalColors('pre_fill_colors'))];
+            if (!baseColors.length) return;
+            const acrossColors = new Set(getGlobalColors('colors_across_templates'));
+            const allSelected = baseColors.every(hex => acrossColors.has(hex));
+            const applyChange = function () {
+                baseColors.forEach(hex => {
+                    if (allSelected) {
+                        if (getGlobalColors('colors_across_templates').includes(hex)) {
+                            removeGlobalColorByHex(hex, 'colors_across_templates');
+                            if (typeof notifyAcrossColorRemoved === 'function') notifyAcrossColorRemoved(hex);
+                        }
+                    } else {
+                        addGlobalColor(hex, 'colors_across_templates');
+                    }
+                });
+                syncAcrossTemplateSourceColors();
+            };
+            if (allSelected) requestColorDeleteConfirmation(null, applyChange, 'All selected base colors');
+            else applyChange();
+        });
+
+        $(document).ready(function () {
+            if (pickrInstance) pickrInstance.destroyAndRemove();
+
+            const dummyElement = document.createElement('div');
+            dummyElement.style.position = 'fixed';
+            dummyElement.style.top = '0';
+            dummyElement.style.left = '0';
+            dummyElement.style.width = '0';
+            dummyElement.style.height = '0';
+            document.body.appendChild(dummyElement);
+
+            pickrInstance = Pickr.create({
+                el: dummyElement,
+                theme: 'classic',
+                components: {
+                    preview: false,
+                    opacity: false,
+                    hue: true,
+                    interaction: {
+                        input: true,
+                        save: true,
+                        clear: true
+                    }
                 }
-            }, 500);
+            });
+
+            // Reposition the popover next to the button that actually opened it.
+            // We hook Pickr's own 'show' event instead of guessing with setTimeout(0):
+            // that guarantees the panel already has the 'visible' class in the DOM
+            // by the time we move it — this was the root cause of the picker
+            // silently opening off-screen / not appearing.
+            pickrInstance.on('show', () => {
+                if (!currentTrigger) return;
+
+                const pickerPanel = document.querySelector('.pcr-app.visible');
+                if (!pickerPanel) return;
+
+                const rect = currentTrigger.getBoundingClientRect();
+                pickerPanel.style.position = 'fixed';
+                pickerPanel.style.left = `${rect.left}px`;
+                pickerPanel.style.top = `${rect.bottom + 5}px`;
+                pickerPanel.style.zIndex = 9999;
+            });
+
+            pickrInstance.on('save', (color) => {
+                if (!color) {
+                    pickrInstance.hide();
+                    return;
+                }
+
+                const hex = color.toHEXA().toString().toLowerCase();
+
+                if (!currentCard) {
+                    addGlobalColor(hex, currentGlobalColorTarget);
+                    pickrInstance.hide();
+                    return;
+                }
+
+                if (!currentCard.selectedColors) currentCard.selectedColors = [];
+                if (!currentCard.selectedColors.includes(hex)) {
+                    currentCard.selectedColors.push(hex);
+                }
+
+                renderSelectedColors(currentCard);
+                buildHiddenTemplateInputs();
+                pickrInstance.hide();
+            });
+
+            pickrInstance.on('clear', () => {
+                if (!currentCard) {
+                    const config = getGlobalColorConfig(currentGlobalColorTarget);
+                    const selectedColors = document.getElementById(config.selectedId);
+                    const inputContainer = document.getElementById(config.inputContainerId);
+                    requestColorDeleteConfirmation(null, function () {
+                        if (selectedColors) selectedColors.innerHTML = '';
+                        if (inputContainer) inputContainer.innerHTML = '';
+                        syncAcrossTemplateSourceColors();
+                    }, 'All colors');
+                    pickrInstance.hide();
+                    return;
+                }
+                const card = currentCard;
+                requestColorDeleteConfirmation(null, function () {
+                    card.selectedColors = [];
+                    renderSelectedColors(card);
+                    buildHiddenTemplateInputs();
+                }, 'All template colors');
+                pickrInstance.hide();
+            });
+
+            syncAcrossTemplateSourceColors();
+        });
+
+        $(document).on('click', '.openColorPicker', function () {
+            currentTrigger = this;
+            const globalTarget = this.dataset.colorTarget;
+
+            if (globalTarget) {
+                currentCard = null;
+                currentGlobalColorTarget = globalTarget;
+                pickrInstance.show();
+                return;
+            }
+
+            const card = this.closest('.template-card');
+            currentCard = card;
+            if (!card) return;
+            if (!card.selectedColors) card.selectedColors = [];
+
+            pickrInstance.show();
+        });
+
+        window.removeColor = function (hex, btn) {
+            const card = btn.closest('.template-card');
+            if (!card) return;
+            requestColorDeleteConfirmation(hex, function () {
+                if (!card.selectedColors) card.selectedColors = [];
+                card.selectedColors = card.selectedColors.filter(c => c.toLowerCase() !== hex.toLowerCase());
+                renderSelectedColors(card);
+                buildHiddenTemplateInputs();
+            });
+        };
+
+        function renderSelectedColors(card) {
+            const ul = card.querySelector('.selected-colors');
+            const container = card.querySelector('.colorsInputContainer');
+
+            if (!ul || !container) return;
+
+            ul.innerHTML = '';
+            ul.classList.add('list-unstyled', 'm-0', 'p-0');
+            container.innerHTML = '';
+
+            (card.selectedColors || []).forEach(c => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div class="selected-color-wrapper position-relative">
+                        <div class="selected-color-dot" style="background-color: #fff;">
+                            <div class="selected-color-inner" style="background-color: ${c};"></div>
+                        </div>
+                        <button type="button" onclick="removeColor('${c}', this)" class="remove-color-btn">×</button>
+                    </div>`;
+                ul.appendChild(li);
+
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'pre_fill_colors[]';
+                hiddenInput.value = c;
+                container.appendChild(hiddenInput);
+            });
+        }
+
+        function buildTemplateColorInputs(card, templateIndex) {
+            const container = card.querySelector('.colorsInputContainer');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            (card.selectedColors || []).forEach(color => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = `templates[${templateIndex}][colors][]`;
+                input.value = color.toLowerCase();
+
+                const inputColors = document.createElement('input');
+                inputColors.type = 'hidden';
+                inputColors.name = 'pre_fill_colors[]';
+                inputColors.value = color.toLowerCase();
+
+                container.appendChild(input);
+                container.appendChild(inputColors);
+            });
+        }
+    </script>
+    <script>
+        window.currentMockupId = "{{ $mockup->id ?? '' }}";
+
+        function notifyAcrossColorRemoved(hex) {
+            if (!window.currentMockupId) return; // not saved yet — nothing to sync server-side
+
+            const url = @json(
+        route('mockups.colors-across-templates.remove', ['mockup' => '__MOCKUP_ID__', 'hex' => '__HEX__'])
+    ).replace('__MOCKUP_ID__', window.currentMockupId).replace('__HEX__', hex.toLowerCase());
+
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                success: function () {
+                    Toastify({text: 'Color removed from templates and generated files cleaned up', backgroundColor: '#28a745', duration: 2000}).showToast();
+                },
+                error: function (xhr) {
+                    console.error('Failed to remove across-template color', xhr.responseJSON || xhr.responseText);
+                    Toastify({text: 'Failed to sync color removal with server', backgroundColor: '#dc3545', duration: 2000}).showToast();
+                }
+            });
+        }
+
+        window.removeGlobalColor = function (hex, btn, target = 'pre_fill_colors') {
+            requestColorDeleteConfirmation(hex, function () {
+                const li = btn.closest('li');
+                if (li) li.remove();
+                const config = getGlobalColorConfig(target);
+                const inputContainer = document.getElementById(config.inputContainerId);
+                if (inputContainer) {
+                    [...inputContainer.querySelectorAll(`input[name="${config.inputName}"]`)]
+                        .filter(input => input.value.toLowerCase() === hex.toLowerCase())
+                        .forEach(input => input.remove());
+                }
+                syncAcrossTemplateSourceColors();
+                if (target === 'colors_across_templates') notifyAcrossColorRemoved(hex);
+            });
+        };
+        $(document).on('click', '.js-toggle-across-color', function () {
+            const hex = String(this.dataset.hex || '').toLowerCase();
+            if (!hex) return;
+            if (getGlobalColors('colors_across_templates').includes(hex)) {
+                requestColorDeleteConfirmation(hex, function () {
+                    removeGlobalColorByHex(hex, 'colors_across_templates');
+                    notifyAcrossColorRemoved(hex);
+                });
+            } else {
+                addGlobalColor(hex, 'colors_across_templates');
+            }
         });
     </script>
-
 @endsection
+

@@ -325,7 +325,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
     Route::prefix('api/v1/')->group(function () {
         Route::post('mockups/{mockup}/bulk-jobs', [BulkMockupController::class, 'generateBulk']);
-        Route::get('bulk-jobs/{bulkJob}', [BulkMockupController::class, 'status']);
+        Route::get('bulk-jobs/{bulkJob}', [BulkMockupController::class, 'status'])->name('bulk-jobs.status');
         Route::post('bulk-jobs/{bulkJob}/cancel', [BulkMockupController::class, 'cancel']);
         Route::post('bulk-jobs/{bulkJob}/retry', [BulkMockupController::class, 'retry']);
         Route::delete('fixed-specs/{product_specification}', [FixedSpecController::class, 'destroy'])

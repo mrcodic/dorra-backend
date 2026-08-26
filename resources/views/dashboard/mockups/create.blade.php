@@ -615,6 +615,57 @@
             </div>
         </div>
 
+
+        <div class="modal fade" id="confirmColorDeleteModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-3 shadow">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Delete Color?</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2">Are you sure you want to delete this color?</p>
+                        <div class="d-flex align-items-center gap-1" id="confirmDeleteColorPreviewWrap">
+                            <span id="confirmDeleteColorPreview" style="width:28px;height:28px;border-radius:50%;border:1px solid #ddd;display:inline-block;"></span>
+                            <strong id="confirmDeleteColorValue"></strong>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirmDeleteColorAction">Yes, Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade" id="generationProgressModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-3 shadow">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Generating Mockups</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span id="generationProgressStatus">Preparing...</span>
+                            <strong id="generationProgressPercent">0%</strong>
+                        </div>
+                        <div class="progress" style="height:12px;">
+                            <div id="generationProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width:0%" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1 small text-muted">
+                            <span id="generationProgressCount">0 / 0</span>
+                            <span id="generationProgressRemaining">Calculating...</span>
+                        </div>
+                        <div id="generationProgressError" class="alert alert-danger d-none mt-2 mb-0"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary d-none" id="generationProgressClose" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         @include("modals.templates.template-modal")
     </section>
     <!-- users list ends -->
@@ -644,12 +695,102 @@
 
 @section('page-script')
     <script>
+        function resetGenerateButton() {
+            const $button = $('#generateTemplateMockupFiles');
+            $button.prop('disabled', false);
+            $('#generateTemplateMockupFilesLoader').addClass('d-none');
+            $button.find('.btn-text').text('Generate Mockups');
+        }
+
+
+        let generationPollTimer = null;
+        let generationReloadOnClose = false;
+        const bulkJobStatusUrlTemplate = @json(route('bulk-jobs.status', ['__JOB_ID__']));
+
+        function extractBulkJobId(response) {
+            return response?.data?.data?.bulk_job_id ?? response?.data?.bulk_job_id ?? response?.bulk_job_id ?? response?.data?.data?.id ?? response?.data?.id ?? null;
+        }
+
+        function formatRemainingSeconds(seconds) {
+            seconds = Math.max(0, parseInt(seconds || 0, 10));
+            if (!seconds) return 'Finishing...';
+            if (seconds < 60) return `${seconds}s remaining`;
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes}m ${secs}s remaining`;
+        }
+
+        function resetGenerationProgressModal() {
+            $('#generationProgressStatus').text('Preparing...');
+            $('#generationProgressPercent').text('0%');
+            $('#generationProgressBar').css('width', '0%').attr('aria-valuenow', 0).addClass('progress-bar-animated');
+            $('#generationProgressCount').text('0 / 0');
+            $('#generationProgressRemaining').text('Calculating...');
+            $('#generationProgressError').addClass('d-none').text('');
+            $('#generationProgressClose').addClass('d-none');
+        }
+
+        function startGenerationProgress(jobId, reloadOnClose = false) {
+            if (!jobId) return false;
+            clearTimeout(generationPollTimer);
+            generationReloadOnClose = reloadOnClose;
+            resetGenerationProgressModal();
+            $('#generationProgressModal').modal('show');
+            const statusUrl = bulkJobStatusUrlTemplate.replace('__JOB_ID__', jobId);
+
+            const poll = function () {
+                $.ajax({
+                    url: statusUrl,
+                    type: 'GET',
+                    headers: {'Accept': 'application/json'},
+                    success: function (response) {
+                        const job = response?.data?.data ?? response?.data ?? response ?? {};
+                        const status = String(job.status || 'processing');
+                        const percent = Math.max(0, Math.min(100, Number(job.percent) || 0));
+                        const completed = Number(job.completed_count) || 0;
+                        const failed = Number(job.failed_count) || 0;
+                        const total = Number(job.total_count) || 0;
+                        const terminal = ['completed', 'completed_with_errors', 'failed', 'cancelled'].includes(status);
+
+                        $('#generationProgressPercent').text(`${percent.toFixed(1)}%`);
+                        $('#generationProgressBar').css('width', `${percent}%`).attr('aria-valuenow', percent);
+                        $('#generationProgressCount').text(`${completed} / ${total}${failed ? ` • ${failed} failed` : ''}`);
+                        $('#generationProgressRemaining').text(terminal ? 'Finished' : formatRemainingSeconds(job.estimated_remaining_seconds));
+                        $('#generationProgressStatus').text(status.replaceAll('_', ' '));
+
+                        if (terminal) {
+                            $('#generationProgressBar').removeClass('progress-bar-animated');
+                            $('#generationProgressClose').removeClass('d-none');
+                            if (status === 'failed' || status === 'cancelled') {
+                                $('#generationProgressError').removeClass('d-none').text(status === 'failed' ? 'Mockup generation failed.' : 'Mockup generation was cancelled.');
+                            } else if (status === 'completed_with_errors') {
+                                $('#generationProgressError').removeClass('d-none').text('Generation completed with some failed items.');
+                            }
+                            if (typeof resetGenerateButton === 'function') resetGenerateButton();
+                            return;
+                        }
+
+                        generationPollTimer = setTimeout(poll, 1000);
+                    },
+                    error: function (xhr) {
+                        $('#generationProgressError').removeClass('d-none').text(xhr.responseJSON?.message || 'Unable to read generation progress. Retrying...');
+                        generationPollTimer = setTimeout(poll, 2000);
+                    }
+                });
+            };
+
+            poll();
+            return true;
+        }
+
+        $(document).on('hidden.bs.modal', '#generationProgressModal', function () {
+            clearTimeout(generationPollTimer);
+            if (generationReloadOnClose) location.reload();
+        });
+
         $(document).on('click', '#generateTemplateMockupFiles', function () {
             const $button = $(this);
             const mockupId = $button.attr('data-mockup-id');
-            const $loader = $('#generateTemplateMockupFilesLoader');
-            const $text = $button.find('.btn-text');
-
             if (!mockupId) {
                 Toastify({
                     text: 'Please save the mockup first',
@@ -657,68 +798,56 @@
                     gravity: 'top',
                     position: 'right',
                     backgroundColor: '#dc3545',
-                    close: true,
+                    close: true
                 }).showToast();
-
                 return;
             }
 
-            const url = @json(
-            route(
-                'mockups.generate-template-files',
-                ['mockup' => '__MOCKUP_ID__']
-            )
-        ).replace('__MOCKUP_ID__', mockupId);
-
+            const url = @json(route('mockups.generate-template-files', ['mockup' => '__MOCKUP_ID__'])).replace('__MOCKUP_ID__', mockupId);
             $button.prop('disabled', true);
-            $loader.removeClass('d-none');
-            $text.text('Generating...');
+            $('#generateTemplateMockupFilesLoader').removeClass('d-none');
+            $button.find('.btn-text').text('Generating...');
 
             $.ajax({
                 url: url,
                 type: 'POST',
-
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-                    'Accept': 'application/json',
+                    'Accept': 'application/json'
                 },
-
                 success: function (response) {
+                    const jobId = extractBulkJobId(response);
                     Toastify({
-                        text:
-                            response.message ||
-                            'Mockup generation started',
-                        duration: 3000,
+                        text: response.message || 'Mockup generation started',
+                        duration: 2500,
                         gravity: 'top',
                         position: 'right',
                         backgroundColor: '#28a745',
-                        close: true,
+                        close: true
                     }).showToast();
+                    if (!startGenerationProgress(jobId, false)) {
+                        Toastify({
+                            text: 'Generation started but no bulk job id was returned.',
+                            duration: 3000,
+                            gravity: 'top',
+                            position: 'right',
+                            backgroundColor: '#dc3545',
+                            close: true
+                        }).showToast();
+                        resetGenerateButton();
+                    }
                 },
-
                 error: function (xhr) {
-                    console.error(
-                        'Generate mockup error:',
-                        xhr.responseJSON || xhr.responseText
-                    );
-
                     Toastify({
-                        text:
-                            xhr.responseJSON?.message ||
-                            'Failed to generate mockup files',
+                        text: xhr.responseJSON?.message || 'Failed to generate mockup files',
                         duration: 3000,
                         gravity: 'top',
                         position: 'right',
                         backgroundColor: '#dc3545',
-                        close: true,
+                        close: true
                     }).showToast();
-                },
-
-                complete: function () {
-                    $button.prop('disabled', false);
-                    $loader.addClass('d-none');
-                    $text.text('Generate Mockups');
-                },
+                    resetGenerateButton();
+                }
             });
         });
     </script>
@@ -2192,6 +2321,26 @@
         let currentGlobalColorTarget = 'pre_fill_colors';
         let currentTrigger = null;
 
+        let pendingConfirmColorDelete = null;
+
+        function requestColorDeleteConfirmation(hex, callback, label = null) {
+            pendingConfirmColorDelete = callback;
+            const value = label || String(hex || '');
+            const hasColor = !!hex;
+            $('#confirmDeleteColorValue').text(value);
+            $('#confirmDeleteColorPreviewWrap').toggleClass('d-none', !hasColor && !label);
+            $('#confirmDeleteColorPreview').toggleClass('d-none', !hasColor).css('background-color', hasColor ? hex : 'transparent');
+            $('#confirmColorDeleteModal').modal('show');
+        }
+
+        $(document).on('click', '#confirmDeleteColorAction', function () {
+            if (typeof pendingConfirmColorDelete !== 'function') return;
+            const action = pendingConfirmColorDelete;
+            pendingConfirmColorDelete = null;
+            $('#confirmColorDeleteModal').modal('hide');
+            setTimeout(action, 120);
+        });
+
         function getGlobalColorConfig(target) {
             if (target === 'colors_across_templates') {
                 return {
@@ -2342,22 +2491,23 @@
         $(document).on('click', '#selectAllBasePaletteColors', function () {
             const baseColors = [...new Set(getGlobalColors('pre_fill_colors'))];
             if (!baseColors.length) return;
-
             const acrossColors = new Set(getGlobalColors('colors_across_templates'));
             const allSelected = baseColors.every(hex => acrossColors.has(hex));
-
-            baseColors.forEach(hex => {
-                if (allSelected) {
-                    if (getGlobalColors('colors_across_templates').includes(hex)) {
-                        removeGlobalColorByHex(hex, 'colors_across_templates');
-                        if (typeof notifyAcrossColorRemoved === 'function') notifyAcrossColorRemoved(hex);
+            const applyChange = function () {
+                baseColors.forEach(hex => {
+                    if (allSelected) {
+                        if (getGlobalColors('colors_across_templates').includes(hex)) {
+                            removeGlobalColorByHex(hex, 'colors_across_templates');
+                            if (typeof notifyAcrossColorRemoved === 'function') notifyAcrossColorRemoved(hex);
+                        }
+                    } else {
+                        addGlobalColor(hex, 'colors_across_templates');
                     }
-                } else {
-                    addGlobalColor(hex, 'colors_across_templates');
-                }
-            });
-
-            syncAcrossTemplateSourceColors();
+                });
+                syncAcrossTemplateSourceColors();
+            };
+            if (allSelected) requestColorDeleteConfirmation(null, applyChange, 'All selected base colors');
+            else applyChange();
         });
 
         $(document).ready(function () {
@@ -2433,17 +2583,20 @@
                     const config = getGlobalColorConfig(currentGlobalColorTarget);
                     const selectedColors = document.getElementById(config.selectedId);
                     const inputContainer = document.getElementById(config.inputContainerId);
-
-                    if (selectedColors) selectedColors.innerHTML = '';
-                    if (inputContainer) inputContainer.innerHTML = '';
-                    syncAcrossTemplateSourceColors();
+                    requestColorDeleteConfirmation(null, function () {
+                        if (selectedColors) selectedColors.innerHTML = '';
+                        if (inputContainer) inputContainer.innerHTML = '';
+                        syncAcrossTemplateSourceColors();
+                    }, 'All colors');
                     pickrInstance.hide();
                     return;
                 }
-
-                currentCard.selectedColors = [];
-                renderSelectedColors(currentCard);
-                buildHiddenTemplateInputs();
+                const card = currentCard;
+                requestColorDeleteConfirmation(null, function () {
+                    card.selectedColors = [];
+                    renderSelectedColors(card);
+                    buildHiddenTemplateInputs();
+                }, 'All template colors');
                 pickrInstance.hide();
             });
 
@@ -2472,14 +2625,12 @@
         window.removeColor = function (hex, btn) {
             const card = btn.closest('.template-card');
             if (!card) return;
-            if (!card.selectedColors) card.selectedColors = [];
-
-            card.selectedColors = card.selectedColors.filter(
-                c => c.toLowerCase() !== hex.toLowerCase()
-            );
-
-            renderSelectedColors(card);
-            buildHiddenTemplateInputs();
+            requestColorDeleteConfirmation(hex, function () {
+                if (!card.selectedColors) card.selectedColors = [];
+                card.selectedColors = card.selectedColors.filter(c => c.toLowerCase() !== hex.toLowerCase());
+                renderSelectedColors(card);
+                buildHiddenTemplateInputs();
+            });
         };
 
         function renderSelectedColors(card) {
@@ -2558,31 +2709,28 @@
         }
 
         window.removeGlobalColor = function (hex, btn, target = 'pre_fill_colors') {
-            const li = btn.closest('li');
-            if (li) li.remove();
-
-            const config = getGlobalColorConfig(target);
-            const inputContainer = document.getElementById(config.inputContainerId);
-
-            if (inputContainer) {
-                [...inputContainer.querySelectorAll(`input[name="${config.inputName}"]`)]
-                    .filter(input => input.value.toLowerCase() === hex.toLowerCase())
-                    .forEach(input => input.remove());
-            }
-
-            syncAcrossTemplateSourceColors();
-
-            if (target === 'colors_across_templates') {
-                notifyAcrossColorRemoved(hex);
-            }
+            requestColorDeleteConfirmation(hex, function () {
+                const li = btn.closest('li');
+                if (li) li.remove();
+                const config = getGlobalColorConfig(target);
+                const inputContainer = document.getElementById(config.inputContainerId);
+                if (inputContainer) {
+                    [...inputContainer.querySelectorAll(`input[name="${config.inputName}"]`)]
+                        .filter(input => input.value.toLowerCase() === hex.toLowerCase())
+                        .forEach(input => input.remove());
+                }
+                syncAcrossTemplateSourceColors();
+                if (target === 'colors_across_templates') notifyAcrossColorRemoved(hex);
+            });
         };
         $(document).on('click', '.js-toggle-across-color', function () {
             const hex = String(this.dataset.hex || '').toLowerCase();
             if (!hex) return;
-
             if (getGlobalColors('colors_across_templates').includes(hex)) {
-                removeGlobalColorByHex(hex, 'colors_across_templates');
-                notifyAcrossColorRemoved(hex);
+                requestColorDeleteConfirmation(hex, function () {
+                    removeGlobalColorByHex(hex, 'colors_across_templates');
+                    notifyAcrossColorRemoved(hex);
+                });
             } else {
                 addGlobalColor(hex, 'colors_across_templates');
             }
