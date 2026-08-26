@@ -139,12 +139,17 @@ class MockupController extends DashboardController
             );
         }
 
-        $generator->generate($mockup, $colors, force: $request->boolean('force')
+        $job = $generator->generate($mockup, $colors, force: $request->boolean('force')
+        );
+        return Response::api(
+            data: [
+                'bulk_job_id' => $job->id,
+                'status' => $job->status,
+                'total_count' => $job->total_count,
+            ],
+            message: 'Mockup generation started successfully'
         );
 
-        return Response::api(
-            message: "Mockup generation started successfully"
-        );
     }
 
     public function removeAcrossTemplateColor(

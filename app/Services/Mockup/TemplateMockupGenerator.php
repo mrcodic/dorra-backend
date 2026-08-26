@@ -19,7 +19,7 @@ class TemplateMockupGenerator
         0.35, 0.55,
         0.65, 0.55,
     ];
-    public function generate(Mockup $mockup, array $colors = [], bool $force = false, ?Template $template = null): void
+    public function generate(Mockup $mockup, array $colors = [], bool $force = false, ?Template $template = null): ?MockupGenerationJob
     {
         if ($template && empty($colors)) {
             $attachedTemplate = $mockup->templates()->where('templates.id', $template->id)->first();
@@ -40,10 +40,10 @@ class TemplateMockupGenerator
 
         if ($template) {
             if (!$mockup->templates()->where('templates.id', $template->id)->exists()) {
-                return;
+                return null;
             }
         } elseif (!$mockup->templates()->exists()) {
-            return;
+            return null;
         }
 
         if ($force) {
@@ -55,8 +55,7 @@ class TemplateMockupGenerator
         }
 
         if (empty($colors)) {
-            $this->generateWithoutColor($mockup, $template?->id, $force);
-            return;
+            return $this->generateWithoutColor($mockup, $template?->id, $force);
         }
 
         $hexes = collect($colors)
@@ -65,9 +64,8 @@ class TemplateMockupGenerator
             ->values()
             ->all();
 
-        $this->generateForNewColors($mockup, $hexes, $template?->id);
+        return $this->generateForNewColors($mockup, $hexes, $template?->id);
     }
-
     public function generateForUnlinkedMockups(Template $template, array $excludeMockupIds = []): void
     {
         $hasProducts = $template->products()->exists();
@@ -439,7 +437,7 @@ class TemplateMockupGenerator
         return str_starts_with($color, '#') ? $color : '#' . $color;
     }
 
-    protected function generateForNewColors(Mockup $mockup, array $addedHexes, ?string $templateId = null): void
+    protected function generateForNewColors(Mockup $mockup, array $addedHexes, ?string $templateId = null): ?MockupGenerationJob
     {
         $addedHexes = collect($addedHexes)
             ->filter()
@@ -449,7 +447,7 @@ class TemplateMockupGenerator
             ->all();
 
         if (empty($addedHexes)) {
-            return;
+            return null;
         }
 
         $hexToOriginalColor = collect($mockup->colors_across_templates ?? [])
@@ -555,7 +553,7 @@ class TemplateMockupGenerator
                 'completed_at' => now(),
             ]);
 
-            return;
+            return $bulkJob;
         }
 
         $bulkJob->update([
@@ -569,6 +567,7 @@ class TemplateMockupGenerator
             ->where('status', 'pending')
             ->lazyById(100)
             ->each(fn ($item) => RenderMockupJob::dispatch($bulkJob, $item, $mockup));
+        return $bulkJob;
     }
     protected function generateWithoutColor(Mockup $mockup, ?string $templateId = null, bool $force = false): void
     {
