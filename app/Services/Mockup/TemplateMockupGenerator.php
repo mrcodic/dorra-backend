@@ -366,7 +366,7 @@ class TemplateMockupGenerator
         }
     }
 
-    protected function generateOriginalMockup(Mockup $mockup, int $templateId): void
+    protected function generateOriginalMockup(Mockup $mockup, string $templateId): void
     {
         $template = $mockup->templates()->where('templates.id', $templateId)->first();
 
