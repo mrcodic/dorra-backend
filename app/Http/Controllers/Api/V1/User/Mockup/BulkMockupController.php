@@ -31,7 +31,8 @@ class BulkMockupController extends Controller
         $colors = collect($request->input('colors') ?? [])->filter(fn($color) => is_string($color) && trim($color) !== '')->unique()->values()->all();
         $hasColors = count($colors) > 0;
         $newColorsNormalized = collect($colors)->map(fn($color) => $this->normalizeHex($color))->all();
-        $renderJobs = $hasColors ? [] : collect($templateIds)->map(fn($templateId) => ['template_id' => (string)$templateId, 'hex' => 'model', 'model_only' => true])->all();
+        $renderJobs = $hasColors ? [] : collect($templateIds)->map(fn($templateId) =>
+        ['template_id' => (string)$templateId, 'hex' => null, 'model_only' => true])->all();
         $mergedPivotColors = [];
         if ($type === 'single') {
             $templateId = (string)$templateIds[0];
@@ -169,7 +170,7 @@ class BulkMockupController extends Controller
         $bulkJob = MockupGenerationJob::create(['mockup_id' => $mockup->id, 'status' => 'pending', 'total_count' => $totalCount, 'completed_count' => 0, 'failed_count' => 0]);
         foreach ($renderJobs as $job) {
             $isModelOnly = $job['model_only'] ?? false;
-            $originalColor = $isModelOnly ? 'model' : ($hexToOriginalColor[$job['hex']] ?? $job['hex']);
+            $originalColor = $isModelOnly ? null : ($hexToOriginalColor[$job['hex']] ?? $job['hex']);
             foreach ($sides as $side) {
                 $item = BulkJobItem::create(['bulk_job_id' => $bulkJob->id, 'template_id' => $job['template_id'], 'color' => $originalColor, 'side' => $side, 'points' => $positions[$side], 'status' => 'pending']);
                 RenderMockupJob::dispatch($bulkJob, $item, $mockup);
