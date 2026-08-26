@@ -147,9 +147,15 @@ class MockupController extends DashboardController
         );
     }
 
-    public function removeAcrossTemplateColor(Mockup $mockup, string $hex, TemplateMockupGenerator $generator,
-                                              ?Template $template = null) {
-        $hex = strtolower(ltrim(trim($hex), '#'));
+    public function removeAcrossTemplateColor(
+        Mockup $mockup,
+        string $hex,
+        TemplateMockupGenerator $generator,
+        ?Template $template = null
+    ) {
+        $hex = strtolower(trim($hex));
+        $hex = str_starts_with($hex, '#') ? $hex : '#' . $hex;
+
         if ($template) {
             $generator->removeDeletedColors(
                 mockup: $mockup,
@@ -161,25 +167,19 @@ class MockupController extends DashboardController
                 message: 'Color removed from this template successfully.'
             );
         }
-        $oldColors = collect($mockup->colors_across_templates ?? [])
-            ->filter()
-            ->map(fn ($color) => strtolower(ltrim(trim($color), '#')))
-            ->unique()
-            ->values()
-            ->all();
 
-        $newColors = collect($oldColors)
-            ->reject(fn ($color) => $color === $hex)
+        $newColors = collect($mockup->colors_across_templates ?? [])
+            ->filter()
+            ->reject(fn ($color) => strtolower(trim($color)) === $hex)
             ->values()
             ->all();
 
         $mockup->colors_across_templates = $newColors;
         $mockup->save();
 
-        $generator->handleUpdated(
+        $generator->removeDeletedColors(
             mockup: $mockup,
-            oldColors: $oldColors,
-            template: $template
+            removedHexes: [$hex]
         );
 
         return Response::api(message: 'Color removed successfully.');
