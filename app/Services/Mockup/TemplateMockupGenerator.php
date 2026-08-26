@@ -19,29 +19,27 @@ class TemplateMockupGenerator
         0.35, 0.55,
         0.65, 0.55,
     ];
-
     public function generate(Mockup $mockup, array $colors = [], bool $force = false, ?Template $template = null): void
     {
-        if (empty($colors)) {
+        if ($template && empty($colors)) {
+            $attachedTemplate = $mockup->templates()->where('templates.id', $template->id)->first();
+            $colors = $attachedTemplate
+                ? $this->toArray($attachedTemplate->pivot->colors ?? [])
+                : ($mockup->colors_across_templates ?? []);
+        } elseif (empty($colors)) {
             $colors = $mockup->colors_across_templates ?? [];
         }
 
         $colors = $this->cleanColors($colors);
 
-        if (empty($colors)) {
-            return;
-        }
-
         if ($template) {
             $this->attachTemplateIfMissing($mockup, $template, $colors);
-        } else {
+        } elseif (!empty($colors)) {
             $this->attachMatchingTemplates($mockup, $colors);
         }
 
         if ($template) {
-            $hasTemplate = $mockup->templates()->where('templates.id', $template->id)->exists();
-
-            if (!$hasTemplate) {
+            if (!$mockup->templates()->where('templates.id', $template->id)->exists()) {
                 return;
             }
         } elseif (!$mockup->templates()->exists()) {
@@ -54,6 +52,11 @@ class TemplateMockupGenerator
             } else {
                 $this->deleteGeneratedFiles($mockup);
             }
+        }
+
+        if (empty($colors)) {
+            $this->generateWithoutColor($mockup, $template?->id, $force);
+            return;
         }
 
         $hexes = collect($colors)
@@ -303,12 +306,12 @@ class TemplateMockupGenerator
         }
 
         $newModelColorsByTemplate = [];
+        $templatesWithoutColors = [];
 
         $templatesQuery
             ->lazyById(100, 'templates.id', 'id')
-            ->each(function ($currentTemplate) use ($mockup, $removedHexes, &$newModelColorsByTemplate) {
+            ->each(function ($currentTemplate) use ($mockup, $removedHexes, &$newModelColorsByTemplate, &$templatesWithoutColors) {
                 $pivotColors = $this->toArray($currentTemplate->pivot->colors ?? []);
-
                 $remainingColors = collect($pivotColors)
                     ->filter()
                     ->reject(fn ($color) => in_array($this->normalizeHex($color), $removedHexes, true))
@@ -316,23 +319,30 @@ class TemplateMockupGenerator
                     ->all();
 
                 $updateData = ['colors' => $remainingColors];
-
                 $modelColor = $currentTemplate->pivot->model_color;
 
                 if (!empty($modelColor) && in_array($this->normalizeHex($modelColor), $removedHexes, true)) {
                     $newModelColor = $remainingColors[0] ?? null;
                     $updateData['model_color'] = $newModelColor;
 
-                    if (!empty($newModelColor)) {
+                    if ($newModelColor !== null) {
                         $newModelColorsByTemplate[$currentTemplate->id] = $newModelColor;
+                    } else {
+                        $templatesWithoutColors[] = (string) $currentTemplate->id;
                     }
+                }
+
+                if (empty($remainingColors)) {
+                    $updateData['model_color'] = null;
+                    $templatesWithoutColors[] = (string) $currentTemplate->id;
                 }
 
                 $mockup->templates()->updateExistingPivot($currentTemplate->id, $updateData);
             });
 
-        $mediaQuery = $mockup->media()
-            ->where('collection_name', 'generated_mockups');
+        $templatesWithoutColors = array_values(array_unique($templatesWithoutColors));
+
+        $mediaQuery = $mockup->media()->where('collection_name', 'generated_mockups');
 
         if ($template) {
             $mediaQuery->whereRaw(
@@ -354,7 +364,12 @@ class TemplateMockupGenerator
             ->each(fn ($media) => $media->delete());
 
         foreach ($newModelColorsByTemplate as $templateId => $hex) {
-            $this->generateForNewColors($mockup, [$hex], $templateId);
+            $this->deleteGeneratedColorForTemplate($mockup, (int) $templateId, $hex);
+            $this->generateForNewColors($mockup, [$hex], (string) $templateId);
+        }
+
+        foreach ($templatesWithoutColors as $templateId) {
+            $this->generateWithoutColor($mockup, $templateId, true);
         }
     }
 
@@ -500,6 +515,135 @@ class TemplateMockupGenerator
             ->where('status', 'pending')
             ->lazyById(100)
             ->each(fn ($item) => RenderMockupJob::dispatch($bulkJob, $item, $mockup));
+    }
+    protected function generateWithoutColor(Mockup $mockup, ?string $templateId = null, bool $force = false): void
+    {
+        $bulkJob = MockupGenerationJob::create([
+            'mockup_id' => $mockup->id,
+            'status' => 'pending',
+            'total_count' => 0,
+            'completed_count' => 0,
+            'failed_count' => 0,
+        ]);
+
+        $totalCount = 0;
+        $templatesQuery = $mockup->templates();
+
+        if ($templateId) {
+            $templatesQuery->where('templates.id', $templateId);
+        }
+
+        $templatesQuery
+            ->lazyById(100, 'templates.id', 'id')
+            ->each(function ($template) use ($mockup, $bulkJob, $force, &$totalCount) {
+                $pivotColors = $this->cleanColors($this->toArray($template->pivot->colors ?? []));
+
+                if (!empty($pivotColors)) {
+                    return;
+                }
+
+                $pivotPositions = $this->toArray($template->pivot->positions ?? []);
+                $isPivotPositionsEmpty = empty($pivotPositions);
+                $positions = $isPivotPositionsEmpty
+                    ? $this->getDefaultPositions($mockup, $template)
+                    : $this->getTemplatePositions($template);
+
+                if (empty($positions)) {
+                    return;
+                }
+
+                $pivotUpdateData = ['colors' => [], 'model_color' => null];
+
+                if ($isPivotPositionsEmpty) {
+                    $pivotUpdateData['positions'] = $this->positionsForPivot($positions);
+                }
+
+                $mockup->templates()->updateExistingPivot($template->id, $pivotUpdateData);
+
+                if ($force) {
+                    $this->deleteGeneratedWithoutColorForTemplate($mockup, (int) $template->id);
+                }
+
+                foreach ($positions as $side => $points) {
+                    if (!$force && $this->alreadyGeneratedWithoutColor($mockup, $template->id, $side)) {
+                        continue;
+                    }
+
+                    BulkJobItem::create([
+                        'bulk_job_id' => $bulkJob->id,
+                        'template_id' => $template->id,
+                        'color' => null,
+                        'side' => $side,
+                        'points' => $points,
+                        'status' => 'pending',
+                    ]);
+
+                    $totalCount++;
+                }
+            });
+
+        if ($totalCount === 0) {
+            $bulkJob->update([
+                'status' => 'completed',
+                'total_count' => 0,
+                'started_at' => now(),
+                'completed_at' => now(),
+            ]);
+            return;
+        }
+
+        $bulkJob->update([
+            'status' => 'processing',
+            'total_count' => $totalCount,
+            'started_at' => now(),
+        ]);
+
+        BulkJobItem::query()
+            ->where('bulk_job_id', $bulkJob->id)
+            ->where('status', 'pending')
+            ->lazyById(100)
+            ->each(fn ($item) => RenderMockupJob::dispatch($bulkJob, $item, $mockup));
+    }
+
+    protected function alreadyGeneratedWithoutColor(Mockup $mockup, $templateId, string $side): bool
+    {
+        return $mockup->media()
+            ->where('collection_name', 'generated_mockups')
+            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
+            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$side])
+            ->where(function ($query) {
+                $query->whereNull('custom_properties->hex')
+                    ->orWhereRaw("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex')), '') = ''");
+            })
+            ->exists();
+    }
+
+    protected function deleteGeneratedWithoutColorForTemplate(Mockup $mockup, int $templateId): void
+    {
+        $mockup->media()
+            ->where('collection_name', 'generated_mockups')
+            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
+            ->where(function ($query) {
+                $query->whereNull('custom_properties->hex')
+                    ->orWhereRaw("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex')), '') = ''");
+            })
+            ->lazyById(100)
+            ->each(fn ($media) => $media->delete());
+    }
+
+    protected function deleteGeneratedColorForTemplate(Mockup $mockup, int $templateId, string $hex): void
+    {
+        $normalizedHex = ltrim($this->normalizeHex($hex), '#');
+
+        $mockup->media()
+            ->where('collection_name', 'generated_mockups')
+            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
+            ->whereRaw(
+                "LOWER(REPLACE(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex')), '#', '')) = ?",
+                [$normalizedHex]
+            )
+            ->lazyById(100)
+            ->each(fn ($media) => $media->delete());
     }
 
     protected function getTemplatePositions(Template $template): array
@@ -706,7 +850,6 @@ class TemplateMockupGenerator
 
         return true;
     }
-
     protected function alreadyGenerated(Mockup $mockup, $templateId, string $hex, string $side): bool
     {
         return $mockup->media()
@@ -715,7 +858,7 @@ class TemplateMockupGenerator
             ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$side])
             ->whereRaw(
                 "LOWER(REPLACE(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex')), '#', '')) = ?",
-                [$this->normalizeHex($hex)]
+                [ltrim($this->normalizeHex($hex), '#')]
             )
             ->exists();
     }
@@ -748,7 +891,6 @@ class TemplateMockupGenerator
             ->all();
     }
 
-
     protected function toArray(mixed $value): array
     {
         if (is_array($value)) {
@@ -761,7 +903,6 @@ class TemplateMockupGenerator
 
         return [];
     }
-
 
     protected function deleteGeneratedFiles(Mockup $mockup): void
     {
