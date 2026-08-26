@@ -17,104 +17,44 @@ class BulkMockupController extends Controller
     public function generateBulk(Request $request, Mockup $mockup)
     {
         $type = $request->input('type', 'bulk');
-        $colorsProvided = $request->has('colors');   // key present at all, even if null/empty
-        $hasColors = $request->filled('colors');     // key present AND non-empty
-
-        $request->validate([
-            'type' => ['sometimes', 'string', Rule::in(['bulk', 'single'])],
+        $colorsProvided = $request->has('colors');
+        $hasColors = $request->filled('colors');
+        $request->validate(['type' => ['sometimes', 'string', Rule::in(['bulk', 'single'])],
             'template_ids' => ['required', 'array', 'min:1', $type === 'single' ? 'max:1' : ''],
-            'template_ids.*' => 'string|exists:templates,id',
-            'colors' => 'nullable|array|min:1',
-            'colors.*' => 'nullable|string',
+            'template_ids.*' => ['string', 'exists:templates,id'],
+            'colors' => ['sometimes', 'nullable', 'array'], 'colors.*' => ['nullable', 'string'],
             'positions' => ['required', 'array'],
             'positions.*.name' => ['required', 'string', 'max:100',
-                Rule::in($mockup->types->map(fn($t) => $t->value->key())->toArray()),
-            ],
-            'positions.*.p1x' => ['required', 'numeric'],
-            'positions.*.p1y' => ['required', 'numeric'],
-            'positions.*.p2x' => ['required', 'numeric'],
-            'positions.*.p2y' => ['required', 'numeric'],
-            'positions.*.p3x' => ['required', 'numeric'],
-            'positions.*.p3y' => ['required', 'numeric'],
-            'positions.*.p4x' => ['required', 'numeric'],
-            'positions.*.p4y' => ['required', 'numeric'],
-        ]);
-
+                Rule::in($mockup->types->map(fn($t) => $t->value->key())->toArray())], 'positions.*.p1x' => ['required', 'numeric'], 'positions.*.p1y' => ['required', 'numeric'], 'positions.*.p2x' => ['required', 'numeric'], 'positions.*.p2y' => ['required', 'numeric'], 'positions.*.p3x' => ['required', 'numeric'], 'positions.*.p3y' => ['required', 'numeric'], 'positions.*.p4x' => ['required', 'numeric'], 'positions.*.p4y' => ['required', 'numeric']]);
         $templateIds = $request->input('template_ids');
-
-        $positions = collect($request->input('positions'))
-            ->keyBy('name')
-            ->map(fn($p) => [
-                'p1x' => $p['p1x'], 'p1y' => $p['p1y'],
-                'p2x' => $p['p2x'], 'p2y' => $p['p2y'],
-                'p3x' => $p['p3x'], 'p3y' => $p['p3y'],
-                'p4x' => $p['p4x'], 'p4y' => $p['p4y'],
-            ])
-            ->toArray();
-
+        $positions = collect($request->input('positions'))->keyBy('name')->map(fn($p) => ['p1x' => $p['p1x'], 'p1y' => $p['p1y'], 'p2x' => $p['p2x'], 'p2y' => $p['p2y'], 'p3x' => $p['p3x'], 'p3y' => $p['p3y'], 'p4x' => $p['p4x'], 'p4y' => $p['p4y']])->toArray();
         $sides = array_keys($positions);
-
-        $colors = $hasColors
-            ? collect($request->input('colors'))->filter()->unique()->values()->all()
-            : [];
-
-        $newColorsNormalized = collect($colors)
-            ->map(fn($c) => $this->normalizeHex($c))
-            ->all();
-
+        $colors = $hasColors ? collect($request->input('colors'))->filter()->unique()->values()->all() : [];
+        $newColorsNormalized = collect($colors)->map(fn($color) => $this->normalizeHex($color))->all();
         $renderJobs = [];
         $mergedPivotColors = [];
-
-        // =========================================================================
-        // SINGLE — one template, pivot type "single". Does NOT detach/remove
-        // previously attached single-type templates — only adds/updates this one.
-        // =========================================================================
         if ($type === 'single') {
             $templateId = (string)$templateIds[0];
-
-            $existingTemplate = $mockup->templates()
-                ->wherePivot('type', 'single')
-                ->where('templates.id', $templateId)
-                ->first();
-
+            $existingTemplate = $mockup->templates()->wherePivot('type', 'single')->where('templates.id', $templateId)->first();
             $existingPivot = $existingTemplate?->pivot;
-            $previousPositions = $existingPivot->positions ?? [];
+            $previousPositions = $existingPivot?->positions ?? [];
             $positionsChanged = json_encode($previousPositions) !== json_encode($request->input('positions'));
-
             if ($hasColors) {
                 $mergedPivotColors[$templateId] = $colors;
-
-                $existingMediaHexes = $mockup->media()
-                    ->where('collection_name', 'generated_mockups')
-                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [$templateId])
-                    ->get()
-                    ->map(fn($m) => $this->normalizeHex($m->getCustomProperty('hex') ?? ''))
-                    ->filter()->unique()->values()->all();
-
+                $existingMediaHexes = $mockup->media()->where('collection_name', 'generated_mockups')->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [$templateId])->get()->map(fn($media) => $this->normalizeHex($media->getCustomProperty('hex') ?? ''))->filter()->unique()->values()->all();
                 $removedHexes = array_diff($existingMediaHexes, $newColorsNormalized);
                 foreach ($removedHexes as $hex) {
-                    $mockup->media()
-                        ->where('collection_name', 'generated_mockups')
-                        ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [$templateId])
-                        ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
-                        ->get()->each(fn($media) => $media->delete());
+                    $mockup->media()->where('collection_name', 'generated_mockups')->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [$templateId])->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])->get()->each(fn($media) => $media->delete());
                 }
-
                 $hexesToRender = array_diff($newColorsNormalized, $existingMediaHexes);
                 $hexesWithMedia = array_intersect($newColorsNormalized, $existingMediaHexes);
-
                 $modelColorHex = $existingPivot?->model_color ? $this->normalizeHex($existingPivot->model_color) : null;
                 if ($modelColorHex && !in_array($modelColorHex, $newColorsNormalized)) {
                     $mockup->templates()->updateExistingPivot($templateId, ['model_color' => null]);
                 }
-
                 if ($positionsChanged) {
                     foreach ($hexesWithMedia as $hex) {
-                        $mockup->media()
-                            ->where('collection_name', 'generated_mockups')
-                            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [$templateId])
-                            ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
-                            ->get()->each(fn($media) => $media->delete());
+                        $mockup->media()->where('collection_name', 'generated_mockups')->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [$templateId])->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])->get()->each(fn($media) => $media->delete());
                     }
                     foreach ($newColorsNormalized as $hex) {
                         $renderJobs[] = ['template_id' => $templateId, 'hex' => $hex];
@@ -126,130 +66,62 @@ class BulkMockupController extends Controller
                 }
             } else {
                 $mergedPivotColors[$templateId] = [];
-
                 if ($positionsChanged) {
-                    $mockup->media()
-                        ->where('collection_name', 'generated_mockups')
-                        ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [$templateId])
-                        ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])
-                        ->get()->each(fn($media) => $media->delete());
+                    $mockup->media()->where('collection_name', 'generated_mockups')->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [$templateId])->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])->get()->each(fn($media) => $media->delete());
                 }
-
-                // Always create a job for the model image, whether or not one
-                // already exists / positions changed — ensures generateBulk
-                // never returns an empty 0/0 job when no colors are sent.
                 $renderJobs[] = ['template_id' => $templateId, 'hex' => 'model', 'model_only' => true];
             }
-
-            // Sync pivot — preserve ALL existing templates (bulk + other singles),
-            // only add/update this one single template
             $allExistingTemplates = $mockup->templates()->get()->keyBy('id');
-
             $syncData = [];
-
             foreach ($allExistingTemplates as $existingId => $template) {
-                if ((string)$existingId === $templateId) continue; // will be overwritten below
-
-                $syncData[(string)$existingId] = [
-                    'colors' => $template->pivot->colors,
-                    'positions' => $template->pivot->positions,
-                    'model_color' => $template->pivot->model_color,
-                    'type' => $template->pivot->type,
-                ];
+                if ((string)$existingId === $templateId) {
+                    continue;
+                }
+                $syncData[(string)$existingId] = ['colors' => $template->pivot->colors, 'positions' => $template->pivot->positions, 'model_color' => $template->pivot->model_color, 'type' => $template->pivot->type];
             }
-
-            $singlePivotEntry = [
-                'positions' => $request->input('positions'),
-                'type' => 'single',
-                'colors' => $hasColors ? $colors : [],
-                'model_color' => $hasColors ? ($colors[0] ?? null) : null,
-            ];
-            $syncData[$templateId] = $singlePivotEntry;
-
+            $syncData[$templateId] = ['positions' => $request->input('positions'), 'type' => 'single', 'colors' => $hasColors ? $colors : [], 'model_color' => $hasColors ? ($colors[0] ?? null) : null];
             $mockup->templates()->sync($syncData);
-
             if ($hasColors) {
                 $mockup->update(['colors' => $colors]);
             } elseif ($colorsProvided) {
-                // colors explicitly sent as null/empty — treat as "clear all colors"
                 $mockup->update(['colors' => []]);
             }
-        }
-
-        // =========================================================================
-        // BULK — original multi-template logic, unchanged
-        // =========================================================================
-        else {
-            $lastJob = MockupGenerationJob::where('mockup_id', $mockup->id)
-                ->whereIn('status', ['completed', 'completed_with_errors'])
-                ->latest()
-                ->first();
-
+        } else {
             $existingTemplates = $mockup->templates()->get()->keyBy('id');
             $previouslyAttachedIds = $existingTemplates->keys()->map(fn($id) => (string)$id)->toArray();
             $incomingIds = collect($templateIds)->map(fn($id) => (string)$id)->toArray();
-
             $removedTemplateIds = array_diff($previouslyAttachedIds, $incomingIds);
             $newTemplateIds = array_diff($incomingIds, $previouslyAttachedIds);
             $alreadyAttachedTemplateIds = array_intersect($incomingIds, $previouslyAttachedIds);
-
-            $singleTemplateIds = $mockup->templates()
-                ->wherePivot('type', 'single')
-                ->pluck('templates.id')
-                ->map(fn($id) => (string)$id)
-                ->toArray();
-
+            $singleTemplateIds = $mockup->templates()->wherePivot('type', 'single')->pluck('templates.id')->map(fn($id) => (string)$id)->toArray();
             foreach ($removedTemplateIds as $removedTemplateId) {
-                if (in_array((string)$removedTemplateId, $singleTemplateIds)) continue;
-
-                $mockup->media()
-                    ->where('collection_name', 'generated_mockups')
-                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$removedTemplateId])
-                    ->get()
-                    ->each(fn($media) => $media->delete());
+                if (in_array((string)$removedTemplateId, $singleTemplateIds)) {
+                    continue;
+                }
+                $mockup->media()->where('collection_name', 'generated_mockups')->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$removedTemplateId])->get()->each(fn($media) => $media->delete());
             }
-
             foreach ($alreadyAttachedTemplateIds as $templateId) {
                 $existingTemplate = $existingTemplates->get($templateId);
                 $pivot = $existingTemplate->pivot;
                 $previousPositions = $pivot->positions ?? [];
                 $positionsChanged = json_encode($previousPositions) !== json_encode($request->input('positions'));
-
                 if ($hasColors) {
                     $mergedPivotColors[$templateId] = $colors;
                     $mergedNormalizedHexes = $newColorsNormalized;
-
-                    $existingMediaHexes = $mockup->media()
-                        ->where('collection_name', 'generated_mockups')
-                        ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$templateId])
-                        ->get()
-                        ->map(fn($m) => $this->normalizeHex($m->getCustomProperty('hex') ?? ''))
-                        ->filter()->unique()->values()->all();
-
+                    $existingMediaHexes = $mockup->media()->where('collection_name', 'generated_mockups')->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$templateId])->get()->map(fn($media) => $this->normalizeHex($media->getCustomProperty('hex') ?? ''))->filter()->unique()->values()->all();
                     $removedHexes = array_diff($existingMediaHexes, $mergedNormalizedHexes);
                     foreach ($removedHexes as $hex) {
-                        $mockup->media()
-                            ->where('collection_name', 'generated_mockups')
-                            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$templateId])
-                            ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
-                            ->get()->each(fn($media) => $media->delete());
+                        $mockup->media()->where('collection_name', 'generated_mockups')->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$templateId])->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])->get()->each(fn($media) => $media->delete());
                     }
-
                     $hexesToRender = array_diff($mergedNormalizedHexes, $existingMediaHexes);
                     $hexesWithMedia = array_intersect($mergedNormalizedHexes, $existingMediaHexes);
-
                     $modelColorHex = $pivot?->model_color ? $this->normalizeHex($pivot->model_color) : null;
                     if ($modelColorHex && !in_array($modelColorHex, $mergedNormalizedHexes)) {
                         $mockup->templates()->updateExistingPivot($templateId, ['model_color' => null]);
                     }
-
                     if ($positionsChanged) {
                         foreach ($hexesWithMedia as $hex) {
-                            $mockup->media()
-                                ->where('collection_name', 'generated_mockups')
-                                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$templateId])
-                                ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])
-                                ->get()->each(fn($media) => $media->delete());
+                            $mockup->media()->where('collection_name', 'generated_mockups')->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$templateId])->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])->get()->each(fn($media) => $media->delete());
                         }
                         foreach ($mergedNormalizedHexes as $hex) {
                             $renderJobs[] = ['template_id' => $templateId, 'hex' => $hex];
@@ -261,21 +133,12 @@ class BulkMockupController extends Controller
                     }
                 } else {
                     $mergedPivotColors[$templateId] = [];
-
                     if ($positionsChanged) {
-                        $mockup->media()
-                            ->where('collection_name', 'generated_mockups')
-                            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$templateId])
-                            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])
-                            ->get()->each(fn($media) => $media->delete());
+                        $mockup->media()->where('collection_name', 'generated_mockups')->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$templateId])->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])->get()->each(fn($media) => $media->delete());
                     }
-
-                    // Always create a job for the model image — see single-branch
-                    // comment above; avoids ending up with an empty 0/0 bulk job.
                     $renderJobs[] = ['template_id' => $templateId, 'hex' => 'model', 'model_only' => true];
                 }
             }
-
             foreach ($newTemplateIds as $templateId) {
                 if ($hasColors) {
                     $mergedPivotColors[$templateId] = $colors;
@@ -287,98 +150,37 @@ class BulkMockupController extends Controller
                     $renderJobs[] = ['template_id' => $templateId, 'hex' => 'model', 'model_only' => true];
                 }
             }
-
-            $singleTemplates = $mockup->templates()
-                ->wherePivot('type', 'single')
-                ->get()->keyBy('id');
-
+            $singleTemplates = $mockup->templates()->wherePivot('type', 'single')->get()->keyBy('id');
             $syncData = [];
-
             foreach ($singleTemplates as $templateId => $template) {
-                $syncData[(string)$templateId] = [
-                    'colors' => $template->pivot->colors,
-                    'positions' => $template->pivot->positions,
-                    'model_color' => $template->pivot->model_color,
-                    'type' => 'single',
-                ];
+                $syncData[(string)$templateId] = ['colors' => $template->pivot->colors, 'positions' => $template->pivot->positions, 'model_color' => $template->pivot->model_color, 'type' => 'single'];
             }
-
             foreach ($templateIds as $templateId) {
-                $pivotColors = $hasColors
-                    ? ($mergedPivotColors[$templateId] ?? $colors)
-                    : [];
-
-                $pivotEntry = [
-                    'positions' => $request->input('positions'),
-                    'type' => 'bulk',
-                    'colors' => $pivotColors,
-                    'model_color' => $pivotColors[0] ?? null,
-                ];
-
-                $syncData[(string)$templateId] = $pivotEntry;
+                $pivotColors = $hasColors ? ($mergedPivotColors[$templateId] ?? $colors) : [];
+                $syncData[(string)$templateId] = ['positions' => $request->input('positions'), 'type' => 'bulk', 'colors' => $pivotColors, 'model_color' => $pivotColors[0] ?? null];
             }
-
             $mockup->templates()->sync($syncData);
-
             if ($hasColors) {
                 $mockup->update(['colors' => $colors]);
             } elseif ($colorsProvided) {
-                // colors explicitly sent as null/empty — treat as "clear all colors"
                 $mockup->update(['colors' => []]);
             }
         }
-
-        // =========================================================================
-        // SHARED — dispatch jobs (same for both types)
-        // =========================================================================
-        $hexToOriginalColor = collect($colors)
-            ->keyBy(fn($c) => $this->normalizeHex($c))
-            ->all();
-
+        $hexToOriginalColor = collect($colors)->keyBy(fn($color) => $this->normalizeHex($color))->all();
         $totalCount = count($renderJobs) * count($sides);
-
-        $bulkJob = MockupGenerationJob::create([
-            'mockup_id' => $mockup->id,
-            'status' => 'pending',
-            'total_count' => $totalCount,
-            'completed_count' => 0,
-            'failed_count' => 0,
-        ]);
-
+        $bulkJob = MockupGenerationJob::create(['mockup_id' => $mockup->id, 'status' => 'pending', 'total_count' => $totalCount, 'completed_count' => 0, 'failed_count' => 0]);
         foreach ($renderJobs as $job) {
             $isModelOnly = $job['model_only'] ?? false;
-            $originalColor = $isModelOnly
-                ? 'model'
-                : ($hexToOriginalColor[$job['hex']] ?? $job['hex']);
-
+            $originalColor = $isModelOnly ? 'model' : ($hexToOriginalColor[$job['hex']] ?? $job['hex']);
             foreach ($sides as $side) {
-                $item = BulkJobItem::create([
-                    'bulk_job_id' => $bulkJob->id,
-                    'template_id' => $job['template_id'],
-                    'color' => $originalColor,
-                    'side' => $side,
-                    'points' => $positions[$side],
-                    'status' => 'pending',
-                ]);
-
+                $item = BulkJobItem::create(['bulk_job_id' => $bulkJob->id, 'template_id' => $job['template_id'], 'color' => $originalColor, 'side' => $side, 'points' => $positions[$side], 'status' => 'pending']);
                 RenderMockupJob::dispatch($bulkJob, $item, $mockup);
             }
         }
-
-        $bulkJob->update([
-            'status' => $totalCount > 0 ? 'processing' : 'completed',
-            'started_at' => now(),
-        ]);
-
-        return Response::api(data: [
-            'success' => true,
-            'bulk_job_id' => $bulkJob->id,
-            'total_count' => $totalCount,
-            'sides' => $sides,
-            'colors' => $hasColors ? $colors : [],
-            'rendered_jobs' => count($renderJobs),
-        ]);
+        $bulkJob->update(['status' => $totalCount > 0 ? 'processing' : 'completed', 'started_at' => now()]);
+        return Response::api(data: ['success' => true, 'bulk_job_id' => $bulkJob->id, 'total_count' => $totalCount, 'sides' => $sides, 'colors' => $hasColors ? $colors : [], 'rendered_jobs' => count($renderJobs)]);
     }
+
     public function status($id)
     {
         $job = MockupGenerationJob::findOrFail($id);
