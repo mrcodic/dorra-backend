@@ -183,82 +183,77 @@
         @endforeach
     </div>
 </div>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const type = document.getElementById('question-type');
-        const section = document.getElementById('options-section');
-        const container = document.getElementById('options-container');
-        const singleSelect = '{{ \App\Enums\Ai\AiGuideQuestionTypeEnum::SINGLE_SELECT->value }}';
-        let index = {{ count($options) }};
+    $(document).ready(function () {
+        feather.replace();
 
-        function renderType() {
-            section.style.display = type.value === singleSelect ? '' : 'none';
-        }
+        const form = $('#question-form');
+        const submitButton = $('#submit-button');
 
-        function addOption() {
-            container.insertAdjacentHTML('beforeend', `
-            <div class="option-row border rounded p-1 mb-1">
-                <div class="row align-items-end">
-                    <div class="col-md-6">
-                        <label class="form-label">Label English</label>
-                        <input type="text"
-                               name="options[${index}][label][en]"
-                               class="form-control">
-                    </div>
+        function setLoading(loading) {
+            if (loading) {
+                submitButton.prop('disabled', true);
+                submitButton.data('original-html', submitButton.html());
+                submitButton.html(`
+                <span class="spinner-border spinner-border-sm me-50" role="status"></span>
+                Saving...
+            `);
+                return;
+            }
 
-                    <div class="col-md-6">
-                        <label class="form-label">Label Arabic</label>
-                        <input type="text"
-                               name="options[${index}][label][ar]"
-                               class="form-control"
-                               dir="rtl">
-                    </div>
-
-                    <div class="col-md-6 mt-1">
-                        <label class="form-label">Prompt Value English</label>
-                        <input type="text"
-                               name="options[${index}][prompt_value][en]"
-                               class="form-control">
-                    </div>
-
-                    <div class="col-md-5 mt-1">
-                        <label class="form-label">Prompt Value Arabic</label>
-                        <input type="text"
-                               name="options[${index}][prompt_value][ar]"
-                               class="form-control"
-                               dir="rtl">
-                    </div>
-
-                    <div class="col-md-1 mt-1">
-                        <button type="button"
-                                class="btn btn-outline-danger w-100 remove-option">
-                            <i data-feather="trash-2"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `);
-
-            index++;
+            submitButton.prop('disabled', false);
+            submitButton.html(submitButton.data('original-html'));
             feather.replace();
         }
 
-        type.addEventListener('change', renderType);
-
-        document.getElementById('add-option').addEventListener('click', addOption);
-
-        container.addEventListener('click', function (event) {
-            const button = event.target.closest('.remove-option');
-            if (button) {
-                button.closest('.option-row').remove();
-            }
-        });
-
-        renderType();
-
-        if (type.value === singleSelect && !container.children.length) {
-            addOption();
+        function showToast(message, type = 'error') {
+            Toastify({
+                text: message,
+                duration: 4000,
+                close: true,
+                gravity: 'top',
+                position: 'right',
+                stopOnFocus: true,
+                style: {
+                    background: type === 'success' ? '#28c76f' : '#ea5455'
+                }
+            }).showToast();
         }
+
+        function showErrors(xhr) {
+            const response = xhr.responseJSON;
+
+            if (response?.errors) {
+                Object.values(response.errors).flat().forEach(message => {
+                    showToast(message);
+                });
+                return;
+            }
+
+            showToast(response?.message || 'Something went wrong. Please try again.');
+        }
+
+        form.on('submit', function (e) {
+            e.preventDefault();
+
+            setLoading(true);
+
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                success: function () {
+                    showToast('Question saved successfully.', 'success');
+
+                    setTimeout(() => {
+                        window.location.href = '{{ route('ai-guide-questions.index') }}';
+                    }, 500);
+                },
+                error: function (xhr) {
+                    showErrors(xhr);
+                    setLoading(false);
+                }
+            });
+        });
     });
 </script>
