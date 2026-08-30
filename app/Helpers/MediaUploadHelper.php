@@ -88,9 +88,7 @@ if (!function_exists('handleMediaUploads')) {
         $applyTransparency = static function ($file) use (
             $makeTransparent,
             $transparentColor,
-            $fuzzPercent,
-            $removeInnerBackgroundHoles,
-            $maxInnerHoleAreaPercent
+            $fuzzPercent
         ) {
             if (!$makeTransparent) return $file;
 
@@ -98,13 +96,14 @@ if (!function_exists('handleMediaUploads')) {
                 return $file;
             }
 
-            $mimeType = $file->getClientMimeType();
+            // Important: use detected mime, not client mime
+            $mimeType = $file->getMimeType();
 
-            if (
-                $mimeType === 'image/svg+xml' ||
-                !in_array($mimeType, ['image/jpg', 'image/jpeg', 'image/png'], true) ||
-                !class_exists(\Imagick::class)
-            ) {
+            if (!in_array($mimeType, ['image/jpeg', 'image/png'], true)) {
+                return $file;
+            }
+
+            if (!class_exists(\Imagick::class)) {
                 return $file;
             }
 
@@ -119,66 +118,38 @@ if (!function_exists('handleMediaUploads')) {
                 $height = $image->getImageHeight();
 
                 $quantumRange = \Imagick::getQuantumRange()['quantumRangeLong'];
-
                 $fuzzPercent = max(0, min(100, $fuzzPercent));
                 $fuzzAbs = ($fuzzPercent / 100) * $quantumRange;
 
-                $transparent = new \ImagickPixel('transparent');
-
                 /*
-                |--------------------------------------------------------------------------
-                | Edge points
-                |--------------------------------------------------------------------------
-                */
-
-                $stepX = max(1, (int) floor($width / 50));
-                $stepY = max(1, (int) floor($height / 50));
-
-                $edgePoints = [];
-
-                for ($x = 0; $x < $width; $x += $stepX) {
-                    $edgePoints[] = [$x, 0];
-                    $edgePoints[] = [$x, $height - 1];
-                }
-
-                for ($y = 0; $y < $height; $y += $stepY) {
-                    $edgePoints[] = [0, $y];
-                    $edgePoints[] = [$width - 1, $y];
-                }
-
-                $edgePoints[] = [0, 0];
-                $edgePoints[] = [$width - 1, 0];
-                $edgePoints[] = [0, $height - 1];
-                $edgePoints[] = [$width - 1, $height - 1];
-
-                /*
-                |--------------------------------------------------------------------------
-                | Detect representative white/off-white background
-                |--------------------------------------------------------------------------
-                */
-
+                 * Detect white / off-white background.
+                 */
                 if ($transparentColor) {
-                    $target = new \ImagickPixel($transparentColor);
-                    $backgroundRgb = $target->getColor(true);
+                    $background = new \ImagickPixel($transparentColor);
                 } else {
                     $samples = [];
 
-                    foreach ($edgePoints as [$x, $y]) {
-                        $color = $image->getImagePixelColor($x, $y)->getColor(true);
+                    $samplePoints = [
+                        [2, 2],
+                        [$width - 3, 2],
+                        [2, $height - 3],
+                        [$width - 3, $height - 3],
+                        [(int) ($width / 2), 2],
+                        [(int) ($width / 2), $height - 3],
+                        [2, (int) ($height / 2)],
+                        [$width - 3, (int) ($height / 2)],
+                    ];
 
-                        $r = $color['r'] ?? 0;
-                        $g = $color['g'] ?? 0;
-                        $b = $color['b'] ?? 0;
-                        $a = $color['a'] ?? 1;
+                    foreach ($samplePoints as [$x, $y]) {
+                        $color = $image->getImagePixelColor($x, $y)->getColor();
 
-                        if ($a <= 0.01) continue;
-
-                        $min = min($r, $g, $b);
-                        $max = max($r, $g, $b);
-
-                        // Only white/off-white edge pixels
-                        if ($min >= 0.72 && ($max - $min) <= 0.18) {
-                            $samples[] = [$r, $g, $b];
+                        // take only bright background-looking samples
+                        if (
+                            $color['r'] >= 190 &&
+                            $color['g'] >= 190 &&
+                            $color['b'] >= 190
+                        ) {
+                            $samples[] = $color;
                         }
                     }
 
@@ -188,240 +159,42 @@ if (!function_exists('handleMediaUploads')) {
                         return $file;
                     }
 
-                    $backgroundRgb = [
-                        'r' => array_sum(array_column($samples, 0)) / count($samples),
-                        'g' => array_sum(array_column($samples, 1)) / count($samples),
-                        'b' => array_sum(array_column($samples, 2)) / count($samples),
-                    ];
+                    $r = (int) round(array_sum(array_column($samples, 'r')) / count($samples));
+                    $g = (int) round(array_sum(array_column($samples, 'g')) / count($samples));
+                    $b = (int) round(array_sum(array_column($samples, 'b')) / count($samples));
+
+                    $background = new \ImagickPixel("rgb({$r},{$g},{$b})");
                 }
 
-                $similarityTolerance = max(
-                    0.05,
-                    min(0.30, ($fuzzPercent / 100) + 0.04)
+                $transparent = new \ImagickPixel('transparent');
+
+                /*
+                 * Add temporary border.
+                 *
+                 * This guarantees that point 0,0 is definitely background.
+                 */
+                $image->borderImage($background, 2, 2);
+
+                /*
+                 * Remove ONLY the background connected to the outer border.
+                 *
+                 * White parts inside the product are NOT globally removed.
+                 */
+                $image->floodFillPaintImage(
+                    $transparent,
+                    $fuzzAbs,
+                    $background,
+                    0,
+                    0,
+                    false
                 );
 
-                $isBackgroundLike = static function (\ImagickPixel $pixel) use (
-                    $backgroundRgb,
-                    $similarityTolerance
-                ) {
-                    $color = $pixel->getColor(true);
-
-                    if (($color['a'] ?? 1) <= 0.01) return false;
-
-                    $distance = max(
-                        abs(($color['r'] ?? 0) - $backgroundRgb['r']),
-                        abs(($color['g'] ?? 0) - $backgroundRgb['g']),
-                        abs(($color['b'] ?? 0) - $backgroundRgb['b'])
-                    );
-
-                    return $distance <= $similarityTolerance;
-                };
-
                 /*
-                |--------------------------------------------------------------------------
-                | Pass 1: Remove background connected to image edges
-                |--------------------------------------------------------------------------
-                */
+                 * Remove temporary border.
+                 */
+                $image->shaveImage(2, 2);
 
-                foreach ($edgePoints as [$x, $y]) {
-                    $seed = $image->getImagePixelColor($x, $y);
-
-                    if (!$isBackgroundLike($seed)) continue;
-
-                    $seedColor = clone $seed;
-
-                    $image->floodFillPaintImage(
-                        $transparent,
-                        $fuzzAbs,
-                        $seedColor,
-                        $x,
-                        $y,
-                        false
-                    );
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | Pass 2: Remove enclosed background holes
-                |--------------------------------------------------------------------------
-                |
-                | Examples:
-                | - inside mug handle
-                | - inside O
-                | - inside D
-                | - inside A
-                |
-                | A component is removed only when:
-                | 1. it looks like the detected background
-                | 2. it does NOT touch existing transparency
-                | 3. it isn't too large
-                |
-                */
-
-                if ($removeInnerBackgroundHoles) {
-                    $work = clone $image;
-
-                    $scanStep = 2;
-                    $marker = new \ImagickPixel('#FF00FF');
-                    $processed = new \ImagickPixel('#000000');
-
-                    $maxPixels = (int) (
-                        ($width * $height) *
-                        (max(0, $maxInnerHoleAreaPercent) / 100)
-                    );
-
-                    $isMarker = static function (\ImagickPixel $pixel) {
-                        $color = $pixel->getColor(true);
-
-                        return
-                            ($color['r'] ?? 0) >= 0.98 &&
-                            ($color['g'] ?? 0) <= 0.02 &&
-                            ($color['b'] ?? 0) >= 0.98;
-                    };
-
-                    for ($y = 1; $y < $height - 1; $y += $scanStep) {
-                        for ($x = 1; $x < $width - 1; $x += $scanStep) {
-                            $workPixel = $work->getImagePixelColor($x, $y);
-
-                            if (!$isBackgroundLike($workPixel)) continue;
-
-                            $originalPixel = $image->getImagePixelColor($x, $y);
-                            $originalColor = $originalPixel->getColor(true);
-
-                            if (($originalColor['a'] ?? 1) <= 0.01) {
-                                continue;
-                            }
-
-                            $seedColor = clone $workPixel;
-
-                            /*
-                             * Mark this connected component only.
-                             */
-                            $work->floodFillPaintImage(
-                                $marker,
-                                $fuzzAbs,
-                                $seedColor,
-                                $x,
-                                $y,
-                                false
-                            );
-
-                            /*
-                             * Isolate current marker component and get bbox.
-                             */
-                            $component = clone $work;
-
-                            $component->transparentPaintImage(
-                                $marker,
-                                0,
-                                0,
-                                true
-                            );
-
-                            $component->trimImage(0);
-
-                            $page = $component->getImagePage();
-
-                            $boxX = max(0, (int) ($page['x'] ?? 0));
-                            $boxY = max(0, (int) ($page['y'] ?? 0));
-                            $boxWidth = (int) $component->getImageWidth();
-                            $boxHeight = (int) $component->getImageHeight();
-
-                            $boxWidth = min($boxWidth, $width - $boxX);
-                            $boxHeight = min($boxHeight, $height - $boxY);
-
-                            $component->clear();
-                            $component->destroy();
-
-                            $touchesTransparency = false;
-                            $componentPixels = 0;
-
-                            /*
-                             * Check whether component touches already transparent
-                             * outer background.
-                             */
-                            for ($cy = $boxY; $cy < $boxY + $boxHeight; $cy++) {
-                                for ($cx = $boxX; $cx < $boxX + $boxWidth; $cx++) {
-                                    $pixel = $work->getImagePixelColor($cx, $cy);
-
-                                    if (!$isMarker($pixel)) continue;
-
-                                    $componentPixels++;
-
-                                    foreach ([
-                                                 [-1, -1], [0, -1], [1, -1],
-                                                 [-1, 0],           [1, 0],
-                                                 [-1, 1],  [0, 1],  [1, 1],
-                                             ] as [$dx, $dy]) {
-                                        $nx = $cx + $dx;
-                                        $ny = $cy + $dy;
-
-                                        if (
-                                            $nx < 0 ||
-                                            $ny < 0 ||
-                                            $nx >= $width ||
-                                            $ny >= $height
-                                        ) {
-                                            $touchesTransparency = true;
-                                            break 3;
-                                        }
-
-                                        $neighbor = $image
-                                            ->getImagePixelColor($nx, $ny)
-                                            ->getColor(true);
-
-                                        if (($neighbor['a'] ?? 1) <= 0.01) {
-                                            $touchesTransparency = true;
-                                            break 3;
-                                        }
-                                    }
-                                }
-                            }
-
-                            /*
-                             * Remove only enclosed, reasonably-sized
-                             * background components.
-                             */
-                            if (
-                                !$touchesTransparency &&
-                                $componentPixels > 0 &&
-                                $componentPixels <= $maxPixels
-                            ) {
-                                $image->floodFillPaintImage(
-                                    $transparent,
-                                    $fuzzAbs,
-                                    $image->getImagePixelColor($x, $y),
-                                    $x,
-                                    $y,
-                                    false
-                                );
-                            }
-
-                            /*
-                             * Mark as processed so we don't scan the
-                             * same component again.
-                             */
-                            $work->floodFillPaintImage(
-                                $processed,
-                                0,
-                                $marker,
-                                $x,
-                                $y,
-                                false
-                            );
-                        }
-                    }
-
-                    $work->clear();
-                    $work->destroy();
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | Save PNG
-                |--------------------------------------------------------------------------
-                */
-
+                $image->setImagePage(0, 0, 0, 0);
                 $image->setImageFormat('png');
 
                 $originalBase = pathinfo(
@@ -431,13 +204,13 @@ if (!function_exists('handleMediaUploads')) {
 
                 $originalBase = $originalBase ?: (string) Str::uuid();
 
-                $tempPath = storage_path(
-                    'app/tmp-transparent/' . Str::uuid() . '.png'
-                );
+                $tempDir = storage_path('app/tmp-transparent');
 
-                if (!is_dir(dirname($tempPath))) {
-                    mkdir(dirname($tempPath), 0755, true);
+                if (!is_dir($tempDir)) {
+                    mkdir($tempDir, 0755, true);
                 }
+
+                $tempPath = $tempDir . '/' . Str::uuid() . '.png';
 
                 $image->writeImage($tempPath);
                 $image->clear();
