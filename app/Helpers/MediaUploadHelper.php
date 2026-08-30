@@ -160,8 +160,8 @@ if (!function_exists('handleMediaUploads')) {
 
                 $transparent = new \ImagickPixel('transparent');
 
-                $stepX = max(1, (int) floor($width / 20));
-                $stepY = max(1, (int) floor($height / 20));
+                $stepX = max(1, (int) floor($width / 50));
+                $stepY = max(1, (int) floor($height / 50));
 
                 $points = [];
 
@@ -175,6 +175,39 @@ if (!function_exists('handleMediaUploads')) {
                     $points[] = [$width - 1, $y];
                 }
 
+                $edgeSamples = [];
+
+                foreach ($points as [$x, $y]) {
+                    $pixel = $imagick->getImagePixelColor($x, $y);
+
+                    $edgeSamples[] = [
+                        'x' => $x,
+                        'y' => $y,
+                        'color' => clone $pixel,
+                    ];
+                }
+
+                foreach ($edgeSamples as $sample) {
+                    $x = $sample['x'];
+                    $y = $sample['y'];
+
+                    $currentPixel = $imagick->getImagePixelColor($x, $y);
+                    $currentColor = $currentPixel->getColor(true);
+
+                    // already transparent
+                    if (($currentColor['a'] ?? 1) <= 0.01) {
+                        continue;
+                    }
+
+                    $imagick->floodFillPaintImage(
+                        $transparent,
+                        $fuzzAbs,
+                        $sample['color'],
+                        $x,
+                        $y,
+                        false
+                    );
+                }
                 $points[] = [0, 0];
                 $points[] = [$width - 1, 0];
                 $points[] = [0, $height - 1];
