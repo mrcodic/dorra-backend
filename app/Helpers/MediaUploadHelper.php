@@ -147,7 +147,6 @@ if (!function_exists('handleMediaUploads')) {
 
             try {
                 $imagick = new \Imagick($file->getPathname());
-
                 $imagick->setImageFormat('png');
                 $imagick->setImageColorspace(\Imagick::COLORSPACE_SRGB);
                 $imagick->setImageAlphaChannel(\Imagick::ALPHACHANNEL_SET);
@@ -161,44 +160,138 @@ if (!function_exists('handleMediaUploads')) {
 
                 $transparent = new \ImagickPixel('transparent');
 
-                $corners = [
-                    [0, 0],
-                    [$width - 1, 0],
-                    [0, $height - 1],
-                    [$width - 1, $height - 1],
-                ];
+                $stepX = max(1, (int) floor($width / 20));
+                $stepY = max(1, (int) floor($height / 20));
 
-                $targetColors = [];
+                $points = [];
 
-                foreach ($corners as $index => [$x, $y]) {
-                    $targetColors[$index] = $transparentColor
-                        ? new \ImagickPixel($transparentColor)
-                        : $sampleColor($imagick, $x, $y, $width, $height);
+                for ($x = 0; $x < $width; $x += $stepX) {
+                    $points[] = [$x, 0];
+                    $points[] = [$x, $height - 1];
                 }
 
-                foreach ($corners as $index => [$x, $y]) {
+                for ($y = 0; $y < $height; $y += $stepY) {
+                    $points[] = [0, $y];
+                    $points[] = [$width - 1, $y];
+                }
+
+                $points[] = [0, 0];
+                $points[] = [$width - 1, 0];
+                $points[] = [0, $height - 1];
+                $points[] = [$width - 1, $height - 1];
+
+                $visited = [];
+
+                /*
+                 * المرحلة 1:
+                 * إزالة الخلفية البيضاء المتصلة بحواف الصورة فقط
+                 */
+                foreach ($points as [$x, $y]) {
+                    $key = "{$x}-{$y}";
+
+                    if (isset($visited[$key])) {
+                        continue;
+                    }
+
+                    $visited[$key] = true;
+
+                    $targetColor = $transparentColor
+                        ? new \ImagickPixel($transparentColor)
+                        : $sampleColor($imagick, $x, $y, $width, $height);
+
                     $imagick->floodFillPaintImage(
                         $transparent,
                         $fuzzAbs,
-                        $targetColors[$index],
+                        $targetColor,
                         $x,
                         $y,
                         false
                     );
                 }
 
+                /*
+                 * المرحلة 2:
+                 * إزالة الفراغات البيضاء الصغيرة المغلقة داخل الحروف
+                 * بدون لمس المساحات البيضاء الكبيرة مثل جسم العربية
+                 */
+                $removeInnerWhiteHoles = true;
+                $maxHoleArea = 6000; // جربي 2000 أو 4000 أو 6000 حسب الصور
+                $holeStep = 6;
+
+                if ($removeInnerWhiteHoles) {
+                    for ($y = 1; $y < $height - 1; $y += $holeStep) {
+                        for ($x = 1; $x < $width - 1; $x += $holeStep) {
+                            $pixel = $imagick->getImagePixelColor($x, $y);
+                            $color = $pixel->getColor(true);
+
+                            $alpha = $color['a'] ?? 1;
+                            $r = ($color['r'] ?? 0) * 255;
+                            $g = ($color['g'] ?? 0) * 255;
+                            $b = ($color['b'] ?? 0) * 255;
+
+                            // لو البيكسل already transparent نتخطاه
+                            if ($alpha <= 0.01) {
+                                continue;
+                            }
+
+                            // نعتبره أبيض/شبه أبيض
+                            $isNearWhite = $r >= 245 && $g >= 245 && $b >= 245;
+
+                            if (!$isNearWhite) {
+                                continue;
+                            }
+
+                            // فحص تقريبي للمساحة قبل الإزالة
+                            $probe = clone $imagick;
+                            $probe->floodFillPaintImage(
+                                new \ImagickPixel('red'),
+                                $fuzzAbs,
+                                new \ImagickPixel('#FFFFFF'),
+                                $x,
+                                $y,
+                                false
+                            );
+
+                            $componentMask = clone $probe;
+                            $componentMask->transparentPaintImage(
+                                new \ImagickPixel('red'),
+                                0,
+                                0,
+                                false
+                            );
+
+                            $bbox = $componentMask->getImagePage();
+                            $area = ($bbox['width'] ?? 0) * ($bbox['height'] ?? 0);
+
+                            $probe->clear();
+                            $probe->destroy();
+                            $componentMask->clear();
+                            $componentMask->destroy();
+
+                            /*
+                             * لو المساحة صغيرة نعتبرها hole داخل حرف/لوجو
+                             * ونحولها transparent
+                             */
+                            if ($area > 0 && $area <= $maxHoleArea) {
+                                $imagick->floodFillPaintImage(
+                                    $transparent,
+                                    $fuzzAbs,
+                                    new \ImagickPixel('#FFFFFF'),
+                                    $x,
+                                    $y,
+                                    false
+                                );
+                            }
+                        }
+                    }
+                }
+
                 $imagick->setImageFormat('png');
 
-                $originalBase = pathinfo(
-                    $file->getClientOriginalName(),
-                    PATHINFO_FILENAME
-                );
+                $originalBase = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $originalBase = $originalBase ?: (string) \Illuminate\Support\Str::uuid();
 
-                $originalBase = $originalBase ?: (string) Str::uuid();
-
-                $tempPath = storage_path(
-                    'app/tmp-transparent/' . Str::uuid() . '.png'
-                );
+                $tempPath = storage_path('app/tmp-transparent/' . \Illuminate\Support\Str::uuid() . '.png');
 
                 if (!is_dir(dirname($tempPath))) {
                     mkdir(dirname($tempPath), 0755, true);
@@ -217,7 +310,6 @@ if (!function_exists('handleMediaUploads')) {
                 );
             } catch (\Throwable $e) {
                 report($e);
-
                 return $file;
             }
         };
