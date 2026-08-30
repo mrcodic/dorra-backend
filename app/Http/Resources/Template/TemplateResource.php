@@ -103,51 +103,6 @@ class TemplateResource extends JsonResource
             ->get()
             ->groupBy('model_id')
             ->map(fn($rows) => $rows->pluck('hex')->filter()->unique());
-
-        $templateColors = $mockups
-            ->sortByDesc(function ($mockup) use ($templateId) {
-                return $mockup->templates
-                    ->first(fn($tpl) => $tpl->id == $templateId)
-                    ?->pivot->model_color ? 1 : 0;
-            })
-            ->flatMap(function ($mockup) use ($templateId, $hexesByMockup) {
-                $mockupHexes = $hexesByMockup->get($mockup->id, collect());
-
-                return $mockup->templates
-                    ->filter(fn($tpl) => $tpl->id == $templateId)
-                    ->flatMap(function ($tpl) use ($mockupHexes) {
-                        $colors = $tpl->pivot->colors ?? [];
-
-                        if (is_string($colors)) {
-                            $colors = json_decode($colors, true) ?: [];
-                        }
-
-                        $colors = is_array($colors) ? $colors : [];
-                        $modelColor = $tpl->pivot->model_color ?? null;
-
-                        if ($modelColor && in_array($modelColor, $colors)) {
-                            $colors = array_merge(
-                                [$modelColor],
-                                array_values(array_filter(
-                                    $colors,
-                                    fn($color) => $color !== $modelColor
-                                ))
-                            );
-                        }
-
-                        return array_values(array_filter(
-                            $colors,
-                            fn($color) => $mockupHexes->contains(
-                                strtolower(ltrim($color, '#'))
-                            )
-                        ));
-                    });
-            })
-            ->filter()
-            ->unique()
-            ->values();
-
-        $colorTemplateFile = $this->getFirstMedia('color_templates');
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
@@ -263,26 +218,48 @@ class TemplateResource extends JsonResource
                     ? $colors
                     : json_decode($colors ?: '[]', true);
             }),
-            'template_colors' => $templateColors,
+            'template_colors' => $mockups
+                ->sortByDesc(function ($mockup) use ($templateId) {
+                    return $mockup->templates
+                        ->first(fn($tpl) => $tpl->id == $templateId)
+                        ?->pivot->model_color ? 1 : 0;
+                })
+                ->flatMap(function ($mockup) use ($templateId, $hexesByMockup) {
+                    $mockupHexes = $hexesByMockup->get($mockup->id, collect());
 
-            'color_templates_media' => $this->when(
-                $this->approach == 'without_editor' && $templateColors->isEmpty(),
-                function () use ($colorTemplateFile) {
-                    if ($colorTemplateFile) {
-                        return MediaResource::make($colorTemplateFile);
-                    }
+                    return $mockup->templates
+                        ->filter(fn($tpl) => $tpl->id == $templateId)
+                        ->flatMap(function ($tpl) use ($mockupHexes) {
+                            $colors = $tpl->pivot->colors ?? [];
+                            if (is_string($colors)) {
+                                $colors = json_decode($colors, true) ?: [];
+                            }
+                            $colors = is_array($colors) ? $colors : [];
+                            $modelColor = $tpl->pivot->model_color ?? null;
+                            if ($modelColor && in_array($modelColor, $colors)) {
+                                $colors = array_merge(
+                                    [$modelColor],
+                                    array_values(array_filter($colors, fn($c) => $c !== $modelColor))
+                                );
+                            }
 
-                    return [
-                        'url' => null,
-                    ];
-                }
-            ),
+                            return array_values(array_filter($colors, function ($color) use ($mockupHexes) {
+                                return $mockupHexes->contains(strtolower(ltrim($color, '#')));
+                            }));
+                        });
+                })
+                ->filter()
+                ->unique()
+                ->values(),
             'mockup_model_id' => $this->mockups()
                 ->whereCategoryId($categoryId)
                 ->wherePivot('model_color', '!=', null)
                 ->whereRaw("mockup_template.model_color != ''")
                 ->first()
                 ?->id,
+            'color_templates_media' => $this->when($this->approach == 'without_editor', function () {
+                return MediaResource::collection($this->getMedia('color_templates'));
+            }),
             'font_media' => FontResource::collection(
                 $this->whenLoaded('libraryMedia', function () {
                     return $this->libraryMedia

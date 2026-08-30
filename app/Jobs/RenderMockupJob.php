@@ -120,8 +120,7 @@ class RenderMockupJob implements ShouldQueue
                 ? strtolower(ltrim(trim($primaryColor), '#'))
                 : null;
 
-            $isModelImage = $primaryHex !== null && $primaryHex === $hex ? 1 : 0;
-
+            $isModelImage = $primaryHex === null ? 1 : ($primaryHex === $hex ? 1 : 0);
             /*
              * Keep pivot model_color always synced with first color.
              * No colors => model_color = null.
