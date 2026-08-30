@@ -187,18 +187,18 @@
 
         },
         {
+            "name": "AI Questions",
+            "icon": "ai-question.png",
+            "slug": "",
+            "url": "/ai-guide-questions"
+        },
+        {
             "name": "Roles",
             "icon": "Roles.svg",
             "slug": "",
             "url": "/roles",
             "modalTarget": ""
 
-        },
-        {
-            "name": "AI Questions",
-            "icon": "ai-question.png",
-            "slug": "",
-            "url": "/ai-guide-questions"
         },
         {
             "name": "FAQs & Help",
