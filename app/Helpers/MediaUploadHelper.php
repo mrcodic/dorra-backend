@@ -25,7 +25,7 @@ if (!function_exists('handleMediaUploads')) {
         bool $clearExisting = false,
         $columns = null,
         bool $makeTransparent = false,
-        ?string $transparentColor = '#FFFFFF',
+        ?string $transparentColor = null,
         float $fuzzPercent = 10
     ) {
         if (empty($files)) {
@@ -117,22 +117,20 @@ if (!function_exists('handleMediaUploads')) {
 
             return $pixel;
         };
-        $applyTransparency = static function ($file) use ($makeTransparent, $transparentColor, $fuzzPercent, $sampleColor) {
-            if (!$makeTransparent) {
-                return $file;
-            }
+        $applyTransparency = static function ($file) use (
+            $makeTransparent,
+            $transparentColor,
+            $fuzzPercent
+        ) {
+            if (!$makeTransparent) return $file;
 
             if (!($file instanceof \Illuminate\Http\UploadedFile) || !$file->isValid()) {
                 return $file;
             }
 
-            $mimeType = $file->getClientMimeType();
+            $mimeType = $file->getMimeType();
 
-            if ($mimeType === 'image/svg+xml') {
-                return $file;
-            }
-
-            if (!in_array($mimeType, ['image/jpg', 'image/jpeg', 'image/png'], true)) {
+            if (!in_array($mimeType, ['image/jpeg', 'image/png'], true)) {
                 return $file;
             }
 
@@ -142,6 +140,7 @@ if (!function_exists('handleMediaUploads')) {
 
             try {
                 $imagick = new \Imagick($file->getPathname());
+
                 $imagick->setImageFormat('png');
                 $imagick->setImageColorspace(\Imagick::COLORSPACE_SRGB);
                 $imagick->setImageAlphaChannel(\Imagick::ALPHACHANNEL_SET);
@@ -150,62 +149,159 @@ if (!function_exists('handleMediaUploads')) {
                 $height = $imagick->getImageHeight();
 
                 $quantumRange = \Imagick::getQuantumRange()['quantumRangeLong'];
+
                 $fuzzPercent = max(0, min(100, $fuzzPercent));
                 $fuzzAbs = ($fuzzPercent / 100) * $quantumRange;
 
+                /*
+                |--------------------------------------------------------------------------
+                | Detect background
+                |--------------------------------------------------------------------------
+                */
+
+                if ($transparentColor) {
+                    $background = new \ImagickPixel($transparentColor);
+                } else {
+                    $points = [
+                        [2, 2],
+                        [$width - 3, 2],
+                        [2, $height - 3],
+                        [$width - 3, $height - 3],
+                        [(int) ($width / 2), 2],
+                        [(int) ($width / 2), $height - 3],
+                        [2, (int) ($height / 2)],
+                        [$width - 3, (int) ($height / 2)],
+                    ];
+
+                    $colors = [];
+
+                    foreach ($points as [$x, $y]) {
+                        $color = $imagick
+                            ->getImagePixelColor($x, $y)
+                            ->getColor();
+
+                        if (
+                            $color['r'] >= 180 &&
+                            $color['g'] >= 180 &&
+                            $color['b'] >= 180
+                        ) {
+                            $colors[] = $color;
+                        }
+                    }
+
+                    if (!$colors) {
+                        $imagick->clear();
+                        $imagick->destroy();
+
+                        return $file;
+                    }
+
+                    $r = (int) round(
+                        array_sum(array_column($colors, 'r')) / count($colors)
+                    );
+
+                    $g = (int) round(
+                        array_sum(array_column($colors, 'g')) / count($colors)
+                    );
+
+                    $b = (int) round(
+                        array_sum(array_column($colors, 'b')) / count($colors)
+                    );
+
+                    $background = new \ImagickPixel(
+                        "rgb({$r},{$g},{$b})"
+                    );
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Remove ONLY outer connected background
+                |--------------------------------------------------------------------------
+                */
+
                 $transparent = new \ImagickPixel('transparent');
 
+                /*
+                 * Temporary border guarantees that 0,0 is background.
+                 */
+                $border = 3;
 
-                $corners = [
-                    [0, 0],
-                    [$width - 1, 0],
-                    [0, $height - 1],
-                    [$width - 1, $height - 1],
-                ];
-                $targetColors = [];
+                $imagick->borderImage(
+                    $background,
+                    $border,
+                    $border
+                );
 
-                foreach ($corners as $i => [$x, $y]) {
-                    $targetColors[$i] = $transparentColor
-                        ? new \ImagickPixel($transparentColor)
-                        : $sampleColor($imagick, $x, $y, $width, $height);
-                }
+                $imagick->floodFillPaintImage(
+                    $transparent,
+                    $fuzzAbs,
+                    $background,
+                    0,
+                    0,
+                    false
+                );
 
-                foreach ($corners as $i => [$x, $y]) {
-                    $imagick->floodFillPaintImage(
-                        $transparent,
-                        $fuzzAbs,
-                        $targetColors[$i],
-                        $x,
-                        $y,
-                        false
-                    );
-                }
+                $imagick->shaveImage(
+                    $border,
+                    $border
+                );
 
+                $imagick->setImagePage(0, 0, 0, 0);
 
-                $uniqueTargets = [];
+                /*
+                |--------------------------------------------------------------------------
+                | Clean thin white fringe
+                |--------------------------------------------------------------------------
+                |
+                | Shrink alpha by about 1 pixel.
+                | This removes the white background halo without globally
+                | deleting white pixels inside the product.
+                */
 
-                foreach ($targetColors as $color) {
-                    $uniqueTargets[$color->getColorAsString()] = $color;
-                }
+                $alpha = clone $imagick;
 
-                foreach ($uniqueTargets as $color) {
-                    $imagick->transparentPaintImage(
-                        $color,
-                        0,
-                        $fuzzAbs,
-                        false
-                    );
-                }
+                $alpha->separateImageChannel(
+                    \Imagick::CHANNEL_ALPHA
+                );
+
+                $alpha->morphology(
+                    \Imagick::MORPHOLOGY_ERODE,
+                    1,
+                    'Disk:1'
+                );
+
+                $imagick->compositeImage(
+                    $alpha,
+                    \Imagick::COMPOSITE_COPYOPACITY,
+                    0,
+                    0
+                );
+
+                $alpha->clear();
+                $alpha->destroy();
+
+                /*
+                |--------------------------------------------------------------------------
+                | Save
+                |--------------------------------------------------------------------------
+                */
+
                 $imagick->setImageFormat('png');
 
-                $originalBase = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $originalBase = pathinfo(
+                    $file->getClientOriginalName(),
+                    PATHINFO_FILENAME
+                );
+
                 $originalBase = $originalBase ?: (string) Str::uuid();
 
-                $tempPath = storage_path('app/tmp-transparent/' . Str::uuid() . '.png');
+                $tempDir = storage_path('app/tmp-transparent');
 
-                if (!is_dir(dirname($tempPath))) {
-                    mkdir(dirname($tempPath), 0755, true);
+                if (!is_dir($tempDir)) {
+                    mkdir($tempDir, 0755, true);
                 }
+
+                $tempPath = $tempDir . '/' . Str::uuid() . '.png';
 
                 $imagick->writeImage($tempPath);
 
@@ -221,10 +317,10 @@ if (!function_exists('handleMediaUploads')) {
                 );
             } catch (\Throwable $e) {
                 report($e);
+
                 return $file;
             }
         };
-
         $uploaded = collect($files)->map(function ($file) use (
             $modelData,
             $collectionName,
