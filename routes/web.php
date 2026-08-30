@@ -319,6 +319,11 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::post('tableau-scenes', [TableauSceneController::class, 'store'])
             ->name('tableau-scenes.store');
         Route::post('tableau-scenes/specifications', [TableauSceneController::class, 'tableauSize'])->name('tableau.specifications.size');
+
+        Route::group(['prefix' => 'ai-guide-questions', 'as' => 'ai-guide-questions.', 'controller' => AiGuideQuestionController::class,], (function () {
+            Route::get('/data', [AiGuideQuestionController::class, 'getData'])->name('data');
+            Route::post('/bulk-delete', [AiGuideQuestionController::class, 'bulkDelete'])->name('bulk-delete');
+        }));
         Route::resource('ai-guide-questions', AiGuideQuestionController::class);
 
     });

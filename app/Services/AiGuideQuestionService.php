@@ -5,8 +5,10 @@ namespace App\Services;
 use App\Enums\Ai\AiGuideQuestionTypeEnum;
 use App\Repositories\Interfaces\AiGuideQuestionOptionRepositoryInterface;
 use App\Repositories\Interfaces\AiGuideQuestionRepositoryInterface;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Yajra\DataTables\Facades\DataTables;
 
 class AiGuideQuestionService extends BaseService
 {
@@ -16,7 +18,60 @@ class AiGuideQuestionService extends BaseService
     ) {
         parent::__construct($repository);
     }
+    public function getData(): JsonResponse
+    {
+        $locale = app()->getLocale();
 
+        $questions = $this->repository
+            ->query()
+            ->withCount('options')
+            ->when(request()->filled('search_value'), function ($query) use ($locale) {
+                if (hasMeaningfulSearch(request('search_value'))) {
+                    $search = strtolower(request('search_value'));
+
+                    $query->where(function ($query) use ($search, $locale) {
+                        $query->whereRaw(
+                            "LOWER(JSON_UNQUOTE(JSON_EXTRACT(title, '$.\"{$locale}\"'))) LIKE ?",
+                            ["%{$search}%"]
+                        )->orWhereRaw(
+                            "LOWER(JSON_UNQUOTE(JSON_EXTRACT(prompt_label, '$.\"{$locale}\"'))) LIKE ?",
+                            ["%{$search}%"]
+                        );
+                    });
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
+            })
+            ->when(request()->filled('type'), function ($query) {
+                $query->where('type', request('type'));
+            })
+            ->when(request()->filled('is_active'), function ($query) {
+                $query->where('is_active', request('is_active'));
+            })
+            ->orderBy('sort_order')
+            ->latest();
+
+        return DataTables::of($questions)
+            ->editColumn('title', function ($question) {
+                return $question->title;
+            })
+            ->editColumn('type', function ($question) {
+                return $question->type->value;
+            })
+            ->editColumn('prompt_label', function ($question) {
+                return $question->prompt_label;
+            })
+            ->addColumn('type_label', function ($question) {
+                return $question->type->label();
+            })
+            ->addColumn('action', function () {
+                return [
+                    'can_edit' => (bool)auth()->user()->hasPermissionTo('ai-guide-questions_update'),
+                    'can_delete' => (bool)auth()->user()->hasPermissionTo('ai-guide-questions_delete'),
+                ];
+            })
+            ->make(true);
+    }
     public function getAll($relations = [], bool $paginate = false, $columns = ['*'], $perPage = 10, $counts = [])
     {
         $perPage = request('per_page', $perPage);
