@@ -189,15 +189,104 @@
 
         const form = $('#question-form');
         const submitButton = $('#submit-button');
+        const typeSelect = $('#question-type');
+        const optionsSection = $('#options-section');
+        const optionsContainer = $('#options-container');
+        const singleSelect = '{{ \App\Enums\Ai\AiGuideQuestionTypeEnum::SINGLE_SELECT->value }}';
+
+        let optionIndex = {{ count($options) }};
+        let isSubmitting = false;
+
+        function toggleOptions() {
+            if (typeSelect.val() === singleSelect) {
+                optionsSection.show();
+
+                if (!optionsContainer.children('.option-row').length) {
+                    addOption();
+                }
+
+                return;
+            }
+
+            optionsSection.hide();
+        }
+
+        function addOption() {
+            const index = optionIndex++;
+
+            optionsContainer.append(`
+            <div class="option-row border rounded p-1 mb-1">
+                <div class="row align-items-end">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Label English</label>
+                        <input type="text"
+                               name="options[${index}][label][en]"
+                               class="form-control">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Label Arabic</label>
+                        <input type="text"
+                               name="options[${index}][label][ar]"
+                               class="form-control"
+                               dir="rtl">
+                    </div>
+
+                    <div class="col-md-6 mt-1">
+                        <label class="form-label">Prompt Value English</label>
+                        <input type="text"
+                               name="options[${index}][prompt_value][en]"
+                               class="form-control">
+                    </div>
+
+                    <div class="col-md-5 mt-1">
+                        <label class="form-label">Prompt Value Arabic</label>
+                        <input type="text"
+                               name="options[${index}][prompt_value][ar]"
+                               class="form-control"
+                               dir="rtl">
+                    </div>
+
+                    <div class="col-md-1 mt-1">
+                        <button type="button"
+                                class="btn btn-outline-danger w-100 remove-option">
+                            <i data-feather="trash-2"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        `);
+
+            feather.replace();
+        }
+
+        $('#add-option').on('click', function () {
+            addOption();
+        });
+
+        optionsContainer.on('click', '.remove-option', function () {
+            $(this).closest('.option-row').remove();
+        });
+
+        typeSelect.on('change', function () {
+            toggleOptions();
+        });
 
         function setLoading(loading) {
             if (loading) {
                 submitButton.prop('disabled', true);
-                submitButton.data('original-html', submitButton.html());
+
+                if (!submitButton.data('original-html')) {
+                    submitButton.data('original-html', submitButton.html());
+                }
+
                 submitButton.html(`
                 <span class="spinner-border spinner-border-sm me-50" role="status"></span>
                 Saving...
             `);
+
                 return;
             }
 
@@ -224,28 +313,35 @@
             const response = xhr.responseJSON ?? {};
 
             if (xhr.status === 422 && response.errors) {
-                Object.entries(response.errors).forEach(([field, messages]) => {
+                Object.values(response.errors).forEach(messages => {
                     const errors = Array.isArray(messages) ? messages : [messages];
 
                     errors.forEach(message => {
-                        showToast(message, 'error');
+                        showToast(message);
                     });
                 });
 
                 return;
             }
 
-            showToast(response.message ?? 'Something went wrong. Please try again.', 'error');
+            showToast(
+                response.message ?? 'Something went wrong. Please try again.'
+            );
         }
-        form.on('submit', function (e) {
+
+        form.off('submit.aiQuestion').on('submit.aiQuestion', function (e) {
             e.preventDefault();
 
+            if (isSubmitting) return;
+
+            isSubmitting = true;
             setLoading(true);
 
             $.ajax({
                 url: form.attr('action'),
                 type: 'POST',
                 data: form.serialize(),
+
                 success: function () {
                     showToast('Question saved successfully.', 'success');
 
@@ -253,11 +349,15 @@
                         window.location.href = '{{ route('ai-guide-questions.index') }}';
                     }, 500);
                 },
+
                 error: function (xhr) {
                     showErrors(xhr);
+                    isSubmitting = false;
                     setLoading(false);
                 }
             });
         });
+
+        toggleOptions();
     });
 </script>
