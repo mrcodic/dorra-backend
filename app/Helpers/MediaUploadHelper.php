@@ -26,11 +26,11 @@ if (!function_exists('handleMediaUploads')) {
         $columns = null,
         bool $makeTransparent = false,
         ?string $transparentColor = '#FFFFFF',
-        float $fuzzPercent = 10
+        float $fuzzPercent = 10,
+        bool $removeInnerBackgroundHoles = true,
+        float $maxInnerHoleAreaPercent = 3
     ) {
-        if (empty($files)) {
-            return null;
-        }
+        if (empty($files)) return null;
 
         $collectionName = $collectionName
             ? getMediaCollectionName($collectionName)
@@ -44,88 +44,55 @@ if (!function_exists('handleMediaUploads')) {
 
         $makeNames = static function ($originalName) {
             $base = pathinfo($originalName, PATHINFO_FILENAME);
-            $ext  = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-
+            $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
             $slug = Str::slug($base);
 
-            if ($slug === '' || $slug === null) {
-                $slug = (string) Str::uuid();
-            }
+            if (!$slug) $slug = (string) Str::uuid();
 
-            $safeFileName = $slug . ($ext ? ".{$ext}" : '');
-            $humanName = $base ?: $slug;
-
-            return [$humanName, $safeFileName, $ext];
+            return [
+                $base ?: $slug,
+                $slug . ($ext ? ".{$ext}" : ''),
+                $ext
+            ];
         };
 
         $getImageDimensions = static function ($file) {
             try {
-                if (!($file instanceof \Illuminate\Http\UploadedFile)) {
+                if (!($file instanceof \Illuminate\Http\UploadedFile) || !$file->isValid()) {
                     return [];
                 }
 
-                if (!$file->isValid()) {
+                if (!str_starts_with((string) $file->getClientMimeType(), 'image/')) {
                     return [];
                 }
 
-                $mimeType = $file->getClientMimeType();
+                if (!class_exists(\Imagick::class)) return [];
 
-                if (!str_starts_with((string) $mimeType, 'image/')) {
-                    return [];
-                }
+                $image = new \Imagick();
+                $image->pingImage($file->getPathname());
 
-                if (!class_exists(\Imagick::class)) {
-                    return [];
-                }
-
-                $imagick = new \Imagick();
-                $imagick->pingImage($file->getPathname());
-
-                $width = $imagick->getImageWidth();
-                $height = $imagick->getImageHeight();
-
-                $imagick->clear();
-                $imagick->destroy();
-
-                if (!$width || !$height) {
-                    return [];
-                }
-
-                return [
-                    'width' => (int) $width,
-                    'height' => (int) $height,
+                $dimensions = [
+                    'width' => (int) $image->getImageWidth(),
+                    'height' => (int) $image->getImageHeight(),
                 ];
+
+                $image->clear();
+                $image->destroy();
+
+                return $dimensions;
             } catch (\Throwable $e) {
                 return [];
             }
         };
-        $sampleColor = static function (\Imagick $img, int $cx, int $cy, int $w, int $h) {
-            $size = 5;
-            $x0 = max(0, min($cx - intdiv($size, 2), max($w - 1, 0)));
-            $y0 = max(0, min($cy - intdiv($size, 2), max($h - 1, 0)));
-            $sw = max(1, min($size, $w - $x0));
-            $sh = max(1, min($size, $h - $y0));
 
-            $clone = clone $img;
-            $clone->cropImage($sw, $sh, $x0, $y0);
-            $clone->resizeImage(1, 1, \Imagick::FILTER_BOX, 1);
-
-            $pixel = $clone->getImagePixelColor(0, 0);
-
-            $clone->clear();
-            $clone->destroy();
-
-            return $pixel;
-        };
         $applyTransparency = static function ($file) use (
             $makeTransparent,
             $transparentColor,
             $fuzzPercent,
-            $sampleColor
+            $removeInnerBackgroundHoles,
+            $maxInnerHoleAreaPercent
         ) {
-            if (!$makeTransparent) {
-                return $file;
-            }
+            if (!$makeTransparent) return $file;
 
             if (!($file instanceof \Illuminate\Http\UploadedFile) || !$file->isValid()) {
                 return $file;
@@ -133,109 +100,140 @@ if (!function_exists('handleMediaUploads')) {
 
             $mimeType = $file->getClientMimeType();
 
-            if ($mimeType === 'image/svg+xml') {
-                return $file;
-            }
-
-            if (!in_array($mimeType, ['image/jpg', 'image/jpeg', 'image/png'], true)) {
-                return $file;
-            }
-
-            if (!class_exists(\Imagick::class)) {
+            if (
+                $mimeType === 'image/svg+xml' ||
+                !in_array($mimeType, ['image/jpg', 'image/jpeg', 'image/png'], true) ||
+                !class_exists(\Imagick::class)
+            ) {
                 return $file;
             }
 
             try {
-                $imagick = new \Imagick($file->getPathname());
-                $imagick->setImageFormat('png');
-                $imagick->setImageColorspace(\Imagick::COLORSPACE_SRGB);
-                $imagick->setImageAlphaChannel(\Imagick::ALPHACHANNEL_SET);
+                $image = new \Imagick($file->getPathname());
 
-                $width = $imagick->getImageWidth();
-                $height = $imagick->getImageHeight();
+                $image->setImageFormat('png');
+                $image->setImageColorspace(\Imagick::COLORSPACE_SRGB);
+                $image->setImageAlphaChannel(\Imagick::ALPHACHANNEL_SET);
+
+                $width = $image->getImageWidth();
+                $height = $image->getImageHeight();
 
                 $quantumRange = \Imagick::getQuantumRange()['quantumRangeLong'];
+
                 $fuzzPercent = max(0, min(100, $fuzzPercent));
                 $fuzzAbs = ($fuzzPercent / 100) * $quantumRange;
 
                 $transparent = new \ImagickPixel('transparent');
 
+                /*
+                |--------------------------------------------------------------------------
+                | Edge points
+                |--------------------------------------------------------------------------
+                */
+
                 $stepX = max(1, (int) floor($width / 50));
                 $stepY = max(1, (int) floor($height / 50));
 
-                $points = [];
+                $edgePoints = [];
 
                 for ($x = 0; $x < $width; $x += $stepX) {
-                    $points[] = [$x, 0];
-                    $points[] = [$x, $height - 1];
+                    $edgePoints[] = [$x, 0];
+                    $edgePoints[] = [$x, $height - 1];
                 }
 
                 for ($y = 0; $y < $height; $y += $stepY) {
-                    $points[] = [0, $y];
-                    $points[] = [$width - 1, $y];
+                    $edgePoints[] = [0, $y];
+                    $edgePoints[] = [$width - 1, $y];
                 }
 
-                $edgeSamples = [];
+                $edgePoints[] = [0, 0];
+                $edgePoints[] = [$width - 1, 0];
+                $edgePoints[] = [0, $height - 1];
+                $edgePoints[] = [$width - 1, $height - 1];
 
-                foreach ($points as [$x, $y]) {
-                    $pixel = $imagick->getImagePixelColor($x, $y);
+                /*
+                |--------------------------------------------------------------------------
+                | Detect representative white/off-white background
+                |--------------------------------------------------------------------------
+                */
 
-                    $edgeSamples[] = [
-                        'x' => $x,
-                        'y' => $y,
-                        'color' => clone $pixel,
+                if ($transparentColor) {
+                    $target = new \ImagickPixel($transparentColor);
+                    $backgroundRgb = $target->getColor(true);
+                } else {
+                    $samples = [];
+
+                    foreach ($edgePoints as [$x, $y]) {
+                        $color = $image->getImagePixelColor($x, $y)->getColor(true);
+
+                        $r = $color['r'] ?? 0;
+                        $g = $color['g'] ?? 0;
+                        $b = $color['b'] ?? 0;
+                        $a = $color['a'] ?? 1;
+
+                        if ($a <= 0.01) continue;
+
+                        $min = min($r, $g, $b);
+                        $max = max($r, $g, $b);
+
+                        // Only white/off-white edge pixels
+                        if ($min >= 0.72 && ($max - $min) <= 0.18) {
+                            $samples[] = [$r, $g, $b];
+                        }
+                    }
+
+                    if (!$samples) {
+                        $image->clear();
+                        $image->destroy();
+                        return $file;
+                    }
+
+                    $backgroundRgb = [
+                        'r' => array_sum(array_column($samples, 0)) / count($samples),
+                        'g' => array_sum(array_column($samples, 1)) / count($samples),
+                        'b' => array_sum(array_column($samples, 2)) / count($samples),
                     ];
                 }
 
-                foreach ($edgeSamples as $sample) {
-                    $x = $sample['x'];
-                    $y = $sample['y'];
+                $similarityTolerance = max(
+                    0.05,
+                    min(0.30, ($fuzzPercent / 100) + 0.04)
+                );
 
-                    $currentPixel = $imagick->getImagePixelColor($x, $y);
-                    $currentColor = $currentPixel->getColor(true);
+                $isBackgroundLike = static function (\ImagickPixel $pixel) use (
+                    $backgroundRgb,
+                    $similarityTolerance
+                ) {
+                    $color = $pixel->getColor(true);
 
-                    // already transparent
-                    if (($currentColor['a'] ?? 1) <= 0.01) {
-                        continue;
-                    }
+                    if (($color['a'] ?? 1) <= 0.01) return false;
 
-                    $imagick->floodFillPaintImage(
-                        $transparent,
-                        $fuzzAbs,
-                        $sample['color'],
-                        $x,
-                        $y,
-                        false
+                    $distance = max(
+                        abs(($color['r'] ?? 0) - $backgroundRgb['r']),
+                        abs(($color['g'] ?? 0) - $backgroundRgb['g']),
+                        abs(($color['b'] ?? 0) - $backgroundRgb['b'])
                     );
-                }
-                $points[] = [0, 0];
-                $points[] = [$width - 1, 0];
-                $points[] = [0, $height - 1];
-                $points[] = [$width - 1, $height - 1];
 
-                $visited = [];
+                    return $distance <= $similarityTolerance;
+                };
 
                 /*
-                 * المرحلة 1:
-                 * إزالة الخلفية البيضاء المتصلة بحواف الصورة فقط
-                 */
-                foreach ($points as [$x, $y]) {
-                    $key = "{$x}-{$y}";
+                |--------------------------------------------------------------------------
+                | Pass 1: Remove background connected to image edges
+                |--------------------------------------------------------------------------
+                */
 
-                    if (isset($visited[$key])) {
-                        continue;
-                    }
+                foreach ($edgePoints as [$x, $y]) {
+                    $seed = $image->getImagePixelColor($x, $y);
 
-                    $visited[$key] = true;
+                    if (!$isBackgroundLike($seed)) continue;
 
-                    $targetColor = $transparentColor
-                        ? new \ImagickPixel($transparentColor)
-                        : $sampleColor($imagick, $x, $y, $width, $height);
+                    $seedColor = clone $seed;
 
-                    $imagick->floodFillPaintImage(
+                    $image->floodFillPaintImage(
                         $transparent,
                         $fuzzAbs,
-                        $targetColor,
+                        $seedColor,
                         $x,
                         $y,
                         false
@@ -243,96 +241,207 @@ if (!function_exists('handleMediaUploads')) {
                 }
 
                 /*
-                 * المرحلة 2:
-                 * إزالة الفراغات البيضاء الصغيرة المغلقة داخل الحروف
-                 * بدون لمس المساحات البيضاء الكبيرة مثل جسم العربية
-                 */
-                $removeInnerWhiteHoles = true;
-                $maxHoleArea = 6000; // جربي 2000 أو 4000 أو 6000 حسب الصور
-                $holeStep = 6;
+                |--------------------------------------------------------------------------
+                | Pass 2: Remove enclosed background holes
+                |--------------------------------------------------------------------------
+                |
+                | Examples:
+                | - inside mug handle
+                | - inside O
+                | - inside D
+                | - inside A
+                |
+                | A component is removed only when:
+                | 1. it looks like the detected background
+                | 2. it does NOT touch existing transparency
+                | 3. it isn't too large
+                |
+                */
 
-                if ($removeInnerWhiteHoles) {
-                    for ($y = 1; $y < $height - 1; $y += $holeStep) {
-                        for ($x = 1; $x < $width - 1; $x += $holeStep) {
-                            $pixel = $imagick->getImagePixelColor($x, $y);
-                            $color = $pixel->getColor(true);
+                if ($removeInnerBackgroundHoles) {
+                    $work = clone $image;
 
-                            $alpha = $color['a'] ?? 1;
-                            $r = ($color['r'] ?? 0) * 255;
-                            $g = ($color['g'] ?? 0) * 255;
-                            $b = ($color['b'] ?? 0) * 255;
+                    $scanStep = 2;
+                    $marker = new \ImagickPixel('#FF00FF');
+                    $processed = new \ImagickPixel('#000000');
 
-                            // لو البيكسل already transparent نتخطاه
-                            if ($alpha <= 0.01) {
+                    $maxPixels = (int) (
+                        ($width * $height) *
+                        (max(0, $maxInnerHoleAreaPercent) / 100)
+                    );
+
+                    $isMarker = static function (\ImagickPixel $pixel) {
+                        $color = $pixel->getColor(true);
+
+                        return
+                            ($color['r'] ?? 0) >= 0.98 &&
+                            ($color['g'] ?? 0) <= 0.02 &&
+                            ($color['b'] ?? 0) >= 0.98;
+                    };
+
+                    for ($y = 1; $y < $height - 1; $y += $scanStep) {
+                        for ($x = 1; $x < $width - 1; $x += $scanStep) {
+                            $workPixel = $work->getImagePixelColor($x, $y);
+
+                            if (!$isBackgroundLike($workPixel)) continue;
+
+                            $originalPixel = $image->getImagePixelColor($x, $y);
+                            $originalColor = $originalPixel->getColor(true);
+
+                            if (($originalColor['a'] ?? 1) <= 0.01) {
                                 continue;
                             }
 
-                            // نعتبره أبيض/شبه أبيض
-                            $isNearWhite = $r >= 245 && $g >= 245 && $b >= 245;
+                            $seedColor = clone $workPixel;
 
-                            if (!$isNearWhite) {
-                                continue;
-                            }
-
-                            // فحص تقريبي للمساحة قبل الإزالة
-                            $probe = clone $imagick;
-                            $probe->floodFillPaintImage(
-                                new \ImagickPixel('red'),
+                            /*
+                             * Mark this connected component only.
+                             */
+                            $work->floodFillPaintImage(
+                                $marker,
                                 $fuzzAbs,
-                                new \ImagickPixel('#FFFFFF'),
+                                $seedColor,
                                 $x,
                                 $y,
                                 false
                             );
 
-                            $componentMask = clone $probe;
-                            $componentMask->transparentPaintImage(
-                                new \ImagickPixel('red'),
+                            /*
+                             * Isolate current marker component and get bbox.
+                             */
+                            $component = clone $work;
+
+                            $component->transparentPaintImage(
+                                $marker,
                                 0,
                                 0,
-                                false
+                                true
                             );
 
-                            $bbox = $componentMask->getImagePage();
-                            $area = ($bbox['width'] ?? 0) * ($bbox['height'] ?? 0);
+                            $component->trimImage(0);
 
-                            $probe->clear();
-                            $probe->destroy();
-                            $componentMask->clear();
-                            $componentMask->destroy();
+                            $page = $component->getImagePage();
+
+                            $boxX = max(0, (int) ($page['x'] ?? 0));
+                            $boxY = max(0, (int) ($page['y'] ?? 0));
+                            $boxWidth = (int) $component->getImageWidth();
+                            $boxHeight = (int) $component->getImageHeight();
+
+                            $boxWidth = min($boxWidth, $width - $boxX);
+                            $boxHeight = min($boxHeight, $height - $boxY);
+
+                            $component->clear();
+                            $component->destroy();
+
+                            $touchesTransparency = false;
+                            $componentPixels = 0;
 
                             /*
-                             * لو المساحة صغيرة نعتبرها hole داخل حرف/لوجو
-                             * ونحولها transparent
+                             * Check whether component touches already transparent
+                             * outer background.
                              */
-                            if ($area > 0 && $area <= $maxHoleArea) {
-                                $imagick->floodFillPaintImage(
+                            for ($cy = $boxY; $cy < $boxY + $boxHeight; $cy++) {
+                                for ($cx = $boxX; $cx < $boxX + $boxWidth; $cx++) {
+                                    $pixel = $work->getImagePixelColor($cx, $cy);
+
+                                    if (!$isMarker($pixel)) continue;
+
+                                    $componentPixels++;
+
+                                    foreach ([
+                                                 [-1, -1], [0, -1], [1, -1],
+                                                 [-1, 0],           [1, 0],
+                                                 [-1, 1],  [0, 1],  [1, 1],
+                                             ] as [$dx, $dy]) {
+                                        $nx = $cx + $dx;
+                                        $ny = $cy + $dy;
+
+                                        if (
+                                            $nx < 0 ||
+                                            $ny < 0 ||
+                                            $nx >= $width ||
+                                            $ny >= $height
+                                        ) {
+                                            $touchesTransparency = true;
+                                            break 3;
+                                        }
+
+                                        $neighbor = $image
+                                            ->getImagePixelColor($nx, $ny)
+                                            ->getColor(true);
+
+                                        if (($neighbor['a'] ?? 1) <= 0.01) {
+                                            $touchesTransparency = true;
+                                            break 3;
+                                        }
+                                    }
+                                }
+                            }
+
+                            /*
+                             * Remove only enclosed, reasonably-sized
+                             * background components.
+                             */
+                            if (
+                                !$touchesTransparency &&
+                                $componentPixels > 0 &&
+                                $componentPixels <= $maxPixels
+                            ) {
+                                $image->floodFillPaintImage(
                                     $transparent,
                                     $fuzzAbs,
-                                    new \ImagickPixel('#FFFFFF'),
+                                    $image->getImagePixelColor($x, $y),
                                     $x,
                                     $y,
                                     false
                                 );
                             }
+
+                            /*
+                             * Mark as processed so we don't scan the
+                             * same component again.
+                             */
+                            $work->floodFillPaintImage(
+                                $processed,
+                                0,
+                                $marker,
+                                $x,
+                                $y,
+                                false
+                            );
                         }
                     }
+
+                    $work->clear();
+                    $work->destroy();
                 }
 
-                $imagick->setImageFormat('png');
+                /*
+                |--------------------------------------------------------------------------
+                | Save PNG
+                |--------------------------------------------------------------------------
+                */
 
-                $originalBase = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-                $originalBase = $originalBase ?: (string) \Illuminate\Support\Str::uuid();
+                $image->setImageFormat('png');
 
-                $tempPath = storage_path('app/tmp-transparent/' . \Illuminate\Support\Str::uuid() . '.png');
+                $originalBase = pathinfo(
+                    $file->getClientOriginalName(),
+                    PATHINFO_FILENAME
+                );
+
+                $originalBase = $originalBase ?: (string) Str::uuid();
+
+                $tempPath = storage_path(
+                    'app/tmp-transparent/' . Str::uuid() . '.png'
+                );
 
                 if (!is_dir(dirname($tempPath))) {
                     mkdir(dirname($tempPath), 0755, true);
                 }
 
-                $imagick->writeImage($tempPath);
-                $imagick->clear();
-                $imagick->destroy();
+                $image->writeImage($tempPath);
+                $image->clear();
+                $image->destroy();
 
                 return new \Illuminate\Http\UploadedFile(
                     $tempPath,
@@ -346,6 +455,7 @@ if (!function_exists('handleMediaUploads')) {
                 return $file;
             }
         };
+
         $uploaded = collect($files)->map(function ($file) use (
             $modelData,
             $collectionName,
@@ -356,57 +466,66 @@ if (!function_exists('handleMediaUploads')) {
         ) {
             $file = $applyTransparency($file);
 
-            [$humanName, $safeFileName, $ext] = $makeNames($file->getClientOriginalName());
-
-            $imageDimensions = $getImageDimensions($file);
+            [$humanName, $safeFileName] = $makeNames(
+                $file->getClientOriginalName()
+            );
 
             $finalCustomProperties = array_merge(
                 $customProperties,
-                $imageDimensions
+                $getImageDimensions($file)
             );
 
             if ($modelData) {
-                $mediaAdder = $modelData->addMedia($file)
+                $mediaAdder = $modelData
+                    ->addMedia($file)
                     ->usingName($humanName)
                     ->usingFileName($safeFileName);
 
-                if (!empty($finalCustomProperties)) {
-                    $mediaAdder->withCustomProperties($finalCustomProperties);
+                if ($finalCustomProperties) {
+                    $mediaAdder->withCustomProperties(
+                        $finalCustomProperties
+                    );
                 }
 
-                return $mediaAdder->toMediaCollection($collectionName);
-            } else {
-                if (!($file instanceof \Illuminate\Http\UploadedFile) || !$file->isValid()) {
-                    throw new \Exception("Invalid file upload");
-                }
-
-                $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::create([
-                    'collection_name'       => $collectionName,
-                    'name'                  => $humanName,
-                    'file_name'             => $safeFileName,
-                    'mime_type'             => $file->getClientMimeType(),
-                    'disk'                  => 'public',
-                    'conversions_disk'      => 'public',
-                    'size'                  => $file->getSize(),
-                    'custom_properties'     => $finalCustomProperties,
-                    'manipulations'         => [],
-                    'responsive_images'     => [],
-                    'generated_conversions' => [],
-                ]);
-
-                $directory = (string) $media->id;
-
-                $path = $file->storeAs($directory, $safeFileName, 'public');
-
-                $media->update([
-                    'file_name' => basename($path),
-                ]);
-
-                return $media;
+                return $mediaAdder->toMediaCollection(
+                    $collectionName
+                );
             }
+
+            if (!($file instanceof \Illuminate\Http\UploadedFile) || !$file->isValid()) {
+                throw new \Exception('Invalid file upload');
+            }
+
+            $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::create([
+                'collection_name' => $collectionName,
+                'name' => $humanName,
+                'file_name' => $safeFileName,
+                'mime_type' => $file->getClientMimeType(),
+                'disk' => 'public',
+                'conversions_disk' => 'public',
+                'size' => $file->getSize(),
+                'custom_properties' => $finalCustomProperties,
+                'manipulations' => [],
+                'responsive_images' => [],
+                'generated_conversions' => [],
+            ]);
+
+            $path = $file->storeAs(
+                (string) $media->id,
+                $safeFileName,
+                'public'
+            );
+
+            $media->update([
+                'file_name' => basename($path),
+            ]);
+
+            return $media;
         });
 
-        return count($uploaded) === 1 ? $uploaded->first() : $uploaded;
+        return count($uploaded) === 1
+            ? $uploaded->first()
+            : $uploaded;
     }
 }
 
