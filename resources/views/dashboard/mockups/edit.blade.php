@@ -393,6 +393,226 @@
             transition: transform 180ms var(--anim-ease), box-shadow 180ms var(--anim-ease);
         }
     </style>
+    <style>
+
+        #generationProgressModal .modal-dialog {
+            max-width: 440px;
+            padding: 18px;
+        }
+
+        #generationProgressModal .modal-content {
+            border: 0;
+            border-radius: 28px !important;
+            overflow: hidden;
+            box-shadow: 0 22px 70px rgba(15, 23, 42, .22) !important;
+        }
+
+        .generation-progress-card {
+            position: relative;
+            padding: 24px 24px 20px;
+            text-align: center;
+            background: #fff;
+        }
+
+        .generation-minimize-btn {
+            position: absolute;
+            top: 17px;
+            right: 17px;
+            width: 36px;
+            height: 36px;
+            border: 0;
+            border-radius: 50%;
+            background: #f7f8fa;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .generation-spinner-shell {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 18px;
+            border-radius: 50%;
+            background: #e9f9f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .generation-spinner-ring {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(36, 176, 148, .25);
+            border-top-color: #24b094;
+            border-radius: 50%;
+            animation: generationSpin .8s linear infinite;
+        }
+
+        @keyframes generationSpin {
+            to { transform: rotate(360deg); }
+        }
+
+        .generation-title {
+            margin: 0;
+            color: #172033;
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .generation-copy {
+            max-width: 330px;
+            margin: 10px auto 24px;
+            color: #7b8497;
+            font-size: 13px;
+            line-height: 1.65;
+        }
+
+        .generation-progress-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #596273;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .generation-progress-track {
+            height: 10px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #f1f3f6;
+        }
+
+        #generationProgressBar {
+            height: 100%;
+            width: 0;
+            border-radius: inherit;
+            background: #24b094;
+            transition: width .35s ease;
+        }
+
+        .generation-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .generation-stat {
+            border-radius: 16px;
+            padding: 15px 8px 12px;
+            background: #f8f9fb;
+        }
+
+        .generation-stat.done { background: #eafaf4; }
+        .generation-stat.failed { background: #fff0f0; }
+
+        .generation-stat-value {
+            display: block;
+            color: #172033;
+            font-size: 19px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .generation-stat.done .generation-stat-value { color: #0c9d79; }
+        .generation-stat.failed .generation-stat-value { color: #ef4444; }
+
+        .generation-stat-label {
+            display: block;
+            margin-top: 7px;
+            color: #a0a8b7;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .generation-remaining {
+            min-height: 18px;
+            margin: 14px 0 4px;
+            color: #8b94a5;
+            font-size: 11px;
+        }
+
+        .generation-action-btn {
+            width: 100%;
+            min-height: 44px;
+            border: 0;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .generation-background-btn {
+            margin-top: 16px;
+            background: #24b094;
+            color: #fff;
+        }
+
+        .generation-background-btn:hover {
+            background: #1d9f86;
+            color: #fff;
+        }
+
+        .generation-cancel-btn {
+            margin-top: 10px;
+            border: 1px solid #ffcaca;
+            background: #fff4f4;
+            color: #ef4444;
+        }
+
+        .generation-cancel-btn:hover {
+            background: #ffeaea;
+            color: #dc2626;
+        }
+
+        .generation-close-btn {
+            margin-top: 16px;
+            background: #172033;
+            color: #fff;
+        }
+
+        .generation-hint {
+            margin: 12px 0 0;
+            color: #a4acba;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        #generationProgressError {
+            margin-top: 14px;
+            border: 0;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+
+        #generationFloatingStatus {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 1055;
+            border: 0;
+            border-radius: 999px;
+            padding: 11px 16px;
+            background: #172033;
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, .2);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        #generationFloatingStatus .floating-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 7px;
+            border-radius: 50%;
+            background: #24b094;
+        }
+    </style>
 @endsection
 
 @section('page-style')
@@ -713,31 +933,47 @@
 
     <div class="modal fade" id="generationProgressModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-3 shadow">
-                <div class="modal-header">
-                    <h5 class="modal-title">Generating Mockups</h5>
-                </div>
-                <div class="modal-body">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span id="generationProgressStatus">Preparing...</span>
+            <div class="modal-content">
+                <div class="generation-progress-card">
+                    <button type="button" class="generation-minimize-btn" id="generationMinimizeButton" aria-label="Continue in background">↙</button>
+                    <div class="generation-spinner-shell" id="generationSpinnerShell">
+                        <div class="generation-spinner-ring"></div>
+                    </div>
+                    <h3 class="generation-title">Generating mockups</h3>
+                    <p class="generation-copy">You can safely minimize this window. Generation will continue in the background and you can reopen the progress from the bottom-right status button.</p>
+                    <span id="generationProgressStatus" class="d-none">Preparing...</span>
+                    <div class="generation-progress-meta">
+                        <span id="generationProgressCount">0 / 0 processed</span>
                         <strong id="generationProgressPercent">0%</strong>
                     </div>
-                    <div class="progress" style="height:12px;">
-                        <div id="generationProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width:0%" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                    <div class="generation-progress-track">
+                        <div id="generationProgressBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
                     </div>
-                    <div class="d-flex justify-content-between mt-1 small text-muted">
-                        <span id="generationProgressCount">0 / 0</span>
-                        <span id="generationProgressRemaining">Calculating...</span>
+                    <div class="generation-stats">
+                        <div class="generation-stat">
+                            <span class="generation-stat-value" id="generationTotalCount">0</span>
+                            <span class="generation-stat-label">Total</span>
+                        </div>
+                        <div class="generation-stat done">
+                            <span class="generation-stat-value" id="generationDoneCount">0</span>
+                            <span class="generation-stat-label">Done</span>
+                        </div>
+                        <div class="generation-stat failed">
+                            <span class="generation-stat-value" id="generationFailedCount">0</span>
+                            <span class="generation-stat-label">Failed</span>
+                        </div>
                     </div>
-                    <div id="generationProgressError" class="alert alert-danger d-none mt-2 mb-0"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary d-none" id="generationProgressClose" data-bs-dismiss="modal">Close</button>
+                    <div class="generation-remaining" id="generationProgressRemaining">Calculating...</div>
+                    <div id="generationProgressError" class="alert alert-danger d-none mb-0"></div>
+                    <button type="button" class="generation-action-btn generation-background-btn" id="generationContinueBackground">↙ &nbsp; Continue in background</button>
+                    <button type="button" class="generation-action-btn generation-cancel-btn" id="generationCancelButton">⊗ &nbsp; Cancel generation</button>
+                    <button type="button" class="generation-action-btn generation-close-btn d-none" id="generationProgressClose" data-bs-dismiss="modal">Close</button>
+                    <p class="generation-hint">Closing this window will not stop the generation.</p>
                 </div>
             </div>
         </div>
     </div>
-
+    <button type="button" id="generationFloatingStatus" class="d-none"><span class="floating-dot"></span><span id="generationFloatingText">Generating mockups</span> · <span id="generationFloatingPercent">0%</span></button>
     <!-- Remove Color Modal -->
     <div class="modal fade" id="removeColorModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -3116,7 +3352,11 @@
 
         let generationPollTimer = null;
         let generationReloadOnClose = false;
+        let generationCurrentJobId = null;
+        let generationBackgroundMode = false;
+        let generationTerminal = false;
         const bulkJobStatusUrlTemplate = @json(route('bulk-jobs.status', ['__JOB_ID__']));
+        const bulkJobCancelUrlTemplate = @json(\Illuminate\Support\Facades\Route::has('bulk-jobs.cancel') ? route('bulk-jobs.cancel', ['__JOB_ID__']) : null);
 
         function extractBulkJobId(response) {
             return response?.data?.data?.bulk_job_id ?? response?.data?.bulk_job_id ?? response?.bulk_job_id ?? response?.data?.data?.id ?? response?.data?.id ?? null;
@@ -3132,19 +3372,31 @@
         }
 
         function resetGenerationProgressModal() {
+            generationTerminal = false;
             $('#generationProgressStatus').text('Preparing...');
             $('#generationProgressPercent').text('0%');
-            $('#generationProgressBar').css('width', '0%').attr('aria-valuenow', 0).addClass('progress-bar-animated');
-            $('#generationProgressCount').text('0 / 0');
+            $('#generationProgressBar').css('width', '0%').attr('aria-valuenow', 0);
+            $('#generationProgressCount').text('0 / 0 processed');
+            $('#generationTotalCount').text('0');
+            $('#generationDoneCount').text('0');
+            $('#generationFailedCount').text('0');
             $('#generationProgressRemaining').text('Calculating...');
             $('#generationProgressError').addClass('d-none').text('');
             $('#generationProgressClose').addClass('d-none');
+            $('#generationContinueBackground, #generationMinimizeButton').removeClass('d-none');
+            $('#generationCancelButton').toggleClass('d-none', !bulkJobCancelUrlTemplate).prop('disabled', false).html('⊗ &nbsp; Cancel generation');
+            $('#generationSpinnerShell').removeClass('d-none');
+            $('#generationFloatingStatus').addClass('d-none');
+            $('#generationFloatingText').text('Generating mockups');
+            $('#generationFloatingPercent').text('0%');
         }
 
         function startGenerationProgress(jobId, reloadOnClose = false) {
             if (!jobId) return false;
             clearTimeout(generationPollTimer);
+            generationCurrentJobId = jobId;
             generationReloadOnClose = reloadOnClose;
+            generationBackgroundMode = false;
             resetGenerationProgressModal();
             $('#generationProgressModal').modal('show');
             const statusUrl = bulkJobStatusUrlTemplate.replace('__JOB_ID__', jobId);
@@ -3165,13 +3417,20 @@
 
                         $('#generationProgressPercent').text(`${percent.toFixed(1)}%`);
                         $('#generationProgressBar').css('width', `${percent}%`).attr('aria-valuenow', percent);
-                        $('#generationProgressCount').text(`${completed} / ${total}${failed ? ` • ${failed} failed` : ''}`);
+                        $('#generationProgressCount').text(`${completed} / ${total} processed`);
+                        $('#generationTotalCount').text(total);
+                        $('#generationDoneCount').text(completed);
+                        $('#generationFailedCount').text(failed);
                         $('#generationProgressRemaining').text(terminal ? 'Finished' : formatRemainingSeconds(job.estimated_remaining_seconds));
                         $('#generationProgressStatus').text(status.replaceAll('_', ' '));
+                        $('#generationFloatingPercent').text(`${Math.round(percent)}%`);
 
                         if (terminal) {
-                            $('#generationProgressBar').removeClass('progress-bar-animated');
+                            generationTerminal = true;
+                            $('#generationSpinnerShell').addClass('d-none');
+                            $('#generationContinueBackground, #generationMinimizeButton, #generationCancelButton').addClass('d-none');
                             $('#generationProgressClose').removeClass('d-none');
+                            $('#generationFloatingText').text(status === 'completed' ? 'Generation complete' : status.replaceAll('_', ' '));
                             if (status === 'failed' || status === 'cancelled') {
                                 $('#generationProgressError').removeClass('d-none').text(status === 'failed' ? 'Mockup generation failed.' : 'Mockup generation was cancelled.');
                             } else if (status === 'completed_with_errors') {
@@ -3194,8 +3453,43 @@
             return true;
         }
 
+        $(document).on('click', '#generationContinueBackground, #generationMinimizeButton', function () {
+            if (!generationCurrentJobId || generationTerminal) return;
+            generationBackgroundMode = true;
+            $('#generationFloatingStatus').removeClass('d-none');
+            $('#generationProgressModal').modal('hide');
+        });
+
+        $(document).on('click', '#generationFloatingStatus', function () {
+            generationBackgroundMode = false;
+            $(this).addClass('d-none');
+            $('#generationProgressModal').modal('show');
+        });
+
+        $(document).on('click', '#generationCancelButton', function () {
+            if (!bulkJobCancelUrlTemplate || !generationCurrentJobId || generationTerminal) return;
+            const $button = $(this);
+            $button.prop('disabled', true).text('Cancelling...');
+            $.ajax({
+                url: bulkJobCancelUrlTemplate.replace('__JOB_ID__', generationCurrentJobId),
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Accept': 'application/json'
+                },
+                error: function (xhr) {
+                    $button.prop('disabled', false).html('⊗ &nbsp; Cancel generation');
+                    $('#generationProgressError').removeClass('d-none').text(xhr.responseJSON?.message || 'Failed to cancel generation.');
+                }
+            });
+        });
+
         $(document).on('hidden.bs.modal', '#generationProgressModal', function () {
+            if (generationBackgroundMode) return;
+            if (!generationTerminal) return;
             clearTimeout(generationPollTimer);
+            generationCurrentJobId = null;
+            $('#generationFloatingStatus').addClass('d-none');
             if (generationReloadOnClose) location.reload();
         });
 
@@ -3387,3 +3681,4 @@
     </script>
 
 @endsection
+
