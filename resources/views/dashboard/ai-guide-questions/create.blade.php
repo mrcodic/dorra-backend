@@ -23,25 +23,3 @@
     </div>
 @endsection
 
-@section('page-script')
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script>
-        $(document).ready(function () {
-            feather.replace();
-
-            $('#question-form').on('submit', function (e) {
-                e.preventDefault();
-
-                $.ajax({
-                    url: this.action,
-                    method: 'POST',
-                    data: $(this).serialize(),
-                    success: () => window.location.href = '{{ route('ai-guide-questions.index') }}',
-                    error: function (xhr) {
-                        console.error(xhr.responseJSON);
-                    }
-                });
-            });
-        });
-    </script>
-@endsection
