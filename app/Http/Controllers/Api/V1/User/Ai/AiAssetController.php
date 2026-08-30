@@ -37,7 +37,6 @@ class AiAssetController extends Controller
             $request->user(),
             'ai_assets',
             makeTransparent: true,
-            transparentColor: null,
             fuzzPercent: 4,
         );
         return Response::api(data: MediaResource::make($media)->response()->getData(true));
