@@ -221,18 +221,22 @@
         }
 
         function showErrors(xhr) {
-            const response = xhr.responseJSON;
+            const response = xhr.responseJSON ?? {};
 
-            if (response?.errors) {
-                Object.values(response.errors).flat().forEach(message => {
-                    showToast(message);
+            if (xhr.status === 422 && response.errors) {
+                Object.entries(response.errors).forEach(([field, messages]) => {
+                    const errors = Array.isArray(messages) ? messages : [messages];
+
+                    errors.forEach(message => {
+                        showToast(message, 'error');
+                    });
                 });
+
                 return;
             }
 
-            showToast(response?.message || 'Something went wrong. Please try again.');
+            showToast(response.message ?? 'Something went wrong. Please try again.', 'error');
         }
-
         form.on('submit', function (e) {
             e.preventDefault();
 
