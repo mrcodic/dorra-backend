@@ -26,11 +26,11 @@ if (!function_exists('handleMediaUploads')) {
         $columns = null,
         bool $makeTransparent = false,
         ?string $transparentColor = '#FFFFFF',
-        float $fuzzPercent = 10,
-        bool $removeInnerBackgroundHoles = true,
-        float $maxInnerHoleAreaPercent = 3
+        float $fuzzPercent = 10
     ) {
-        if (empty($files)) return null;
+        if (empty($files)) {
+            return null;
+        }
 
         $collectionName = $collectionName
             ? getMediaCollectionName($collectionName)
@@ -44,62 +44,95 @@ if (!function_exists('handleMediaUploads')) {
 
         $makeNames = static function ($originalName) {
             $base = pathinfo($originalName, PATHINFO_FILENAME);
-            $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+            $ext  = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+
             $slug = Str::slug($base);
 
-            if (!$slug) $slug = (string) Str::uuid();
+            if ($slug === '' || $slug === null) {
+                $slug = (string) Str::uuid();
+            }
 
-            return [
-                $base ?: $slug,
-                $slug . ($ext ? ".{$ext}" : ''),
-                $ext
-            ];
+            $safeFileName = $slug . ($ext ? ".{$ext}" : '');
+            $humanName = $base ?: $slug;
+
+            return [$humanName, $safeFileName, $ext];
         };
 
         $getImageDimensions = static function ($file) {
             try {
-                if (!($file instanceof \Illuminate\Http\UploadedFile) || !$file->isValid()) {
+                if (!($file instanceof \Illuminate\Http\UploadedFile)) {
                     return [];
                 }
 
-                if (!str_starts_with((string) $file->getClientMimeType(), 'image/')) {
+                if (!$file->isValid()) {
                     return [];
                 }
 
-                if (!class_exists(\Imagick::class)) return [];
+                $mimeType = $file->getClientMimeType();
 
-                $image = new \Imagick();
-                $image->pingImage($file->getPathname());
+                if (!str_starts_with((string) $mimeType, 'image/')) {
+                    return [];
+                }
 
-                $dimensions = [
-                    'width' => (int) $image->getImageWidth(),
-                    'height' => (int) $image->getImageHeight(),
+                if (!class_exists(\Imagick::class)) {
+                    return [];
+                }
+
+                $imagick = new \Imagick();
+                $imagick->pingImage($file->getPathname());
+
+                $width = $imagick->getImageWidth();
+                $height = $imagick->getImageHeight();
+
+                $imagick->clear();
+                $imagick->destroy();
+
+                if (!$width || !$height) {
+                    return [];
+                }
+
+                return [
+                    'width' => (int) $width,
+                    'height' => (int) $height,
                 ];
-
-                $image->clear();
-                $image->destroy();
-
-                return $dimensions;
             } catch (\Throwable $e) {
                 return [];
             }
         };
+        $sampleColor = static function (\Imagick $img, int $cx, int $cy, int $w, int $h) {
+            $size = 5;
+            $x0 = max(0, min($cx - intdiv($size, 2), max($w - 1, 0)));
+            $y0 = max(0, min($cy - intdiv($size, 2), max($h - 1, 0)));
+            $sw = max(1, min($size, $w - $x0));
+            $sh = max(1, min($size, $h - $y0));
 
-        $applyTransparency = static function ($file) use (
-            $makeTransparent,
-            $transparentColor,
-            $fuzzPercent
-        ) {
-            if (!$makeTransparent) return $file;
+            $clone = clone $img;
+            $clone->cropImage($sw, $sh, $x0, $y0);
+            $clone->resizeImage(1, 1, \Imagick::FILTER_BOX, 1);
+
+            $pixel = $clone->getImagePixelColor(0, 0);
+
+            $clone->clear();
+            $clone->destroy();
+
+            return $pixel;
+        };
+        $applyTransparency = static function ($file) use ($makeTransparent, $transparentColor, $fuzzPercent, $sampleColor) {
+            if (!$makeTransparent) {
+                return $file;
+            }
 
             if (!($file instanceof \Illuminate\Http\UploadedFile) || !$file->isValid()) {
                 return $file;
             }
 
-            // Important: use detected mime, not client mime
-            $mimeType = $file->getMimeType();
+            $mimeType = $file->getClientMimeType();
 
-            if (!in_array($mimeType, ['image/jpeg', 'image/png'], true)) {
+            if ($mimeType === 'image/svg+xml') {
+                return $file;
+            }
+
+            if (!in_array($mimeType, ['image/jpg', 'image/jpeg', 'image/png'], true)) {
                 return $file;
             }
 
@@ -108,113 +141,76 @@ if (!function_exists('handleMediaUploads')) {
             }
 
             try {
-                $image = new \Imagick($file->getPathname());
+                $imagick = new \Imagick($file->getPathname());
+                $imagick->setImageFormat('png');
+                $imagick->setImageColorspace(\Imagick::COLORSPACE_SRGB);
+                $imagick->setImageAlphaChannel(\Imagick::ALPHACHANNEL_SET);
 
-                $image->setImageFormat('png');
-                $image->setImageColorspace(\Imagick::COLORSPACE_SRGB);
-                $image->setImageAlphaChannel(\Imagick::ALPHACHANNEL_SET);
-
-                $width = $image->getImageWidth();
-                $height = $image->getImageHeight();
+                $width = $imagick->getImageWidth();
+                $height = $imagick->getImageHeight();
 
                 $quantumRange = \Imagick::getQuantumRange()['quantumRangeLong'];
                 $fuzzPercent = max(0, min(100, $fuzzPercent));
                 $fuzzAbs = ($fuzzPercent / 100) * $quantumRange;
 
-                /*
-                 * Detect white / off-white background.
-                 */
-                if ($transparentColor) {
-                    $background = new \ImagickPixel($transparentColor);
-                } else {
-                    $samples = [];
-
-                    $samplePoints = [
-                        [2, 2],
-                        [$width - 3, 2],
-                        [2, $height - 3],
-                        [$width - 3, $height - 3],
-                        [(int) ($width / 2), 2],
-                        [(int) ($width / 2), $height - 3],
-                        [2, (int) ($height / 2)],
-                        [$width - 3, (int) ($height / 2)],
-                    ];
-
-                    foreach ($samplePoints as [$x, $y]) {
-                        $color = $image->getImagePixelColor($x, $y)->getColor();
-
-                        // take only bright background-looking samples
-                        if (
-                            $color['r'] >= 190 &&
-                            $color['g'] >= 190 &&
-                            $color['b'] >= 190
-                        ) {
-                            $samples[] = $color;
-                        }
-                    }
-
-                    if (!$samples) {
-                        $image->clear();
-                        $image->destroy();
-                        return $file;
-                    }
-
-                    $r = (int) round(array_sum(array_column($samples, 'r')) / count($samples));
-                    $g = (int) round(array_sum(array_column($samples, 'g')) / count($samples));
-                    $b = (int) round(array_sum(array_column($samples, 'b')) / count($samples));
-
-                    $background = new \ImagickPixel("rgb({$r},{$g},{$b})");
-                }
-
                 $transparent = new \ImagickPixel('transparent');
 
-                /*
-                 * Add temporary border.
-                 *
-                 * This guarantees that point 0,0 is definitely background.
-                 */
-                $image->borderImage($background, 2, 2);
 
-                /*
-                 * Remove ONLY the background connected to the outer border.
-                 *
-                 * White parts inside the product are NOT globally removed.
-                 */
-                $image->floodFillPaintImage(
-                    $transparent,
-                    $fuzzAbs,
-                    $background,
-                    0,
-                    0,
-                    false
-                );
+                $corners = [
+                    [0, 0],
+                    [$width - 1, 0],
+                    [0, $height - 1],
+                    [$width - 1, $height - 1],
+                ];
+                $targetColors = [];
 
-                /*
-                 * Remove temporary border.
-                 */
-                $image->shaveImage(2, 2);
-
-                $image->setImagePage(0, 0, 0, 0);
-                $image->setImageFormat('png');
-
-                $originalBase = pathinfo(
-                    $file->getClientOriginalName(),
-                    PATHINFO_FILENAME
-                );
-
-                $originalBase = $originalBase ?: (string) Str::uuid();
-
-                $tempDir = storage_path('app/tmp-transparent');
-
-                if (!is_dir($tempDir)) {
-                    mkdir($tempDir, 0755, true);
+                foreach ($corners as $i => [$x, $y]) {
+                    $targetColors[$i] = $transparentColor
+                        ? new \ImagickPixel($transparentColor)
+                        : $sampleColor($imagick, $x, $y, $width, $height);
                 }
 
-                $tempPath = $tempDir . '/' . Str::uuid() . '.png';
+                foreach ($corners as $i => [$x, $y]) {
+                    $imagick->floodFillPaintImage(
+                        $transparent,
+                        $fuzzAbs,
+                        $targetColors[$i],
+                        $x,
+                        $y,
+                        false
+                    );
+                }
 
-                $image->writeImage($tempPath);
-                $image->clear();
-                $image->destroy();
+
+                $uniqueTargets = [];
+
+                foreach ($targetColors as $color) {
+                    $uniqueTargets[$color->getColorAsString()] = $color;
+                }
+
+                foreach ($uniqueTargets as $color) {
+                    $imagick->transparentPaintImage(
+                        $color,
+                        0,
+                        $fuzzAbs,
+                        false
+                    );
+                }
+                $imagick->setImageFormat('png');
+
+                $originalBase = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $originalBase = $originalBase ?: (string) Str::uuid();
+
+                $tempPath = storage_path('app/tmp-transparent/' . Str::uuid() . '.png');
+
+                if (!is_dir(dirname($tempPath))) {
+                    mkdir(dirname($tempPath), 0755, true);
+                }
+
+                $imagick->writeImage($tempPath);
+
+                $imagick->clear();
+                $imagick->destroy();
 
                 return new \Illuminate\Http\UploadedFile(
                     $tempPath,
@@ -239,66 +235,57 @@ if (!function_exists('handleMediaUploads')) {
         ) {
             $file = $applyTransparency($file);
 
-            [$humanName, $safeFileName] = $makeNames(
-                $file->getClientOriginalName()
-            );
+            [$humanName, $safeFileName, $ext] = $makeNames($file->getClientOriginalName());
+
+            $imageDimensions = $getImageDimensions($file);
 
             $finalCustomProperties = array_merge(
                 $customProperties,
-                $getImageDimensions($file)
+                $imageDimensions
             );
 
             if ($modelData) {
-                $mediaAdder = $modelData
-                    ->addMedia($file)
+                $mediaAdder = $modelData->addMedia($file)
                     ->usingName($humanName)
                     ->usingFileName($safeFileName);
 
-                if ($finalCustomProperties) {
-                    $mediaAdder->withCustomProperties(
-                        $finalCustomProperties
-                    );
+                if (!empty($finalCustomProperties)) {
+                    $mediaAdder->withCustomProperties($finalCustomProperties);
                 }
 
-                return $mediaAdder->toMediaCollection(
-                    $collectionName
-                );
+                return $mediaAdder->toMediaCollection($collectionName);
+            } else {
+                if (!($file instanceof \Illuminate\Http\UploadedFile) || !$file->isValid()) {
+                    throw new \Exception("Invalid file upload");
+                }
+
+                $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::create([
+                    'collection_name'       => $collectionName,
+                    'name'                  => $humanName,
+                    'file_name'             => $safeFileName,
+                    'mime_type'             => $file->getClientMimeType(),
+                    'disk'                  => 'public',
+                    'conversions_disk'      => 'public',
+                    'size'                  => $file->getSize(),
+                    'custom_properties'     => $finalCustomProperties,
+                    'manipulations'         => [],
+                    'responsive_images'     => [],
+                    'generated_conversions' => [],
+                ]);
+
+                $directory = (string) $media->id;
+
+                $path = $file->storeAs($directory, $safeFileName, 'public');
+
+                $media->update([
+                    'file_name' => basename($path),
+                ]);
+
+                return $media;
             }
-
-            if (!($file instanceof \Illuminate\Http\UploadedFile) || !$file->isValid()) {
-                throw new \Exception('Invalid file upload');
-            }
-
-            $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::create([
-                'collection_name' => $collectionName,
-                'name' => $humanName,
-                'file_name' => $safeFileName,
-                'mime_type' => $file->getClientMimeType(),
-                'disk' => 'public',
-                'conversions_disk' => 'public',
-                'size' => $file->getSize(),
-                'custom_properties' => $finalCustomProperties,
-                'manipulations' => [],
-                'responsive_images' => [],
-                'generated_conversions' => [],
-            ]);
-
-            $path = $file->storeAs(
-                (string) $media->id,
-                $safeFileName,
-                'public'
-            );
-
-            $media->update([
-                'file_name' => basename($path),
-            ]);
-
-            return $media;
         });
 
-        return count($uploaded) === 1
-            ? $uploaded->first()
-            : $uploaded;
+        return count($uploaded) === 1 ? $uploaded->first() : $uploaded;
     }
 }
 
