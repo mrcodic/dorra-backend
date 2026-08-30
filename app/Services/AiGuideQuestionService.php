@@ -26,33 +26,40 @@ class AiGuideQuestionService extends BaseService
             ->withCount('options')
             ->when(request()->filled('search_value'), function ($query) {
                 $search = request('search_value');
+
                 $query->where(function ($query) use ($search) {
-                    $query->where('title', 'like', "%{$search}%")
-                        ->orWhere('key', 'like', "%{$search}%")
-                        ->orWhere('prompt_label', 'like', "%{$search}%");
+                    $query->where('key', 'like', "%{$search}%")
+                        ->orWhereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(title, '$.en'))) LIKE ?", ['%' . strtolower($search) . '%'])
+                        ->orWhereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(title, '$.ar'))) LIKE ?", ['%' . strtolower($search) . '%']);
                 });
             })
             ->when(request()->filled('type'), fn($query) => $query->where('type', request('type')))
-            ->when(request()->has('is_active') && request('is_active') !== '', function ($query) {
-                $query->where('is_active', request()->boolean('is_active'));
-            })
+            ->when(request()->has('is_active') && request('is_active') !== '', fn($query) => $query->where('is_active', request()->boolean('is_active')))
             ->orderBy('sort_order')
             ->orderBy('id');
 
         return $paginate ? $query->paginate($perPage)->withQueryString() : $query->get();
     }
 
+    public function getActiveQuestions()
+    {
+        return $this->repository->query()
+            ->with('options')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+    }
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         return $this->handleTransaction(function () use ($validatedData, $relationsToLoad) {
             $options = Arr::pull($validatedData, 'options', []);
-
             $validatedData['key'] = (string) Str::ulid();
 
             $question = $this->repository->create($validatedData);
 
-            $this->syncOptions($question->id, $question->type->value, $options);
+            $this->syncOptions($question->id, $question->type, $options);
 
             return $question->load($relationsToLoad);
         });
@@ -64,39 +71,86 @@ class AiGuideQuestionService extends BaseService
             $options = Arr::pull($validatedData, 'options', []);
             $question = $this->repository->update($validatedData, $id);
 
-            $this->syncOptions($question->id, $question->type->value, $options);
+            $this->syncOptions($question->id, $question->type, $options);
 
             return $question->load($relationsToLoad);
         });
     }
 
-    private function syncOptions(int $questionId, string $type, array $options): void
+    private function syncOptions(int $questionId, AiGuideQuestionTypeEnum $type, array $options): void
     {
-        $this->optionRepository->query()
-            ->where('ai_guide_question_id', $questionId)
-            ->delete();
+        if ($type !== AiGuideQuestionTypeEnum::SINGLE_SELECT) {
+            $this->optionRepository->query()
+                ->where('ai_guide_question_id', $questionId)
+                ->delete();
 
-        if ($type !== AiGuideQuestionTypeEnum::SINGLE_SELECT->value) {
             return;
         }
 
+        $submittedIds = [];
+
         foreach (array_values($options) as $index => $option) {
-            $this->optionRepository->create([
+            $optionId = $option['id'] ?? null;
+            $value = $this->generateOptionValue(
+                $questionId,
+                $option['label']['en'],
+                $optionId
+            );
+
+            $data = [
                 'ai_guide_question_id' => $questionId,
-                'value' => $option['value'],
+                'value' => $value,
                 'label' => $option['label'],
                 'prompt_value' => $option['prompt_value'] ?? null,
                 'sort_order' => $index,
-            ]);
+            ];
+
+            if ($optionId) {
+                $model = $this->optionRepository->query()
+                    ->where('ai_guide_question_id', $questionId)
+                    ->find($optionId);
+
+                if ($model) {
+                    $model->update($data);
+                    $submittedIds[] = $model->id;
+                    continue;
+                }
+            }
+
+            $model = $this->optionRepository->create($data);
+            $submittedIds[] = $model->id;
         }
+
+        $query = $this->optionRepository->query()
+            ->where('ai_guide_question_id', $questionId);
+
+        if ($submittedIds) {
+            $query->whereNotIn('id', $submittedIds);
+        }
+
+        $query->delete();
     }
-    public function getActiveQuestions()
+
+    private function generateOptionValue(int $questionId, string $label, ?int $ignoreId = null): string
     {
-        return $this->repository->query()
-            ->with('options')
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get();
+        $baseValue = Str::slug($label, '_') ?: 'option';
+        $value = $baseValue;
+        $counter = 2;
+
+        while ($this->optionValueExists($questionId, $value, $ignoreId)) {
+            $value = "{$baseValue}_{$counter}";
+            $counter++;
+        }
+
+        return $value;
+    }
+
+    private function optionValueExists(int $questionId, string $value, ?int $ignoreId = null): bool
+    {
+        return $this->optionRepository->query()
+            ->where('ai_guide_question_id', $questionId)
+            ->where('value', $value)
+            ->when($ignoreId, fn($query) => $query->where('id', '!=', $ignoreId))
+            ->exists();
     }
 }

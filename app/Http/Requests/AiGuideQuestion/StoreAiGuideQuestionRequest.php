@@ -26,7 +26,6 @@ class StoreAiGuideQuestionRequest extends FormRequest
                 'array',
                 $singleSelect ? 'min:1' : null,
             ]),
-            'options.*.value' => ['required_if:type,' . AiGuideQuestionTypeEnum::SINGLE_SELECT->value, 'nullable', 'string', 'max:255'],
             'options.*.label' => ['required_if:type,' . AiGuideQuestionTypeEnum::SINGLE_SELECT->value, 'nullable', 'string', 'max:255'],
             'options.*.prompt_value' => ['nullable', 'string', 'max:1000'],
         ];

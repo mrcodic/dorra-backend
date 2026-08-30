@@ -11,10 +11,10 @@ return new class extends Migration
         Schema::create('ai_guide_questions', function (Blueprint $table) {
             $table->id();
             $table->string('key')->unique();
-            $table->string('title');
+            $table->json('title');
             $table->string('type', 30);
-            $table->string('prompt_label');
-            $table->string('placeholder')->nullable();
+            $table->json('prompt_label');
+            $table->json('placeholder')->nullable();
             $table->boolean('required')->default(false);
             $table->unsignedInteger('sort_order')->default(0);
             $table->boolean('is_active')->default(true);

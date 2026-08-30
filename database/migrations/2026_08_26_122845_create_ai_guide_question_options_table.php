@@ -13,8 +13,8 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(AiGuideQuestion::class)->constrained()->cascadeOnDelete();
             $table->string('value');
-            $table->string('label');
-            $table->text('prompt_value')->nullable();
+            $table->json('label');
+            $table->json('prompt_value')->nullable();
             $table->unsignedInteger('sort_order')->default(0);
             $table->timestamps();
 
