@@ -274,7 +274,7 @@ class GenAiImageService
 
         $tokens = random_int(700, 2000);
 
-        $imagePath = public_path('images/test/ai-image.jpg');
+        $imagePath = public_path('images/test/ai-image.png');
 
         if (!file_exists($imagePath)) {
             return [
