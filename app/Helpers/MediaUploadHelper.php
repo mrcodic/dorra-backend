@@ -117,7 +117,12 @@ if (!function_exists('handleMediaUploads')) {
 
             return $pixel;
         };
-        $applyTransparency = static function ($file) use ($makeTransparent, $transparentColor, $fuzzPercent, $sampleColor) {
+        $applyTransparency = static function ($file) use (
+            $makeTransparent,
+            $transparentColor,
+            $fuzzPercent,
+            $sampleColor
+        ) {
             if (!$makeTransparent) {
                 return $file;
             }
@@ -142,6 +147,7 @@ if (!function_exists('handleMediaUploads')) {
 
             try {
                 $imagick = new \Imagick($file->getPathname());
+
                 $imagick->setImageFormat('png');
                 $imagick->setImageColorspace(\Imagick::COLORSPACE_SRGB);
                 $imagick->setImageAlphaChannel(\Imagick::ALPHACHANNEL_SET);
@@ -155,60 +161,50 @@ if (!function_exists('handleMediaUploads')) {
 
                 $transparent = new \ImagickPixel('transparent');
 
-
                 $corners = [
                     [0, 0],
                     [$width - 1, 0],
                     [0, $height - 1],
                     [$width - 1, $height - 1],
                 ];
+
                 $targetColors = [];
 
-                foreach ($corners as $i => [$x, $y]) {
-                    $targetColors[$i] = $transparentColor
+                foreach ($corners as $index => [$x, $y]) {
+                    $targetColors[$index] = $transparentColor
                         ? new \ImagickPixel($transparentColor)
                         : $sampleColor($imagick, $x, $y, $width, $height);
                 }
 
-                foreach ($corners as $i => [$x, $y]) {
+                foreach ($corners as $index => [$x, $y]) {
                     $imagick->floodFillPaintImage(
                         $transparent,
                         $fuzzAbs,
-                        $targetColors[$i],
+                        $targetColors[$index],
                         $x,
                         $y,
                         false
                     );
                 }
 
-
-                $uniqueTargets = [];
-
-                foreach ($targetColors as $color) {
-                    $uniqueTargets[$color->getColorAsString()] = $color;
-                }
-
-                foreach ($uniqueTargets as $color) {
-                    $imagick->transparentPaintImage(
-                        $color,
-                        0,
-                        $fuzzAbs,
-                        false
-                    );
-                }
                 $imagick->setImageFormat('png');
 
-                $originalBase = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $originalBase = pathinfo(
+                    $file->getClientOriginalName(),
+                    PATHINFO_FILENAME
+                );
+
                 $originalBase = $originalBase ?: (string) Str::uuid();
 
-                $tempPath = storage_path('app/tmp-transparent/' . Str::uuid() . '.png');
+                $tempPath = storage_path(
+                    'app/tmp-transparent/' . Str::uuid() . '.png'
+                );
 
                 if (!is_dir(dirname($tempPath))) {
                     mkdir(dirname($tempPath), 0755, true);
                 }
 
                 $imagick->writeImage($tempPath);
-
                 $imagick->clear();
                 $imagick->destroy();
 
@@ -221,10 +217,10 @@ if (!function_exists('handleMediaUploads')) {
                 );
             } catch (\Throwable $e) {
                 report($e);
+
                 return $file;
             }
         };
-
         $uploaded = collect($files)->map(function ($file) use (
             $modelData,
             $collectionName,
