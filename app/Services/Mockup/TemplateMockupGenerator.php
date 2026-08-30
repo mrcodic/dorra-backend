@@ -288,7 +288,7 @@ class TemplateMockupGenerator
     {
         $removedHexes = collect($removedHexes)
             ->filter()
-            ->map(fn ($color) => $this->normalizeHex($color))
+            ->map(fn ($color) => strtolower(ltrim(trim((string) $color), '#')))
             ->unique()
             ->values()
             ->all();
@@ -312,19 +312,26 @@ class TemplateMockupGenerator
 
                 $remainingColors = collect($pivotColors)
                     ->filter()
-                    ->reject(fn ($color) => in_array($this->normalizeHex($color), $removedHexes, true))
+                    ->reject(function ($color) use ($removedHexes) {
+                        $hex = strtolower(ltrim(trim((string) $color), '#'));
+                        return in_array($hex, $removedHexes, true);
+                    })
                     ->values()
                     ->all();
 
                 $updateData = ['colors' => $remainingColors];
                 $modelColor = $currentTemplate->pivot->model_color;
 
-                if (!empty($modelColor) && in_array($this->normalizeHex($modelColor), $removedHexes, true)) {
-                    $newModelColor = $remainingColors[0] ?? null;
-                    $updateData['model_color'] = $newModelColor;
+                if (!empty($modelColor)) {
+                    $modelHex = strtolower(ltrim(trim((string) $modelColor), '#'));
 
-                    if ($newModelColor !== null) {
-                        $newModelColorsByTemplate[(string) $currentTemplate->id] = $newModelColor;
+                    if (in_array($modelHex, $removedHexes, true)) {
+                        $newModelColor = $remainingColors[0] ?? null;
+                        $updateData['model_color'] = $newModelColor;
+
+                        if ($newModelColor !== null) {
+                            $newModelColorsByTemplate[(string) $currentTemplate->id] = $newModelColor;
+                        }
                     }
                 }
 
@@ -334,28 +341,25 @@ class TemplateMockupGenerator
                 }
 
                 $mockup->templates()->updateExistingPivot($currentTemplate->id, $updateData);
+
+                $mockup->media()
+                    ->where('collection_name', 'generated_mockups')
+                    ->whereRaw(
+                        "JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?",
+                        [(string) $currentTemplate->id]
+                    )
+                    ->lazyById(100)
+                    ->each(function ($media) use ($removedHexes) {
+                        $mediaHex = strtolower(ltrim(
+                            trim((string) $media->getCustomProperty('hex', '')),
+                            '#'
+                        ));
+
+                        if ($mediaHex !== '' && in_array($mediaHex, $removedHexes, true)) {
+                            $media->delete();
+                        }
+                    });
             });
-
-        $mediaQuery = $mockup->media()->where('collection_name', 'generated_mockups');
-
-        if ($template) {
-            $mediaQuery->whereRaw(
-                "JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?",
-                [(string) $template->id]
-            );
-        }
-
-        $mediaQuery
-            ->where(function ($query) use ($removedHexes) {
-                foreach ($removedHexes as $hex) {
-                    $query->orWhereRaw(
-                        "LOWER(REPLACE(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex')), '#', '')) = ?",
-                        [ltrim($hex, '#')]
-                    );
-                }
-            })
-            ->lazyById(100)
-            ->each(fn ($media) => $media->delete());
 
         foreach ($newModelColorsByTemplate as $templateId => $color) {
             $this->forceGenerateColorForTemplate($mockup, $templateId, $color);
