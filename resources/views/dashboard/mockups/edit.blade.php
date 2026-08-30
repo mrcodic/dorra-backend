@@ -400,6 +400,8 @@
             padding: 18px;
         }
 
+        .generation-retry-btn {background:#fff7e8;color:#b96d00;border:1px solid #ffd48a;}
+        .generation-retry-btn:hover {background:#fff0cf;}
         #generationProgressModal .modal-content {
             border: 0;
             border-radius: 28px !important;
@@ -967,6 +969,7 @@
                     <div id="generationProgressError" class="alert alert-danger d-none mb-0"></div>
                     <button type="button" class="generation-action-btn generation-background-btn" id="generationContinueBackground">↙ &nbsp; Continue in background</button>
                     <button type="button" class="generation-action-btn generation-cancel-btn" id="generationCancelButton">⊗ &nbsp; Cancel generation</button>
+                    <button type="button" class="generation-action-btn generation-retry-btn d-none" id="generationRetryButton">↻ &nbsp; Retry failed</button>
                     <button type="button" class="generation-action-btn generation-close-btn d-none" id="generationProgressClose" data-bs-dismiss="modal">Close</button>
                     <p class="generation-hint">Closing this window will not stop the generation.</p>
                 </div>
@@ -3357,6 +3360,7 @@
         let generationTerminal = false;
         const bulkJobStatusUrlTemplate = @json(route('bulk-jobs.status', ['__JOB_ID__']));
         const bulkJobCancelUrlTemplate = @json(\Illuminate\Support\Facades\Route::has('bulk-jobs.cancel') ? route('bulk-jobs.cancel', ['__JOB_ID__']) : null);
+        const bulkJobRetryUrlTemplate = @json(route('bulk-jobs.retry', ['bulkJob' => '__JOB_ID__']));
 
         function extractBulkJobId(response) {
             return response?.data?.data?.bulk_job_id ?? response?.data?.bulk_job_id ?? response?.bulk_job_id ?? response?.data?.data?.id ?? response?.data?.id ?? null;
@@ -3382,7 +3386,7 @@
             $('#generationFailedCount').text('0');
             $('#generationProgressRemaining').text('Calculating...');
             $('#generationProgressError').addClass('d-none').text('');
-            $('#generationProgressClose').addClass('d-none');
+            $('#generationProgressClose, #generationRetryButton').addClass('d-none');
             $('#generationContinueBackground, #generationMinimizeButton').removeClass('d-none');
             $('#generationCancelButton').toggleClass('d-none', !bulkJobCancelUrlTemplate).prop('disabled', false).html('⊗ &nbsp; Cancel generation');
             $('#generationSpinnerShell').removeClass('d-none');
@@ -3430,6 +3434,8 @@
                             $('#generationSpinnerShell').addClass('d-none');
                             $('#generationContinueBackground, #generationMinimizeButton, #generationCancelButton').addClass('d-none');
                             $('#generationProgressClose').removeClass('d-none');
+                            const canRetry = failed > 0 && ['failed', 'completed_with_errors'].includes(status);
+                            $('#generationRetryButton').toggleClass('d-none', !canRetry);
                             $('#generationFloatingText').text(status === 'completed' ? 'Generation complete' : status.replaceAll('_', ' '));
                             if (status === 'failed' || status === 'cancelled') {
                                 $('#generationProgressError').removeClass('d-none').text(status === 'failed' ? 'Mockup generation failed.' : 'Mockup generation was cancelled.');
@@ -3464,6 +3470,29 @@
             generationBackgroundMode = false;
             $(this).addClass('d-none');
             $('#generationProgressModal').modal('show');
+        });
+
+        $(document).on('click', '#generationRetryButton', function () {
+            if (!bulkJobRetryUrlTemplate || !generationCurrentJobId) return;
+            const $button = $(this);
+            $button.prop('disabled', true).text('Retrying...');
+            $.ajax({
+                url: bulkJobRetryUrlTemplate.replace('__JOB_ID__', generationCurrentJobId),
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Accept': 'application/json'
+                },
+                success: function (response) {
+                    const newJobId = extractBulkJobId(response) || generationCurrentJobId;
+                    $('#generationRetryButton').addClass('d-none').prop('disabled', false).html('↻ &nbsp; Retry failed');
+                    startGenerationProgress(newJobId, generationReloadOnClose);
+                },
+                error: function (xhr) {
+                    $button.prop('disabled', false).html('↻ &nbsp; Retry failed');
+                    $('#generationProgressError').removeClass('d-none').text(xhr.responseJSON?.message || 'Failed to retry generation.');
+                }
+            });
         });
 
         $(document).on('click', '#generationCancelButton', function () {
