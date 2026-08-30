@@ -260,12 +260,10 @@ class GenAiImageService
 
     private function fakeGenerate(string $prompt, ?string $negativePrompt = null): array
     {
-        // simulate real latency
         usleep(random_int(300, 900) * 1000);
 
         $promptLower = strtolower($prompt);
 
-        // 🔥 FORCE FAILURE TEST
         if (str_contains($promptLower, 'fail')) {
             return [
                 'ok' => false,
@@ -274,12 +272,22 @@ class GenAiImageService
             ];
         }
 
-        // simulate token usage variation
         $tokens = random_int(700, 2000);
 
-        // fake base64 image (tiny pixel)
-        $fakeImage = 'data:image/png;base64,' .
-            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=';
+        $imagePath = public_path('images/test/ai-image.jpg');
+
+        if (!file_exists($imagePath)) {
+            return [
+                'ok' => false,
+                'status' => 500,
+                'error' => 'Fake AI test image not found.',
+            ];
+        }
+
+        $mime = mime_content_type($imagePath) ?: 'image/png';
+
+        $fakeImage = 'data:' . $mime . ';base64,' .
+            base64_encode(file_get_contents($imagePath));
 
         return [
             'ok' => true,
@@ -287,7 +295,7 @@ class GenAiImageService
             'images' => [$fakeImage],
             'model' => 'fake-gemini',
             'usage' => [
-                'totalTokenCount' => $tokens
+                'totalTokenCount' => $tokens,
             ],
             'promptFeedback' => null,
             'arabicNote' => 'FAKE MODE ACTIVE',
