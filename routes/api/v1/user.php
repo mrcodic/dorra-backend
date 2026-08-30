@@ -78,7 +78,7 @@ Route::prefix('ship-blu/')->controller(ShippingController::class)->group(functio
     Route::post('delivery-fee', 'deliveryFee');
     Route::get('webhook', 'handleWebhook');
 });
-Route::get('ai-guide-questions', AiGuideQuestionController::class);
+Route::get('ai-guide-questions', AiGuideQuestionController::class)->middleware(LocalizationMiddleware::class);
 
 Route::get('/fonts', [MainController::Class, 'fonts']);
 Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
