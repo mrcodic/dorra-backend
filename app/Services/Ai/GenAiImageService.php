@@ -16,44 +16,95 @@ class GenAiImageService
         'gemini-2.5-flash-image',
     ];
 
-    // Gemini's image models do not reliably output a real alpha channel — when asked
-    // for a "transparent background" they sometimes paint a literal gray/black
-    // checkerboard pattern into the RGB pixels instead (mimicking how editors *display*
-    // transparency, rather than actually emitting alpha). Asking for a solid, known
-    // background color is far more reliable, and we convert that to real transparency
-    // afterward via handleMediaUploads()'s Imagick-based post-processing.
-    private const SOLID_BG_INSTRUCTION = "Generate the subject centered on a single flat solid white background (#FFFFFF), completely uniform with no gradient, no shadow, no texture, and no pattern of any kind behind the subject.";
+    /**
+     * Used when transparentBackground = true.
+     *
+     * We ask the image model itself to generate an isolated asset
+     * with real alpha transparency instead of generating a white
+     * background and removing it afterward.
+     */
+    private const TRANSPARENT_BG_INSTRUCTION = <<<'PROMPT'
+Generate ONLY the isolated artwork with a truly transparent background.
 
-    private int $perRequestCount = 1; // one image
+The output image must use real alpha transparency.
+All pixels outside the artwork must be fully transparent with zero alpha.
+
+IMPORTANT:
+- Keep ONLY the actual artwork/design visible.
+- Preserve white, cream, light gray, and other light colors that are part of the artwork itself.
+- Preserve internal details, holes, text, highlights, borders, and light-colored design elements.
+- Do not remove any part of the actual artwork just because it is white or light colored.
+
+Do NOT generate:
+- a white background
+- a black background
+- a gray background
+- a solid color background
+- a checkerboard transparency pattern
+- a fake transparency pattern
+- a wall
+- a floor
+- a table
+- a room
+- a scene
+- an environment
+- a product mockup
+- a frame around the artwork
+- background shadows
+- background glow
+- background texture
+
+The result must be an isolated transparent PNG-style design asset,
+ready to be placed directly on products, mockups, or inside a design editor.
+PROMPT;
+
+    private int $perRequestCount = 1;
     private int $chunk = 1;
 
-    // limiter
+    /**
+     * Rate limiter.
+     */
     private int $limitPerMinute = 50;
     private string $limitKeyPrefix = 'genai:limiter:minute';
 
-    // breaker
+    /**
+     * Circuit breaker.
+     */
     private int $breakerTtlSec = 180;
 
     public function __construct(
         private readonly ?string $apiKey
-    )
-    {
+    ) {
     }
 
-    public function generate(string $prompt, ?string $negativePrompt = null, bool $transparentBackground = false): array
-    {
+    public function generate(
+        string $prompt,
+        ?string $negativePrompt = null,
+        bool $transparentBackground = false
+    ): array {
         if (config('app.ai_fake_mode')) {
-            return $this->fakeGenerate($prompt, $negativePrompt);
+            return $this->fakeGenerate(
+                $prompt,
+                $negativePrompt
+            );
         }
+
         $prompt = trim($prompt);
-        $neg = trim((string)$negativePrompt);
+        $neg = trim((string) $negativePrompt);
 
         $instruction = $neg !== ''
             ? $prompt . "\n\nNegative prompt: " . $neg
             : $prompt;
 
+        /*
+         * Request transparency directly from the AI model.
+         *
+         * No solid white background.
+         * No post-generation background removal here.
+         */
         if ($transparentBackground) {
-            $instruction .= "\n\n" . self::SOLID_BG_INSTRUCTION;
+            $instruction .= "\n\n"
+                . self::TRANSPARENT_BG_INSTRUCTION;
         }
 
         $images = [];
@@ -62,39 +113,64 @@ class GenAiImageService
         $promptFeedback = null;
 
         foreach (self::MODEL_CHAIN as $model) {
-            if ($this->breakerIsOpen($model)) continue;
+            if ($this->breakerIsOpen($model)) {
+                continue;
+            }
 
             try {
-                $batches = (int)ceil($this->perRequestCount / $this->chunk);
+                $batches = (int) ceil(
+                    $this->perRequestCount / $this->chunk
+                );
 
                 for ($i = 0; $i < $batches; $i++) {
-                    $want = min($this->chunk, $this->perRequestCount - count($images));
+                    $want = min(
+                        $this->chunk,
+                        $this->perRequestCount - count($images)
+                    );
 
                     $ask = $want > 1
-                        ? $instruction . "\n\nGenerate {$want} different logo variations in one response."
+                        ? $instruction
+                        . "\n\nGenerate {$want} different design variations in one response."
                         : $instruction;
 
-                    $result = $this->generateOnce($model, $ask);
+                    $result = $this->generateOnce(
+                        $model,
+                        $ask
+                    );
 
                     if (!empty($result['images'])) {
                         foreach ($result['images'] as $url) {
-                            if (count($images) < $this->perRequestCount) $images[] = $url;
+                            if (
+                                count($images)
+                                < $this->perRequestCount
+                            ) {
+                                $images[] = $url;
+                            }
                         }
 
                         $usedModel = $model;
-                        $usageMetadata = $result['usageMetadata'] ?? null;
-                        $promptFeedback = $result['promptFeedback'] ?? null;
+
+                        $usageMetadata =
+                            $result['usageMetadata'] ?? null;
+
+                        $promptFeedback =
+                            $result['promptFeedback'] ?? null;
                     }
 
-                    if (count($images) >= $this->perRequestCount) {
-                        break 2; // stop model loop
+                    if (
+                        count($images)
+                        >= $this->perRequestCount
+                    ) {
+                        break 2;
                     }
                 }
             } catch (\Throwable $e) {
-                $status = (int)($e->getCode() ?: 0);
+                $status = (int) ($e->getCode() ?: 0);
+
                 if ($status >= 500) {
                     $this->tripBreaker($model);
                 }
+
                 continue;
             }
         }
@@ -107,8 +183,11 @@ class GenAiImageService
             ];
         }
 
-        $arabicNote = ($usedModel && $usedModel !== self::PRIMARY_MODEL)
-            ? "تنبيه: قد لا تكون حروف اللغة العربية دقيقة في النتيجة لأن الموديل المستخدم ليس Gemini 3 Pro Image Preview. (Note: Arabic letters may be inaccurate because the model used is not Gemini 3 Pro Image Preview.)"
+        $arabicNote = (
+            $usedModel
+            && $usedModel !== self::PRIMARY_MODEL
+        )
+            ? 'تنبيه: قد لا تكون حروف اللغة العربية دقيقة في النتيجة لأن الموديل المستخدم ليس Gemini 3 Pro Image Preview. (Note: Arabic letters may be inaccurate because the model used is not Gemini 3 Pro Image Preview.)'
             : null;
 
         return [
@@ -122,10 +201,14 @@ class GenAiImageService
         ];
     }
 
-    /** ===== Circuit breaker ===== */
+    /**
+     * ===== Circuit Breaker =====
+     */
     private function breakerIsOpen(string $model): bool
     {
-        return Cache::has($this->breakerKey($model));
+        return Cache::has(
+            $this->breakerKey($model)
+        );
     }
 
     private function breakerKey(string $model): string
@@ -133,10 +216,14 @@ class GenAiImageService
         return 'genai:breaker:' . Str::slug($model);
     }
 
-    /** One provider call: limiter + backoff + timeout */
-    private function generateOnce(string $model, string $instruction): array
-    {
-
+    /**
+     * One provider call:
+     * limiter + retry + backoff + timeout.
+     */
+    private function generateOnce(
+        string $model,
+        string $instruction
+    ): array {
         $this->acquireLimiterTokenOrFail();
 
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent";
@@ -146,13 +233,18 @@ class GenAiImageService
                 [
                     'role' => 'user',
                     'parts' => [
-                        ['text' => $instruction],
+                        [
+                            'text' => $instruction,
+                        ],
                     ],
                 ],
             ],
+
             'generationConfig' => [
-                // Some models ignore this; harmless if unsupported
-                'responseModalities' => ['IMAGE', 'TEXT'],
+                'responseModalities' => [
+                    'IMAGE',
+                    'TEXT',
+                ],
             ],
         ];
 
@@ -163,16 +255,31 @@ class GenAiImageService
         for ($i = 0; $i <= $retries; $i++) {
             try {
                 $resp = Http::timeout(45)
-                    ->withHeaders(['Content-Type' => 'application/json'])
-                    ->post($url . '?key=' . urlencode($this->apiKey), $payload);
+                    ->withHeaders([
+                        'Content-Type' => 'application/json',
+                    ])
+                    ->post(
+                        $url . '?key=' . urlencode($this->apiKey),
+                        $payload
+                    );
 
-                if (in_array($resp->status(), [429, 503], true)) {
-                    throw new \RuntimeException('Transient provider error', $resp->status());
+                if (
+                    in_array(
+                        $resp->status(),
+                        [429, 503],
+                        true
+                    )
+                ) {
+                    throw new \RuntimeException(
+                        'Transient provider error',
+                        $resp->status()
+                    );
                 }
 
                 if ($resp->failed()) {
                     throw new \RuntimeException(
-                        $resp->json('error.message') ?: 'Provider request failed',
+                        $resp->json('error.message')
+                            ?: 'Provider request failed',
                         $resp->status()
                     );
                 }
@@ -187,50 +294,112 @@ class GenAiImageService
             } catch (\Throwable $e) {
                 $lastErr = $e;
 
-                $code = (int)($e->getCode() ?: 0);
-                $isTransient = in_array($code, [429, 503], true);
+                $code = (int) (
+                $e->getCode() ?: 0
+                );
 
-                if (!$isTransient || $i === $retries) {
+                $isTransient = in_array(
+                    $code,
+                    [429, 503],
+                    true
+                );
+
+                if (
+                    !$isTransient
+                    || $i === $retries
+                ) {
                     throw $e;
                 }
 
-                $delay = (int)($baseMs * (2 ** $i) + random_int(0, 250));
-                usleep($delay * 1000);
+                $delay = (int) (
+                    $baseMs * (2 ** $i)
+                    + random_int(0, 250)
+                );
+
+                usleep(
+                    $delay * 1000
+                );
             }
         }
 
-        throw $lastErr ?: new \RuntimeException('Unknown error', 500);
+        throw $lastErr
+            ?: new \RuntimeException(
+                'Unknown error',
+                500
+            );
     }
 
-    /** ===== Limiter: simple per-minute reservoir ===== */
+    /**
+     * ===== Limiter =====
+     *
+     * Simple per-minute reservoir.
+     */
     private function acquireLimiterTokenOrFail(): void
     {
-        $minuteKey = $this->limitKeyPrefix . ':' . now()->format('YmdHi');
+        $minuteKey =
+            $this->limitKeyPrefix
+            . ':'
+            . now()->format('YmdHi');
 
-        $count = Cache::increment($minuteKey);
+        $count = Cache::increment(
+            $minuteKey
+        );
+
         if ($count === 1) {
-            Cache::put($minuteKey, 1, 70);
+            Cache::put(
+                $minuteKey,
+                1,
+                70
+            );
         }
 
-        if ($count > $this->limitPerMinute) {
-            throw new \RuntimeException('Rate limited (server limiter)', 429);
+        if (
+            $count
+            > $this->limitPerMinute
+        ) {
+            throw new \RuntimeException(
+                'Rate limited (server limiter)',
+                429
+            );
         }
     }
 
-    /** Extract inlineData images -> data URLs */
+    /**
+     * Extract inlineData images from Gemini
+     * and return them as data URLs.
+     */
     private function extractImages(array $json): array
     {
         $out = [];
-        $candidates = $json['candidates'] ?? [];
 
-        foreach ($candidates as $c) {
-            $parts = data_get($c, 'content.parts', []);
-            foreach ($parts as $p) {
-                $b64 = data_get($p, 'inlineData.data');
-                if ($b64) {
-                    $mime = data_get($p, 'inlineData.mimeType', 'image/png');
-                    $out[] = "data:{$mime};base64,{$b64}";
+        $candidates =
+            $json['candidates'] ?? [];
+
+        foreach ($candidates as $candidate) {
+            $parts = data_get(
+                $candidate,
+                'content.parts',
+                []
+            );
+
+            foreach ($parts as $part) {
+                $b64 = data_get(
+                    $part,
+                    'inlineData.data'
+                );
+
+                if (!$b64) {
+                    continue;
                 }
+
+                $mime = data_get(
+                    $part,
+                    'inlineData.mimeType',
+                    'image/png'
+                );
+
+                $out[] =
+                    "data:{$mime};base64,{$b64}";
             }
         }
 
@@ -239,32 +408,72 @@ class GenAiImageService
 
     private function tripBreaker(string $model): void
     {
-        Cache::put($this->breakerKey($model), 1, $this->breakerTtlSec);
+        Cache::put(
+            $this->breakerKey($model),
+            1,
+            $this->breakerTtlSec
+        );
     }
 
-    public function estimateTokens(string $prompt, ?string $negativePrompt = null, int $outputImages = 1, bool $hasInputImage = false): int
-    {
-        $text = trim($prompt) . "\n" . trim((string)$negativePrompt);
+    public function estimateTokens(
+        string $prompt,
+        ?string $negativePrompt = null,
+        int $outputImages = 1,
+        bool $hasInputImage = false
+    ): int {
+        $text =
+            trim($prompt)
+            . "\n"
+            . trim((string) $negativePrompt);
 
-        // rough text estimate: ~1 token لكل 4 chars (تقريب)
-        $textTokens = (int)ceil(mb_strlen($text) / 4);
+        /**
+         * Rough text estimate:
+         * approximately 1 token per 4 characters.
+         */
+        $textTokens = (int) ceil(
+            mb_strlen($text) / 4
+        );
 
-        $inputImageTokens  = $hasInputImage ? 560 : 0;        // لو عندك input image
-        $outputImageTokens = 1120 * $outputImages;            // 1024x1024
+        $inputImageTokens =
+            $hasInputImage
+                ? 560
+                : 0;
 
-        // + margin buffer (اختياري) عشان التقدير مايبقاش أقل بزيادة
+        $outputImageTokens =
+            1120 * $outputImages;
+
+        /**
+         * Small buffer so the estimation
+         * isn't consistently too low.
+         */
         $buffer = 100;
 
-        return $textTokens + $inputImageTokens + $outputImageTokens + $buffer;
+        return
+            $textTokens
+            + $inputImageTokens
+            + $outputImageTokens
+            + $buffer;
     }
 
-    private function fakeGenerate(string $prompt, ?string $negativePrompt = null): array
-    {
-        usleep(random_int(300, 900) * 1000);
+    private function fakeGenerate(
+        string $prompt,
+        ?string $negativePrompt = null
+    ): array {
+        usleep(
+            random_int(300, 900)
+            * 1000
+        );
 
-        $promptLower = strtolower($prompt);
+        $promptLower = strtolower(
+            $prompt
+        );
 
-        if (str_contains($promptLower, 'fail')) {
+        if (
+            str_contains(
+                $promptLower,
+                'fail'
+            )
+        ) {
             return [
                 'ok' => false,
                 'status' => 500,
@@ -272,9 +481,14 @@ class GenAiImageService
             ];
         }
 
-        $tokens = random_int(700, 2000);
+        $tokens = random_int(
+            700,
+            2000
+        );
 
-        $imagePath = public_path('images/test/ai-image.jpg');
+        $imagePath = public_path(
+            'images/test/ai-image.jpg'
+        );
 
         if (!file_exists($imagePath)) {
             return [
@@ -284,15 +498,24 @@ class GenAiImageService
             ];
         }
 
-        $mime = mime_content_type($imagePath) ?: 'image/png';
+        $mime =
+            mime_content_type($imagePath)
+                ?: 'image/png';
 
-        $fakeImage = 'data:' . $mime . ';base64,' .
-            base64_encode(file_get_contents($imagePath));
+        $fakeImage =
+            'data:'
+            . $mime
+            . ';base64,'
+            . base64_encode(
+                file_get_contents($imagePath)
+            );
 
         return [
             'ok' => true,
             'status' => 200,
-            'images' => [$fakeImage],
+            'images' => [
+                $fakeImage,
+            ],
             'model' => 'fake-gemini',
             'usage' => [
                 'totalTokenCount' => $tokens,
@@ -301,6 +524,4 @@ class GenAiImageService
             'arabicNote' => 'FAKE MODE ACTIVE',
         ];
     }
-
-
 }
