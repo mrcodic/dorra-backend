@@ -10,6 +10,7 @@ use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Services\Mockup\MockupRenderer;
 use App\Traits\RendersTemplateMockups;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class MockupService extends BaseService
 {
@@ -70,27 +71,42 @@ class MockupService extends BaseService
                 ?->pivot->model_color ? 1 : 0;
         });
         // --- All colors across all mockups ---
+        $templateHexesByMockup = DB::table('media')
+            ->where('model_type', \App\Models\Mockup::class)
+            ->whereIn('model_id', $filtered->pluck('id'))
+            ->where('collection_name', 'generated_mockups')
+            ->where('custom_properties->template_id', $templateId)
+            ->select('model_id', DB::raw("LOWER(TRIM(LEADING '#' FROM JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex')))) as hex"))
+            ->get()
+            ->groupBy('model_id')
+            ->map(fn($rows) => $rows->pluck('hex')->filter()->unique());
+
         $allColors = $filtered
-            ->flatMap(fn($mockup) => $mockup->templates
-                ->filter(fn($tpl) => $tpl->id == $templateId)
-                ->flatMap(function ($tpl) {
-                    $c = $tpl->pivot->colors ?? [];
-                    if (is_string($c)) {
-                        $c = json_decode($c, true) ?: [];
-                    }
-                    $colors = is_array($c) ? $c : [];
+            ->flatMap(function ($mockup) use ($templateId, $templateHexesByMockup) {
+                $mockupHexes = $templateHexesByMockup->get($mockup->id, collect());
 
-                    $modelColor = $tpl->pivot->model_color ?? null;
-                    if ($modelColor && in_array($modelColor, $colors)) {
-                        $colors = array_merge(
-                            [$modelColor],
-                            array_values(array_filter($colors, fn($color) => $color !== $modelColor))
-                        );
-                    }
+                return $mockup->templates
+                    ->filter(fn($tpl) => $tpl->id == $templateId)
+                    ->flatMap(function ($tpl) use ($mockupHexes) {
+                        $c = $tpl->pivot->colors ?? [];
+                        if (is_string($c)) {
+                            $c = json_decode($c, true) ?: [];
+                        }
+                        $colors = is_array($c) ? $c : [];
 
-                    return $colors;
-                })
-            )
+                        $modelColor = $tpl->pivot->model_color ?? null;
+                        if ($modelColor && in_array($modelColor, $colors)) {
+                            $colors = array_merge(
+                                [$modelColor],
+                                array_values(array_filter($colors, fn($color) => $color !== $modelColor))
+                            );
+                        }
+
+                        return array_values(array_filter($colors, function ($color) use ($mockupHexes) {
+                            return $mockupHexes->contains(strtolower(ltrim($color, '#')));
+                        }));
+                    });
+            })
             ->filter()
             ->unique()
             ->values()

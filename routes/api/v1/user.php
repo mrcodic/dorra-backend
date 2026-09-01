@@ -5,6 +5,7 @@ use App\Http\Controllers\Shared\LibraryAssetController;
 use App\Http\Middleware\LocalizationMiddleware;
 use App\Http\Middleware\TrackVisits;
 use App\Http\Controllers\Api\V1\User\{Ai\AiAssetController,
+    Ai\AiGuideQuestionController,
     Ai\CreditController,
     Auth\LoginController,
     Auth\LogoutController,
@@ -77,6 +78,7 @@ Route::prefix('ship-blu/')->controller(ShippingController::class)->group(functio
     Route::post('delivery-fee', 'deliveryFee');
     Route::get('webhook', 'handleWebhook');
 });
+Route::get('ai-guide-questions', AiGuideQuestionController::class)->middleware(LocalizationMiddleware::class);
 
 Route::get('/fonts', [MainController::Class, 'fonts']);
 Route::get('template-assets', [TemplateController::class, 'templateAssets'])->name("templates.assets");
@@ -88,7 +90,6 @@ Route::delete('/media/bulk', [MainController::class, 'removeMediaBulk']);
 Route::delete('/media/{media}', [MainController::class, 'removeMedia']);
 Route::get('media/{media}/download', [MainController::class, 'downloadMedia']);
 Route::post('designs/{design}/fonts', [DesignController::class,'attachMultipleFonts']);
-
 
 Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::prefix('register')->group(function () {

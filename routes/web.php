@@ -5,6 +5,7 @@ use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Api\V1\User\Mockup\BulkMockupController;
 use App\Http\Controllers\Api\V1\User\ShippingAddress\ShippingController;
 use App\Http\Controllers\Dashboard\{AdminController,
+    AiGuideQuestionController,
     BoardController,
     CategoryController,
     CreditOrderController,
@@ -319,13 +320,19 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             ->name('tableau-scenes.store');
         Route::post('tableau-scenes/specifications', [TableauSceneController::class, 'tableauSize'])->name('tableau.specifications.size');
 
+        Route::group(['prefix' => 'ai-guide-questions', 'as' => 'ai-guide-questions.', 'controller' => AiGuideQuestionController::class,], (function () {
+            Route::get('/data', [AiGuideQuestionController::class, 'getData'])->name('data');
+            Route::post('/bulk-delete', [AiGuideQuestionController::class, 'bulkDelete'])->name('bulk-delete');
+        }));
+        Route::resource('ai-guide-questions', AiGuideQuestionController::class);
+
     });
 
     Route::prefix('api/v1/')->group(function () {
         Route::post('mockups/{mockup}/bulk-jobs', [BulkMockupController::class, 'generateBulk']);
-        Route::get('bulk-jobs/{bulkJob}', [BulkMockupController::class, 'status']);
-        Route::post('bulk-jobs/{bulkJob}/cancel', [BulkMockupController::class, 'cancel']);
-        Route::post('bulk-jobs/{bulkJob}/retry', [BulkMockupController::class, 'retry']);
+        Route::get('bulk-jobs/{bulkJob}', [BulkMockupController::class, 'status'])->name('bulk-jobs.status');
+        Route::post('bulk-jobs/{bulkJob}/cancel', [BulkMockupController::class, 'cancel'])->name('bulk-jobs.cancel');
+        Route::post('bulk-jobs/{bulkJob}/retry', [BulkMockupController::class, 'retry'])->name('bulk-jobs.retry');
         Route::delete('fixed-specs/{product_specification}', [FixedSpecController::class, 'destroy'])
             ->name('fixed-specs.destroy');
         Route::controller(ReviewController::class)->group(function () {
@@ -384,8 +391,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
         Route::apiResource('comments', CommentController::class)->only(['store', 'index', 'destroy']);
 
+
         Route::controller(MockupController::class)->group(function () {
-            // routes/web.php
             Route::post('mockups/remove-color', 'removeColor')
                 ->name('mockups.remove-color');
 
@@ -396,6 +403,11 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::get('mockup-types', 'mockupTypes');
             Route::patch('mockups/{mockup}', 'updateEditorData');
             Route::delete('recent-mockups/{mockup}', 'destroyRecentMockup');
+            Route::post('mockups/{mockup}/generate-template-files', 'generateTemplateFiles')
+                ->name('mockups.generate-template-files');
+            Route::delete('mockups/{mockup}/colors-across-templates/{hex}/{template?}', 'removeAcrossTemplateColor')
+                ->where('hex', '[A-Fa-f0-9]{6,8}')
+                ->name('mockups.colors-across-templates.remove');
         });
 
         Route::post('check-product-type', [TemplateController::class, 'checkProductTypeInEditor']);

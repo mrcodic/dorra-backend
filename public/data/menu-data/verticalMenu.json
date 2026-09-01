@@ -38,6 +38,12 @@
             "url": "/products"
         },
         {
+            "name": "AI Questions",
+            "icon": "help-circle",
+            "slug": "",
+            "url": "/ai-guide-questions"
+        },
+        {
             "name": "Roles",
             "icon": "shield",
             "slug": "",

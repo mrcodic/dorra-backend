@@ -96,6 +96,258 @@
             display: none !important;
         }
 
+
+        .color-settings-wrap {
+            background: #fff;
+            border-radius: 16px;
+            padding: 18px 16px 14px;
+            margin-top: 8px;
+        }
+
+        .color-settings-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 6px;
+        }
+
+        .color-settings-description {
+            font-size: 12px;
+            color: #686868;
+            margin-bottom: 16px;
+        }
+
+        .color-settings-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .palette-card {
+            min-height: 198px;
+            border-radius: 22px;
+            padding: 16px 20px 14px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .palette-card--base {
+            border: 1px solid #24B094;
+            background: #fbfffe;
+        }
+
+        .palette-card--across {
+            border: 1px solid #6f3aa6;
+            background: #fffafe;
+        }
+
+        .palette-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .palette-card-heading {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .palette-card-icon {
+            width: 40px;
+            height: 40px;
+            flex: 0 0 40px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 21px;
+            line-height: 1;
+        }
+
+        .palette-card--base .palette-card-icon {
+            color: #0a9e83;
+            background: #e3f7f2;
+        }
+
+        .palette-card--across .palette-card-icon {
+            color: #643091;
+            background: #f2e5f7;
+        }
+
+        .palette-card-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e1e1e;
+            margin: 2px 0 4px;
+        }
+
+        .palette-card-copy {
+            font-size: 11px;
+            color: #626262;
+            margin: 0;
+            line-height: 1.45;
+        }
+
+        .palette-badge {
+            flex: 0 0 auto;
+            padding: 6px 11px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .palette-card--base .palette-badge {
+            color: #24B094;
+            background: #e2f6f1;
+        }
+
+        .palette-card--across .palette-badge {
+            color: #6f3aa6;
+            background: #f2e4f6;
+        }
+
+        .palette-note {
+            display: inline-flex;
+            align-items: center;
+            align-self: flex-start;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            margin-top: 14px;
+            font-size: 10px;
+            line-height: 1.2;
+        }
+
+        .palette-card--base .palette-note {
+            background: #e5f7f3;
+            color: #128b75;
+        }
+
+        .palette-card--across .palette-note {
+            background: #f3e8f7;
+            color: #66308d;
+        }
+
+        .palette-note-check {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .palette-colors-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 18px;
+            min-height: 30px;
+        }
+
+        .palette-card .selected-color-wrapper {
+            width: 24px;
+            height: 24px;
+        }
+
+        .palette-card .selected-color-dot {
+            padding: 0;
+            border: 0;
+            background: transparent !important;
+        }
+
+        .palette-card .selected-color-inner {
+            border: 0;
+        }
+
+        .palette-card .gradient-picker-trigger {
+            width: 34px;
+            height: 34px;
+            min-width: 24px;
+
+            box-shadow: none;
+        }
+
+        .palette-source-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 0;
+            padding: 0;
+            cursor: pointer;
+            position: relative;
+            transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+        }
+
+        .palette-source-color:hover {
+            transform: translateY(-1px);
+        }
+
+        .palette-source-color.is-selected {
+            box-shadow: 0 0 0 2px #fff, 0 0 0 4px #6f3aa6;
+            opacity: 1;
+        }
+
+        .palette-source-color:not(.is-selected) {
+            opacity: .7;
+        }
+
+        .palette-source-color-check {
+            position: absolute;
+            right: -4px;
+            top: -6px;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #6f3aa6;
+            color: #fff;
+            font-size: 9px;
+            line-height: 13px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .palette-footer {
+            margin-top: auto;
+            padding-top: 13px;
+            font-size: 9px;
+            color: #a0a0a0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .palette-footer-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex: 0 0 7px;
+        }
+
+        .palette-card--base .palette-footer-dot {
+            background: #24B094;
+        }
+
+        .palette-card--across .palette-footer-dot {
+            background: #6f3aa6;
+        }
+
+        #selected-colors,
+        #selected-colors-across-templates,
+        #mockupColorsAcrossOptions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        @media (max-width: 991.98px) {
+            .color-settings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         /* كل بلوك ياخد سطر كامل ويتكدس عموديًا */
         .type-block {
             display: block !important;
@@ -133,6 +385,228 @@
             transform: translateY(-4px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
             transition: transform 180ms var(--anim-ease), box-shadow 180ms var(--anim-ease);
+        }
+    </style>
+    <style>
+
+        #generationProgressModal .modal-dialog {
+            max-width: 440px;
+            padding: 18px;
+        }
+
+        .generation-retry-btn {background:#fff7e8;color:#b96d00;border:1px solid #ffd48a;}
+        .generation-retry-btn:hover {background:#fff0cf;}
+        #generationProgressModal .modal-content {
+            border: 0;
+            border-radius: 28px !important;
+            overflow: hidden;
+            box-shadow: 0 22px 70px rgba(15, 23, 42, .22) !important;
+        }
+
+        .generation-progress-card {
+            position: relative;
+            padding: 24px 24px 20px;
+            text-align: center;
+            background: #fff;
+        }
+
+        .generation-minimize-btn {
+            position: absolute;
+            top: 17px;
+            right: 17px;
+            width: 36px;
+            height: 36px;
+            border: 0;
+            border-radius: 50%;
+            background: #f7f8fa;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .generation-spinner-shell {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 18px;
+            border-radius: 50%;
+            background: #e9f9f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .generation-spinner-ring {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(36, 176, 148, .25);
+            border-top-color: #24b094;
+            border-radius: 50%;
+            animation: generationSpin .8s linear infinite;
+        }
+
+        @keyframes generationSpin {
+            to { transform: rotate(360deg); }
+        }
+
+        .generation-title {
+            margin: 0;
+            color: #172033;
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .generation-copy {
+            max-width: 330px;
+            margin: 10px auto 24px;
+            color: #7b8497;
+            font-size: 13px;
+            line-height: 1.65;
+        }
+
+        .generation-progress-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #596273;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .generation-progress-track {
+            height: 10px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #f1f3f6;
+        }
+
+        #generationProgressBar {
+            height: 100%;
+            width: 0;
+            border-radius: inherit;
+            background: #24b094;
+            transition: width .35s ease;
+        }
+
+        .generation-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .generation-stat {
+            border-radius: 16px;
+            padding: 15px 8px 12px;
+            background: #f8f9fb;
+        }
+
+        .generation-stat.done { background: #eafaf4; }
+        .generation-stat.failed { background: #fff0f0; }
+
+        .generation-stat-value {
+            display: block;
+            color: #172033;
+            font-size: 19px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .generation-stat.done .generation-stat-value { color: #0c9d79; }
+        .generation-stat.failed .generation-stat-value { color: #ef4444; }
+
+        .generation-stat-label {
+            display: block;
+            margin-top: 7px;
+            color: #a0a8b7;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .generation-remaining {
+            min-height: 18px;
+            margin: 14px 0 4px;
+            color: #8b94a5;
+            font-size: 11px;
+        }
+
+        .generation-action-btn {
+            width: 100%;
+            min-height: 44px;
+            border: 0;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .generation-background-btn {
+            margin-top: 16px;
+            background: #24b094;
+            color: #fff;
+        }
+
+        .generation-background-btn:hover {
+            background: #1d9f86;
+            color: #fff;
+        }
+
+        .generation-cancel-btn {
+            margin-top: 10px;
+            border: 1px solid #ffcaca;
+            background: #fff4f4;
+            color: #ef4444;
+        }
+
+        .generation-cancel-btn:hover {
+            background: #ffeaea;
+            color: #dc2626;
+        }
+
+        .generation-close-btn {
+            margin-top: 16px;
+            background: #172033;
+            color: #fff;
+        }
+
+        .generation-hint {
+            margin: 12px 0 0;
+            color: #a4acba;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        #generationProgressError {
+            margin-top: 14px;
+            border: 0;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+
+        #generationFloatingStatus {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 1055;
+            border: 0;
+            border-radius: 999px;
+            padding: 11px 16px;
+            background: #172033;
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, .2);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        #generationFloatingStatus .floating-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 7px;
+            border-radius: 50%;
+            background: #24b094;
         }
     </style>
 @endsection
@@ -265,56 +739,70 @@
                                     <div id="fileInputsContainer" class="row g-1"></div>
                                 </div>
                             </div>
-                            <!-- العمود اليمين: الـ editor / preview -->
-                            {{--                        <div class="row">--}}
-                            {{--                            <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorFrontWrapper">--}}
-                            {{--                                <label class="label-text">Mockup Editor (Front)</label>--}}
-                            {{--                                <canvas id="mockupCanvasFront" style="border:1px solid #ccc;" height="480"--}}
-                            {{--                                        width="480"></canvas>--}}
-                            {{--                            </div>--}}
-                            {{--                            <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorBackWrapper">--}}
-                            {{--                                <label class="label-text">Mockup Editor (Back)</label>--}}
-                            {{--                                <canvas id="mockupCanvasBack" style="border:1px solid #ccc;" height="480"--}}
-                            {{--                                        width="480"></canvas>--}}
-                            {{--                            </div>--}}
-
-                            {{--                            <div class="d-none col-md-6 d-flex flex-column align-items-center" id="editorNoneWrapper">--}}
-                            {{--                                <label class="label-text">Mockup Editor (General)</label>--}}
-                            {{--                                <canvas id="mockupCanvasNone" class="w-100" height="480" width="480"--}}
-                            {{--                                        style="border:1px solid #ccc;"></canvas>--}}
-                            {{--                            </div>--}}
-                            {{--                        </div>--}}
-
-                            {{--                        @if(request('q') === 'without')--}}
-
-
-                            {{--                        <div class="form-group my-2 d-none" id="templatesCardsWrapper">--}}
-                            {{--                            <label class="form-label mb-2">Choose Template</label>--}}
-                            {{--                            <div id="templatesCardsContainer" class="row g-1 p-1 bg-white border rounded-3 shadow-sm">--}}
-                            {{--                            </div>--}}
-                            {{--                            <input type="hidden" name="template_id" id="selectedTemplateId" class="col-md-3">--}}
-                            {{--                            <div id="templatesHiddenContainer"></div>--}}
-                            {{--                        </div>--}}
-                            {{--                        @endif--}}
                         </div>
 
 
-                        <div class="mb-2">
-                            <label class="label-text mb-1 d-block">Colors</label>
-                            <div class="d-flex flex-wrap align-items-center gap-1">
-                                <button type="button" id="openColorPicker"
-                                        class="gradient-picker-trigger border openColorPicker"></button>
-
-                                <span id="selected-colors"
-                                      class="d-flex gap-1 flex-wrap align-items-center selected-colors"></span>
+                        <div class="color-settings-wrap mb-2">
+                            <div class="color-settings-title">Color settings</div>
+                            <div class="color-settings-description">Keep the colors used automatically by the mockup separate from the optional colors used across templates.</div>
+                            <div class="color-settings-grid">
+                                <div class="palette-card palette-card--base">
+                                    <div class="palette-card-header">
+                                        <div class="palette-card-heading">
+                                            <div class="palette-card-icon">&#128274;</div>
+                                            <div>
+                                                <div class="palette-card-name">Mockup Base Palette</div>
+                                                <p class="palette-card-copy">Fixed colors used automatically across all generated mockups.</p>
+                                            </div>
+                                        </div>
+                                        <span class="palette-badge">APPLIES TO ALL</span>
+                                    </div>
+                                    <div class="palette-note"><span class="palette-note-check">&#10003;</span><span>Customers don't choose these colors — they are part of the mockup setup.</span></div>
+                                    <div class="palette-colors-row">
+                                        <span id="selected-colors" class="selected-colors"></span>
+                                        <button type="button" id="openColorPicker" class="gradient-picker-trigger openColorPicker" data-color-target="pre_fill_colors" title="Add mockup color"></button>
+                                    </div>
+                                    <div id="colorsInputContainer"></div>
+                                    <div class="palette-footer"><span class="palette-footer-dot"></span><span>Automatic · Used in every mockup render</span></div>
+                                </div>
+                                <div class="palette-card palette-card--across">
+                                    <div class="palette-card-header">
+                                        <div class="palette-card-heading">
+                                            <div class="palette-card-icon">&#127912;</div>
+                                            <div>
+                                                <div class="palette-card-name">Colors Across Templates</div>
+                                                <p class="palette-card-copy">Select from Mockup Colors or add another color to use across templates.</p>
+                                            </div>
+                                        </div>
+                                        <span class="palette-badge">OPTIONAL</span>
+                                    </div>
+                                    <div class="palette-note"><span class="palette-note-check">&#10003;</span><span>Select any base color below, or add a custom color.</span></div>
+                                    <div class="palette-colors-row">
+                                        <span id="selected-colors-across-templates"></span>
+                                        <button type="button" id="openAcrossTemplatesColorPicker" class="gradient-picker-trigger openColorPicker"
+                                                data-color-target="colors_across_templates" title="Pick a custom color"></button>
+                                    </div>
+                                    <div id="colorsAcrossTemplatesInputContainer"></div>
+                                    <button type="button" id="toggleBasePaletteSelect"
+                                            class="btn btn-link btn-sm p-0 mt-1 ms-auto d-block text-decoration-underline"
+                                            data-bs-toggle="modal" data-bs-target="#basePaletteModal"
+                                            title="Select from Mockup Base Palette">
+                                        Select from Base Palette
+                                    </button>
+                                    <div class="palette-footer"><span class="palette-footer-dot"></span><span>Optional · Can reuse base colors or include custom colors</span></div>
+                                    <button type="button" class="btn btn-secondary btn-sm d-none mt-2 px-2 py-1" id="generateTemplateMockupFiles" data-mockup-id="" style="font-size:13px;white-space:nowrap;">
+                                        <span class="btn-text">Generate Mockups</span>
+                                        <span class="spinner-border spinner-border-sm d-none ms-1" id="generateTemplateMockupFilesLoader"></span>
+                                    </button>
+                                </div>
                             </div>
-                            <div id="colorsInputContainer"></div>
-                        </div>
 
+                        </div>
 
                         <div class="modal-footer border-top-0">
                             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel
                             </button>
+
                             <button type="submit" class="btn btn-primary fs-5 saveChangesButton" id="SaveChangesButton">
                                 <span class="btn-text">Create</span>
                                 <span id="saveLoader" class="spinner-border spinner-border-sm d-none saveLoader"
@@ -323,12 +811,100 @@
                             </button>
                         </div>
 
+                    </div>
+
                 </form>
             </div>
 
         </div>
 
+        {{-- Select-from-Mockup-Base-Palette popup --}}
+        <div class="modal fade" id="basePaletteModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Select from Mockup Base Palette</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="mockupColorsAcrossOptions"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-primary me-auto" id="selectAllBasePaletteColors">Select All</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Done</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+
+        <div class="modal fade" id="confirmColorDeleteModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-3 shadow">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Delete Color?</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2">Are you sure you want to delete this color?</p>
+                        <div class="d-flex align-items-center gap-1" id="confirmDeleteColorPreviewWrap">
+                            <span id="confirmDeleteColorPreview" style="width:28px;height:28px;border-radius:50%;border:1px solid #ddd;display:inline-block;"></span>
+                            <strong id="confirmDeleteColorValue"></strong>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirmDeleteColorAction">Yes, Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade" id="generationProgressModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="generation-progress-card">
+                        <button type="button" class="generation-minimize-btn" id="generationMinimizeButton" aria-label="Continue in background">↙</button>
+                        <div class="generation-spinner-shell" id="generationSpinnerShell">
+                            <div class="generation-spinner-ring"></div>
+                        </div>
+                        <h3 class="generation-title">Generating mockups</h3>
+                        <p class="generation-copy">You can safely minimize this window. Generation will continue in the background and you can reopen the progress from the bottom-right status button.</p>
+                        <span id="generationProgressStatus" class="d-none">Preparing...</span>
+                        <div class="generation-progress-meta">
+                            <span id="generationProgressCount">0 / 0 processed</span>
+                            <strong id="generationProgressPercent">0%</strong>
+                        </div>
+                        <div class="generation-progress-track">
+                            <div id="generationProgressBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                        </div>
+                        <div class="generation-stats">
+                            <div class="generation-stat">
+                                <span class="generation-stat-value" id="generationTotalCount">0</span>
+                                <span class="generation-stat-label">Total</span>
+                            </div>
+                            <div class="generation-stat done">
+                                <span class="generation-stat-value" id="generationDoneCount">0</span>
+                                <span class="generation-stat-label">Done</span>
+                            </div>
+                            <div class="generation-stat failed">
+                                <span class="generation-stat-value" id="generationFailedCount">0</span>
+                                <span class="generation-stat-label">Failed</span>
+                            </div>
+                        </div>
+                        <div class="generation-remaining" id="generationProgressRemaining">Calculating...</div>
+                        <div id="generationProgressError" class="alert alert-danger d-none mb-0"></div>
+                        <button type="button" class="generation-action-btn generation-background-btn" id="generationContinueBackground">↙ &nbsp; Continue in background</button>
+                        <button type="button" class="generation-action-btn generation-cancel-btn" id="generationCancelButton">⊗ &nbsp; Cancel generation</button>
+                        <button type="button" class="generation-action-btn generation-retry-btn d-none" id="generationRetryButton">↻ &nbsp; Retry failed</button>
+                        <button type="button" class="generation-action-btn generation-close-btn d-none" id="generationProgressClose" data-bs-dismiss="modal">Close</button>
+                        <p class="generation-hint">Closing this window will not stop the generation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button type="button" id="generationFloatingStatus" class="d-none"><span class="floating-dot"></span><span id="generationFloatingText">Generating mockups</span> · <span id="generationFloatingPercent">0%</span></button>
         @include("modals.templates.template-modal")
     </section>
     <!-- users list ends -->
@@ -357,6 +933,247 @@
 @endsection
 
 @section('page-script')
+    <script>
+        function resetGenerateButton() {
+            const $button = $('#generateTemplateMockupFiles');
+            $button.prop('disabled', false);
+            $('#generateTemplateMockupFilesLoader').addClass('d-none');
+            $button.find('.btn-text').text('Generate Mockups');
+        }
+
+
+        let generationPollTimer = null;
+        let generationReloadOnClose = false;
+        let generationCurrentJobId = null;
+        let generationBackgroundMode = false;
+        let generationTerminal = false;
+        const bulkJobStatusUrlTemplate = @json(route('bulk-jobs.status', ['__JOB_ID__']));
+        const bulkJobCancelUrlTemplate = @json(\Illuminate\Support\Facades\Route::has('bulk-jobs.cancel') ? route('bulk-jobs.cancel', ['__JOB_ID__']) : null);
+        const bulkJobRetryUrlTemplate = @json(route('bulk-jobs.retry', ['bulkJob' => '__JOB_ID__']));
+
+        function extractBulkJobId(response) {
+            return response?.data?.data?.bulk_job_id ?? response?.data?.bulk_job_id ?? response?.bulk_job_id ?? response?.data?.data?.id ?? response?.data?.id ?? null;
+        }
+
+        function formatRemainingSeconds(seconds) {
+            seconds = Math.max(0, parseInt(seconds || 0, 10));
+            if (!seconds) return 'Finishing...';
+            if (seconds < 60) return `${seconds}s remaining`;
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes}m ${secs}s remaining`;
+        }
+
+        function resetGenerationProgressModal() {
+            generationTerminal = false;
+            $('#generationProgressStatus').text('Preparing...');
+            $('#generationProgressPercent').text('0%');
+            $('#generationProgressBar').css('width', '0%').attr('aria-valuenow', 0);
+            $('#generationProgressCount').text('0 / 0 processed');
+            $('#generationTotalCount').text('0');
+            $('#generationDoneCount').text('0');
+            $('#generationFailedCount').text('0');
+            $('#generationProgressRemaining').text('Calculating...');
+            $('#generationProgressError').addClass('d-none').text('');
+            $('#generationProgressClose, #generationRetryButton').addClass('d-none');
+            $('#generationContinueBackground, #generationMinimizeButton').removeClass('d-none');
+            $('#generationCancelButton').toggleClass('d-none', !bulkJobCancelUrlTemplate).prop('disabled', false).html('⊗ &nbsp; Cancel generation');
+            $('#generationSpinnerShell').removeClass('d-none');
+            $('#generationFloatingStatus').addClass('d-none');
+            $('#generationFloatingText').text('Generating mockups');
+            $('#generationFloatingPercent').text('0%');
+        }
+
+        function startGenerationProgress(jobId, reloadOnClose = false) {
+            if (!jobId) return false;
+            clearTimeout(generationPollTimer);
+            generationCurrentJobId = jobId;
+            generationReloadOnClose = reloadOnClose;
+            generationBackgroundMode = false;
+            resetGenerationProgressModal();
+            $('#generationProgressModal').modal('show');
+            const statusUrl = bulkJobStatusUrlTemplate.replace('__JOB_ID__', jobId);
+
+            const poll = function () {
+                $.ajax({
+                    url: statusUrl,
+                    type: 'GET',
+                    headers: {'Accept': 'application/json'},
+                    success: function (response) {
+                        const job = response?.data?.data ?? response?.data ?? response ?? {};
+                        const status = String(job.status || 'processing');
+                        const percent = Math.max(0, Math.min(100, Number(job.percent) || 0));
+                        const completed = Number(job.completed_count) || 0;
+                        const failed = Number(job.failed_count) || 0;
+                        const total = Number(job.total_count) || 0;
+                        const terminal = ['completed', 'completed_with_errors', 'failed', 'cancelled'].includes(status);
+
+                        $('#generationProgressPercent').text(`${percent.toFixed(1)}%`);
+                        $('#generationProgressBar').css('width', `${percent}%`).attr('aria-valuenow', percent);
+                        $('#generationProgressCount').text(`${completed} / ${total} processed`);
+                        $('#generationTotalCount').text(total);
+                        $('#generationDoneCount').text(completed);
+                        $('#generationFailedCount').text(failed);
+                        $('#generationProgressRemaining').text(terminal ? 'Finished' : formatRemainingSeconds(job.estimated_remaining_seconds));
+                        $('#generationProgressStatus').text(status.replaceAll('_', ' '));
+                        $('#generationFloatingPercent').text(`${Math.round(percent)}%`);
+
+                        if (terminal) {
+                            generationTerminal = true;
+                            $('#generationSpinnerShell').addClass('d-none');
+                            $('#generationContinueBackground, #generationMinimizeButton, #generationCancelButton').addClass('d-none');
+                            $('#generationProgressClose').removeClass('d-none');
+                            const canRetry = failed > 0 && ['failed', 'completed_with_errors'].includes(status);
+                            $('#generationRetryButton').toggleClass('d-none', !canRetry);
+                            $('#generationFloatingText').text(status === 'completed' ? 'Generation complete' : status.replaceAll('_', ' '));
+                            if (status === 'failed' || status === 'cancelled') {
+                                $('#generationProgressError').removeClass('d-none').text(status === 'failed' ? 'Mockup generation failed.' : 'Mockup generation was cancelled.');
+                            } else if (status === 'completed_with_errors') {
+                                $('#generationProgressError').removeClass('d-none').text('Generation completed with some failed items.');
+                            }
+                            if (typeof resetGenerateButton === 'function') resetGenerateButton();
+                            return;
+                        }
+
+                        generationPollTimer = setTimeout(poll, 1000);
+                    },
+                    error: function (xhr) {
+                        $('#generationProgressError').removeClass('d-none').text(xhr.responseJSON?.message || 'Unable to read generation progress. Retrying...');
+                        generationPollTimer = setTimeout(poll, 2000);
+                    }
+                });
+            };
+
+            poll();
+            return true;
+        }
+
+        $(document).on('click', '#generationContinueBackground, #generationMinimizeButton', function () {
+            if (!generationCurrentJobId || generationTerminal) return;
+            generationBackgroundMode = true;
+            $('#generationFloatingStatus').removeClass('d-none');
+            $('#generationProgressModal').modal('hide');
+        });
+
+        $(document).on('click', '#generationFloatingStatus', function () {
+            generationBackgroundMode = false;
+            $(this).addClass('d-none');
+            $('#generationProgressModal').modal('show');
+        });
+
+        $(document).on('click', '#generationRetryButton', function () {
+            if (!bulkJobRetryUrlTemplate || !generationCurrentJobId) return;
+            const $button = $(this);
+            $button.prop('disabled', true).text('Retrying...');
+            $.ajax({
+                url: bulkJobRetryUrlTemplate.replace('__JOB_ID__', generationCurrentJobId),
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Accept': 'application/json'
+                },
+                success: function (response) {
+                    const newJobId = extractBulkJobId(response) || generationCurrentJobId;
+                    $('#generationRetryButton').addClass('d-none').prop('disabled', false).html('↻ &nbsp; Retry failed');
+                    startGenerationProgress(newJobId, generationReloadOnClose);
+                },
+                error: function (xhr) {
+                    $button.prop('disabled', false).html('↻ &nbsp; Retry failed');
+                    $('#generationProgressError').removeClass('d-none').text(xhr.responseJSON?.message || 'Failed to retry generation.');
+                }
+            });
+        });
+
+        $(document).on('click', '#generationCancelButton', function () {
+            if (!bulkJobCancelUrlTemplate || !generationCurrentJobId || generationTerminal) return;
+            const $button = $(this);
+            $button.prop('disabled', true).text('Cancelling...');
+            $.ajax({
+                url: bulkJobCancelUrlTemplate.replace('__JOB_ID__', generationCurrentJobId),
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Accept': 'application/json'
+                },
+                error: function (xhr) {
+                    $button.prop('disabled', false).html('⊗ &nbsp; Cancel generation');
+                    $('#generationProgressError').removeClass('d-none').text(xhr.responseJSON?.message || 'Failed to cancel generation.');
+                }
+            });
+        });
+
+        $(document).on('hidden.bs.modal', '#generationProgressModal', function () {
+            if (generationBackgroundMode) return;
+            if (!generationTerminal) return;
+            clearTimeout(generationPollTimer);
+            generationCurrentJobId = null;
+            $('#generationFloatingStatus').addClass('d-none');
+            if (generationReloadOnClose) location.reload();
+        });
+
+        $(document).on('click', '#generateTemplateMockupFiles', function () {
+            const $button = $(this);
+            const mockupId = $button.attr('data-mockup-id');
+            if (!mockupId) {
+                Toastify({
+                    text: 'Please save the mockup first',
+                    duration: 3000,
+                    gravity: 'top',
+                    position: 'right',
+                    backgroundColor: '#dc3545',
+                    close: true
+                }).showToast();
+                return;
+            }
+
+            const url = @json(route('mockups.generate-template-files', ['mockup' => '__MOCKUP_ID__'])).replace('__MOCKUP_ID__', mockupId);
+            $button.prop('disabled', true);
+            $('#generateTemplateMockupFilesLoader').removeClass('d-none');
+            $button.find('.btn-text').text('Generating...');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Accept': 'application/json'
+                },
+                success: function (response) {
+                    const jobId = extractBulkJobId(response);
+                    Toastify({
+                        text: response.message || 'Mockup generation started',
+                        duration: 2500,
+                        gravity: 'top',
+                        position: 'right',
+                        backgroundColor: '#28a745',
+                        close: true
+                    }).showToast();
+                    if (!startGenerationProgress(jobId, false)) {
+                        Toastify({
+                            text: 'Generation started but no bulk job id was returned.',
+                            duration: 3000,
+                            gravity: 'top',
+                            position: 'right',
+                            backgroundColor: '#dc3545',
+                            close: true
+                        }).showToast();
+                        resetGenerateButton();
+                    }
+                },
+                error: function (xhr) {
+                    Toastify({
+                        text: xhr.responseJSON?.message || 'Failed to generate mockup files',
+                        duration: 3000,
+                        gravity: 'top',
+                        position: 'right',
+                        backgroundColor: '#dc3545',
+                        close: true
+                    }).showToast();
+                    resetGenerateButton();
+                }
+            });
+        });
+    </script>
     <script>
         $('#productsSelect').select2({
             placeholder: 'Choose product',
@@ -644,59 +1461,9 @@
                     .get(); // → [1, 2] مثلاً
             }
 
-            {{--function fetchTemplatesForProduct(productId) {--}}
-            {{--    if (!productId) {--}}
-            {{--        resetTemplatesUI();--}}
-            {{--        return;--}}
-            {{--    }--}}
-
-            {{--    resetTemplatesUI();--}}
-            {{--    currentProductId = productId;--}}
-
-            {{--    $templatesCardsContainer.html(`--}}
-            {{--    <div class="col-12 text-center py-2">--}}
-            {{--        Loading templates...--}}
-            {{--    </div>--}}
-            {{--`);--}}
-            {{--    $templatesWrapper.removeClass('d-none');--}}
-
-            {{--    $.ajax({--}}
-            {{--        url: "{{ route('product-templates.index') }}",--}}
-            {{--        method: "GET",--}}
-            {{--        data: {--}}
-            {{--            product_without_category_id: productId,--}}
-            {{--            request_type: "api",--}}
-            {{--            // approach: "without_editor",--}}
-            {{--            paginate: true,--}}
-            {{--            // has_not_mockups: true,--}}
-            {{--            per_page: 12,--}}
-            {{--            types: getSelectedTypesForRequest(),--}}
-            {{--        },--}}
-
-            {{--        success: function (response) {--}}
-            {{--            const data = response.data ?? {};--}}
-            {{--            const items = data.data ?? [];--}}
-            {{--            const links = data.links ?? {};--}}
-
-            {{--            firstPageTemplates = items;--}}
-            {{--            nextPageUrl = links.next || null;--}}
-
-            {{--            renderTemplateCards(firstPageTemplates);--}}
-            {{--        },--}}
-            {{--        error: function (xhr) {--}}
-            {{--            console.error("Error loading templates", xhr);--}}
-            {{--            resetTemplatesUI();--}}
-            {{--        }--}}
-            {{--    });--}}
-            {{--}--}}
-
             // =========================
             // Events: Product change
             // =========================
-            // $productSelect.on('change', function () {
-            //     const productId = $(this).val();
-            //     fetchTemplatesForProduct(productId);
-            // });
 
             // حالة edit: لو فيه value جاهزة
             if ($productSelect.val()) {
@@ -908,11 +1675,6 @@
                 };
             };
 
-            // $('form').on('submit', function () {
-            //     buildHiddenTemplateInputs();
-            // });
-
-
             // حفظ أماكن Template واحد
             function savePositionsForTemplate(templateId) {
                 const id = String(templateId);
@@ -1018,46 +1780,6 @@
             canvas.renderAll();
         }
 
-        // function syncTemplateInputs(obj, type) {
-        //     const container = document.getElementById('templatesHiddenContainer');
-        //     if (!container) return;
-
-        //     const canvas = obj.canvas;
-        //     const meta = canvas && canvas.__mockupMeta;
-        //     if (!meta) return;
-
-        //     const templateId = obj.templateId;
-
-        //     const templateContainer = container.querySelector(`.template-inputs[data-template-id="${templateId}"]`);
-        //     if (!templateContainer) return;
-
-        //     const xInput = templateContainer.querySelector(`.template_x.${type}`);
-        //     const yInput = templateContainer.querySelector(`.template_y.${type}`);
-        //     const widthInput = templateContainer.querySelector(`.template_width.${type}`);
-        //     const heightInput = templateContainer.querySelector(`.template_height.${type}`);
-        //     const angleInput = templateContainer.querySelector(`.template_angle.${type}`);
-        //     if (!xInput || !yInput || !widthInput || !heightInput || !angleInput) return;
-
-        //     const center = obj.getCenterPoint();
-        //     const wReal  = (obj.width || 0) * (obj.scaleX || 1);
-        //     const hReal  = (obj.height || 0) * (obj.scaleY || 1);
-
-        //     let xPct = (center.x - meta.offsetLeft) / meta.scaledWidth;
-        //     let yPct = (center.y - meta.offsetTop)  / meta.scaledHeight;
-        //     let wPct = wReal / meta.scaledWidth;
-        //     let hPct = hReal / meta.scaledHeight;
-
-        //     if (!Number.isFinite(xPct)) xPct = 0;
-        //     if (!Number.isFinite(yPct)) yPct = 0;
-        //     if (!Number.isFinite(wPct)) wPct = 0;
-        //     if (!Number.isFinite(hPct)) hPct = 0;
-
-        //     xInput.value      = xPct.toFixed(6);
-        //     yInput.value      = yPct.toFixed(6);
-        //     widthInput.value  = wPct.toFixed(6);
-        //     heightInput.value = hPct.toFixed(6);
-        //     angleInput.value  = String(obj.angle || 0);
-        // }
         function updateTemplatePositionsFromObject(obj, type) {
             const canvas = obj.canvas;
             const meta = canvas && canvas.__mockupMeta;
@@ -1202,39 +1924,9 @@
             });
         }
 
-
-        // function saveAllTemplatePositions() {
-        //     if (window.canvasFront) {
-        //         window.canvasFront.getObjects().forEach(obj => {
-        //             if (obj.templateType === 'front') {
-        //                 syncTemplateInputs(obj, 'front');
-        //             }
-        //         });
-        //     }
-
-        //     if (window.canvasBack) {
-        //         console.log('Canvas', window.canvasBack.getObjects());
-
-        //         window.canvasBack.getObjects().forEach(obj => {
-        //             if (obj.templateType === 'back') {
-        //                 syncTemplateInputs(obj, 'back');
-        //             }
-        //         });
-        //     }
-
-        //     if (window.canvasNone) {
-        //         window.canvasNone.getObjects().forEach(obj => {
-        //             if (obj.templateType === 'none') {
-        //                 syncTemplateInputs(obj, 'none');
-        //             }
-        //         });
-        //     }
-        // }
-
         function bindCanvasUpdates(canvas, type) {
             canvas.on('object:modified', function (e) {
                 const obj = e.target;
-                // syncTemplateInputs(obj, type);
                 updateTemplatePositionsFromObject(obj, type);
                 buildHiddenTemplateInputs();
             });
@@ -1301,12 +1993,6 @@
             });
 
             renderFileInputs();
-            if (window.jQuery) {
-                // const $prod = $('#productsSelect');
-                // if ($prod.length && $prod.val()) {
-                //     $prod.trigger('change');
-                // }
-            }
         }
 
         function hideCanvasForType(type) {
@@ -1859,8 +2545,20 @@
         $(document).ready(function () {
             handleAjaxFormSubmit("#addMockupForm", {
                 successMessage: "Mockup Created Successfully",
-                onSuccess: function () {
-                    location.replace('/mockups');
+                resetForm:false,
+                onSuccess: function (response) {
+                    const mockupId = response?.data?.id;
+
+                    if (!mockupId) {
+                        return;
+                    }
+
+                    $('#generateTemplateMockupFiles')
+                        .attr('data-mockup-id', mockupId)
+                        .removeClass('d-none');
+
+                    $('#SaveChangesButton')
+                        .prop('disabled', true);
                 }
             });
         });
@@ -1941,27 +2639,209 @@
         // =========================
         // COLOR PICKER
         // =========================
-        window.removeGlobalColor = function (hex, btn) {
+        let pickrInstance = null;
+        let currentCard = null;
+        let currentGlobalColorTarget = 'pre_fill_colors';
+        let currentTrigger = null;
+
+        let pendingConfirmColorDelete = null;
+
+        function requestColorDeleteConfirmation(hex, callback, label = null) {
+            pendingConfirmColorDelete = callback;
+            const value = label || String(hex || '');
+            const hasColor = !!hex;
+            $('#confirmDeleteColorValue').text(value);
+            $('#confirmDeleteColorPreviewWrap').toggleClass('d-none', !hasColor && !label);
+            $('#confirmDeleteColorPreview').toggleClass('d-none', !hasColor).css('background-color', hasColor ? hex : 'transparent');
+            $('#confirmColorDeleteModal').modal('show');
+        }
+
+        $(document).on('click', '#confirmDeleteColorAction', function () {
+            if (typeof pendingConfirmColorDelete !== 'function') return;
+            const action = pendingConfirmColorDelete;
+            pendingConfirmColorDelete = null;
+            $('#confirmColorDeleteModal').modal('hide');
+            setTimeout(action, 120);
+        });
+
+        function getGlobalColorConfig(target) {
+            if (target === 'colors_across_templates') {
+                return {
+                    selectedId: 'selected-colors-across-templates',
+                    inputContainerId: 'colorsAcrossTemplatesInputContainer',
+                    inputName: 'colors_across_templates[]'
+                };
+            }
+
+            return {
+                selectedId: 'selected-colors',
+                inputContainerId: 'colorsInputContainer',
+                inputName: 'pre_fill_colors[]'
+            };
+        }
+
+        function getGlobalColors(target) {
+            const config = getGlobalColorConfig(target);
+            const container = document.getElementById(config.inputContainerId);
+            if (!container) return [];
+
+            return [...container.querySelectorAll(`input[name="${config.inputName}"]`)]
+                .map(input => input.value.toLowerCase());
+        }
+
+        function addGlobalColor(hex, target) {
+            hex = hex.toLowerCase();
+            const config = getGlobalColorConfig(target);
+            const selectedColors = document.getElementById(config.selectedId);
+            const inputContainer = document.getElementById(config.inputContainerId);
+
+            if (!selectedColors || !inputContainer) return false;
+
+            const exists = getGlobalColors(target).includes(hex);
+            if (exists) return false;
+
+            const li = document.createElement('li');
+            li.style.listStyle = 'none';
+            li.dataset.hex = hex;
+            li.innerHTML = `
+                <div class="selected-color-wrapper position-relative">
+                    <div class="selected-color-dot" style="background-color:#fff;">
+                        <div class="selected-color-inner" style="background-color:${hex};"></div>
+                    </div>
+                    <button type="button" onclick="removeGlobalColor('${hex}', this, '${target}')" class="remove-color-btn">×</button>
+                </div>`;
+            selectedColors.appendChild(li);
+
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = config.inputName;
+            input.value = hex;
+            inputContainer.appendChild(input);
+
+            syncAcrossTemplateSourceColors();
+            return true;
+        }
+
+        function removeGlobalColorByHex(hex, target) {
+            hex = hex.toLowerCase();
+            const config = getGlobalColorConfig(target);
+            const selectedColors = document.getElementById(config.selectedId);
+            const inputContainer = document.getElementById(config.inputContainerId);
+
+            if (selectedColors) {
+                [...selectedColors.querySelectorAll('li')].forEach(li => {
+                    if ((li.dataset.hex || '').toLowerCase() === hex) li.remove();
+                });
+            }
+
+            if (inputContainer) {
+                [...inputContainer.querySelectorAll(`input[name="${config.inputName}"]`)]
+                    .filter(input => input.value.toLowerCase() === hex)
+                    .forEach(input => input.remove());
+            }
+
+            syncAcrossTemplateSourceColors();
+        }
+
+        window.removeGlobalColor = function (hex, btn, target = 'pre_fill_colors') {
             const li = btn.closest('li');
             if (li) li.remove();
 
-            const inputContainer = document.getElementById('colorsInputContainer');
-            if (!inputContainer) return;
+            const config = getGlobalColorConfig(target);
+            const inputContainer = document.getElementById(config.inputContainerId);
 
-            [...inputContainer.querySelectorAll('input')]
-                .filter(i => i.value.toLowerCase() === hex.toLowerCase())
-                .forEach(i => i.remove());
+            if (inputContainer) {
+                [...inputContainer.querySelectorAll(`input[name="${config.inputName}"]`)]
+                    .filter(input => input.value.toLowerCase() === hex.toLowerCase())
+                    .forEach(input => input.remove());
+            }
+
+            syncAcrossTemplateSourceColors();
         };
-        let pickrInstance = null;
-        let currentCard = null; // card for current pickr session
+
+        function updateBasePaletteSelectAllButton() {
+            const button = document.getElementById('selectAllBasePaletteColors');
+            if (!button) return;
+
+            const baseColors = [...new Set(getGlobalColors('pre_fill_colors'))];
+            const acrossColors = new Set(getGlobalColors('colors_across_templates'));
+            const allSelected = baseColors.length > 0 && baseColors.every(hex => acrossColors.has(hex));
+
+            button.disabled = baseColors.length === 0;
+            button.textContent = allSelected ? 'Deselect All' : 'Select All';
+        }
+
+        function syncAcrossTemplateSourceColors() {
+            const optionsContainer = document.getElementById('mockupColorsAcrossOptions');
+            if (!optionsContainer) return;
+
+            const mockupColors = [...new Set(getGlobalColors('pre_fill_colors'))];
+            const acrossSet = new Set(getGlobalColors('colors_across_templates'));
+            optionsContainer.innerHTML = '';
+
+            if (!mockupColors.length) {
+                const text = document.createElement('small');
+                text.className = 'text-muted';
+                text.textContent = 'Add Mockup Colors first to select them here';
+                optionsContainer.appendChild(text);
+                updateBasePaletteSelectAllButton();
+                return;
+            }
+
+            mockupColors.forEach(hex => {
+                const selected = acrossSet.has(hex);
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = `js-toggle-across-color palette-source-color${selected ? ' is-selected' : ''}`;
+                button.style.backgroundColor = hex;
+                button.dataset.hex = hex;
+                button.title = selected ? 'Remove from Colors Across Templates' : 'Add to Colors Across Templates';
+                if (selected) {
+                    button.innerHTML = '<span class="palette-source-color-check">✓</span>';
+                }
+                optionsContainer.appendChild(button);
+            });
+
+            updateBasePaletteSelectAllButton();
+        }
+
+        // Refresh the base-palette swatches every time the popup opens (colors may have
+        // changed since the panel was last built).
+        $(document).on('show.bs.modal', '#basePaletteModal', function () {
+            syncAcrossTemplateSourceColors();
+        });
+
+        $(document).on('click', '#selectAllBasePaletteColors', function () {
+            const baseColors = [...new Set(getGlobalColors('pre_fill_colors'))];
+            if (!baseColors.length) return;
+            const acrossColors = new Set(getGlobalColors('colors_across_templates'));
+            const allSelected = baseColors.every(hex => acrossColors.has(hex));
+            const applyChange = function () {
+                baseColors.forEach(hex => {
+                    if (allSelected) {
+                        if (getGlobalColors('colors_across_templates').includes(hex)) {
+                            removeGlobalColorByHex(hex, 'colors_across_templates');
+                            if (typeof notifyAcrossColorRemoved === 'function') notifyAcrossColorRemoved(hex);
+                        }
+                    } else {
+                        addGlobalColor(hex, 'colors_across_templates');
+                    }
+                });
+                syncAcrossTemplateSourceColors();
+            };
+            if (allSelected) requestColorDeleteConfirmation(null, applyChange, 'All selected base colors');
+            else applyChange();
+        });
 
         $(document).ready(function () {
-
-            // Destroy previous instance if exists
             if (pickrInstance) pickrInstance.destroyAndRemove();
 
-            // Dummy element for pickr
             const dummyElement = document.createElement('div');
+            dummyElement.style.position = 'fixed';
+            dummyElement.style.top = '0';
+            dummyElement.style.left = '0';
+            dummyElement.style.width = '0';
+            dummyElement.style.height = '0';
             document.body.appendChild(dummyElement);
 
             pickrInstance = Pickr.create({
@@ -1979,49 +2859,38 @@
                 }
             });
 
-            // Handle save
+            // Reposition the popover next to the button that actually opened it.
+            // We hook Pickr's own 'show' event instead of guessing with setTimeout(0):
+            // that guarantees the panel already has the 'visible' class in the DOM
+            // by the time we move it — this was the root cause of the picker
+            // silently opening off-screen / not appearing.
+            pickrInstance.on('show', () => {
+                if (!currentTrigger) return;
+
+                const pickerPanel = document.querySelector('.pcr-app.visible');
+                if (!pickerPanel) return;
+
+                const rect = currentTrigger.getBoundingClientRect();
+                pickerPanel.style.position = 'fixed';
+                pickerPanel.style.left = `${rect.left}px`;
+                pickerPanel.style.top = `${rect.bottom + 5}px`;
+                pickerPanel.style.zIndex = 9999;
+            });
+
             pickrInstance.on('save', (color) => {
-                const hex = color.toHEXA().toString().toLowerCase();
-
-                // ===== q=with mode: write directly to #selected-colors & #colorsInputContainer =====
-                if (!currentCard) {
-                    const selectedColors = document.getElementById('selected-colors');
-                    const inputContainer = document.getElementById('colorsInputContainer');
-                    if (!selectedColors || !inputContainer) {
-                        pickrInstance.hide();
-                        return;
-                    }
-
-                    // avoid duplicates
-                    if ([...inputContainer.querySelectorAll('input')].some(i => i.value === hex)) {
-                        pickrInstance.hide();
-                        return;
-                    }
-
-                    // color dot
-                    const li = document.createElement('li');
-                    li.style.listStyle = 'none';
-                    li.innerHTML = `
-            <div class="selected-color-wrapper position-relative">
-                <div class="selected-color-dot" style="background-color:#fff;">
-                    <div class="selected-color-inner" style="background-color:${hex};"></div>
-                </div>
-                <button type="button" onclick="removeGlobalColor('${hex}', this)" class="remove-color-btn">×</button>
-            </div>`;
-                    selectedColors.appendChild(li);
-
-                    // hidden input
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'pre_fill_colors[]';
-                    input.value = hex;
-                    inputContainer.appendChild(input);
-
+                if (!color) {
                     pickrInstance.hide();
                     return;
                 }
 
-                // ===== q=without mode: write to card =====
+                const hex = color.toHEXA().toString().toLowerCase();
+
+                if (!currentCard) {
+                    addGlobalColor(hex, currentGlobalColorTarget);
+                    pickrInstance.hide();
+                    return;
+                }
+
                 if (!currentCard.selectedColors) currentCard.selectedColors = [];
                 if (!currentCard.selectedColors.includes(hex)) {
                     currentCard.selectedColors.push(hex);
@@ -2031,88 +2900,62 @@
                 buildHiddenTemplateInputs();
                 pickrInstance.hide();
             });
-            // Handle clear
+
             pickrInstance.on('clear', () => {
-                // ===== q=with mode: clear global colors =====
                 if (!currentCard) {
-                    const selectedColors = document.getElementById('selected-colors');
-                    const inputContainer = document.getElementById('colorsInputContainer');
-                    if (selectedColors) selectedColors.innerHTML = '';
-                    if (inputContainer) inputContainer.innerHTML = '';
+                    const config = getGlobalColorConfig(currentGlobalColorTarget);
+                    const selectedColors = document.getElementById(config.selectedId);
+                    const inputContainer = document.getElementById(config.inputContainerId);
+                    requestColorDeleteConfirmation(null, function () {
+                        if (selectedColors) selectedColors.innerHTML = '';
+                        if (inputContainer) inputContainer.innerHTML = '';
+                        syncAcrossTemplateSourceColors();
+                    }, 'All colors');
                     pickrInstance.hide();
                     return;
                 }
-
-                // ===== q=without mode: clear card colors =====
-                currentCard.selectedColors = [];
-                renderSelectedColors(currentCard);
-                buildHiddenTemplateInputs();
+                const card = currentCard;
+                requestColorDeleteConfirmation(null, function () {
+                    card.selectedColors = [];
+                    renderSelectedColors(card);
+                    buildHiddenTemplateInputs();
+                }, 'All template colors');
                 pickrInstance.hide();
             });
+
+            syncAcrossTemplateSourceColors();
         });
 
-        // Open color picker
-        // Open color picker
         $(document).on('click', '.openColorPicker', function () {
-            const trigger = this;
+            currentTrigger = this;
+            const globalTarget = this.dataset.colorTarget;
 
-            // ===== q=with: single global color picker (no template card) =====
-            const isWithMode = trigger.id === 'openColorPicker'; // the static #openColorPicker button
-
-            if (isWithMode) {
-                currentCard = null; // no card context
-
+            if (globalTarget) {
+                currentCard = null;
+                currentGlobalColorTarget = globalTarget;
                 pickrInstance.show();
-
-                setTimeout(() => {
-                    const pickerPanel = document.querySelector('.pcr-app.visible');
-                    if (pickerPanel) {
-                        const rect = trigger.getBoundingClientRect();
-                        pickerPanel.style.position = 'fixed';
-                        pickerPanel.style.left = `${rect.left}px`;
-                        pickerPanel.style.top = `${rect.bottom + 5}px`;
-                        pickerPanel.style.zIndex = 9999;
-                    }
-                }, 0);
-                return; // stop here, don't look for .template-card
+                return;
             }
 
-            // ===== q=without: per-template-card color picker =====
-            const card = trigger.closest('.template-card');
+            const card = this.closest('.template-card');
             currentCard = card;
+            if (!card) return;
             if (!card.selectedColors) card.selectedColors = [];
 
-            const rect = trigger.getBoundingClientRect();
-            const modalScrollTop = document.querySelector('#templateModal .modal-body')?.scrollTop || 0;
-
             pickrInstance.show();
-
-            setTimeout(() => {
-                const pickerPanel = document.querySelector('.pcr-app.visible');
-                if (pickerPanel) {
-                    pickerPanel.style.position = 'absolute';
-                    pickerPanel.style.left = `${rect.left + window.scrollX}px`;
-                    pickerPanel.style.top = `${rect.bottom + window.scrollY + modalScrollTop + 5}px`;
-                    pickerPanel.style.zIndex = 9999;
-                }
-            }, 0);
         });
-        // Remove color from current card
+
         window.removeColor = function (hex, btn) {
             const card = btn.closest('.template-card');
             if (!card) return;
-
-            if (!card.selectedColors) card.selectedColors = [];
-
-            card.selectedColors = card.selectedColors.filter(
-                c => c.toLowerCase() !== hex.toLowerCase()
-            );
-
-            renderSelectedColors(card);
-            buildHiddenTemplateInputs(); // نحدّث templates[..][colors][] بناءً على التغييرات
+            requestColorDeleteConfirmation(hex, function () {
+                if (!card.selectedColors) card.selectedColors = [];
+                card.selectedColors = card.selectedColors.filter(c => c.toLowerCase() !== hex.toLowerCase());
+                renderSelectedColors(card);
+                buildHiddenTemplateInputs();
+            });
         };
 
-        // Render colors inside a card
         function renderSelectedColors(card) {
             const ul = card.querySelector('.selected-colors');
             const container = card.querySelector('.colorsInputContainer');
@@ -2126,13 +2969,12 @@
             (card.selectedColors || []).forEach(c => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                <div class="selected-color-wrapper position-relative">
-                    <div class="selected-color-dot" style="background-color: #fff;">
-                        <div class="selected-color-inner" style="background-color: ${c};"></div>
-                    </div>
-                    <button type="button" onclick="removeColor('${c}', this)" class="remove-color-btn">×</button>
-                </div>
-            `;
+                    <div class="selected-color-wrapper position-relative">
+                        <div class="selected-color-dot" style="background-color: #fff;">
+                            <div class="selected-color-inner" style="background-color: ${c};"></div>
+                        </div>
+                        <button type="button" onclick="removeColor('${c}', this)" class="remove-color-btn">×</button>
+                    </div>`;
                 ul.appendChild(li);
 
                 const hiddenInput = document.createElement('input');
@@ -2153,16 +2995,69 @@
                 const input = document.createElement('input');
                 input.type = 'hidden';
                 input.name = `templates[${templateIndex}][colors][]`;
-                input.value = color.toLowerCase(); // توحيد اللون
+                input.value = color.toLowerCase();
+
                 const inputColors = document.createElement('input');
                 inputColors.type = 'hidden';
                 inputColors.name = 'pre_fill_colors[]';
                 inputColors.value = color.toLowerCase();
+
                 container.appendChild(input);
                 container.appendChild(inputColors);
             });
         }
-
     </script>
+    <script>
+        window.currentMockupId = "{{ $mockup->id ?? '' }}";
 
+        function notifyAcrossColorRemoved(hex) {
+            if (!window.currentMockupId) return; // not saved yet — nothing to sync server-side
+
+            const url = @json(
+        route('mockups.colors-across-templates.remove', ['mockup' => '__MOCKUP_ID__', 'hex' => '__HEX__'])
+    ).replace('__MOCKUP_ID__', window.currentMockupId).replace('__HEX__', hex.toLowerCase());
+
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                success: function () {
+                    Toastify({text: 'Color removed from templates and generated files cleaned up', backgroundColor: '#28a745', duration: 2000}).showToast();
+                },
+                error: function (xhr) {
+                    console.error('Failed to remove across-template color', xhr.responseJSON || xhr.responseText);
+                    Toastify({text: 'Failed to sync color removal with server', backgroundColor: '#dc3545', duration: 2000}).showToast();
+                }
+            });
+        }
+
+        window.removeGlobalColor = function (hex, btn, target = 'pre_fill_colors') {
+            requestColorDeleteConfirmation(hex, function () {
+                const li = btn.closest('li');
+                if (li) li.remove();
+                const config = getGlobalColorConfig(target);
+                const inputContainer = document.getElementById(config.inputContainerId);
+                if (inputContainer) {
+                    [...inputContainer.querySelectorAll(`input[name="${config.inputName}"]`)]
+                        .filter(input => input.value.toLowerCase() === hex.toLowerCase())
+                        .forEach(input => input.remove());
+                }
+                syncAcrossTemplateSourceColors();
+                if (target === 'colors_across_templates') notifyAcrossColorRemoved(hex);
+            });
+        };
+        $(document).on('click', '.js-toggle-across-color', function () {
+            const hex = String(this.dataset.hex || '').toLowerCase();
+            if (!hex) return;
+            if (getGlobalColors('colors_across_templates').includes(hex)) {
+                requestColorDeleteConfirmation(hex, function () {
+                    removeGlobalColorByHex(hex, 'colors_across_templates');
+                    notifyAcrossColorRemoved(hex);
+                });
+            } else {
+                addGlobalColor(hex, 'colors_across_templates');
+            }
+        });
+    </script>
 @endsection
+

@@ -32,12 +32,11 @@ class AiAssetController extends Controller
         $request->validate(['file' => ['required','file',  'mimetypes:image/jpeg,image/png,image/svg+xml',
             'mimes:jpg,jpeg,png,svg',
             ]]);
-        $media = handleMediaUploads($request->file('file'),$request->user(),'ai_assets',
-            makeTransparent: true,
-            transparentColor: null,
-            fuzzPercent: 15,
-
-           );
+        $media = handleMediaUploads(
+            $request->file('file'),
+            $request->user(),
+            'ai_assets',
+        );
         return Response::api(data: MediaResource::make($media)->response()->getData(true));
 
    }

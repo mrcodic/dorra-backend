@@ -641,7 +641,6 @@ class MainController extends Controller
             'Content-Length' => strlen($binary),
         ]);
     }
-
     public function removeMediaBulk(Request $request)
     {
         $request->validate([

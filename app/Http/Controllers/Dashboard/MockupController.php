@@ -8,9 +8,12 @@ use App\Http\Controllers\Base\DashboardController;
 
 use App\Http\Resources\MockupResource;
 
+use App\Models\Mockup;
+use App\Models\Template;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\TemplateRepositoryInterface;
 use App\Repositories\Interfaces\TypeRepositoryInterface;
+use App\Services\Mockup\TemplateMockupGenerator;
 use App\Services\MockupService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
@@ -120,4 +123,71 @@ class MockupController extends DashboardController
         $this->mockupService->removeColor($data);
         return Response::api();
     }
+
+    public function generateTemplateFiles(Request $request,
+        Mockup $mockup, TemplateMockupGenerator $generator) {
+        $colors = collect(
+            $mockup->colors_across_templates ?? []
+        )
+            ->filter()
+            ->values()
+            ->all();
+
+        if (empty($colors)) {
+            return Response::api(
+                message: "No colors found."
+            );
+        }
+
+        $job = $generator->generate($mockup, $colors, force: $request->boolean('force')
+        );
+        return Response::api(
+            data: [
+                'bulk_job_id' => $job->id,
+                'status' => $job->status,
+                'total_count' => $job->total_count,
+            ],
+            message: 'Mockup generation started successfully'
+        );
+
+    }
+
+    public function removeAcrossTemplateColor(
+        Mockup $mockup,
+        string $hex,
+        TemplateMockupGenerator $generator,
+        ?Template $template = null
+    ) {
+        $hex = strtolower(trim($hex));
+        $hex = str_starts_with($hex, '#') ? $hex : '#' . $hex;
+
+        if ($template) {
+            $generator->removeDeletedColors(
+                mockup: $mockup,
+                removedHexes: [$hex],
+                template: $template
+            );
+
+            return Response::api(
+                message: 'Color removed from this template successfully.'
+            );
+        }
+
+        $newColors = collect($mockup->colors_across_templates ?? [])
+            ->filter()
+            ->reject(fn ($color) => strtolower(trim($color)) === $hex)
+            ->values()
+            ->all();
+
+        $mockup->colors_across_templates = $newColors;
+        $mockup->save();
+
+        $generator->removeDeletedColors(
+            mockup: $mockup,
+            removedHexes: [$hex]
+        );
+
+        return Response::api(message: 'Color removed successfully.');
+    }
+
 }

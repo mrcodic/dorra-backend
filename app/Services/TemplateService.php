@@ -15,6 +15,7 @@ use App\Models\TableauScene;
 use App\Models\Template;
 use App\Models\Type;
 use App\Repositories\Base\BaseRepositoryInterface;
+use App\Services\Mockup\TemplateMockupGenerator;
 use App\Traits\RendersTemplateMockups;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
@@ -38,6 +39,7 @@ class TemplateService extends BaseService
         , public ProductRepositoryInterface                 $productRepository
         , public CategoryRepositoryInterface                $categoryRepository
         , public ImageService                               $imageService
+        , public TemplateMockupGenerator                    $templateMockupGenerator
     )
     {
         parent::__construct($repository);
@@ -218,80 +220,71 @@ class TemplateService extends BaseService
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
-        $colors = Arr::get($validatedData, 'colors');
-        $finalColors = collect($colors)->flatMap(function ($color) {
-            return [
-                $color['value'],
-            ];
-        })->toArray();
-        $validatedData['colors'] = $finalColors;
-        $model = $this->handleTransaction(function () use ($validatedData, $relationsToStore, $relationsToLoad, $colors) {
+        $colors = Arr::get($validatedData, 'colors', []);
+        $validatedData['colors'] = collect($colors)->flatMap(fn ($color) => [$color['value']])->toArray();
+
+        $model = $this->handleTransaction(function () use ($validatedData, $colors) {
             $model = $this->repository->create($validatedData);
+
             if (!empty($validatedData['tableau_scene_ids'])) {
-                $scenes = json_decode($validatedData['tableau_scene_ids'], true);
-                $model->tableauScenes()->sync($scenes);
+                $model->tableauScenes()->sync(json_decode($validatedData['tableau_scene_ids'], true));
             }
+
             if (!empty($validatedData['tableau_size_options'])) {
-                $selectedOptionIds = collect($validatedData['tableau_size_options'])
-                    ->flatten()
-                    ->unique()
-                    ->values()
-                    ->all();
+                $selectedOptionIds = collect($validatedData['tableau_size_options'])->flatten()->unique()->values()->all();
                 $model->specificationOptions()->sync($selectedOptionIds);
             }
+
             $model->products()->sync($validatedData['product_ids'] ?? []);
             $model->industries()->sync($validatedData['industry_ids'] ?? []);
             $model->categories()->sync($validatedData['category_ids'] ?? []);
+
             if (request()->allFiles()) {
                 handleMediaUploads(request()->allFiles(), $model);
             }
 
             if (isset($validatedData['template_image_id'])) {
-                Media::where('id', $validatedData['template_image_id'])
-                    ->update([
-                        'model_type' => get_class($model),
-                        'model_id' => $model->id,
-                        'collection_name' => 'template_model_image',
-                    ]);
+                Media::whereKey($validatedData['template_image_id'])->update([
+                    'model_type' => get_class($model),
+                    'model_id' => $model->id,
+                    'collection_name' => 'template_model_image',
+                ]);
             }
 
             if (isset($validatedData['template_image_front_id'])) {
-                Media::where(function ($query) use ($validatedData) {
-                    $query->whereKey($validatedData['template_image_front_id']);
-                })
-                    ->update([
-                        'model_type' => get_class($model),
-                        'model_id' => $model->id,
-                        'collection_name' => 'templates',
-                    ]);
+                Media::whereKey($validatedData['template_image_front_id'])->update([
+                    'model_type' => get_class($model),
+                    'model_id' => $model->id,
+                    'collection_name' => 'templates',
+                ]);
 
                 $this->imageService->processUploaded($validatedData['template_image_front_id']);
-
             }
+
             if (isset($validatedData['template_image_back_id'])) {
+                Media::whereKey($validatedData['template_image_back_id'])->update([
+                    'model_type' => get_class($model),
+                    'model_id' => $model->id,
+                    'collection_name' => 'back_templates',
+                ]);
 
-                Media::whereKey($validatedData['template_image_back_id'])
-                    ->update([
-                        'model_type' => get_class($model),
-                        'model_id' => $model->id,
-                        'collection_name' => 'back_templates',
-                    ]);
-                $this->imageService->processUploaded($validatedData['template_image_back_id'], 'back-templates');
-
+                $this->imageService->processUploaded(
+                    $validatedData['template_image_back_id'],
+                    'back-templates'
+                );
             }
+
+            $model->types()->sync(Arr::get($validatedData, 'types', []));
+
             $mockupIds = $validatedData['mockup_ids'] ?? [];
-            $selectedTypeValues = Arr::get($validatedData, 'types', []);
-            $model->types()->sync($validatedData['types']);
 
             if (!empty($mockupIds)) {
-                $pivotData = collect($mockupIds)->mapWithKeys(function ($mockupId) {
-                    return [
-                        (int)$mockupId => [
-                            'positions' => [],
-                            'colors' => []
-                        ],
-                    ];
-                })->toArray();
+                $pivotData = collect($mockupIds)->mapWithKeys(fn ($mockupId) => [
+                    (int) $mockupId => [
+                        'positions' => [],
+                        'colors' => [],
+                    ],
+                ])->toArray();
 
                 $model->mockups()->syncWithoutDetaching($pivotData);
             }
@@ -302,67 +295,53 @@ class TemplateService extends BaseService
             return $model->refresh();
         });
 
-
         if (isset($validatedData['base64_preview_image'])) {
-            ProcessBase64Image::dispatch($validatedData['base64_preview_image'], $model, 'templates');
+            ProcessBase64Image::dispatch(
+                $validatedData['base64_preview_image'],
+                $model,
+                'templates'
+            );
         }
+
         if (isset($validatedData['back_base64_preview_image'])) {
-            ProcessBase64Image::dispatch($validatedData['back_base64_preview_image'], $model, 'back_templates');
+            ProcessBase64Image::dispatch(
+                $validatedData['back_base64_preview_image'],
+                $model,
+                'back_templates'
+            );
         }
+
+        $this->templateMockupGenerator->generateForUnlinkedMockups($model);
 
         return $model->load($relationsToLoad);
     }
-
-    private function defaultPositionsForTypes(array $typeIds): array
-    {
-        $sides = [];
-
-        if (in_array(1, $typeIds, true)) $sides[] = 'front';
-        if (in_array(2, $typeIds, true)) $sides[] = 'back';
-        if (in_array(3, $typeIds, true)) $sides[] = 'none';
-
-        if (!$sides) $sides = ['front', 'back', 'none'];
-
-        $pos = [];
-        foreach ($sides as $side) {
-            $pos["{$side}_x"] = 0.5;
-            $pos["{$side}_y"] = 0.507031;
-            $pos["{$side}_width"] = 0.264844;
-            $pos["{$side}_height"] = 0.176563;
-            $pos["{$side}_angle"] = 0;
-        }
-
-        return $pos;
-    }
-
     public function updateResource($validatedData, $id, $relationsToLoad = [])
     {
         if (empty($validatedData['supported_languages'])) {
             $validatedData['supported_languages'] = null;
         }
 
-        $colors = Arr::get($validatedData, 'colors');
-        $finalColors = collect($colors)->flatMap(fn($color) => [$color['value']])->toArray();
-        $validatedData['colors'] = $finalColors;
+        $colors = Arr::get($validatedData, 'colors', []);
+        $validatedData['colors'] = collect($colors)->flatMap(fn ($color) => [$color['value']])->toArray();
+        $removedMockupIdsForGeneration = [];
 
         $model = $this->handleTransaction(function () use (
             $validatedData,
             $id,
             $colors,
+            &$removedMockupIdsForGeneration
         ) {
             $model = $this->repository->update($validatedData, $id);
+
             if (!empty($validatedData['tableau_scene_ids'])) {
-                $scenes = json_decode($validatedData['tableau_scene_ids'], true);
-                $model->tableauScenes()->sync($scenes);
+                $model->tableauScenes()->sync(json_decode($validatedData['tableau_scene_ids'], true));
             }
+
             if (!empty($validatedData['tableau_size_options'])) {
-                $selectedOptionIds = collect($validatedData['tableau_size_options'])
-                    ->flatten()
-                    ->unique()
-                    ->values()
-                    ->all();
+                $selectedOptionIds = collect($validatedData['tableau_size_options'])->flatten()->unique()->values()->all();
                 $model->specificationOptions()->sync($selectedOptionIds);
             }
+
             $selectedTypeValues = Arr::get($validatedData, 'types', []);
             $modelTypesValues = $model->types->pluck('value.value')->toArray();
 
@@ -370,8 +349,8 @@ class TemplateService extends BaseService
                 != collect($modelTypesValues)->sort()->values()->all();
 
             if ($typesChanged) {
-                $hasFront = in_array(\App\Enums\Template\TypeEnum::FRONT->value, $selectedTypeValues);
-                $hasBack = in_array(\App\Enums\Template\TypeEnum::BACK->value, $selectedTypeValues);
+                $hasFront = in_array(TypeEnum::FRONT->value, $selectedTypeValues);
+                $hasBack = in_array(TypeEnum::BACK->value, $selectedTypeValues);
 
                 if (!($hasFront && $hasBack)) {
                     if ($hasFront) {
@@ -383,7 +362,6 @@ class TemplateService extends BaseService
                         $model->clearMediaCollection('templates');
                         $model->clearMediaCollection('templates-preview');
                     }
-
                 }
             }
 
@@ -395,7 +373,7 @@ class TemplateService extends BaseService
                     ->where('id', '!=', $validatedData['template_image_id'])
                     ->each->delete();
 
-                Media::where('id', $validatedData['template_image_id'])->update([
+                Media::whereKey($validatedData['template_image_id'])->update([
                     'model_type' => get_class($model),
                     'model_id' => $model->id,
                     'collection_name' => 'template_model_image',
@@ -403,81 +381,56 @@ class TemplateService extends BaseService
             }
 
             $frontId = $validatedData['template_image_front_id'] ?? null;
-            $newId = $frontId;
 
-            if ($newId) {
-                $alreadyAttached = $model->getMedia('templates')
-                    ->contains('id', $newId);
+            if ($frontId) {
+                $alreadyAttached = $model->getMedia('templates')->contains('id', $frontId);
 
                 if (!$alreadyAttached) {
-                    $model->getMedia('templates')
-                        ->where('id', '!=', $newId)
-                        ->each->delete();
+                    $model->getMedia('templates')->where('id', '!=', $frontId)->each->delete();
+                    $model->getMedia('templates-preview')->each->delete();
 
-                    $model->getMedia('templates-preview')
-                        ->each->delete();
-
-                    Media::whereKey($newId)->update([
+                    Media::whereKey($frontId)->update([
                         'model_type' => get_class($model),
                         'model_id' => $model->id,
                         'collection_name' => 'templates',
                     ]);
 
-                    $this->imageService->processUploaded($newId);
+                    $this->imageService->processUploaded($frontId);
                 }
             }
 
             if (isset($validatedData['template_image_back_id'])) {
-                $alreadyAttached = $model->getMedia('back_templates')
-                    ->contains('id', $validatedData['template_image_back_id']);
+                $backId = $validatedData['template_image_back_id'];
+                $alreadyAttached = $model->getMedia('back_templates')->contains('id', $backId);
 
                 if (!$alreadyAttached) {
-                    $model->getMedia('back_templates')
-                        ->where('id', '!=', $validatedData['template_image_back_id'])
-                        ->each->delete();
+                    $model->getMedia('back_templates')->where('id', '!=', $backId)->each->delete();
+                    $model->getMedia('back-templates-preview')->each->delete();
 
-                    $model->getMedia('back-templates-preview')
-                        ->each->delete();
-
-                    Media::whereKey($validatedData['template_image_back_id'])->update([
+                    Media::whereKey($backId)->update([
                         'model_type' => get_class($model),
                         'model_id' => $model->id,
                         'collection_name' => 'back_templates',
                     ]);
 
-                    $this->imageService->processUploaded(
-                        $validatedData['template_image_back_id'],
-                        'back-templates'
-                    );
+                    $this->imageService->processUploaded($backId, 'back-templates');
                 }
             }
 
-            $mockupIds = collect($validatedData['mockup_ids'] ?? [])->map(fn($id) => (int)$id);
-            $existingMockupIds = $model->mockups->pluck('id');
-
+            $mockupIds = collect($validatedData['mockup_ids'] ?? [])->map(fn ($id) => (int) $id);
+            $existingMockupIds = $model->mockups()->pluck('mockups.id');
             $newMockupIds = $mockupIds->diff($existingMockupIds);
             $removedMockupIds = $existingMockupIds->diff($mockupIds);
 
-            if ($mockupIds->isNotEmpty()) {
-                if ($newMockupIds->isNotEmpty()) {
-                    $model->mockups()->syncWithoutDetaching(
-                        $this->buildMockupAttachPayload($newMockupIds)
-                    );
-                }
-            } else {
-                $attachedMockupIds = $model->mockups()->pluck('mockups.id');
+            $removedMockupIdsForGeneration = $removedMockupIds
+                ->map(fn ($id) => (int) $id)
+                ->values()
+                ->all();
 
-                foreach ($attachedMockupIds as $mockupId) {
-                    $mockup = Mockup::find($mockupId);
-
-                    if (!$mockup) {
-                        continue;
-                    }
-
-                    $this->deleteGeneratedMockupMedia($mockup, $model->id);
-                }
-
-                $model->mockups()->detach();
+            if ($newMockupIds->isNotEmpty()) {
+                $model->mockups()->syncWithoutDetaching(
+                    $this->buildMockupAttachPayload($newMockupIds)
+                );
             }
 
             foreach ($removedMockupIds as $removedId) {
@@ -502,12 +455,21 @@ class TemplateService extends BaseService
                 ->whereNotIn('id', $imageIds)
                 ->each->delete();
 
-            return $model;
+            return $model->refresh();
         });
 
         if (request()->allFiles()) {
-            handleMediaUploads(request()->allFiles(), $model, clearExisting: true);
+            handleMediaUploads(
+                request()->allFiles(),
+                $model,
+                clearExisting: true
+            );
         }
+
+        $this->templateMockupGenerator->generateForUnlinkedMockups(
+            $model,
+            $removedMockupIdsForGeneration
+        );
 
         return $model->load($relationsToLoad);
     }
@@ -523,7 +485,7 @@ class TemplateService extends BaseService
             ])
             ->toArray();
     }
-
+    
     protected function deleteGeneratedMockupMedia(Mockup $mockup, $templateId): void
     {
         $mockup->getMedia('generated_mockups')

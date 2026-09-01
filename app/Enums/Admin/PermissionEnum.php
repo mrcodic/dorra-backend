@@ -170,6 +170,12 @@ enum PermissionEnum: string
     case SHOW_CREDIT_ORDERS = 'credit-orders_show';
     case DELETE_CREDIT_ORDERS = 'credit-orders_delete';
 
+    // AI Guide Questions
+    case CREATE_AI_GUIDE_QUESTIONS = 'ai-guide-questions_create';
+    case SHOW_AI_GUIDE_QUESTIONS = 'ai-guide-questions_show';
+    case UPDATE_AI_GUIDE_QUESTIONS = 'ai-guide-questions_update';
+    case DELETE_AI_GUIDE_QUESTIONS = 'ai-guide-questions_delete';
+
     public function group(): array
     {
         return [
@@ -218,6 +224,7 @@ enum PermissionEnum: string
             'users.campaigns'    => 'Campaigns',
             'plans'    => 'Plans',
             'credit-orders'    => 'Credit Orders',
+            'ai-guide-questions' => 'AI Guide Questions',
             default               => Str::headline(str_replace('-', ' ', $this->groupKey())),
         };
     }

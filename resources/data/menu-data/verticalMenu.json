@@ -57,7 +57,6 @@
             "modalTarget": ""
 
         },
-
         {
             "name": "Industries",
             "icon": "idustry.svg",
@@ -186,6 +185,12 @@
             ],
             "modalTarget": ""
 
+        },
+        {
+            "name": "AI Questions",
+            "icon": "ai-question.png",
+            "slug": "",
+            "url": "/ai-guide-questions"
         },
         {
             "name": "Roles",
