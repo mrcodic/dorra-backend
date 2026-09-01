@@ -16,21 +16,30 @@ class GenAiImageService
         'gemini-2.5-flash-image',
     ];
 
-    private const TRANSPARENT_BG_INSTRUCTION = <<<'PROMPT'
-Create only the isolated artwork.
+    private const REMOVABLE_BG_INSTRUCTION = <<<'PROMPT'
+Generate only the requested artwork, centered and isolated.
 
-The final output should be a PNG image with a genuinely transparent background.
+Place the artwork on one completely uniform solid chroma-green background using exactly #00FF00.
 
-Everything outside the actual artwork should contain no visible pixels.
+The entire area outside the artwork must use the same flat #00FF00 background.
 
-Do not place the artwork on a product mockup.
-Do not create a surrounding environment, scene, backdrop, canvas, frame, texture, or decorative background.
+Important:
+- Do not generate transparency.
+- Do not generate a transparency preview.
+- Do not create any pattern behind the artwork.
+- Do not create any texture behind the artwork.
+- Do not create gradients on the background.
+- Do not create lighting variations on the background.
+- Do not create shadows on the background.
+- Do not create a wall, floor, room, table, environment, or scene.
+- Do not place the artwork on a product mockup.
+- Do not create frames or borders around the image.
 
-Keep the artwork isolated and production-ready.
+Do not use #00FF00 or chroma green inside the actual artwork.
 
-Preserve every color and detail that belongs to the artwork itself, including white, cream, light gray, black, highlights, fine lines, borders, internal details, decorative elements, and typography.
+Keep a clean visual separation between the artwork and the temporary solid background.
 
-Return only the isolated artwork ready to be placed directly inside a design editor or onto another product.
+The #00FF00 background is temporary and will be removed programmatically after generation.
 PROMPT;
 
     private int $perRequestCount = 1;
@@ -60,16 +69,16 @@ PROMPT;
         }
 
         $prompt = trim($prompt);
-        $neg = trim((string) $negativePrompt);
+        $negativePrompt = trim((string) $negativePrompt);
 
         $instruction = $prompt;
 
-        if ($neg !== '') {
-            $instruction .= "\n\nAvoid the following:\n" . $neg;
+        if ($negativePrompt !== '') {
+            $instruction .= "\n\nAvoid the following:\n" . $negativePrompt;
         }
 
         if ($transparentBackground) {
-            $instruction .= "\n\n" . self::TRANSPARENT_BG_INSTRUCTION;
+            $instruction .= "\n\n" . self::REMOVABLE_BG_INSTRUCTION;
         }
 
         $images = [];
@@ -105,7 +114,7 @@ PROMPT;
                     if (!empty($result['images'])) {
                         foreach ($result['images'] as $image) {
                             if ($transparentBackground) {
-                                $image = $this->postProcessTransparentImage(
+                                $image = $this->removeSolidGeneratedBackground(
                                     $image
                                 );
                             }
@@ -144,8 +153,8 @@ PROMPT;
         }
 
         $arabicNote = (
-            $usedModel
-            && $usedModel !== self::PRIMARY_MODEL
+            $usedModel &&
+            $usedModel !== self::PRIMARY_MODEL
         )
             ? 'تنبيه: قد لا تكون حروف اللغة العربية دقيقة في النتيجة لأن الموديل المستخدم ليس Gemini 3 Pro Image Preview. (Note: Arabic letters may be inaccurate because the model used is not Gemini 3 Pro Image Preview.)'
             : null;
@@ -180,7 +189,6 @@ PROMPT;
                     ],
                 ],
             ],
-
             'generationConfig' => [
                 'responseModalities' => [
                     'IMAGE',
@@ -252,9 +260,7 @@ PROMPT;
                     + random_int(0, 250)
                 );
 
-                usleep(
-                    $delay * 1000
-                );
+                usleep($delay * 1000);
             }
         }
 
@@ -301,7 +307,7 @@ PROMPT;
         return $out;
     }
 
-    private function postProcessTransparentImage(
+    private function removeSolidGeneratedBackground(
         string $dataUrl
     ): string {
         if (!class_exists(\Imagick::class)) {
@@ -323,10 +329,6 @@ PROMPT;
                 $binary
             );
 
-            /*
-             * If animated/multi-frame somehow comes back,
-             * work with the first image.
-             */
             if ($image->getNumberImages() > 1) {
                 $image->setIteratorIndex(0);
 
@@ -348,9 +350,19 @@ PROMPT;
                 \Imagick::ALPHACHANNEL_SET
             );
 
+            $width = $image->getImageWidth();
+            $height = $image->getImageHeight();
+
+            if (!$width || !$height) {
+                $image->clear();
+                $image->destroy();
+
+                return $dataUrl;
+            }
+
             /*
-             * If the border already contains significant
-             * true transparency, leave the image untouched.
+             * If Gemini actually returned real transparency,
+             * don't touch it.
              */
             if ($this->hasRealTransparentBorder($image)) {
                 $result = $this->encodeDataUrl(
@@ -364,10 +376,110 @@ PROMPT;
                 return $result;
             }
 
+            $transparent = new \ImagickPixel(
+                'transparent'
+            );
+
+            $quantumRange =
+                \Imagick::getQuantumRange()['quantumRangeLong']
+                ?? 65535;
+
             /*
-             * Gemini painted fake transparency/background.
+             * Gemini may slightly modify #00FF00,
+             * so use a moderate fuzz.
              */
-            $this->removeLikelyGeneratedBackground(
+            $fuzz = 0.10 * $quantumRange;
+
+            /*
+             * Sample many actual border points.
+             *
+             * We don't assume Gemini returned exact #00FF00.
+             *
+             * floodFillPaintImage only removes areas connected
+             * to each sampled border location.
+             */
+            $points = $this->getBorderSamplePoints(
+                $width,
+                $height
+            );
+
+            foreach ($points as [$x, $y]) {
+                $pixel = $image->getImagePixelColor(
+                    $x,
+                    $y
+                );
+
+                $color = $pixel->getColor(true);
+
+                /*
+                 * Already transparent at this point?
+                 */
+                if (($color['a'] ?? 1) <= 0.03) {
+                    continue;
+                }
+
+                /*
+                 * Protect against accidentally starting
+                 * flood-fill from a piece of artwork that
+                 * happens to touch the outer edge.
+                 *
+                 * The requested background is strongly green.
+                 */
+                if (!$this->looksLikeChromaGreen($pixel)) {
+                    continue;
+                }
+
+                $image->floodFillPaintImage(
+                    $transparent,
+                    $fuzz,
+                    $pixel,
+                    $x,
+                    $y,
+                    false
+                );
+            }
+
+            /*
+             * Second pass using slightly larger fuzz.
+             *
+             * Only from locations that are still green-ish
+             * and still connected to the outside.
+             *
+             * This catches anti-aliased / AI-variant green.
+             */
+            $secondFuzz = 0.16 * $quantumRange;
+
+            foreach ($points as [$x, $y]) {
+                $pixel = $image->getImagePixelColor(
+                    $x,
+                    $y
+                );
+
+                $color = $pixel->getColor(true);
+
+                if (($color['a'] ?? 1) <= 0.03) {
+                    continue;
+                }
+
+                if (!$this->looksLikeChromaGreen($pixel)) {
+                    continue;
+                }
+
+                $image->floodFillPaintImage(
+                    $transparent,
+                    $secondFuzz,
+                    $pixel,
+                    $x,
+                    $y,
+                    false
+                );
+            }
+
+            /*
+             * Remove a tiny green fringe only from pixels
+             * immediately neighboring transparent background.
+             */
+            $this->cleanChromaEdge(
                 $image
             );
 
@@ -389,6 +501,123 @@ PROMPT;
         }
     }
 
+    private function getBorderSamplePoints(
+        int $width,
+        int $height
+    ): array {
+        $points = [];
+
+        $steps = 30;
+
+        for ($i = 0; $i <= $steps; $i++) {
+            $x = (int) round(
+                ($width - 1) * ($i / $steps)
+            );
+
+            $y = (int) round(
+                ($height - 1) * ($i / $steps)
+            );
+
+            $points[] = [$x, 0];
+            $points[] = [$x, $height - 1];
+
+            $points[] = [0, $y];
+            $points[] = [$width - 1, $y];
+        }
+
+        return $points;
+    }
+
+    private function looksLikeChromaGreen(
+        \ImagickPixel $pixel
+    ): bool {
+        $color = $pixel->getColor();
+
+        $r = (int) ($color['r'] ?? 0);
+        $g = (int) ($color['g'] ?? 0);
+        $b = (int) ($color['b'] ?? 0);
+
+        /*
+         * Deliberately broad enough for Gemini variations,
+         * while still requiring green to dominate.
+         */
+        return (
+            $g >= 120
+            && $g >= ($r * 1.30)
+            && $g >= ($b * 1.20)
+            && ($g - $r) >= 45
+            && ($g - $b) >= 30
+        );
+    }
+
+    private function cleanChromaEdge(
+        \Imagick $image
+    ): void {
+        try {
+            $width = $image->getImageWidth();
+            $height = $image->getImageHeight();
+
+            if (
+                $width < 3
+                || $height < 3
+            ) {
+                return;
+            }
+
+            /*
+             * Clone alpha so we can identify pixels
+             * immediately next to transparent areas.
+             */
+            $alpha = clone $image;
+
+            $alpha->separateImageChannel(
+                \Imagick::CHANNEL_ALPHA
+            );
+
+            try {
+                $kernel = \ImagickKernel::fromBuiltIn(
+                    \Imagick::KERNEL_DISK,
+                    '1'
+                );
+
+                /*
+                 * Slightly grow the transparent region
+                 * toward the artwork.
+                 */
+                $alpha->morphology(
+                    \Imagick::MORPHOLOGY_ERODE,
+                    1,
+                    $kernel
+                );
+
+                $alpha->gaussianBlurImage(
+                    0.25,
+                    0.15
+                );
+
+                $image->setImageAlphaChannel(
+                    \Imagick::ALPHACHANNEL_OFF
+                );
+
+                $image->compositeImage(
+                    $alpha,
+                    \Imagick::COMPOSITE_COPYOPACITY,
+                    0,
+                    0
+                );
+            } catch (\Throwable $e) {
+                /*
+                 * Morphology isn't essential.
+                 */
+            }
+
+            $alpha->clear();
+            $alpha->destroy();
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
     private function hasRealTransparentBorder(
         \Imagick $image
     ): bool {
@@ -399,43 +628,31 @@ PROMPT;
             return false;
         }
 
-        $transparent = 0;
         $samples = 0;
-        $steps = 50;
+        $transparent = 0;
 
-        for ($i = 0; $i <= $steps; $i++) {
-            $x = (int) round(
-                ($width - 1) * ($i / $steps)
+        foreach (
+            $this->getBorderSamplePoints(
+                $width,
+                $height
+            ) as [$x, $y]
+        ) {
+            $pixel = $image->getImagePixelColor(
+                $x,
+                $y
             );
 
-            $y = (int) round(
-                ($height - 1) * ($i / $steps)
+            $color = $pixel->getColor(true);
+
+            $alpha = (float) (
+                $color['a']
+                ?? 1
             );
 
-            $points = [
-                [$x, 0],
-                [$x, $height - 1],
-                [0, $y],
-                [$width - 1, $y],
-            ];
+            $samples++;
 
-            foreach ($points as [$px, $py]) {
-                $pixel = $image->getImagePixelColor(
-                    $px,
-                    $py
-                );
-
-                $color = $pixel->getColor(true);
-
-                $alpha = (float) (
-                    $color['a'] ?? 1
-                );
-
-                $samples++;
-
-                if ($alpha <= 0.03) {
-                    $transparent++;
-                }
+            if ($alpha <= 0.03) {
+                $transparent++;
             }
         }
 
@@ -446,603 +663,6 @@ PROMPT;
         return (
                 $transparent / $samples
             ) >= 0.50;
-    }
-
-    private function removeLikelyGeneratedBackground(
-        \Imagick $image
-    ): void {
-        $width = $image->getImageWidth();
-        $height = $image->getImageHeight();
-
-        if (!$width || !$height) {
-            return;
-        }
-
-        $image->setImageFormat('png');
-
-        $image->setImageColorspace(
-            \Imagick::COLORSPACE_SRGB
-        );
-
-        $image->setImageAlphaChannel(
-            \Imagick::ALPHACHANNEL_SET
-        );
-
-        /*
-         * Detect common colors around the border.
-         *
-         * Gemini's fake transparency generally repeats
-         * those colors across the full outside background.
-         */
-        $palette = $this->detectBorderPalette(
-            $image,
-            12
-        );
-
-        if (!$palette) {
-            return;
-        }
-
-        /*
-         * Candidate mask:
-         *
-         * White = pixel resembles border background.
-         * Black = pixel probably belongs to artwork.
-         */
-        $candidateMask =
-            $this->buildBackgroundCandidateMask(
-                $image,
-                $palette,
-                48
-            );
-
-        /*
-         * Join tiny gaps in checkerboard / anti-aliasing.
-         */
-        try {
-            $kernel = \ImagickKernel::fromBuiltIn(
-                \Imagick::KERNEL_DISK,
-                '1'
-            );
-
-            $candidateMask->morphology(
-                \Imagick::MORPHOLOGY_CLOSE,
-                1,
-                $kernel
-            );
-        } catch (\Throwable $e) {
-            // Optional cleanup only.
-        }
-
-        /*
-         * Clone candidate mask and remove all white
-         * areas that are connected to image borders.
-         *
-         * What remains white is enclosed background-like
-         * color inside the artwork and must NOT be removed.
-         */
-        $remainingMask = clone $candidateMask;
-
-        $this->removeBorderConnectedWhiteRegions(
-            $remainingMask
-        );
-
-        /*
-         * Build actual OUTER background mask.
-         */
-        $backgroundMask =
-            $this->buildConnectedBackgroundMask(
-                $candidateMask,
-                $remainingMask
-            );
-
-        /*
-         * Grow outer background by 1px.
-         *
-         * Removes the thin dark/gray seams Gemini leaves
-         * around checkerboard cells and cut edges.
-         */
-        try {
-            $kernel = \ImagickKernel::fromBuiltIn(
-                \Imagick::KERNEL_DISK,
-                '1'
-            );
-
-            $backgroundMask->morphology(
-                \Imagick::MORPHOLOGY_DILATE,
-                1,
-                $kernel
-            );
-        } catch (\Throwable $e) {
-            // Optional.
-        }
-
-        /*
-         * backgroundMask:
-         *
-         * white = background/remove
-         * black = artwork/keep
-         *
-         * Alpha needs the opposite:
-         *
-         * black = transparent
-         * white = opaque
-         */
-        $alphaMask = clone $backgroundMask;
-
-        $alphaMask->negateImage(
-            false
-        );
-
-        /*
-         * Very slight smoothing around cut edges.
-         */
-        try {
-            $alphaMask->gaussianBlurImage(
-                0.30,
-                0.15
-            );
-        } catch (\Throwable $e) {
-            // Optional.
-        }
-
-        /*
-         * Replace alpha rather than modifying RGB colors.
-         */
-        $image->setImageAlphaChannel(
-            \Imagick::ALPHACHANNEL_OFF
-        );
-
-        $image->compositeImage(
-            $alphaMask,
-            \Imagick::COMPOSITE_COPYOPACITY,
-            0,
-            0
-        );
-
-        $image->setImageFormat('png');
-
-        $candidateMask->clear();
-        $candidateMask->destroy();
-
-        $remainingMask->clear();
-        $remainingMask->destroy();
-
-        $backgroundMask->clear();
-        $backgroundMask->destroy();
-
-        $alphaMask->clear();
-        $alphaMask->destroy();
-    }
-
-    private function detectBorderPalette(
-        \Imagick $image,
-        int $maxColors = 12
-    ): array {
-        $width = $image->getImageWidth();
-        $height = $image->getImageHeight();
-
-        if (!$width || !$height) {
-            return [];
-        }
-
-        $clusters = [];
-        $steps = 120;
-
-        for ($i = 0; $i <= $steps; $i++) {
-            $x = (int) round(
-                ($width - 1) * ($i / $steps)
-            );
-
-            $y = (int) round(
-                ($height - 1) * ($i / $steps)
-            );
-
-            $points = [
-                [$x, 0],
-                [$x, $height - 1],
-                [0, $y],
-                [$width - 1, $y],
-            ];
-
-            foreach ($points as [$px, $py]) {
-                $pixel =
-                    $image->getImagePixelColor(
-                        $px,
-                        $py
-                    );
-
-                $rgb = $pixel->getColor();
-
-                /*
-                 * Quantize colors so slight AI variations
-                 * are grouped into the same background family.
-                 */
-                $r = (int) round(
-                        ($rgb['r'] ?? 0) / 12
-                    ) * 12;
-
-                $g = (int) round(
-                        ($rgb['g'] ?? 0) / 12
-                    ) * 12;
-
-                $b = (int) round(
-                        ($rgb['b'] ?? 0) / 12
-                    ) * 12;
-
-                $r = min(
-                    255,
-                    max(0, $r)
-                );
-
-                $g = min(
-                    255,
-                    max(0, $g)
-                );
-
-                $b = min(
-                    255,
-                    max(0, $b)
-                );
-
-                $key = "{$r}:{$g}:{$b}";
-
-                if (!isset($clusters[$key])) {
-                    $clusters[$key] = [
-                        'count' => 0,
-                        'r' => $r,
-                        'g' => $g,
-                        'b' => $b,
-                    ];
-                }
-
-                $clusters[$key]['count']++;
-            }
-        }
-
-        uasort(
-            $clusters,
-            fn($a, $b) =>
-                $b['count']
-                <=>
-                $a['count']
-        );
-
-        $result = [];
-
-        foreach ($clusters as $cluster) {
-            if ($cluster['count'] < 3) {
-                continue;
-            }
-
-            $result[] = [
-                'r' => $cluster['r'],
-                'g' => $cluster['g'],
-                'b' => $cluster['b'],
-            ];
-
-            if (
-                count($result)
-                >= $maxColors
-            ) {
-                break;
-            }
-        }
-
-        return $result;
-    }
-
-    private function buildBackgroundCandidateMask(
-        \Imagick $image,
-        array $palette,
-        int $distanceThreshold = 48
-    ): \Imagick {
-        $width = $image->getImageWidth();
-        $height = $image->getImageHeight();
-
-        $mask = new \Imagick();
-
-        $mask->newImage(
-            $width,
-            $height,
-            new \ImagickPixel('black'),
-            'png'
-        );
-
-        $mask->setImageColorspace(
-            \Imagick::COLORSPACE_GRAY
-        );
-
-        $thresholdSquared =
-            $distanceThreshold
-            * $distanceThreshold;
-
-        /*
-         * Using direct loops here is slower than a pure
-         * Imagick operation, but much safer for our specific
-         * multi-color checkerboard case.
-         */
-        for ($y = 0; $y < $height; $y++) {
-            for ($x = 0; $x < $width; $x++) {
-                $pixel =
-                    $image->getImagePixelColor(
-                        $x,
-                        $y
-                    );
-
-                $rgb = $pixel->getColor();
-
-                $r = (int) ($rgb['r'] ?? 0);
-                $g = (int) ($rgb['g'] ?? 0);
-                $b = (int) ($rgb['b'] ?? 0);
-
-                $isBackground = false;
-
-                foreach ($palette as $target) {
-                    $dr =
-                        $r
-                        - $target['r'];
-
-                    $dg =
-                        $g
-                        - $target['g'];
-
-                    $db =
-                        $b
-                        - $target['b'];
-
-                    $distanceSquared =
-                        ($dr * $dr)
-                        + ($dg * $dg)
-                        + ($db * $db);
-
-                    if (
-                        $distanceSquared
-                        <= $thresholdSquared
-                    ) {
-                        $isBackground = true;
-
-                        break;
-                    }
-                }
-
-                $mask
-                    ->getImagePixelColor($x, $y)
-                    ->setColor(
-                        $isBackground
-                            ? 'white'
-                            : 'black'
-                    );
-            }
-
-            /*
-             * Force pixel cache synchronization.
-             */
-            $mask->syncImage();
-        }
-
-        return $mask;
-    }
-
-    private function removeBorderConnectedWhiteRegions(
-        \Imagick $mask
-    ): void {
-        $width = $mask->getImageWidth();
-        $height = $mask->getImageHeight();
-
-        if (!$width || !$height) {
-            return;
-        }
-
-        $black =
-            new \ImagickPixel(
-                'black'
-            );
-
-        $white =
-            new \ImagickPixel(
-                'white'
-            );
-
-        $stepX = max(
-            1,
-            (int) floor(
-                $width / 100
-            )
-        );
-
-        $stepY = max(
-            1,
-            (int) floor(
-                $height / 100
-            )
-        );
-
-        for (
-            $x = 0;
-            $x < $width;
-            $x += $stepX
-        ) {
-            $this->floodWhiteAt(
-                $mask,
-                $x,
-                0,
-                $black,
-                $white
-            );
-
-            $this->floodWhiteAt(
-                $mask,
-                $x,
-                $height - 1,
-                $black,
-                $white
-            );
-        }
-
-        for (
-            $y = 0;
-            $y < $height;
-            $y += $stepY
-        ) {
-            $this->floodWhiteAt(
-                $mask,
-                0,
-                $y,
-                $black,
-                $white
-            );
-
-            $this->floodWhiteAt(
-                $mask,
-                $width - 1,
-                $y,
-                $black,
-                $white
-            );
-        }
-
-        /*
-         * Explicit corners.
-         */
-        $this->floodWhiteAt(
-            $mask,
-            0,
-            0,
-            $black,
-            $white
-        );
-
-        $this->floodWhiteAt(
-            $mask,
-            $width - 1,
-            0,
-            $black,
-            $white
-        );
-
-        $this->floodWhiteAt(
-            $mask,
-            0,
-            $height - 1,
-            $black,
-            $white
-        );
-
-        $this->floodWhiteAt(
-            $mask,
-            $width - 1,
-            $height - 1,
-            $black,
-            $white
-        );
-    }
-
-    private function floodWhiteAt(
-        \Imagick $mask,
-        int $x,
-        int $y,
-        \ImagickPixel $fill,
-        \ImagickPixel $target
-    ): void {
-        $pixel =
-            $mask->getImagePixelColor(
-                $x,
-                $y
-            );
-
-        $color =
-            $pixel->getColor();
-
-        /*
-         * Only flood if current point belongs
-         * to candidate background.
-         */
-        if (
-            ($color['r'] ?? 0)
-            < 128
-        ) {
-            return;
-        }
-
-        $mask->floodFillPaintImage(
-            $fill,
-            0,
-            $target,
-            $x,
-            $y,
-            false
-        );
-    }
-
-    private function buildConnectedBackgroundMask(
-        \Imagick $candidateMask,
-        \Imagick $remainingMask
-    ): \Imagick {
-        $width =
-            $candidateMask->getImageWidth();
-
-        $height =
-            $candidateMask->getImageHeight();
-
-        $result = new \Imagick();
-
-        $result->newImage(
-            $width,
-            $height,
-            new \ImagickPixel('black'),
-            'png'
-        );
-
-        $result->setImageColorspace(
-            \Imagick::COLORSPACE_GRAY
-        );
-
-        for ($y = 0; $y < $height; $y++) {
-            for ($x = 0; $x < $width; $x++) {
-                $candidate =
-                    $candidateMask
-                        ->getImagePixelColor(
-                            $x,
-                            $y
-                        )
-                        ->getColor();
-
-                $remaining =
-                    $remainingMask
-                        ->getImagePixelColor(
-                            $x,
-                            $y
-                        )
-                        ->getColor();
-
-                $candidateWhite =
-                    ($candidate['r'] ?? 0)
-                    >= 128;
-
-                $remainingBlack =
-                    ($remaining['r'] ?? 0)
-                    < 128;
-
-                $result
-                    ->getImagePixelColor(
-                        $x,
-                        $y
-                    )
-                    ->setColor(
-                        (
-                            $candidateWhite
-                            && $remainingBlack
-                        )
-                            ? 'white'
-                            : 'black'
-                    );
-            }
-
-            $result->syncImage();
-        }
-
-        return $result;
     }
 
     private function decodeDataUrl(
@@ -1061,15 +681,13 @@ PROMPT;
             ];
         }
 
-        $mime =
-            $matches[1]
+        $mime = $matches[1]
             ?? 'image/png';
 
-        $binary =
-            base64_decode(
-                $matches[2] ?? '',
-                true
-            );
+        $binary = base64_decode(
+            $matches[2] ?? '',
+            true
+        );
 
         return [
             $mime,
@@ -1081,8 +699,7 @@ PROMPT;
         string $mime,
         string $binary
     ): string {
-        return
-            'data:'
+        return 'data:'
             . $mime
             . ';base64,'
             . base64_encode(
@@ -1094,29 +711,22 @@ PROMPT;
         string $model
     ): bool {
         return Cache::has(
-            $this->breakerKey(
-                $model
-            )
+            $this->breakerKey($model)
         );
     }
 
     private function breakerKey(
         string $model
     ): string {
-        return
-            'genai:breaker:'
-            . Str::slug(
-                $model
-            );
+        return 'genai:breaker:'
+            . Str::slug($model);
     }
 
     private function tripBreaker(
         string $model
     ): void {
         Cache::put(
-            $this->breakerKey(
-                $model
-            ),
+            $this->breakerKey($model),
             1,
             $this->breakerTtlSec
         );
@@ -1127,14 +737,11 @@ PROMPT;
         $minuteKey =
             $this->limitKeyPrefix
             . ':'
-            . now()->format(
-                'YmdHi'
-            );
+            . now()->format('YmdHi');
 
-        $count =
-            Cache::increment(
-                $minuteKey
-            );
+        $count = Cache::increment(
+            $minuteKey
+        );
 
         if ($count === 1) {
             Cache::put(
@@ -1168,10 +775,9 @@ PROMPT;
                 (string) $negativePrompt
             );
 
-        $textTokens =
-            (int) ceil(
-                mb_strlen($text) / 4
-            );
+        $textTokens = (int) ceil(
+            mb_strlen($text) / 4
+        );
 
         $inputImageTokens =
             $hasInputImage
@@ -1179,8 +785,7 @@ PROMPT;
                 : 0;
 
         $outputImageTokens =
-            1120
-            * $outputImages;
+            1120 * $outputImages;
 
         $buffer = 100;
 
@@ -1203,10 +808,9 @@ PROMPT;
             ) * 1000
         );
 
-        $promptLower =
-            strtolower(
-                $prompt
-            );
+        $promptLower = strtolower(
+            $prompt
+        );
 
         if (
             str_contains(
@@ -1221,16 +825,14 @@ PROMPT;
             ];
         }
 
-        $tokens =
-            random_int(
-                700,
-                2000
-            );
+        $tokens = random_int(
+            700,
+            2000
+        );
 
-        $imagePath =
-            public_path(
-                'images/test/ai-image.png'
-            );
+        $imagePath = public_path(
+            'images/test/ai-image.png'
+        );
 
         if (!file_exists($imagePath)) {
             return [
@@ -1240,11 +842,9 @@ PROMPT;
             ];
         }
 
-        $mime =
-            mime_content_type(
-                $imagePath
-            )
-                ?: 'image/png';
+        $mime = mime_content_type(
+            $imagePath
+        ) ?: 'image/png';
 
         $fakeImage =
             'data:'
@@ -1258,7 +858,7 @@ PROMPT;
 
         if ($transparentBackground) {
             $fakeImage =
-                $this->postProcessTransparentImage(
+                $this->removeSolidGeneratedBackground(
                     $fakeImage
                 );
         }
