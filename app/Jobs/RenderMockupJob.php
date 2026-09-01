@@ -21,6 +21,7 @@ class RenderMockupJob implements ShouldQueue
 
     public int $tries = 3;
     public int $timeout = 120;
+    public array $backoff = [10, 30, 60];
 
     public function __construct(
         public MockupGenerationJob $bulkJob,
@@ -30,27 +31,42 @@ class RenderMockupJob implements ShouldQueue
 
     public function handle(): void
     {
-        if ($this->bulkJob->fresh()->status === 'cancelled') {
+        $bulkJob = $this->bulkJob->fresh();
+
+        if (!$bulkJob || $bulkJob->status === 'cancelled') {
             $this->item->update(['status' => 'cancelled']);
             return;
         }
 
-        $this->item->update(['status' => 'processing']);
+        $this->item->update([
+            'status' => 'processing',
+            'error_message' => null,
+        ]);
 
-        $mockup = $this->mockup;
+        $mockup = $this->mockup->fresh();
 
         try {
-            $side = $this->item->side;
+            $side = (string) $this->item->side;
+            $template = $this->item->template;
+
+            if (!$template) {
+                throw new \RuntimeException('Template not found for render item.');
+            }
+
+            $rawColor = $this->item->color;
+            $hasColor = is_string($rawColor) && trim($rawColor) !== '';
+            $hex = $hasColor ? strtolower(ltrim(trim($rawColor), '#')) : null;
+            $fileHex = $hex ?? 'base';
 
             $mediaByRole = $mockup->getMedia('mockups')
                 ->filter(fn ($media) => $media->getCustomProperty('side') === $side)
                 ->keyBy(fn ($media) => $media->getCustomProperty('role'));
 
-            Log::info('render_debug', [
-                'side' => $side,
-                'available_sides' => $mockup->getMedia('mockups')->pluck('custom_properties.side')->unique()->values(),
-                'available_roles_for_side' => $mediaByRole->keys(),
-            ]);
+            $designUrl = $this->item->getDesignUrl();
+
+            if (!$designUrl) {
+                throw new \RuntimeException("Design URL not found for template {$template->id} side {$side}.");
+            }
 
             $config = [
                 'mockupConfig' => [
@@ -64,45 +80,52 @@ class RenderMockupJob implements ShouldQueue
                     'shadowStrength' => $mockup->shadow_strength,
                     'lightStrength' => $mockup->light_strength,
                     'vertices' => $this->item->points,
-                    'pixiBundleUrl' => config('services.node_render_url') . '/pixi-render-bundle.js',
+                    'pixiBundleUrl' => rtrim(config('services.node_render_url'), '/') . '/pixi-render-bundle.js',
                 ],
-                'designUrl' => $this->item->getDesignUrl(),
-                'color' => $this->item->color,
-                'side' => $this->item->side,
+                'designUrl' => $designUrl,
+                'color' => $hasColor ? $rawColor : null,
+                'side' => $side,
             ];
 
-            Log::info('render_config', $config);
-
-            $hex = strtolower(ltrim(trim($this->item->color), '#'));
-            $template = $this->item->template;
+            Log::info('render_config', [
+                'bulk_job_id' => $this->bulkJob->id,
+                'item_id' => $this->item->id,
+                'mockup_id' => $mockup->id,
+                'template_id' => $template->id,
+                'side' => $side,
+                'color' => $rawColor,
+                'config' => $config,
+            ]);
 
             $tempPath = sys_get_temp_dir()
-                . "/mockup_{$mockup->id}_{$template->id}_{$side}_{$hex}.png";
+                . "/mockup_{$mockup->id}_{$template->id}_{$side}_{$fileHex}_{$this->item->id}.png";
 
-            $response = Http::withOptions([
-                'sink' => $tempPath,
-            ])
-                ->timeout(30)
-                ->post(config('services.node_render_url') . '/api/render', $config);
+            $response = Http::withOptions(['sink' => $tempPath])
+                ->connectTimeout(10)
+                ->timeout(90)
+                ->post(rtrim(config('services.node_render_url'), '/') . '/api/render', $config);
 
             if (!$response->successful()) {
                 $error = file_exists($tempPath) ? file_get_contents($tempPath) : '';
-
-                throw new \Exception(
-                    'Render service returned: ' . $error
+                throw new \RuntimeException(
+                    'Render service returned HTTP ' . $response->status()
+                    . ($error !== '' ? ': ' . mb_substr($error, 0, 2000) : '')
                 );
             }
 
-            /*
-             * ---------------------------------------------------------------
-             * FIRST PIVOT COLOR = PRIMARY / MODEL COLOR
-             * ---------------------------------------------------------------
-             */
+            if (!file_exists($tempPath) || filesize($tempPath) === 0) {
+                throw new \RuntimeException('Render service returned an empty image.');
+            }
+
             $currentTemplate = $mockup->templates()
                 ->where('templates.id', $template->id)
                 ->first();
 
-            $pivotColors = $currentTemplate?->pivot?->colors ?? [];
+            if (!$currentTemplate) {
+                throw new \RuntimeException("Template {$template->id} is no longer attached to mockup {$mockup->id}.");
+            }
+
+            $pivotColors = $currentTemplate->pivot->colors ?? [];
 
             if (is_string($pivotColors)) {
                 $pivotColors = json_decode($pivotColors, true) ?? [];
@@ -112,35 +135,54 @@ class RenderMockupJob implements ShouldQueue
                 $pivotColors = [];
             }
 
-            $primaryColor = collect($pivotColors)
+            $pivotColors = collect($pivotColors)
                 ->filter(fn ($color) => is_string($color) && trim($color) !== '')
-                ->first();
+                ->values()
+                ->all();
 
+            $primaryColor = $pivotColors[0] ?? null;
             $primaryHex = $primaryColor
                 ? strtolower(ltrim(trim($primaryColor), '#'))
                 : null;
 
-            $isModelImage = $primaryHex === null ? 1 : ($primaryHex === $hex ? 1 : 0);
-            /*
-             * Keep pivot model_color always synced with first color.
-             * No colors => model_color = null.
-             */
-            $currentModelColor = $currentTemplate?->pivot?->model_color;
-
+            $currentModelColor = $currentTemplate->pivot->model_color;
             $currentModelHex = $currentModelColor
-                ? strtolower(ltrim(trim($currentModelColor), '#'))
+                ? strtolower(ltrim(trim((string) $currentModelColor), '#'))
                 : null;
 
-            if ($currentModelHex !== $primaryHex) {
-                $mockup->templates()->updateExistingPivot($template->id, [
-                    'model_color' => $primaryColor,
-                ]);
+            if ($hasColor) {
+                if (!$currentModelHex || !in_array(
+                        $currentModelHex,
+                        collect($pivotColors)
+                            ->map(fn ($color) => strtolower(ltrim(trim((string) $color), '#')))
+                            ->all(),
+                        true
+                    )) {
+                    $currentModelColor = $primaryColor;
+                    $currentModelHex = $primaryHex;
+
+                    $mockup->templates()->updateExistingPivot($template->id, [
+                        'model_color' => $primaryColor,
+                    ]);
+                }
+
+                $isModelImage = $currentModelHex !== null && $currentModelHex === $hex ? 1 : 0;
+            } else {
+                if (!empty($pivotColors)) {
+                    throw new \RuntimeException(
+                        "Null-color render item cannot be used while template {$template->id} still has colors."
+                    );
+                }
+
+                if ($currentModelColor !== null) {
+                    $mockup->templates()->updateExistingPivot($template->id, [
+                        'model_color' => null,
+                    ]);
+                }
+
+                $isModelImage = 1;
             }
 
-            /*
-             * If this render is the primary color, clear model_image from
-             * other generated images for this template + side first.
-             */
             if ($isModelImage) {
                 $mockup->media()
                     ->where('collection_name', 'generated_mockups')
@@ -154,20 +196,14 @@ class RenderMockupJob implements ShouldQueue
                     )
                     ->get()
                     ->each(function ($media) {
-                        if ((int) $media->getCustomProperty('model_image', 0) !== 1) {
-                            return;
+                        if ((int) $media->getCustomProperty('model_image', 0) === 1) {
+                            $media->setCustomProperty('model_image', 0);
+                            $media->save();
                         }
-
-                        $media->setCustomProperty('model_image', 0);
-                        $media->save();
                     });
             }
 
-            /*
-             * Delete old generated image for same:
-             * template + side + color
-             */
-            $mockup->media()
+            $deleteQuery = $mockup->media()
                 ->where('collection_name', 'generated_mockups')
                 ->whereRaw(
                     "JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?",
@@ -176,18 +212,28 @@ class RenderMockupJob implements ShouldQueue
                 ->whereRaw(
                     "JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?",
                     [$side]
-                )
-                ->whereRaw(
+                );
+
+            if ($hasColor) {
+                $deleteQuery->whereRaw(
                     "LOWER(REPLACE(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex')), '#', '')) = ?",
                     [$hex]
-                )
-                ->get()
-                ->each(fn ($media) => $media->delete());
+                );
+            } else {
+                $deleteQuery->where(function ($query) {
+                    $query->whereNull('custom_properties->hex')
+                        ->orWhereRaw(
+                            "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex')), '') = ''"
+                        );
+                });
+            }
+
+            $deleteQuery->get()->each(fn ($media) => $media->delete());
 
             try {
                 $mockup
                     ->addMedia($tempPath)
-                    ->usingFileName("mockup_{$side}_tpl{$template->id}_{$hex}.png")
+                    ->usingFileName("mockup_{$side}_tpl{$template->id}_{$fileHex}.png")
                     ->withCustomProperties([
                         'side' => $side,
                         'template_id' => (string) $template->id,
@@ -199,11 +245,11 @@ class RenderMockupJob implements ShouldQueue
                     ->toMediaCollection('generated_mockups');
             } finally {
                 if (file_exists($tempPath)) {
-                    unlink($tempPath);
+                    @unlink($tempPath);
                 }
             }
 
-            $media = $mockup->media()
+            $mediaQuery = $mockup->media()
                 ->where('collection_name', 'generated_mockups')
                 ->whereRaw(
                     "JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?",
@@ -212,16 +258,27 @@ class RenderMockupJob implements ShouldQueue
                 ->whereRaw(
                     "JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?",
                     [$side]
-                )
-                ->whereRaw(
+                );
+
+            if ($hasColor) {
+                $mediaQuery->whereRaw(
                     "LOWER(REPLACE(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex')), '#', '')) = ?",
                     [$hex]
-                )
-                ->latest()
-                ->first();
+                );
+            } else {
+                $mediaQuery->where(function ($query) {
+                    $query->whereNull('custom_properties->hex')
+                        ->orWhereRaw(
+                            "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex')), '') = ''"
+                        );
+                });
+            }
+
+            $media = $mediaQuery->latest()->first();
 
             $this->item->update([
                 'status' => 'completed',
+                'error_message' => null,
                 'output_path' => $media
                     ? parse_url($media->getUrl(), PHP_URL_PATH)
                     : null,
@@ -232,8 +289,23 @@ class RenderMockupJob implements ShouldQueue
 
             $this->checkCompletion();
         } catch (Throwable $e) {
+            if (isset($tempPath) && file_exists($tempPath)) {
+                @unlink($tempPath);
+            }
+
             $this->item->update([
                 'error_message' => $e->getMessage(),
+            ]);
+
+            Log::error('RenderMockupJob failed attempt', [
+                'bulk_job_id' => $this->bulkJob->id,
+                'item_id' => $this->item->id,
+                'mockup_id' => $this->mockup->id,
+                'template_id' => $this->item->template_id,
+                'side' => $this->item->side,
+                'color' => $this->item->color,
+                'attempt' => $this->attempts(),
+                'error' => $e->getMessage(),
             ]);
 
             throw $e;
@@ -242,9 +314,12 @@ class RenderMockupJob implements ShouldQueue
 
     public function failed(Throwable $e): void
     {
+        $item = $this->item->fresh();
+        $existingError = $item?->error_message;
+
         $this->item->update([
             'status' => 'failed',
-            'error_message' => $e->getMessage(),
+            'error_message' => $existingError ?: $e->getMessage(),
         ]);
 
         MockupGenerationJob::where('id', $this->bulkJob->id)
@@ -278,10 +353,17 @@ class RenderMockupJob implements ShouldQueue
                 return;
             }
 
-            $completed = (int) $job->completed_count;
-            $failed = (int) $job->failed_count;
+            $completed = BulkJobItem::where('bulk_job_id', $job->id)
+                ->where('status', 'completed')
+                ->count();
+
+            $failed = BulkJobItem::where('bulk_job_id', $job->id)
+                ->where('status', 'failed')
+                ->count();
 
             $job->update([
+                'completed_count' => $completed,
+                'failed_count' => $failed,
                 'status' => match (true) {
                     $failed === 0 => 'completed',
                     $completed === 0 => 'failed',
