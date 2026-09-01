@@ -1,0 +1,49 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('ai_studio_items', function (Blueprint $table) {
+            $table->id();
+            $table->string('key')->unique();
+
+            $table->json('name');
+            $table->json('description')->nullable();
+
+            $table->string('generation_type', 30);
+
+            $table->foreignId('prompt_template_id')
+                ->nullable()
+                ->constrained('ai_prompt_templates')
+                ->nullOnDelete();
+
+            $table->string('default_resolution')->nullable();
+            $table->string('aspect_ratio')->nullable();
+
+            $table->unsignedInteger('credits_cost')->default(1);
+
+            $table->boolean('is_active')->default(true);
+            $table->unsignedInteger('sort_order')->default(0);
+
+            $table->json('settings')->nullable();
+
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('ai_studio_items');
+    }
+};

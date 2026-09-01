@@ -7,7 +7,9 @@ use App\Helpers\EnumHelpers;
 enum AiGuideQuestionTypeEnum: string
 {
     use EnumHelpers;
+
     case SINGLE_SELECT = 'single_select';
+    case MULTI_SELECT = 'multi_select';
     case TEXT = 'text';
     case TEXTAREA = 'textarea';
 
@@ -15,13 +17,9 @@ enum AiGuideQuestionTypeEnum: string
     {
         return match ($this) {
             self::SINGLE_SELECT => 'Single Select',
+            self::MULTI_SELECT => 'Multi Select',
             self::TEXT => 'Text',
             self::TEXTAREA => 'Textarea',
         };
-    }
-
-    public static function values(): array
-    {
-        return array_column(self::cases(), 'value');
     }
 }

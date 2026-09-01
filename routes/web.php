@@ -5,6 +5,7 @@ use App\Enums\Template\StatusEnum;
 use App\Http\Controllers\Api\V1\User\Mockup\BulkMockupController;
 use App\Http\Controllers\Api\V1\User\ShippingAddress\ShippingController;
 use App\Http\Controllers\Dashboard\{AdminController,
+    AiCategoryController,
     AiGuideQuestionController,
     BoardController,
     CategoryController,
@@ -325,6 +326,12 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::post('/bulk-delete', [AiGuideQuestionController::class, 'bulkDelete'])->name('bulk-delete');
         }));
         Route::resource('ai-guide-questions', AiGuideQuestionController::class);
+
+        Route::group(['prefix' => 'ai-categories', 'as' => 'ai-categories.', 'controller' => AiCategoryController::class,], (function () {
+            Route::get('/data', [AiCategoryController::class, 'getData'])->name('data');
+            Route::post('/bulk-delete', [AiCategoryController::class, 'bulkDelete'])->name('bulk-delete');
+        }));
+        Route::resource('ai-categories', AiCategoryController::class);
 
     });
 

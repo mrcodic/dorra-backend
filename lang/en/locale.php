@@ -5,6 +5,8 @@ return [
     "User Interface" => "User Interface",
     "Dashboards" => "Dashboards",
     "AI Questions" => "AI Questions",
+    "AI Products" => "AI Products",
+    "AI Management" => "AI Management",
     "Add New" => "Add New",
     "All Templates" => "All Templates",
     "Plans" => "Plans",
