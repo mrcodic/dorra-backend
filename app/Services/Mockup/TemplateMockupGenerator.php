@@ -9,7 +9,6 @@ use App\Models\Mockup;
 use App\Models\MockupGenerationJob;
 use App\Models\Template;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class TemplateMockupGenerator
@@ -35,7 +34,7 @@ class TemplateMockupGenerator
 
         if ($template) {
             $this->attachTemplateIfMissing($mockup, $template, $colors);
-        } else {
+        } elseif (!empty($colors)) {
             $this->attachMatchingTemplates($mockup, $colors);
         }
 
@@ -109,6 +108,10 @@ class TemplateMockupGenerator
             ->each(function ($mockup) use ($template) {
                 $colors = $mockup->colors_across_templates ?? [];
 
+                if (empty($colors)) {
+                    return;
+                }
+
                 $this->generate(mockup: $mockup, colors: $colors, template: $template);
             });
     }
@@ -116,6 +119,10 @@ class TemplateMockupGenerator
     public function handleCreated(Mockup $mockup): void
     {
         $colors = $this->cleanColors($mockup->colors_across_templates ?? []);
+
+        if (empty($colors)) {
+            return;
+        }
 
         $this->generate($mockup, $colors);
     }
@@ -182,14 +189,13 @@ class TemplateMockupGenerator
         $colors ??= collect($mockup->colors_across_templates ?? []);
         $colors = $this->cleanColors($colors->all());
 
-        $this->attachMatchingTemplates($mockup, $colors);
-
-        if (!$mockup->templates()->exists()) {
+        if (empty($colors)) {
             return;
         }
 
-        if (empty($colors)) {
-            $this->generateWithoutColor($mockup);
+        $this->attachMatchingTemplates($mockup, $colors);
+
+        if (!$mockup->templates()->exists()) {
             return;
         }
 
@@ -224,6 +230,10 @@ class TemplateMockupGenerator
     protected function attachMatchingTemplates(Mockup $mockup, array $colors): void
     {
         $colors = $this->cleanColors($colors);
+
+        if (empty($colors)) {
+            return;
+        }
 
         $hasCategory = !empty($mockup->category_id);
         $hasProducts = $mockup->products()->exists();
@@ -479,7 +489,7 @@ class TemplateMockupGenerator
         ]);
 
         foreach ($positions as $side => $points) {
-            BulkJobItem::create([
+            $item = BulkJobItem::create([
                 'bulk_job_id' => $bulkJob->id,
                 'template_id' => $templateId,
                 'color' => $color,
@@ -487,76 +497,12 @@ class TemplateMockupGenerator
                 'points' => $points,
                 'status' => 'pending',
             ]);
+
+            RenderMockupJob::dispatch($bulkJob, $item, $mockup);
         }
 
         $bulkJob->update(['status' => 'processing']);
-
-        $this->dispatchNextRenderItem($bulkJob, $mockup);
     }
-    /**
-     * Start only one render item for this bulk job.
-     *
-     * The next item is claimed as "processing" before dispatch so two callers
-     * cannot dispatch the same pending item at the same time.
-     */
-    protected function dispatchNextRenderItem(
-        MockupGenerationJob $bulkJob,
-        Mockup $mockup
-    ): void {
-        $item = DB::transaction(function () use ($bulkJob) {
-            $job = MockupGenerationJob::query()
-                ->lockForUpdate()
-                ->find($bulkJob->id);
-
-            if (
-                !$job ||
-                in_array(
-                    $job->status,
-                    ['completed', 'completed_with_errors', 'failed', 'cancelled'],
-                    true
-                )
-            ) {
-                return null;
-            }
-
-            $hasActiveItem = BulkJobItem::query()
-                ->where('bulk_job_id', $job->id)
-                ->where('status', 'processing')
-                ->exists();
-
-            if ($hasActiveItem) {
-                return null;
-            }
-
-            $nextItem = BulkJobItem::query()
-                ->where('bulk_job_id', $job->id)
-                ->where('status', 'pending')
-                ->orderBy('id')
-                ->lockForUpdate()
-                ->first();
-
-            if (!$nextItem) {
-                return null;
-            }
-
-            $nextItem->update([
-                'status' => 'processing',
-            ]);
-
-            return $nextItem->fresh();
-        });
-
-        if (!$item) {
-            return;
-        }
-
-        RenderMockupJob::dispatch(
-            $bulkJob->fresh(),
-            $item,
-            $mockup->fresh()
-        );
-    }
-
     protected function normalizeHex(string $color): string
     {
         return strtolower(trim($color));
@@ -694,10 +640,14 @@ class TemplateMockupGenerator
             'started_at' => now(),
         ]);
 
-        $this->dispatchNextRenderItem($bulkJob, $mockup);
+        BulkJobItem::query()
+            ->where('bulk_job_id', $bulkJob->id)
+            ->where('status', 'pending')
+            ->lazyById(100)
+            ->each(fn ($item) => RenderMockupJob::dispatch($bulkJob, $item, $mockup));
         return $bulkJob;
     }
-    protected function generateWithoutColor(Mockup $mockup, ?string $templateId = null, bool $force = false): ?MockupGenerationJob
+    protected function generateWithoutColor(Mockup $mockup, ?string $templateId = null, bool $force = false): void
     {
         $bulkJob = MockupGenerationJob::create([
             'mockup_id' => $mockup->id,
@@ -770,7 +720,7 @@ class TemplateMockupGenerator
                 'started_at' => now(),
                 'completed_at' => now(),
             ]);
-            return $bulkJob;
+            return;
         }
 
         $bulkJob->update([
@@ -779,9 +729,11 @@ class TemplateMockupGenerator
             'started_at' => now(),
         ]);
 
-        $this->dispatchNextRenderItem($bulkJob, $mockup);
-
-        return $bulkJob;
+        BulkJobItem::query()
+            ->where('bulk_job_id', $bulkJob->id)
+            ->where('status', 'pending')
+            ->lazyById(100)
+            ->each(fn ($item) => RenderMockupJob::dispatch($bulkJob, $item, $mockup));
     }
 
     protected function alreadyGeneratedWithoutColor(Mockup $mockup, $templateId, string $side): bool
