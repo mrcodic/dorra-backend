@@ -16,60 +16,34 @@ class GenAiImageService
         'gemini-2.5-flash-image',
     ];
 
-    /**
-     * Used when transparentBackground = true.
-     *
-     * We ask the image model itself to generate an isolated asset
-     * with real alpha transparency instead of generating a white
-     * background and removing it afterward.
-     */
     private const TRANSPARENT_BG_INSTRUCTION = <<<'PROMPT'
-Generate ONLY the isolated artwork with a truly transparent background.
+Create only the isolated artwork.
 
-The output image must use real alpha transparency.
-All pixels outside the artwork must be fully transparent with zero alpha.
+The final output must be a PNG image with a real alpha channel.
 
-IMPORTANT:
-- Keep ONLY the actual artwork/design visible.
-- Preserve white, cream, light gray, and other light colors that are part of the artwork itself.
-- Preserve internal details, holes, text, highlights, borders, and light-colored design elements.
-- Do not remove any part of the actual artwork just because it is white or light colored.
+Everything outside the actual artwork must contain no visible pixels and must be fully transparent with alpha equal to zero.
 
-Do NOT generate:
-- a white background
-- a black background
-- a gray background
-- a solid color background
-- a checkerboard transparency pattern
-- a fake transparency pattern
-- a wall
-- a floor
-- a table
-- a room
-- a scene
-- an environment
-- a product mockup
-- a frame around the artwork
-- background shadows
-- background glow
-- background texture
+The output must contain only the requested design elements.
 
-The result must be an isolated transparent PNG-style design asset,
-ready to be placed directly on products, mockups, or inside a design editor.
+Do not create any visible surrounding surface, backdrop, canvas, environment, frame, border, texture, scenery, decorative area, or background element.
+
+Do not place the artwork on a product or mockup.
+
+Do not add shadows, lighting effects, glow, reflections, or visual elements outside the actual artwork.
+
+Preserve every color that belongs to the artwork itself, including white, cream, light gray, highlights, internal holes, text details, thin lines, borders, and small decorative elements.
+
+Keep clean edges around the artwork.
+
+Return the generated artwork as an isolated production-ready PNG asset with real transparency, ready to be placed directly inside a design editor or on a product.
 PROMPT;
 
     private int $perRequestCount = 1;
     private int $chunk = 1;
 
-    /**
-     * Rate limiter.
-     */
     private int $limitPerMinute = 50;
     private string $limitKeyPrefix = 'genai:limiter:minute';
 
-    /**
-     * Circuit breaker.
-     */
     private int $breakerTtlSec = 180;
 
     public function __construct(
@@ -92,16 +66,12 @@ PROMPT;
         $prompt = trim($prompt);
         $neg = trim((string) $negativePrompt);
 
-        $instruction = $neg !== ''
-            ? $prompt . "\n\nNegative prompt: " . $neg
-            : $prompt;
+        $instruction = $prompt;
 
-        /*
-         * Request transparency directly from the AI model.
-         *
-         * No solid white background.
-         * No post-generation background removal here.
-         */
+        if ($neg !== '') {
+            $instruction .= "\n\nAvoid the following:\n" . $neg;
+        }
+
         if ($transparentBackground) {
             $instruction .= "\n\n"
                 . self::TRANSPARENT_BG_INSTRUCTION;
@@ -139,12 +109,12 @@ PROMPT;
                     );
 
                     if (!empty($result['images'])) {
-                        foreach ($result['images'] as $url) {
+                        foreach ($result['images'] as $image) {
                             if (
                                 count($images)
                                 < $this->perRequestCount
                             ) {
-                                $images[] = $url;
+                                $images[] = $image;
                             }
                         }
 
@@ -165,7 +135,9 @@ PROMPT;
                     }
                 }
             } catch (\Throwable $e) {
-                $status = (int) ($e->getCode() ?: 0);
+                $status = (int) (
+                $e->getCode() ?: 0
+                );
 
                 if ($status >= 500) {
                     $this->tripBreaker($model);
@@ -201,25 +173,21 @@ PROMPT;
         ];
     }
 
-    /**
-     * ===== Circuit Breaker =====
-     */
-    private function breakerIsOpen(string $model): bool
-    {
+    private function breakerIsOpen(
+        string $model
+    ): bool {
         return Cache::has(
             $this->breakerKey($model)
         );
     }
 
-    private function breakerKey(string $model): string
-    {
-        return 'genai:breaker:' . Str::slug($model);
+    private function breakerKey(
+        string $model
+    ): string {
+        return 'genai:breaker:'
+            . Str::slug($model);
     }
 
-    /**
-     * One provider call:
-     * limiter + retry + backoff + timeout.
-     */
     private function generateOnce(
         string $model,
         string $instruction
@@ -259,7 +227,9 @@ PROMPT;
                         'Content-Type' => 'application/json',
                     ])
                     ->post(
-                        $url . '?key=' . urlencode($this->apiKey),
+                        $url
+                        . '?key='
+                        . urlencode($this->apiKey),
                         $payload
                     );
 
@@ -287,9 +257,17 @@ PROMPT;
                 $json = $resp->json();
 
                 return [
-                    'images' => $this->extractImages($json),
-                    'usageMetadata' => $json['usageMetadata'] ?? null,
-                    'promptFeedback' => $json['promptFeedback'] ?? null,
+                    'images' => $this->extractImages(
+                        $json
+                    ),
+
+                    'usageMetadata' =>
+                        $json['usageMetadata']
+                        ?? null,
+
+                    'promptFeedback' =>
+                        $json['promptFeedback']
+                        ?? null,
                 ];
             } catch (\Throwable $e) {
                 $lastErr = $e;
@@ -329,11 +307,6 @@ PROMPT;
             );
     }
 
-    /**
-     * ===== Limiter =====
-     *
-     * Simple per-minute reservoir.
-     */
     private function acquireLimiterTokenOrFail(): void
     {
         $minuteKey =
@@ -364,12 +337,9 @@ PROMPT;
         }
     }
 
-    /**
-     * Extract inlineData images from Gemini
-     * and return them as data URLs.
-     */
-    private function extractImages(array $json): array
-    {
+    private function extractImages(
+        array $json
+    ): array {
         $out = [];
 
         $candidates =
@@ -406,8 +376,9 @@ PROMPT;
         return $out;
     }
 
-    private function tripBreaker(string $model): void
-    {
+    private function tripBreaker(
+        string $model
+    ): void {
         Cache::put(
             $this->breakerKey($model),
             1,
@@ -426,10 +397,6 @@ PROMPT;
             . "\n"
             . trim((string) $negativePrompt);
 
-        /**
-         * Rough text estimate:
-         * approximately 1 token per 4 characters.
-         */
         $textTokens = (int) ceil(
             mb_strlen($text) / 4
         );
@@ -442,10 +409,6 @@ PROMPT;
         $outputImageTokens =
             1120 * $outputImages;
 
-        /**
-         * Small buffer so the estimation
-         * isn't consistently too low.
-         */
         $buffer = 100;
 
         return
@@ -487,7 +450,7 @@ PROMPT;
         );
 
         $imagePath = public_path(
-            'images/test/ai-image.jpg'
+            'images/test/ai-image.png'
         );
 
         if (!file_exists($imagePath)) {
@@ -513,15 +476,21 @@ PROMPT;
         return [
             'ok' => true,
             'status' => 200,
+
             'images' => [
                 $fakeImage,
             ],
+
             'model' => 'fake-gemini',
+
             'usage' => [
                 'totalTokenCount' => $tokens,
             ],
+
             'promptFeedback' => null,
-            'arabicNote' => 'FAKE MODE ACTIVE',
+
+            'arabicNote' =>
+                'FAKE MODE ACTIVE',
         ];
     }
 }
