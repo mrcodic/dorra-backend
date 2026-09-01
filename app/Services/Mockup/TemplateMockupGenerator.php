@@ -9,6 +9,7 @@ use App\Models\Mockup;
 use App\Models\MockupGenerationJob;
 use App\Models\Template;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class TemplateMockupGenerator
@@ -490,12 +491,72 @@ class TemplateMockupGenerator
 
         $bulkJob->update(['status' => 'processing']);
 
-        BulkJobItem::query()
-            ->where('bulk_job_id', $bulkJob->id)
-            ->where('status', 'pending')
-            ->lazyById(100)
-            ->each(fn ($item) => RenderMockupJob::dispatch($bulkJob, $item, $mockup));
+        $this->dispatchNextRenderItem($bulkJob, $mockup);
     }
+    /**
+     * Start only one render item for this bulk job.
+     *
+     * The next item is claimed as "processing" before dispatch so two callers
+     * cannot dispatch the same pending item at the same time.
+     */
+    protected function dispatchNextRenderItem(
+        MockupGenerationJob $bulkJob,
+        Mockup $mockup
+    ): void {
+        $item = DB::transaction(function () use ($bulkJob) {
+            $job = MockupGenerationJob::query()
+                ->lockForUpdate()
+                ->find($bulkJob->id);
+
+            if (
+                !$job ||
+                in_array(
+                    $job->status,
+                    ['completed', 'completed_with_errors', 'failed', 'cancelled'],
+                    true
+                )
+            ) {
+                return null;
+            }
+
+            $hasActiveItem = BulkJobItem::query()
+                ->where('bulk_job_id', $job->id)
+                ->where('status', 'processing')
+                ->exists();
+
+            if ($hasActiveItem) {
+                return null;
+            }
+
+            $nextItem = BulkJobItem::query()
+                ->where('bulk_job_id', $job->id)
+                ->where('status', 'pending')
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->first();
+
+            if (!$nextItem) {
+                return null;
+            }
+
+            $nextItem->update([
+                'status' => 'processing',
+            ]);
+
+            return $nextItem->fresh();
+        });
+
+        if (!$item) {
+            return;
+        }
+
+        RenderMockupJob::dispatch(
+            $bulkJob->fresh(),
+            $item,
+            $mockup->fresh()
+        );
+    }
+
     protected function normalizeHex(string $color): string
     {
         return strtolower(trim($color));
@@ -633,11 +694,7 @@ class TemplateMockupGenerator
             'started_at' => now(),
         ]);
 
-        BulkJobItem::query()
-            ->where('bulk_job_id', $bulkJob->id)
-            ->where('status', 'pending')
-            ->lazyById(100)
-            ->each(fn ($item) => RenderMockupJob::dispatch($bulkJob, $item, $mockup));
+        $this->dispatchNextRenderItem($bulkJob, $mockup);
         return $bulkJob;
     }
     protected function generateWithoutColor(Mockup $mockup, ?string $templateId = null, bool $force = false): ?MockupGenerationJob
@@ -722,11 +779,7 @@ class TemplateMockupGenerator
             'started_at' => now(),
         ]);
 
-        BulkJobItem::query()
-            ->where('bulk_job_id', $bulkJob->id)
-            ->where('status', 'pending')
-            ->lazyById(100)
-            ->each(fn ($item) => RenderMockupJob::dispatch($bulkJob, $item, $mockup));
+        $this->dispatchNextRenderItem($bulkJob, $mockup);
 
         return $bulkJob;
     }

@@ -8,6 +8,7 @@ use App\Models\BulkJobItem;
 use App\Models\Mockup;
 use App\Models\MockupGenerationJob;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -171,12 +172,28 @@ class BulkMockupController extends Controller
         foreach ($renderJobs as $job) {
             $isModelOnly = $job['model_only'] ?? false;
             $originalColor = $isModelOnly ? null : ($hexToOriginalColor[$job['hex']] ?? $job['hex']);
+
             foreach ($sides as $side) {
-                $item = BulkJobItem::create(['bulk_job_id' => $bulkJob->id, 'template_id' => $job['template_id'], 'color' => $originalColor, 'side' => $side, 'points' => $positions[$side], 'status' => 'pending']);
-                RenderMockupJob::dispatch($bulkJob, $item, $mockup);
+                BulkJobItem::create([
+                    'bulk_job_id' => $bulkJob->id,
+                    'template_id' => $job['template_id'],
+                    'color' => $originalColor,
+                    'side' => $side,
+                    'points' => $positions[$side],
+                    'status' => 'pending',
+                ]);
             }
         }
-        $bulkJob->update(['status' => $totalCount > 0 ? 'processing' : 'completed', 'started_at' => now()]);
+
+        $bulkJob->update([
+            'status' => $totalCount > 0 ? 'processing' : 'completed',
+            'started_at' => now(),
+            'completed_at' => $totalCount > 0 ? null : now(),
+        ]);
+
+        if ($totalCount > 0) {
+            $this->dispatchNextRenderItem($bulkJob, $mockup);
+        }
         return Response::api(data: ['success' => true, 'bulk_job_id' => $bulkJob->id, 'total_count' => $totalCount, 'sides' => $sides, 'colors' => $hasColors ? $colors : [], 'rendered_jobs' => count($renderJobs)]);
     }
     public function status($id)
@@ -280,9 +297,7 @@ class BulkMockupController extends Controller
             'started_at' => now(),
         ]);
 
-        foreach ($failedItems as $item) {
-            RenderMockupJob::dispatch($bulkJob, $item->fresh(), $mockup);
-        }
+        $this->dispatchNextRenderItem($bulkJob->fresh(), $mockup);
 
         return Response::api(data: [
             'success' => true,
@@ -291,7 +306,67 @@ class BulkMockupController extends Controller
         ]);
     }
 
-    // Used ONLY for media DB queries and deduplication — never for pivot storage
+    /**
+     * Claim and dispatch only one pending item at a time.
+     */
+    private function dispatchNextRenderItem(
+        MockupGenerationJob $bulkJob,
+        Mockup $mockup
+    ): void {
+        $item = DB::transaction(function () use ($bulkJob) {
+            $job = MockupGenerationJob::query()
+                ->lockForUpdate()
+                ->find($bulkJob->id);
+
+            if (
+                !$job ||
+                in_array(
+                    $job->status,
+                    ['completed', 'completed_with_errors', 'failed', 'cancelled'],
+                    true
+                )
+            ) {
+                return null;
+            }
+
+            $hasActiveItem = BulkJobItem::query()
+                ->where('bulk_job_id', $job->id)
+                ->where('status', 'processing')
+                ->exists();
+
+            if ($hasActiveItem) {
+                return null;
+            }
+
+            $nextItem = BulkJobItem::query()
+                ->where('bulk_job_id', $job->id)
+                ->where('status', 'pending')
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->first();
+
+            if (!$nextItem) {
+                return null;
+            }
+
+            $nextItem->update([
+                'status' => 'processing',
+            ]);
+
+            return $nextItem->fresh();
+        });
+
+        if (!$item) {
+            return;
+        }
+
+        RenderMockupJob::dispatch(
+            $bulkJob->fresh(),
+            $item,
+            $mockup->fresh()
+        );
+    }
+
     private function normalizeHex(string $color): string
     {
         return strtolower(ltrim(trim($color), '#'));

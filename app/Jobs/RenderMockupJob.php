@@ -288,6 +288,7 @@ class RenderMockupJob implements ShouldQueue
                 ->increment('completed_count');
 
             $this->checkCompletion();
+            $this->dispatchNextItem();
         } catch (Throwable $e) {
             if (isset($tempPath) && file_exists($tempPath)) {
                 @unlink($tempPath);
@@ -326,6 +327,69 @@ class RenderMockupJob implements ShouldQueue
             ->increment('failed_count');
 
         $this->checkCompletion();
+        $this->dispatchNextItem();
+    }
+
+    /**
+     * Dispatch exactly one next pending item for this bulk job.
+     *
+     * A transient exception does NOT call this method from handle(); Laravel
+     * retries the same item first. This runs only after success or final failure.
+     */
+    private function dispatchNextItem(): void
+    {
+        $nextItem = DB::transaction(function () {
+            $job = MockupGenerationJob::query()
+                ->lockForUpdate()
+                ->find($this->bulkJob->id);
+
+            if (
+                !$job ||
+                in_array(
+                    $job->status,
+                    ['completed', 'completed_with_errors', 'failed', 'cancelled'],
+                    true
+                )
+            ) {
+                return null;
+            }
+
+            $hasActiveItem = BulkJobItem::query()
+                ->where('bulk_job_id', $job->id)
+                ->where('status', 'processing')
+                ->exists();
+
+            if ($hasActiveItem) {
+                return null;
+            }
+
+            $item = BulkJobItem::query()
+                ->where('bulk_job_id', $job->id)
+                ->where('status', 'pending')
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->first();
+
+            if (!$item) {
+                return null;
+            }
+
+            $item->update([
+                'status' => 'processing',
+            ]);
+
+            return $item->fresh();
+        });
+
+        if (!$nextItem) {
+            return;
+        }
+
+        RenderMockupJob::dispatch(
+            $this->bulkJob->fresh(),
+            $nextItem,
+            $this->mockup->fresh()
+        );
     }
 
     private function checkCompletion(): void
