@@ -831,7 +831,7 @@ PROMPT;
         );
 
         $imagePath = public_path(
-            'images/test/ai-image.png'
+            'images/test/ai-image.jpg'
         );
 
         if (!file_exists($imagePath)) {
