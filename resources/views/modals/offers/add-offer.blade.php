@@ -42,42 +42,110 @@
 
 
                     <!-- Radio switch for Products or Categories -->
+                    {{-- Offer is always for products --}}
+                    <input type="hidden" name="type" value="1">
+
                     <div class="form-group mb-2">
-                        <label class="label-text mb-1 d-block">Type</label>
+                        <label class="label-text mb-1 d-block">Product Type</label>
+
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="type" id="applyToProducts" value="2"
-                                   checked>
-                            <label class="form-check-label text-black fs-16" for="applyToProducts">Categories</label>
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="product_scope"
+                                id="addProductsWithCategory"
+                                value="with_category"
+                                checked
+                            >
+                            <label class="form-check-label" for="addProductsWithCategory">
+                                Products With Categories
+                            </label>
                         </div>
+
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="type" id="applyToCategories" value="1">
-                            <label class="form-check-label text-black fs-16" for="applyToCategories">Products</label>
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="product_scope"
+                                id="addProductsWithoutCategory"
+                                value="without_category"
+                            >
+                            <label class="form-check-label" for="addProductsWithoutCategory">
+                                Products Without Categories
+                            </label>
                         </div>
-                    </div>
-                    <!-- Products dropdown (lists PRODUCTS, sends product_ids[]) -->
-                    <div class="form-group mb-2 addProductsField" id="addProductsField">
-                        <label for="productsSelect" class="label-text mb-1">Categories</label>
-                        <select id="productsSelect"
-                                name="product_ids[]"
-                                class="form-select select2 add-products-select"
-                                multiple>
-                            @foreach($associatedData['products'] as $product)
-                                <option value="{{ $product->id }}">{{ $product->name }}</option>
-                            @endforeach
-                        </select>
                     </div>
 
-                    <!-- Categories dropdown (lists CATEGORIES, sends category_ids[]) -->
-                    <div class="form-group mb-2 d-none addCategoriesField" id="addCategoriesField">
-                        <label for="categoriesSelect" class="label-text mb-1">Products</label>
-                        <select id="categoriesSelect"
-                                name="category_ids[]"
-                                class="form-select select2 add-categories-select"
-                                multiple>
-                            @foreach($associatedData['categories'] as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
-                            @endforeach
-                        </select>
+
+                    {{-- ============================= --}}
+                    {{-- PRODUCTS WITH CATEGORY --}}
+                    {{-- ============================= --}}
+
+                    <div id="addProductsWithCategoryWrapper">
+
+                        <div class="form-group mb-2">
+                            <label for="addCategorySelect" class="label-text mb-1">
+                                Categories
+                            </label>
+
+                            <select
+                                id="addCategorySelect"
+                                class="form-select select2"
+                                multiple
+                            >
+                                @foreach($associatedData['categories'] as $category)
+                                    <option value="{{ $category->id }}">
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+
+                        <div class="form-group mb-2">
+                            <label for="addCategoryProductsSelect" class="label-text mb-1">
+                                Products
+                            </label>
+
+                            <select
+                                id="addCategoryProductsSelect"
+                                name="product_ids[]"
+                                class="form-select select2"
+                                multiple
+                            >
+                            </select>
+                        </div>
+
+                    </div>
+
+
+                    {{-- ============================= --}}
+                    {{-- PRODUCTS WITHOUT CATEGORY --}}
+                    {{-- ============================= --}}
+
+                    <div id="addProductsWithoutCategoryWrapper" class="d-none">
+
+                        <div class="form-group mb-2">
+                            <label for="addProductsWithoutCategorySelect" class="label-text mb-1">
+                                Products
+                            </label>
+
+                            <select
+                                id="addProductsWithoutCategorySelect"
+                                name="product_ids[]"
+                                class="form-select select2"
+                                multiple
+                                disabled
+                            >
+                                @foreach($associatedData['productsWithoutCategories'] as $product)
+                                    <option value="{{ $product->id }}">
+                                        {{ $product->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                        </div>
+
                     </div>
 
 
