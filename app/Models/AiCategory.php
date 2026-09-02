@@ -10,9 +10,7 @@ class AiCategory extends Model
 {
     protected $fillable = [
         'category_id',
-        'prompt_template_id',
         'enabled',
-        'generation_type',
         'default_resolution',
         'aspect_ratio',
         'credits_cost',
@@ -23,7 +21,6 @@ class AiCategory extends Model
     ];
 
     protected $casts = [
-        'generation_type' => AiGenerationTypeEnum::class,
         'enabled' => 'boolean',
         'settings' => 'array',
         'credits_cost' => 'integer',
@@ -33,11 +30,6 @@ class AiCategory extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
-    }
-
-    public function promptTemplate(): BelongsTo
-    {
-        return $this->belongsTo(AiPromptTemplate::class, 'prompt_template_id');
     }
 
     public function questions(): MorphToMany

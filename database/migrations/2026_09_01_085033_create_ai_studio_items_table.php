@@ -20,11 +20,6 @@ return new class extends Migration
 
             $table->string('generation_type', 30);
 
-            $table->foreignId('prompt_template_id')
-                ->nullable()
-                ->constrained('ai_prompt_templates')
-                ->nullOnDelete();
-
             $table->string('default_resolution')->nullable();
             $table->string('aspect_ratio')->nullable();
 

@@ -5,9 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Base\DashboardController;
 use App\Repositories\Interfaces\AiGuideQuestionRepositoryInterface;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\View;
 use App\Http\Requests\AiCategory\{StoreAiCategoryRequest, UpdateAiCategoryQuestionsRequest, UpdateAiCategoryRequest};
-use App\Repositories\Interfaces\AiPromptTemplateRepositoryInterface;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Services\Ai\AiCategoryService;
 use Illuminate\Http\JsonResponse;
@@ -17,7 +15,6 @@ class AiCategoryController extends DashboardController
     public function __construct(
         public AiCategoryService $aiCategoryService,
         public CategoryRepositoryInterface $categoryRepository,
-        public AiPromptTemplateRepositoryInterface $promptTemplateRepository,
         public AiGuideQuestionRepositoryInterface $aiGuideQuestionRepository,
     ) {
         parent::__construct($aiCategoryService);
@@ -54,10 +51,7 @@ class AiCategoryController extends DashboardController
                     ->orderBy('name')
                     ->get(),
 
-                'promptTemplates' => $this->promptTemplateRepository->query()
-                    ->where('is_active', true)
-                    ->orderBy('name')
-                    ->get(),
+
                 'questions' => $questions,
             ],
 
@@ -67,11 +61,6 @@ class AiCategoryController extends DashboardController
                     ->orderBy('name')
                     ->get(),
                 'questions' => $questions,
-
-                'promptTemplates' => $this->promptTemplateRepository->query()
-                    ->where('is_active', true)
-                    ->orderBy('name')
-                    ->get(),
             ],
         ];
     }

@@ -202,6 +202,12 @@
                     "name": "AI Products",
                     "icon": "circle",
                     "slug": ""
+                },
+                {
+                    "url": "/ai-studio-items",
+                    "name": "AI Studio Items",
+                    "icon": "circle",
+                    "slug": ""
                 }
             ]
         },

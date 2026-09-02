@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1\User\Ai;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\AiGuideQuestionResource;
+use App\Http\Resources\Ai\AiGuideQuestionResource;
 use App\Services\Ai\AiGuideQuestionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Response;

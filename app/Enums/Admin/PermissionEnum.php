@@ -181,6 +181,11 @@ enum PermissionEnum: string
     case SHOW_AI_CATEGORIES = 'ai-categories_show';
     case UPDATE_AI_CATEGORIES = 'ai-categories_update';
     case DELETE_AI_CATEGORIES = 'ai-categories_delete';
+    // AI Studio Items
+    case CREATE_AI_STUDIO_ITEMS = 'ai-studio-items_create';
+    case SHOW_AI_STUDIO_ITEMS = 'ai-studio-items_show';
+    case UPDATE_AI_STUDIO_ITEMS = 'ai-studio-items_update';
+    case DELETE_AI_STUDIO_ITEMS = 'ai-studio-items_delete';
 
     public function group(): array
     {
@@ -232,6 +237,7 @@ enum PermissionEnum: string
             'credit-orders'    => 'Credit Orders',
             'ai-guide-questions' => 'AI Guide Questions',
             'ai-categories' => 'AI Products',
+            'ai-studio-items' => 'AI Studio Items',
             default               => Str::headline(str_replace('-', ' ', $this->groupKey())),
         };
     }

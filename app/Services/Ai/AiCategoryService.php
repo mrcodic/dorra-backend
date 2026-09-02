@@ -6,6 +6,7 @@ use App\Enums\Ai\AiGuideQuestionTypeEnum;
 use App\Models\AiGuideQuestion;
 use App\Repositories\Interfaces\AiCategoryRepositoryInterface;
 use App\Services\BaseService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
@@ -222,5 +223,16 @@ class AiCategoryService extends BaseService
                 'options',
             ]);
         });
+    }
+    public function getActiveCategories(bool $paginate = false, int $perPage = 15)
+    {
+        $query = $this->repository->query()
+            ->where('enabled', true)
+            ->with('category')
+            ->orderBy('sort_order');
+
+        return $paginate
+            ? $query->paginate($perPage)
+            : $query->get();
     }
 }

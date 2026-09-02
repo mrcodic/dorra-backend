@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\User\ShippingAddress\ShippingController;
 use App\Http\Controllers\Dashboard\{AdminController,
     AiCategoryController,
     AiGuideQuestionController,
+    AiStudioItemController,
     BoardController,
     CategoryController,
     CreditOrderController,
@@ -335,6 +336,16 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
         }));
         Route::resource('ai-categories', AiCategoryController::class);
+
+        Route::group(['prefix' => 'ai-studio-items', 'as' => 'ai-studio-items.', 'controller' => AiStudioItemController::class,], (function () {
+            Route::get('/data', [AiStudioItemController::class, 'getData'])->name('data');
+            Route::post('/bulk-delete', [AiStudioItemController::class, 'bulkDelete'])->name('bulk-delete');
+            Route::get('/{id}/questions', [AiStudioItemController::class, 'questions'])->name('questions');
+            Route::put('/{id}/questions', [AiStudioItemController::class, 'updateQuestions'])->name('questions.update');
+
+        }));
+        Route::resource('ai-studio-items', AiStudioItemController::class);
+
 
     });
 

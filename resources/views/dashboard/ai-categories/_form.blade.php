@@ -25,34 +25,6 @@
         </select>
     </div>
 
-    <div class="col-md-6 mb-1">
-        <label class="form-label">Prompt Template</label>
-
-        <select name="prompt_template_id" class="form-select">
-            <option value="">Use Default</option>
-
-            @foreach($associatedData['promptTemplates'] as $template)
-                <option value="{{ $template->id }}"
-                    @selected(old('prompt_template_id', $aiCategory?->prompt_template_id) == $template->id)>
-                    {{ $template->name }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-
-    <div class="col-md-4 mb-1">
-        <label class="form-label">Generation Type</label>
-
-        <select name="generation_type" class="form-select">
-            @foreach(\App\Enums\Ai\AiGenerationTypeEnum::cases() as $type)
-                <option value="{{ $type->value }}"
-                    @selected($selectedGenerationType === $type->value)>
-                    {{ $type->label() }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-
     <div class="col-md-4 mb-1">
         <label class="form-label">Default Resolution</label>
 
@@ -64,14 +36,55 @@
     </div>
 
     <div class="col-md-4 mb-1">
-        <label class="form-label">Aspect Ratio</label>
+        <label class="form-label">
+            Aspect Ratio
+        </label>
 
-        <input type="text"
-               name="aspect_ratio"
-               value="{{ old('aspect_ratio', $aiCategory?->aspect_ratio) }}"
-               class="form-control"
-               placeholder="1:1">
+        <select
+            name="aspect_ratio"
+            class="form-select"
+        >
+            <option value="">
+                Default
+            </option>
+
+            <option
+                value="1:1"
+                @selected($selectedAspectRatio === '1:1')
+            >
+                1:1
+            </option>
+
+            <option
+                value="4:5"
+                @selected($selectedAspectRatio === '4:5')
+            >
+                4:5
+            </option>
+
+            <option
+                value="3:4"
+                @selected($selectedAspectRatio === '3:4')
+            >
+                3:4
+            </option>
+
+            <option
+                value="16:9"
+                @selected($selectedAspectRatio === '16:9')
+            >
+                16:9
+            </option>
+
+            <option
+                value="9:16"
+                @selected($selectedAspectRatio === '9:16')
+            >
+                9:16
+            </option>
+        </select>
     </div>
+
 
     <div class="col-md-4 mb-1">
         <label class="form-label">Credits Cost</label>
@@ -82,27 +95,6 @@
                value="{{ old('credits_cost', $aiCategory?->credits_cost ?? 1) }}"
                class="form-control">
     </div>
-
-    <div class="col-md-4 mb-1">
-        <label class="form-label">Provider Override</label>
-
-        <input type="text"
-               name="provider"
-               value="{{ old('provider', $aiCategory?->provider) }}"
-               class="form-control"
-               placeholder="Leave empty for global provider">
-    </div>
-
-    <div class="col-md-4 mb-1">
-        <label class="form-label">Model Override</label>
-
-        <input type="text"
-               name="model"
-               value="{{ old('model', $aiCategory?->model) }}"
-               class="form-control"
-               placeholder="Leave empty for global model">
-    </div>
-
     <div class="col-md-4 mb-1">
         <label class="form-label">Orientation</label>
 

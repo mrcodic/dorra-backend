@@ -4,4 +4,7 @@ namespace App\Repositories\Interfaces;
 
 use App\Repositories\Base\BaseRepositoryInterface;
 
-interface AiPromptTemplateRepositoryInterface extends BaseRepositoryInterface{}
+interface AiStudioItemRepositoryInterface extends BaseRepositoryInterface
+{
+
+}

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Ai;
 
 use App\Enums\Ai\AiGuideQuestionTypeEnum;
 use Illuminate\Http\Request;
@@ -18,7 +18,7 @@ class AiGuideQuestionResource extends JsonResource
             'placeholder' => $this->whenNotNull($this->placeholder),
             'promptLabel' => $this->prompt_label,
             'options' => $this->when(
-                $this->type === AiGuideQuestionTypeEnum::SINGLE_SELECT,
+                in_array($this->type , [AiGuideQuestionTypeEnum::SINGLE_SELECT, AiGuideQuestionTypeEnum::MULTI_SELECT]),
                 fn() => AiGuideQuestionOptionResource::collection($this->options)
             ),
         ];
