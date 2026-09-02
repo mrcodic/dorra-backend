@@ -79,7 +79,15 @@ class BulkMockupController extends Controller
                 }
                 $syncData[(string)$existingId] = ['colors' => $template->pivot->colors, 'positions' => $template->pivot->positions, 'model_color' => $template->pivot->model_color, 'type' => $template->pivot->type];
             }
-            $syncData[$templateId] = ['positions' => $request->input('positions'), 'type' => 'single', 'colors' => $hasColors ? $colors : [], 'model_color' => $hasColors ? ($colors[0] ?? null) : null];
+            $syncData[$templateId] = [
+                'positions' => $request->input('positions'),
+                'type' => 'single',
+                'colors' => $hasColors ? $colors : [],
+                'model_color' => $this->resolveModelColor(
+                    $existingPivot?->model_color,
+                    $hasColors ? $colors : []
+                ),
+            ];
             $mockup->templates()->sync($syncData);
             if ($hasColors) {
                 $mockup->update(['colors' => $colors]);
@@ -156,7 +164,18 @@ class BulkMockupController extends Controller
             }
             foreach ($templateIds as $templateId) {
                 $pivotColors = $hasColors ? ($mergedPivotColors[$templateId] ?? $colors) : [];
-                $syncData[(string)$templateId] = ['positions' => $request->input('positions'), 'type' => 'bulk', 'colors' => $pivotColors, 'model_color' => $pivotColors[0] ?? null];
+                $existingTemplate = $existingTemplates->get($templateId)
+                    ?? $existingTemplates->get((int) $templateId);
+
+                $syncData[(string)$templateId] = [
+                    'positions' => $request->input('positions'),
+                    'type' => 'bulk',
+                    'colors' => $pivotColors,
+                    'model_color' => $this->resolveModelColor(
+                        $existingTemplate?->pivot?->model_color,
+                        $pivotColors
+                    ),
+                ];
             }
             $mockup->templates()->sync($syncData);
             if ($hasColors) {
@@ -291,7 +310,36 @@ class BulkMockupController extends Controller
         ]);
     }
 
-    // Used ONLY for media DB queries and deduplication — never for pivot storage
+    /**
+     * Keep the currently selected model color whenever it is still available.
+     * Only fall back to the first color when there is no valid model color.
+     */
+    private function resolveModelColor(mixed $currentModelColor, array $colors): ?string
+    {
+        $colors = collect($colors)
+            ->filter(fn ($color) => is_string($color) && trim($color) !== '')
+            ->values()
+            ->all();
+
+        if (empty($colors)) {
+            return null;
+        }
+
+        if (is_string($currentModelColor) && trim($currentModelColor) !== '') {
+            $currentHex = $this->normalizeHex($currentModelColor);
+
+            $matchingColor = collect($colors)->first(
+                fn ($color) => $this->normalizeHex($color) === $currentHex
+            );
+
+            if ($matchingColor !== null) {
+                return $matchingColor;
+            }
+        }
+
+        return $colors[0] ?? null;
+    }
+
     private function normalizeHex(string $color): string
     {
         return strtolower(ltrim(trim($color), '#'));

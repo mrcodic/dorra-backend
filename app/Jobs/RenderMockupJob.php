@@ -95,8 +95,11 @@ class RenderMockupJob implements ShouldQueue
 
             /*
              * ---------------------------------------------------------------
-             * FIRST PIVOT COLOR = PRIMARY / MODEL COLOR
+             * MODEL COLOR
              * ---------------------------------------------------------------
+             * Preserve the explicitly/currently selected pivot model_color.
+             * Only use the first pivot color when model_color is missing or
+             * no longer exists in the template colors.
              */
             $currentTemplate = $mockup->templates()
                 ->where('templates.id', $template->id)
@@ -112,34 +115,61 @@ class RenderMockupJob implements ShouldQueue
                 $pivotColors = [];
             }
 
-            $primaryColor = collect($pivotColors)
+            $pivotColors = collect($pivotColors)
                 ->filter(fn ($color) => is_string($color) && trim($color) !== '')
-                ->first();
+                ->values()
+                ->all();
 
-            $primaryHex = $primaryColor
-                ? strtolower(ltrim(trim($primaryColor), '#'))
-                : null;
-
-            $isModelImage = $primaryHex === null ? 1 : ($primaryHex === $hex ? 1 : 0);
-            /*
-             * Keep pivot model_color always synced with first color.
-             * No colors => model_color = null.
-             */
             $currentModelColor = $currentTemplate?->pivot?->model_color;
 
-            $currentModelHex = $currentModelColor
+            $currentModelHex = is_string($currentModelColor) && trim($currentModelColor) !== ''
                 ? strtolower(ltrim(trim($currentModelColor), '#'))
                 : null;
 
-            if ($currentModelHex !== $primaryHex) {
+            $pivotColorsByHex = collect($pivotColors)
+                ->mapWithKeys(fn ($color) => [
+                    strtolower(ltrim(trim($color), '#')) => $color,
+                ]);
+
+            /*
+             * Fallback to first color ONLY when there is no valid model color.
+             */
+            if (
+                !empty($pivotColors) &&
+                (
+                    $currentModelHex === null ||
+                    !$pivotColorsByHex->has($currentModelHex)
+                )
+            ) {
+                $currentModelColor = $pivotColors[0];
+                $currentModelHex = strtolower(
+                    ltrim(trim($currentModelColor), '#')
+                );
+
                 $mockup->templates()->updateExistingPivot($template->id, [
-                    'model_color' => $primaryColor,
+                    'model_color' => $currentModelColor,
                 ]);
             }
 
             /*
-             * If this render is the primary color, clear model_image from
-             * other generated images for this template + side first.
+             * A no-color/base render remains the model image.
+             * For colored renders, only the selected model_color is model_image.
+             */
+            if (empty($pivotColors)) {
+                if ($currentModelColor !== null) {
+                    $mockup->templates()->updateExistingPivot($template->id, [
+                        'model_color' => null,
+                    ]);
+                }
+
+                $isModelImage = 1;
+            } else {
+                $isModelImage = $currentModelHex === $hex ? 1 : 0;
+            }
+
+            /*
+             * If this render is the selected model color, clear model_image
+             * from other generated images for this template + side first.
              */
             if ($isModelImage) {
                 $mockup->media()
