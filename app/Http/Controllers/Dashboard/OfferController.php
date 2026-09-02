@@ -23,6 +23,7 @@ class OfferController extends DashboardController
         $this->indexView = 'offers.index';
         $this->usePagination = true;
         $this->resourceTable = 'offers';
+
         $productWithCategories = $this->categoryRepository
             ->query()
             ->where('is_has_category', 1)
@@ -42,6 +43,19 @@ class OfferController extends DashboardController
             })
             ->get(['id', 'name']);
 
+        $editProductWithCategories = $this->categoryRepository
+            ->query()
+            ->where('is_has_category', 1)
+            ->where('is_tableau', 0)
+            ->has('products')
+            ->get(['id', 'name']);
+
+        $editProductWithoutCategories = $this->categoryRepository
+            ->query()
+            ->where('is_has_category', 0)
+            ->where('is_tableau', 0)
+            ->get(['id', 'name']);
+
         $editCategories = $this->categoryRepository
             ->query()
             ->whereNull('parent_id')
@@ -56,6 +70,8 @@ class OfferController extends DashboardController
             'index' => [
                 'product_with_categories' => $productWithCategories,
                 'product_without_categories' => $productWithoutCategories,
+                'edit_product_with_categories' => $editProductWithCategories,
+                'edit_product_without_categories' => $editProductWithoutCategories,
 
                 'categories' => $productWithCategories,
                 'products' => $productWithoutCategories,
