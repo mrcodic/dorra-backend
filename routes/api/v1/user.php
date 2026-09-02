@@ -225,6 +225,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
             Route::get('categories', [AiCategoryController::class, 'index']);
             Route::get('studio-items', [AiStudioItemController::class, 'index']);
             Route::get('questions', [AiGenerationConfigController::class, 'questions']);
+//            Route::post('generate', [AiGenerationController::class, 'generate']);
         });
 
     });
