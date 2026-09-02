@@ -23,61 +23,75 @@ class OfferController extends DashboardController
         $this->indexView = 'offers.index';
         $this->usePagination = true;
         $this->resourceTable = 'offers';
-
-        $productWithCategories = $this->categoryRepository
-            ->query()
-            ->where('is_has_category', 1)
-            ->where('is_tableau', 0)
-            ->has('products')
-            ->whereDoesntHave('offers', function ($query) {
-                $query->where('offers.end_at', '>', now());
-            })
-            ->get(['id', 'name']);
-
-        $productWithoutCategories = $this->categoryRepository
-            ->query()
-            ->where('is_has_category', 0)
-            ->where('is_tableau', 0)
-            ->whereDoesntHave('offers', function ($query) {
-                $query->where('offers.end_at', '>', now());
-            })
-            ->get(['id', 'name']);
-
-        $editProductWithCategories = $this->categoryRepository
-            ->query()
-            ->where('is_has_category', 1)
-            ->where('is_tableau', 0)
-            ->has('products')
-            ->get(['id', 'name']);
-
-        $editProductWithoutCategories = $this->categoryRepository
-            ->query()
-            ->where('is_has_category', 0)
-            ->where('is_tableau', 0)
-            ->get(['id', 'name']);
-
-        $editCategories = $this->categoryRepository
-            ->query()
-            ->whereNull('parent_id')
-            ->whereIsHasCategory(0)
-            ->get(['id', 'name']);
-
-        $editProducts = $this->productRepository
-            ->query()
-            ->get(['id', 'name']);
-
         $this->assoiciatedData = [
             'index' => [
-                'product_with_categories' => $productWithCategories,
-                'product_without_categories' => $productWithoutCategories,
-                'edit_product_with_categories' => $editProductWithCategories,
-                'edit_product_without_categories' => $editProductWithoutCategories,
+                'product_with_categories' => $this->categoryRepository
+                    ->query()
+                    ->where('is_has_category', 1)
+                    ->where('is_tableau', 0)
+                    ->has('products')
+                    ->where(function ($query) {
+                        $query->whereDoesntHave('offers')
+                            ->orWhereHas('offers', function ($query) {
+                                $query->where('offers.end_at', '<=', now());
+                            });
+                    })
+                    ->get([
+                        'id',
+                        'name'
+                    ]),
 
-                'categories' => $productWithCategories,
-                'products' => $productWithoutCategories,
-                'editCategories' => $editCategories,
-                'editProducts' => $editProducts,
-            ],
+                'product_without_categories' => $this->categoryRepository
+                    ->query()
+                    ->where('is_has_category', 0)
+                    ->where('is_tableau', 0)
+                    ->where(function ($query) {
+                        $query->whereDoesntHave('offers')
+                            ->orWhereHas('offers', function ($query) {
+                                $query->where('offers.end_at', '<=', now());
+                            });
+                    })
+                    ->get([
+                        'id',
+                        'name'
+                    ]),
+
+                'edit_product_with_categories' => $this->categoryRepository
+                    ->query()
+                    ->where('is_has_category', 1)
+                    ->where('is_tableau', 0)
+                    ->has('products')
+                    ->get([
+                        'id',
+                        'name'
+                    ]),
+
+                'edit_product_without_categories' => $this->categoryRepository
+                    ->query()
+                    ->where('is_has_category', 0)
+                    ->where('is_tableau', 0)
+                    ->get([
+                        'id',
+                        'name'
+                    ]),
+
+                // Keep old Edit modal compatibility
+                'editCategories' => $this->categoryRepository
+                    ->query()
+                    ->whereNull('parent_id')
+                    ->whereIsHasCategory(0)
+                    ->get([
+                        'id',
+                        'name'
+                    ]),
+
+                'editProducts' => $this->productRepository
+                    ->query()
+                    ->get([
+                        'id',
+                        'name'
+                    ]),
+            ]
         ];
     }
 

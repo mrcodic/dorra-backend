@@ -134,7 +134,7 @@
 
                         <div class="form-group mb-2">
                             <label for="addCategorySelect" class="label-text mb-1">
-                                Categories
+                                Products
                             </label>
 
                             {{--
@@ -158,7 +158,7 @@
 
                         <div class="form-group mb-2">
                             <label for="addCategoryProductsSelect" class="label-text mb-1">
-                                Products
+                                Categories
                             </label>
 
                             <select
