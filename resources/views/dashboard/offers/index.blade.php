@@ -460,59 +460,6 @@
             $(this).val(v);
         });
 
-        // ---- EDIT MODAL ----
-        $('#editOfferModal')
-            .on('shown.bs.modal', function () {
-                const $m = $(this);
-                // Init only selects inside this modal
-                $m.find('.select2').each(function () {
-                    // if (!$(this).hasClass('select2-hidden-accessible')) {
-                        $(this).select2({ dropdownParent: $m });
-                    // }
-                });
-                // Ensure correct section visibility on open
-                // $m.find('input[name="type"]:checked').trigger('change');
-            })
-            .on('change', 'input[name="type"]', function () {
-                const $m = $('#editOfferModal');
-                const v = parseInt(this.value, 10);
-                if (v === 2) {
-                    // Products
-                    $m.find('.productsField').removeClass('d-none');
-                    $m.find('.categoriesField').addClass('d-none');
-                } else if (v === 1) {
-                    // Categories
-                    $m.find('.categoriesField').removeClass('d-none');
-                    $m.find('.productsField').addClass('d-none');
-                }
-            });
-
-        // ---- ADD MODAL ----
-        $('#addOfferModal')
-            .on('shown.bs.modal', function () {
-                const $m = $(this);
-                // Init only selects inside this modal
-                $m.find('.select2').each(function () {
-                    // if (!$(this).hasClass('select2-hidden-accessible')) {
-                        $(this).select2({ dropdownParent: $m });
-                    // }
-                });
-                // Ensure correct section visibility on open
-                // $m.find('input[name="type"]:checked').trigger('change');
-            })
-            .on('change', 'input[name="type"]', function () {
-                const $m = $('#addOfferModal');
-                const v = parseInt(this.value, 10);
-                if (v === 2) {
-                    // Products
-                    $m.find('.addProductsField').removeClass('d-none');
-                    $m.find('.addCategoriesField').addClass('d-none');
-                } else if (v === 1) {
-                    // Categories
-                    $m.find('.addCategoriesField').removeClass('d-none');
-                    $m.find('.addProductsField').addClass('d-none');
-                }
-            });
 
         // Keep your form handlers
         handleAjaxFormSubmit("#addOfferForm", {

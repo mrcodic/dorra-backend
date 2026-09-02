@@ -1,10 +1,4 @@
 @php
-    /*
-     * Compatibility fallback:
-     * - New controller keys are preferred.
-     * - Old keys keep the page from crashing if an older controller
-     *   is still deployed/cached.
-     */
     $editProductWithCategories =
         $associatedData['edit_product_with_categories']
         ?? $associatedData['editCategories']
@@ -19,11 +13,24 @@
 <div class="modal modal-slide-in new-user-modal fade" id="editOfferModal">
     <div class="modal-dialog">
         <div class="add-new-user modal-content pt-0">
-            <form id="editOfferForm" method="post" enctype="multipart/form-data" action="">
+
+            <form
+                id="editOfferForm"
+                method="post"
+                enctype="multipart/form-data"
+                action=""
+            >
                 @csrf
                 @method('PUT')
 
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                >
+                    ×
+                </button>
 
                 <div class="modal-header mb-1">
                     <h5 class="modal-title">Edit Offer</h5>
@@ -33,7 +40,10 @@
 
                     <div class="row mb-2">
                         <div class="col-md-6">
-                            <label for="editOfferNameEn" class="label-text mb-1">Offer Name En</label>
+                            <label for="editOfferNameEn" class="label-text mb-1">
+                                Offer Name En
+                            </label>
+
                             <input
                                 type="text"
                                 name="name[en]"
@@ -44,7 +54,10 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label for="editOfferNameAr" class="label-text mb-1">Offer Name Ar</label>
+                            <label for="editOfferNameAr" class="label-text mb-1">
+                                Offer Name Ar
+                            </label>
+
                             <input
                                 type="text"
                                 name="name[ar]"
@@ -55,8 +68,12 @@
                         </div>
                     </div>
 
+
                     <div class="form-group mb-2">
-                        <label for="editOfferValue" class="label-text mb-1">Offer Value (%)</label>
+                        <label for="editOfferValue" class="label-text mb-1">
+                            Offer Value (%)
+                        </label>
+
                         <input
                             type="number"
                             name="value"
@@ -69,10 +86,15 @@
                         >
                     </div>
 
+
+                    {{-- Product offer --}}
                     <input type="hidden" name="type" value="2">
 
+
                     <div class="form-group mb-2">
-                        <label class="label-text mb-1 d-block">Product Type</label>
+                        <label class="label-text mb-1 d-block">
+                            Product Type
+                        </label>
 
                         <div class="form-check form-check-inline">
                             <input
@@ -83,7 +105,11 @@
                                 value="with_category"
                                 checked
                             >
-                            <label class="form-check-label" for="editProductsWithCategory">
+
+                            <label
+                                class="form-check-label"
+                                for="editProductsWithCategory"
+                            >
                                 Products With Categories
                             </label>
                         </div>
@@ -96,12 +122,20 @@
                                 id="editProductsWithoutCategory"
                                 value="without_category"
                             >
-                            <label class="form-check-label" for="editProductsWithoutCategory">
+
+                            <label
+                                class="form-check-label"
+                                for="editProductsWithoutCategory"
+                            >
                                 Products Without Categories
                             </label>
                         </div>
                     </div>
 
+
+                    {{-- ================================================ --}}
+                    {{-- PRODUCTS WITH CATEGORIES                         --}}
+                    {{-- ================================================ --}}
                     <div id="editProductsWithCategoryWrapper">
 
                         <div class="form-group mb-2">
@@ -115,15 +149,26 @@
                                 multiple
                             >
                                 @foreach($editProductWithCategories as $category)
-                                    <option value="{{ $category->id }}">
+                                    <option
+                                        value="{{ $category->id }}"
+                                        data-product-ids='@json(
+                                            $category->relationLoaded("products")
+                                                ? $category->products->pluck("id")->map(fn ($id) => (string) $id)->values()
+                                                : []
+                                        )'
+                                    >
                                         {{ $category->name }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
 
+
                         <div class="form-group mb-2">
-                            <label for="editCategoryProductsSelect" class="label-text mb-1">
+                            <label
+                                for="editCategoryProductsSelect"
+                                class="label-text mb-1"
+                            >
                                 Products
                             </label>
 
@@ -138,10 +183,19 @@
 
                     </div>
 
-                    <div id="editProductsWithoutCategoryWrapper" class="d-none">
 
+                    {{-- ================================================ --}}
+                    {{-- PRODUCTS WITHOUT CATEGORIES                      --}}
+                    {{-- ================================================ --}}
+                    <div
+                        id="editProductsWithoutCategoryWrapper"
+                        class="d-none"
+                    >
                         <div class="form-group mb-2">
-                            <label for="editProductsWithoutCategorySelect" class="label-text mb-1">
+                            <label
+                                for="editProductsWithoutCategorySelect"
+                                class="label-text mb-1"
+                            >
                                 Products
                             </label>
 
@@ -159,12 +213,15 @@
                                 @endforeach
                             </select>
                         </div>
-
                     </div>
+
 
                     <div class="row">
                         <div class="col mb-2">
-                            <label for="editStartDate" class="form-label">Start Date</label>
+                            <label for="editStartDate" class="form-label">
+                                Start Date
+                            </label>
+
                             <input
                                 type="date"
                                 name="start_at"
@@ -174,7 +231,10 @@
                         </div>
 
                         <div class="col mb-2">
-                            <label for="editEndDate" class="form-label">End Date</label>
+                            <label for="editEndDate" class="form-label">
+                                End Date
+                            </label>
+
                             <input
                                 type="date"
                                 name="end_at"
@@ -186,8 +246,13 @@
 
                 </div>
 
+
                 <div class="modal-footer border-top-0 d-flex justify-content-end">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal"
+                    >
                         Cancel
                     </button>
 
@@ -197,6 +262,7 @@
                         id="editOfferSaveButton"
                     >
                         <span>Save Changes</span>
+
                         <span
                             class="spinner-border spinner-border-sm d-none saveLoader"
                             role="status"
@@ -204,25 +270,48 @@
                         ></span>
                     </button>
                 </div>
+
             </form>
         </div>
     </div>
 </div>
 
+
 <script>
     $(function () {
         const $modal = $('#editOfferModal');
-        const $parents = $('#editCategorySelect');
-        const $withProducts = $('#editCategoryProductsSelect');
-        const $withoutProducts = $('#editProductsWithoutCategorySelect');
 
-        function toDateInput(value) {
-            if (!value) return '';
+        const $categorySelect =
+            $('#editCategorySelect');
+
+        const $categoryProductsSelect =
+            $('#editCategoryProductsSelect');
+
+        const $withoutCategorySelect =
+            $('#editProductsWithoutCategorySelect');
+
+
+        /*
+         * -------------------------
+         * Helpers
+         * -------------------------
+         */
+        function toEditDate(value) {
+            if (!value) {
+                return '';
+            }
 
             value = String(value).trim();
 
             if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
                 return value;
+            }
+
+            const slashMatch =
+                value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+
+            if (slashMatch) {
+                return `${slashMatch[3]}-${slashMatch[2]}-${slashMatch[1]}`;
             }
 
             if (value.includes('T')) {
@@ -233,17 +322,14 @@
                 return value.split(' ')[0];
             }
 
-            const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-
-            if (match) {
-                return `${match[3]}-${match[2]}-${match[1]}`;
-            }
-
             return '';
         }
 
-        function parseItems(raw) {
-            if (!raw) return [];
+
+        function parseEditItems(raw) {
+            if (raw == null) {
+                return [];
+            }
 
             if (typeof raw === 'string') {
                 try {
@@ -256,20 +342,30 @@
             return Array.isArray(raw) ? raw : [];
         }
 
-        function itemId(item) {
+
+        function editItemId(item) {
             if (item && typeof item === 'object') {
-                return String(item.id ?? item.value ?? '');
+                return String(
+                    item.id ??
+                    item.value ??
+                    ''
+                );
             }
 
             return String(item ?? '');
         }
 
-        function itemName(item) {
+
+        function editItemName(item) {
             if (!item || typeof item !== 'object') {
-                return '#' + itemId(item);
+                return `#${editItemId(item)}`;
             }
 
-            let name = item.name ?? item.title ?? item.label ?? null;
+            let name =
+                item.name ??
+                item.title ??
+                item.label ??
+                null;
 
             if (name && typeof name === 'object') {
                 name =
@@ -279,73 +375,179 @@
                     null;
             }
 
-            return name ? String(name) : '#' + itemId(item);
+            return name
+                ? String(name)
+                : `#${editItemId(item)}`;
         }
 
-        function parentId(item) {
-            if (!item || typeof item !== 'object') {
-                return null;
+
+        function parseOptionProductIds(option) {
+            const raw =
+                $(option).attr('data-product-ids');
+
+            if (!raw) {
+                return [];
             }
 
-            const id =
-                item.category_id ??
-                item.parent_id ??
-                item.product_category_id ??
-                item.category?.id ??
-                item.parent?.id ??
-                null;
+            try {
+                const ids = JSON.parse(raw);
 
-            return id == null ? null : String(id);
+                return Array.isArray(ids)
+                    ? ids.map(String)
+                    : [];
+            } catch (_) {
+                return [];
+            }
         }
 
-        function loadProductsByParents(parentIds, selectedIds = [], selectedItems = []) {
-            parentIds = (parentIds || []).map(String);
-            selectedIds = (selectedIds || []).map(String);
 
-            if (!parentIds.length) {
-                $withProducts.empty().trigger('change');
+        /*
+         * Find parent categories from the currently-selected child products.
+         *
+         * This is the important fix:
+         * the Edit modal no longer requires row.products to contain category_id.
+         */
+        function findParentCategoriesForProducts(productIds) {
+            const selectedIds =
+                new Set((productIds || []).map(String));
+
+            const parentIds = [];
+
+            $categorySelect
+                .find('option')
+                .each(function () {
+                    const childIds =
+                        parseOptionProductIds(this);
+
+                    const containsSelectedProduct =
+                        childIds.some(id => selectedIds.has(String(id)));
+
+                    if (containsSelectedProduct) {
+                        parentIds.push(
+                            String(this.value)
+                        );
+                    }
+                });
+
+            return [...new Set(parentIds)];
+        }
+
+
+        /*
+         * Fallback if API/resource already provides category_id.
+         */
+        function getParentIdsFromProducts(items) {
+            return [
+                ...new Set(
+                    (items || [])
+                        .map(function (item) {
+                            if (!item || typeof item !== 'object') {
+                                return null;
+                            }
+
+                            return (
+                                item.category_id ??
+                                item.parent_id ??
+                                item.product_category_id ??
+                                item.category?.id ??
+                                item.parent?.id ??
+                                null
+                            );
+                        })
+                        .filter(id => id !== null && id !== undefined)
+                        .map(String)
+                )
+            ];
+        }
+
+
+        /*
+         * Parent categories -> child products
+         * Same AJAX endpoint used by Templates.
+         */
+        function loadEditProductsByCategories(
+            categoryIds,
+            selectedProductIds = [],
+            selectedItems = []
+        ) {
+            categoryIds =
+                (categoryIds || []).map(String);
+
+            selectedProductIds =
+                (selectedProductIds || []).map(String);
+
+
+            if (!categoryIds.length) {
+                $categoryProductsSelect
+                    .empty()
+                    .trigger('change');
+
                 return;
             }
 
-            $withProducts.prop('disabled', true);
+
+            $categoryProductsSelect
+                .prop('disabled', true);
+
 
             $.ajax({
                 url: "{{ route('products.categories') }}",
+
                 type: 'POST',
+
                 data: {
                     _token: "{{ csrf_token() }}",
-                    category_ids: parentIds
+                    category_ids: categoryIds
                 },
 
                 success: function (response) {
-                    $withProducts.empty();
+                    const returnedItems =
+                        response.data || [];
 
-                    const returnedIds = new Set();
+                    const returnedIds =
+                        new Set();
 
-                    (response.data || []).forEach(function (product) {
-                        const id = String(product.id);
+                    $categoryProductsSelect.empty();
+
+
+                    returnedItems.forEach(function (product) {
+                        const id =
+                            String(product.id);
+
                         returnedIds.add(id);
 
-                        const selected = selectedIds.includes(id);
+                        const selected =
+                            selectedProductIds.includes(id);
 
-                        $withProducts.append(
+                        const option =
                             new Option(
                                 product.name,
                                 product.id,
                                 selected,
                                 selected
-                            )
-                        );
+                            );
+
+                        $categoryProductsSelect
+                            .append(option);
                     });
 
-                    // Keep existing selected items visible if endpoint omitted them.
-                    selectedItems.forEach(function (item) {
-                        const id = itemId(item);
 
-                        if (selectedIds.includes(id) && !returnedIds.has(id)) {
-                            $withProducts.append(
+                    /*
+                     * Safety fallback:
+                     * never lose a currently-selected resource if the endpoint
+                     * does not return it for any reason.
+                     */
+                    selectedItems.forEach(function (item) {
+                        const id =
+                            editItemId(item);
+
+                        if (
+                            selectedProductIds.includes(id) &&
+                            !returnedIds.has(id)
+                        ) {
+                            $categoryProductsSelect.append(
                                 new Option(
-                                    itemName(item),
+                                    editItemName(item),
                                     id,
                                     true,
                                     true
@@ -354,208 +556,380 @@
                         }
                     });
 
-                    $withProducts
+
+                    $categoryProductsSelect
                         .prop('disabled', false)
                         .trigger('change');
                 },
 
                 error: function (xhr) {
-                    console.error('Error loading edit products:', xhr.responseText);
+                    console.error(
+                        'Error loading edit products:',
+                        xhr.responseText
+                    );
 
-                    $withProducts.empty();
+                    $categoryProductsSelect.empty();
 
+                    /*
+                     * Keep current selections visible on request failure.
+                     */
                     selectedItems.forEach(function (item) {
-                        $withProducts.append(
+                        $categoryProductsSelect.append(
                             new Option(
-                                itemName(item),
-                                itemId(item),
+                                editItemName(item),
+                                editItemId(item),
                                 true,
                                 true
                             )
                         );
                     });
 
-                    $withProducts
+                    $categoryProductsSelect
                         .prop('disabled', false)
                         .trigger('change');
                 }
             });
         }
 
-        $modal.on('shown.bs.modal', function () {
-            $modal.find('.select2').each(function () {
-                const $select = $(this);
 
-                if (!$select.hasClass('select2-hidden-accessible')) {
-                    $select.select2({
-                        dropdownParent: $modal,
-                        width: '100%'
-                    });
-                }
-            });
+        /*
+         * Select2
+         */
+        $modal.on('shown.bs.modal', function () {
+            $modal
+                .find('.select2')
+                .each(function () {
+                    const $select =
+                        $(this);
+
+                    if (
+                        !$select.hasClass(
+                            'select2-hidden-accessible'
+                        )
+                    ) {
+                        $select.select2({
+                            dropdownParent: $modal,
+                            width: '100%'
+                        });
+                    }
+                });
         });
 
-        $parents.on('change', function () {
-            loadProductsByParents(
-                $(this).val() || [],
-                $withProducts.val() || []
+
+        /*
+         * User manually changes parent category.
+         */
+        $categorySelect.on('change', function () {
+            const categoryIds =
+                $(this).val() || [];
+
+            const oldSelectedProducts =
+                $categoryProductsSelect.val() || [];
+
+            loadEditProductsByCategories(
+                categoryIds,
+                oldSelectedProducts
             );
         });
 
-        $('input[name="edit_product_scope"]').on('change', function () {
-            const scope =
-                $('input[name="edit_product_scope"]:checked').val();
 
-            if (scope === 'with_category') {
-                $('#editProductsWithCategoryWrapper').removeClass('d-none');
-                $('#editProductsWithoutCategoryWrapper').addClass('d-none');
+        /*
+         * Switch between:
+         * - products with categories
+         * - products without categories
+         */
+        $('input[name="edit_product_scope"]').on(
+            'change',
+            function () {
+                const scope =
+                    $('input[name="edit_product_scope"]:checked')
+                        .val();
 
-                $parents.prop('disabled', false);
-                $withProducts.prop('disabled', false);
 
-                $withoutProducts
+                if (scope === 'with_category') {
+                    $('#editProductsWithCategoryWrapper')
+                        .removeClass('d-none');
+
+                    $('#editProductsWithoutCategoryWrapper')
+                        .addClass('d-none');
+
+                    $categorySelect
+                        .prop('disabled', false);
+
+                    $categoryProductsSelect
+                        .prop('disabled', false);
+
+                    $withoutCategorySelect
+                        .prop('disabled', true)
+                        .val(null)
+                        .trigger('change');
+
+                    return;
+                }
+
+
+                $('#editProductsWithCategoryWrapper')
+                    .addClass('d-none');
+
+                $('#editProductsWithoutCategoryWrapper')
+                    .removeClass('d-none');
+
+                $categorySelect
                     .prop('disabled', true)
                     .val(null)
+                    .trigger('change.select2');
+
+                $categoryProductsSelect
+                    .empty()
+                    .prop('disabled', true)
                     .trigger('change');
 
-                return;
+                $withoutCategorySelect
+                    .prop('disabled', false);
             }
+        );
 
-            $('#editProductsWithCategoryWrapper').addClass('d-none');
-            $('#editProductsWithoutCategoryWrapper').removeClass('d-none');
 
-            $parents
-                .prop('disabled', true)
-                .val(null)
-                .trigger('change.select2');
+        /*
+         * ==========================================
+         * EDIT OFFER OPEN
+         * ==========================================
+         *
+         * IMPORTANT:
+         * This is the ONLY Edit handler that should exist.
+         * The old .edit-details handler must be removed from
+         * app-offer-list.js.
+         */
+        $(document).on(
+            'click.offerEditV2',
+            '.edit-details',
+            function (e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
 
-            $withProducts
-                .empty()
-                .prop('disabled', true)
-                .trigger('change');
+                const $button =
+                    $(this);
 
-            $withoutProducts.prop('disabled', false);
-        });
 
-        $(document).on('click.fixedEditOffer', '.edit-details', function (e) {
-            e.preventDefault();
+                const offerId =
+                    $button.data('id');
 
-            const $button = $(this);
 
-            const offerId = $button.data('id');
+                $('#editOfferForm')
+                    .attr(
+                        'action',
+                        '/offers/' + offerId
+                    );
 
-            $('#editOfferForm').attr('action', '/offers/' + offerId);
 
-            $('#editOfferNameEn').val($button.data('name_en') ?? '');
-            $('#editOfferNameAr').val($button.data('name_ar') ?? '');
+                $('#editOfferNameEn')
+                    .val(
+                        $button.data('name_en') ?? ''
+                    );
 
-            $('#editOfferValue').val(
-                String($button.data('value') ?? '')
-                    .replace(/[%٪]/g, '')
-                    .trim()
-            );
+                $('#editOfferNameAr')
+                    .val(
+                        $button.data('name_ar') ?? ''
+                    );
 
-            $('#editStartDate').val(
-                toDateInput($button.data('start_at'))
-            );
 
-            $('#editEndDate').val(
-                toDateInput($button.data('end_at'))
-            );
+                $('#editOfferValue')
+                    .val(
+                        String(
+                            $button.data('value') ?? ''
+                        )
+                            .replace(/[%٪]/g, '')
+                            .trim()
+                    );
 
-            const selectedProducts =
-                parseItems($button.attr('data-products'));
 
-            const selectedIds =
-                selectedProducts
-                    .map(itemId)
-                    .filter(Boolean);
+                $('#editStartDate')
+                    .val(
+                        toEditDate(
+                            $button.data('start_at')
+                        )
+                    );
 
-            const withoutIds = new Set(
-                $withoutProducts
-                    .find('option')
-                    .map(function () {
-                        return String(this.value);
-                    })
-                    .get()
-            );
 
-            const selectedWithout =
-                selectedIds.filter(id => withoutIds.has(String(id)));
+                $('#editEndDate')
+                    .val(
+                        toEditDate(
+                            $button.data('end_at')
+                        )
+                    );
 
-            if (
-                selectedIds.length &&
-                selectedWithout.length === selectedIds.length
-            ) {
-                $('#editProductsWithoutCategory').prop('checked', true);
+
+                /*
+                 * Existing selected products
+                 */
+                const selectedProducts =
+                    parseEditItems(
+                        $button.attr('data-products')
+                    );
+
+
+                const selectedProductIds =
+                    selectedProducts
+                        .map(editItemId)
+                        .filter(Boolean);
+
+
+                /*
+                 * Is this a "Products Without Categories" offer?
+                 *
+                 * Compare selected IDs against the options rendered in
+                 * edit_product_without_categories.
+                 */
+                const withoutCategoryIds =
+                    new Set(
+                        $withoutCategorySelect
+                            .find('option')
+                            .map(function () {
+                                return String(
+                                    this.value
+                                );
+                            })
+                            .get()
+                    );
+
+
+                const selectedWithoutCategory =
+                    selectedProductIds.filter(
+                        id =>
+                            withoutCategoryIds.has(
+                                String(id)
+                            )
+                    );
+
+
+                if (
+                    selectedProductIds.length &&
+                    selectedWithoutCategory.length ===
+                    selectedProductIds.length
+                ) {
+                    $('#editProductsWithoutCategory')
+                        .prop('checked', true);
+
+
+                    $('input[name="edit_product_scope"]:checked')
+                        .trigger('change');
+
+
+                    $withoutCategorySelect
+                        .val(selectedWithoutCategory)
+                        .trigger('change');
+
+                    return;
+                }
+
+
+                /*
+                 * Products With Categories
+                 */
+                $('#editProductsWithCategory')
+                    .prop('checked', true);
+
 
                 $('input[name="edit_product_scope"]:checked')
                     .trigger('change');
 
-                $withoutProducts
-                    .val(selectedWithout)
-                    .trigger('change');
 
-                return;
-            }
+                /*
+                 * FIRST:
+                 * use the parent->children mapping rendered in the options.
+                 */
+                let selectedCategoryIds =
+                    findParentCategoriesForProducts(
+                        selectedProductIds
+                    );
 
-            $('#editProductsWithCategory').prop('checked', true);
 
-            $('input[name="edit_product_scope"]:checked')
-                .trigger('change');
+                /*
+                 * FALLBACK:
+                 * if the DataTable response already exposes category_id.
+                 */
+                if (!selectedCategoryIds.length) {
+                    selectedCategoryIds =
+                        getParentIdsFromProducts(
+                            selectedProducts
+                        );
+                }
 
-            const parentIds = [
-                ...new Set(
-                    selectedProducts
-                        .map(parentId)
-                        .filter(Boolean)
-                )
-            ];
 
-            if (parentIds.length) {
-                $parents
-                    .val(parentIds)
+                /*
+                 * Select the parent category/categories.
+                 */
+                $categorySelect
+                    .val(selectedCategoryIds)
                     .trigger('change.select2');
 
-                loadProductsByParents(
-                    parentIds,
-                    selectedIds,
-                    selectedProducts
+
+                if (selectedCategoryIds.length) {
+                    /*
+                     * Load all products from these parents and restore current
+                     * selected product(s).
+                     */
+                    loadEditProductsByCategories(
+                        selectedCategoryIds,
+                        selectedProductIds,
+                        selectedProducts
+                    );
+
+                    return;
+                }
+
+
+                /*
+                 * Last fallback:
+                 * keep current products visible even if no parent could be resolved.
+                 */
+                $categoryProductsSelect.empty();
+
+
+                selectedProducts.forEach(
+                    function (product) {
+                        $categoryProductsSelect.append(
+                            new Option(
+                                editItemName(product),
+                                editItemId(product),
+                                true,
+                                true
+                            )
+                        );
+                    }
                 );
 
-                return;
+
+                $categoryProductsSelect
+                    .trigger('change');
             }
+        );
 
-            // Parent IDs were not included in row.products.
-            // Keep current products selected instead of losing them.
-            $parents
-                .val(null)
-                .trigger('change.select2');
 
-            $withProducts.empty();
+        /*
+         * Percentage clamp
+         */
+        $('#editOfferValue').on(
+            'input',
+            function () {
+                let value =
+                    parseInt(
+                        $(this).val(),
+                        10
+                    );
 
-            selectedProducts.forEach(function (item) {
-                $withProducts.append(
-                    new Option(
-                        itemName(item),
-                        itemId(item),
-                        true,
-                        true
-                    )
-                );
-            });
+                if (Number.isNaN(value)) {
+                    return;
+                }
 
-            $withProducts.trigger('change');
-        });
+                value =
+                    Math.max(
+                        1,
+                        Math.min(100, value)
+                    );
 
-        $('#editOfferValue').on('input', function () {
-            let value = parseInt($(this).val(), 10);
-
-            if (Number.isNaN(value)) return;
-
-            $(this).val(
-                Math.max(1, Math.min(100, value))
-            );
-        });
+                $(this).val(value);
+            }
+        );
     });
 </script>
