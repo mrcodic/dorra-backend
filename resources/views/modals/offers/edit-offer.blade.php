@@ -1,12 +1,10 @@
 @php
     $editProductWithCategories =
         $associatedData['edit_product_with_categories']
-        ?? $associatedData['editCategories']
         ?? collect();
 
     $editProductWithoutCategories =
         $associatedData['edit_product_without_categories']
-        ?? $associatedData['editProducts']
         ?? collect();
 @endphp
 
@@ -140,7 +138,7 @@
 
                         <div class="form-group mb-2">
                             <label for="editCategorySelect" class="label-text mb-1">
-                                Categories
+                                Products
                             </label>
 
                             <select
@@ -169,7 +167,7 @@
                                 for="editCategoryProductsSelect"
                                 class="label-text mb-1"
                             >
-                                Products
+                                Categories
                             </label>
 
                             <select
