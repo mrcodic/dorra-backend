@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
 use App\Repositories\Interfaces\AiGuideQuestionRepositoryInterface;
-use App\Http\Requests\AiCategory\{StoreAiCategoryRequest, UpdateAiCategoryRequest};
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\View;
+use App\Http\Requests\AiCategory\{StoreAiCategoryRequest, UpdateAiCategoryQuestionsRequest, UpdateAiCategoryRequest};
 use App\Repositories\Interfaces\AiPromptTemplateRepositoryInterface;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Services\Ai\AiCategoryService;
@@ -77,5 +79,16 @@ class AiCategoryController extends DashboardController
     public function getData(): JsonResponse
     {
         return $this->aiCategoryService->getData();
+    }
+    public function questions(int $id)
+    {
+        $data = $this->aiCategoryService->getQuestionsConfiguration($id);
+        return view('dashboard.ai-categories.questions', $data);
+    }
+
+    public function updateQuestions(UpdateAiCategoryQuestionsRequest $request, int $id): JsonResponse
+    {
+        $this->aiCategoryService->syncQuestions($id, $request->validated('questions') ?? []);
+        return Response::api(message:'Questions updated successfully.');
     }
 }

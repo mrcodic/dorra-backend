@@ -330,6 +330,9 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::group(['prefix' => 'ai-categories', 'as' => 'ai-categories.', 'controller' => AiCategoryController::class,], (function () {
             Route::get('/data', [AiCategoryController::class, 'getData'])->name('data');
             Route::post('/bulk-delete', [AiCategoryController::class, 'bulkDelete'])->name('bulk-delete');
+            Route::get('/{id}/questions', [AiCategoryController::class, 'questions'])->name('questions');
+            Route::put('/{id}/questions', [AiCategoryController::class, 'updateQuestions'])->name('questions.update');
+
         }));
         Route::resource('ai-categories', AiCategoryController::class);
 

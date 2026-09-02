@@ -16,6 +16,7 @@ return new class extends Migration
             $table->json('label');
             $table->json('prompt_value')->nullable();
             $table->unsignedInteger('sort_order')->default(0);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
 
             $table->unique(['ai_guide_question_id', 'value']);
