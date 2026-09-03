@@ -214,4 +214,23 @@ class Mockup extends Model implements HasMedia
             }
         );
     }
+    public function generatedAssetsAreStale(?string $templateId = null): bool
+    {
+        if (!$this->assets_updated_at) {
+            return false;
+        }
+
+        $query = $this->media()
+            ->where('collection_name', 'generated_mockups')
+            ->where('created_at', '<', $this->assets_updated_at);
+
+        if ($templateId !== null) {
+            $query->whereRaw(
+                "JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?",
+                [(string) $templateId]
+            );
+        }
+
+        return $query->exists();
+    }
 }
