@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Design;
+use App\Models\Media;
 use App\Models\Product;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\MockupRepositoryInterface;
