@@ -187,10 +187,29 @@
 
         },
         {
-            "name": "AI Questions",
+            "name": "AI Management",
             "icon": "ai-question.png",
             "slug": "",
-            "url": "/ai-guide-questions"
+            "submenu": [
+                {
+                    "url": "/ai-guide-questions",
+                    "name": "AI Questions",
+                    "icon": "circle",
+                    "slug": ""
+                },
+                {
+                    "url": "/ai-categories",
+                    "name": "AI Products",
+                    "icon": "circle",
+                    "slug": ""
+                },
+                {
+                    "url": "/ai-studio-items",
+                    "name": "AI Studio Items",
+                    "icon": "circle",
+                    "slug": ""
+                }
+            ]
         },
         {
             "name": "Roles",

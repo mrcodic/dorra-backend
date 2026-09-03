@@ -10,7 +10,10 @@ class StoreAiGuideQuestionRequest extends FormRequest
 {
     public function rules($id = null): array
     {
-        $singleSelect = request('type') === AiGuideQuestionTypeEnum::SINGLE_SELECT->value;
+        $withOptions = in_array(request('type'), [
+            AiGuideQuestionTypeEnum::SINGLE_SELECT->value,
+            AiGuideQuestionTypeEnum::MULTI_SELECT->value,
+        ], true);
 
         return [
             'title' => ['required', 'array'],
@@ -28,39 +31,59 @@ class StoreAiGuideQuestionRequest extends FormRequest
             'placeholder.ar' => ['nullable', 'string', 'max:255'],
 
             'required' => ['required', 'boolean'],
-            'sort_order' => ['required', 'integer', 'min:0'],
             'is_active' => ['required', 'boolean'],
+            'sort_order' => ['required', 'integer', 'min:0'],
 
-            'options' => array_filter([
-                Rule::requiredIf($singleSelect),
-                'nullable',
-                'array',
-                $singleSelect ? 'min:1' : null,
-            ]),
-
-            'options.*.id' => ['nullable', 'integer', 'exists:ai_guide_question_options,id'],
-
-            'options.*.label' => [
-                Rule::requiredIf($singleSelect),
+            'options' => [
+                Rule::requiredIf($withOptions),
                 'nullable',
                 'array',
             ],
+
+            'options.*.id' => [
+                'nullable',
+                'integer',
+                'exists:ai_guide_question_options,id',
+            ],
+
+            'options.*.label' => [
+                Rule::requiredIf($withOptions),
+                'nullable',
+                'array',
+            ],
+
             'options.*.label.en' => [
-                Rule::requiredIf($singleSelect),
+                Rule::requiredIf($withOptions),
                 'nullable',
                 'string',
                 'max:255',
             ],
+
             'options.*.label.ar' => [
-                Rule::requiredIf($singleSelect),
+                Rule::requiredIf($withOptions),
                 'nullable',
                 'string',
                 'max:255',
             ],
 
             'options.*.prompt_value' => ['nullable', 'array'],
-            'options.*.prompt_value.en' => ['nullable', 'string', 'max:1000'],
-            'options.*.prompt_value.ar' => ['nullable', 'string', 'max:1000'],
+
+            'options.*.prompt_value.en' => [
+                'nullable',
+                'string',
+                'max:2000',
+            ],
+
+            'options.*.prompt_value.ar' => [
+                'nullable',
+                'string',
+                'max:2000',
+            ],
+
+            'options.*.is_active' => [
+                'nullable',
+                'boolean',
+            ],
         ];
     }
 
@@ -76,6 +99,8 @@ class StoreAiGuideQuestionRequest extends FormRequest
             'title.ar' => 'Arabic question',
             'prompt_label.en' => 'English prompt label',
             'prompt_label.ar' => 'Arabic prompt label',
+            'options.*.label.en' => 'English option label',
+            'options.*.label.ar' => 'Arabic option label',
         ];
     }
 }

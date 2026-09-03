@@ -187,7 +187,35 @@ class Product extends Model implements HasMedia
         return $this->belongsTo(Offer::class, 'last_offer_id');
     }
 
+    public function aiQuestions(): MorphToMany
+    {
+        return $this->morphToMany(
+            AiGuideQuestion::class,
+            'assignable', 'ai_guide_question_assignments'
+        )
+            ->withPivot([
+                'required',
+                'is_active',
+                'sort_order',
+                'options_mode',
+            ])
+            ->withTimestamps();
+    }
 
+    public function aiOptions(): MorphToMany
+    {
+        return $this->morphToMany(
+            AiGuideQuestionOption::class,
+            'assignable',
+            'ai_guide_option_assignments'
+        )
+            ->withPivot([
+                'prompt_value_override',
+                'is_active',
+                'sort_order',
+            ])
+            ->withTimestamps();
+    }
     public function scopeWithLastOfferId(Builder $q): Builder
     {
         $offerables = 'offerables';

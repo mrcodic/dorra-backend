@@ -4,11 +4,14 @@ namespace App\Providers;
 
 use App\Enums\HttpEnum;
 use App\Models\Admin;
+use App\Models\AiCategory;
+use App\Models\AiStudioItem;
 use App\Services\Ai\GenAiImageService;
 use App\Services\Mockup\MockupRenderConfigResolver;
 use App\Services\Mockup\MockupRenderModeResolver;
 use App\Services\SMS\SmsInterface;
 use App\Services\SMS\SmsMisrService;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
@@ -34,6 +37,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Relation::morphMap([
+            'ai_category' => AiCategory::class,
+            'ai_studio_item' => AiStudioItem::class,
+        ]);
         $this->app->bind(GenAiImageService::class, function () {
             $apiKey = config('services.google_genai.api_key');
             return new GenAiImageService($apiKey);

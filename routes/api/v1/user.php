@@ -5,7 +5,11 @@ use App\Http\Controllers\Shared\LibraryAssetController;
 use App\Http\Middleware\LocalizationMiddleware;
 use App\Http\Middleware\TrackVisits;
 use App\Http\Controllers\Api\V1\User\{Ai\AiAssetController,
+    Ai\AiCategoryController,
+    Ai\AiGenerationConfigController,
+    Ai\AiGuidedGenerationController,
     Ai\AiGuideQuestionController,
+    Ai\AiStudioItemController,
     Ai\CreditController,
     Auth\LoginController,
     Auth\LogoutController,
@@ -218,6 +222,13 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
         Route::post('plans/subscribe', [PlanController::class,'subscribe']);
 
         Route::get('wallet', WalletController::class);
+        Route::prefix('ai')->group(function () {
+            Route::get('categories', [AiCategoryController::class, 'index']);
+            Route::get('studio-items', [AiStudioItemController::class, 'index']);
+            Route::get('questions', [AiGenerationConfigController::class, 'questions']);
+            Route::post('guided-generation', [AiGuidedGenerationController::class, 'generate']
+            );
+        });
 
     });
 
