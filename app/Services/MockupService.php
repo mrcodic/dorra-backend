@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Design;
+use App\Models\Media;
 use App\Models\Product;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\MockupRepositoryInterface;
@@ -564,25 +565,58 @@ class MockupService extends BaseService
 //                }
 //            }
 
-            $model->types->each(function ($type) use ($model) {
+            $assetsChanged = false;
+
+            $model->types->each(function ($type) use ($model, &$assetsChanged) {
                 $typeName = strtolower($type->value->name);
-                $mediaTypes = ['base_image', 'mask_image', 'shadow_image', 'displacement_image', 'light_image'];
+
+                $mediaTypes = [
+                    'base_image',
+                    'mask_image',
+                    'shadow_image',
+                    'displacement_image',
+                    'light_image',
+                ];
+
                 foreach ($mediaTypes as $mediaType) {
-                    $inputName = $typeName. '_' . $mediaType . '_id';
+                    $inputName = $typeName . '_' . $mediaType . '_id';
+
                     if (!request()->filled($inputName)) {
                         continue;
                     }
+
+                    $mediaId = (int) request()->input($inputName);
+
+                    $media = Media::find($mediaId);
+
+                    if (!$media) {
+                        continue;
+                    }
+
+                    $alreadyAttached =
+                        $media->model_type === get_class($model)
+                        && (int) $media->model_id === (int) $model->id
+                        && $media->collection_name === 'mockups';
+
+                    if ($alreadyAttached) {
+                        continue;
+                    }
+
                     attachMediaToModel(
-                        mediaId: request()->input($inputName),
+                        mediaId: $mediaId,
                         model: $model,
-                        collectionName: 'mockups');
-                    $model->update(['assets_updated_at'=> now()]);
+                        collectionName: 'mockups'
+                    );
 
+                    $assetsChanged = true;
                 }
-
-
             });
 
+            if ($assetsChanged) {
+                $model->update([
+                    'assets_updated_at' => now(),
+                ]);
+            }
             if ($model->category->is_has_category) {
                 $model->products()->sync($validatedData['product_ids'] ?? $model->category->products->pluck('id'));
             }
