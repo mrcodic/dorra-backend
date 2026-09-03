@@ -75,11 +75,8 @@
                         <thead class="table-light">
                         <tr>
                             <th>Product</th>
-                            <th>Generation Type</th>
-                            <th>Prompt Template</th>
                             <th>Resolution</th>
                             <th>Aspect Ratio</th>
-                            <th>Credits</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -132,29 +129,12 @@
                     }
                 },
                 {
-                    data: 'generation_type_label',
-                    render: function (data) {
-                        return `
-                            <span class="badge bg-light-primary text-primary">
-                                ${data}
-                            </span>
-                        `;
-                    }
-                },
-                {
-                    data: 'prompt_template_name'
-                },
-                {
                     data: 'default_resolution',
                     render: data => data || '-'
                 },
                 {
                     data: 'aspect_ratio',
                     render: data => data || '-'
-                },
-                {
-                    data: 'credits_cost',
-                    render: data => `${data} Credits`
                 },
                 {
                     data: 'enabled',

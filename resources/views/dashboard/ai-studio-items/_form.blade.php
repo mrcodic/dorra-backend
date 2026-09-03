@@ -8,6 +8,11 @@
             ?? $studioItem?->generation_type
     );
 
+      $selectedResolution = old(
+        'default_resolution',
+        $studioItem?->default_resolution ?? '1024x1024'
+    );
+
     $selectedAspectRatio = old(
         'aspect_ratio',
         $studioItem?->aspect_ratio
@@ -107,23 +112,6 @@
 
         <div class="col-md-4 mb-1">
             <label class="form-label">
-                Key *
-            </label>
-
-            <input
-                type="text"
-                name="key"
-                class="form-control"
-                placeholder="illustration"
-                value="{{ old(
-                    'key',
-                    $studioItem?->key
-                ) }}"
-            >
-        </div>
-
-        <div class="col-md-4 mb-1">
-            <label class="form-label">
                 Generation Type *
             </label>
 
@@ -153,16 +141,35 @@
                 Default Resolution
             </label>
 
-            <input
-                type="text"
+            <select
                 name="default_resolution"
-                class="form-control"
-                placeholder="1024x1024"
-                value="{{ old(
-                    'default_resolution',
-                    $studioItem?->default_resolution
-                ) }}"
+                class="form-select"
             >
+                <option value="">
+                    Select Resolution
+                </option>
+
+                <option
+                    value="512x512"
+                    @selected($selectedResolution === '512x512')
+                >
+                    512x512
+                </option>
+
+                <option
+                    value="768x768"
+                    @selected($selectedResolution === '768x768')
+                >
+                    768x768
+                </option>
+
+                <option
+                    value="1024x1024"
+                    @selected($selectedResolution === '1024x1024')
+                >
+                    1024x1024
+                </option>
+            </select>
         </div>
 
         <div class="col-md-4 mb-1">

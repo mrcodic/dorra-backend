@@ -8,7 +8,7 @@
         <div class="card-header border-bottom">
             <div>
                 <h4 class="card-title mb-25">Edit AI Studio Item</h4>
-                <p class="text-muted mb-0">{{ $item->name }}</p>
+                <p class="text-muted mb-0">{{ $model?->name ?? 'AI Studio Item' }}</p>
             </div>
 
             <a href="{{ route('ai-studio-items.index') }}"
@@ -19,9 +19,7 @@
         </div>
 
         <div class="card-body pt-2">
-            @include('dashboard.ai-studio-items._form', [
-                'item' => $item
-            ])
+            @include('dashboard.ai-studio-items._form')
         </div>
     </div>
 @endsection

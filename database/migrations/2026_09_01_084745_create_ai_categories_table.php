@@ -23,11 +23,6 @@ return new class extends Migration
             $table->string('default_resolution')->nullable();
             $table->string('aspect_ratio')->nullable();
 
-            $table->unsignedInteger('credits_cost')->default(1);
-
-            $table->string('provider')->nullable();
-            $table->string('model')->nullable();
-
             $table->json('settings')->nullable();
 
             $table->unsignedInteger('sort_order')->default(0);

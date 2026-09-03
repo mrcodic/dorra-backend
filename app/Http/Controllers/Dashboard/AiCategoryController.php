@@ -30,9 +30,9 @@ class AiCategoryController extends DashboardController
         $this->resourceTable = 'ai_categories';
 
         $this->methodRelations = [
-            'edit' => ['category', 'promptTemplate'],
-            'store' => ['category', 'promptTemplate'],
-            'update' => ['category', 'promptTemplate'],
+            'edit' => ['category'],
+            'store' => ['category'],
+            'update' => ['category'],
         ];
         $questions = $this->aiGuideQuestionRepository
             ->query()

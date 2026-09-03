@@ -7,6 +7,7 @@ use App\Http\Middleware\TrackVisits;
 use App\Http\Controllers\Api\V1\User\{Ai\AiAssetController,
     Ai\AiCategoryController,
     Ai\AiGenerationConfigController,
+    Ai\AiGuidedGenerationController,
     Ai\AiGuideQuestionController,
     Ai\AiStudioItemController,
     Ai\CreditController,
@@ -225,7 +226,8 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
             Route::get('categories', [AiCategoryController::class, 'index']);
             Route::get('studio-items', [AiStudioItemController::class, 'index']);
             Route::get('questions', [AiGenerationConfigController::class, 'questions']);
-//            Route::post('generate', [AiGenerationController::class, 'generate']);
+            Route::post('guided-generation', [AiGuidedGenerationController::class, 'generate']
+            );
         });
 
     });

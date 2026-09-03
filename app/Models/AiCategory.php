@@ -13,9 +13,6 @@ class AiCategory extends Model
         'enabled',
         'default_resolution',
         'aspect_ratio',
-        'credits_cost',
-        'provider',
-        'model',
         'settings',
         'sort_order',
     ];
@@ -23,7 +20,6 @@ class AiCategory extends Model
     protected $casts = [
         'enabled' => 'boolean',
         'settings' => 'array',
-        'credits_cost' => 'integer',
         'sort_order' => 'integer',
     ];
 

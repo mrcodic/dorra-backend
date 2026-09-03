@@ -22,7 +22,7 @@ class AiCategoryService extends BaseService
     {
         $aiCategories = $this->repository
             ->query()
-            ->with(['category', 'promptTemplate'])
+            ->with(['category'])
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $search = request('search_value');
@@ -34,9 +34,6 @@ class AiCategoryService extends BaseService
                     $query->whereRaw('1 = 0');
                 }
             })
-            ->when(request()->filled('generation_type'), function ($query) {
-                $query->where('generation_type', request('generation_type'));
-            })
             ->when(request()->filled('enabled'), function ($query) {
                 $query->where('enabled', request('enabled'));
             })
@@ -46,15 +43,6 @@ class AiCategoryService extends BaseService
         return DataTables::of($aiCategories)
             ->addColumn('category_name', function ($aiCategory) {
                 return $aiCategory->category?->name;
-            })
-            ->addColumn('prompt_template_name', function ($aiCategory) {
-                return $aiCategory->promptTemplate?->name ?: '-';
-            })
-            ->editColumn('generation_type', function ($aiCategory) {
-                return $aiCategory->generation_type->value;
-            })
-            ->addColumn('generation_type_label', function ($aiCategory) {
-                return $aiCategory->generation_type->label();
             })
             ->addColumn('action', function () {
                 return [

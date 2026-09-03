@@ -32,12 +32,6 @@ class AiStudioItemController extends DashboardController
         $this->usePagination = true;
         $this->resourceTable = 'ai_studio_items';
 
-        $this->methodRelations = [
-            'edit' => ['promptTemplate'],
-            'store' => ['promptTemplate'],
-            'update' => ['promptTemplate'],
-        ];
-
         $questions = $this->aiGuideQuestionRepository
             ->query()
             ->where('is_active', true)

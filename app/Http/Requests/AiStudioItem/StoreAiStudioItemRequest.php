@@ -24,14 +24,6 @@ class StoreAiStudioItemRequest extends FormRequest
             'description.en' => ['nullable', 'string', 'max:2000'],
             'description.ar' => ['nullable', 'string', 'max:2000'],
 
-            'key' => [
-                'required',
-                'string',
-                'max:100',
-                'alpha_dash',
-                Rule::unique('ai_studio_items', 'key'),
-            ],
-
             'generation_type' => [
                 'required',
                 Rule::enum(AiGenerationTypeEnum::class),

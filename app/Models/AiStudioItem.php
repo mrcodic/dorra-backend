@@ -4,9 +4,8 @@ namespace App\Models;
 
 use App\Enums\Ai\AiGenerationTypeEnum;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
@@ -25,8 +24,6 @@ class AiStudioItem extends Model implements HasMedia
         'name',
         'description',
         'generation_type',
-        'default_resolution',
-        'aspect_ratio',
         'credits_cost',
         'is_active',
         'sort_order',
@@ -40,6 +37,45 @@ class AiStudioItem extends Model implements HasMedia
         'sort_order' => 'integer',
         'settings' => 'array',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (AiStudioItem $studioItem) {
+            if (!empty($studioItem->key)) {
+                return;
+            }
+
+            $name = $studioItem->getTranslation(
+                'name',
+                'en',
+                false
+            );
+
+            $baseKey = Str::slug(
+                $name ?: 'studio-item',
+                '_'
+            );
+
+            if (!$baseKey) {
+                $baseKey = 'studio_item';
+            }
+
+            $key = $baseKey;
+            $counter = 2;
+
+            while (
+            static::query()
+                ->where('key', $key)
+                ->exists()
+            ) {
+                $key = $baseKey . '_' . $counter;
+                $counter++;
+            }
+
+            $studioItem->key = $key;
+        });
+    }
+
     public function questions(): MorphToMany
     {
         return $this->morphToMany(
@@ -74,6 +110,7 @@ class AiStudioItem extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('image')->singleFile();
+        $this->addMediaCollection('image')
+            ->singleFile();
     }
 }

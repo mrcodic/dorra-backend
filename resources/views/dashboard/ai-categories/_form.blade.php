@@ -7,6 +7,14 @@
     );
 
     $settings = old('settings', $aiCategory?->settings ?? []);
+  $selectedResolution = old(
+        'default_resolution',
+        $aiCategory?->default_resolution ?? '1024x1024'
+    );
+    $selectedAspectRatio = old(
+        'aspect_ratio',
+        $aiCategory?->aspect_ratio
+    );
 @endphp
 
 <div class="row">
@@ -26,15 +34,40 @@
     </div>
 
     <div class="col-md-4 mb-1">
-        <label class="form-label">Default Resolution</label>
+        <label class="form-label">
+            Default Resolution
+        </label>
 
-        <input type="text"
-               name="default_resolution"
-               value="{{ old('default_resolution', $aiCategory?->default_resolution) }}"
-               class="form-control"
-               placeholder="1024x1024">
+        <select
+            name="default_resolution"
+            class="form-select"
+        >
+            <option value="">
+                Select Resolution
+            </option>
+
+            <option
+                value="512x512"
+                @selected($selectedResolution === '512x512')
+            >
+                512x512
+            </option>
+
+            <option
+                value="768x768"
+                @selected($selectedResolution === '768x768')
+            >
+                768x768
+            </option>
+
+            <option
+                value="1024x1024"
+                @selected($selectedResolution === '1024x1024')
+            >
+                1024x1024
+            </option>
+        </select>
     </div>
-
     <div class="col-md-4 mb-1">
         <label class="form-label">
             Aspect Ratio
@@ -86,15 +119,7 @@
     </div>
 
 
-    <div class="col-md-4 mb-1">
-        <label class="form-label">Credits Cost</label>
 
-        <input type="number"
-               name="credits_cost"
-               min="0"
-               value="{{ old('credits_cost', $aiCategory?->credits_cost ?? 1) }}"
-               class="form-control">
-    </div>
     <div class="col-md-4 mb-1">
         <label class="form-label">Orientation</label>
 

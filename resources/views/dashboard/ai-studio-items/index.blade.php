@@ -75,10 +75,7 @@
                         <thead class="table-light">
                         <tr>
                             <th>Item</th>
-                            <th>Key</th>
                             <th>Generation Type</th>
-                            <th>Resolution</th>
-                            <th>Aspect Ratio</th>
                             <th>Credits</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -139,7 +136,6 @@
                     `;
                         }
                     },
-                    { data: 'key' },
                     {
                         data: 'generation_type_label',
                         render: data => `
@@ -147,14 +143,6 @@
                         ${data ?? '-'}
                     </span>
                 `
-                    },
-                    {
-                        data: 'default_resolution',
-                        render: data => data || '-'
-                    },
-                    {
-                        data: 'aspect_ratio',
-                        render: data => data || '-'
                     },
                     {
                         data: 'credits_cost',
@@ -271,3 +259,4 @@
         });
     </script>
 @endsection
+
