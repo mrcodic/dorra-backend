@@ -41,6 +41,7 @@ class BulkMockupController extends Controller
             $previousPositions = $existingPivot?->positions ?? [];
             $positionsChanged = json_encode($previousPositions) !== json_encode($request->input('positions'));
             $assetsChanged = $mockup->generatedAssetsAreStale($templateId);
+            dd($assetsChanged, $positionsChanged);
             if ($hasColors) {
                 $mergedPivotColors[$templateId] = $colors;
                 $existingMediaHexes = $mockup->media()->where('collection_name', 'generated_mockups')->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [$templateId])->get()->map(fn($media) => $this->normalizeHex($media->getCustomProperty('hex') ?? ''))->filter()->unique()->values()->all();
