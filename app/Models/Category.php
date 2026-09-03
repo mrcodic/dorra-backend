@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -96,7 +97,10 @@ class Category extends Model implements HasMedia
             'template_id'
         )->withTimestamps();
     }
-
+    public function aiCategory(): HasOne
+    {
+        return $this->hasOne(AiCategory::class,);
+    }
     public function subCategoryProducts(): HasMany
     {
         return $this->hasMany(Product::class, 'sub_category_id');

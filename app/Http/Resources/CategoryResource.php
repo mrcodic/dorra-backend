@@ -160,6 +160,9 @@ class CategoryResource extends JsonResource
             'source_design_svg' => $templatePreviewData['source_design_svg'],
             'back_base64_preview_image' => $templatePreviewData['back_base64_preview_image'],
             'template_model_image' => $templatePreviewData['template_model_image'],
+            'ai_enabled' => (bool) (
+                $this->aiCategory?->enabled ?? false
+            ),
         ];
     }
 
