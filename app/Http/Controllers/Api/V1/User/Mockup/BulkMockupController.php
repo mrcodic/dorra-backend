@@ -40,6 +40,7 @@ class BulkMockupController extends Controller
             $existingPivot = $existingTemplate?->pivot;
             $previousPositions = $existingPivot?->positions ?? [];
             $positionsChanged = json_encode($previousPositions) !== json_encode($request->input('positions'));
+            $assetsChanged = $mockup->generatedAssetsAreStale($templateId);
             if ($hasColors) {
                 $mergedPivotColors[$templateId] = $colors;
                 $existingMediaHexes = $mockup->media()->where('collection_name', 'generated_mockups')->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [$templateId])->get()->map(fn($media) => $this->normalizeHex($media->getCustomProperty('hex') ?? ''))->filter()->unique()->values()->all();
@@ -53,7 +54,7 @@ class BulkMockupController extends Controller
                 if ($modelColorHex && !in_array($modelColorHex, $newColorsNormalized)) {
                     $mockup->templates()->updateExistingPivot($templateId, ['model_color' => null]);
                 }
-                if ($positionsChanged) {
+                if ($positionsChanged || $assetsChanged) {
                     foreach ($hexesWithMedia as $hex) {
                         $mockup->media()->where('collection_name', 'generated_mockups')->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [$templateId])->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])->get()->each(fn($media) => $media->delete());
                     }
@@ -65,9 +66,10 @@ class BulkMockupController extends Controller
                         $renderJobs[] = ['template_id' => $templateId, 'hex' => $hex];
                     }
                 }
-            } else {
+            }
+            else {
                 $mergedPivotColors[$templateId] = [];
-                if ($positionsChanged) {
+                if ($positionsChanged  || $assetsChanged) {
                     $mockup->media()->where('collection_name', 'generated_mockups')->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [$templateId])->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])->get()->each(fn($media) => $media->delete());
                 }
             }
@@ -114,6 +116,8 @@ class BulkMockupController extends Controller
                 $pivot = $existingTemplate->pivot;
                 $previousPositions = $pivot->positions ?? [];
                 $positionsChanged = json_encode($previousPositions) !== json_encode($request->input('positions'));
+                $assetsChanged = $mockup->generatedAssetsAreStale((string) $templateId);
+
                 if ($hasColors) {
                     $mergedPivotColors[$templateId] = $colors;
                     $mergedNormalizedHexes = $newColorsNormalized;
@@ -128,7 +132,7 @@ class BulkMockupController extends Controller
                     if ($modelColorHex && !in_array($modelColorHex, $mergedNormalizedHexes)) {
                         $mockup->templates()->updateExistingPivot($templateId, ['model_color' => null]);
                     }
-                    if ($positionsChanged) {
+                    if ($positionsChanged || $assetsChanged) {
                         foreach ($hexesWithMedia as $hex) {
                             $mockup->media()->where('collection_name', 'generated_mockups')->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$templateId])->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex'))) = ?", [$hex])->get()->each(fn($media) => $media->delete());
                         }
@@ -142,7 +146,7 @@ class BulkMockupController extends Controller
                     }
                 } else {
                     $mergedPivotColors[$templateId] = [];
-                    if ($positionsChanged) {
+                    if ($positionsChanged || $assetsChanged) {
                         $mockup->media()->where('collection_name', 'generated_mockups')->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string)$templateId])->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.model_image')) = ?", ['1'])->get()->each(fn($media) => $media->delete());
                     }
                 }

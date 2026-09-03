@@ -738,7 +738,7 @@ class TemplateMockupGenerator
 
     protected function alreadyGeneratedWithoutColor(Mockup $mockup, $templateId, string $side): bool
     {
-        return $mockup->media()
+        $media = $mockup->media()
             ->where('collection_name', 'generated_mockups')
             ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
             ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$side])
@@ -746,7 +746,22 @@ class TemplateMockupGenerator
                 $query->whereNull('custom_properties->hex')
                     ->orWhereRaw("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex')), '') = ''");
             })
-            ->exists();
+            ->latest('created_at')
+            ->first();
+
+        if (!$media) {
+            return false;
+        }
+
+        if (
+            $mockup->assets_updated_at &&
+            $media->created_at &&
+            $media->created_at->lt($mockup->assets_updated_at)
+        ) {
+            return false;
+        }
+
+        return true;
     }
 
     protected function deleteGeneratedWithoutColorForTemplate(Mockup $mockup, int $templateId): void
@@ -983,7 +998,7 @@ class TemplateMockupGenerator
     }
     protected function alreadyGenerated(Mockup $mockup, $templateId, string $hex, string $side): bool
     {
-        return $mockup->media()
+        $media = $mockup->media()
             ->where('collection_name', 'generated_mockups')
             ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.template_id')) = ?", [(string) $templateId])
             ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.side')) = ?", [$side])
@@ -991,7 +1006,22 @@ class TemplateMockupGenerator
                 "LOWER(REPLACE(JSON_UNQUOTE(JSON_EXTRACT(custom_properties, '$.hex')), '#', '')) = ?",
                 [ltrim($this->normalizeHex($hex), '#')]
             )
-            ->exists();
+            ->latest('created_at')
+            ->first();
+
+        if (!$media) {
+            return false;
+        }
+
+        if (
+            $mockup->assets_updated_at &&
+            $media->created_at &&
+            $media->created_at->lt($mockup->assets_updated_at)
+        ) {
+            return false;
+        }
+
+        return true;
     }
 
     public function handleDeleted(Mockup $mockup): void
