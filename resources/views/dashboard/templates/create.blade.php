@@ -1,3 +1,4 @@
+
 @extends('layouts/contentLayoutMaster')
 
 @section('title', 'Templates')
@@ -629,6 +630,27 @@
         </div>
 
     </section>
+
+
+    <!-- Confirm Media Delete Modal -->
+    <div class="modal fade" id="confirmMediaDeleteModal" tabindex="-1" aria-labelledby="confirmMediaDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmMediaDeleteModalLabel">Delete Media</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this media? This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmMediaDeleteBtn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @include('modals.tags.add-tag')
     @php
         // لو route محتاج parameter اسمه mockup
@@ -1676,6 +1698,71 @@
 
 @section('page-script')
     <script>
+
+        // Confirm user-initiated Dropzone removals before firing existing `removedfile` handlers.
+        (function initMediaDeleteConfirmation() {
+            const modalElement = document.getElementById('confirmMediaDeleteModal');
+            const confirmButton = document.getElementById('confirmMediaDeleteBtn');
+
+            if (!modalElement || !confirmButton || typeof bootstrap === 'undefined') {
+                return;
+            }
+
+            const mediaDeleteModal = bootstrap.Modal.getOrCreateInstance(modalElement);
+            let pendingDeleteAction = null;
+
+            window.openMediaDeleteConfirm = function (action) {
+                pendingDeleteAction = typeof action === 'function' ? action : null;
+                mediaDeleteModal.show();
+            };
+
+            confirmButton.addEventListener('click', function () {
+                const action = pendingDeleteAction;
+                pendingDeleteAction = null;
+                mediaDeleteModal.hide();
+
+                if (action) {
+                    action();
+                }
+            });
+
+            modalElement.addEventListener('hidden.bs.modal', function () {
+                pendingDeleteAction = null;
+            });
+
+            // Capture the click before Dropzone's own remove-link handler executes.
+            document.addEventListener('click', function (event) {
+                const removeLink = event.target.closest('.dz-remove');
+                if (!removeLink) {
+                    return;
+                }
+
+                const previewElement = removeLink.closest('.dz-preview');
+                const dropzoneElement = removeLink.closest('.dropzone');
+                const dropzone = dropzoneElement ? dropzoneElement.dropzone : null;
+
+                if (!previewElement || !dropzone) {
+                    return;
+                }
+
+                const file = dropzone.files.find(function (item) {
+                    return item.previewElement === previewElement;
+                });
+
+                if (!file) {
+                    return;
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+
+                window.openMediaDeleteConfirm(function () {
+                    dropzone.removeFile(file);
+                });
+            }, true);
+        })();
+
         Dropzone.autoDiscover = false;
 
         const templateDropzone = new Dropzone("#template-dropzone", {
