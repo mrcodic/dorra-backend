@@ -95,11 +95,11 @@ class MainController extends Controller
     }
 
 
-    public function removeMedia(Media $media)
+    public function removeMedia(\App\Models\Media $media)
     {
         $notAuth = request()->is('api/v1/admin/*');
         $user = $notAuth ? Admin::first() : getAuthOrGuest();
-        abort_unless((int)$media->model_id === (int)$user->id, 403);
+        abort_unless($media->model_id === $user->id, 403);
         if (empty($media->model_type) && empty($media->model_id)) {
             $media->deleteQuietly();
         } else {
@@ -109,7 +109,7 @@ class MainController extends Controller
         return Response::api();
     }
 
-    public function removeMediaFromDashboard(Media $media)
+    public function removeMediaFromDashboard(\App\Models\Media $media)
     {
         if (empty($media->model_type) && empty($media->model_id)) {
             $media->deleteQuietly();

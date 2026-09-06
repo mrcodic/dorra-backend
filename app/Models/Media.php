@@ -6,39 +6,12 @@ namespace App\Models;
 use App\Observers\MediaObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
-#[ObservedBy(MediaObserver::class)]
+//#[ObservedBy(MediaObserver::class)]
 class Media extends \Spatie\MediaLibrary\MediaCollections\Models\Media
 {
-    protected static function booted()
-    {
-        static::deleting(function ($media) {
-            $previewId = $media->getCustomProperty('preview_id');
-
-            if (!$previewId) {
-                return;
-            }
-
-            $preview = Media::find($previewId);
-
-            if ($preview && $preview->id !== $media->id) {
-
-                Storage::disk($preview->disk)->delete($preview->getPathRelativeToRoot());
-
-                foreach ($preview->generated_conversions ?? [] as $conversion => $generated) {
-                    if ($generated) {
-                        Storage::disk($preview->conversions_disk ?? $preview->disk)
-                            ->delete($preview->getPath($conversion));
-                    }
-                }
-
-                $preview->delete();
-            }
-        });
-
-        parent::booted();
-    }
-
+    use SoftDeletes;
     public function templates(): MorphToMany
     {
         return $this->morphedByMany(
