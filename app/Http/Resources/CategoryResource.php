@@ -163,6 +163,7 @@ class CategoryResource extends JsonResource
             'ai_enabled' => (bool) (
                 $this->aiCategory?->enabled ?? false
             ),
+            'ai_category_id' => $this->aiCategory?->id,
         ];
     }
 
