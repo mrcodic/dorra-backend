@@ -95,7 +95,7 @@ class MainController extends Controller
     }
 
 
-    public function removeMedia(Media $media)
+    public function removeMedia(\App\Models\Media $media)
     {
         $notAuth = request()->is('api/v1/admin/*');
         $user = $notAuth ? Admin::first() : getAuthOrGuest();
