@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Enums\HttpEnum;
 use App\Enums\Mockup\TypeEnum;
 use App\Http\Controllers\Base\DashboardController;
 
@@ -139,7 +140,7 @@ class MockupController extends DashboardController
         if (empty($colors)) {
             return Response::api(
                 message: 'No colors found.',
-                statusCode: 422
+                statusCode: HttpEnum::UNPROCESSABLE_ENTITY
             );
         }
 
@@ -152,7 +153,7 @@ class MockupController extends DashboardController
         if (!$job) {
             return Response::api(
                 message: 'No matching templates found for this mockup.',
-                statusCode: 422
+                statusCode: HttpEnum::UNPROCESSABLE_ENTITY
             );
         }
 
