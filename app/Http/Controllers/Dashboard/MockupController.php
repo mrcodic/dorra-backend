@@ -124,8 +124,11 @@ class MockupController extends DashboardController
         return Response::api();
     }
 
-    public function generateTemplateFiles(Request $request,
-        Mockup $mockup, TemplateMockupGenerator $generator) {
+    public function generateTemplateFiles(
+        Request $request,
+        Mockup $mockup,
+        TemplateMockupGenerator $generator
+    ) {
         $colors = collect(
             $mockup->colors_across_templates ?? []
         )
@@ -135,12 +138,24 @@ class MockupController extends DashboardController
 
         if (empty($colors)) {
             return Response::api(
-                message: "No colors found."
+                message: 'No colors found.',
+                status: 422
             );
         }
 
-        $job = $generator->generate($mockup, $colors, force: $request->boolean('force')
+        $job = $generator->generate(
+            $mockup,
+            $colors,
+            force: $request->boolean('force')
         );
+
+        if (!$job) {
+            return Response::api(
+                message: 'No matching templates found for this mockup.',
+                status: 422
+            );
+        }
+
         return Response::api(
             data: [
                 'bulk_job_id' => $job->id,
@@ -149,7 +164,6 @@ class MockupController extends DashboardController
             ],
             message: 'Mockup generation started successfully'
         );
-
     }
 
     public function removeAcrossTemplateColor(
