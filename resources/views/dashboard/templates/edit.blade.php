@@ -903,6 +903,7 @@
                         duration: 3000,
                         gravity: 'top',
                         position: 'right',
+                        backgroundColor: "#EA5455",
                         close: true,
                     }).showToast();
                 }
