@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
-//#[ObservedBy(MediaObserver::class)]
+#[ObservedBy(MediaObserver::class)]
 class Media extends \Spatie\MediaLibrary\MediaCollections\Models\Media
 {
     use SoftDeletes;
