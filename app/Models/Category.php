@@ -97,6 +97,10 @@ class Category extends Model implements HasMedia
             'template_id'
         )->withTimestamps();
     }
+    public function bundleItems(): MorphMany
+    {
+        return $this->morphMany(BundleItem::class, 'itemable');
+    }
     public function aiCategory(): HasOne
     {
         return $this->hasOne(AiCategory::class,);

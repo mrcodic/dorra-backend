@@ -159,6 +159,11 @@
                     "icon": "circle",
                     "slug": "",
                     "url": "/offers"
+                }, {
+                    "name": "Bundles",
+                    "icon": "circle",
+                    "slug": "",
+                    "url": "/bundles"
                 }
 
             ],
