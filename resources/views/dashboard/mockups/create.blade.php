@@ -2553,6 +2553,8 @@
                         return;
                     }
 
+                    window.currentMockupId = mockupId;
+
                     $('#generateTemplateMockupFiles')
                         .attr('data-mockup-id', mockupId)
                         .removeClass('d-none');
@@ -2719,6 +2721,11 @@
             inputContainer.appendChild(input);
 
             syncAcrossTemplateSourceColors();
+
+            if (target === 'colors_across_templates') {
+                scheduleColorsAcrossTemplatesSync();
+            }
+
             return true;
         }
 
@@ -3031,6 +3038,80 @@
             });
         }
 
+        let acrossColorsSyncTimer = null;
+
+        function syncColorsAcrossTemplates() {
+            if (!window.currentMockupId) {
+                return;
+            }
+
+            const colors = [
+                ...new Set(
+                    getGlobalColors('colors_across_templates')
+                )
+            ];
+
+            const url = @json(
+        route(
+            'mockups.update',
+            ['mockup' => '__MOCKUP_ID__']
+        )
+    ).replace(
+                '__MOCKUP_ID__',
+                window.currentMockupId
+            );
+
+            $.ajax({
+                url: url,
+                type: 'PATCH',
+
+                data: {
+                    colors_across_templates: colors,
+                },
+
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Accept': 'application/json',
+                },
+
+                success: function () {
+                    Toastify({
+                        text: 'Colors updated successfully',
+                        duration: 1500,
+                        gravity: 'top',
+                        position: 'right',
+                        backgroundColor: '#28a745',
+                    }).showToast();
+                },
+
+                error: function (xhr) {
+                    console.error(
+                        'Failed to update colors across templates',
+                        xhr.responseJSON || xhr.responseText
+                    );
+
+                    Toastify({
+                        text: 'Failed to update colors',
+                        duration: 2000,
+                        gravity: 'top',
+                        position: 'right',
+                        backgroundColor: '#dc3545',
+                    }).showToast();
+                },
+            });
+        }
+
+        function scheduleColorsAcrossTemplatesSync() {
+            if (!window.currentMockupId) {
+                return;
+            }
+
+            clearTimeout(acrossColorsSyncTimer);
+
+            acrossColorsSyncTimer = setTimeout(function () {
+                syncColorsAcrossTemplates();
+            }, 300);
+        }
         window.removeGlobalColor = function (hex, btn, target = 'pre_fill_colors') {
             requestColorDeleteConfirmation(hex, function () {
                 const li = btn.closest('li');
