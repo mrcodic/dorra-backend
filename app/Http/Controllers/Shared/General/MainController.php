@@ -10,6 +10,7 @@ use App\Http\Requests\Dimension\StoreDimensionRequest;
 use App\Models\Admin;
 use App\Models\Category;
 use App\Models\Media as ModelsMedia;
+use App\Models\MediaDeleteLog;
 use App\Models\Product;
 use App\Repositories\Implementations\StationStatusRepository;
 use App\Services\FlagService;
@@ -99,7 +100,11 @@ class MainController extends Controller
     {
         $notAuth = request()->is('api/v1/admin/*');
         $user = $notAuth ? Admin::first() : getAuthOrGuest();
+
         abort_unless($media->model_id === $user->id, 403);
+
+        $this->logDeletion($media);
+
         if (empty($media->model_type) && empty($media->model_id)) {
             $media->deleteQuietly();
         } else {
@@ -111,6 +116,8 @@ class MainController extends Controller
 
     public function removeMediaFromDashboard(\App\Models\Media $media)
     {
+        $this->logDeletion($media);
+
         if (empty($media->model_type) && empty($media->model_id)) {
             $media->deleteQuietly();
         } else {
@@ -120,7 +127,23 @@ class MainController extends Controller
         return Response::api();
     }
 
+    private function logDeletion(\App\Models\Media $media): void
+    {
+        $deletedBy = auth(getActiveGuard())->user();
 
+        $log = new MediaDeleteLog([
+            'media_id' => $media->id,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'deleted_at' => now(),
+        ]);
+
+        if ($deletedBy) {
+            $log->deletedBy()->associate($deletedBy);
+        }
+
+        $log->save();
+    }
     public function mockups()
     {
         return Response::api(data: $this->mockupService->getMockups());
