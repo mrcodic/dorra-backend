@@ -845,7 +845,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="confirmMediaDeleteModalLabel">Delete Media</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
                 </div>
                 <div class="modal-body">
                     Are you sure you want to delete this media? This action cannot be undone.
@@ -891,11 +891,20 @@
 
             confirmButton.addEventListener('click', function () {
                 const action = pendingDeleteAction;
+
                 pendingDeleteAction = null;
                 mediaDeleteModal.hide();
 
                 if (action) {
                     action();
+
+                    Toastify({
+                        text: 'Media deleted successfully',
+                        duration: 3000,
+                        gravity: 'top',
+                        position: 'right',
+                        close: true,
+                    }).showToast();
                 }
             });
 
@@ -906,13 +915,16 @@
             // Capture the click before Dropzone's own remove-link handler executes.
             document.addEventListener('click', function (event) {
                 const removeLink = event.target.closest('.dz-remove');
+
                 if (!removeLink) {
                     return;
                 }
 
                 const previewElement = removeLink.closest('.dz-preview');
                 const dropzoneElement = removeLink.closest('.dropzone');
-                const dropzone = dropzoneElement ? dropzoneElement.dropzone : null;
+                const dropzone = dropzoneElement
+                    ? dropzoneElement.dropzone
+                    : null;
 
                 if (!previewElement || !dropzone) {
                     return;
@@ -935,7 +947,6 @@
                 });
             }, true);
         })();
-
         handleAjaxFormSubmit("#addTagForm", {
             successMessage: "Tag Added Successfully",
             onSuccess: function (response) {
