@@ -17,10 +17,12 @@ class AiGuideQuestionOption extends Model
         'label',
         'prompt_value',
         'sort_order',
+        'ui_data'
     ];
 
     protected $casts = [
         'sort_order' => 'integer',
+        'ui_data' => 'array',
     ];
 
     public function aiGuideQuestion(): BelongsTo

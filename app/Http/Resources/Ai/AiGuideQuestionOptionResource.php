@@ -13,6 +13,11 @@ class AiGuideQuestionOptionResource extends JsonResource
             'value' => $this->value,
             'label' => $this->label,
             'promptValue' => $this->whenNotNull($this->prompt_value),
+            'colors' => data_get(
+                $this->ui_data,
+                'colors',
+                []
+            ),
         ];
     }
 }
