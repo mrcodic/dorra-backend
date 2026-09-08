@@ -33,7 +33,7 @@ class ProductController extends Controller
 
     public function show(Product $product, Request $request)
     {
-        return Response::api(data: ProductResource::make($this->productService->showResource($product->id, [
+        $product = $this->productService->showResource($product->id, [
             'category:id,name,is_has_category,has_orientation,is_tableau,allowed_color_palettes',
 //            'templates.industries.children',
             'media',
@@ -41,7 +41,10 @@ class ProductController extends Controller
             'dimensions',
             'prices' => fn($q) => $q->orderBy('quantity'),
             'lastOffer',
-        ])));
+        ]);
+        $product->setRelation('attachedBundles', $product->activeAttachedBundles());
+
+        return Response::api(data: ProductResource::make($product));
     }
 
     public function productTypes()

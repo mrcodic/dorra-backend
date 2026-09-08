@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAttachedBundles;
 use App\Observers\CategoryObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,7 +21,7 @@ use Spatie\Translatable\HasTranslations;
 #[ObservedBy(CategoryObserver::class)]
 class Category extends Model implements HasMedia
 {
-    use InteractsWithMedia, HasTranslations,SoftDeletes;
+    use InteractsWithMedia, HasTranslations,SoftDeletes, HasAttachedBundles;
 
     public $translatable = ['name', 'description'];
     protected $fillable = [

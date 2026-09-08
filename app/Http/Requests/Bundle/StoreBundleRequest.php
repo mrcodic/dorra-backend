@@ -23,12 +23,8 @@ class StoreBundleRequest extends FormRequest
             'description.ar' => ['nullable', 'string', 'max:2000'],
 
             'status' => ['required', 'in:draft,active'],
-            'application_type' => ['required', 'in:manual,automatic'],
             'repeat_type' => ['required', 'in:once,repeat'],
-
-            'auto_add_ready_rewards' => ['nullable', 'boolean'],
-            'show_on_website' => ['nullable', 'boolean'],
-            'show_on_product_page' => ['nullable', 'boolean'],
+            'display_bundle_on_visit' => ['nullable', 'boolean'],
 
             'start_at' => ['nullable', 'date'],
             'end_at' => ['nullable', 'date', 'after_or_equal:start_at'],
@@ -42,7 +38,8 @@ class StoreBundleRequest extends FormRequest
                 'exists:categories,id',
             ],
             'trigger.item_id' => ['required', 'integer'],
-            'trigger.quantity_rule' => ['required', 'in:any,minimum'],
+            'trigger.price_id' => ['nullable', 'integer'],
+            'trigger.quantity_rule' => ['nullable', 'in:any,minimum'],
             'trigger.quantity' => [
                 'nullable',
                 'required_if:trigger.quantity_rule,minimum',
@@ -59,7 +56,8 @@ class StoreBundleRequest extends FormRequest
                 'exists:categories,id',
             ],
             'rewards.*.item_id' => ['required', 'integer'],
-            'rewards.*.quantity' => ['required', 'integer', 'min:1'],
+            'rewards.*.price_id' => ['nullable', 'integer'],
+            'rewards.*.quantity' => ['nullable', 'integer', 'min:1'],
             'rewards.*.discount_type' => ['required', 'in:free,percentage'],
             'rewards.*.discount_value' => [
                 'nullable',
@@ -77,6 +75,7 @@ class StoreBundleRequest extends FormRequest
         return [
             'trigger.parent_category_id.required_if' => 'Please choose the trigger product group first.',
             'trigger.item_id.required' => 'Please choose the trigger item.',
+            'trigger.quantity.required_if' => 'Trigger quantity is required when minimum quantity is selected.',
             'rewards.required' => 'Add at least one reward.',
             'rewards.min' => 'Add at least one reward.',
             'rewards.*.parent_category_id.required_if' => 'Please choose the reward product group.',
@@ -88,9 +87,12 @@ class StoreBundleRequest extends FormRequest
     public function attributes(): array
     {
         return [
+            'display_bundle_on_visit' => 'display bundle on visit',
             'trigger.item_id' => 'trigger item',
+            'trigger.price_id' => 'trigger quantity / price option',
             'trigger.quantity' => 'trigger quantity',
             'rewards.*.item_id' => 'reward item',
+            'rewards.*.price_id' => 'reward quantity / price option',
             'rewards.*.quantity' => 'reward quantity',
             'rewards.*.discount_value' => 'reward discount',
         ];

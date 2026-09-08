@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Enums\Template\StatusEnum;
+use App\Http\Resources\Bundle\BundleResource;
 use App\Http\Resources\Product\ProductPriceResource;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\Product\ProductSpecificationResource;
@@ -164,6 +165,7 @@ class CategoryResource extends JsonResource
                 $this->aiCategory?->enabled ?? false
             ),
             'ai_category_id' => $this->aiCategory?->id,
+            'attached_bundles' => BundleResource::collection($this->whenLoaded('attachedBundles')),
         ];
     }
 

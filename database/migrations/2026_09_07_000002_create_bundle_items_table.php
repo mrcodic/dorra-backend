@@ -23,7 +23,8 @@ return new class extends Migration
 
 
             $table->unsignedInteger('quantity')->default(1);
-
+            $table->unsignedBigInteger('price_id')
+                ->nullable();
 
             $table->string('discount_type')->nullable();
             $table->decimal('discount_value', 8, 2)->nullable();

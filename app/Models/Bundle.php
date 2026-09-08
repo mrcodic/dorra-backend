@@ -26,9 +26,7 @@ class Bundle extends Model
         'status',
         'application_type',
         'repeat_type',
-        'auto_add_ready_rewards',
-        'show_on_website',
-        'show_on_product_page',
+        'display_bundle_on_visit',
         'start_at',
         'end_at',
     ];
@@ -38,14 +36,138 @@ class Bundle extends Model
         return [
             'status' => StatusEnum::class,
             'repeat_type' => RepeatTypeEnum::class,
-            'auto_add_ready_rewards' => 'boolean',
-            'show_on_website' => 'boolean',
-            'show_on_product_page' => 'boolean',
+            'display_bundle_on_visit' => 'boolean',
             'start_at' => 'datetime',
             'end_at' => 'datetime',
         ];
     }
+    protected $appends = [
+        'saving',
+    ];
 
+    public function getSavingAttribute(): array
+    {
+        $items = collect();
+
+        if ($this->relationLoaded('trigger') && $this->trigger) {
+            $items->push($this->trigger);
+        }
+
+        if ($this->relationLoaded('rewards')) {
+            $items = $items->merge($this->rewards);
+        }
+
+        if ($items->isEmpty()) {
+            return $this->emptySavingSummary();
+        }
+
+        $originalTotal = 0.0;
+        $discountTotal = 0.0;
+
+        foreach ($items as $bundleItem) {
+            $originalPrice = $this->getBundleItemOriginalPrice($bundleItem);
+
+            $originalTotal += $originalPrice;
+
+            if ($this->isRewardItem($bundleItem)) {
+                $discountTotal += $this->getBundleItemDiscountAmount(
+                    $bundleItem,
+                    $originalPrice
+                );
+            }
+        }
+
+        $finalTotal = max($originalTotal - $discountTotal, 0);
+
+        $savingPercentage = $originalTotal > 0
+            ? round(($discountTotal / $originalTotal) * 100, 2)
+            : 0;
+
+        return [
+            'original_total' => round($originalTotal, 2),
+            'discount_total' => round($discountTotal, 2),
+            'final_total' => round($finalTotal, 2),
+            'saving_percentage' => $savingPercentage,
+            'saving_percentage_label' => $savingPercentage . '%',
+        ];
+    }
+
+    private function emptySavingSummary(): array
+    {
+        return [
+            'original_total' => 0,
+            'discount_total' => 0,
+            'final_total' => 0,
+            'saving_percentage' => 0,
+            'saving_percentage_label' => '0%',
+        ];
+    }
+
+    private function getBundleItemOriginalPrice(BundleItem $bundleItem): float
+    {
+        $item = $bundleItem->itemable;
+
+        if (! $item) {
+            return 0;
+        }
+
+        if ($bundleItem->price_id && method_exists($item, 'prices')) {
+            $price = $item->prices()
+                ->whereKey($bundleItem->price_id)
+                ->first();
+
+            if ($price) {
+                return $this->getPriceAmount($price);
+            }
+        }
+
+        $basePrice =
+            data_get($item, 'base_price')
+            ?? data_get($item, 'price')
+            ?? 0;
+
+        return (float) $basePrice * (int) $bundleItem->quantity;
+    }
+
+    private function getBundleItemDiscountAmount(
+        BundleItem $bundleItem,
+        float $originalPrice
+    ): float {
+        if ($originalPrice <= 0) {
+            return 0;
+        }
+
+        $discountType = $bundleItem->discount_type?->value
+            ?? $bundleItem->discount_type;
+
+        if ($discountType === 'free') {
+            $discountAmount = $originalPrice;
+        } elseif ($discountType === 'percentage') {
+            $discountAmount = $originalPrice * ((float) $bundleItem->discount_value / 100);
+        } else {
+            $discountAmount = 0;
+        }
+
+        if ($bundleItem->max_discount_amount !== null) {
+            $discountAmount = min(
+                $discountAmount,
+                (float) $bundleItem->max_discount_amount
+            );
+        }
+
+        return min($discountAmount, $originalPrice);
+    }
+
+    private function isRewardItem(BundleItem $bundleItem): bool
+    {
+        return ($bundleItem->role?->value ?? $bundleItem->role) === 'reward';
+    }
+
+    private function getPriceAmount($price): float
+    {
+        return (float) (
+            data_get($price, 'price'));
+    }
     public function items(): HasMany
     {
         return $this->hasMany(BundleItem::class)->orderBy('sort_order');

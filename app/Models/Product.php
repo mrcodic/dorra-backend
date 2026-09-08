@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAttachedBundles;
 use App\Models\Mockup;
 use App\Enums\Product\StatusEnum;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, H
 
 class Product extends Model implements HasMedia
 {
-    use InteractsWithMedia, HasTranslations, SoftDeletes;
+    use InteractsWithMedia, HasTranslations, SoftDeletes, HasAttachedBundles;
 
     public $translatable = ['name', 'description',];
     protected $fillable = [
@@ -256,11 +257,6 @@ class Product extends Model implements HasMedia
     public function stationStatuses(): MorphMany
     {
         return $this->morphMany(StationStatus::class, 'resourceable');
-    }
-
-    public function bundleItems(): MorphMany
-    {
-        return $this->morphMany(BundleItem::class, 'itemable');
     }
 
     public function getAllProductImages()

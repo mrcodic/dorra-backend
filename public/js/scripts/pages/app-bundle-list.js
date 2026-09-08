@@ -19,7 +19,7 @@ $.ajaxSetup({
             data: function (d) {
                 d.search_value = $('#search-bundle-form').val();
                 d.status = $('.filter-bundle-status').val();
-                d.application_type = $('.filter-bundle-application').val();
+
                 return d;
             }
         },
@@ -45,11 +45,13 @@ $.ajaxSetup({
                 render: function (data) {
                     if (!data) return '-';
 
-                    const qty = data.quantity_rule === 'any'
-                        ? 'Any qty'
-                        : `Min ${data.quantity}`;
+                    const qty = data.price_label
+                        ? data.price_label
+                        : data.quantity_rule === 'any'
+                            ? 'Any qty'
+                            : `Min ${data.quantity}`;
 
-                    return `${escapeHtml(data.item_name)}<br><small class="text-muted">${qty}</small>`;
+                    return `${escapeHtml(data.item_name)}<br><small class="text-muted">${escapeHtml(qty)}</small>`;
                 }
             },
             {
@@ -58,14 +60,20 @@ $.ajaxSetup({
                 render: data => `${data || 0} item(s)`
             },
             {
-                data: 'application_type_data',
+                data: 'repeat_type_data',
                 orderable: false,
                 render: data => data?.label ?? '-'
             },
             {
-                data: 'repeat_type_data',
+                data: 'display_bundle_on_visit',
                 orderable: false,
-                render: data => data?.label ?? '-'
+                render: function (data) {
+                    const enabled = Boolean(data);
+                    const cls = enabled ? 'bg-light-success' : 'bg-light-secondary';
+                    const label = enabled ? 'Enabled' : 'Disabled';
+
+                    return `<span class="badge ${cls}">${label}</span>`;
+                }
             },
             {
                 data: 'status_data',
@@ -157,8 +165,7 @@ $.ajaxSetup({
         table.draw();
     });
 
-    $('.filter-bundle-status, .filter-bundle-application')
-        .on('change', () => table.draw());
+    $('.filter-bundle-status').on('change', () => table.draw());
 
     /*
      * =====================================================================
@@ -176,7 +183,6 @@ $.ajaxSetup({
         initSelect2($modal);
         bindTrigger($modal);
         bindRewards($modal);
-        bindBehavior($modal);
 
         if (!$modal.find('.bundle-reward-card').length) {
             addReward($modal);
@@ -184,47 +190,80 @@ $.ajaxSetup({
 
         applyTriggerScope($modal);
         applyTriggerQuantityRule($modal);
-        applyApplicationType($modal);
+        resetTriggerPriceOptions($modal);
+        applyDisplayBundleOnVisitAvailability($modal, getCurrentModalBundleId($modal));
     }
 
     function initSelect2($root) {
-        $root.find('.select2').each(function () {
-            const $select = $(this);
+        $root
+            .find('.bundle-select2')
+            .filter(function () {
+                return !$(this)
+                    .closest('.bundle-reward-template')
+                    .length;
+            })
+            .each(function () {
+                const $select = $(this);
 
-            if ($select.hasClass('select2-hidden-accessible')) {
-                return;
-            }
+                if ($select.hasClass('select2-hidden-accessible')) {
+                    return;
+                }
 
-            $select.select2({
-                dropdownParent: $root,
-                width: '100%'
+                const $modal = $select.closest('.modal');
+
+                $select.select2({
+                    dropdownParent: $modal.length ? $modal : $root,
+                    width: '100%'
+                });
             });
-        });
     }
 
     $('#addBundleModal, #editBundleModal').on('shown.bs.modal', function () {
-        initBundleModal($(this));
-        initSelect2($(this));
+        const $modal = $(this);
+
+        initBundleModal($modal);
+        initSelect2($modal);
+        applyDisplayBundleOnVisitAvailability($modal, getCurrentModalBundleId($modal));
     });
+
+    $('#addBundleModal').on('hidden.bs.modal', function () {
+        $(this).removeData('current-bundle-id');
+    });
+
+    /*
+     * =====================================================================
+     * Trigger
+     * =====================================================================
+     */
 
     function bindTrigger($modal) {
         $modal.on('change', '.bundle-trigger-scope', function () {
             applyTriggerScope($modal);
+            resetTriggerPriceOptions($modal);
+            clearDuplicateRewardsForCurrentTrigger($modal);
         });
 
         $modal.on('change', '.bundle-trigger-parent', function () {
             const parentId = $(this).val();
             const $child = $modal.find('.bundle-trigger-child');
 
-            loadProductsByCategory(parentId, $child);
+            resetTriggerPriceOptions($modal);
+            loadProductsByCategory(parentId, $child).done(function () {
+                clearDuplicateRewardsForCurrentTrigger($modal);
+            });
         });
 
         $modal.on('change', '.bundle-trigger-child, .bundle-trigger-direct', function () {
             refreshTriggerFlow($modal);
+            clearDuplicateRewardsForCurrentTrigger($modal);
         });
 
         $modal.on('change', '.bundle-trigger-quantity-rule', function () {
             applyTriggerQuantityRule($modal);
+        });
+
+        $modal.on('change', '.bundle-trigger-price-option', function () {
+            syncTriggerSelectedPriceQuantity($modal);
         });
     }
 
@@ -266,7 +305,7 @@ $.ajaxSetup({
             .toggleClass('d-none', rule !== 'minimum');
     }
 
-    async function refreshTriggerFlow($modal) {
+    async function refreshTriggerFlow($modal, selectedPriceId = null) {
         const scope = $modal.find('.bundle-trigger-scope:checked').val();
 
         const itemId = scope === 'with_category'
@@ -277,11 +316,21 @@ $.ajaxSetup({
             ? $modal.find('.bundle-trigger-parent').val()
             : null;
 
+        const meta = await fetchItemMeta(scope, itemId, parentId);
+
         renderFlow(
             $modal.find('.bundle-trigger-flow'),
-            await fetchItemMeta(scope, itemId, parentId)
+            meta
         );
+
+        applyTriggerPriceOptions($modal, meta, selectedPriceId);
     }
+
+    /*
+     * =====================================================================
+     * Rewards
+     * =====================================================================
+     */
 
     function bindRewards($modal) {
         $modal.on('click', '.bundle-add-reward', function () {
@@ -292,15 +341,7 @@ $.ajaxSetup({
             const cards = $modal.find('.bundle-reward-card');
 
             if (cards.length <= 1) {
-                Toastify({
-                    text: 'A bundle must have at least one reward.',
-                    duration: 2500,
-                    gravity: 'top',
-                    position: 'right',
-                    backgroundColor: '#EA5455',
-                    close: true
-                }).showToast();
-
+                showErrorToast('A bundle must have at least one reward.');
                 return;
             }
 
@@ -310,12 +351,16 @@ $.ajaxSetup({
 
         $modal.on('change', '.bundle-reward-scope', function () {
             const $card = $(this).closest('.bundle-reward-card');
+
             applyRewardScope($card);
+            resetRewardPriceOptions($card);
         });
 
         $modal.on('change', '.bundle-reward-parent', function () {
             const $card = $(this).closest('.bundle-reward-card');
             const parentId = $(this).val();
+
+            resetRewardPriceOptions($card);
 
             loadProductsByCategory(
                 parentId,
@@ -324,12 +369,27 @@ $.ajaxSetup({
         });
 
         $modal.on('change', '.bundle-reward-child, .bundle-reward-direct', async function () {
-            const $card = $(this).closest('.bundle-reward-card');
+            const $changedSelect = $(this);
+            const $card = $changedSelect.closest('.bundle-reward-card');
+
+            if (isRewardSameAsTrigger($modal, $card)) {
+                showErrorToast('Reward item cannot be the same as trigger item.');
+                clearRewardItemSelection($card, $changedSelect);
+                return;
+            }
+
             await refreshRewardFlow($card);
+        });
+
+        $modal.on('change', '.bundle-reward-price-option', function () {
+            const $card = $(this).closest('.bundle-reward-card');
+
+            syncRewardSelectedPriceQuantity($card);
         });
 
         $modal.on('change', '.bundle-reward-discount-type', function () {
             const $card = $(this).closest('.bundle-reward-card');
+
             applyRewardDiscountType($card);
         });
     }
@@ -348,9 +408,10 @@ $.ajaxSetup({
 
         $modal.find('.bundle-rewards-container').append($card);
 
-        initSelect2($modal);
+        initSelect2($card);
         applyRewardScope($card);
         applyRewardDiscountType($card);
+        resetRewardPriceOptions($card);
 
         if (data) {
             fillRewardCard($modal, $card, data);
@@ -385,6 +446,7 @@ $.ajaxSetup({
             $without.addClass('d-none');
 
             $with.find('select').prop('disabled', false);
+
             $without.find('select')
                 .prop('disabled', true)
                 .val(null)
@@ -416,7 +478,7 @@ $.ajaxSetup({
         }
     }
 
-    async function refreshRewardFlow($card) {
+    async function refreshRewardFlow($card, selectedPriceId = null) {
         const scope = $card.find('.bundle-reward-scope:checked').val();
 
         const itemId = scope === 'with_category'
@@ -427,24 +489,14 @@ $.ajaxSetup({
             ? $card.find('.bundle-reward-parent').val()
             : null;
 
+        const meta = await fetchItemMeta(scope, itemId, parentId);
+
         renderFlow(
             $card.find('.bundle-reward-flow'),
-            await fetchItemMeta(scope, itemId, parentId)
+            meta
         );
-    }
 
-    function bindBehavior($modal) {
-        $modal.on('change', '.bundle-application-type', function () {
-            applyApplicationType($modal);
-        });
-    }
-
-    function applyApplicationType($modal) {
-        const type = $modal.find('.bundle-application-type').val();
-
-        $modal
-            .find('.bundle-auto-ready-wrapper')
-            .toggleClass('d-none', type !== 'automatic');
+        applyRewardPriceOptions($card, meta, selectedPriceId);
     }
 
     /*
@@ -598,6 +650,431 @@ $.ajaxSetup({
 
     /*
      * =====================================================================
+     * Trigger price / quantity options
+     * =====================================================================
+     */
+
+    function applyTriggerPriceOptions($modal, meta, selectedPriceId = null) {
+        const prices = extractPriceOptions(meta);
+
+        const $manualWrapper = $modal.find('.bundle-trigger-manual-quantity-wrapper');
+        const $manualInputs = $manualWrapper.find('input, select');
+        const $priceWrapper = $modal.find('.bundle-trigger-price-wrapper');
+        const $priceSelect = $modal.find('.bundle-trigger-price-option');
+        const $priceQuantityRule = $modal.find('.bundle-trigger-price-quantity-rule');
+        const $priceQuantity = $modal.find('.bundle-trigger-price-quantity');
+
+        $priceSelect.empty().append(new Option('Select quantity', '', false, false));
+
+        if (!prices.length) {
+            $manualWrapper.removeClass('d-none');
+            $manualInputs.prop('disabled', false);
+
+            $priceWrapper.addClass('d-none');
+
+            $priceSelect
+                .prop('disabled', true)
+                .val('')
+                .trigger('change.select2');
+
+            $priceQuantityRule.prop('disabled', true);
+
+            $priceQuantity
+                .val('')
+                .prop('disabled', true);
+
+            applyTriggerQuantityRule($modal);
+
+            return;
+        }
+
+        $manualWrapper.addClass('d-none');
+        $manualInputs.prop('disabled', true);
+
+        $priceWrapper.removeClass('d-none');
+
+        $priceQuantityRule
+            .val('minimum')
+            .prop('disabled', false);
+
+        $priceSelect.prop('disabled', false);
+
+        prices.forEach(function (price) {
+            const id = String(getPriceOptionId(price));
+
+            if (!id) {
+                return;
+            }
+
+            const option = new Option(
+                formatPriceOptionLabel(price),
+                id,
+                false,
+                false
+            );
+
+            $(option).attr(
+                'data-quantity',
+                getPriceOptionQuantity(price)
+            );
+
+            $priceSelect.append(option);
+        });
+
+        const firstOptionId = $priceSelect.find('option[value!=""]').first().val();
+
+        const valueToSelect = selectedPriceId
+            ? String(selectedPriceId)
+            : firstOptionId;
+
+        $priceSelect
+            .val(valueToSelect || '')
+            .trigger('change')
+            .trigger('change.select2');
+
+        syncTriggerSelectedPriceQuantity($modal);
+    }
+    function syncTriggerSelectedPriceQuantity($modal) {
+        const $priceSelect = $modal.find('.bundle-trigger-price-option');
+        const $priceQuantity = $modal.find('.bundle-trigger-price-quantity');
+
+        if ($priceSelect.prop('disabled')) {
+            $priceQuantity
+                .val('')
+                .prop('disabled', true);
+
+            return;
+        }
+
+        const quantity = $priceSelect
+            .find('option:selected')
+            .attr('data-quantity');
+
+        $priceQuantity
+            .val(quantity || '')
+            .prop('disabled', !quantity);
+    }
+    function resetTriggerPriceOptions($modal) {
+        applyTriggerPriceOptions($modal, null);
+    }
+
+    /*
+     * =====================================================================
+     * Reward price / quantity options
+     * =====================================================================
+     */
+
+    function applyRewardPriceOptions($card, meta, selectedPriceId = null) {
+        const prices = extractPriceOptions(meta);
+
+        const $manualWrapper = $card.find('.bundle-reward-manual-quantity-wrapper');
+        const $manualQuantity = $card.find('.bundle-reward-quantity');
+        const $priceWrapper = $card.find('.bundle-reward-price-wrapper');
+        const $priceSelect = $card.find('.bundle-reward-price-option');
+        const $priceQuantity = $card.find('.bundle-reward-price-quantity');
+
+        $priceSelect.empty().append(new Option('Select quantity', '', false, false));
+
+        if (!prices.length) {
+            $manualWrapper.removeClass('d-none');
+            $manualQuantity.prop('disabled', false);
+
+            $priceWrapper.addClass('d-none');
+
+            $priceSelect
+                .prop('disabled', true)
+                .val('')
+                .trigger('change.select2');
+
+            $priceQuantity
+                .val('')
+                .prop('disabled', true);
+
+            return;
+        }
+
+        $manualWrapper.addClass('d-none');
+        $manualQuantity.prop('disabled', true);
+
+        $priceWrapper.removeClass('d-none');
+        $priceSelect.prop('disabled', false);
+
+        prices.forEach(function (price) {
+            const id = String(getPriceOptionId(price));
+
+            if (!id) {
+                return;
+            }
+
+            const option = new Option(
+                formatPriceOptionLabel(price),
+                id,
+                false,
+                false
+            );
+
+            $(option).attr(
+                'data-quantity',
+                getPriceOptionQuantity(price)
+            );
+
+            $priceSelect.append(option);
+        });
+
+        const firstOptionId = $priceSelect.find('option[value!=""]').first().val();
+
+        const valueToSelect = selectedPriceId
+            ? String(selectedPriceId)
+            : firstOptionId;
+
+        $priceSelect
+            .val(valueToSelect || '')
+            .trigger('change')
+            .trigger('change.select2');
+
+        syncRewardSelectedPriceQuantity($card);
+    }
+
+    function resetRewardPriceOptions($card) {
+        applyRewardPriceOptions($card, null);
+    }
+
+    function syncRewardSelectedPriceQuantity($card) {
+        const $priceSelect = $card.find('.bundle-reward-price-option');
+        const $priceQuantity = $card.find('.bundle-reward-price-quantity');
+
+        if ($priceSelect.prop('disabled')) {
+            $priceQuantity
+                .val('')
+                .prop('disabled', true);
+
+            return;
+        }
+
+        const quantity = $priceSelect
+            .find('option:selected')
+            .data('quantity');
+
+        $priceQuantity
+            .val(quantity || '')
+            .prop('disabled', !quantity);
+    }
+
+    function extractPriceOptions(meta) {
+        if (!meta || meta.error) {
+            return [];
+        }
+
+        const possibleLists = [
+            meta.prices,
+            meta.price_options,
+            meta.available_prices,
+            meta.flow?.prices,
+            meta.flow?.price_options
+        ];
+
+        const prices = possibleLists.find(Array.isArray);
+
+        return prices || [];
+    }
+
+    function getPriceOptionId(price) {
+        return price.id ?? price.price_id ?? price.value ?? '';
+    }
+
+    function getPriceOptionQuantity(price) {
+        return price.quantity
+            ?? price.qty
+            ?? price.min_quantity
+            ?? price.pieces
+            ?? price.count
+            ?? '';
+    }
+
+    function formatPriceOptionLabel(price) {
+        const quantity = getPriceOptionQuantity(price);
+
+        const label = price.label
+            ?? price.name
+            ?? price.title
+            ?? (quantity ? `${quantity} pcs` : null);
+
+        const amount = price.price
+            ?? price.amount
+            ?? price.value_price
+            ?? price.final_price
+            ?? null;
+
+        if (label && amount !== null) {
+            return `${label} - ${amount}`;
+        }
+
+        if (label) {
+            return label;
+        }
+
+        if (amount !== null) {
+            return `${amount}`;
+        }
+
+        return `Option #${getPriceOptionId(price)}`;
+    }
+
+    /*
+     * =====================================================================
+     * Duplicate trigger/reward validation
+     * =====================================================================
+     */
+
+    function getSelectedBundleItemKey(scope, itemId) {
+        if (!scope || !itemId) {
+            return null;
+        }
+
+        return [scope, itemId].join(':');
+    }
+
+    function getTriggerSelectedItemKey($modal) {
+        const scope = $modal.find('.bundle-trigger-scope:checked').val();
+
+        const itemId = scope === 'with_category'
+            ? $modal.find('.bundle-trigger-child').val()
+            : $modal.find('.bundle-trigger-direct').val();
+
+        return getSelectedBundleItemKey(scope, itemId);
+    }
+
+    function getRewardSelectedItemKey($card) {
+        const scope = $card.find('.bundle-reward-scope:checked').val();
+
+        const itemId = scope === 'with_category'
+            ? $card.find('.bundle-reward-child').val()
+            : $card.find('.bundle-reward-direct').val();
+
+        return getSelectedBundleItemKey(scope, itemId);
+    }
+
+    function isRewardSameAsTrigger($modal, $card) {
+        const triggerKey = getTriggerSelectedItemKey($modal);
+        const rewardKey = getRewardSelectedItemKey($card);
+
+        return Boolean(triggerKey && rewardKey && triggerKey === rewardKey);
+    }
+
+    function clearRewardItemSelection($card, $changedSelect = null) {
+        const $select = $changedSelect && $changedSelect.length
+            ? $changedSelect
+            : $card.find('.bundle-reward-child, .bundle-reward-direct').filter(':enabled');
+
+        $select
+            .val(null)
+            .trigger('change.select2');
+
+        resetRewardPriceOptions($card);
+        $card.find('.bundle-reward-flow').addClass('d-none').empty();
+    }
+
+    function clearDuplicateRewardsForCurrentTrigger($modal) {
+        const triggerKey = getTriggerSelectedItemKey($modal);
+
+        if (!triggerKey) {
+            return;
+        }
+
+        let foundDuplicate = false;
+
+        $modal.find('.bundle-reward-card').each(function () {
+            const $card = $(this);
+            const rewardKey = getRewardSelectedItemKey($card);
+
+            if (rewardKey && rewardKey === triggerKey) {
+                clearRewardItemSelection($card);
+                foundDuplicate = true;
+            }
+        });
+
+        if (foundDuplicate) {
+            showErrorToast('Reward item cannot be the same as trigger item. Duplicate reward selection was removed.');
+        }
+    }
+
+    function validateNoDuplicateTriggerAndRewards($modal) {
+        const triggerKey = getTriggerSelectedItemKey($modal);
+
+        if (!triggerKey) {
+            return true;
+        }
+
+        let isValid = true;
+
+        $modal.find('.bundle-reward-card').each(function () {
+            const $card = $(this);
+            const rewardKey = getRewardSelectedItemKey($card);
+
+            if (rewardKey && rewardKey === triggerKey) {
+                isValid = false;
+                return false;
+            }
+        });
+
+        if (!isValid) {
+            showErrorToast('Reward item cannot be the same as trigger item.');
+        }
+
+        return isValid;
+    }
+
+    /*
+     * =====================================================================
+     * Display bundle on visit
+     * =====================================================================
+     */
+
+    function getDisplayBundleOnVisitBundleId() {
+        if (typeof window.bundleDisplayOnVisitBundleId !== 'undefined') {
+            return window.bundleDisplayOnVisitBundleId;
+        }
+
+        if (typeof bundleDisplayOnVisitBundleId !== 'undefined') {
+            return bundleDisplayOnVisitBundleId;
+        }
+
+        return null;
+    }
+
+    function setDisplayBundleOnVisitBundleId(bundleId) {
+        window.bundleDisplayOnVisitBundleId = bundleId || null;
+    }
+
+    function getCurrentModalBundleId($modal) {
+        return $modal.data('current-bundle-id') || null;
+    }
+
+    function applyDisplayBundleOnVisitAvailability($modal, currentBundleId = null) {
+        const selectedBundleId = getDisplayBundleOnVisitBundleId();
+        const $checkbox = $modal.find('.bundle-display-on-visit');
+        const $warning = $modal.find('.bundle-display-on-visit-warning');
+
+        const anotherBundleAlreadySelected =
+            selectedBundleId &&
+            String(selectedBundleId) !== String(currentBundleId || '');
+
+        if (anotherBundleAlreadySelected) {
+            $checkbox
+                .prop('checked', false)
+                .prop('disabled', true);
+
+            $warning.removeClass('d-none');
+
+            return;
+        }
+
+        $checkbox.prop('disabled', false);
+        $warning.addClass('d-none');
+    }
+
+    /*
+     * =====================================================================
      * Edit
      * =====================================================================
      */
@@ -613,6 +1090,8 @@ $.ajaxSetup({
 
         const $modal = $('#editBundleModal');
         const $form = $('#editBundleForm');
+
+        $modal.data('current-bundle-id', row.id);
 
         initBundleModal($modal);
 
@@ -632,33 +1111,21 @@ $.ajaxSetup({
 
         $modal.find('#editBundleStatus').val(
             row.status_data?.value || 'active'
-        );
+        ).trigger('change');
 
         $modal.find('#editBundleStartAt').val(row.start_at || '');
         $modal.find('#editBundleEndAt').val(row.end_at || '');
 
-        $modal.find('#editShowOnWebsite').prop(
+        $modal.find('.bundle-display-on-visit').prop(
             'checked',
-            Boolean(row.show_on_website)
+            Boolean(row.display_bundle_on_visit)
         );
 
-        $modal.find('#editShowOnProductPage').prop(
-            'checked',
-            Boolean(row.show_on_product_page)
-        );
-
-        $modal.find('.bundle-application-type')
-            .val(row.application_type_data?.value || 'manual')
-            .trigger('change');
+        applyDisplayBundleOnVisitAvailability($modal, row.id);
 
         $modal.find('select[name="repeat_type"]')
             .val(row.repeat_type_data?.value || 'once')
             .trigger('change');
-
-        $modal.find('#editAutoAddReadyRewards').prop(
-            'checked',
-            Boolean(row.auto_add_ready_rewards)
-        );
 
         fillTrigger($modal, row.trigger_data || null);
 
@@ -671,8 +1138,6 @@ $.ajaxSetup({
         if (!(row.rewards_data || []).length) {
             addReward($modal);
         }
-
-        applyApplicationType($modal);
     });
 
     async function fillTrigger($modal, data) {
@@ -698,7 +1163,7 @@ $.ajaxSetup({
             $modal
                 .find('.bundle-trigger-direct')
                 .val(String(data.item_id))
-                .trigger('change');
+                .trigger('change.select2');
         }
 
         $modal
@@ -710,7 +1175,10 @@ $.ajaxSetup({
             .find('.bundle-trigger-quantity')
             .val(data.quantity || 1);
 
-        refreshTriggerFlow($modal);
+        await refreshTriggerFlow(
+            $modal,
+            data.price_id || data.product_price_id || null
+        );
     }
 
     async function fillRewardCard($modal, $card, data) {
@@ -734,11 +1202,11 @@ $.ajaxSetup({
             $card
                 .find('.bundle-reward-direct')
                 .val(String(data.item_id))
-                .trigger('change');
+                .trigger('change.select2');
         }
 
         $card
-            .find('input[name$="[quantity]"]')
+            .find('.bundle-reward-quantity')
             .val(data.quantity || 1);
 
         $card
@@ -758,7 +1226,10 @@ $.ajaxSetup({
             .find('input[name$="[max_discount_amount]"]')
             .val(data.max_discount_amount || '');
 
-        refreshRewardFlow($card);
+        await refreshRewardFlow(
+            $card,
+            data.price_id || data.product_price_id || null
+        );
     }
 
     /*
@@ -782,7 +1253,7 @@ $.ajaxSetup({
 
         $('#showBundleTrigger').html(
             trigger
-                ? `${escapeHtml(trigger.item_name)} × ${trigger.quantity}`
+                ? `${escapeHtml(trigger.item_name)} × ${escapeHtml(trigger.price_label || trigger.quantity)}`
                 : '<span class="text-muted">—</span>'
         );
 
@@ -795,10 +1266,14 @@ $.ajaxSetup({
                         ? 'FREE'
                         : `${reward.discount_value}% OFF`;
 
+                    const quantityLabel = reward.price_label
+                        ? reward.price_label
+                        : `Qty: ${reward.quantity}`;
+
                     return `
                         <div class="mb-1">
                             ${escapeHtml(reward.item_name)}
-                            × ${reward.quantity}
+                            <small class="text-muted">${escapeHtml(quantityLabel)}</small>
                             <strong>${escapeHtml(discount)}</strong>
                         </div>
                     `;
@@ -806,8 +1281,8 @@ $.ajaxSetup({
                 : '<span class="text-muted">—</span>'
         );
 
-        $('#showBundleApplication').val(
-            row.application_type_data?.label || ''
+        $('#showBundleDisplayOnVisit').val(
+            row.display_bundle_on_visit ? 'Enabled' : 'Disabled'
         );
 
         $('#showBundleRepeat').val(
@@ -825,6 +1300,7 @@ $.ajaxSetup({
         e.preventDefault();
 
         const $form = $(this);
+        const $modal = $form.closest('.modal');
         const $button = $form.find('.saveChangesButton');
         const $loader = $form.find('.saveLoader');
         const $text = $form.find('.btn-text');
@@ -833,13 +1309,32 @@ $.ajaxSetup({
         $loader.removeClass('d-none');
         $text.addClass('d-none');
 
+        if (!validateNoDuplicateTriggerAndRewards($modal)) {
+            $button.prop('disabled', false);
+            $loader.addClass('d-none');
+            $text.removeClass('d-none');
+            return;
+        }
+
         $.ajax({
             url: $form.attr('action'),
             type: 'POST',
             data: new FormData(this),
             processData: false,
             contentType: false
-        }).done(function () {
+        }).done(function (response) {
+            const currentBundleId = getCurrentModalBundleId($modal) || response?.data?.id || null;
+            const displayOnVisitChecked = $modal.find('.bundle-display-on-visit').is(':checked');
+
+            if (displayOnVisitChecked && currentBundleId) {
+                setDisplayBundleOnVisitBundleId(currentBundleId);
+            } else if (
+                currentBundleId &&
+                String(getDisplayBundleOnVisitBundleId() || '') === String(currentBundleId)
+            ) {
+                setDisplayBundleOnVisitBundleId(null);
+            }
+
             Toastify({
                 text: $form.attr('id') === 'addBundleForm'
                     ? 'Bundle added successfully!'
@@ -874,7 +1369,14 @@ $.ajaxSetup({
             form.reset();
         }
 
-        $modal.find('.select2')
+        $modal.removeData('current-bundle-id');
+
+        $modal.find('.bundle-select2')
+            .filter(function () {
+                return !$(this)
+                    .closest('.bundle-reward-template')
+                    .length;
+            })
             .val(null)
             .trigger('change');
 
@@ -887,7 +1389,8 @@ $.ajaxSetup({
 
         applyTriggerScope($modal);
         applyTriggerQuantityRule($modal);
-        applyApplicationType($modal);
+        resetTriggerPriceOptions($modal);
+        applyDisplayBundleOnVisitAvailability($modal, null);
     }
 
     /*
@@ -911,6 +1414,10 @@ $.ajaxSetup({
             url: bundleDeleteUrlTemplate.replace('__ID__', deletingBundleId),
             type: 'DELETE'
         }).done(function () {
+            if (String(getDisplayBundleOnVisitBundleId() || '') === String(deletingBundleId)) {
+                setDisplayBundleOnVisitBundleId(null);
+            }
+
             $('#deleteBundleModal').modal('hide');
 
             Toastify({
@@ -942,6 +1449,10 @@ $.ajaxSetup({
             type: 'DELETE',
             data: { ids }
         }).done(function () {
+            if (ids.map(String).includes(String(getDisplayBundleOnVisitBundleId() || ''))) {
+                setDisplayBundleOnVisitBundleId(null);
+            }
+
             $('#deleteBundlesModal').modal('hide');
 
             Toastify({
@@ -999,23 +1510,22 @@ $.ajaxSetup({
 
         if (Object.keys(errors).length) {
             Object.values(errors).forEach(messages => {
-                Toastify({
-                    text: Array.isArray(messages)
+                showErrorToast(
+                    Array.isArray(messages)
                         ? messages[0]
-                        : messages,
-                    duration: 4000,
-                    gravity: 'top',
-                    position: 'right',
-                    backgroundColor: '#EA5455',
-                    close: true
-                }).showToast();
+                        : messages
+                );
             });
 
             return;
         }
 
+        showErrorToast(xhr.responseJSON?.message || 'Something went wrong.');
+    }
+
+    function showErrorToast(message) {
         Toastify({
-            text: xhr.responseJSON?.message || 'Something went wrong.',
+            text: message,
             duration: 4000,
             gravity: 'top',
             position: 'right',

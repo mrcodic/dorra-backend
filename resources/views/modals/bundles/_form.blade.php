@@ -80,7 +80,7 @@
             <select
                 name="status"
                 id="{{ $prefix }}BundleStatus"
-                class="form-select"
+                class="form-select bundle-select2"
             >
                 <option value="active">Active</option>
                 <option value="draft">Draft</option>
@@ -113,52 +113,37 @@
     </div>
 
     <div class="row mb-3">
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="form-check">
                 <input
                     type="hidden"
-                    name="show_on_website"
+                    name="display_bundle_on_visit"
                     value="0"
                 >
-                <input
-                    class="form-check-input"
-                    type="checkbox"
-                    name="show_on_website"
-                    value="1"
-                    id="{{ $prefix }}ShowOnWebsite"
-                    checked
-                >
-                <label
-                    class="form-check-label"
-                    for="{{ $prefix }}ShowOnWebsite"
-                >
-                    Show on Bundles page
-                </label>
-            </div>
-        </div>
 
-        <div class="col-md-6">
-            <div class="form-check">
                 <input
-                    type="hidden"
-                    name="show_on_product_page"
-                    value="0"
-                >
-                <input
-                    class="form-check-input"
+                    class="form-check-input bundle-display-on-visit"
                     type="checkbox"
-                    name="show_on_product_page"
+                    name="display_bundle_on_visit"
                     value="1"
-                    id="{{ $prefix }}ShowOnProductPage"
-                    checked
+                    id="{{ $prefix }}DisplayBundleOnVisit"
                 >
+
                 <label
                     class="form-check-label"
-                    for="{{ $prefix }}ShowOnProductPage"
+                    for="{{ $prefix }}DisplayBundleOnVisit"
                 >
-                    Show on related Product pages
+                    Display this bundle popup when customer visits website
                 </label>
             </div>
+
+            <small class="text-muted d-block mt-50">
+                Only one bundle can be displayed on website visit. The customer still chooses and configures it manually.
+            </small>
+
+            <small class="text-danger d-block mt-50 d-none bundle-display-on-visit-warning">
+                Another bundle is already selected for website visit popup.
+            </small>
         </div>
     </div>
 
@@ -207,17 +192,18 @@
     </div>
 
     <div class="bundle-trigger-with-category">
-        {{--
-            Intentionally follows your existing Dorra labels:
-            actual value = Category(is_has_category=1), admin label = Products.
-        --}}
         <div class="form-group mb-2">
+            {{--
+                Intentionally follows your existing Dorra labels:
+                actual value = Category(is_has_category=1), admin label = Products.
+            --}}
             <label class="label-text mb-1">Products</label>
             <select
                 name="trigger[parent_category_id]"
-                class="form-select select2 bundle-trigger-parent"
+                class="form-select bundle-select2 bundle-trigger-parent"
             >
                 <option value="">Select Product</option>
+
                 @foreach($productWithCategories as $category)
                     <option value="{{ $category->id }}">
                         {{ $category->name }}
@@ -226,14 +212,12 @@
             </select>
         </div>
 
-        {{--
-            actual value = Product child, admin label = Categories.
-        --}}
         <div class="form-group mb-2">
+            {{-- actual value = Product child, admin label = Categories. --}}
             <label class="label-text mb-1">Categories</label>
             <select
                 name="trigger[item_id]"
-                class="form-select select2 bundle-trigger-child"
+                class="form-select bundle-select2 bundle-trigger-child"
             >
                 <option value="">Select Category</option>
             </select>
@@ -245,7 +229,7 @@
             <label class="label-text mb-1">Products</label>
             <select
                 name="trigger[item_id]"
-                class="form-select select2 bundle-trigger-direct"
+                class="form-select bundle-select2 bundle-trigger-direct"
                 disabled
             >
                 <option value="">Select Product</option>
@@ -258,12 +242,44 @@
         </div>
     </div>
 
-    <div class="row mb-2">
+    <div class="row mb-2 bundle-trigger-price-wrapper d-none">
+        <div class="col-md-6">
+            <label class="label-text mb-1">
+                Trigger Quantity  Option
+            </label>
+
+            <select
+                name="trigger[price_id]"
+                class="form-select bundle-select2 bundle-trigger-price-option"
+                disabled
+            >
+                <option value="">Select quantity</option>
+            </select>
+
+            <input
+                type="hidden"
+                name="trigger[quantity_rule]"
+                class="bundle-trigger-price-quantity-rule"
+                value="minimum"
+                disabled
+            >
+
+            <input
+                type="hidden"
+                name="trigger[quantity]"
+                class="bundle-trigger-price-quantity"
+                value=""
+                disabled
+            >
+        </div>
+    </div>
+
+    <div class="row mb-2 bundle-trigger-manual-quantity-wrapper">
         <div class="col-md-6">
             <label class="label-text mb-1">Quantity Rule</label>
             <select
                 name="trigger[quantity_rule]"
-                class="form-select bundle-trigger-quantity-rule"
+                class="form-select bundle-select2 bundle-trigger-quantity-rule"
             >
                 <option value="any">Any Quantity</option>
                 <option value="minimum">Minimum Quantity</option>
@@ -360,7 +376,7 @@
                         <label class="label-text mb-1">Products</label>
                         <select
                             name="rewards[__INDEX__][parent_category_id]"
-                            class="form-select select2 bundle-reward-parent"
+                            class="form-select bundle-select2 bundle-reward-parent"
                         >
                             <option value="">Select Product</option>
                             @foreach($productWithCategories as $category)
@@ -376,7 +392,7 @@
                         <label class="label-text mb-1">Categories</label>
                         <select
                             name="rewards[__INDEX__][item_id]"
-                            class="form-select select2 bundle-reward-child"
+                            class="form-select bundle-select2 bundle-reward-child"
                         >
                             <option value="">Select Category</option>
                         </select>
@@ -388,7 +404,7 @@
                         <label class="label-text mb-1">Products</label>
                         <select
                             name="rewards[__INDEX__][item_id]"
-                            class="form-select select2 bundle-reward-direct"
+                            class="form-select bundle-select2 bundle-reward-direct"
                             disabled
                         >
                             <option value="">Select Product</option>
@@ -402,15 +418,34 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-4 mb-2">
+                    <div class="col-md-4 mb-2 bundle-reward-manual-quantity-wrapper">
                         <label class="label-text mb-1">Reward Quantity</label>
                         <input
                             type="number"
                             min="1"
                             step="1"
                             name="rewards[__INDEX__][quantity]"
-                            class="form-control"
+                            class="form-control bundle-reward-quantity"
                             value="1"
+                        >
+                    </div>
+
+                    <div class="col-md-4 mb-2 bundle-reward-price-wrapper d-none">
+                        <label class="label-text mb-1">Reward Quantity Option</label>
+                        <select
+                            name="rewards[__INDEX__][price_id]"
+                            class="form-select bundle-select2 bundle-reward-price-option"
+                            disabled
+                        >
+                            <option value="">Select quantity</option>
+                        </select>
+
+                        <input
+                            type="hidden"
+                            name="rewards[__INDEX__][quantity]"
+                            class="bundle-reward-price-quantity"
+                            value=""
+                            disabled
                         >
                     </div>
 
@@ -418,7 +453,7 @@
                         <label class="label-text mb-1">Reward Type</label>
                         <select
                             name="rewards[__INDEX__][discount_type]"
-                            class="form-select bundle-reward-discount-type"
+                            class="form-select bundle-select2 bundle-reward-discount-type"
                         >
                             <option value="free">Free</option>
                             <option value="percentage">Percentage Discount</option>
@@ -467,21 +502,10 @@
 
     <div class="row mb-2">
         <div class="col-md-6">
-            <label class="label-text mb-1">Activation</label>
-            <select
-                name="application_type"
-                class="form-select bundle-application-type"
-            >
-                <option value="manual">Customer chooses this bundle</option>
-                <option value="automatic">Automatically activate when eligible</option>
-            </select>
-        </div>
-
-        <div class="col-md-6">
             <label class="label-text mb-1">Bundle Usage</label>
             <select
                 name="repeat_type"
-                class="form-select"
+                class="form-select bundle-select2"
             >
                 <option value="once">Apply Once</option>
                 <option value="repeat">Repeat Based On Quantity</option>
@@ -489,37 +513,4 @@
         </div>
     </div>
 
-    <div class="bundle-auto-ready-wrapper d-none mb-2">
-        <div class="form-check">
-            <input
-                type="hidden"
-                name="auto_add_ready_rewards"
-                value="0"
-            >
-            <input
-                class="form-check-input"
-                type="checkbox"
-                name="auto_add_ready_rewards"
-                value="1"
-                id="{{ $prefix }}AutoAddReadyRewards"
-                checked
-            >
-            <label
-                class="form-check-label"
-                for="{{ $prefix }}AutoAddReadyRewards"
-            >
-                Add ready rewards automatically
-            </label>
-        </div>
-
-        <small class="text-muted">
-            Rewards that require prices, specifications, or custom design are never
-            silently added; the customer must configure/claim them first.
-        </small>
-    </div>
-
-    <div class="alert alert-info mb-0">
-        Bundle controls item, quantity and discount only.
-        Product/Category controls prices, specifications and design flow.
-    </div>
 </div>

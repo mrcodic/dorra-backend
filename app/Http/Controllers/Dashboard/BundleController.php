@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
 use App\Http\Requests\Bundle\{StoreBundleRequest, UpdateBundleRequest};
+use App\Models\Bundle;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Services\BundleService;
 use Illuminate\Http\JsonResponse;
@@ -26,8 +27,6 @@ class BundleController extends DashboardController
         $this->resourceTable = 'bundles';
 
         /*
-         * IMPORTANT:
-         *
          * Friendly admin labels:
          * - Products With Categories
          * - Products Without Categories
@@ -52,10 +51,15 @@ class BundleController extends DashboardController
             ->where('is_tableau', 0)
             ->get(['id', 'name']);
 
+        $displayBundleOnVisitBundleId = Bundle::query()
+            ->where('display_bundle_on_visit', true)
+            ->value('id');
+
         $this->assoiciatedData = [
             'index' => [
                 'product_with_categories' => $productWithCategories,
                 'product_without_categories' => $productWithoutCategories,
+                'display_bundle_on_visit_bundle_id' => $displayBundleOnVisitBundleId,
             ],
         ];
 

@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Product;
 
 use App\Enums\Template\StatusEnum;
+use App\Http\Resources\Bundle\BundleResource;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\DimensionResource;
 use App\Http\Resources\IndustryResource;
@@ -155,6 +156,7 @@ class ProductResource extends JsonResource
             'back_base64_preview_image' => $templatePreviewData['back_base64_preview_image'],
             'template_model_image' => $templatePreviewData['template_model_image'],
             'is_tableau' => $this->category->is_tableau,
+            'attached_bundles' => BundleResource::collection($this->whenLoaded('attachedBundles')),
         ];
     }
     private function resolveTemplatePreviewData(Request $request): array

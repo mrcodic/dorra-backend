@@ -16,7 +16,7 @@
 
             <div class="row gx-2 gy-2 align-items-center px-1 py-1">
 
-                <div class="col-12 col-md-5">
+                <div class="col-12 col-md-7">
                     <form action="" method="get" class="position-relative search-form">
                         <i
                             data-feather="search"
@@ -50,14 +50,6 @@
                     </select>
                 </div>
 
-                <div class="col-6 col-md-2">
-                    <select class="form-select filter-bundle-application">
-                        <option value="">All Types</option>
-                        <option value="manual">Manual</option>
-                        <option value="automatic">Automatic</option>
-                    </select>
-                </div>
-
                 @can('bundles_create')
                     <div class="col-12 col-md-3 text-md-end">
                         <a
@@ -86,8 +78,8 @@
                         <th>Bundle</th>
                         <th>Trigger</th>
                         <th>Rewards</th>
-                        <th>Type</th>
                         <th>Usage</th>
+                        <th>Popup</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -145,6 +137,8 @@
 
 @section('page-script')
 <script>
+    window.bundleDisplayOnVisitBundleId = @json($associatedData['display_bundle_on_visit_bundle_id'] ?? null);
+
     const bundlesDataUrl = @json(route('bundles.data'));
     const bundleStoreUrl = @json(route('bundles.store'));
     const bundleItemMetaUrl = @json(route('bundles.item-meta'));

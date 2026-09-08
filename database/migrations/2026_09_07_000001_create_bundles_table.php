@@ -13,19 +13,11 @@ return new class extends Migration
 
             $table->json('name');
             $table->json('description')->nullable();
-
             $table->string('status')->default('draft');
             $table->string('repeat_type')->default('once');
-
-
-            $table->boolean('auto_add_ready_rewards')->default(true);
-
-            $table->boolean('show_on_website')->default(true);
-            $table->boolean('show_on_product_page')->default(true);
-
+            $table->boolean('display_bundle_on_visit')->default(true);
             $table->dateTime('start_at')->nullable();
             $table->dateTime('end_at')->nullable();
-
             $table->timestamps();
             $table->softDeletes();
 

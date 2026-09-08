@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\User\{Ai\AiAssetController,
     Auth\OtpController,
     Auth\RegisterController,
     Auth\ResetPasswordController,
+    BundleController,
     Cart\CartController,
     Category\CategoryController,
     CMS\LandingController,
@@ -160,6 +161,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::apiResource('shipping-addresses', ShippingAddressController::class);
     Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
 
+    Route::get('bundles/entry-popup', [BundleController::class, 'entryPopup']);
 
     Route::middleware('auth:sanctum')->group(function () {
 
