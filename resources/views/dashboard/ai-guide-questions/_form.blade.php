@@ -22,7 +22,88 @@
         ])->toArray() ?? []
     );
 @endphp
+<style>
+    .option-actions {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: 10px;
+    }
 
+    .option-active-control {
+        min-height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        white-space: nowrap;
+    }
+
+    .option-active-label {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: #6e6b7b;
+        cursor: pointer;
+    }
+
+    .option-switch {
+        position: relative;
+        display: inline-block;
+        width: 38px;
+        height: 22px;
+        flex: 0 0 38px;
+        margin: 0;
+    }
+
+    .option-switch input {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .option-switch-slider {
+        position: absolute;
+        inset: 0;
+        cursor: pointer;
+        background: #d8d6de;
+        border-radius: 999px;
+        transition: .2s ease;
+    }
+
+    .option-switch-slider::before {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        left: 3px;
+        top: 3px;
+        background: #fff;
+        border-radius: 50%;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
+        transition: .2s ease;
+    }
+
+    .option-switch input:checked + .option-switch-slider {
+        background: #24b094;
+    }
+
+    .option-switch input:checked + .option-switch-slider::before {
+        transform: translateX(16px);
+    }
+
+    .option-switch input:focus + .option-switch-slider {
+        box-shadow: 0 0 0 3px rgba(36, 176, 148, .15);
+    }
+
+    .option-actions .remove-option {
+        min-height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
 <div class="row">
     <div class="col-md-6 mb-1">
         <label class="form-label">Question English</label>
@@ -151,25 +232,30 @@
                                   rows="2">{{ $option['prompt_value']['en'] ?? '' }}</textarea>
                     </div>
 
-                    <div class="col-md-5 mt-1">
+                    <div class="col-md-4 mt-1">
                         <label class="form-label">Prompt Value Arabic</label>
                         <textarea name="options[{{ $index }}][prompt_value][ar]"
                                   class="form-control"
                                   rows="2"
                                   dir="rtl">{{ $option['prompt_value']['ar'] ?? '' }}</textarea>
                     </div>
-
-                    <div class="col-md-1 mt-1">
-                        <div class="form-check form-switch mb-1">
+                    <div class="col-md-2 mt-1 option-actions">
+                        <div class="option-active-control">
                             <input type="hidden"
                                    name="options[{{ $index }}][is_active]"
                                    value="0">
 
-                            <input type="checkbox"
-                                   name="options[{{ $index }}][is_active]"
-                                   value="1"
-                                   class="form-check-input"
-                                @checked($option['is_active'] ?? true)>
+                            <label class="option-active-label"
+                                   for="option-active-{{ $index }}">Active</label>
+
+                            <label class="option-switch" for="option-active-{{ $index }}">
+                                <input type="checkbox"
+                                       id="option-active-{{ $index }}"
+                                       name="options[{{ $index }}][is_active]"
+                                       value="1"
+                                    @checked($option['is_active'] ?? true)>
+                                <span class="option-switch-slider"></span>
+                            </label>
                         </div>
 
                         <button type="button"
@@ -248,7 +334,7 @@
                                   rows="2"></textarea>
                     </div>
 
-                    <div class="col-md-5 mt-1">
+                    <div class="col-md-4 mt-1">
                         <label class="form-label">Prompt Value Arabic</label>
                         <textarea name="options[${index}][prompt_value][ar]"
                                   class="form-control"
@@ -256,17 +342,23 @@
                                   dir="rtl"></textarea>
                     </div>
 
-                    <div class="col-md-1 mt-1">
-                        <div class="form-check form-switch mb-1">
+                    <div class="col-md-2 mt-1 option-actions">
+                        <div class="option-active-control">
                             <input type="hidden"
                                    name="options[${index}][is_active]"
                                    value="0">
 
-                            <input type="checkbox"
-                                   name="options[${index}][is_active]"
-                                   value="1"
-                                   class="form-check-input"
-                                   checked>
+                            <label class="option-active-label"
+                                   for="option-active-${index}">Active</label>
+
+                            <label class="option-switch" for="option-active-${index}">
+                                <input type="checkbox"
+                                       id="option-active-${index}"
+                                       name="options[${index}][is_active]"
+                                       value="1"
+                                       checked>
+                                <span class="option-switch-slider"></span>
+                            </label>
                         </div>
 
                         <button type="button"
