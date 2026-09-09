@@ -15,7 +15,7 @@ class GetAiQuestionsRequest extends FormRequest
                 'exists:ai_categories,id',
             ],
             'ai_studio_item_id' => [
-                'required',
+                'nullable',
                 'integer',
                 'exists:ai_studio_items,id',
             ],
