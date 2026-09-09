@@ -21,7 +21,7 @@ class AiGenerationConfigController extends Controller
             ->aiGenerationConfigService
             ->getAssignedQuestions(
                 $data['ai_category_id'],
-                $data['ai_studio_item_id']
+                $data['ai_studio_item_id'] ?? null,
             );
         return Response::api(data:AiGuideQuestionResource::collection($questions));
     }
