@@ -6,6 +6,7 @@ return [
     "Dashboards" => "Dashboards",
     "AI Questions" => "AI Questions",
     "AI Products" => "AI Products",
+    "Bundles" => "Bundles",
     "AI Studio Items" => "AI Studio Items",
     "AI Management" => "AI Management",
     "Add New" => "Add New",

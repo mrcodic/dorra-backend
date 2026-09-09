@@ -158,8 +158,8 @@ enum PermissionEnum: string
     case UPDATE_SUB_INDUSTRIES = 'sub-industries_update';
 
     case TEMPLATES_PUBLISHED_SHOW = 'product-templates.change-status.publish_show';
-    case TEMPLATES_DRAFTED_SHOW   = 'product-templates.change-status.draft_show';
-    case TEMPLATES_LIVE_SHOW      = 'product-templates.change-status.live_show';
+    case TEMPLATES_DRAFTED_SHOW = 'product-templates.change-status.draft_show';
+    case TEMPLATES_LIVE_SHOW = 'product-templates.change-status.live_show';
     case CAMPAIGNS = 'users.campaigns_show';
     // Plans
     case SHOW_PLANS = 'plans_show';
@@ -186,11 +186,16 @@ enum PermissionEnum: string
     case SHOW_AI_STUDIO_ITEMS = 'ai-studio-items_show';
     case UPDATE_AI_STUDIO_ITEMS = 'ai-studio-items_update';
     case DELETE_AI_STUDIO_ITEMS = 'ai-studio-items_delete';
+    // Bundles
+    case CREATE_BUNDLES = 'bundles_create';
+    case SHOW_BUNDLES = 'bundles_show';
+    case UPDATE_BUNDLES = 'bundles_update';
+    case DELETE_BUNDLES = 'bundles_delete';
 
     public function group(): array
     {
         return [
-            'key'   => $this->groupKey(),
+            'key' => $this->groupKey(),
             'value' => $this->groupLabel(),
         ];
     }
@@ -203,42 +208,43 @@ enum PermissionEnum: string
     private function groupLabel(): string
     {
         return match ($this->groupKey()) {
-            'dashboard'          => 'Dashboards',
-            'admins'              => 'Admins',
-            'users'               => 'Users',
-            'products'            => 'Categories',
-            'categories'          => 'Products',
-            'sub-categories'      => 'Sub Products',
-            'tags'                => 'Tags',
-            'flags'               => 'Flags',
-            'product-templates'   => 'Templates',
-            'product-templates.change-status.publish'=> 'Publish Templates',
-            'product-templates.change-status.draft'=> 'Draft Templates',
-            'product-templates.change-status.live'=> 'Live Templates',
-            'mockups'             => 'Mockups',
-            'orders'              => 'Orders',
-            'discount-codes'      => 'Discount Codes',
-            'offers'              => 'Offers',
-            'invoices'            => 'Invoices',
-            'locations'           => 'Locations',
-            'roles'               => 'Roles',
-            'faqs'                => 'FAQs',
-            'messages'            => 'Messages',
-            'settings-details'    => 'Settings Details',
-            'settings-payments'   => 'Settings Payments',
+            'dashboard' => 'Dashboards',
+            'admins' => 'Admins',
+            'users' => 'Users',
+            'products' => 'Categories',
+            'categories' => 'Products',
+            'sub-categories' => 'Sub Products',
+            'tags' => 'Tags',
+            'flags' => 'Flags',
+            'product-templates' => 'Templates',
+            'product-templates.change-status.publish' => 'Publish Templates',
+            'product-templates.change-status.draft' => 'Draft Templates',
+            'product-templates.change-status.live' => 'Live Templates',
+            'mockups' => 'Mockups',
+            'orders' => 'Orders',
+            'discount-codes' => 'Discount Codes',
+            'offers' => 'Offers',
+            'invoices' => 'Invoices',
+            'locations' => 'Locations',
+            'roles' => 'Roles',
+            'faqs' => 'FAQs',
+            'messages' => 'Messages',
+            'settings-details' => 'Settings Details',
+            'settings-payments' => 'Settings Payments',
             'settings-notifications' => 'Settings Notifications',
-            'settings-website'    => 'Settings Website',
-            'jobs'                => 'Jobs',
-            'board'               => 'Board',
-            'inventories'         => 'Inventories',
-            'station-statuses'    => 'Custom Statuses',
-            'users.campaigns'    => 'Campaigns',
-            'plans'    => 'Plans',
-            'credit-orders'    => 'Credit Orders',
+            'settings-website' => 'Settings Website',
+            'jobs' => 'Jobs',
+            'board' => 'Board',
+            'inventories' => 'Inventories',
+            'station-statuses' => 'Custom Statuses',
+            'users.campaigns' => 'Campaigns',
+            'plans' => 'Plans',
+            'credit-orders' => 'Credit Orders',
             'ai-guide-questions' => 'AI Guide Questions',
             'ai-categories' => 'AI Products',
             'ai-studio-items' => 'AI Studio Items',
-            default               => Str::headline(str_replace('-', ' ', $this->groupKey())),
+            'bundles' => 'Bundles',
+            default => Str::headline(str_replace('-', ' ', $this->groupKey())),
         };
     }
 
@@ -250,9 +256,9 @@ enum PermissionEnum: string
         return match (true) {
             str_contains($this->value, '_create') => [$resource . '.create', $resource . '.store'],
             str_contains($this->value, '_update') => [$resource . '.edit', $resource . '.update'],
-            str_contains($this->value, '_show')   => [$resource . '.index', $resource . '.show'],
+            str_contains($this->value, '_show') => [$resource . '.index', $resource . '.show'],
             str_contains($this->value, '_delete') => [$resource . '.destroy', $resource . '.bulk-delete'],
-            default                               => [],
+            default => [],
         };
     }
 }

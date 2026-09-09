@@ -9,6 +9,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
     AiGuideQuestionController,
     AiStudioItemController,
     BoardController,
+    BundleController,
     CategoryController,
     CreditOrderController,
     DiscountCodeController,
@@ -333,12 +334,25 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::post('/bulk-delete', [AiCategoryController::class, 'bulkDelete'])->name('bulk-delete');
             Route::get('/{id}/questions', [AiCategoryController::class, 'questions'])->name('questions');
             Route::put('/{id}/questions', [AiCategoryController::class, 'updateQuestions'])->name('questions.update');
-            Route::post('questions/quick-store', 'quickStoreQuestion')->name('questions.quick-store');
 
         }));
         Route::resource('ai-categories', AiCategoryController::class);
 
+        Route::group(['prefix' => 'ai-studio-items', 'as' => 'ai-studio-items.', 'controller' => AiStudioItemController::class,], (function () {
+            Route::get('/data',  'getData')->name('data');
+            Route::post('/bulk-delete',  'bulkDelete')->name('bulk-delete');
+            Route::get('/{id}/questions',  'questions')->name('questions');
+            Route::put('/{id}/questions',  'updateQuestions')->name('questions.update');
 
+        }));
+        Route::resource('ai-studio-items', AiStudioItemController::class);
+
+        Route::group(['prefix' => 'bundles', 'as' => 'bundles.', 'controller' => BundleController::class,], (function () {
+            Route::get('/data', 'getData')->name('data');
+            Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
+            Route::get('item-meta', 'itemMeta')->name('item-meta');
+        }));
+        Route::resource('/bundles', BundleController::class);
 
     });
 

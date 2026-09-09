@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAttachedBundles;
 use App\Models\Mockup;
 use App\Enums\Product\StatusEnum;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, H
 
 class Product extends Model implements HasMedia
 {
-    use InteractsWithMedia, HasTranslations,SoftDeletes;
+    use InteractsWithMedia, HasTranslations, SoftDeletes, HasAttachedBundles;
 
     public $translatable = ['name', 'description',];
     protected $fillable = [
@@ -51,7 +52,7 @@ class Product extends Model implements HasMedia
         return Attribute::make(
             get: function () {
                 $avg = $this->reviews_avg_rating ?? $this->reviews()->avg('rating');
-                return is_numeric($avg) ? (int) round($avg) : null;
+                return is_numeric($avg) ? (int)round($avg) : null;
             }
         );
     }
@@ -62,7 +63,7 @@ class Product extends Model implements HasMedia
 
     public function scopeWithReviewRating(Builder $query, $ratings): Builder
     {
-        $ratings = is_array($ratings) ? $ratings : explode(',', (string) $ratings);
+        $ratings = is_array($ratings) ? $ratings : explode(',', (string)$ratings);
         $ratings = array_values(array_filter(array_map('intval', $ratings)));
 
         if (empty($ratings)) {
@@ -71,7 +72,7 @@ class Product extends Model implements HasMedia
 
         return $query
             ->withAvg('reviews as avg_rating', 'rating')
-            ->havingRaw('ROUND(avg_rating) IN ('.implode(',', $ratings).')');
+            ->havingRaw('ROUND(avg_rating) IN (' . implode(',', $ratings) . ')');
     }
 
     public function category(): BelongsTo
@@ -83,6 +84,7 @@ class Product extends Model implements HasMedia
     {
         return $this->belongsTo(Category::class, 'sub_category_id');
     }
+
     public function variants(): MorphMany
     {
         return $this->morphMany(Variant::class, 'variantable');
@@ -100,23 +102,24 @@ class Product extends Model implements HasMedia
 
     public function dimensions()
     {
-        return $this->morphToMany(Dimension::class,'dimensionable','dimension_product')->withTimestamps();
+        return $this->morphToMany(Dimension::class, 'dimensionable', 'dimension_product')->withTimestamps();
     }
 
     public function orders()
     {
         return $this->morphToMany(Order::class, 'orderable', 'order_items');
     }
+
     public function confirmedOrders()
     {
-        return $this->morphToMany(Order::class,'orderable','order_items')
+        return $this->morphToMany(Order::class, 'orderable', 'order_items')
             ->where('status', \App\Enums\Order\StatusEnum::CONFIRMED);
     }
 
 
     public function specifications()
     {
-        return $this->morphMany(ProductSpecification::class,'specifiable');
+        return $this->morphMany(ProductSpecification::class, 'specifiable');
     }
 
     public function templates()
@@ -151,7 +154,7 @@ class Product extends Model implements HasMedia
 
     public function reviews(): MorphMany
     {
-        return $this->morphMany(Review::class,'reviewable');
+        return $this->morphMany(Review::class, 'reviewable');
     }
 
     public function users(): MorphToMany
@@ -168,20 +171,24 @@ class Product extends Model implements HasMedia
     {
         return $this->morphMany(Save::class, 'savable');
     }
+
     public function designs()
     {
         return $this->morphToMany(Design::class, 'designable', 'designables')
             ->withTimestamps();
     }
+
     public function carts(): MorphMany
     {
         return $this->morphMany(CartItem::class, 'cartable');
     }
+
     public function offers(): MorphToMany
     {
         return $this->morphToMany(Offer::class, 'offerable')
             ->withTimestamps();
     }
+
     public function lastOffer(): BelongsTo
     {
         return $this->belongsTo(Offer::class, 'last_offer_id');
@@ -216,14 +223,15 @@ class Product extends Model implements HasMedia
             ])
             ->withTimestamps();
     }
+
     public function scopeWithLastOfferId(Builder $q): Builder
     {
         $offerables = 'offerables';
-        $offers     = 'offers';
-        $table      = $this->getTable();
+        $offers = 'offers';
+        $table = $this->getTable();
 
 
-        $morphType  = $this->getMorphClass();
+        $morphType = $this->getMorphClass();
 
 
         if (empty($q->getQuery()->columns)) {
@@ -250,6 +258,7 @@ class Product extends Model implements HasMedia
     {
         return $this->morphMany(StationStatus::class, 'resourceable');
     }
+
     public function getAllProductImages()
     {
         return $this->getMedia('product_extra_images')

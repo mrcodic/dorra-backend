@@ -36,13 +36,24 @@ class CategoryController extends Controller
 
     public function show($id, Request $request)
     {
-        return Response::api(data: CategoryResource::make($this->categoryService->showResource(
-            $id,
-            ['media','specifications.options',
-            'prices' => fn($q) => $request->query('all_prices') !== 'true' ? $q->orderBy('quantity')->limit(5) : null,
-            'dimensions',
-            'lastOffer'
-        ])));
+        $category = $this->categoryService->showResource($id, [
+                'media',
+                'specifications.options',
+                'prices' => function ($query) use ($request) {
+                    $query->orderBy('quantity');
+
+                    if ($request->query('all_prices') !== 'true') {
+                        $query->limit(5);
+                    }
+                },
+                'dimensions',
+                'lastOffer',
+            ]
+        );
+
+        $category->setRelation('attachedBundles', $category->activeAttachedBundles());
+
+        return Response::api(data: CategoryResource::make($category));
     }
 
     public function getSubCategories()
