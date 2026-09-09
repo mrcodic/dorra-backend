@@ -12,7 +12,14 @@ trait HasAttachedBundles
     {
         return $this->morphMany(BundleItem::class, 'itemable');
     }
+    public function getHasBundlesAttribute(): bool
+    {
+        if ($this->relationLoaded('attachedBundles')) {
+            return $this->attachedBundles->isNotEmpty();
+        }
 
+        return false;
+    }
     public function activeAttachedBundles()
     {
         return Bundle::query()

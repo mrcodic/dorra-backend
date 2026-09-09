@@ -165,6 +165,7 @@ class CategoryResource extends JsonResource
                 $this->aiCategory?->enabled ?? false
             ),
             'ai_category_id' => $this->aiCategory?->id,
+            'has_bundles' => (bool) $this->has_bundles,
             'attached_bundles' => BundleResource::collection($this->whenLoaded('attachedBundles')),
         ];
     }
