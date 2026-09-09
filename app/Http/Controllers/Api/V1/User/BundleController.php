@@ -16,6 +16,6 @@ class BundleController extends Controller
     public function entryPopup()
     {
         $bundle = $this->bundleService->getEntryPopupBundle();
-        return Response::api(data: $bundle ? BundleResource::make($bundle) : null);
+        return Response::api(data: $bundle ? BundleResource::make($bundle) : (object)[]);
     }
 }

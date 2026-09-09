@@ -8,11 +8,14 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class BundleItemResource extends JsonResource
 {
+
     public function toArray(Request $request): array
     {
         $item = $this->itemable;
         $isProduct = $item instanceof Product;
-
+        $templatePreviewData = $this->resource->getTemplatePreviewData(
+            $request->get('template_id')
+        );
         return [
             'bundle_item_id' => $this->id,
 
@@ -44,6 +47,9 @@ class BundleItemResource extends JsonResource
             'has_custom_prices' => $this->hasCustomPrices($item),
 
             'require_customize_design' => $this->requiresCustomizeDesign($item),
+            'source_design_svg' => $templatePreviewData['source_design_svg'],
+            'back_base64_preview_image' => $templatePreviewData['back_base64_preview_image'],
+            'template_model_image' => $templatePreviewData['template_model_image'],
         ];
     }
 
