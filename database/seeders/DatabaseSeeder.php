@@ -27,6 +27,8 @@ class DatabaseSeeder extends Seeder
             SettingSeeder::class,
             StationSeeder::class,
             StationStatusesSeeder::class,
+            AiStudioItemSeeder::class,
+
         ]);
     }
 }

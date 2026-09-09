@@ -75,11 +75,18 @@ class AiStudioItemService extends BaseService
     }
     public function getActiveItems(
         bool $paginate = false,
-        int $perPage = 15
+        int $perPage = 15,
+        ?int $aiCategoryId = null
     ) {
         $query = $this->repository->query()
             ->where('is_active', true)
+            ->when($aiCategoryId, function ($query) use ($aiCategoryId) {
+                $query->whereHas('aiCategories', function ($query) use ($aiCategoryId) {
+                    $query->where('ai_categories.id', $aiCategoryId);
+                });
+            })
             ->orderBy('sort_order');
+
         return $paginate
             ? $query->paginate($perPage)
             : $query->get();

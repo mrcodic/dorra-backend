@@ -333,18 +333,11 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::post('/bulk-delete', [AiCategoryController::class, 'bulkDelete'])->name('bulk-delete');
             Route::get('/{id}/questions', [AiCategoryController::class, 'questions'])->name('questions');
             Route::put('/{id}/questions', [AiCategoryController::class, 'updateQuestions'])->name('questions.update');
+            Route::post('questions/quick-store', 'quickStoreQuestion')->name('questions.quick-store');
 
         }));
         Route::resource('ai-categories', AiCategoryController::class);
 
-        Route::group(['prefix' => 'ai-studio-items', 'as' => 'ai-studio-items.', 'controller' => AiStudioItemController::class,], (function () {
-            Route::get('/data', [AiStudioItemController::class, 'getData'])->name('data');
-            Route::post('/bulk-delete', [AiStudioItemController::class, 'bulkDelete'])->name('bulk-delete');
-            Route::get('/{id}/questions', [AiStudioItemController::class, 'questions'])->name('questions');
-            Route::put('/{id}/questions', [AiStudioItemController::class, 'updateQuestions'])->name('questions.update');
-
-        }));
-        Route::resource('ai-studio-items', AiStudioItemController::class);
 
 
     });

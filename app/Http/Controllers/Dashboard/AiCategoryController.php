@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
+use App\Http\Requests\Ai\QuickStoreAiGuideQuestionRequest;
+use App\Http\Requests\AiCategory\StoreAiCategoryRequest;
+use App\Http\Requests\AiCategory\UpdateAiCategoryRequest;
+use App\Models\AiStudioItem;
 use App\Repositories\Interfaces\AiGuideQuestionRepositoryInterface;
-use Illuminate\Support\Facades\Response;
-use App\Http\Requests\AiCategory\{StoreAiCategoryRequest, UpdateAiCategoryQuestionsRequest, UpdateAiCategoryRequest};
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Services\Ai\AiCategoryService;
+use App\Services\Ai\AiGuideQuestionService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Response;
 
 class AiCategoryController extends DashboardController
 {
@@ -30,38 +34,65 @@ class AiCategoryController extends DashboardController
         $this->resourceTable = 'ai_categories';
 
         $this->methodRelations = [
-            'edit' => ['category'],
-            'store' => ['category'],
-            'update' => ['category'],
+            'edit' => [
+                'category',
+                'questions',
+                'options',
+                'studioItems',
+            ],
+            'store' => [
+                'category',
+                'questions',
+                'options',
+                'studioItems',
+            ],
+            'update' => [
+                'category',
+                'questions',
+                'options',
+                'studioItems',
+            ],
         ];
+
+        $categories = $this->categoryRepository
+            ->query()
+            ->select(['id', 'name'])
+            ->orderBy('name')
+            ->get();
+
         $questions = $this->aiGuideQuestionRepository
             ->query()
             ->where('is_active', true)
             ->with([
-                'options' => fn($query) => $query
+                'options' => fn ($query) => $query
                     ->where('is_active', true)
                     ->orderBy('sort_order')
+                    ->orderBy('id'),
             ])
             ->orderBy('sort_order')
+            ->orderBy('id')
             ->get();
+
+        $studioItems = AiStudioItem::query()
+            ->where('is_active', true)
+            ->whereIn('key', [
+                'image',
+                'logo',
+                'pattern',
+            ])
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        $associatedData = [
+            'categories' => $categories,
+            'questions' => $questions,
+            'studioItems' => $studioItems,
+        ];
+
         $this->assoiciatedData = [
-            'create' => [
-                'categories' => $this->categoryRepository->query()
-                    ->select(['id', 'name'])
-                    ->orderBy('name')
-                    ->get(),
-
-
-                'questions' => $questions,
-            ],
-
-            'edit' => [
-                'categories' => $this->categoryRepository->query()
-                    ->select(['id', 'name'])
-                    ->orderBy('name')
-                    ->get(),
-                'questions' => $questions,
-            ],
+            'create' => $associatedData,
+            'edit' => $associatedData,
         ];
     }
 
@@ -69,15 +100,48 @@ class AiCategoryController extends DashboardController
     {
         return $this->aiCategoryService->getData();
     }
-    public function questions(int $id)
-    {
-        $data = $this->aiCategoryService->getQuestionsConfiguration($id);
-        return view('dashboard.ai-categories.questions', $data);
-    }
 
-    public function updateQuestions(UpdateAiCategoryQuestionsRequest $request, int $id): JsonResponse
-    {
-        $this->aiCategoryService->syncQuestions($id, $request->validated('questions') ?? []);
-        return Response::api(message:'Questions updated successfully.');
+    public function quickStoreQuestion(
+        QuickStoreAiGuideQuestionRequest $request,
+        AiGuideQuestionService $aiGuideQuestionService
+    ): JsonResponse {
+        $question = $aiGuideQuestionService->storeResource(
+            $request->validated(),
+            relationsToLoad: ['options']
+        );
+
+        $question->load('options');
+
+        $isColorPalette = $question->options->contains(
+            fn ($option) => !empty(
+            data_get($option->ui_data, 'colors', [])
+            )
+        );
+
+        return Response::api(data: [
+            'id' => $question->id,
+            'key' => $question->key,
+            'title' => $question->title,
+            'prompt_label' => $question->prompt_label,
+            'type' => $question->type?->value ?? $question->type,
+            'type_label' => $question->type?->label() ?? (string) $question->type,
+            'required' => (bool) $question->required,
+            'sort_order' => (int) ($question->sort_order ?? 0),
+            'isColorPalette' => $isColorPalette,
+
+            'options' => $question->options
+                ->map(fn ($option) => [
+                    'id' => $option->id,
+                    'value' => $option->value,
+                    'label' => $option->label,
+                    'colors' => data_get(
+                        $option->ui_data,
+                        'colors',
+                        []
+                    ),
+                ])
+                ->values()
+                ->all(),
+        ]);
     }
 }

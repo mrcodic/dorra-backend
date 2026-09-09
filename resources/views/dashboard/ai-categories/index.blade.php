@@ -18,7 +18,7 @@
                         <div>
                             <h4 class="mb-25">AI Products</h4>
                             <p class="text-muted mb-0">
-                                Manage product AI configuration, credits and generation settings.
+                                Manage product AI context, generation modes and guided questions.
                             </p>
                         </div>
 
@@ -48,18 +48,6 @@
                                     style="right:10px;top:50%;transform:translateY(-50%);font-size:18px;color:#aaa">
                                 &times;
                             </button>
-                        </div>
-
-                        <div class="col-12 col-md-2">
-                            <select class="form-select filter-generation-type">
-                                <option value="">All Types</option>
-
-                                @foreach(\App\Enums\Ai\AiGenerationTypeEnum::cases() as $type)
-                                    <option value="{{ $type->value }}">
-                                        {{ $type->label() }}
-                                    </option>
-                                @endforeach
-                            </select>
                         </div>
 
                         <div class="col-12 col-md-2">
@@ -115,7 +103,6 @@
                 type: 'GET',
                 data: function (d) {
                     d.search_value = $('#search-ai-product').val();
-                    d.generation_type = $('.filter-generation-type').val();
                     d.enabled = $('.filter-enabled').val();
                     return d;
                 }
@@ -158,13 +145,6 @@
                                 </a>
                             `);
 
-                            buttons.push(`
-                                <a href="${aiProductsBaseUrl}/${id}/questions"
-                                   class="btn btn-sm btn-outline-info"
-                                   title="Configure Questions">
-                                    <i data-feather="list"></i>
-                                </a>
-                            `);
                         }
 
                         if (row?.action?.can_delete) {
@@ -214,7 +194,7 @@
             table.draw();
         });
 
-        $('.filter-generation-type, .filter-enabled').on('change', function () {
+        $('.filter-enabled').on('change', function () {
             table.draw();
         });
 

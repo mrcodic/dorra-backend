@@ -3,117 +3,58 @@
 namespace App\Services\Ai;
 
 use App\Models\AiCategory;
-use App\Models\AiGuideQuestion;
-use App\Models\AiStudioItem;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class AiGenerationConfigService
 {
-    public function getAssignedQuestions(
-        int $aiCategoryId,
-        int $aiStudioItemId
-    ): Collection {
-        $contexts = [
-            [
-                'type' => (new AiCategory())->getMorphClass(),
-                'id' => $aiCategoryId,
-            ],
-            [
-                'type' => (new AiStudioItem())->getMorphClass(),
-                'id' => $aiStudioItemId,
-            ],
-        ];
+    /**
+     * Guided questions now belong only to the AI Product (AiCategory).
+     * The second argument remains optional temporarily so old callers do not break.
+     */
+    public function getAssignedQuestions(int $aiCategoryId, ?int $unusedStudioItemId = null): Collection
+    {
+        $aiCategory = AiCategory::query()
+            ->with([
+                'questions' => fn($query) => $query
+                    ->where('ai_guide_questions.is_active', true)
+                    ->with('options'),
+                'options',
+            ])
+            ->findOrFail($aiCategoryId);
 
-        $assignments = DB::table('ai_guide_question_assignments')
-            ->where(function ($query) use ($contexts) {
-                foreach ($contexts as $context) {
-                    $query->orWhere(function ($q) use ($context) {
-                        $q->where('assignable_type', $context['type'])
-                            ->where('assignable_id', $context['id']);
-                    });
-                }
-            })
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->get();
+        $assignedOptions = $aiCategory->options
+            ->filter(fn($option) => (bool) ($option->pivot->is_active ?? true));
 
-        $questionIds = $assignments
-            ->pluck('ai_guide_question_id')
-            ->unique()
-            ->values();
+        $assignedOptionIdsByQuestion = $assignedOptions
+            ->groupBy('ai_guide_question_id')
+            ->map(fn($options) => $options->pluck('id')->map(fn($id) => (int) $id)->values());
 
-        if ($questionIds->isEmpty()) {
-            return collect();
-        }
+        return $aiCategory->questions
+            ->filter(fn($question) => (bool) ($question->pivot->is_active ?? true))
+            ->sortBy(fn($question) => $question->pivot->sort_order ?? $question->sort_order ?? 0)
+            ->values()
+            ->map(function ($question) use ($assignedOptionIdsByQuestion) {
+                $requiredOverride = $question->pivot->required;
 
-        $questions = AiGuideQuestion::query()
-            ->whereIn('id', $questionIds)
-            ->where('is_active', true)
-            ->with('options')
-            ->get()
-            ->keyBy('id');
+                $question->resolved_required = $requiredOverride === null
+                    ? (bool) $question->required
+                    : (bool) $requiredOverride;
 
-        $optionAssignments = DB::table('ai_guide_option_assignments')
-            ->where(function ($query) use ($contexts) {
-                foreach ($contexts as $context) {
-                    $query->orWhere(function ($q) use ($context) {
-                        $q->where('assignable_type', $context['type'])
-                            ->where('assignable_id', $context['id']);
-                    });
-                }
-            })
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->get();
+                $assignedOptionIds = $assignedOptionIdsByQuestion
+                    ->get($question->id, collect())
+                    ->values();
 
-        $assignedOptionIds = $optionAssignments
-            ->pluck('ai_guide_question_option_id')
-            ->map(fn($id) => (int) $id)
-            ->unique();
+                $question->assigned_option_ids = $assignedOptionIds->all();
 
-        return $questionIds
-            ->map(function ($questionId) use (
-                $questions,
-                $assignments,
-                $assignedOptionIds
-            ) {
-                $question = $questions->get($questionId);
-
-                if (!$question) {
-                    return null;
-                }
-
-                $questionAssignments = $assignments
-                    ->where(
-                        'ai_guide_question_id',
-                        $questionId
-                    );
-
-                $question->setAttribute(
-                    'resolved_required',
-                    $questionAssignments->contains(
-                        fn($assignment) =>
-                        (bool) $assignment->required
-                    )
-                );
-
-                $questionOptionIds = $question
-                    ->options
-                    ->pluck('id')
-                    ->map(fn($id) => (int) $id);
-
-                $question->setAttribute(
-                    'assigned_option_ids',
-                    $assignedOptionIds
-                        ->intersect($questionOptionIds)
+                $question->setRelation(
+                    'options',
+                    $question->options
+                        ->whereIn('id', $assignedOptionIds)
+                        ->sortBy('sort_order')
                         ->values()
-                        ->all()
                 );
 
                 return $question;
-            })
-            ->filter()
-            ->values();
+            });
     }
 }

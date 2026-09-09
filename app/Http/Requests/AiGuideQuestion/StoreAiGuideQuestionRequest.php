@@ -84,6 +84,22 @@ class StoreAiGuideQuestionRequest extends FormRequest
                 'nullable',
                 'boolean',
             ],
+            'options.*.ui_data' => [
+                'nullable',
+                'array',
+            ],
+
+            'options.*.ui_data.colors' => [
+                'nullable',
+                'array',
+                'max:10',
+            ],
+
+            'options.*.ui_data.colors.*' => [
+                'nullable',
+                'string',
+                'regex:/^#[0-9A-Fa-f]{6}$/',
+            ],
         ];
     }
 

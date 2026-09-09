@@ -20,8 +20,17 @@ class AiStudioItemController extends Controller
             'paginate' => ['nullable', 'in:true,false'],
             'page' => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'ai_category_id' => ['nullable', 'integer', 'exists:ai_categories,id'],
         ]);
-        $items = $this->aiStudioItemService->getActiveItems($request->boolean('paginate'), $data['per_page'] ?? 15);
-        return Response::api(data: AiStudioItemResource::collection($items)->response()->getData());
+
+        $items = $this->aiStudioItemService->getActiveItems(
+            $request->boolean('paginate'),
+            $data['per_page'] ?? 15,
+            $data['ai_category_id'] ?? null,
+        );
+
+        return Response::api(
+            data: AiStudioItemResource::collection($items)->response()->getData()
+        );
     }
 }

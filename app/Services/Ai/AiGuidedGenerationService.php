@@ -15,7 +15,7 @@ class AiGuidedGenerationService
     ) {
     }
 
-    public function generate($user, int $aiCategoryId, int $aiStudioItemId, array $answers = []): array {/*
+    public function generate($user, int $aiCategoryId, ?int $aiStudioItemId = null, array $answers = []): array {/*
          * Build prompt from:
          * Category + Studio Item + Answers
          */

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\Ai\AiGenerationTypeEnum;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
@@ -106,6 +107,18 @@ class AiStudioItem extends Model implements HasMedia
             ])
             ->withTimestamps()
             ->orderByPivot('sort_order');
+    }
+
+    public function aiCategories(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            AiCategory::class,
+            'ai_category_studio_items',
+            'ai_studio_item_id',
+            'ai_category_id'
+        )
+            ->withPivot('sort_order')
+            ->withTimestamps();
     }
 
     public function registerMediaCollections(): void
