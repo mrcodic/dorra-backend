@@ -156,6 +156,7 @@ class ProductResource extends JsonResource
             'back_base64_preview_image' => $templatePreviewData['back_base64_preview_image'],
             'template_model_image' => $templatePreviewData['template_model_image'],
             'is_tableau' => $this->category->is_tableau,
+            'has_bundles' => (bool) $this->has_bundles,
             'attached_bundles' => BundleResource::collection($this->whenLoaded('attachedBundles')),
         ];
     }
