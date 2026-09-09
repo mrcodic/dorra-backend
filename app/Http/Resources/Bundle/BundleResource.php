@@ -17,7 +17,7 @@ class BundleResource extends JsonResource
 
             'status' => $this->status?->value ?? $this->status,
             'repeat_type' => $this->repeat_type?->value ?? $this->repeat_type,
-
+            'image_url' => $this->image_url,
             'display_bundle_on_visit' => (bool) $this->display_bundle_on_visit,
 
             'start_at' => $this->start_at?->format('Y-m-d'),
