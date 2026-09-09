@@ -25,7 +25,7 @@ class AiGuidedGenerationController extends Controller
             ],
 
             'ai_studio_item_id' => [
-                'required',
+                'nullable',
                 'integer',
                 'exists:ai_studio_items,id',
             ],
@@ -39,7 +39,7 @@ class AiGuidedGenerationController extends Controller
         $result = $this->aiGuidedGenerationService->generate(
             user: $request->user(),
             aiCategoryId: $data['ai_category_id'],
-            aiStudioItemId: $data['ai_studio_item_id'],
+            aiStudioItemId: $data['ai_studio_item_id']?? null,
             answers: $data['answers'] ?? [],
         );
 

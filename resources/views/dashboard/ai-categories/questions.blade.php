@@ -1,6 +1,6 @@
 @extends('layouts/contentLayoutMaster')
 
-@section('title', 'Configure AI Questions')
+@section('title', 'Configure AI Generation')
 @section('main-page', 'AI Products')
 
 @section('vendor-style')
@@ -20,6 +20,12 @@
         ->pluck('id')
         ->map(fn($id) => (int) $id)
         ->all();
+
+    $assignedStudioItemIds = $aiCategory
+        ->studioItems
+        ->pluck('id')
+        ->map(fn($id) => (int) $id)
+        ->all();
 @endphp
 
 @section('content')
@@ -28,7 +34,7 @@
         <div class="card-header border-bottom">
             <div>
                 <h4 class="card-title mb-25">
-                    Configure Questions
+                    Configure AI Generation
                 </h4>
 
                 <p class="text-muted mb-0">
@@ -46,7 +52,7 @@
         <div class="card-body pt-2">
 
             <div class="alert alert-primary">
-                Select the questions and options that should
+                Choose the generation modes, questions and options that should
                 appear when users generate designs for
                 <strong>
                     {{ $aiCategory->category?->name }}
@@ -64,6 +70,82 @@
 
                 @csrf
                 @method('PUT')
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div>
+                            <h5 class="mb-25">Available Studio Items</h5>
+                            <small class="text-muted">
+                                Select which fixed generation modes are available for this AI Product.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        @forelse($studioItems as $studioItem)
+                            @php
+                                $studioSelected = in_array(
+                                    (int) $studioItem->id,
+                                    $assignedStudioItemIds,
+                                    true
+                                );
+                            @endphp
+
+                            <div class="col-md-4 mb-1">
+                                <label
+                                    class="studio-item-card border rounded p-1 w-100 h-100 {{ $studioSelected ? 'border-primary' : '' }}"
+                                    for="studio-item-{{ $studioItem->id }}"
+                                    style="cursor:pointer"
+                                >
+                                    <div class="d-flex justify-content-between align-items-start gap-1">
+                                        <div class="form-check mb-0">
+                                            <input
+                                                type="checkbox"
+                                                id="studio-item-{{ $studioItem->id }}"
+                                                name="studio_items[]"
+                                                value="{{ $studioItem->id }}"
+                                                class="form-check-input studio-item-checkbox"
+                                                @checked($studioSelected)
+                                            >
+
+                                            <span class="form-check-label fw-bolder">
+                                                {{ $studioItem->name }}
+                                            </span>
+                                        </div>
+
+                                        <span class="badge bg-light-primary text-primary">
+                                            {{ $studioItem->key }}
+                                        </span>
+                                    </div>
+
+                                    @if($studioItem->description)
+                                        <small class="text-muted d-block mt-1">
+                                            {{ $studioItem->description }}
+                                        </small>
+                                    @endif
+
+                                    <div class="d-flex gap-1 mt-1">
+                                        <small class="text-muted">
+                                            {{ $studioItem->generation_type?->label() ?? $studioItem->generation_type }}
+                                        </small>
+                                        <small class="text-muted">•</small>
+                                        <small class="text-muted">
+                                            {{ (int) $studioItem->credits_cost }} Credits
+                                        </small>
+                                    </div>
+                                </label>
+                            </div>
+                        @empty
+                            <div class="col-12">
+                                <div class="alert alert-warning mb-0">
+                                    No active Studio Items found. Run the AI Studio Item seeder first.
+                                </div>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                <hr class="my-2">
 
                 <div class="d-flex justify-content-between align-items-center mb-2">
 
@@ -370,7 +452,7 @@
                         class="btn btn-primary"
                     >
                         <i data-feather="save"></i>
-                        Save Questions
+                        Save Generation Configuration
                     </button>
 
                 </div>
@@ -395,6 +477,7 @@
 
             const form = $('#questions-form');
             const saveButton = $('#save-questions');
+            const studioItemCheckboxes = $('.studio-item-checkbox');
 
             let submitting = false;
 
@@ -421,6 +504,20 @@
 
             $('.question-card').each(function () {
                 toggleQuestion($(this));
+            });
+
+            function toggleStudioItemCard(input) {
+                input
+                    .closest('.studio-item-card')
+                    .toggleClass('border-primary', input.is(':checked'));
+            }
+
+            studioItemCheckboxes.each(function () {
+                toggleStudioItemCard($(this));
+            });
+
+            $(document).on('change', '.studio-item-checkbox', function () {
+                toggleStudioItemCard($(this));
             });
 
             $(document).on(
@@ -582,6 +679,11 @@
                             return;
                         }
 
+                        if (!$('.studio-item-checkbox:checked').length) {
+                            toast('Select at least one Studio Item.');
+                            return;
+                        }
+
                         submitting = true;
 
                         setLoading(true);
@@ -597,7 +699,7 @@
                             success: function () {
 
                                 toast(
-                                    'Questions updated successfully.',
+                                    'AI generation configuration updated successfully.',
                                     false
                                 );
 

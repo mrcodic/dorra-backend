@@ -4,8 +4,6 @@ namespace App\Services\Ai;
 
 use App\Enums\Ai\AiGuideQuestionTypeEnum;
 use App\Repositories\Interfaces\AiCategoryRepositoryInterface;
-use App\Repositories\Interfaces\AiStudioItemRepositoryInterface;
-use BackedEnum;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
@@ -13,34 +11,49 @@ class AiPromptBuilderService
 {
     public function __construct(
         private readonly AiCategoryRepositoryInterface $aiCategoryRepository,
-        private readonly AiStudioItemRepositoryInterface $aiStudioItemRepository,
         private readonly AiGenerationConfigService $aiGenerationConfigService,
     ) {
     }
 
-    public function build(int $aiCategoryId, int $aiStudioItemId, array $answers = []): array
+    public function build(int $aiCategoryId, ?int $aiStudioItemId = null, array $answers = []): array
     {
         $aiCategory = $this->aiCategoryRepository
             ->query()
             ->where('enabled', true)
-            ->with('category')
+            ->with([
+                'category',
+                'studioItems' => fn($query) => $query->where('ai_studio_items.is_active', true),
+            ])
             ->findOrFail($aiCategoryId);
 
-        $studioItem = $this->aiStudioItemRepository
-            ->query()
-            ->where('is_active', true)
-            ->findOrFail($aiStudioItemId);
+        $studioItem = null;
 
-        $questions = $this->aiGenerationConfigService->getAssignedQuestions(
-            $aiCategoryId,
-            $aiStudioItemId
+        if ($aiStudioItemId !== null) {
+            $studioItem = $aiCategory->studioItems
+                ->firstWhere('id', $aiStudioItemId);
+
+            if (!$studioItem) {
+                throw ValidationException::withMessages([
+                    'ai_studio_item_id' => [
+                        'The selected AI Studio Item is not enabled for this AI Product.',
+                    ],
+                ]);
+            }
+        }
+
+        $questions = $this->aiGenerationConfigService
+            ->getAssignedQuestions($aiCategoryId);
+
+        $resolvedAnswers = $this->resolveAnswers(
+            $questions,
+            $answers
         );
 
-        $resolvedAnswers = $this->resolveAnswers($questions, $answers);
         $categorySettings = $aiCategory->settings ?? [];
-        $studioSettings = $studioItem->settings ?? [];
-        $categoryName = (string) ($aiCategory->category?->name ?? '');
-        $studioName = (string) ($studioItem->name ?? '');
+        $studioSettings = $studioItem?->settings ?? [];
+
+        $categoryName = $aiCategory->category?->name ?? '';
+        $studioName = $studioItem?->name ?? $categoryName;
 
         $prompt = $this->buildPrompt(
             categoryName: $categoryName,
@@ -50,17 +63,23 @@ class AiPromptBuilderService
             studioSettings: $studioSettings,
         );
 
+        $negativePrompt = $this->buildNegativePrompt(
+            $categorySettings,
+            $studioSettings
+        );
+
         return [
             'prompt' => $prompt,
-            'negative_prompt' => $this->buildNegativePrompt($categorySettings, $studioSettings),
+            'negative_prompt' => $negativePrompt,
             'generation' => [
-                // Studio Item owns generation behavior and fixed guided-flow price.
-                'type' => $this->enumValue($studioItem->generation_type),
-                'credits_cost' => max(0, (int) $studioItem->credits_cost),
-
-                // AI Category owns product/canvas configuration.
+                'type' => $studioItem
+                    ? ($studioItem->generation_type?->value ?? $studioItem->generation_type)
+                    : null,
                 'resolution' => $aiCategory->default_resolution,
                 'aspect_ratio' => $aiCategory->aspect_ratio,
+                'provider' => $aiCategory->provider,
+                'model' => $aiCategory->model,
+                'credits_cost' => (int) ($studioItem?->credits_cost ?? 1),
                 'transparent_background' => (bool) data_get(
                     $categorySettings,
                     'transparent_background',
@@ -74,9 +93,9 @@ class AiPromptBuilderService
             ],
             'context' => [
                 'ai_category_id' => $aiCategory->id,
-                'ai_studio_item_id' => $studioItem->id,
+                'ai_studio_item_id' => $studioItem?->id,
                 'category_name' => $categoryName,
-                'studio_item_name' => $studioName,
+                'studio_item_name' => $studioItem?->name,
             ],
             'resolved_answers' => $resolvedAnswers->values()->all(),
         ];
@@ -91,35 +110,64 @@ class AiPromptBuilderService
     ): string {
         $sections = [];
 
-        $intro = $studioName !== ''
-            ? "Create a professional {$studioName} design."
-            : 'Create a professional design.';
+        $sections[] = trim("
+Create a professional {$studioName} design.
 
-        if ($categoryName !== '') {
-            $intro .= "\n\nThe design is intended for:\n{$categoryName}.";
-        }
-
-        $sections[] = $intro;
+The design is intended for:
+{$categoryName}.
+        ");
 
         if ($resolvedAnswers->isNotEmpty()) {
-            $sections[] = "Design requirements:\n" . $resolvedAnswers
-                    ->map(fn(array $answer) => '- ' . $answer['prompt_label'] . ': ' . $answer['prompt_value'])
+            $sections[] =
+                "Design requirements:\n"
+                . $resolvedAnswers
+                    ->map(
+                        fn($answer) =>
+                            '- '
+                            . $answer['prompt_label']
+                            . ': '
+                            . $answer['prompt_value']
+                    )
                     ->implode("\n");
         }
 
-        $studioInstructions = trim((string) data_get($studioSettings, 'prompt_instructions', ''));
+        $studioInstructions = trim(
+            (string) data_get(
+                $studioSettings,
+                'prompt_instructions',
+                ''
+            )
+        );
+
         if ($studioInstructions !== '') {
-            $sections[] = "Studio instructions:\n{$studioInstructions}";
+            $sections[] =
+                "Studio instructions:\n"
+                . $studioInstructions;
         }
 
-        $productContext = trim((string) data_get($categorySettings, 'product_context', ''));
+        $productContext = trim(
+            (string) data_get(
+                $categorySettings,
+                'product_context',
+                ''
+            )
+        );
+
         if ($productContext !== '') {
-            $sections[] = "Product context:\n{$productContext}";
+            $sections[] =
+                "Product context:\n"
+                . $productContext;
         }
 
-        $productionRequirements = $this->buildProductionRequirements($categorySettings);
+        $productionRequirements =
+            $this->buildProductionRequirements(
+                $categorySettings
+            );
+
         if ($productionRequirements !== '') {
-            $sections[] = "Production requirements:\n{$productionRequirements}";
+            $sections[] =
+                "Production requirements:\n"
+                . $productionRequirements;
         }
 
         $sections[] = implode("\n", [
@@ -130,7 +178,7 @@ class AiPromptBuilderService
         ]);
 
         return collect($sections)
-            ->map(fn(string $section) => trim($section))
+            ->map(fn($section) => trim($section))
             ->filter()
             ->implode("\n\n");
     }
@@ -139,21 +187,23 @@ class AiPromptBuilderService
     {
         $errors = [];
         $resolved = collect();
-        $allowedKeys = $questions->pluck('key')->map(fn($key) => (string) $key)->all();
-
-        foreach (array_keys($answers) as $answerKey) {
-            if (!in_array((string) $answerKey, $allowedKeys, true)) {
-                $errors["answers.{$answerKey}"][] = 'This question is not available for the selected category and studio item.';
-            }
-        }
 
         foreach ($questions as $question) {
-            $key = (string) $question->key;
+            $key = $question->key;
             $value = $answers[$key] ?? null;
-            $required = (bool) ($question->resolved_required ?? $question->required);
 
-            if ($required && $this->isEmptyAnswer($value)) {
-                $errors["answers.{$key}"][] = "{$question->title} is required.";
+            $required = (bool) (
+                $question->resolved_required
+                ?? $question->required
+            );
+
+            if (
+                $required
+                && $this->isEmptyAnswer($value)
+            ) {
+                $errors["answers.{$key}"][] =
+                    "{$question->title} is required.";
+
                 continue;
             }
 
@@ -161,79 +211,130 @@ class AiPromptBuilderService
                 continue;
             }
 
-            $promptLabel = trim((string) ($question->prompt_label ?: $question->title));
+            $promptLabel = trim(
+                (string) (
+                $question->prompt_label
+                    ?: $question->title
+                )
+            );
 
             switch ($question->type) {
                 case AiGuideQuestionTypeEnum::TEXT:
                 case AiGuideQuestionTypeEnum::TEXTAREA:
-                    if (!is_string($value) && !is_numeric($value)) {
-                        $errors["answers.{$key}"][] = 'Invalid answer.';
+
+                    if (
+                        !is_string($value)
+                        && !is_numeric($value)
+                    ) {
+                        $errors["answers.{$key}"][] =
+                            'Invalid answer.';
+
                         continue 2;
                     }
 
-                    $resolvedValue = trim((string) $value);
+                    $resolvedValue = trim(
+                        (string) $value
+                    );
+
                     break;
 
                 case AiGuideQuestionTypeEnum::SINGLE_SELECT:
-                    if (!is_string($value) && !is_numeric($value)) {
-                        $errors["answers.{$key}"][] = 'Please select one valid option.';
+
+                    if (
+                        !is_string($value)
+                        && !is_numeric($value)
+                    ) {
+                        $errors["answers.{$key}"][] =
+                            'Please select one valid option.';
+
                         continue 2;
                     }
 
-                    $option = $this->resolveOption($question, (string) $value);
+                    $option = $this->resolveOption(
+                        $question,
+                        (string) $value
+                    );
+
                     if (!$option) {
-                        $errors["answers.{$key}"][] = 'The selected option is not available.';
+                        $errors["answers.{$key}"][] =
+                            'The selected option is not available.';
+
                         continue 2;
                     }
 
-                    $resolvedValue = trim((string) ($option->prompt_value ?: $option->label));
+                    $resolvedValue =
+                        $option->prompt_value
+                            ?: $option->label;
+
                     break;
 
                 case AiGuideQuestionTypeEnum::MULTI_SELECT:
+
                     if (!is_array($value)) {
-                        $errors["answers.{$key}"][] = 'Please select valid options.';
+                        $errors["answers.{$key}"][] =
+                            'Please select valid options.';
+
                         continue 2;
                     }
 
                     $selectedValues = collect($value)
-                        ->filter(fn($item) => is_string($item) || is_numeric($item))
-                        ->map(fn($item) => (string) $item)
+                        ->filter(
+                            fn($item) =>
+                                is_string($item)
+                                || is_numeric($item)
+                        )
+                        ->map(
+                            fn($item) => (string) $item
+                        )
                         ->unique()
                         ->values();
-
-                    if ($required && $selectedValues->isEmpty()) {
-                        $errors["answers.{$key}"][] = "{$question->title} is required.";
-                        continue 2;
-                    }
 
                     $optionValues = [];
 
                     foreach ($selectedValues as $selectedValue) {
-                        $option = $this->resolveOption($question, $selectedValue);
+                        $option = $this->resolveOption(
+                            $question,
+                            $selectedValue
+                        );
 
                         if (!$option) {
-                            $errors["answers.{$key}"][] = "Invalid option: {$selectedValue}.";
+                            $errors["answers.{$key}"][] =
+                                "Invalid option: {$selectedValue}.";
+
                             continue;
                         }
 
-                        $optionValues[] = trim((string) ($option->prompt_value ?: $option->label));
+                        $optionValues[] =
+                            $option->prompt_value
+                                ?: $option->label;
                     }
 
-                    if (isset($errors["answers.{$key}"])) {
+                    if (
+                        isset(
+                            $errors["answers.{$key}"]
+                        )
+                    ) {
                         continue 2;
                     }
 
-                    $resolvedValue = implode(', ', array_filter($optionValues));
+                    $resolvedValue = implode(
+                        ', ',
+                        $optionValues
+                    );
+
                     break;
 
                 default:
-                    $errors["answers.{$key}"][] = 'Unsupported question type.';
+
+                    $errors["answers.{$key}"][] =
+                        'Unsupported question type.';
+
                     continue 2;
             }
 
             $resolved->push([
                 'question_id' => $question->id,
-                'question_key' => $key,
+                'question_key' => $question->key,
                 'title' => $question->title,
                 'prompt_label' => $promptLabel,
                 'prompt_value' => $resolvedValue,
@@ -241,58 +342,117 @@ class AiPromptBuilderService
         }
 
         if (!empty($errors)) {
-            throw ValidationException::withMessages($errors);
+            throw ValidationException::withMessages(
+                $errors
+            );
         }
 
         return $resolved;
     }
 
-    private function resolveOption($question, string $value)
-    {
-        $assignedOptionIds = collect($question->assigned_option_ids ?? [])
+    private function resolveOption(
+        $question,
+        string $value
+    ) {
+        $assignedOptionIds = collect(
+            $question->assigned_option_ids ?? []
+        )
             ->map(fn($id) => (int) $id);
 
-        return $question->options
-            ->filter(fn($option) => $assignedOptionIds->contains((int) $option->id))
-            ->first(fn($option) => (string) $option->value === $value);
+        return $question
+            ->options
+            ->filter(
+                fn($option) =>
+                $assignedOptionIds->contains(
+                    (int) $option->id
+                )
+            )
+            ->first(
+                fn($option) =>
+                    (string) $option->value
+                    === $value
+            );
     }
 
-    private function buildProductionRequirements(array $settings): string
-    {
+    private function buildProductionRequirements(
+        array $settings
+    ): string {
         $requirements = [];
-        $custom = trim((string) data_get($settings, 'production_requirements', ''));
+
+        $custom = trim(
+            (string) data_get(
+                $settings,
+                'production_requirements',
+                ''
+            )
+        );
 
         if ($custom !== '') {
             $requirements[] = $custom;
         }
 
-        if ((bool) data_get($settings, 'print_ready', false)) {
-            $requirements[] = 'Create production-ready artwork suitable for printing.';
-            $requirements[] = 'Keep clean printable edges.';
-            $requirements[] = 'Avoid unnecessary tiny details that may not reproduce well in print.';
-            $requirements[] = 'Generate the artwork itself, not a product mockup.';
+        if (
+            data_get(
+                $settings,
+                'print_ready',
+                false
+            )
+        ) {
+            $requirements[] =
+                'Create production-ready artwork suitable for printing.';
+
+            $requirements[] =
+                'Keep clean printable edges.';
+
+            $requirements[] =
+                'Avoid unnecessary tiny details that may not reproduce well in print.';
+
+            $requirements[] =
+                'Generate the artwork itself, not a product mockup.';
         }
 
-        if ((bool) data_get($settings, 'transparent_background', false)) {
-            $requirements[] = 'Keep the artwork isolated from its background for transparent output processing.';
+        if (
+            data_get(
+                $settings,
+                'transparent_background',
+                false
+            )
+        ) {
+            $requirements[] =
+                'Keep the artwork isolated from its background for transparent output processing.';
         }
 
-        $orientation = trim((string) data_get($settings, 'orientation', ''));
-        if ($orientation !== '') {
-            $requirements[] = "Composition orientation: {$orientation}.";
+        $orientation = data_get(
+            $settings,
+            'orientation'
+        );
+
+        if ($orientation) {
+            $requirements[] =
+                "Composition orientation: {$orientation}.";
         }
 
-        return collect($requirements)
-            ->filter()
-            ->unique()
-            ->implode("\n");
+        return implode(
+            "\n",
+            $requirements
+        );
     }
 
-    private function buildNegativePrompt(array $categorySettings, array $studioSettings): string
-    {
+    private function buildNegativePrompt(
+        array $categorySettings,
+        array $studioSettings
+    ): string {
         return collect([
-            data_get($studioSettings, 'negative_rules'),
-            data_get($categorySettings, 'negative_rules'),
+            data_get(
+                $studioSettings,
+                'negative_rules'
+            ),
+
+            data_get(
+                $categorySettings,
+                'negative_rules'
+            ),
+
             'low quality',
             'distorted composition',
             'unrelated elements',
@@ -304,21 +464,21 @@ class AiPromptBuilderService
             ->implode("\n");
     }
 
-    private function enumValue(mixed $value): mixed
-    {
-        return $value instanceof BackedEnum ? $value->value : $value;
-    }
-
-    private function isEmptyAnswer(mixed $value): bool
-    {
+    private function isEmptyAnswer(
+        mixed $value
+    ): bool {
         if ($value === null) {
             return true;
         }
 
-        if (is_string($value) && trim($value) === '') {
+        if (
+            is_string($value)
+            && trim($value) === ''
+        ) {
             return true;
         }
 
-        return is_array($value) && empty($value);
+        return is_array($value)
+            && empty($value);
     }
 }

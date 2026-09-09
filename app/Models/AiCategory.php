@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Enums\Ai\AiGenerationTypeEnum;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, MorphToMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, MorphToMany};
 
 class AiCategory extends Model
 {
@@ -56,6 +56,18 @@ class AiCategory extends Model
                 'is_active',
                 'sort_order',
             ])
+            ->withTimestamps()
+            ->orderByPivot('sort_order');
+    }
+    public function studioItems(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            AiStudioItem::class,
+            'ai_category_studio_items',
+            'ai_category_id',
+            'ai_studio_item_id'
+        )
+            ->withPivot('sort_order')
             ->withTimestamps()
             ->orderByPivot('sort_order');
     }
