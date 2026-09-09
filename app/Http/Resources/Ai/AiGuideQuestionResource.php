@@ -10,6 +10,12 @@ class AiGuideQuestionResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $isColorPalette = $this->options->contains(
+            fn($option) => !empty(
+            data_get($option->ui_data, 'colors', [])
+            )
+        );
+
         return [
             'id' => $this->key,
             'title' => $this->title,
@@ -17,9 +23,21 @@ class AiGuideQuestionResource extends JsonResource
             'required' => $this->required,
             'placeholder' => $this->whenNotNull($this->placeholder),
             'promptLabel' => $this->prompt_label,
+
+            'isColorPalette' => $isColorPalette,
+
             'options' => $this->when(
-                in_array($this->type , [AiGuideQuestionTypeEnum::SINGLE_SELECT, AiGuideQuestionTypeEnum::MULTI_SELECT]),
-                fn() => AiGuideQuestionOptionResource::collection($this->options)
+                in_array(
+                    $this->type,
+                    [
+                        AiGuideQuestionTypeEnum::SINGLE_SELECT,
+                        AiGuideQuestionTypeEnum::MULTI_SELECT,
+                    ],
+                    true
+                ),
+                fn() => AiGuideQuestionOptionResource::collection(
+                    $this->options
+                )
             ),
         ];
     }
