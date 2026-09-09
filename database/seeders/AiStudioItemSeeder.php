@@ -35,7 +35,7 @@ class AiStudioItemSeeder extends Seeder
                     'ar' => 'إنشاء لوجو احترافي ونظيف.',
                 ],
                 'generation_type' => AiGenerationTypeEnum::IMAGE->value,
-                'credits_cost' => 1,
+                'credits_cost' => 2,
                 'is_active' => true,
                 'sort_order' => 2,
                 'settings' => [
@@ -51,7 +51,7 @@ class AiStudioItemSeeder extends Seeder
                     'ar' => 'إنشاء باترن متكرر ومتناسق.',
                 ],
                 'generation_type' => AiGenerationTypeEnum::PATTERN->value,
-                'credits_cost' => 1,
+                'credits_cost' => 3,
                 'is_active' => true,
                 'sort_order' => 3,
                 'settings' => [
