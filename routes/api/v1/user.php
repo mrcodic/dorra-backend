@@ -162,6 +162,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
 
     Route::get('bundles/entry-popup', [BundleController::class, 'entryPopup']);
+    Route::resource('bundles', BundleController::class)->only(['index', 'show']);
 
     Route::middleware('auth:sanctum')->group(function () {
 
