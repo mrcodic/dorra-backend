@@ -332,6 +332,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::group(['prefix' => 'ai-categories', 'as' => 'ai-categories.', 'controller' => AiCategoryController::class,], (function () {
             Route::get('/data', [AiCategoryController::class, 'getData'])->name('data');
             Route::post('/bulk-delete', [AiCategoryController::class, 'bulkDelete'])->name('bulk-delete');
+            Route::post('questions/quick-store', 'quickStoreQuestion')->name('questions.quick-store');
+
         }));
         Route::resource('ai-categories', AiCategoryController::class);
 
