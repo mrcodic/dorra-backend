@@ -17,7 +17,7 @@ class BundleController extends Controller
 
     public function index(Request $request)
     {
-        $bundles = $this->bundleService->getAll(paginate: $request->get('paginate',false));
+        $bundles = $this->bundleService->getAll(relations: ['trigger','rewards'], paginate: $request->get('paginate',false));
         $bundleResourceCollection = $bundles instanceof LengthAwarePaginator ?
             BundleResource::collection($bundles)->response()->getData()
             : BundleResource::collection($bundles);
@@ -25,7 +25,7 @@ class BundleController extends Controller
     }
     public function show($id, Request $request)
     {
-        $bundle = $this->bundleService->showResource($id);
+        $bundle = $this->bundleService->showResource($id,['trigger','rewards']);
         return Response::api(data: BundleResource::make($bundle));
     }
     public function entryPopup()
