@@ -340,6 +340,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::post('/bulk-delete',  'bulkDelete')->name('bulk-delete');
             Route::get('/{id}/questions',  'questions')->name('questions');
             Route::put('/{id}/questions',  'updateQuestions')->name('questions.update');
+            Route::post('questions/quick-store', 'quickStoreQuestion')->name('questions.quick-store');
+
 
         }));
         Route::resource('ai-studio-items', AiStudioItemController::class);
