@@ -47,14 +47,14 @@ class StoreBundleCartRequest extends BaseRequest
             'items.*.template_id' => [
                 'required_without:items.*.design_id',
                 'nullable',
-                'integer',
+                'string',
                 Rule::exists((new Template())->getTable(), 'id'),
             ],
 
             'items.*.design_id' => [
                 'required_without:items.*.template_id',
                 'nullable',
-                'integer',
+                'string',
                 Rule::exists((new Design())->getTable(), 'id'),
             ],
 

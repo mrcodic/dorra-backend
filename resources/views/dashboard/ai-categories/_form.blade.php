@@ -594,7 +594,7 @@
                         </small>
                     </div>
 
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
                 </div>
 
                 <div class="modal-body">
@@ -719,7 +719,7 @@
                         class="btn-close"
                         data-bs-dismiss="modal"
                         aria-label="Close"
-                    ></button>
+                    >x</button>
                 </div>
 
                 <div class="modal-body">
