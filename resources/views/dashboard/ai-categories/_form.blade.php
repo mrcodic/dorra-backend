@@ -34,6 +34,27 @@
         ->all() ?? [];
 
     $oldQuestions = old('questions');
+
+    $studioItemsPayload = $studioItems->mapWithKeys(function ($studioItem) {
+        return [
+            $studioItem->id => [
+                'id' => $studioItem->id,
+                'key' => $studioItem->key,
+                'name' => $studioItem->name,
+                'name_en' => $studioItem->getTranslation('name', 'en', false),
+                'name_ar' => $studioItem->getTranslation('name', 'ar', false),
+                'description' => $studioItem->description,
+                'description_en' => $studioItem->getTranslation('description', 'en', false),
+                'description_ar' => $studioItem->getTranslation('description', 'ar', false),
+                'generation_type' => $studioItem->generation_type?->value ?? $studioItem->generation_type,
+                'generation_type_label' => $studioItem->generation_type?->label() ?? $studioItem->generation_type,
+                'credits_cost' => (int) $studioItem->credits_cost,
+                'sort_order' => (int) $studioItem->sort_order,
+                'is_active' => (bool) $studioItem->is_active,
+                'settings' => $studioItem->settings ?? [],
+            ],
+        ];
+    })->all();
 @endphp
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -201,34 +222,43 @@
 
 {{-- Studio Items --}}
 <div class="card border mb-2">
-    <div class="card-header border-bottom">
+    <div class="card-header border-bottom d-flex justify-content-between align-items-center">
         <div>
             <h5 class="mb-25">Studio Items</h5>
             <small class="text-muted">
-                Choose which generation modes are available for this product.
+                Choose the generation modes available for this product. Add/Edit changes Studio Items globally.
             </small>
         </div>
+
+        @can('ai-studio-items_create')
+            <button
+                type="button"
+                id="add-studio-item"
+                class="btn btn-sm btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#quick-studio-item-modal"
+            >
+                <i data-feather="plus"></i>
+                Add Studio Item
+            </button>
+        @endcan
     </div>
 
     <div class="card-body pt-2">
-        <div class="row">
+        <div id="studio-items-container" class="row">
             @forelse($studioItems as $studioItem)
                 @php
-                    $studioSelected = in_array(
+                    $studioSelected = (bool) $studioItem->is_active && in_array(
                         (int) $studioItem->id,
                         $selectedStudioItemIds,
                         true
                     );
                 @endphp
 
-                <div class="col-md-4 mb-1">
-                    <label
-                        class="ai-config-card studio-item-card border rounded p-1 w-100 h-100 {{ $studioSelected ? 'is-selected' : '' }}"
-                        for="studio-item-{{ $studioItem->id }}"
-                        style="cursor:pointer"
-                    >
+                <div class="col-md-4 mb-1 studio-item-column" data-studio-item-id="{{ $studioItem->id }}">
+                    <div class="ai-config-card studio-item-card border rounded p-1 w-100 h-100 {{ $studioSelected ? 'is-selected' : '' }}">
                         <div class="d-flex justify-content-between align-items-start gap-1">
-                            <div class="form-check mb-0">
+                            <div class="form-check mb-0 flex-grow-1">
                                 <input
                                     type="checkbox"
                                     id="studio-item-{{ $studioItem->id }}"
@@ -236,39 +266,61 @@
                                     value="{{ $studioItem->id }}"
                                     class="form-check-input studio-item-checkbox"
                                     @checked($studioSelected)
+                                    @disabled(!$studioItem->is_active)
                                 >
 
-                                <span class="form-check-label fw-bolder">
+                                <label class="form-check-label fw-bolder" for="studio-item-{{ $studioItem->id }}">
                                     {{ $studioItem->name }}
-                                </span>
+                                </label>
                             </div>
 
-                            <span class="badge bg-light-primary text-primary">
+                            <div class="d-flex gap-50 align-items-center">
+                                <span class="badge {{ $studioItem->is_active ? 'bg-light-success text-success' : 'bg-light-danger text-danger' }} studio-item-status-badge">
+                                    {{ $studioItem->is_active ? 'Active' : 'Inactive' }}
+                                </span>
+
+                                @can('ai-studio-items_update')
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-primary quick-edit-studio-item"
+                                        data-id="{{ $studioItem->id }}"
+                                        title="Edit Studio Item"
+                                    >
+                                        <i data-feather="edit-2"></i>
+                                    </button>
+                                @endcan
+                            </div>
+                        </div>
+
+                        <div class="mt-1">
+                            <span class="badge bg-light-primary text-primary studio-item-key">
                                 {{ $studioItem->key }}
                             </span>
                         </div>
 
                         @if($studioItem->description)
-                            <small class="text-muted d-block mt-1">
+                            <small class="text-muted d-block mt-1 studio-item-description">
                                 {{ $studioItem->description }}
                             </small>
+                        @else
+                            <small class="text-muted d-block mt-1 studio-item-description"></small>
                         @endif
 
                         <div class="d-flex gap-1 mt-1">
-                            <small class="text-muted">
+                            <small class="text-muted studio-item-generation-type">
                                 {{ $studioItem->generation_type?->label() ?? $studioItem->generation_type }}
                             </small>
                             <small class="text-muted">•</small>
-                            <small class="text-muted">
+                            <small class="text-muted studio-item-credits">
                                 {{ (int) $studioItem->credits_cost }} Credits
                             </small>
                         </div>
-                    </label>
+                    </div>
                 </div>
             @empty
-                <div class="col-12">
+                <div id="no-studio-items-alert" class="col-12">
                     <div class="alert alert-warning mb-0">
-                        No active Studio Items found.
+                        No Studio Items found. Use “Add Studio Item”.
                     </div>
                 </div>
             @endforelse
@@ -528,6 +580,110 @@
     </div>
 </div>
 
+{{-- Quick Studio Item Modal. Add/Edit is global; product attachment is saved with the parent form. --}}
+@if(auth()->user()?->can('ai-studio-items_create') || auth()->user()?->can('ai-studio-items_update'))
+    <div class="modal fade" id="quick-studio-item-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title" id="quick-studio-item-modal-title">Add Studio Item</h5>
+                        <small class="text-muted">
+                            Studio Item settings are global and can be used by multiple AI Products.
+                        </small>
+                    </div>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" id="quick-studio-item-id">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-1">
+                            <label class="form-label">Name English *</label>
+                            <input type="text" id="quick-studio-name-en" class="form-control">
+                        </div>
+
+                        <div class="col-md-6 mb-1">
+                            <label class="form-label">Name Arabic</label>
+                            <input type="text" id="quick-studio-name-ar" class="form-control" dir="rtl">
+                        </div>
+
+                        <div class="col-md-6 mb-1">
+                            <label class="form-label">Description English</label>
+                            <textarea id="quick-studio-description-en" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="col-md-6 mb-1">
+                            <label class="form-label">Description Arabic</label>
+                            <textarea id="quick-studio-description-ar" class="form-control" rows="3" dir="rtl"></textarea>
+                        </div>
+
+                        <div class="col-md-4 mb-1">
+                            <label class="form-label">Generation Type *</label>
+                            <select id="quick-studio-generation-type" class="form-select">
+                                <option value="">Select Type</option>
+                                @foreach(\App\Enums\Ai\AiGenerationTypeEnum::cases() as $type)
+                                    <option value="{{ $type->value }}">{{ $type->label() }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-1">
+                            <label class="form-label">Credits Cost *</label>
+                            <input type="number" id="quick-studio-credits-cost" min="0" value="1" class="form-control">
+                        </div>
+
+                        <div class="col-md-4 mb-1">
+                            <label class="form-label">Sort Order</label>
+                            <input type="number" id="quick-studio-sort-order" min="0" value="0" class="form-control">
+                        </div>
+
+                        <div class="col-md-6 mb-1">
+                            <label class="form-label">Prompt Instructions</label>
+                            <textarea
+                                id="quick-studio-prompt-instructions"
+                                class="form-control"
+                                rows="4"
+                                placeholder="Instructions specific to this Studio Item..."
+                            ></textarea>
+                        </div>
+
+                        <div class="col-md-6 mb-1">
+                            <label class="form-label">Negative Rules</label>
+                            <textarea
+                                id="quick-studio-negative-rules"
+                                class="form-control"
+                                rows="4"
+                                placeholder="Things the generated result should avoid..."
+                            ></textarea>
+                        </div>
+
+                        <div class="col-md-4 mb-1">
+                            <label class="form-label d-block">Status</label>
+
+                            <div class="form-check form-switch mt-50">
+                                <input type="checkbox" id="quick-studio-is-active" class="form-check-input" checked>
+                                <label for="quick-studio-is-active" class="form-check-label">Active</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                    <button type="button" id="quick-save-studio-item" class="btn btn-primary">
+                        <i data-feather="save"></i>
+                        Save Studio Item
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
+
 {{-- Quick Question Modal. No nested form: values are sent with AJAX manually. --}}
 @can('ai-guide-questions_create')
     <div
@@ -705,6 +861,10 @@
         const multiSelect = @json(\App\Enums\Ai\AiGuideQuestionTypeEnum::MULTI_SELECT->value);
         const quickStoreUrl = @json(route('ai-categories.questions.quick-store'));
         const csrfToken = @json(csrf_token());
+        const quickStudioStoreUrl = @json(route('ai-categories.studio-items.quick-store'));
+        const quickStudioUpdateUrlTemplate = @json(route('ai-categories.studio-items.quick-update', ['studioItem' => '__STUDIO_ITEM_ID__']));
+
+        let studioItemData = @json($studioItemsPayload);
 
         let quickOptionIndex = 0;
 
@@ -735,6 +895,228 @@
 
         $(document).on('change', '.studio-item-checkbox', function () {
             toggleStudioItemCard($(this));
+        });
+
+        function resetStudioItemModal() {
+            $('#quick-studio-item-id').val('');
+            $('#quick-studio-item-modal-title').text('Add Studio Item');
+            $('#quick-studio-name-en, #quick-studio-name-ar, #quick-studio-description-en, #quick-studio-description-ar, #quick-studio-prompt-instructions, #quick-studio-negative-rules').val('');
+            $('#quick-studio-generation-type').val('');
+            $('#quick-studio-credits-cost').val(1);
+            $('#quick-studio-sort-order').val(0);
+            $('#quick-studio-is-active').prop('checked', true);
+        }
+
+        function fillStudioItemModal(item) {
+            $('#quick-studio-item-id').val(item.id);
+            $('#quick-studio-item-modal-title').text(`Edit Studio Item: ${item.name ?? item.key ?? ''}`);
+            $('#quick-studio-name-en').val(item.name_en ?? '');
+            $('#quick-studio-name-ar').val(item.name_ar ?? '');
+            $('#quick-studio-description-en').val(item.description_en ?? '');
+            $('#quick-studio-description-ar').val(item.description_ar ?? '');
+            $('#quick-studio-generation-type').val(item.generation_type ?? '');
+            $('#quick-studio-credits-cost').val(Number(item.credits_cost ?? 1));
+            $('#quick-studio-sort-order').val(Number(item.sort_order ?? 0));
+            $('#quick-studio-is-active').prop('checked', !!item.is_active);
+            $('#quick-studio-prompt-instructions').val(item.settings?.prompt_instructions ?? '');
+            $('#quick-studio-negative-rules').val(item.settings?.negative_rules ?? '');
+        }
+
+        function buildStudioItemCard(item, selected = true) {
+            const active = !!item.is_active;
+            const checked = active && selected;
+            const disabled = active ? '' : 'disabled';
+            const statusClass = active ? 'bg-light-success text-success' : 'bg-light-danger text-danger';
+            const statusText = active ? 'Active' : 'Inactive';
+            const description = item.description
+                ? `<small class="text-muted d-block mt-1 studio-item-description">${escapeHtml(item.description)}</small>`
+                : '<small class="text-muted d-block mt-1 studio-item-description"></small>';
+
+            return `
+                <div class="col-md-4 mb-1 studio-item-column" data-studio-item-id="${item.id}">
+                    <div class="ai-config-card studio-item-card border rounded p-1 w-100 h-100 ${checked ? 'is-selected' : ''}">
+                        <div class="d-flex justify-content-between align-items-start gap-1">
+                            <div class="form-check mb-0 flex-grow-1">
+                                <input
+                                    type="checkbox"
+                                    id="studio-item-${item.id}"
+                                    name="studio_items[]"
+                                    value="${item.id}"
+                                    class="form-check-input studio-item-checkbox"
+                                    ${checked ? 'checked' : ''}
+                                    ${disabled}
+                                >
+
+                                <label class="form-check-label fw-bolder" for="studio-item-${item.id}">
+                                    ${escapeHtml(item.name)}
+                                </label>
+                            </div>
+
+                            <div class="d-flex gap-50 align-items-center">
+                                <span class="badge ${statusClass} studio-item-status-badge">
+                                    ${statusText}
+                                </span>
+
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-primary quick-edit-studio-item"
+                                    data-id="${item.id}"
+                                    title="Edit Studio Item"
+                                >
+                                    <i data-feather="edit-2"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-1">
+                            <span class="badge bg-light-primary text-primary studio-item-key">
+                                ${escapeHtml(item.key)}
+                            </span>
+                        </div>
+
+                        ${description}
+
+                        <div class="d-flex gap-1 mt-1">
+                            <small class="text-muted studio-item-generation-type">
+                                ${escapeHtml(item.generation_type_label)}
+                            </small>
+                            <small class="text-muted">•</small>
+                            <small class="text-muted studio-item-credits">
+                                ${Number(item.credits_cost ?? 0)} Credits
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function upsertStudioItemCard(item, selectNew = false) {
+            studioItemData[item.id] = item;
+
+            const current = $(`.studio-item-column[data-studio-item-id="${item.id}"]`);
+            const wasSelected = current.length
+                ? current.find('.studio-item-checkbox').is(':checked')
+                : selectNew;
+
+            const html = buildStudioItemCard(item, wasSelected);
+
+            if (current.length) {
+                current.replaceWith(html);
+            } else {
+                $('#no-studio-items-alert').remove();
+                $('#studio-items-container').append(html);
+            }
+
+            const checkbox = $(`.studio-item-column[data-studio-item-id="${item.id}"] .studio-item-checkbox`);
+            toggleStudioItemCard(checkbox);
+            feather.replace();
+        }
+
+        $('#add-studio-item').on('click', function () {
+            resetStudioItemModal();
+        });
+
+        $(document).on('click', '.quick-edit-studio-item', function () {
+            const id = Number($(this).data('id'));
+            const item = studioItemData[id];
+
+            if (!item) {
+                toast('Studio Item data could not be loaded.');
+                return;
+            }
+
+            fillStudioItemModal(item);
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('quick-studio-item-modal')).show();
+        });
+
+        $('#quick-save-studio-item').on('click', function () {
+            const button = $(this);
+            const originalHtml = button.html();
+            const id = Number($('#quick-studio-item-id').val() || 0);
+            const nameEn = $('#quick-studio-name-en').val().trim();
+            const generationType = $('#quick-studio-generation-type').val();
+
+            if (!nameEn) {
+                toast('Studio Item English name is required.');
+                return;
+            }
+
+            if (!generationType) {
+                toast('Generation Type is required.');
+                return;
+            }
+
+            const data = {
+                name: {
+                    en: nameEn,
+                    ar: $('#quick-studio-name-ar').val().trim()
+                },
+                description: {
+                    en: $('#quick-studio-description-en').val().trim(),
+                    ar: $('#quick-studio-description-ar').val().trim()
+                },
+                generation_type: generationType,
+                credits_cost: Number($('#quick-studio-credits-cost').val() || 0),
+                sort_order: Number($('#quick-studio-sort-order').val() || 0),
+                is_active: $('#quick-studio-is-active').is(':checked') ? 1 : 0,
+                settings: {
+                    prompt_instructions: $('#quick-studio-prompt-instructions').val().trim(),
+                    negative_rules: $('#quick-studio-negative-rules').val().trim()
+                },
+                _token: csrfToken
+            };
+
+            let url = quickStudioStoreUrl;
+
+            if (id) {
+                url = quickStudioUpdateUrlTemplate.replace('__STUDIO_ITEM_ID__', id);
+                data._method = 'PUT';
+            }
+
+            button
+                .prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm me-50"></span>Saving...');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: data,
+
+                success: function (response) {
+                    const item = response.data ?? response;
+
+                    upsertStudioItemCard(item, !id);
+
+                    bootstrap.Modal
+                        .getOrCreateInstance(document.getElementById('quick-studio-item-modal'))
+                        .hide();
+
+                    resetStudioItemModal();
+                    toast(id ? 'Studio Item updated successfully.' : 'Studio Item created and selected.', false);
+                },
+
+                error: function (xhr) {
+                    const response = xhr.responseJSON ?? {};
+
+                    if (xhr.status === 422 && response.errors) {
+                        Object.values(response.errors)
+                            .flat()
+                            .forEach(message => toast(message));
+                        return;
+                    }
+
+                    toast(response.message ?? 'Unable to save Studio Item.');
+                },
+
+                complete: function () {
+                    button.prop('disabled', false).html(originalHtml);
+                    feather.replace();
+                }
+            });
+        });
+
+        $('#quick-studio-item-modal').on('hidden.bs.modal', function () {
+            resetStudioItemModal();
         });
 
         function toggleQuestion(card) {
