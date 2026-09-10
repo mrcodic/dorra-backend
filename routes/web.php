@@ -348,7 +348,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
         Route::resource('ai-studio-items', AiStudioItemController::class);
         Route::post('ai-categories/studio-items/quick-store', [AiCategoryController::class, 'quickStoreStudioItem'])
             ->name('ai-categories.studio-items.quick-store');
-
+        Route::delete('ai-categories/studio-items/{studioItem}/quick-delete', [AiCategoryController::class, 'quickDeleteStudioItem'])
+            ->name('ai-categories.studio-items.quick-delete');
         Route::put('ai-categories/studio-items/{studioItem}/quick-update', [AiCategoryController::class, 'quickUpdateStudioItem'])
             ->name('ai-categories.studio-items.quick-update');
         Route::group(['prefix' => 'bundles', 'as' => 'bundles.', 'controller' => BundleController::class,], (function () {

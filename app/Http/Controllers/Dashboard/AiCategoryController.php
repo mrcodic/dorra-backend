@@ -15,7 +15,9 @@ use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Services\Ai\AiCategoryService;
 use App\Services\Ai\AiGuideQuestionService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class AiCategoryController extends DashboardController
@@ -154,6 +156,38 @@ class AiCategoryController extends DashboardController
             data: $this->studioItemPayload($studioItem),
             message: 'Studio Item updated successfully.'
         );
+    }
+
+    public function quickDeleteStudioItem(AiStudioItem $studioItem): JsonResponse
+    {
+        abort_unless(auth()->user()?->hasPermissionTo('ai-studio-items_delete'), 403);
+
+        DB::transaction(function () use ($studioItem) {
+            if (Schema::hasTable('ai_category_studio_items')) {
+                DB::table('ai_category_studio_items')->where('ai_studio_item_id', $studioItem->id)->delete();
+            }
+
+            // Clean old polymorphic assignments if they still exist from the previous architecture.
+            $assignableTypes = ['ai_studio_item', AiStudioItem::class];
+
+            if (Schema::hasTable('ai_guide_question_assignments')) {
+                DB::table('ai_guide_question_assignments')
+                    ->where('assignable_id', $studioItem->id)
+                    ->whereIn('assignable_type', $assignableTypes)
+                    ->delete();
+            }
+
+            if (Schema::hasTable('ai_guide_option_assignments')) {
+                DB::table('ai_guide_option_assignments')
+                    ->where('assignable_id', $studioItem->id)
+                    ->whereIn('assignable_type', $assignableTypes)
+                    ->delete();
+            }
+
+            $studioItem->delete();
+        });
+
+        return Response::api(message: 'Studio Item deleted successfully.');
     }
 
     private function studioItemPayload(AiStudioItem $studioItem): array

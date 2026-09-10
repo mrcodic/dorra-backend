@@ -280,13 +280,14 @@
                                 </span>
 
                                 @can('ai-studio-items_update')
-                                    <button
-                                        type="button"
-                                        class="btn btn-sm btn-outline-primary quick-edit-studio-item"
-                                        data-id="{{ $studioItem->id }}"
-                                        title="Edit Studio Item"
-                                    >
+                                    <button type="button" class="btn btn-sm btn-outline-primary quick-edit-studio-item" data-id="{{ $studioItem->id }}" title="Edit Studio Item">
                                         <i data-feather="edit-2"></i>
+                                    </button>
+                                @endcan
+
+                                @can('ai-studio-items_delete')
+                                    <button type="button" class="btn btn-sm btn-outline-danger quick-delete-studio-item-card" data-id="{{ $studioItem->id }}" title="Delete Studio Item">
+                                        <i data-feather="trash-2"></i>
                                     </button>
                                 @endcan
                             </div>
@@ -671,13 +672,24 @@
                     </div>
                 </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <div class="modal-footer d-flex justify-content-between">
+                    <div>
+                        @can('ai-studio-items_delete')
+                            <button type="button" id="quick-delete-studio-item" class="btn btn-outline-danger d-none">
+                                <i data-feather="trash-2"></i>
+                                Delete Studio Item
+                            </button>
+                        @endcan
+                    </div>
 
-                    <button type="button" id="quick-save-studio-item" class="btn btn-primary">
-                        <i data-feather="save"></i>
-                        Save Studio Item
-                    </button>
+                    <div class="d-flex gap-1">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                        <button type="button" id="quick-save-studio-item" class="btn btn-primary">
+                            <i data-feather="save"></i>
+                            Save Studio Item
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -852,6 +864,7 @@
 
 <script src="https://unpkg.com/feather-icons"></script>
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     $(function () {
@@ -863,6 +876,9 @@
         const csrfToken = @json(csrf_token());
         const quickStudioStoreUrl = @json(route('ai-categories.studio-items.quick-store'));
         const quickStudioUpdateUrlTemplate = @json(route('ai-categories.studio-items.quick-update', ['studioItem' => '__STUDIO_ITEM_ID__']));
+        const quickStudioDeleteUrlTemplate = @json(route('ai-categories.studio-items.quick-delete', ['studioItem' => '__STUDIO_ITEM_ID__']));
+        const canEditStudioItems = @json(auth()->user()?->can('ai-studio-items_update') ?? false);
+        const canDeleteStudioItems = @json(auth()->user()?->can('ai-studio-items_delete') ?? false);
 
         let studioItemData = @json($studioItemsPayload);
 
@@ -905,6 +921,7 @@
             $('#quick-studio-credits-cost').val(1);
             $('#quick-studio-sort-order').val(0);
             $('#quick-studio-is-active').prop('checked', true);
+            $('#quick-delete-studio-item').addClass('d-none');
         }
 
         function fillStudioItemModal(item) {
@@ -920,6 +937,10 @@
             $('#quick-studio-is-active').prop('checked', !!item.is_active);
             $('#quick-studio-prompt-instructions').val(item.settings?.prompt_instructions ?? '');
             $('#quick-studio-negative-rules').val(item.settings?.negative_rules ?? '');
+
+            if (canDeleteStudioItems) {
+                $('#quick-delete-studio-item').removeClass('d-none');
+            }
         }
 
         function buildStudioItemCard(item, selected = true) {
@@ -957,14 +978,17 @@
                                     ${statusText}
                                 </span>
 
-                                <button
-                                    type="button"
-                                    class="btn btn-sm btn-outline-primary quick-edit-studio-item"
-                                    data-id="${item.id}"
-                                    title="Edit Studio Item"
-                                >
-                                    <i data-feather="edit-2"></i>
-                                </button>
+                                ${canEditStudioItems ? `
+                                    <button type="button" class="btn btn-sm btn-outline-primary quick-edit-studio-item" data-id="${item.id}" title="Edit Studio Item">
+                                        <i data-feather="edit-2"></i>
+                                    </button>
+                                ` : ''}
+
+                                ${canDeleteStudioItems ? `
+                                    <button type="button" class="btn btn-sm btn-outline-danger quick-delete-studio-item-card" data-id="${item.id}" title="Delete Studio Item">
+                                        <i data-feather="trash-2"></i>
+                                    </button>
+                                ` : ''}
                             </div>
                         </div>
 
@@ -1027,6 +1051,81 @@
 
             fillStudioItemModal(item);
             bootstrap.Modal.getOrCreateInstance(document.getElementById('quick-studio-item-modal')).show();
+        });
+
+        function removeStudioItemCard(id) {
+            delete studioItemData[id];
+            $(`.studio-item-column[data-studio-item-id="${id}"]`).remove();
+
+            if (!$('#studio-items-container .studio-item-column').length) {
+                $('#studio-items-container').html(`
+                    <div id="no-studio-items-alert" class="col-12">
+                        <div class="alert alert-warning mb-0">
+                            No Studio Items found. Use “Add Studio Item”.
+                        </div>
+                    </div>
+                `);
+            }
+        }
+
+        function deleteStudioItem(id) {
+            const item = studioItemData[id];
+
+            if (!item) {
+                toast('Studio Item data could not be loaded.');
+                return;
+            }
+
+            Swal.fire({
+                title: 'Delete Studio Item?',
+                html: `This will delete <strong>${escapeHtml(item.name ?? item.key ?? 'this Studio Item')}</strong> globally and remove it from all AI Products.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it',
+                cancelButtonText: 'Cancel',
+                customClass: {
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-outline-secondary ms-1'
+                },
+                buttonsStyling: false
+            }).then(result => {
+                if (!result.isConfirmed) return;
+
+                const url = quickStudioDeleteUrlTemplate.replace('__STUDIO_ITEM_ID__', id);
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        _method: 'DELETE',
+                        _token: csrfToken
+                    },
+                    success: function (response) {
+                        const modalElement = document.getElementById('quick-studio-item-modal');
+                        const modal = bootstrap.Modal.getInstance(modalElement);
+
+                        if (modal) modal.hide();
+
+                        removeStudioItemCard(id);
+                        resetStudioItemModal();
+                        feather.replace();
+                        toast(response.message ?? 'Studio Item deleted successfully.', false);
+                    },
+                    error: function (xhr) {
+                        const response = xhr.responseJSON ?? {};
+                        toast(response.message ?? 'Unable to delete Studio Item.');
+                    }
+                });
+            });
+        }
+
+        $(document).on('click', '.quick-delete-studio-item-card', function () {
+            deleteStudioItem(Number($(this).data('id')));
+        });
+
+        $('#quick-delete-studio-item').on('click', function () {
+            const id = Number($('#quick-studio-item-id').val() || 0);
+            if (id) deleteStudioItem(id);
         });
 
         $('#quick-save-studio-item').on('click', function () {
