@@ -15,9 +15,9 @@ class BundleController extends Controller
     {
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $bundles = $this->bundleService->getAll();
+        $bundles = $this->bundleService->getAll(paginate: $request->get('paginate',false));
         $bundleResourceCollection = $bundles instanceof LengthAwarePaginator ?
             BundleResource::collection($bundles)->response()->getData()
             : BundleResource::collection($bundles);
