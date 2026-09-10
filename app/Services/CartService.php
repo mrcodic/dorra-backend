@@ -305,6 +305,9 @@ class CartService extends BaseService
                 'cart' => ['Item not found in cart.'],
             ]);
         }
+        if ($item->bundle_group_key) {
+            return $this->deleteBundleGroupFromCart($cart, $item->bundle_group_key);
+        }
         $message = $this->handleTransaction(function () use ($item, $cart) {
             if ($cart->items()->count() == 1) {
                 $cart->update([
@@ -341,7 +344,11 @@ class CartService extends BaseService
                 'cart' => [__('discount.cart_not_found')],
             ]);
         }
-
+        if ($cart->items()->whereNotNull('bundle_id')->exists()) {
+            throw ValidationException::withMessages([
+                'code' => ['Cannot apply discount code while cart has bundle items.'],
+            ]);
+        }
         $items = $cart->items;
 
         $hasOffer = $items->contains(
@@ -527,6 +534,11 @@ class CartService extends BaseService
     {
         $message =  __('messages.request_completed_successfully');
         $cartItem = $this->cartItemRepository->find($id);
+        if ($cartItem->bundle_group_key) {
+            throw ValidationException::withMessages([
+                'item' => ['Please remove the bundle and add it again.'],
+            ]);
+        }
         if ($cartItem->cartable->has_custom_prices) {
             $productPrice = $this->productPriceRepository->query()->find($request->product_price_id);
             $updated = $cartItem->update(['product_price' => $productPrice->price,
@@ -566,7 +578,11 @@ class CartService extends BaseService
         $cartItem = $this->cartItemRepository->query()
             ->whereKey($itemId)
             ->firstOrFail();
-
+        if ($cartItem->bundle_group_key) {
+            throw ValidationException::withMessages([
+                'item' => ['Please remove the bundle and add it again.'],
+            ]);
+        }
 
         $product = $cartItem->cartable;
         $priceDetails = $this->calculatePriceDetails($validatedData, $product, price: $cartItem->product_price);
@@ -662,4 +678,21 @@ class CartService extends BaseService
 
             return $existingSpecs === $newSpecs;
         });
-    }}
+    }
+    private function deleteBundleGroupFromCart($cart, string $bundleGroupKey): string
+    {
+        return $this->handleTransaction(function () use ($cart, $bundleGroupKey) {
+            $cart->items()
+                ->where('bundle_group_key', $bundleGroupKey)
+                ->delete();
+
+            $cart->update([
+                'discount_code_id' => null,
+                'discount_amount' => 0,
+                'price' => $cart->items()->sum('sub_total'),
+            ]);
+
+            return 'Bundle removed from cart successfully.';
+        });
+    }
+}

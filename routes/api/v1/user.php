@@ -163,6 +163,8 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
 
     Route::get('bundles/entry-popup', [BundleController::class, 'entryPopup']);
     Route::resource('bundles', BundleController::class)->only(['index', 'show']);
+    Route::post('carts/bundles', [BundleController::class,'addBundleToCart']);
+
 
     Route::middleware('auth:sanctum')->group(function () {
 

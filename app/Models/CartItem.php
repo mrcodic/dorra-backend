@@ -27,7 +27,12 @@ class CartItem extends Model
         'color',
         'type',
         'discount_code_id',
-        'discount_amount'
+        'discount_amount',
+        'bundle_id',
+        'bundle_item_id',
+        'bundle_group_key',
+        'bundle_role',
+
     ];
     protected $table = 'cart_items';
     protected $appends = ['sub_total_after_offer', 'offer_amount'];

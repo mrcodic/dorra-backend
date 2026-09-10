@@ -16,7 +16,7 @@ class BundleResource extends JsonResource
             'description' => $this->description,
 
             'status' => $this->status?->value ?? $this->status,
-            'repeat_type' => $this->repeat_type?->value ?? $this->repeat_type,
+//            'repeat_type' => $this->repeat_type?->value ?? $this->repeat_type,
             'image_url' => $this->image_url,
             'display_bundle_on_visit' => (bool) $this->display_bundle_on_visit,
 

@@ -498,19 +498,19 @@
     {{-- ============================================================= --}}
     {{-- BEHAVIOR                                                      --}}
     {{-- ============================================================= --}}
-    <h6 class="mb-1">3. Bundle Behavior</h6>
+{{--    <h6 class="mb-1">3. Bundle Behavior</h6>--}}
 
-    <div class="row mb-2">
-        <div class="col-md-6">
-            <label class="label-text mb-1">Bundle Usage</label>
-            <select
-                name="repeat_type"
-                class="form-select bundle-select2"
-            >
-                <option value="once">Apply Once</option>
-                <option value="repeat">Repeat Based On Quantity</option>
-            </select>
-        </div>
-    </div>
+{{--    <div class="row mb-2">--}}
+{{--        <div class="col-md-6">--}}
+{{--            <label class="label-text mb-1">Bundle Usage</label>--}}
+{{--            <select--}}
+{{--                name="repeat_type"--}}
+{{--                class="form-select bundle-select2"--}}
+{{--            >--}}
+{{--                <option value="once">Apply Once</option>--}}
+{{--                <option value="repeat">Repeat Based On Quantity</option>--}}
+{{--            </select>--}}
+{{--        </div>--}}
+{{--    </div>--}}
 
 </div>
