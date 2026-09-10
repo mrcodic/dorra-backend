@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\User\Cart;
+namespace App\Http\Requests\Cart;
 
 use App\Http\Requests\Base\BaseRequest;
 use App\Models\Bundle;
