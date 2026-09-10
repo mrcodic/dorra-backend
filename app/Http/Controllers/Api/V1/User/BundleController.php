@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1\User;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\User\Cart\StoreBundleCartRequest;
+use App\Http\Requests\Cart\StoreBundleCartRequest;
 use App\Http\Resources\Bundle\BundleResource;
 use App\Services\Bundle\BundleCartService;
 use App\Services\BundleService;
