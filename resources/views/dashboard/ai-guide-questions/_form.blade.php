@@ -453,6 +453,14 @@
                 $('.color-palette-section').show();
                 $('.palette-value').prop('disabled', false);
 
+                optionsContainer.children('.option-row').each(function () {
+                    const row = $(this);
+
+                    if (!row.find('.palette-color-row').length) {
+                        addPaletteColor(row, '#000000');
+                    }
+                });
+
                 updateAllPaletteValues();
 
                 return;
@@ -486,7 +494,7 @@
 
                     <div class="col-md-11">
                         <div class="row option-label-fields">
-                            <div class="col-md-6">
+                            <div class="col-md-6 mb-2">
                                 <label class="form-label">Label English *</label>
 
                                 <input
@@ -594,6 +602,10 @@
                 newRow.find('.normal-option-fields').hide();
                 newRow.find('.color-palette-section').show();
                 newRow.find('.palette-value').prop('disabled', false);
+
+                if (!newRow.find('.palette-color-row').length) {
+                    addPaletteColor(newRow, '#000000');
+                }
             } else {
                 newRow.find('.option-label-fields').show();
                 newRow.find('.normal-option-fields').show();
@@ -945,4 +957,5 @@
         toggleColorPaletteMode();
     });
 </script>
+
 
