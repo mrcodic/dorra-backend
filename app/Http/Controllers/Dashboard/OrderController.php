@@ -74,7 +74,7 @@ class OrderController extends DashboardController
                 'orderItems.specs',
                 'orderItems.itemable.media',
                 'orderItems.orderable',
-                'orderItems.orderable.category',
+                'orderItems.orderable',
             ] ,
             'show' => [
                 'orderItems.itemable',
@@ -84,7 +84,7 @@ class OrderController extends DashboardController
                 'orderItems.specs',
                 'orderItems.itemable.media',
                 'orderItems.orderable',
-                'orderItems.orderable.category',],
+                'orderItems.orderable',],
         ];
 
     }
