@@ -225,4 +225,5 @@ class Bundle extends Model
             }
         });
     }
+
 }
