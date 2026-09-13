@@ -79,7 +79,12 @@ class OrderService extends BaseService
             ->when(request('search'), function ($query) {
                 $query->where('order_number', 'LIKE', '%' . request('search') . '%');
             })
-            ->with(['orderItems.product', 'paymentMethod'])
+            ->with([
+                'orderItems.product',
+                'orderItems.bundle',
+                'orderItems.bundleItem',
+                'paymentMethod',
+            ])
             ->latest()
             ->paginate();
     }
@@ -92,7 +97,13 @@ class OrderService extends BaseService
             ->when(request('status'), function ($query) {
                 $query->where('status', request('status'));
             })
-            ->with(['orderItems', 'orderItems.specs', 'orderItems.itemable.media'])
+            ->with([
+                'orderItems',
+                'orderItems.specs',
+                'orderItems.itemable.media',
+                'orderItems.bundle',
+                'orderItems.bundleItem',
+            ])
             ->firstOrFail();
     }
 
@@ -694,13 +705,25 @@ class OrderService extends BaseService
         }
         $subTotal = round(
             $cart->items->sum(function ($item) {
-                $hasOffer = (float)optional($item->cartable?->lastOffer)->getRawOriginal('value') > 0;
+                $isBundleItem = ! empty($item->bundle_group_key) || ! empty($item->bundle_id);
 
-                if ($hasOffer) {
-                    return (float)$item->sub_total_after_offer;
+                if ($isBundleItem) {
+                    return max(
+                        0,
+                        (float) $item->sub_total - (float) ($item->discount_amount ?? 0)
+                    );
                 }
 
-                return max(0, (float)$item->sub_total - (float)($item->discount_amount ?? 0));
+                $hasOffer = (float) optional($item->cartable?->lastOffer)->getRawOriginal('value') > 0;
+
+                if ($hasOffer) {
+                    return (float) $item->sub_total_after_offer;
+                }
+
+                return max(
+                    0,
+                    (float) $item->sub_total - (float) ($item->discount_amount ?? 0)
+                );
             }),
             2
         );
@@ -830,48 +853,66 @@ class OrderService extends BaseService
         // order items
         $orderItems = $order->orderItems()->createMany(
             $cart->items->map(function ($item) use ($cart) {
-                $hasOffer = $item->hasActiveOffer();
-                $hasDiscount = !$hasOffer && $item->discount_code_id !== null;
+                $isBundleItem = ! empty($item->bundle_group_key) || ! empty($item->bundle_id);
 
-                if ($hasOffer) {
-                    $subTotal = (float)$item->sub_total;
+                if ($isBundleItem) {
+                    $subTotal = (float) $item->sub_total;
                     $discountCodeId = null;
-                    $cart->load('items.discountCode');
-
-                    $cartHasDiscount = $cart->discountCode()->exists()
-                        || $cart->items->contains(fn($item) => $item->discountCode()->exists());
-
-                    $discountAmount = $cartHasDiscount ? null : $item->offerAmount;
-                    Log::info("offer", [$discountAmount]);
-                } elseif ($hasDiscount) {
-                    $subTotal = max(0, (float)$item->sub_total);
-                    $discountCodeId = $item->discount_code_id;
-                    $discountAmount = (float)($item->discount_amount ?? 0);
-
+                    $discountAmount = (float) ($item->discount_amount ?? 0);
                 } else {
-                    $subTotal = (float)$item->sub_total;
-                    $discountCodeId = null;
-                    $discountAmount = 0;
+                    $hasOffer = $item->hasActiveOffer();
+                    $hasDiscount = ! $hasOffer && $item->discount_code_id !== null;
+
+                    if ($hasOffer) {
+                        $subTotal = (float) $item->sub_total;
+                        $discountCodeId = null;
+
+                        $cart->loadMissing('items.discountCode');
+
+                        $cartHasDiscount = $cart->discountCode()->exists()
+                            || $cart->items->contains(fn ($item) => $item->discountCode()->exists());
+
+                        $discountAmount = $cartHasDiscount ? null : $item->offerAmount;
+
+                        Log::info('offer', [$discountAmount]);
+                    } elseif ($hasDiscount) {
+                        $subTotal = max(0, (float) $item->sub_total);
+                        $discountCodeId = $item->discount_code_id;
+                        $discountAmount = (float) ($item->discount_amount ?? 0);
+                    } else {
+                        $subTotal = (float) $item->sub_total;
+                        $discountCodeId = null;
+                        $discountAmount = 0;
+                    }
                 }
 
                 return [
                     'orderable_id' => $item->cartable_id,
                     'orderable_type' => $item->cartable_type,
+
                     'quantity' => $item->quantity,
                     'product_price' => $item->product_price,
+                    'product_price_id' => $item->product_price_id,
+
                     'itemable_id' => $item->itemable_id,
                     'itemable_type' => $item->itemable_type,
+
                     'specs_price' => $item->specs_price,
                     'sub_total' => $subTotal,
+
                     'discount_code_id' => $discountCodeId,
                     'discount_amount' => $discountAmount,
-                    'product_price_id' => $item->product_price_id,
+
                     'color' => $item->color,
                     'type' => $item->type,
+
+                    'bundle_id' => $item->bundle_id,
+                    'bundle_item_id' => $item->bundle_item_id,
+                    'bundle_group_key' => $item->bundle_group_key,
+                    'bundle_role' => $item->bundle_role,
                 ];
             })->toArray()
         );
-
         // specs
         $cartItems = $cart->items->values();
         $orderItems->values()->each(function ($orderItem, $i) use ($cartItems) {

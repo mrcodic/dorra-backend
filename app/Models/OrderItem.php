@@ -32,6 +32,10 @@ class OrderItem extends Model implements HasMedia
         'type',
         'discount_code_id',
         'discount_amount',
+        'bundle_id',
+        'bundle_item_id',
+        'bundle_group_key',
+        'bundle_role',
     ];
     protected $casts = [
         'type' => TypeEnum::class
@@ -82,5 +86,14 @@ class OrderItem extends Model implements HasMedia
     public function discountCode(): BelongsTo
     {
         return $this->belongsTo(DiscountCode::class);
+    }
+    public function bundle(): BelongsTo
+    {
+        return $this->belongsTo(Bundle::class, 'bundle_id');
+    }
+
+    public function bundleItem(): BelongsTo
+    {
+        return $this->belongsTo(BundleItem::class, 'bundle_item_id');
     }
 }
