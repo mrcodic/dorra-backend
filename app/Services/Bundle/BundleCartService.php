@@ -35,11 +35,15 @@ class BundleCartService
         return DB::transaction(function () use ($request) {
             $cart = $this->cartService->resolveUserCart();
 
+            if (! $cart) {
+                throw ValidationException::withMessages([
+                    'cart' => ['Cart could not be resolved.'],
+                ]);
+            }
+
             $this->ensureCartCanAcceptBundle($cart);
 
             $bundle = $this->getValidBundle((int) $request->bundle_id);
-
-//            $applications = $this->resolveApplications($bundle, $request);
 
             $payloadItems = collect($request->input('items', []))
                 ->keyBy(fn ($item) => (int) Arr::get($item, 'bundle_item_id'));
@@ -50,6 +54,12 @@ class BundleCartService
                 ->merge($bundle->rewards)
                 ->filter()
                 ->values();
+
+            $this->ensureBundleItemsAreNotAlreadyInCart(
+                cart: $cart,
+                bundle: $bundle,
+                bundleItems: $bundleItems
+            );
 
             foreach ($bundleItems as $bundleItem) {
                 $config = $payloadItems->get($bundleItem->id);
@@ -74,8 +84,7 @@ class BundleCartService
                     config: $config,
                     cartable: $cartable,
                     itemable: $itemable,
-                    bundleItem: $bundleItem,
-//                    applications: $applications
+                    bundleItem: $bundleItem
                 );
 
                 $discountAmount = $this->isReward($bundleItem)
@@ -129,6 +138,8 @@ class BundleCartService
             ]);
 
             return $cart->fresh([
+                'items.bundle',
+                'items.bundleItem',
                 'items.itemable',
                 'items.cartable',
                 'items.specs',
@@ -137,6 +148,48 @@ class BundleCartService
         });
     }
 
+    private function ensureBundleItemsAreNotAlreadyInCart(
+        Cart $cart,
+        Bundle $bundle,
+        $bundleItems
+    ): void {
+        $sameBundleAlreadyExists = $cart->items()
+            ->where('bundle_id', $bundle->id)
+            ->whereNotNull('bundle_group_key')
+            ->exists();
+
+        if ($sameBundleAlreadyExists) {
+            throw ValidationException::withMessages([
+                'bundle_id' => ['This bundle is already added to cart.'],
+            ]);
+        }
+
+        foreach ($bundleItems as $bundleItem) {
+            $cartable = $bundleItem->itemable;
+
+            if (! $cartable instanceof Product && ! $cartable instanceof Category) {
+                continue;
+            }
+
+            $cartableTypes = array_unique([
+                get_class($cartable),
+                $cartable->getMorphClass(),
+            ]);
+
+            $alreadyInCart = $cart->items()
+                ->whereIn('cartable_type', $cartableTypes)
+                ->where('cartable_id', $cartable->getKey())
+                ->exists();
+
+            if ($alreadyInCart) {
+                throw ValidationException::withMessages([
+                    'bundle_id' => [
+                        "Item [{$cartable->name}] is already in cart. Remove it first before adding this bundle.",
+                    ],
+                ]);
+            }
+        }
+    }
     private function getValidBundle(int $bundleId): Bundle
     {
         $bundle = Bundle::query()
