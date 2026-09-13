@@ -289,6 +289,19 @@ class Product extends Model implements HasMedia
         return $this->getMedia('product_extra_images')
             ->merge($this->getMedia('products'));
     }
+    public function getHasSpecsAttribute(): bool
+    {
+        if ($this->relationLoaded('specifications')) {
+            return $this->specifications->isNotEmpty();
+        }
 
+        return $this->specifications()->exists();
+    }
+
+    public function getRequireCustomizeDesignAttribute(): bool
+    {
+        return (bool) $this->show_customize_design_btn
+            && ! (bool) $this->show_add_cart_btn;
+    }
 
 }
