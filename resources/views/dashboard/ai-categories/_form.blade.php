@@ -59,6 +59,7 @@
 @endphp
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
 
 <style>
     .ai-config-card {
@@ -73,6 +74,25 @@
 
     .question-options-panel {
         background: #fafafa;
+    }
+
+    #quick-studio-item-modal .select2-container {
+        width: 100% !important;
+    }
+
+    #quick-studio-item-modal .select2-selection--multiple {
+        min-height: 38px;
+        border: 1px solid #d8d6de;
+        border-radius: .357rem;
+        padding: 2px 6px;
+    }
+
+    #quick-studio-item-modal .select2-selection--multiple .select2-selection__choice {
+        margin-top: 5px;
+    }
+
+    .select2-container--open {
+        z-index: 9999;
     }
 </style>
 
@@ -887,30 +907,45 @@
 <script src="https://unpkg.com/feather-icons"></script>
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-    function initStudioQuestionsSelect2() {
-        const select = $('#quick-studio-question-ids');
-
-        if (!select.length) return;
-
-        if (select.hasClass('select2-hidden-accessible')) {
-            select.select2('destroy');
-        }
-
-        select.select2({
-            width: '100%',
-            placeholder: 'Select Questions',
-            allowClear: true,
-            closeOnSelect: false,
-            dropdownParent: $('#quick-studio-item-modal')
-        });
-    }
-    $('#quick-studio-item-modal').on('shown.bs.modal', function () {
-        initStudioQuestionsSelect2();
-    });
     $(function () {
         feather.replace();
+
+        function initStudioQuestionsSelect2() {
+            const select = $('#quick-studio-question-ids');
+
+            if (!select.length) return;
+
+            if (typeof $.fn.select2 !== 'function') {
+                console.error('Select2 is not loaded.');
+                return;
+            }
+
+            if (!select.hasClass('select2-hidden-accessible')) {
+                select.select2({
+                    width: '100%',
+                    placeholder: 'Select Questions',
+                    allowClear: true,
+                    closeOnSelect: false,
+                    dropdownParent: $('#quick-studio-item-modal')
+                });
+            }
+        }
+
+        $('#quick-studio-item-modal').on('shown.bs.modal', function () {
+            initStudioQuestionsSelect2();
+
+            const id = Number($('#quick-studio-item-id').val() || 0);
+            const selectedQuestionIds = id && studioItemData[id]
+                ? (studioItemData[id].question_ids ?? []).map(String)
+                : [];
+
+            $('#quick-studio-question-ids')
+                .val(selectedQuestionIds)
+                .trigger('change.select2');
+        });
 
         const singleSelect = @json(\App\Enums\Ai\AiGuideQuestionTypeEnum::SINGLE_SELECT->value);
         const multiSelect = @json(\App\Enums\Ai\AiGuideQuestionTypeEnum::MULTI_SELECT->value);
@@ -966,7 +1001,7 @@
             $('#quick-studio-sort-order').val(0);
             $('#quick-studio-is-active').prop('checked', true);
 
-            $('#quick-studio-question-ids').val([]).trigger('change');
+            $('#quick-studio-question-ids').val([]).trigger('change.select2');
 
             $('#quick-delete-studio-item').addClass('d-none');
         }
@@ -989,7 +1024,7 @@
 
             $('#quick-studio-question-ids')
                 .val((item.question_ids ?? []).map(String))
-                .trigger('change');
+                .trigger('change.select2');
 
             if (canDeleteStudioItems) {
                 $('#quick-delete-studio-item').removeClass('d-none');
@@ -2100,4 +2135,5 @@
         });
     });
 </script>
+
 
