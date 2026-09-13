@@ -241,16 +241,17 @@
 
                 <div class="row align-items-end">
 
-                    <div class="col-md-11 normal-option-fields">
-                        <div class="row">
+                    <div class="col-md-11">
+                        <div class="row option-label-fields">
                             <div class="col-md-6">
-                                <label class="form-label">Label English</label>
+                                <label class="form-label">Label English *</label>
 
                                 <input
                                     type="text"
                                     name="options[{{ $index }}][label][en]"
                                     value="{{ data_get($option, 'label.en', '') }}"
                                     class="form-control option-label-en"
+                                    placeholder="e.g. Warm Sunset"
                                 >
                             </div>
 
@@ -263,10 +264,13 @@
                                     value="{{ data_get($option, 'label.ar', '') }}"
                                     class="form-control option-label-ar"
                                     dir="rtl"
+                                    placeholder="مثال: غروب دافئ"
                                 >
                             </div>
+                        </div>
 
-                            <div class="col-md-6 mt-1">
+                        <div class="row mt-1 normal-option-fields">
+                            <div class="col-md-6">
                                 <label class="form-label">Prompt Value English</label>
 
                                 <textarea
@@ -276,7 +280,7 @@
                                 >{{ data_get($option, 'prompt_value.en', '') }}</textarea>
                             </div>
 
-                            <div class="col-md-6 mt-1">
+                            <div class="col-md-6">
                                 <label class="form-label">Prompt Value Arabic</label>
 
                                 <textarea
@@ -323,7 +327,7 @@
                                     </label>
 
                                     <small class="text-muted d-block">
-                                        Add the colors displayed to the user.
+                                        Write the palette label above, then add the colors displayed to the user.
                                     </small>
                                 </div>
 
@@ -444,6 +448,7 @@
                     addOption();
                 }
 
+                $('.option-label-fields').show();
                 $('.normal-option-fields').hide();
                 $('.color-palette-section').show();
                 $('.palette-value').prop('disabled', false);
@@ -455,6 +460,7 @@
 
             typeSelect.find('option').prop('disabled', false);
 
+            $('.option-label-fields').show();
             $('.normal-option-fields').show();
             $('.color-palette-section').hide();
 
@@ -478,15 +484,16 @@
             >
                 <div class="row align-items-end">
 
-                    <div class="col-md-11 normal-option-fields">
-                        <div class="row">
+                    <div class="col-md-11">
+                        <div class="row option-label-fields">
                             <div class="col-md-6">
-                                <label class="form-label">Label English</label>
+                                <label class="form-label">Label English *</label>
 
                                 <input
                                     type="text"
                                     name="options[${index}][label][en]"
                                     class="form-control option-label-en"
+                                    placeholder="e.g. Warm Sunset"
                                 >
                             </div>
 
@@ -498,10 +505,13 @@
                                     name="options[${index}][label][ar]"
                                     class="form-control option-label-ar"
                                     dir="rtl"
+                                    placeholder="مثال: غروب دافئ"
                                 >
                             </div>
+                        </div>
 
-                            <div class="col-md-6 mt-1">
+                        <div class="row mt-1 normal-option-fields">
+                            <div class="col-md-6">
                                 <label class="form-label">Prompt Value English</label>
 
                                 <textarea
@@ -511,7 +521,7 @@
                                 ></textarea>
                             </div>
 
-                            <div class="col-md-6 mt-1">
+                            <div class="col-md-6">
                                 <label class="form-label">Prompt Value Arabic</label>
 
                                 <textarea
@@ -556,7 +566,7 @@
                                     <label class="form-label mb-0">Color Palette</label>
 
                                     <small class="text-muted d-block">
-                                        Add the colors displayed to the user.
+                                        Write the palette label above, then add the colors displayed to the user.
                                     </small>
                                 </div>
 
@@ -580,10 +590,12 @@
             const newRow = optionsContainer.children('.option-row').last();
 
             if (colorPaletteToggle.is(':checked')) {
+                newRow.find('.option-label-fields').show();
                 newRow.find('.normal-option-fields').hide();
                 newRow.find('.color-palette-section').show();
                 newRow.find('.palette-value').prop('disabled', false);
             } else {
+                newRow.find('.option-label-fields').show();
                 newRow.find('.normal-option-fields').show();
                 newRow.find('.color-palette-section').hide();
                 newRow.find('.palette-value').prop('disabled', true);
@@ -670,31 +682,16 @@
                 }
             });
 
-            const optionNumber = optionRow.index() + 1;
             const prompt = colors.length
                 ? `Use this exact color palette: ${colors.join(', ')}`
                 : '';
 
             /*
-             * These fields remain in the form, but are hidden while
-             * palette mode is enabled. The backend can also generate
-             * the same values as a fallback.
+             * Admin writes the palette label manually.
+             * Only the AI prompt value is generated from selected colors.
              */
-            optionRow
-                .find('.option-label-en')
-                .val(`Color Palette ${optionNumber}`);
-
-            optionRow
-                .find('.option-label-ar')
-                .val(`لوحة ألوان ${optionNumber}`);
-
-            optionRow
-                .find('.option-prompt-en')
-                .val(prompt);
-
-            optionRow
-                .find('.option-prompt-ar')
-                .val(prompt);
+            optionRow.find('.option-prompt-en').val(prompt);
+            optionRow.find('.option-prompt-ar').val(prompt);
         }
 
         function updateAllPaletteValues() {
@@ -876,26 +873,33 @@
                     updateAllPaletteValues();
 
                     let hasEmptyPalette = false;
+                    let hasEmptyPaletteLabel = false;
 
                     $('.option-row').each(function () {
-                        const validColors = $(this)
+                        const row = $(this);
+                        const validColors = row
                             .find('.palette-value')
                             .filter(function () {
-                                return /^#[0-9A-Fa-f]{6}$/.test(
-                                    $(this).val().trim()
-                                );
+                                return /^#[0-9A-Fa-f]{6}$/.test($(this).val().trim());
                             });
+
+                        if (!row.find('.option-label-en').val().trim()) {
+                            hasEmptyPaletteLabel = true;
+                            row.find('.option-label-en').addClass('is-invalid');
+                        }
 
                         if (!validColors.length) {
                             hasEmptyPalette = true;
                         }
                     });
 
-                    if (hasEmptyPalette) {
-                        showToast(
-                            'Each color palette option must contain at least one color.'
-                        );
+                    if (hasEmptyPaletteLabel) {
+                        showToast('Each color palette option must have an English label.');
+                        return;
+                    }
 
+                    if (hasEmptyPalette) {
+                        showToast('Each color palette option must contain at least one color.');
                         return;
                     }
                 }
@@ -941,3 +945,4 @@
         toggleColorPaletteMode();
     });
 </script>
+
