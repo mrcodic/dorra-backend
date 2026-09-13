@@ -4,8 +4,8 @@
 @section('main-page', 'AI Products')
 
 @section('vendor-style')
+    <link rel="stylesheet" href="{{ asset('admin/vendors/css/forms/select/select2.min.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
 @endsection
 
 @section('content')
@@ -36,11 +36,58 @@
     </div>
 @endsection
 
+@section('vendor-script')
+    <script src="{{ asset('admin/vendors/js/forms/select/select2.full.min.js') }}"></script>
+@endsection
+
 @section('page-script')
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     @include('dashboard.ai-categories._submit')
+
+    <script>
+        $(function () {
+            const modal = $('#quick-studio-item-modal');
+            const questionsSelect = $('#quick-studio-question-ids');
+
+            function initStudioQuestionsSelect2() {
+                if (!questionsSelect.length) return;
+
+                if (typeof $.fn.select2 !== 'function') {
+                    console.error('Select2 is NOT loaded');
+                    return;
+                }
+
+                if (questionsSelect.hasClass('select2-hidden-accessible')) {
+                    questionsSelect.select2('destroy');
+                }
+
+                questionsSelect.select2({
+                    width: '100%',
+                    placeholder: 'Select Questions',
+                    allowClear: true,
+                    closeOnSelect: false,
+                    dropdownParent: modal
+                });
+            }
+
+            modal.on('shown.bs.modal', function () {
+                initStudioQuestionsSelect2();
+
+                const id = Number($('#quick-studio-item-id').val() || 0);
+
+                if (
+                    id &&
+                    typeof studioItemData !== 'undefined' &&
+                    studioItemData[id]
+                ) {
+                    questionsSelect
+                        .val((studioItemData[id].question_ids ?? []).map(String))
+                        .trigger('change');
+                }
+            });
+        });
+    </script>
 @endsection

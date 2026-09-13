@@ -911,40 +911,6 @@
     $(function () {
         feather.replace();
 
-        function initStudioQuestionsSelect2() {
-            const select = $('#quick-studio-question-ids');
-
-            if (!select.length) return;
-
-            if (typeof $.fn.select2 !== 'function') {
-                console.error('Select2 is not loaded.');
-                return;
-            }
-
-            if (!select.hasClass('select2-hidden-accessible')) {
-                select.select2({
-                    width: '100%',
-                    placeholder: 'Select Questions',
-                    allowClear: true,
-                    closeOnSelect: false,
-                    dropdownParent: $('#quick-studio-item-modal')
-                });
-            }
-        }
-
-        $('#quick-studio-item-modal').on('shown.bs.modal', function () {
-            initStudioQuestionsSelect2();
-
-            const id = Number($('#quick-studio-item-id').val() || 0);
-            const selectedQuestionIds = id && studioItemData[id]
-                ? (studioItemData[id].question_ids ?? []).map(String)
-                : [];
-
-            $('#quick-studio-question-ids')
-                .val(selectedQuestionIds)
-                .trigger('change.select2');
-        });
-
         const singleSelect = @json(\App\Enums\Ai\AiGuideQuestionTypeEnum::SINGLE_SELECT->value);
         const multiSelect = @json(\App\Enums\Ai\AiGuideQuestionTypeEnum::MULTI_SELECT->value);
         const quickStoreUrl = @json(route('ai-categories.questions.quick-store'));
