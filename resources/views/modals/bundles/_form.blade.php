@@ -508,22 +508,22 @@
                     </div>
                 </div>
 
-                <div class="form-group mb-2">
-                    <label class="label-text mb-1">
-                        Maximum Discount Amount
-                        <span class="text-muted">(optional)</span>
-                    </label>
-                    <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        name="rewards[__INDEX__][max_discount_amount]"
-                        class="form-control"
-                        placeholder="Leave empty for no maximum"
-                    >
-                </div>
+{{--                <div class="form-group mb-2">--}}
+{{--                    <label class="label-text mb-1">--}}
+{{--                        Maximum Discount Amount--}}
+{{--                        <span class="text-muted">(optional)</span>--}}
+{{--                    </label>--}}
+{{--                    <input--}}
+{{--                        type="number"--}}
+{{--                        min="0"--}}
+{{--                        step="0.01"--}}
+{{--                        name="rewards[__INDEX__][max_discount_amount]"--}}
+{{--                        class="form-control"--}}
+{{--                        placeholder="Leave empty for no maximum"--}}
+{{--                    >--}}
+{{--                </div>--}}
 
-                <div class="bundle-reward-flow alert alert-light border mb-0 d-none"></div>
+{{--                <div class="bundle-reward-flow alert alert-light border mb-0 d-none"></div>--}}
             </div>
         </div>
     </template>
