@@ -23,7 +23,6 @@ class StoreBundleRequest extends FormRequest
             'description.ar' => ['nullable', 'string', 'max:2000'],
 
             'status' => ['required', 'in:draft,active'],
-            'repeat_type' => ['required', 'in:once,repeat'],
             'display_bundle_on_visit' => ['nullable', 'boolean'],
 
             'start_at' => ['nullable', 'date'],
