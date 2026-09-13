@@ -24,37 +24,34 @@ class OrderItemResource extends JsonResource
             ? Str::plural(Str::lower(class_basename($itemable)))
             : null;
 
-        $discountAmount = (float) ($this->discount_amount ?? 0);
         $subTotal = (float) ($this->sub_total ?? 0);
+        $discountAmount = (float) ($this->discount_amount ?? 0);
+        $finalPrice = max(0, $subTotal - $discountAmount);
 
         $isBundleItem = ! empty($this->bundle_group_key) || ! empty($this->bundle_id);
 
         return [
             'id' => $this->id,
 
-            'product_name' => $orderable?->name,
+            'product_name' => $orderable?->name ?? $itemable?->name,
             'quantity' => $this->quantity,
             'color' => $this->color,
 
             'total_price' => $subTotal,
             'discount_amount' => $discountAmount,
-            'final_price' => max(0, $subTotal - $discountAmount),
+            'final_price' => $finalPrice,
 
             'is_bundle_item' => $isBundleItem,
-            'bundle_id' => $this->bundle_id,
-            'bundle_item_id' => $this->bundle_item_id,
-            'bundle_group_key' => $this->bundle_group_key,
-            'bundle_role' => $this->bundle_role,
-            'bundle_name' => $this->whenLoaded(
-                'bundle',
-                fn () => $this->bundle?->name
-            ),
+            'bundle' => $isBundleItem ? [
+                'id' => $this->bundle_id,
+                'item_id' => $this->bundle_item_id,
+                'group_key' => $this->bundle_group_key,
+                'role' => $this->bundle_role,
+                'name' => $this->bundle?->name,
+            ] : null,
 
             'discount' => [
-                'type' => $isBundleItem
-                    ? 'bundle'
-                    : ($this->discountCode ? 'discount_code' : null),
-
+                'type' => $this->discountType($isBundleItem, $discountAmount),
                 'id' => $isBundleItem ? null : $this->discountCode?->id,
                 'code' => $isBundleItem ? null : $this->discountCode?->code,
                 'value' => $discountAmount,
@@ -78,6 +75,23 @@ class OrderItemResource extends JsonResource
         ];
     }
 
+    private function discountType(bool $isBundleItem, float $discountAmount): ?string
+    {
+        if ($isBundleItem) {
+            return 'bundle';
+        }
+
+        if ($this->discountCode) {
+            return 'discount_code';
+        }
+
+        if ($discountAmount > 0) {
+            return 'offer';
+        }
+
+        return null;
+    }
+
     private function mockupDesignImage(): ?string
     {
         $itemable = $this->itemable;
@@ -95,7 +109,12 @@ class OrderItemResource extends JsonResource
         return match (true) {
             filled($orderItemPreview) && ! $isDesign => $orderItemPreview,
 
-            $isDesign && $itemable->linked_to_mockup =>
+            $isDesign && (bool) ($itemable->linked_to_mockup ?? false) =>
+            $itemable->getFirstMediaUrl('front-mockup-designs')
+                ?: $itemable->getFirstMediaUrl('none-mockup-designs')
+                ?: $itemable->getFirstMediaUrl('back-mockup-designs'),
+
+            $isDesign && (bool) ($itemable->mockup_id ?? false) =>
             $itemable->getFirstMediaUrl('front-mockup-designs')
                 ?: $itemable->getFirstMediaUrl('none-mockup-designs')
                 ?: $itemable->getFirstMediaUrl('back-mockup-designs'),
@@ -119,7 +138,7 @@ class OrderItemResource extends JsonResource
             return null;
         }
 
-        return $itemable?->approach === 'without_editor'
+        return $itemable->approach === 'without_editor'
             ? $itemable->getFirstMediaUrl($collectionName . '-preview')
             : $itemable->getFirstMediaUrl($collectionName);
     }
