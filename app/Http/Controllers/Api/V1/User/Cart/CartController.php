@@ -54,7 +54,7 @@ class CartController extends Controller
             'item_id' => [
                 'nullable',
                 'required_without:bundle_id',
-                'exists:items,id',
+                'exists:cart_items,id',
             ],
             'bundle_id' => [
                 'nullable',
