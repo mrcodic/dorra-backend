@@ -644,15 +644,22 @@
 
                         <div class="col-12 mb-1">
                             <label class="form-label">Attach Questions</label>
-                            <select id="quick-studio-question-ids" class="form-select" multiple size="8">
+
+                            <select
+                                id="quick-studio-question-ids"
+                                class="form-select"
+                                multiple
+                                style="width:100%"
+                            >
                                 @foreach($questions as $question)
                                     <option value="{{ $question->id }}">
                                         {{ $question->title }} — {{ $question->type->label() }}
                                     </option>
                                 @endforeach
                             </select>
+
                             <small class="text-muted">
-                                These questions are added when this Studio Item is selected. Product questions still remain and both sets are merged during generation.
+                                Select the questions attached to this Studio Item.
                             </small>
                         </div>
 
@@ -882,6 +889,26 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+    function initStudioQuestionsSelect2() {
+        const select = $('#quick-studio-question-ids');
+
+        if (!select.length) return;
+
+        if (select.hasClass('select2-hidden-accessible')) {
+            select.select2('destroy');
+        }
+
+        select.select2({
+            width: '100%',
+            placeholder: 'Select Questions',
+            allowClear: true,
+            closeOnSelect: false,
+            dropdownParent: $('#quick-studio-item-modal')
+        });
+    }
+    $('#quick-studio-item-modal').on('shown.bs.modal', function () {
+        initStudioQuestionsSelect2();
+    });
     $(function () {
         feather.replace();
 
@@ -931,35 +958,43 @@
         function resetStudioItemModal() {
             $('#quick-studio-item-id').val('');
             $('#quick-studio-item-modal-title').text('Add Studio Item');
+
             $('#quick-studio-name-en, #quick-studio-name-ar, #quick-studio-description-en, #quick-studio-description-ar, #quick-studio-prompt-instructions, #quick-studio-negative-rules').val('');
+
             $('#quick-studio-generation-type').val('');
             $('#quick-studio-credits-cost').val(1);
             $('#quick-studio-sort-order').val(0);
             $('#quick-studio-is-active').prop('checked', true);
+
             $('#quick-studio-question-ids').val([]).trigger('change');
+
             $('#quick-delete-studio-item').addClass('d-none');
         }
-
         function fillStudioItemModal(item) {
             $('#quick-studio-item-id').val(item.id);
             $('#quick-studio-item-modal-title').text(`Edit Studio Item: ${item.name ?? item.key ?? ''}`);
+
             $('#quick-studio-name-en').val(item.name_en ?? '');
             $('#quick-studio-name-ar').val(item.name_ar ?? '');
             $('#quick-studio-description-en').val(item.description_en ?? '');
             $('#quick-studio-description-ar').val(item.description_ar ?? '');
+
             $('#quick-studio-generation-type').val(item.generation_type ?? '');
             $('#quick-studio-credits-cost').val(Number(item.credits_cost ?? 1));
             $('#quick-studio-sort-order').val(Number(item.sort_order ?? 0));
             $('#quick-studio-is-active').prop('checked', !!item.is_active);
+
             $('#quick-studio-prompt-instructions').val(item.settings?.prompt_instructions ?? '');
             $('#quick-studio-negative-rules').val(item.settings?.negative_rules ?? '');
-            $('#quick-studio-question-ids').val((item.question_ids ?? []).map(String)).trigger('change');
+
+            $('#quick-studio-question-ids')
+                .val((item.question_ids ?? []).map(String))
+                .trigger('change');
 
             if (canDeleteStudioItems) {
                 $('#quick-delete-studio-item').removeClass('d-none');
             }
         }
-
         function buildStudioItemCard(item, selected = true) {
             const active = !!item.is_active;
             const checked = active && selected;
@@ -1167,22 +1202,26 @@
                     en: nameEn,
                     ar: $('#quick-studio-name-ar').val().trim()
                 },
+
                 description: {
                     en: $('#quick-studio-description-en').val().trim(),
                     ar: $('#quick-studio-description-ar').val().trim()
                 },
+
                 generation_type: generationType,
                 credits_cost: Number($('#quick-studio-credits-cost').val() || 0),
                 sort_order: Number($('#quick-studio-sort-order').val() || 0),
                 is_active: $('#quick-studio-is-active').is(':checked') ? 1 : 0,
-                question_ids: ($('#quick-studio-question-ids').val() ?? []).map(Number),
+
+                question_ids: $('#quick-studio-question-ids').val() ?? [],
+
                 settings: {
                     prompt_instructions: $('#quick-studio-prompt-instructions').val().trim(),
                     negative_rules: $('#quick-studio-negative-rules').val().trim()
                 },
+
                 _token: csrfToken
             };
-
             let url = quickStudioStoreUrl;
 
             if (id) {
