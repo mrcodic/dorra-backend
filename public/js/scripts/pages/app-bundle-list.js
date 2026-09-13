@@ -43,7 +43,9 @@ $.ajaxSetup({
                 data: 'trigger_data',
                 orderable: false,
                 render: function (data) {
-                    if (!data) return '-';
+                    if (!data) {
+                        return '-';
+                    }
 
                     const qty = data.price_label
                         ? data.price_label
@@ -58,11 +60,6 @@ $.ajaxSetup({
                 data: 'rewards_count',
                 orderable: false,
                 render: data => `${data || 0} item(s)`
-            },
-            {
-                data: 'repeat_type_data',
-                orderable: false,
-                render: data => data?.label ?? '-'
             },
             {
                 data: 'display_bundle_on_visit',
@@ -80,6 +77,7 @@ $.ajaxSetup({
                 orderable: false,
                 render: function (data) {
                     const label = data?.label ?? '-';
+
                     const cls = label === 'Active'
                         ? 'bg-light-success'
                         : label === 'Expired'
@@ -183,6 +181,7 @@ $.ajaxSetup({
         initSelect2($modal);
         bindTrigger($modal);
         bindRewards($modal);
+        bindBundleImageUpload($modal);
 
         if (!$modal.find('.bundle-reward-card').length) {
             addReward($modal);
@@ -198,9 +197,7 @@ $.ajaxSetup({
         $root
             .find('.bundle-select2')
             .filter(function () {
-                return !$(this)
-                    .closest('.bundle-reward-template')
-                    .length;
+                return !$(this).closest('.bundle-reward-template').length;
             })
             .each(function () {
                 const $select = $(this);
@@ -232,6 +229,127 @@ $.ajaxSetup({
 
     /*
      * =====================================================================
+     * Bundle image upload
+     * =====================================================================
+     */
+
+    function bindBundleImageUpload($modal) {
+        $modal.on('click', '.bundle-image-dropzone', function (e) {
+            if ($(e.target).hasClass('bundle-image-input')) {
+                return;
+            }
+
+            $(this).find('.bundle-image-input').trigger('click');
+        });
+
+        $modal.on('click', '.bundle-image-input', function (e) {
+            e.stopPropagation();
+        });
+
+        $modal.on('change', '.bundle-image-input', function () {
+            const file = this.files && this.files[0];
+
+            if (!file) {
+                resetBundleImagePreview($modal);
+                return;
+            }
+
+            updateBundleImagePreview(
+                $(this).closest('.bundle-image-dropzone'),
+                file
+            );
+        });
+
+        $modal.on('dragenter dragover', '.bundle-image-dropzone', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            $(this).addClass('border-primary');
+        });
+
+        $modal.on('dragleave dragend drop', '.bundle-image-dropzone', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            $(this).removeClass('border-primary');
+        });
+
+        $modal.on('drop', '.bundle-image-dropzone', function (e) {
+            const files = e.originalEvent?.dataTransfer?.files || [];
+
+            if (!files.length) {
+                return;
+            }
+
+            const file = files[0];
+
+            if (!isValidImageFile(file)) {
+                showErrorToast('Please upload a valid image file.');
+                return;
+            }
+
+            const input = $(this).find('.bundle-image-input')[0];
+
+            if (input) {
+                input.files = files;
+            }
+
+            updateBundleImagePreview($(this), file);
+        });
+    }
+
+    function updateBundleImagePreview($dropzone, file) {
+        if (!isValidImageFile(file)) {
+            showErrorToast('Please upload a valid image file.');
+            return;
+        }
+
+        const previewUrl = URL.createObjectURL(file);
+
+        $dropzone
+            .find('.bundle-image-preview')
+            .attr('src', previewUrl)
+            .removeClass('d-none');
+
+        $dropzone
+            .find('.bundle-image-placeholder')
+            .addClass('d-none');
+    }
+
+    function setBundleImagePreview($modal, imageUrl = null) {
+        const $dropzone = $modal.find('.bundle-image-dropzone');
+        const $preview = $dropzone.find('.bundle-image-preview');
+        const $placeholder = $dropzone.find('.bundle-image-placeholder');
+
+        $dropzone.find('.bundle-image-input').val('');
+
+        if (!imageUrl) {
+            $preview
+                .attr('src', '')
+                .addClass('d-none');
+
+            $placeholder.removeClass('d-none');
+
+            return;
+        }
+
+        $preview
+            .attr('src', imageUrl)
+            .removeClass('d-none');
+
+        $placeholder.addClass('d-none');
+    }
+
+    function resetBundleImagePreview($modal) {
+        setBundleImagePreview($modal, null);
+    }
+
+    function isValidImageFile(file) {
+        return Boolean(file && file.type && file.type.startsWith('image/'));
+    }
+
+    /*
+     * =====================================================================
      * Trigger
      * =====================================================================
      */
@@ -248,6 +366,7 @@ $.ajaxSetup({
             const $child = $modal.find('.bundle-trigger-child');
 
             resetTriggerPriceOptions($modal);
+
             loadProductsByCategory(parentId, $child).done(function () {
                 clearDuplicateRewardsForCurrentTrigger($modal);
             });
@@ -398,7 +517,7 @@ $.ajaxSetup({
         const index = nextRewardIndex($modal);
         const number = $modal.find('.bundle-reward-card').length + 1;
 
-        let html = $modal
+        const html = $modal
             .find('.bundle-reward-template')
             .html()
             .replaceAll('__INDEX__', String(index))
@@ -659,12 +778,15 @@ $.ajaxSetup({
 
         const $manualWrapper = $modal.find('.bundle-trigger-manual-quantity-wrapper');
         const $manualInputs = $manualWrapper.find('input, select');
+
         const $priceWrapper = $modal.find('.bundle-trigger-price-wrapper');
         const $priceSelect = $modal.find('.bundle-trigger-price-option');
         const $priceQuantityRule = $modal.find('.bundle-trigger-price-quantity-rule');
         const $priceQuantity = $modal.find('.bundle-trigger-price-quantity');
 
-        $priceSelect.empty().append(new Option('Select quantity', '', false, false));
+        $priceSelect
+            .empty()
+            .append(new Option('Select quantity', '', false, false));
 
         if (!prices.length) {
             $manualWrapper.removeClass('d-none');
@@ -734,6 +856,7 @@ $.ajaxSetup({
 
         syncTriggerSelectedPriceQuantity($modal);
     }
+
     function syncTriggerSelectedPriceQuantity($modal) {
         const $priceSelect = $modal.find('.bundle-trigger-price-option');
         const $priceQuantity = $modal.find('.bundle-trigger-price-quantity');
@@ -754,6 +877,7 @@ $.ajaxSetup({
             .val(quantity || '')
             .prop('disabled', !quantity);
     }
+
     function resetTriggerPriceOptions($modal) {
         applyTriggerPriceOptions($modal, null);
     }
@@ -769,11 +893,14 @@ $.ajaxSetup({
 
         const $manualWrapper = $card.find('.bundle-reward-manual-quantity-wrapper');
         const $manualQuantity = $card.find('.bundle-reward-quantity');
+
         const $priceWrapper = $card.find('.bundle-reward-price-wrapper');
         const $priceSelect = $card.find('.bundle-reward-price-option');
         const $priceQuantity = $card.find('.bundle-reward-price-quantity');
 
-        $priceSelect.empty().append(new Option('Select quantity', '', false, false));
+        $priceSelect
+            .empty()
+            .append(new Option('Select quantity', '', false, false));
 
         if (!prices.length) {
             $manualWrapper.removeClass('d-none');
@@ -853,7 +980,7 @@ $.ajaxSetup({
 
         const quantity = $priceSelect
             .find('option:selected')
-            .data('quantity');
+            .attr('data-quantity');
 
         $priceQuantity
             .val(quantity || '')
@@ -1052,6 +1179,7 @@ $.ajaxSetup({
 
     function applyDisplayBundleOnVisitAvailability($modal, currentBundleId = null) {
         const selectedBundleId = getDisplayBundleOnVisitBundleId();
+
         const $checkbox = $modal.find('.bundle-display-on-visit');
         const $warning = $modal.find('.bundle-display-on-visit-warning');
 
@@ -1086,7 +1214,9 @@ $.ajaxSetup({
             .row($(this).closest('tr'))
             .data();
 
-        if (!row) return;
+        if (!row) {
+            return;
+        }
 
         const $modal = $('#editBundleModal');
         const $form = $('#editBundleForm');
@@ -1109,6 +1239,8 @@ $.ajaxSetup({
         $modal.find('#editBundleDescriptionEn').val(descriptions.en || '');
         $modal.find('#editBundleDescriptionAr').val(descriptions.ar || '');
 
+        setBundleImagePreview($modal, row.image_url || null);
+
         $modal.find('#editBundleStatus').val(
             row.status_data?.value || 'active'
         ).trigger('change');
@@ -1122,10 +1254,6 @@ $.ajaxSetup({
         );
 
         applyDisplayBundleOnVisitAvailability($modal, row.id);
-
-        $modal.find('select[name="repeat_type"]')
-            .val(row.repeat_type_data?.value || 'once')
-            .trigger('change');
 
         fillTrigger($modal, row.trigger_data || null);
 
@@ -1141,7 +1269,9 @@ $.ajaxSetup({
     });
 
     async function fillTrigger($modal, data) {
-        if (!data) return;
+        if (!data) {
+            return;
+        }
 
         $modal
             .find(`.bundle-trigger-scope[value="${data.scope}"]`)
@@ -1245,7 +1375,9 @@ $.ajaxSetup({
             .row($(this).closest('tr'))
             .data();
 
-        if (!row) return;
+        if (!row) {
+            return;
+        }
 
         $('#showBundleName').val(row.name || '');
 
@@ -1283,10 +1415,6 @@ $.ajaxSetup({
 
         $('#showBundleDisplayOnVisit').val(
             row.display_bundle_on_visit ? 'Enabled' : 'Disabled'
-        );
-
-        $('#showBundleRepeat').val(
-            row.repeat_type_data?.label || ''
         );
     });
 
@@ -1373,9 +1501,7 @@ $.ajaxSetup({
 
         $modal.find('.bundle-select2')
             .filter(function () {
-                return !$(this)
-                    .closest('.bundle-reward-template')
-                    .length;
+                return !$(this).closest('.bundle-reward-template').length;
             })
             .val(null)
             .trigger('change');
@@ -1390,6 +1516,7 @@ $.ajaxSetup({
         applyTriggerScope($modal);
         applyTriggerQuantityRule($modal);
         resetTriggerPriceOptions($modal);
+        resetBundleImagePreview($modal);
         applyDisplayBundleOnVisitAvailability($modal, null);
     }
 
@@ -1408,7 +1535,9 @@ $.ajaxSetup({
     $(document).on('submit', '#deleteBundleForm', function (e) {
         e.preventDefault();
 
-        if (!deletingBundleId) return;
+        if (!deletingBundleId) {
+            return;
+        }
 
         $.ajax({
             url: bundleDeleteUrlTemplate.replace('__ID__', deletingBundleId),
@@ -1442,7 +1571,9 @@ $.ajaxSetup({
             })
             .get();
 
-        if (!ids.length) return;
+        if (!ids.length) {
+            return;
+        }
 
         $.ajax({
             url: bundleBulkDeleteUrl,

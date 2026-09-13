@@ -43,6 +43,7 @@ class Bundle extends Model
     }
     protected $appends = [
         'saving',
+        'image_url',
     ];
 
     public function getSavingAttribute(): array
@@ -225,5 +226,16 @@ class Bundle extends Model
             }
         });
     }
+    public function registerMediaCollections(): void
+    {
+        $this
+            ->addMediaCollection('bundle_image')
+            ->singleFile();
+    }
 
+    public function getImageUrlAttribute(): string
+    {
+        return $this->getFirstMediaUrl('bundle_image')
+            ?: asset('assets/images/bundles/default-bundle.png');
+    }
 }

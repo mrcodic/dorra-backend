@@ -23,20 +23,23 @@ class BundleService extends BaseService
     public BaseRepositoryInterface $repository;
 
     public function __construct(
-        BundleRepositoryInterface $repository,
+        BundleRepositoryInterface             $repository,
         public BundleItemPurchaseFlowResolver $purchaseFlowResolver,
-    ) {
+    )
+    {
         parent::__construct($repository);
     }
 
     public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
     {
         return $this->handleTransaction(function () use ($validatedData, $relationsToLoad) {
-            [$bundleData, $triggerData, $rewardsData] = $this->splitPayload($validatedData);
+            [$bundleData, $triggerData, $rewardsData, $image] = $this->splitPayload($validatedData);
 
             $this->ensureOnlyOneDisplayBundleOnVisit($bundleData);
 
             $bundle = $this->repository->create($bundleData);
+
+            $this->syncBundleImage($bundle, $image);
 
             $triggerItem = $this->createTrigger($bundle, $triggerData);
 
@@ -58,16 +61,18 @@ class BundleService extends BaseService
                 ->with(['items'])
                 ->findOrFail($id);
 
-            [$bundleData, $triggerData, $rewardsData] = $this->splitPayload($validatedData);
+            [$bundleData, $triggerData, $rewardsData, $image] = $this->splitPayload($validatedData);
 
             $this->ensureOnlyOneDisplayBundleOnVisit($bundleData, $bundle->id);
 
             $bundle->update($bundleData);
 
+            $this->syncBundleImage($bundle, $image);
+
             /*
-             * Soft-delete old rule rows instead of hard deleting them.
-             * This keeps future cart/order references valid.
-             */
+            * Soft-delete old rule rows instead of hard deleting them.
+            * This keeps future cart/order references valid.
+            */
             $bundle->items()->get()->each->delete();
 
             $triggerItem = $this->createTrigger($bundle, $triggerData);
@@ -93,7 +98,7 @@ class BundleService extends BaseService
             ])
             ->withCount('rewards')
             ->when(request()->filled('search_value'), function ($query) use ($locale) {
-                $search = trim((string) request('search_value'));
+                $search = trim((string)request('search_value'));
 
                 if ($search !== '') {
                     $query->whereRaw(
@@ -108,10 +113,11 @@ class BundleService extends BaseService
             ->latest();
 
         return DataTables::of($query)
-            ->addColumn('name_translate', fn (Bundle $bundle) => $bundle->getTranslations('name'))
-            ->addColumn('description_translate', fn (Bundle $bundle) => $bundle->getTranslations('description'))
-            ->editColumn('name', fn (Bundle $bundle) => $bundle->name)
-            ->editColumn('display_bundle_on_visit', fn (Bundle $bundle) => (bool) $bundle->display_bundle_on_visit)
+            ->addColumn('name_translate', fn(Bundle $bundle) => $bundle->getTranslations('name'))
+            ->addColumn('description_translate', fn(Bundle $bundle) => $bundle->getTranslations('description'))
+            ->addColumn('image_url', fn(Bundle $bundle) => $bundle->image_url)
+            ->editColumn('name', fn(Bundle $bundle) => $bundle->name)
+            ->editColumn('display_bundle_on_visit', fn(Bundle $bundle) => (bool)$bundle->display_bundle_on_visit)
             ->addColumn('status_data', function (Bundle $bundle) {
                 return [
                     'value' => $bundle->status->value,
@@ -124,20 +130,20 @@ class BundleService extends BaseService
                     'label' => $bundle->repeat_type->label(),
                 ];
             })
-            ->addColumn('trigger_data', fn (Bundle $bundle) => $this->serializeItem($bundle->trigger))
+            ->addColumn('trigger_data', fn(Bundle $bundle) => $this->serializeItem($bundle->trigger))
             ->addColumn('rewards_data', function (Bundle $bundle) {
                 return $bundle->rewards
-                    ->map(fn (BundleItem $item) => $this->serializeItem($item))
+                    ->map(fn(BundleItem $item) => $this->serializeItem($item))
                     ->values()
                     ->all();
             })
-            ->editColumn('start_at', fn (Bundle $bundle) => $bundle->start_at?->format('Y-m-d'))
-            ->editColumn('end_at', fn (Bundle $bundle) => $bundle->end_at?->format('Y-m-d'))
+            ->editColumn('start_at', fn(Bundle $bundle) => $bundle->start_at?->format('Y-m-d'))
+            ->editColumn('end_at', fn(Bundle $bundle) => $bundle->end_at?->format('Y-m-d'))
             ->addColumn('action', function () {
                 return [
-                    'can_show' => (bool) auth()->user()->hasPermissionTo('bundles_show'),
-                    'can_edit' => (bool) auth()->user()->hasPermissionTo('bundles_update'),
-                    'can_delete' => (bool) auth()->user()->hasPermissionTo('bundles_delete'),
+                    'can_show' => (bool)auth()->user()->hasPermissionTo('bundles_show'),
+                    'can_edit' => (bool)auth()->user()->hasPermissionTo('bundles_update'),
+                    'can_delete' => (bool)auth()->user()->hasPermissionTo('bundles_delete'),
                 ];
             })
             ->make(true);
@@ -174,11 +180,26 @@ class BundleService extends BaseService
     {
         $trigger = Arr::pull($validatedData, 'trigger');
         $rewards = Arr::pull($validatedData, 'rewards');
+        $image = Arr::pull($validatedData, 'image');
 
         $validatedData['display_bundle_on_visit'] =
-            (bool) ($validatedData['display_bundle_on_visit'] ?? false);
+            (bool)($validatedData['display_bundle_on_visit'] ?? false);
 
-        return [$validatedData, $trigger, $rewards];
+        return [$validatedData, $trigger, $rewards, $image];
+    }
+
+    private function syncBundleImage(Bundle $bundle, mixed $image = null): void
+    {
+        if (!$image) {
+            return;
+        }
+
+        $bundle
+            ->clearMediaCollection('bundle_image');
+
+        $bundle
+            ->addMedia($image)
+            ->toMediaCollection('bundle_image');
     }
 
     private function ensureOnlyOneDisplayBundleOnVisit(array $bundleData, ?int $exceptBundleId = null): void
@@ -219,7 +240,7 @@ class BundleService extends BaseService
 
             $quantity = $quantityRule === QuantityRuleEnum::ANY->value
                 ? 1
-                : (int) ($data['quantity'] ?? 1);
+                : (int)($data['quantity'] ?? 1);
         }
 
         return $bundle->items()->create([
@@ -257,13 +278,13 @@ class BundleService extends BaseService
 
                 $quantity = $priceId
                     ? $priceQuantity
-                    : (int) ($data['quantity'] ?? 1);
+                    : (int)($data['quantity'] ?? 1);
 
                 $discountType = $data['discount_type'];
 
                 $discountValue = $discountType === DiscountTypeEnum::FREE->value
                     ? 100
-                    : (float) $data['discount_value'];
+                    : (float)$data['discount_value'];
 
                 $bundle->items()->create([
                     'itemable_type' => $item->getMorphClass(),
@@ -282,12 +303,13 @@ class BundleService extends BaseService
 
     private function ensureRewardIsDifferentFromTrigger(
         BundleItem $triggerItem,
-        Model $rewardItem,
-        int $index
-    ): void {
+        Model      $rewardItem,
+        int        $index
+    ): void
+    {
         if (
             $triggerItem->itemable_type === $rewardItem->getMorphClass()
-            && (int) $triggerItem->itemable_id === (int) $rewardItem->id
+            && (int)$triggerItem->itemable_id === (int)$rewardItem->id
         ) {
             throw ValidationException::withMessages([
                 "rewards.$index.item_id" => 'Reward item cannot be the same as trigger item.',
@@ -298,9 +320,9 @@ class BundleService extends BaseService
     private function resolveSelectableItem(array $data, string $attribute): Model
     {
         $scope = $data['scope'] ?? null;
-        $itemId = (int) ($data['item_id'] ?? 0);
+        $itemId = (int)($data['item_id'] ?? 0);
         $parentCategoryId = isset($data['parent_category_id'])
-            ? (int) $data['parent_category_id']
+            ? (int)$data['parent_category_id']
             : null;
 
         if ($scope === 'with_category') {
@@ -314,7 +336,7 @@ class BundleService extends BaseService
                 })
                 ->first();
 
-            if (! $product) {
+            if (!$product) {
                 throw ValidationException::withMessages([
                     "$attribute.item_id" => 'The selected product does not belong to the selected product group.',
                 ]);
@@ -332,7 +354,7 @@ class BundleService extends BaseService
                 ->where('is_tableau', 0)
                 ->first();
 
-            if (! $category) {
+            if (!$category) {
                 throw ValidationException::withMessages([
                     "$attribute.item_id" => 'The selected product is invalid.',
                 ]);
@@ -352,7 +374,7 @@ class BundleService extends BaseService
     {
         $flow = $this->purchaseFlowResolver->resolve($item);
 
-        if (! $flow['can_purchase']) {
+        if (!$flow['can_purchase']) {
             throw ValidationException::withMessages([
                 "$attribute.item_id" =>
                     'This item cannot be used in a bundle because both Add To Cart and Customize Design are disabled.',
@@ -362,7 +384,7 @@ class BundleService extends BaseService
 
     private function resolveSelectedPriceOption(Model $item, array $data, string $attribute): array
     {
-        if (! method_exists($item, 'prices')) {
+        if (!method_exists($item, 'prices')) {
             return [null, null];
         }
 
@@ -373,25 +395,25 @@ class BundleService extends BaseService
         }
 
         $priceId = isset($data['price_id'])
-            ? (int) $data['price_id']
+            ? (int)$data['price_id']
             : null;
 
-        if (! $priceId) {
+        if (!$priceId) {
             throw ValidationException::withMessages([
                 $attribute => 'Please select a quantity / price option.',
             ]);
         }
 
         $selectedPriceOption = $priceOptions
-            ->first(fn (array $price) => (int) $price['id'] === $priceId);
+            ->first(fn(array $price) => (int)$price['id'] === $priceId);
 
-        if (! $selectedPriceOption) {
+        if (!$selectedPriceOption) {
             throw ValidationException::withMessages([
                 $attribute => 'The selected quantity / price option is invalid.',
             ]);
         }
 
-        $quantity = (int) ($selectedPriceOption['quantity'] ?? 0);
+        $quantity = (int)($selectedPriceOption['quantity'] ?? 0);
 
         if ($quantity < 1) {
             throw ValidationException::withMessages([
@@ -404,7 +426,7 @@ class BundleService extends BaseService
 
     private function serializeItem(?BundleItem $bundleItem): ?array
     {
-        if (! $bundleItem || ! $bundleItem->itemable) {
+        if (!$bundleItem || !$bundleItem->itemable) {
             return null;
         }
 
@@ -434,7 +456,7 @@ class BundleService extends BaseService
 
     private function getBundleItemPriceOptions($item): array
     {
-        if (! method_exists($item, 'prices')) {
+        if (!method_exists($item, 'prices')) {
             return [];
         }
 
@@ -452,9 +474,9 @@ class BundleService extends BaseService
                 ];
             })
             ->filter(function (array $price) {
-                return ! empty($price['id'])
-                    && ! empty($price['quantity'])
-                    && (int) $price['quantity'] > 0;
+                return !empty($price['id'])
+                    && !empty($price['quantity'])
+                    && (int)$price['quantity'] > 0;
             })
             ->values()
             ->toArray();
@@ -462,11 +484,11 @@ class BundleService extends BaseService
 
     private function getBundleItemPriceLabel(BundleItem $bundleItem): ?string
     {
-        if (! $bundleItem->price_id || ! $bundleItem->itemable) {
+        if (!$bundleItem->price_id || !$bundleItem->itemable) {
             return null;
         }
 
-        if (! method_exists($bundleItem->itemable, 'prices')) {
+        if (!method_exists($bundleItem->itemable, 'prices')) {
             return null;
         }
 
@@ -475,7 +497,7 @@ class BundleService extends BaseService
             ->whereKey($bundleItem->price_id)
             ->first();
 
-        if (! $price) {
+        if (!$price) {
             return null;
         }
 

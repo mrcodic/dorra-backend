@@ -47,6 +47,41 @@
     </div>
 
     <div class="row mb-2">
+        <div class="col-md-12">
+            <label class="label-text mb-1">
+                Bundle Image
+            </label>
+
+            <div class="bundle-image-dropzone border rounded p-2 text-center cursor-pointer">
+                <input
+                    type="file"
+                    name="image"
+                    class="d-none bundle-image-input"
+                    accept="image/*"
+                >
+
+                <div class="bundle-image-placeholder">
+                    <div class="mb-1">
+                        <i data-feather="upload-cloud"></i>
+                    </div>
+
+                    <strong>Drop image here or click to upload</strong>
+
+                    <div class="text-muted small mt-50">
+                        JPG, PNG, WEBP - Max 2MB
+                    </div>
+                </div>
+
+                <img
+                    src=""
+                    class="bundle-image-preview d-none rounded mt-1"
+                    style="max-height: 160px; object-fit: cover;"
+                    alt="Bundle image preview"
+                >
+            </div>
+        </div>
+    </div>
+    <div class="row mb-2">
         <div class="col-md-6">
             <label class="label-text mb-1" for="{{ $prefix }}BundleDescriptionEn">
                 Description En

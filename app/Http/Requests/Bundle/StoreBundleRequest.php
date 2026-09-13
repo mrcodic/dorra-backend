@@ -29,6 +29,13 @@ class StoreBundleRequest extends FormRequest
             'start_at' => ['nullable', 'date'],
             'end_at' => ['nullable', 'date', 'after_or_equal:start_at'],
 
+            'image' => [
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:2048',
+            ],
+
             'trigger' => ['required', 'array'],
             'trigger.scope' => ['required', 'in:with_category,without_category'],
             'trigger.parent_category_id' => [
