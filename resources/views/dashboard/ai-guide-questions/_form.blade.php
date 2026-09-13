@@ -241,7 +241,7 @@
 
                 <div class="row align-items-end">
 
-                    <div class="col-md-11">
+                    <div class="col-md-11 mb-2">
                         <div class="row option-label-fields">
                             <div class="col-md-6">
                                 <label class="form-label">Label English *</label>
