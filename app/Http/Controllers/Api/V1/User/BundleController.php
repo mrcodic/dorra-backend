@@ -48,7 +48,7 @@ class BundleController extends Controller
         );
 
         return Response::api(
-            data: BundleResource::make($bundle)
+            data: BundleCardResource::make($bundle)
         );
     }
 
