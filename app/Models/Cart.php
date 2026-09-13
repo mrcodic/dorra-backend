@@ -76,9 +76,38 @@ class Cart extends Model
         return $this->hasMany(CartItem::class);
     }
 
-    public function totalItems()
+    public function totalItems(): int
     {
-        return $this->items()->count();
+        if ($this->relationLoaded('items')) {
+            $items = $this->items;
+
+            $normalItemsCount = $items
+                ->filter(fn ($item) => empty($item->bundle_group_key))
+                ->count();
+
+            $bundleGroupsCount = $items
+                ->filter(fn ($item) => ! empty($item->bundle_group_key))
+                ->groupBy('bundle_group_key')
+                ->count();
+
+            return $normalItemsCount + $bundleGroupsCount;
+        }
+
+        $normalItemsCount = $this->items()
+            ->where(function ($query) {
+                $query
+                    ->whereNull('bundle_group_key')
+                    ->orWhere('bundle_group_key', '');
+            })
+            ->count();
+
+        $bundleGroupsCount = $this->items()
+            ->whereNotNull('bundle_group_key')
+            ->where('bundle_group_key', '!=', '')
+            ->distinct()
+            ->count('bundle_group_key');
+
+        return $normalItemsCount + $bundleGroupsCount;
     }
 
 
