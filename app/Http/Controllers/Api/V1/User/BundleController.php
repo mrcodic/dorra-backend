@@ -43,7 +43,9 @@ class BundleController extends Controller
             $id,
             [
                 'trigger.itemable',
+                'trigger.itemable.specifications.options',
                 'rewards.itemable',
+                'rewards.itemable.specifications.options',
             ]
         );
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Bundle;
 
+use App\Http\Resources\Product\ProductSpecificationResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -25,6 +26,10 @@ class BundleItemCardResource extends JsonResource
 
             'has_specs' => (bool) ($item?->has_specs ?? false),
             'require_customize_design' => (bool) ($item?->require_customize_design ?? false),
+            'specs' => $this->when(
+                $item && $item->relationLoaded('specifications'),
+                fn () => ProductSpecificationResource::collection($item->specifications)
+            ),
         ];
     }
 }
