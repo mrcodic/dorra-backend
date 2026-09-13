@@ -9,11 +9,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
 
-class Bundle extends Model
+class Bundle extends Model implements HasMedia
 {
-    use HasTranslations, SoftDeletes;
+    use HasTranslations, SoftDeletes,InteractsWithMedia;
 
     public array $translatable = [
         'name',
