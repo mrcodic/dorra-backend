@@ -291,52 +291,81 @@ class CartService extends BaseService
         return $cart;
     }
 
-    public function deleteItemFromCart($itemId)
+    public function deleteItemFromCart($itemId = null, $bundleId = null)
     {
-        $message = "Item removed from cart successfully.";
         $cart = $this->resolveUserCart();
-        if (!$cart) {
+
+        if (! $cart) {
             throw ValidationException::withMessages([
                 'cart' => ['Cart not found for this user.'],
             ]);
         }
-        $item = $cart->items()->whereKey($itemId)->first();
 
-        if (!$item) {
+        /*
+         * Delete full bundle by bundle_id.
+         */
+        if ($bundleId) {
+            $bundleItem = $cart->items()
+                ->where('bundle_id', $bundleId)
+                ->whereNotNull('bundle_group_key')
+                ->first();
+
+            if (! $bundleItem) {
+                throw ValidationException::withMessages([
+                    'bundle_id' => ['Bundle not found in cart.'],
+                ]);
+            }
+
+            return $this->deleteBundleGroupFromCart(
+                cart: $cart,
+                bundleGroupKey: $bundleItem->bundle_group_key
+            );
+        }
+
+        /*
+         * Delete normal item by item_id.
+         */
+        $item = $cart->items()
+            ->whereKey($itemId)
+            ->first();
+
+        if (! $item) {
             throw ValidationException::withMessages([
                 'cart' => ['Item not found in cart.'],
             ]);
         }
-        if ($item->bundle_group_key) {
-            return $this->deleteBundleGroupFromCart($cart, $item->bundle_group_key);
-        }
-        $message = $this->handleTransaction(function () use ($item, $cart) {
-            if ($cart->items()->count() == 1) {
-                $cart->update([
-                    'discount_code_id' => null,
-                    'discount_amount' => 0,
-                ]);
-            }
-            if ($cart->price - $item->sub_total < $cart->discount_amount) {
-                $cart->update([
-                    'discount_code_id' => null,
-                    'discount_amount' => 0,
-                    'price' => $cart->items()->sum('sub_total'),
-                ]);
-                return "The item has been removed from your cart. Since the cart total is now lower, the discount code is no longer valid.";
 
-            }
+        /*
+         * If selected item belongs to bundle, remove the whole bundle group.
+         */
+        if ($item->bundle_group_key) {
+            return $this->deleteBundleGroupFromCart(
+                cart: $cart,
+                bundleGroupKey: $item->bundle_group_key
+            );
+        }
+
+        return $this->handleTransaction(function () use ($item, $cart) {
+            $message = 'Item removed from cart successfully.';
+
+            $discountWillBeInvalid =
+                ($cart->price - $item->sub_total) < $cart->discount_amount;
+
             $item->delete();
+
             $cart->update([
                 'discount_code_id' => null,
                 'discount_amount' => 0,
                 'price' => $cart->items()->sum('sub_total'),
             ]);
 
-        });
-        return $message;
-    }
+            if ($discountWillBeInvalid) {
+                $message = 'The item has been removed from your cart. Since the cart total is now lower, the discount code is no longer valid.';
+            }
 
+            return $message;
+        });
+    }
     public function applyDiscount($request)
     {
         $cart = $this->resolveUserCart();

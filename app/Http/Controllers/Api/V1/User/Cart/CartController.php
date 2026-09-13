@@ -50,8 +50,24 @@ class CartController extends Controller
      */
     public function destroy(Request $request)
     {
-        $request->validate(['item_id' => 'required', 'exists:items,id']);
-        $message = $this->cartService->deleteItemFromCart($request->item_id);
+        $request->validate([
+            'item_id' => [
+                'nullable',
+                'required_without:bundle_id',
+                'exists:items,id',
+            ],
+            'bundle_id' => [
+                'nullable',
+                'required_without:item_id',
+                'exists:bundles,id',
+            ],
+        ]);
+
+        $message = $this->cartService->deleteItemFromCart(
+            itemId: $request->item_id,
+            bundleId: $request->bundle_id
+        );
+
         return Response::api(message: $message);
     }
 
