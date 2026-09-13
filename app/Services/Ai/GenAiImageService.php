@@ -23,6 +23,14 @@ Place the artwork on one completely uniform solid chroma-green background using 
 
 The entire area outside the artwork must use the same flat #00FF00 background.
 
+IMPORTANT FOR CUTOUTS AND INNER EMPTY AREAS:
+- Any empty area inside circles, rings, letters, icons, frames, handles, holes, or cutouts must also use exactly #00FF00.
+- Do not create green outlines around the artwork.
+- Do not create green glow.
+- Do not create green reflections.
+- Do not create green shadows.
+- Do not blend green into the artwork edges.
+
 Important:
 - Do not generate transparency.
 - Do not generate a transparency preview.
@@ -35,11 +43,13 @@ Important:
 - Do not place the artwork on a product mockup.
 - Do not create frames or borders around the image.
 
-Do not use #00FF00 or chroma green inside the actual artwork.
+Do not use #00FF00 or chroma green anywhere inside the actual artwork.
 
-Keep a clean visual separation between the artwork and the temporary solid background.
+Keep a sharp, clean visual separation between the artwork and the temporary background.
 
-The #00FF00 background is temporary and will be removed programmatically after generation.
+The #00FF00 background is temporary and will be converted into real alpha transparency programmatically after generation.
+
+The final processed image must have transparent pixels wherever this temporary green background exists, including enclosed holes and circular cutouts.
 PROMPT;
 
     private int $perRequestCount = 1;
@@ -360,11 +370,29 @@ PROMPT;
                 return $dataUrl;
             }
 
+            $quantumRange =
+                \Imagick::getQuantumRange()['quantumRangeLong']
+                ?? 65535;
+
             /*
-             * If Gemini actually returned real transparency,
-             * don't touch it.
+             * Gemini may occasionally return real alpha already.
+             *
+             * Do not return early here. The outer border can be
+             * transparent while green still survives inside circles,
+             * letters, holes or disconnected empty areas.
              */
             if ($this->hasRealTransparentBorder($image)) {
+                $this->removeAllChromaGreen(
+                    $image,
+                    $quantumRange
+                );
+
+                $this->cleanChromaEdge(
+                    $image
+                );
+
+                $image->setImageFormat('png');
+
                 $result = $this->encodeDataUrl(
                     'image/png',
                     $image->getImageBlob()
@@ -380,13 +408,9 @@ PROMPT;
                 'transparent'
             );
 
-            $quantumRange =
-                \Imagick::getQuantumRange()['quantumRangeLong']
-                ?? 65535;
-
             /*
              * Gemini may slightly modify #00FF00,
-             * so use a moderate fuzz.
+             * so use a moderate fuzz for the first connected pass.
              */
             $fuzz = 0.10 * $quantumRange;
 
@@ -419,11 +443,8 @@ PROMPT;
                 }
 
                 /*
-                 * Protect against accidentally starting
-                 * flood-fill from a piece of artwork that
-                 * happens to touch the outer edge.
-                 *
-                 * The requested background is strongly green.
+                 * Protect against accidentally starting flood-fill
+                 * from artwork that happens to touch the outer edge.
                  */
                 if (!$this->looksLikeChromaGreen($pixel)) {
                     continue;
@@ -440,12 +461,9 @@ PROMPT;
             }
 
             /*
-             * Second pass using slightly larger fuzz.
-             *
-             * Only from locations that are still green-ish
-             * and still connected to the outside.
-             *
-             * This catches anti-aliased / AI-variant green.
+             * Second connected pass using slightly larger fuzz.
+             * This catches anti-aliased / AI-variant green that is
+             * still connected to the outside.
              */
             $secondFuzz = 0.16 * $quantumRange;
 
@@ -476,8 +494,20 @@ PROMPT;
             }
 
             /*
-             * Remove a tiny green fringe only from pixels
-             * immediately neighboring transparent background.
+             * IMPORTANT:
+             * Flood fill only handles green connected to the border.
+             *
+             * This global pass removes chroma green everywhere,
+             * including inside circles, rings, letters, enclosed holes,
+             * disconnected cutouts and remaining green edge pixels.
+             */
+            $this->removeAllChromaGreen(
+                $image,
+                $quantumRange
+            );
+
+            /*
+             * Finish by slightly cleaning the alpha boundary.
              */
             $this->cleanChromaEdge(
                 $image
@@ -498,6 +528,38 @@ PROMPT;
             report($e);
 
             return $dataUrl;
+        }
+    }
+
+    private function removeAllChromaGreen(
+        \Imagick $image,
+        float $quantumRange
+    ): void {
+        /*
+         * Global chroma-key cleanup.
+         *
+         * transparentPaintImage works across the entire image instead
+         * of only on border-connected regions, so enclosed green areas
+         * become true alpha transparency too.
+         *
+         * Multiple targets cover the small green variations Gemini may
+         * introduce while keeping the logic focused on chroma green.
+         */
+        $targets = [
+            '#00FF00',
+            '#00E600',
+            '#00CC00',
+        ];
+
+        $fuzz = 0.14 * $quantumRange;
+
+        foreach ($targets as $target) {
+            $image->transparentPaintImage(
+                new \ImagickPixel($target),
+                0,
+                $fuzz,
+                false
+            );
         }
     }
 
