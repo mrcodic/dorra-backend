@@ -89,4 +89,13 @@ class CartItem extends Model
     {
         return $this->belongsTo(DiscountCode::class);
     }
+    public function bundle(): BelongsTo
+    {
+        return $this->belongsTo(Bundle::class);
+    }
+
+    public function bundleItem(): BelongsTo
+    {
+        return $this->belongsTo(BundleItem::class);
+    }
 }
