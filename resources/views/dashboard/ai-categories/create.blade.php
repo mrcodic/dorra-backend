@@ -4,7 +4,7 @@
 @section('main-page', 'AI Products')
 
 @section('vendor-style')
-    <link rel="stylesheet" href="{{ asset('admin/vendors/css/forms/select/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('vendors/css/forms/select/select2.min.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 @endsection
 
@@ -36,7 +36,7 @@
 @endsection
 
 @section('vendor-script')
-    <script src="{{ asset('admin/vendors/js/forms/select/select2.full.min.js') }}"></script>
+    <script src="{{ asset('vendors/js/forms/select/select2.full.min.js') }}"></script>
 @endsection
 
 @section('page-script')
