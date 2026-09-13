@@ -52,7 +52,11 @@ class AiCategoryController extends DashboardController
             ->with(['options' => fn($query) => $query->orderBy('sort_order')->orderBy('id')])
             ->orderBy('sort_order')->orderBy('id')->get();
 
-        $studioItems = AiStudioItem::query()->orderBy('sort_order')->orderBy('id')->get();
+        $studioItems = AiStudioItem::query()
+            ->with(['questions' => fn($query) => $query->select('ai_guide_questions.id')])
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
         $studioItemQuestionIds = $studioItems->mapWithKeys(fn($studioItem) => [
             $studioItem->id => $this->studioItemQuestionIds($studioItem),
         ])->all();
@@ -233,10 +237,16 @@ class AiCategoryController extends DashboardController
 
     private function studioItemPayload(AiStudioItem $studioItem): array
     {
+        $studioItem->load('questions');
+
         $generationType = $studioItem->generation_type;
         $generationTypeValue = $generationType instanceof AiGenerationTypeEnum ? $generationType->value : (string) $generationType;
         $generationTypeLabel = $generationType instanceof AiGenerationTypeEnum ? $generationType->label() : Str::headline($generationTypeValue);
-        $questionIds = $this->studioItemQuestionIds($studioItem);
+        $questionIds = $studioItem->questions->pluck('id')->map(fn($id) => (int) $id)->values()->all();
+
+        if (!$questionIds) {
+            $questionIds = $this->studioItemQuestionIds($studioItem);
+        }
 
         return [
             'id' => $studioItem->id,

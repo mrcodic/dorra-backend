@@ -52,7 +52,9 @@
                 'sort_order' => (int) $studioItem->sort_order,
                 'is_active' => (bool) $studioItem->is_active,
                 'settings' => $studioItem->settings ?? [],
-                'question_ids' => collect($associatedData['studioItemQuestionIds'][$studioItem->id] ?? [])->map(fn ($id) => (int) $id)->values()->all(),
+                'question_ids' => $studioItem->relationLoaded('questions')
+                    ? $studioItem->questions->pluck('id')->map(fn($id) => (int) $id)->values()->all()
+                    : collect($associatedData['studioItemQuestionIds'][$studioItem->id] ?? [])->map(fn($id) => (int) $id)->values()->all(),
             ],
         ];
     })->all();
@@ -73,25 +75,6 @@
 
     .question-options-panel {
         background: #fafafa;
-    }
-
-    #quick-studio-item-modal .select2-container {
-        width: 100% !important;
-    }
-
-    #quick-studio-item-modal .select2-selection--multiple {
-        min-height: 38px;
-        border: 1px solid #d8d6de;
-        border-radius: .357rem;
-        padding: 2px 6px;
-    }
-
-    #quick-studio-item-modal .select2-selection--multiple .select2-selection__choice {
-        margin-top: 5px;
-    }
-
-    .select2-container--open {
-        z-index: 9999;
     }
 </style>
 
@@ -666,7 +649,7 @@
 
                             <select
                                 id="quick-studio-question-ids"
-                                class="form-select"
+                                class="form-select select2"
                                 multiple
                                 style="width:100%"
                             >
@@ -924,6 +907,36 @@
         let studioItemData = @json($studioItemsPayload);
 
         let quickOptionIndex = 0;
+        let pendingStudioQuestionIds = [];
+
+        function initStudioQuestionsSelect2() {
+            const select = $('#quick-studio-question-ids');
+
+            if (!select.length) return;
+
+            if (typeof $.fn.select2 !== 'function') {
+                console.error('Select2 is not loaded.');
+                return;
+            }
+
+            if (!select.hasClass('select2-hidden-accessible')) {
+                select.select2({
+                    width: '100%',
+                    placeholder: 'Select Questions',
+                    allowClear: true,
+                    closeOnSelect: false,
+                    dropdownParent: $('#quick-studio-item-modal')
+                });
+            }
+        }
+
+        $('#quick-studio-item-modal').on('shown.bs.modal', function () {
+            initStudioQuestionsSelect2();
+
+            $('#quick-studio-question-ids')
+                .val(pendingStudioQuestionIds)
+                .trigger('change');
+        });
 
         function toast(message, error = true) {
             Toastify({
@@ -965,7 +978,12 @@
             $('#quick-studio-sort-order').val(0);
             $('#quick-studio-is-active').prop('checked', true);
 
-            $('#quick-studio-question-ids').val([]).trigger('change.select2');
+            pendingStudioQuestionIds = [];
+            $('#quick-studio-question-ids').val([]);
+
+            if ($('#quick-studio-question-ids').hasClass('select2-hidden-accessible')) {
+                $('#quick-studio-question-ids').trigger('change');
+            }
 
             $('#quick-delete-studio-item').addClass('d-none');
         }
@@ -986,9 +1004,12 @@
             $('#quick-studio-prompt-instructions').val(item.settings?.prompt_instructions ?? '');
             $('#quick-studio-negative-rules').val(item.settings?.negative_rules ?? '');
 
-            $('#quick-studio-question-ids')
-                .val((item.question_ids ?? []).map(String))
-                .trigger('change.select2');
+            pendingStudioQuestionIds = (item.question_ids ?? []).map(String);
+            $('#quick-studio-question-ids').val(pendingStudioQuestionIds);
+
+            if ($('#quick-studio-question-ids').hasClass('select2-hidden-accessible')) {
+                $('#quick-studio-question-ids').trigger('change');
+            }
 
             if (canDeleteStudioItems) {
                 $('#quick-delete-studio-item').removeClass('d-none');
@@ -1268,6 +1289,10 @@
                     feather.replace();
                 }
             });
+        });
+
+        $('#quick-studio-question-ids').on('change', function () {
+            pendingStudioQuestionIds = ($(this).val() ?? []).map(String);
         });
 
         $('#quick-studio-item-modal').on('hidden.bs.modal', function () {
