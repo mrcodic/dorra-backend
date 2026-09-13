@@ -254,6 +254,8 @@ class CartService extends BaseService
             return null;
         }
         $cart = $this->repository->query()
+            ->with(['items.bundle',
+                'items.bundleItem'])
             ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->when(!$userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
             ->with([

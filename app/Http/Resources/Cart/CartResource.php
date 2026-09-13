@@ -11,16 +11,18 @@ class CartResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $isDownload = $this->items->every(
-            fn($item) => $item->type == ItemTypeEnum::DOWNLOAD
-        );
+        $items = $this->items ?? collect();
+
+        $isDownload = $items->isNotEmpty() && $items->every(
+                fn ($item) => $item->type == ItemTypeEnum::DOWNLOAD
+            );
 
         $subAfter = round(
-            $this->items->sum(function ($item) {
+            $items->sum(function ($item) use ($items) {
                 $cartable = $item->cartable;
 
                 $cartHasDiscount = $this->discount_amount > 0
-                    || $this->items->contains(fn($i) => $i->discount_amount > 0);
+                    || $items->contains(fn ($i) => $i->discount_amount > 0);
 
                 $lastOffer = $cartHasDiscount ? null : $cartable?->lastOffer;
 
@@ -47,31 +49,34 @@ class CartResource extends JsonResource
         $bundleGroups = $this->resolveBundleGroups();
 
         return [
-            'id'                     => $this->id,
-            'items'                  => CartItemResource::collection($this->whenLoaded('items')),
+            'id' => $this->id,
 
-            'has_bundle_items'       => $bundleGroups->isNotEmpty(),
-            'bundle_groups'          => $bundleGroups,
+            // normal cart items only
+            'items' => CartItemResource::collection($this->standaloneCartItems()),
+
+            // bundle cart items only
+            'has_bundle_items' => $bundleGroups->isNotEmpty(),
+            'bundle_groups' => $bundleGroups,
 
             'all_items_are_download' => $isDownload,
 
-            'sub_total'              => $subAfter,
+            'sub_total' => $subAfter,
 
-            'total'                  => round(
+            'total' => round(
                 getTotalPrice($cartLevelDiscountCode, $subAfter, $this->delivery_amount, $isDownload),
                 2
             ),
 
             'tax' => [
-                'ratio' => !$isDownload ? setting('tax') * 100 . '%' : '0%',
-                'value' => !$isDownload ? getPriceAfterTax(setting('tax'), $subAfter) : 0,
+                'ratio' => ! $isDownload ? setting('tax') * 100 . '%' : '0%',
+                'value' => ! $isDownload ? round(getPriceAfterTax(setting('tax'), $subAfter), 2) : 0,
             ],
 
             'delivery' => $this->delivery_amount,
 
             'discount' => [
-                'id'    => $this->discountCode?->id,
-                'code'  => $this->discountCode?->code,
+                'id' => $this->discountCode?->id,
+                'code' => $this->discountCode?->code,
                 'ratio' => $subAfter > 0
                     ? (
                         ($this->discountCode?->type === TypeEnum::PERCENTAGE
@@ -93,9 +98,16 @@ class CartResource extends JsonResource
         ];
     }
 
+    private function standaloneCartItems()
+    {
+        return ($this->items ?? collect())
+            ->filter(fn ($item) => empty($item->bundle_group_key))
+            ->values();
+    }
+
     private function resolveBundleGroups()
     {
-        return $this->items
+        return ($this->items ?? collect())
             ->filter(fn ($item) => ! empty($item->bundle_group_key))
             ->groupBy('bundle_group_key')
             ->map(function ($items, $groupKey) {
@@ -113,6 +125,7 @@ class CartResource extends JsonResource
                     'bundle_name' => $bundle?->name,
 
                     'items_count' => $items->count(),
+                    'trigger_items_count' => $items->where('bundle_role', 'trigger')->count(),
                     'reward_items_count' => $items->where('bundle_role', 'reward')->count(),
 
                     'sub_total' => $subTotal,
