@@ -41,8 +41,7 @@ class AiPromptBuilderService
             }
         }
 
-        $questions = $this->aiGenerationConfigService
-            ->getAssignedQuestions($aiCategoryId);
+        $questions = $this->aiGenerationConfigService->getAssignedQuestions($aiCategoryId, $aiStudioItemId);
 
         $resolvedAnswers = $this->resolveAnswers(
             $questions,

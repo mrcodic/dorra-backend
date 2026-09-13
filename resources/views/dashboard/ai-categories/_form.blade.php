@@ -52,6 +52,7 @@
                 'sort_order' => (int) $studioItem->sort_order,
                 'is_active' => (bool) $studioItem->is_active,
                 'settings' => $studioItem->settings ?? [],
+                'question_ids' => collect($associatedData['studioItemQuestionIds'][$studioItem->id] ?? [])->map(fn ($id) => (int) $id)->values()->all(),
             ],
         ];
     })->all();
@@ -641,6 +642,20 @@
                             <input type="number" id="quick-studio-sort-order" min="0" value="0" class="form-control">
                         </div>
 
+                        <div class="col-12 mb-1">
+                            <label class="form-label">Attach Questions</label>
+                            <select id="quick-studio-question-ids" class="form-select" multiple size="8">
+                                @foreach($questions as $question)
+                                    <option value="{{ $question->id }}">
+                                        {{ $question->title }} — {{ $question->type->label() }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="text-muted">
+                                These questions are added when this Studio Item is selected. Product questions still remain and both sets are merged during generation.
+                            </small>
+                        </div>
+
                         <div class="col-md-6 mb-1">
                             <label class="form-label">Prompt Instructions</label>
                             <textarea
@@ -921,6 +936,7 @@
             $('#quick-studio-credits-cost').val(1);
             $('#quick-studio-sort-order').val(0);
             $('#quick-studio-is-active').prop('checked', true);
+            $('#quick-studio-question-ids').val([]).trigger('change');
             $('#quick-delete-studio-item').addClass('d-none');
         }
 
@@ -937,6 +953,7 @@
             $('#quick-studio-is-active').prop('checked', !!item.is_active);
             $('#quick-studio-prompt-instructions').val(item.settings?.prompt_instructions ?? '');
             $('#quick-studio-negative-rules').val(item.settings?.negative_rules ?? '');
+            $('#quick-studio-question-ids').val((item.question_ids ?? []).map(String)).trigger('change');
 
             if (canDeleteStudioItems) {
                 $('#quick-delete-studio-item').removeClass('d-none');
@@ -1158,6 +1175,7 @@
                 credits_cost: Number($('#quick-studio-credits-cost').val() || 0),
                 sort_order: Number($('#quick-studio-sort-order').val() || 0),
                 is_active: $('#quick-studio-is-active').is(':checked') ? 1 : 0,
+                question_ids: ($('#quick-studio-question-ids').val() ?? []).map(Number),
                 settings: {
                     prompt_instructions: $('#quick-studio-prompt-instructions').val().trim(),
                     negative_rules: $('#quick-studio-negative-rules').val().trim()
@@ -1360,40 +1378,28 @@
                         </button>
                     </div>
 
+                    <div class="row mb-1 quick-option-label-fields">
+                        <div class="col-md-6">
+                            <label class="form-label">Label English *</label>
+                            <input type="text" class="form-control quick-option-label-en" placeholder="e.g. Warm Sunset">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Label Arabic</label>
+                            <input type="text" class="form-control quick-option-label-ar" dir="rtl" placeholder="مثال: غروب دافئ">
+                        </div>
+                    </div>
+
                     <div class="quick-normal-option-fields">
                         <div class="row">
                             <div class="col-md-6">
-                                <label class="form-label">Label English *</label>
-                                <input
-                                    type="text"
-                                    class="form-control quick-option-label-en"
-                                >
+                                <label class="form-label">Prompt Value English</label>
+                                <textarea class="form-control quick-option-prompt-en" rows="2"></textarea>
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label">Label Arabic</label>
-                                <input
-                                    type="text"
-                                    class="form-control quick-option-label-ar"
-                                    dir="rtl"
-                                >
-                            </div>
-
-                            <div class="col-md-6 mt-1">
-                                <label class="form-label">Prompt Value English</label>
-                                <textarea
-                                    class="form-control quick-option-prompt-en"
-                                    rows="2"
-                                ></textarea>
-                            </div>
-
-                            <div class="col-md-6 mt-1">
                                 <label class="form-label">Prompt Value Arabic</label>
-                                <textarea
-                                    class="form-control quick-option-prompt-ar"
-                                    rows="2"
-                                    dir="rtl"
-                                ></textarea>
+                                <textarea class="form-control quick-option-prompt-ar" rows="2" dir="rtl"></textarea>
                             </div>
                         </div>
                     </div>
@@ -1407,7 +1413,7 @@
                                     </label>
 
                                     <small class="text-muted d-block">
-                                        Add the colors that belong to this palette.
+                                        Write a label above for this palette, then add the colors that belong to it.
                                     </small>
                                 </div>
 
@@ -1520,18 +1526,9 @@
             }
 
             const colors = getQuickPaletteColors(optionRow);
-            const optionNumber = optionRow.index() + 1;
             const prompt = colors.length
                 ? `Use this exact color palette: ${colors.join(', ')}`
                 : '';
-
-            optionRow
-                .find('.quick-option-label-en')
-                .val(`Color Palette ${optionNumber}`);
-
-            optionRow
-                .find('.quick-option-label-ar')
-                .val(`لوحة ألوان ${optionNumber}`);
 
             optionRow
                 .find('.quick-option-prompt-en')
@@ -1843,7 +1840,13 @@
                 const row = $(this);
 
                 if (quickPaletteEnabled()) {
+                    const labelEn = row.find('.quick-option-label-en').val().trim();
                     const colors = getQuickPaletteColors(row);
+
+                    if (!labelEn) {
+                        error = 'Write an English label for every color palette.';
+                        return;
+                    }
 
                     if (!colors.length) {
                         error = 'Each color palette option must contain at least one valid color.';
@@ -1854,7 +1857,7 @@
 
                     options.push({
                         label: {
-                            en: row.find('.quick-option-label-en').val().trim(),
+                            en: labelEn,
                             ar: row.find('.quick-option-label-ar').val().trim()
                         },
                         prompt_value: {
@@ -2058,3 +2061,4 @@
         });
     });
 </script>
+

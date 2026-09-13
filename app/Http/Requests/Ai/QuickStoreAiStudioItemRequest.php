@@ -29,6 +29,8 @@ class QuickStoreAiStudioItemRequest extends FormRequest
             'settings' => ['nullable', 'array'],
             'settings.prompt_instructions' => ['nullable', 'string', 'max:5000'],
             'settings.negative_rules' => ['nullable', 'string', 'max:5000'],
+            'question_ids' => ['nullable', 'array'],
+            'question_ids.*' => ['integer', 'distinct', Rule::exists('ai_guide_questions', 'id')->where('is_active', true)],
         ];
     }
 }

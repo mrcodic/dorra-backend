@@ -9,6 +9,7 @@ use App\Http\Requests\Ai\QuickStoreAiStudioItemRequest;
 use App\Http\Requests\Ai\QuickUpdateAiStudioItemRequest;
 use App\Http\Requests\AiCategory\StoreAiCategoryRequest;
 use App\Http\Requests\AiCategory\UpdateAiCategoryRequest;
+use App\Models\AiGuideQuestion;
 use App\Models\AiStudioItem;
 use App\Repositories\Interfaces\AiGuideQuestionRepositoryInterface;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class AiCategoryController extends DashboardController
 {
@@ -31,11 +33,9 @@ class AiCategoryController extends DashboardController
 
         $this->storeRequestClass = new StoreAiCategoryRequest();
         $this->updateRequestClass = new UpdateAiCategoryRequest();
-
         $this->indexView = 'ai-categories.index';
         $this->createView = 'ai-categories.create';
         $this->editView = 'ai-categories.edit';
-
         $this->usePagination = true;
         $this->resourceTable = 'ai_categories';
 
@@ -45,40 +45,26 @@ class AiCategoryController extends DashboardController
             'update' => ['category', 'questions', 'options', 'studioItems'],
         ];
 
-        $categories = $this->categoryRepository->query()
-            ->select(['id', 'name'])
-            ->orderBy('name')
-            ->get();
+        $categories = $this->categoryRepository->query()->select(['id', 'name'])->orderBy('name')->get();
 
         $questions = $this->aiGuideQuestionRepository->query()
             ->where('is_active', true)
-            ->with([
-                'options' => fn($query) => $query
-                    ->where('is_active', true)
-                    ->orderBy('sort_order')
-                    ->orderBy('id'),
-            ])
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get();
+            ->with(['options' => fn($query) => $query->orderBy('sort_order')->orderBy('id')])
+            ->orderBy('sort_order')->orderBy('id')->get();
 
-        // Do not filter by key or active status here anymore.
-        // The same Add/Edit screen is now also the Studio Item management surface.
-        $studioItems = AiStudioItem::query()
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get();
+        $studioItems = AiStudioItem::query()->orderBy('sort_order')->orderBy('id')->get();
+        $studioItemQuestionIds = $studioItems->mapWithKeys(fn($studioItem) => [
+            $studioItem->id => $this->studioItemQuestionIds($studioItem),
+        ])->all();
 
         $associatedData = [
             'categories' => $categories,
             'questions' => $questions,
             'studioItems' => $studioItems,
+            'studioItemQuestionIds' => $studioItemQuestionIds,
         ];
 
-        $this->assoiciatedData = [
-            'create' => $associatedData,
-            'edit' => $associatedData,
-        ];
+        $this->assoiciatedData = ['create' => $associatedData, 'edit' => $associatedData];
     }
 
     public function getData(): JsonResponse
@@ -86,20 +72,12 @@ class AiCategoryController extends DashboardController
         return $this->aiCategoryService->getData();
     }
 
-    public function quickStoreQuestion(
-        QuickStoreAiGuideQuestionRequest $request,
-        AiGuideQuestionService $aiGuideQuestionService
-    ): JsonResponse {
-        $question = $aiGuideQuestionService->storeResource(
-            $request->validated(),
-            relationsToLoad: ['options']
-        );
-
+    public function quickStoreQuestion(QuickStoreAiGuideQuestionRequest $request, AiGuideQuestionService $aiGuideQuestionService): JsonResponse
+    {
+        $question = $aiGuideQuestionService->storeResource($request->validated(), relationsToLoad: ['options']);
         $question->load('options');
 
-        $isColorPalette = $question->options->contains(
-            fn($option) => !empty(data_get($option->ui_data, 'colors', []))
-        );
+        $isColorPalette = $question->options->contains(fn($option) => !empty(data_get($option->ui_data, 'colors', [])));
 
         return Response::api(data: [
             'id' => $question->id,
@@ -123,39 +101,38 @@ class AiCategoryController extends DashboardController
     public function quickStoreStudioItem(QuickStoreAiStudioItemRequest $request): JsonResponse
     {
         $data = $request->validated();
-        $data['key'] = $this->generateStudioItemKey((string) data_get($data, 'name.en', 'studio-item'));
+        $questionIds = array_values($data['question_ids'] ?? []);
+        unset($data['question_ids']);
 
-        $studioItem = AiStudioItem::query()->create($data);
+        $studioItem = DB::transaction(function () use ($data, $questionIds) {
+            $data['key'] = $this->generateStudioItemKey((string) data_get($data, 'name.en', 'studio-item'));
+            $studioItem = AiStudioItem::query()->create($data);
+            $this->syncStudioItemQuestions($studioItem, $questionIds);
+            return $studioItem->refresh();
+        });
 
-        return Response::api(
-            data: $this->studioItemPayload($studioItem),
-            message: 'Studio Item created successfully.'
-        );
+        return Response::api(data: $this->studioItemPayload($studioItem), message: 'Studio Item created successfully.');
     }
 
-    public function quickUpdateStudioItem(
-        QuickUpdateAiStudioItemRequest $request,
-        AiStudioItem $studioItem
-    ): JsonResponse {
+    public function quickUpdateStudioItem(QuickUpdateAiStudioItemRequest $request, AiStudioItem $studioItem): JsonResponse
+    {
         $data = $request->validated();
+        $questionIds = array_values($data['question_ids'] ?? []);
+        unset($data['question_ids']);
 
-        if (array_key_exists('settings', $data)) {
-            $data['settings'] = array_replace(
-                $studioItem->settings ?? [],
-                $data['settings'] ?? []
-            );
-        }
+        DB::transaction(function () use ($studioItem, $data, $questionIds) {
+            if (array_key_exists('settings', $data)) {
+                $data['settings'] = array_replace($studioItem->settings ?? [], $data['settings'] ?? []);
+            }
 
-        // Key is intentionally never changed on edit because it is an API/system identifier.
-        unset($data['key']);
+            unset($data['key']);
+            $studioItem->update($data);
+            $this->syncStudioItemQuestions($studioItem, $questionIds);
+        });
 
-        $studioItem->update($data);
         $studioItem->refresh();
 
-        return Response::api(
-            data: $this->studioItemPayload($studioItem),
-            message: 'Studio Item updated successfully.'
-        );
+        return Response::api(data: $this->studioItemPayload($studioItem), message: 'Studio Item updated successfully.');
     }
 
     public function quickDeleteStudioItem(AiStudioItem $studioItem): JsonResponse
@@ -167,21 +144,14 @@ class AiCategoryController extends DashboardController
                 DB::table('ai_category_studio_items')->where('ai_studio_item_id', $studioItem->id)->delete();
             }
 
-            // Clean old polymorphic assignments if they still exist from the previous architecture.
-            $assignableTypes = ['ai_studio_item', AiStudioItem::class];
+            $assignableTypes = $this->studioItemMorphTypes($studioItem);
 
             if (Schema::hasTable('ai_guide_question_assignments')) {
-                DB::table('ai_guide_question_assignments')
-                    ->where('assignable_id', $studioItem->id)
-                    ->whereIn('assignable_type', $assignableTypes)
-                    ->delete();
+                DB::table('ai_guide_question_assignments')->where('assignable_id', $studioItem->id)->whereIn('assignable_type', $assignableTypes)->delete();
             }
 
             if (Schema::hasTable('ai_guide_option_assignments')) {
-                DB::table('ai_guide_option_assignments')
-                    ->where('assignable_id', $studioItem->id)
-                    ->whereIn('assignable_type', $assignableTypes)
-                    ->delete();
+                DB::table('ai_guide_option_assignments')->where('assignable_id', $studioItem->id)->whereIn('assignable_type', $assignableTypes)->delete();
             }
 
             $studioItem->delete();
@@ -190,15 +160,83 @@ class AiCategoryController extends DashboardController
         return Response::api(message: 'Studio Item deleted successfully.');
     }
 
+    private function syncStudioItemQuestions(AiStudioItem $studioItem, array $questionIds): void
+    {
+        $questionIds = collect($questionIds)->map(fn($id) => (int) $id)->filter()->unique()->values();
+
+        $questions = AiGuideQuestion::query()
+            ->where('is_active', true)
+            ->whereIn('id', $questionIds)
+            ->with('options')
+            ->get()
+            ->keyBy('id');
+
+        if ($questions->count() !== $questionIds->count()) {
+            throw ValidationException::withMessages([
+                'question_ids' => ['One or more selected questions are unavailable.'],
+            ]);
+        }
+
+        $assignableTypes = $this->studioItemMorphTypes($studioItem);
+        $morphType = $studioItem->getMorphClass();
+
+        DB::table('ai_guide_question_assignments')
+            ->where('assignable_id', $studioItem->id)
+            ->whereIn('assignable_type', $assignableTypes)
+            ->delete();
+
+        DB::table('ai_guide_option_assignments')
+            ->where('assignable_id', $studioItem->id)
+            ->whereIn('assignable_type', $assignableTypes)
+            ->delete();
+
+        if ($questionIds->isEmpty()) return;
+
+        $now = now();
+        $questionRows = [];
+        $optionRows = [];
+
+        foreach ($questionIds as $sortOrder => $questionId) {
+            $question = $questions->get($questionId);
+
+            $questionRows[] = [
+                'ai_guide_question_id' => $questionId,
+                'assignable_type' => $morphType,
+                'assignable_id' => $studioItem->id,
+                'required' => null,
+                'is_active' => true,
+                'sort_order' => $sortOrder,
+                'options_mode' => 'all',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+
+            if (!in_array($question->type?->value ?? $question->type, ['single_select', 'multi_select'], true)) continue;
+
+            foreach ($question->options->filter(fn($option) => (bool) ($option->is_active ?? true))->values() as $optionSort => $option) {
+                $optionRows[] = [
+                    'ai_guide_question_option_id' => $option->id,
+                    'assignable_type' => $morphType,
+                    'assignable_id' => $studioItem->id,
+                    'prompt_value_override' => null,
+                    'is_active' => true,
+                    'sort_order' => $optionSort,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+        }
+
+        if ($questionRows) DB::table('ai_guide_question_assignments')->insert($questionRows);
+        if ($optionRows) DB::table('ai_guide_option_assignments')->insert($optionRows);
+    }
+
     private function studioItemPayload(AiStudioItem $studioItem): array
     {
         $generationType = $studioItem->generation_type;
-        $generationTypeValue = $generationType instanceof AiGenerationTypeEnum
-            ? $generationType->value
-            : (string) $generationType;
-        $generationTypeLabel = $generationType instanceof AiGenerationTypeEnum
-            ? $generationType->label()
-            : Str::headline($generationTypeValue);
+        $generationTypeValue = $generationType instanceof AiGenerationTypeEnum ? $generationType->value : (string) $generationType;
+        $generationTypeLabel = $generationType instanceof AiGenerationTypeEnum ? $generationType->label() : Str::headline($generationTypeValue);
+        $questionIds = $this->studioItemQuestionIds($studioItem);
 
         return [
             'id' => $studioItem->id,
@@ -215,7 +253,34 @@ class AiCategoryController extends DashboardController
             'sort_order' => (int) $studioItem->sort_order,
             'is_active' => (bool) $studioItem->is_active,
             'settings' => $studioItem->settings ?? [],
+            'question_ids' => $questionIds,
+            'question_count' => count($questionIds),
         ];
+    }
+
+    private function studioItemQuestionIds(AiStudioItem $studioItem): array
+    {
+        if (!Schema::hasTable('ai_guide_question_assignments')) return [];
+
+        return DB::table('ai_guide_question_assignments')
+            ->where('assignable_id', $studioItem->id)
+            ->whereIn('assignable_type', $this->studioItemMorphTypes($studioItem))
+            ->where(function ($query) {
+                $query->whereNull('is_active')->orWhere('is_active', true);
+            })
+            ->orderByRaw('CASE WHEN sort_order IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->pluck('ai_guide_question_id')
+            ->map(fn($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    private function studioItemMorphTypes(AiStudioItem $studioItem): array
+    {
+        return array_values(array_unique([$studioItem->getMorphClass(), 'ai_studio_item', AiStudioItem::class]));
     }
 
     private function generateStudioItemKey(string $name): string
