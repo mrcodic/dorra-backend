@@ -152,9 +152,18 @@ class AiGuideQuestionService extends BaseService
         }
 
 
+        /*
+         * Existing values must remain stable.
+         * Changing an admin label must not change the API identifier.
+         */
+        $value = $existing?->value ?: $this->generateOptionValue(
+            $questionId,
+            $option['label']['en']  ?: "color_palette_" . ($index + 1)
+        );
 
         return [
             'ai_guide_question_id' => $questionId,
+            'value' => $value,
             'label' => $label,
             'prompt_value' => $promptValue ?: null,
             'ui_data' => $uiData,
