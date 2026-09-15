@@ -897,6 +897,7 @@
         const singleSelect = @json(\App\Enums\Ai\AiGuideQuestionTypeEnum::SINGLE_SELECT->value);
         const multiSelect = @json(\App\Enums\Ai\AiGuideQuestionTypeEnum::MULTI_SELECT->value);
         const quickStoreUrl = @json(route('ai-categories.questions.quick-store'));
+        const currentAiCategoryId = @json($aiCategory?->id);
         const csrfToken = @json(csrf_token());
         const quickStudioStoreUrl = @json(route('ai-categories.studio-items.quick-store'));
         const quickStudioUpdateUrlTemplate = @json(route('ai-categories.studio-items.quick-update', ['studioItem' => '__STUDIO_ITEM_ID__']));
@@ -2012,6 +2013,7 @@
                     'Accept': 'application/json'
                 },
                 data: {
+                    ai_category_id: currentAiCategoryId,
                     title: {
                         en: titleEn,
                         ar: $('#quick-title-ar').val().trim()

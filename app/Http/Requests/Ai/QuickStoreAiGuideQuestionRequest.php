@@ -47,6 +47,7 @@ class QuickStoreAiGuideQuestionRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'ai_category_id' => ['nullable', 'integer', 'exists:ai_categories,id'],
             'title' => ['required', 'array'],
             'title.en' => ['required', 'string', 'max:255'],
             'title.ar' => ['nullable', 'string', 'max:255'],

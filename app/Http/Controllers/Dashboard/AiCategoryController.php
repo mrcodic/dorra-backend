@@ -143,10 +143,24 @@ class AiCategoryController extends DashboardController
 
     public function quickStoreQuestion(QuickStoreAiGuideQuestionRequest $request, AiGuideQuestionService $aiGuideQuestionService): JsonResponse
     {
-        $question = $aiGuideQuestionService->storeResource($request->validated(), relationsToLoad: ['options']);
-        $question->load('options');
+        $data = $request->validated();
+        $aiCategoryId = Arr::pull($data, 'ai_category_id');
 
-        $isColorPalette = $question->options->contains(fn($option) => !empty(data_get($option->ui_data, 'colors', [])));
+        $question = DB::transaction(function () use ($data, $aiCategoryId, $aiGuideQuestionService) {
+            $question = $aiGuideQuestionService->storeResource($data, relationsToLoad: ['options']);
+            $question->load('options');
+
+            if ($aiCategoryId) {
+                $aiCategory = AiCategory::query()->findOrFail($aiCategoryId);
+                $this->attachQuestionToAiCategory($aiCategory, $question);
+            }
+
+            return $question;
+        });
+
+        $isColorPalette = $question->options->contains(
+            fn($option) => !empty(data_get($option->ui_data, 'colors', []))
+        );
 
         return Response::api(data: [
             'id' => $question->id,
@@ -166,7 +180,44 @@ class AiCategoryController extends DashboardController
             ])->values()->all(),
         ]);
     }
+    private function attachQuestionToAiCategory(AiCategory $aiCategory, AiGuideQuestion $question): void
+    {
+        $morphType = $aiCategory->getMorphClass();
+        $now = now();
 
+        DB::table('ai_guide_question_assignments')->updateOrInsert(
+            [
+                'ai_guide_question_id' => $question->id,
+                'assignable_type' => $morphType,
+                'assignable_id' => $aiCategory->id,
+            ],
+            [
+                'required' => (bool) $question->required,
+                'is_active' => true,
+                'sort_order' => (int) ($question->sort_order ?? 0),
+                'options_mode' => 'all',
+                'updated_at' => $now,
+            ]
+        );
+
+        foreach ($question->options as $index => $option) {
+            if (!(bool) ($option->is_active ?? true)) continue;
+
+            DB::table('ai_guide_option_assignments')->updateOrInsert(
+                [
+                    'ai_guide_question_option_id' => $option->id,
+                    'assignable_type' => $morphType,
+                    'assignable_id' => $aiCategory->id,
+                ],
+                [
+                    'prompt_value_override' => null,
+                    'is_active' => true,
+                    'sort_order' => $index,
+                    'updated_at' => $now,
+                ]
+            );
+        }
+    }
     public function quickStoreStudioItem(QuickStoreAiStudioItemRequest $request): JsonResponse
     {
         $data = $request->validated();
