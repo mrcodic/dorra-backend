@@ -68,7 +68,7 @@
                     <strong>Drop image here or click to upload</strong>
 
                     <div class="text-muted small mt-50">
-                        JPG, PNG, WEBP - Max 2MB (365x154px)
+                        JPG, PNG, WEBP - Max 2MB (365x154)
                     </div>
                 </div>
 
