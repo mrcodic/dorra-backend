@@ -33,9 +33,11 @@ class AiCategoryController extends DashboardController
 
         $this->storeRequestClass = new StoreAiCategoryRequest();
         $this->updateRequestClass = new UpdateAiCategoryRequest();
+
         $this->indexView = 'ai-categories.index';
         $this->createView = 'ai-categories.create';
         $this->editView = 'ai-categories.edit';
+
         $this->usePagination = true;
         $this->resourceTable = 'ai_categories';
 
@@ -45,21 +47,79 @@ class AiCategoryController extends DashboardController
             'update' => ['category', 'questions', 'options', 'studioItems'],
         ];
 
-        $categories = $this->categoryRepository->query()->select(['id', 'name'])->orderBy('name')->get();
+        $categories = $this->categoryRepository->query()
+            ->select(['id', 'name'])
+            ->orderBy('name')
+            ->get();
+
+        $routeAiCategory = request()->route('ai_category');
+
+        $currentAiCategoryId = $routeAiCategory instanceof \App\Models\AiCategory
+            ? $routeAiCategory->id
+            : (is_numeric($routeAiCategory) ? (int) $routeAiCategory : null);
+
+        $aiCategoryMorph = (new \App\Models\AiCategory())->getMorphClass();
 
         $questions = $this->aiGuideQuestionRepository->query()
             ->where('is_active', true)
-            ->with(['options' => fn($query) => $query->orderBy('sort_order')->orderBy('id')])
-            ->orderBy('sort_order')->orderBy('id')->get();
+            ->where(function ($query) use ($currentAiCategoryId, $aiCategoryMorph) {
+                $query->whereNotExists(function ($subQuery) use ($aiCategoryMorph) {
+                    $subQuery
+                        ->selectRaw('1')
+                        ->from('ai_guide_question_assignments')
+                        ->whereColumn(
+                            'ai_guide_question_assignments.ai_guide_question_id',
+                            'ai_guide_questions.id'
+                        )
+                        ->where(
+                            'ai_guide_question_assignments.assignable_type',
+                            $aiCategoryMorph
+                        );
+                });
 
-        $studioItems = AiStudioItem::query()
-            ->with(['questions' => fn($query) => $query->select('ai_guide_questions.id')])
+                if ($currentAiCategoryId) {
+                    $query->orWhereExists(function ($subQuery) use ($currentAiCategoryId, $aiCategoryMorph) {
+                        $subQuery
+                            ->selectRaw('1')
+                            ->from('ai_guide_question_assignments')
+                            ->whereColumn(
+                                'ai_guide_question_assignments.ai_guide_question_id',
+                                'ai_guide_questions.id'
+                            )
+                            ->where(
+                                'ai_guide_question_assignments.assignable_type',
+                                $aiCategoryMorph
+                            )
+                            ->where(
+                                'ai_guide_question_assignments.assignable_id',
+                                $currentAiCategoryId
+                            );
+                    });
+                }
+            })
+            ->with([
+                'options' => fn($query) => $query
+                    ->orderBy('sort_order')
+                    ->orderBy('id'),
+            ])
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get();
-        $studioItemQuestionIds = $studioItems->mapWithKeys(fn($studioItem) => [
-            $studioItem->id => $this->studioItemQuestionIds($studioItem),
-        ])->all();
+
+        $studioItems = AiStudioItem::query()
+            ->with([
+                'questions' => fn($query) => $query
+                    ->select('ai_guide_questions.id'),
+            ])
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        $studioItemQuestionIds = $studioItems
+            ->mapWithKeys(fn($studioItem) => [
+                $studioItem->id => $this->studioItemQuestionIds($studioItem),
+            ])
+            ->all();
 
         $associatedData = [
             'categories' => $categories,
@@ -68,7 +128,10 @@ class AiCategoryController extends DashboardController
             'studioItemQuestionIds' => $studioItemQuestionIds,
         ];
 
-        $this->assoiciatedData = ['create' => $associatedData, 'edit' => $associatedData];
+        $this->assoiciatedData = [
+            'create' => $associatedData,
+            'edit' => $associatedData,
+        ];
     }
 
     public function getData(): JsonResponse
