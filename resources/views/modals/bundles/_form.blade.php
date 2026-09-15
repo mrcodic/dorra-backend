@@ -68,14 +68,14 @@
                     <strong>Drop image here or click to upload</strong>
 
                     <div class="text-muted small mt-50">
-                        JPG, PNG, WEBP - Max 2MB
+                        JPG, PNG, WEBP - Max 2MB (365x154px)
                     </div>
                 </div>
 
                 <img
                     src=""
                     class="bundle-image-preview d-none rounded mt-1"
-                    style="max-height: 160px; object-fit: cover;"
+                    style="width: 365px; height: 154px; object-fit: cover;"
                     alt="Bundle image preview"
                 >
             </div>
