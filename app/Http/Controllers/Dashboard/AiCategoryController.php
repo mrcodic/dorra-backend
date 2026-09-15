@@ -52,7 +52,9 @@ class AiCategoryController extends DashboardController
             ->orderBy('name')
             ->get();
 
-        $routeAiCategory = request()->route('ai_category');
+        $routeAiCategory = request()->route('ai_category')
+            ?? request()->route('aiCategory')
+            ?? request()->route('id');
 
         $currentAiCategoryId = $routeAiCategory instanceof \App\Models\AiCategory
             ? $routeAiCategory->id
