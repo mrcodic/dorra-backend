@@ -28,8 +28,8 @@ class UpdateUserRequest extends BaseRequest
     {
         $isoCode = CountryCode::find($this->country_code_id)?->iso_code ?? 'US';
         return [
-            'first_name' => ['sometimes', 'string', 'max:255'],
-            'last_name' => ['sometimes', 'string', 'max:255'],
+            'first_name' => ['sometimes', 'string', 'min:2', 'max:30'],
+            'last_name' => ['sometimes', 'string', 'min:2', 'max:30'],
             'email' => ['sometimes', 'email', Rule::unique('users', 'email')->whereNull('deleted_at')->ignore($id)],
             'phone_number' => ['sometimes', 'string', Rule::unique('users', 'phone_number')->ignore($id),],
             'full_phone_number' => ['nullable', 'string', new Phone($isoCode)],

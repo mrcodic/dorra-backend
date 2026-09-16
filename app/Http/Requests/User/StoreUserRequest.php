@@ -42,8 +42,8 @@ class StoreUserRequest extends BaseRequest
     {
         $isoCode = CountryCode::find($this->country_code_id)?->iso_code ?? 'US';
         return [
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string',  'min:2', 'max:30'],
+            'last_name' => ['required', 'string', 'min:2', 'max:30'],
             'email' => [
                 'required',
                 'email',
