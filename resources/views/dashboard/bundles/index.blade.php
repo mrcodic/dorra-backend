@@ -78,7 +78,6 @@
                         <th>Bundle</th>
                         <th>Trigger</th>
                         <th>Rewards</th>
-                        <th>Usage</th>
                         <th>Popup</th>
                         <th>Status</th>
                         <th>Actions</th>
