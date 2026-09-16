@@ -11,7 +11,7 @@ $.ajaxSetup({
         processing: true,
         serverSide: true,
         searching: false,
-        orderable: false,
+        // orderable: false,
 
         ajax: {
             url: bundlesDataUrl,
