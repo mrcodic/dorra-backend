@@ -1,7 +1,10 @@
 @php
-  $category = \App\Models\Category::find(request('product_without_category_id'));
+    $categoryId = request('product_without_category_id');
+    $category = $categoryId
+        ? \Illuminate\Support\Facades\Cache::remember("category_{$categoryId}", 300, fn () => \App\Models\Category::find($categoryId))
+        : null;
     $isTableau = $category && $category->is_tableau;
-  @endphp
+@endphp
 <div class="modal new-user-modal fade" id="templateEditorModal">
     <div class="modal-dialog modal-dialog-centered">
         <div class="add-new-user modal-content pt-0 px-1">
