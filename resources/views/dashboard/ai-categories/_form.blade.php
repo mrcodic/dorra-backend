@@ -3147,10 +3147,10 @@
                 const parentQuestionId = Number(card.find('.condition-parent-question').val() || 0);
                 const parentOptionId = Number(card.find('.condition-parent-option').val() || 0);
 
-                if (!parentQuestionId || !parentOptionId) {
-                    conditionError = 'Choose the parent question and answer for every conditional question.';
-                    return;
-                }
+                // if (!parentQuestionId || !parentOptionId) {
+                //     conditionError = 'Choose the parent question and answer for every conditional question.';
+                //     return;
+                // }
 
                 if (parentQuestionId === childQuestionId) {
                     conditionError = 'A question cannot depend on itself.';
