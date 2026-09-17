@@ -248,6 +248,7 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
         Route::get('carousels', 'carousels');
         Route::get('settings/visibility-sections', 'visibilitySections');
         Route::get('settings/statistics', 'statistics');
+        Route::get('settings/bundle', 'bundle');
         Route::get('partners', 'partners');
         Route::get('reviews-with-images', 'reviewsWithImages');
         Route::get('reviews-without-images', 'reviewsWithoutImages');
