@@ -32,10 +32,10 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6 mb-2">
-                        <label class="label-text mb-1">Usage</label>
-                        <input id="showBundleRepeat" class="form-control" readonly>
-                    </div>
+{{--                    <div class="col-md-6 mb-2">--}}
+{{--                        <label class="label-text mb-1">Usage</label>--}}
+{{--                        <input id="showBundleRepeat" class="form-control" readonly>--}}
+{{--                    </div>--}}
 
                     <div class="col-md-6 mb-2">
                         <label class="label-text mb-1">Display On Visit</label>
