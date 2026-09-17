@@ -8,7 +8,7 @@
     );
 
     $savedOptions = $question?->options?->map(function ($option) {
-        $media = $option->getFirstMedia(getMediaCollectionName('option_image'));
+        $media = $option->getFirstMedia('option_image');
         return [
             'id' => $option->id,
             'label' => [
