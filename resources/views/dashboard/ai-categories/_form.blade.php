@@ -61,6 +61,7 @@
 @endphp
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.css">
 
 <style>
     .ai-config-card {
@@ -75,6 +76,28 @@
 
     .question-options-panel {
         background: #fafafa;
+    }
+
+    .quick-option-dropzone {
+        min-height: 120px;
+        border: 1px dashed #d8d6de;
+        border-radius: .357rem;
+        background: #fff;
+        padding: 12px;
+    }
+
+    .quick-option-dropzone .dz-message {
+        margin: 1rem 0;
+        color: #6e6b7b;
+    }
+
+    .quick-option-dropzone .dz-preview {
+        margin: 8px;
+    }
+
+    .quick-option-dropzone .dz-preview .dz-image {
+        width: 90px;
+        height: 90px;
     }
 </style>
 
@@ -737,7 +760,6 @@
                             The question is created globally, then automatically selected for this product.
                         </small>
                     </div>
-                    <input type="hidden" class="quick-option-media-id">
                     <button
                         type="button"
                         class="btn-close"
@@ -889,6 +911,7 @@
 <script src="https://unpkg.com/feather-icons"></script>
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
 
 <script>
     $(function () {
@@ -897,8 +920,13 @@
         const singleSelect = @json(\App\Enums\Ai\AiGuideQuestionTypeEnum::SINGLE_SELECT->value);
         const multiSelect = @json(\App\Enums\Ai\AiGuideQuestionTypeEnum::MULTI_SELECT->value);
         const quickStoreUrl = @json(route('ai-categories.questions.quick-store'));
+        const mediaStoreUrl = @json(route('media.store'));
         const currentAiCategoryId = @json($aiCategory?->id);
         const csrfToken = @json(csrf_token());
+
+        if (window.Dropzone) {
+            Dropzone.autoDiscover = false;
+        }
         const quickStudioStoreUrl = @json(route('ai-categories.studio-items.quick-store'));
         const quickStudioUpdateUrlTemplate = @json(route('ai-categories.studio-items.quick-update', ['studioItem' => '__STUDIO_ITEM_ID__']));
         const quickStudioDeleteUrlTemplate = @json(route('ai-categories.studio-items.quick-delete', ['studioItem' => '__STUDIO_ITEM_ID__']));
@@ -1422,6 +1450,86 @@
             toggleQuickOptions();
         }
 
+        function initQuickOptionDropzone(optionRow) {
+            if (!window.Dropzone) {
+                console.error('Dropzone is not loaded.');
+                return;
+            }
+
+            const element = optionRow.find('.quick-option-dropzone')[0];
+
+            if (!element || element.dropzone) {
+                return;
+            }
+
+            const hiddenInput = optionRow.find('.quick-option-media-id');
+
+            new Dropzone(element, {
+                url: mediaStoreUrl,
+                maxFiles: 1,
+                acceptedFiles: 'image/*',
+                addRemoveLinks: true,
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+
+                success: function (file, response) {
+                    const mediaId = response?.data?.id ?? null;
+                    const imageUrl = response?.data?.original_url ?? response?.data?.url ?? null;
+
+                    if (!mediaId) {
+                        hiddenInput.val('');
+                        toast('Image uploaded but media ID was not returned.');
+                        this.removeFile(file);
+                        return;
+                    }
+
+                    hiddenInput.val(mediaId);
+                    file._mediaId = mediaId;
+                    file._imageUrl = imageUrl;
+                },
+
+                removedfile: function (file) {
+                    if (file.previewElement) {
+                        file.previewElement.remove();
+                    }
+
+                    if (
+                        !file._mediaId
+                        || String(hiddenInput.val()) === String(file._mediaId)
+                    ) {
+                        hiddenInput.val('');
+                    }
+                },
+
+                maxfilesexceeded: function (file) {
+                    this.removeAllFiles(true);
+                    this.addFile(file);
+                },
+
+                error: function (file, response) {
+                    const message = typeof response === 'string'
+                        ? response
+                        : response?.message ?? 'Unable to upload image.';
+
+                    toast(message);
+
+                    if (file.previewElement) {
+                        file.previewElement.classList.add('dz-error');
+                    }
+                }
+            });
+        }
+
+        function destroyQuickOptionDropzone(optionRow) {
+            const element = optionRow.find('.quick-option-dropzone')[0];
+
+            if (element?.dropzone) {
+                element.dropzone.destroy();
+            }
+        }
+
         function addQuickOption() {
             const index = quickOptionIndex++;
 
@@ -1465,6 +1573,22 @@
                                 <label class="form-label">Prompt Value Arabic</label>
                                 <textarea class="form-control quick-option-prompt-ar" rows="2" dir="rtl"></textarea>
                             </div>
+
+                            <div class="col-12 mt-1">
+                                <label class="form-label">Option Image</label>
+
+                                <div class="dropzone quick-option-dropzone">
+                                    <div class="dz-message">
+                                        Drop image here or click to upload
+                                    </div>
+                                </div>
+
+                                <input type="hidden" class="quick-option-media-id">
+
+                                <small class="text-muted d-block mt-50">
+                                    Optional. One image per option.
+                                </small>
+                            </div>
                         </div>
                     </div>
 
@@ -1498,6 +1622,8 @@
             `);
 
             const row = $('#quick-options-container .quick-option-row').last();
+
+            initQuickOptionDropzone(row);
 
             if (quickPaletteEnabled()) {
                 row.find('.quick-normal-option-fields').hide();
@@ -1625,7 +1751,10 @@
         });
 
         $(document).on('click', '.quick-remove-option', function () {
-            $(this).closest('.quick-option-row').remove();
+            const row = $(this).closest('.quick-option-row');
+
+            destroyQuickOptionDropzone(row);
+            row.remove();
 
             if (quickPaletteEnabled()) {
                 updateAllQuickPaletteValues();
@@ -1684,6 +1813,10 @@
 
             $('#quick-question-type').val(singleSelect);
 
+            $('#quick-options-container .quick-option-row').each(function () {
+                destroyQuickOptionDropzone($(this));
+            });
+
             $('#quick-options-container').empty();
 
             quickOptionIndex = 0;
@@ -1693,6 +1826,20 @@
         }
 
         function buildOptionVisual(option) {
+            const imageUrl = option.image ?? option.image_url ?? null;
+
+            if (imageUrl) {
+                return `
+                    <div class="mt-1">
+                        <img
+                            src="${escapeHtml(imageUrl)}"
+                            alt=""
+                            style="width:100%;height:90px;object-fit:cover;border-radius:6px"
+                        >
+                    </div>
+                `;
+            }
+
             const colors = Array.isArray(option.colors)
                 ? option.colors
                     .map(normalizeHexColor)
@@ -1930,8 +2077,6 @@
                             ar: row.find('.quick-option-prompt-ar').val().trim()
                         },
 
-                        media_id: row.find('.quick-option-media-id').val() || null,
-
                         is_active: 1
                     });
                     return;
@@ -1956,6 +2101,7 @@
                         en: row.find('.quick-option-prompt-en').val().trim(),
                         ar: row.find('.quick-option-prompt-ar').val().trim()
                     },
+                    media_id: row.find('.quick-option-media-id').val() || null,
                     is_active: 1
                 });
             });
@@ -2126,5 +2272,6 @@
         });
     });
 </script>
+
 
 
