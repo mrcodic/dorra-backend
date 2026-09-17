@@ -35,6 +35,44 @@
 
     $oldQuestions = old('questions');
 
+    /*
+     * Conditional visibility belongs to the question assignment, not the global question.
+     * Backend can provide:
+     * $associatedData['questionConditions'][question_id] = [
+     *     'parent_question_id' => 1,
+     *     'parent_option_id' => 4,
+     *     'operator' => 'selected',
+     * ];
+     */
+    $questionConditions = collect($associatedData['questionConditions'] ?? []);
+
+    $conditionQuestionsPayload = $questions
+        ->filter(fn ($question) => in_array(
+            $question->type?->value ?? $question->type,
+            [
+                \App\Enums\Ai\AiGuideQuestionTypeEnum::SINGLE_SELECT->value,
+                \App\Enums\Ai\AiGuideQuestionTypeEnum::MULTI_SELECT->value,
+            ],
+            true
+        ))
+        ->mapWithKeys(function ($question) {
+            return [
+                (int) $question->id => [
+                    'id' => (int) $question->id,
+                    'title' => $question->title,
+                    'options' => $question->options
+                        ->where('is_active', true)
+                        ->values()
+                        ->map(fn ($option) => [
+                            'id' => (int) $option->id,
+                            'label' => $option->label,
+                        ])
+                        ->all(),
+                ],
+            ];
+        })
+        ->all();
+
     $studioItemsPayload = $studioItems->mapWithKeys(function ($studioItem) {
         return [
             $studioItem->id => [
@@ -76,6 +114,29 @@
 
     .question-options-panel {
         background: #fafafa;
+    }
+
+    .question-condition-settings {
+        background: #fcfbff;
+    }
+
+    .question-condition-panel {
+        border: 1px solid rgba(115, 103, 240, .22);
+        background: rgba(115, 103, 240, .035);
+        border-radius: .5rem;
+    }
+
+    .question-condition-summary {
+        border: 1px solid rgba(255, 159, 67, .3);
+        background: rgba(255, 159, 67, .08);
+        color: #a15c11;
+        border-radius: .357rem;
+        padding: .65rem .75rem;
+        font-size: .85rem;
+    }
+
+    .question-condition-badge {
+        white-space: nowrap;
     }
 
     .quick-option-dropzone {
@@ -479,6 +540,24 @@
                         ],
                         true
                     );
+
+                    $savedCondition = $oldRow !== null
+                        ? data_get($oldRow, 'condition', [])
+                        : ($questionConditions->get($question->id) ?? []);
+
+                    $conditionEnabled = $oldRow !== null
+                        ? (bool) data_get($oldRow, 'condition_enabled', false)
+                        : (
+                            !empty(data_get($savedCondition, 'parent_question_id'))
+                            && !empty(data_get($savedCondition, 'parent_option_id'))
+                        );
+
+                    $conditionParentQuestionId = (int) data_get($savedCondition, 'parent_question_id', 0);
+                    $conditionParentOptionId = (int) data_get($savedCondition, 'parent_option_id', 0);
+                    $conditionOperator = (string) data_get($savedCondition, 'operator', 'selected');
+
+                    $conditionParentQuestion = $questions->firstWhere('id', $conditionParentQuestionId);
+                    $conditionParentOption = $conditionParentQuestion?->options?->firstWhere('id', $conditionParentOptionId);
                 @endphp
 
                 <div
@@ -528,6 +607,12 @@
                                         {{ $question->type->label() }}
                                     </span>
 
+                                    <span
+                                        class="badge bg-light-warning text-warning question-condition-badge {{ $conditionEnabled ? '' : 'd-none' }}"
+                                    >
+                                        Conditional
+                                    </span>
+
                                     <div class="form-check form-switch">
                                         <input
                                             type="hidden"
@@ -558,6 +643,124 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="question-condition-settings border-top p-1">
+                        <div class="d-flex justify-content-between align-items-center gap-1">
+                            <div>
+                                <div class="fw-bolder">Conditional Visibility</div>
+                                <small class="text-muted">
+                                    Show this question only when a previous answer matches.
+                                </small>
+                            </div>
+
+                            <div class="form-check form-switch mb-0">
+                                <input
+                                    type="hidden"
+                                    name="questions[{{ $question->id }}][condition_enabled]"
+                                    value="0"
+                                >
+
+                                <input
+                                    type="checkbox"
+                                    id="question-condition-{{ $question->id }}"
+                                    name="questions[{{ $question->id }}][condition_enabled]"
+                                    value="1"
+                                    class="form-check-input question-condition-toggle"
+                                    @checked($conditionEnabled)
+                                >
+
+                                <label
+                                    class="form-check-label"
+                                    for="question-condition-{{ $question->id }}"
+                                >
+                                    Conditional
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="question-condition-panel p-1 mt-1 {{ $conditionEnabled ? '' : 'd-none' }}">
+                            <div class="row">
+                                <div class="col-md-5 mb-1">
+                                    <label class="form-label">Parent Question *</label>
+
+                                    <select
+                                        name="questions[{{ $question->id }}][condition][parent_question_id]"
+                                        class="form-select condition-parent-question"
+                                        data-current-option-id="{{ $conditionParentOptionId ?: '' }}"
+                                    >
+                                        <option value="">Select parent question</option>
+
+                                        @foreach($conditionQuestionsPayload as $parentQuestion)
+                                            @continue((int) $parentQuestion['id'] === (int) $question->id)
+
+                                            <option
+                                                value="{{ $parentQuestion['id'] }}"
+                                                @selected($conditionParentQuestionId === (int) $parentQuestion['id'])
+                                            >
+                                                {{ $parentQuestion['title'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3 mb-1">
+                                    <label class="form-label">Operator *</label>
+
+                                    <select
+                                        name="questions[{{ $question->id }}][condition][operator]"
+                                        class="form-select condition-operator"
+                                    >
+                                        <option value="selected" @selected($conditionOperator === 'selected')>
+                                            Selected
+                                        </option>
+                                        <option value="not_selected" @selected($conditionOperator === 'not_selected')>
+                                            Not selected
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4 mb-1">
+                                    <label class="form-label">Answer *</label>
+
+                                    <select
+                                        name="questions[{{ $question->id }}][condition][parent_option_id]"
+                                        class="form-select condition-parent-option"
+                                    >
+                                        <option value="">Select answer</option>
+
+                                        @if($conditionParentQuestionId && isset($conditionQuestionsPayload[$conditionParentQuestionId]))
+                                            @foreach($conditionQuestionsPayload[$conditionParentQuestionId]['options'] as $parentOption)
+                                                <option
+                                                    value="{{ $parentOption['id'] }}"
+                                                    @selected($conditionParentOptionId === (int) $parentOption['id'])
+                                                >
+                                                    {{ $parentOption['label'] }}
+                                                </option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="question-condition-summary {{ $conditionEnabled && $conditionParentQuestion && $conditionParentOption ? '' : 'd-none' }}">
+                                Show when
+                                <strong class="condition-summary-question">
+                                    {{ $conditionParentQuestion?->title }}
+                                </strong>
+                                <span class="condition-summary-operator">
+                                    {{ $conditionOperator === 'not_selected' ? 'does not have' : 'has' }}
+                                </span>
+                                answer
+                                <strong class="condition-summary-option">
+                                    {{ $conditionParentOption?->label }}
+                                </strong>.
+                            </div>
+
+                            <small class="text-muted d-block mt-50">
+                                If this question is Required, validation applies only while the condition is matched.
+                            </small>
                         </div>
                     </div>
 
@@ -977,6 +1180,7 @@
         const canDeleteStudioItems = @json(auth()->user()?->can('ai-studio-items_delete') ?? false);
 
         let studioItemData = @json($studioItemsPayload);
+        const conditionQuestionData = @json($conditionQuestionsPayload);
 
         let quickOptionIndex = 0;
         let pendingStudioQuestionIds = [];
@@ -1372,20 +1576,126 @@
             resetStudioItemModal();
         });
 
+        function conditionParentOptionsHtml(currentQuestionId, selectedParentId = null) {
+            return Object.values(conditionQuestionData)
+                .filter(question => Number(question.id) !== Number(currentQuestionId))
+                .map(question => `
+                    <option
+                        value="${Number(question.id)}"
+                        ${Number(selectedParentId) === Number(question.id) ? 'selected' : ''}
+                    >
+                        ${escapeHtml(question.title)}
+                    </option>
+                `)
+                .join('');
+        }
+
+        function conditionAnswerOptionsHtml(parentQuestionId, selectedOptionId = null) {
+            const parent = conditionQuestionData[Number(parentQuestionId)];
+
+            if (!parent || !Array.isArray(parent.options)) {
+                return '';
+            }
+
+            return parent.options.map(option => `
+                <option
+                    value="${Number(option.id)}"
+                    ${Number(selectedOptionId) === Number(option.id) ? 'selected' : ''}
+                >
+                    ${escapeHtml(option.label)}
+                </option>
+            `).join('');
+        }
+
+        function populateConditionAnswers(card, selectedOptionId = null) {
+            const parentSelect = card.find('.condition-parent-question');
+            const optionSelect = card.find('.condition-parent-option');
+            const parentQuestionId = Number(parentSelect.val() || 0);
+
+            optionSelect.html(`
+                <option value="">Select answer</option>
+                ${conditionAnswerOptionsHtml(parentQuestionId, selectedOptionId)}
+            `);
+        }
+
+        function updateConditionSummary(card) {
+            const enabled = card.find('.question-condition-toggle').is(':checked');
+            const panel = card.find('.question-condition-panel');
+            const badge = card.find('.question-condition-badge');
+            const summary = card.find('.question-condition-summary');
+
+            panel.toggleClass('d-none', !enabled);
+            badge.toggleClass('d-none', !enabled);
+
+            if (!enabled) {
+                summary.addClass('d-none');
+                return;
+            }
+
+            const parentId = Number(card.find('.condition-parent-question').val() || 0);
+            const optionId = Number(card.find('.condition-parent-option').val() || 0);
+            const operator = card.find('.condition-operator').val();
+            const parent = conditionQuestionData[parentId];
+            const option = parent?.options?.find(item => Number(item.id) === optionId);
+
+            if (!parent || !option) {
+                summary.addClass('d-none');
+                return;
+            }
+
+            summary.find('.condition-summary-question').text(parent.title);
+            summary.find('.condition-summary-operator').text(
+                operator === 'not_selected' ? 'does not have' : 'has'
+            );
+            summary.find('.condition-summary-option').text(option.label);
+            summary.removeClass('d-none');
+        }
+
+        function initializeQuestionCondition(card) {
+            const parentSelect = card.find('.condition-parent-question');
+            const selectedOptionId = Number(parentSelect.data('current-option-id') || 0);
+
+            if (parentSelect.length) {
+                populateConditionAnswers(card, selectedOptionId);
+                parentSelect.removeAttr('data-current-option-id');
+            }
+
+            updateConditionSummary(card);
+        }
+
         function toggleQuestion(card) {
             const checked = card.find('.question-toggle').is(':checked');
 
             card.toggleClass('is-selected', checked);
             card.find('.question-settings').toggle(checked);
             card.find('.question-options').toggle(checked);
+            card.find('.question-condition-settings').toggle(checked);
         }
 
         $('.question-card').each(function () {
-            toggleQuestion($(this));
+            const card = $(this);
+
+            toggleQuestion(card);
+            initializeQuestionCondition(card);
         });
 
         $(document).on('change', '.question-toggle', function () {
             toggleQuestion($(this).closest('.question-card'));
+        });
+
+        $(document).on('change', '.question-condition-toggle', function () {
+            updateConditionSummary($(this).closest('.question-card'));
+        });
+
+        $(document).on('change', '.condition-parent-question', function () {
+            const card = $(this).closest('.question-card');
+
+            populateConditionAnswers(card);
+            updateConditionSummary(card);
+        });
+
+        $(document).on('change', '.condition-parent-option, .condition-operator', function () {
+            updateConditionSummary($(this).closest('.question-card'));
         });
 
         $('#select-all-questions').on('click', function () {
@@ -2099,6 +2409,10 @@
                                         ${escapeHtml(question.type_label)}
                                     </span>
 
+                                    <span class="badge bg-light-warning text-warning question-condition-badge d-none">
+                                        Conditional
+                                    </span>
+
                                     ${question.isColorPalette ? `
                                         <span class="badge bg-light-info text-info">
                                             Color Palette
@@ -2137,6 +2451,88 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="question-condition-settings border-top p-1">
+                        <div class="d-flex justify-content-between align-items-center gap-1">
+                            <div>
+                                <div class="fw-bolder">Conditional Visibility</div>
+                                <small class="text-muted">
+                                    Show this question only when a previous answer matches.
+                                </small>
+                            </div>
+
+                            <div class="form-check form-switch mb-0">
+                                <input
+                                    type="hidden"
+                                    name="questions[${id}][condition_enabled]"
+                                    value="0"
+                                >
+
+                                <input
+                                    type="checkbox"
+                                    id="question-condition-${id}"
+                                    name="questions[${id}][condition_enabled]"
+                                    value="1"
+                                    class="form-check-input question-condition-toggle"
+                                >
+
+                                <label class="form-check-label" for="question-condition-${id}">
+                                    Conditional
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="question-condition-panel p-1 mt-1 d-none">
+                            <div class="row">
+                                <div class="col-md-5 mb-1">
+                                    <label class="form-label">Parent Question *</label>
+
+                                    <select
+                                        name="questions[${id}][condition][parent_question_id]"
+                                        class="form-select condition-parent-question"
+                                    >
+                                        <option value="">Select parent question</option>
+                                        ${conditionParentOptionsHtml(id)}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3 mb-1">
+                                    <label class="form-label">Operator *</label>
+
+                                    <select
+                                        name="questions[${id}][condition][operator]"
+                                        class="form-select condition-operator"
+                                    >
+                                        <option value="selected">Selected</option>
+                                        <option value="not_selected">Not selected</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4 mb-1">
+                                    <label class="form-label">Answer *</label>
+
+                                    <select
+                                        name="questions[${id}][condition][parent_option_id]"
+                                        class="form-select condition-parent-option"
+                                    >
+                                        <option value="">Select answer</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="question-condition-summary d-none">
+                                Show when
+                                <strong class="condition-summary-question"></strong>
+                                <span class="condition-summary-operator">has</span>
+                                answer
+                                <strong class="condition-summary-option"></strong>.
+                            </div>
+
+                            <small class="text-muted d-block mt-50">
+                                If this question is Required, validation applies only while the condition is matched.
+                            </small>
                         </div>
                     </div>
 
@@ -2301,9 +2697,27 @@
 
                     $('#no-questions-alert').remove();
 
+                    conditionQuestionData[Number(question.id)] = {
+                        id: Number(question.id),
+                        title: question.title,
+                        options: Array.isArray(question.options)
+                            ? question.options.map(option => ({
+                                id: Number(option.id),
+                                label: option.label
+                            }))
+                            : []
+                    };
+
                     $('#questions-container').append(
                         buildQuestionCard(question)
                     );
+
+                    const newQuestionCard = $(
+                        `.question-card[data-question-id="${Number(question.id)}"]`
+                    );
+
+                    toggleQuestion(newQuestionCard);
+                    initializeQuestionCondition(newQuestionCard);
 
                     const modalElement =
                         document.getElementById(
@@ -2373,13 +2787,56 @@
                 event.preventDefault();
                 event.stopImmediatePropagation();
 
-                toast(
-                    'Select at least one Studio Item.'
+                toast('Select at least one Studio Item.');
+                return;
+            }
+
+            let conditionError = null;
+
+            form.find('.question-card').each(function () {
+                if (conditionError) return;
+
+                const card = $(this);
+
+                if (
+                    !card.find('.question-toggle').is(':checked')
+                    || !card.find('.question-condition-toggle').is(':checked')
+                ) {
+                    return;
+                }
+
+                const childQuestionId = Number(card.data('question-id'));
+                const parentQuestionId = Number(card.find('.condition-parent-question').val() || 0);
+                const parentOptionId = Number(card.find('.condition-parent-option').val() || 0);
+
+                if (!parentQuestionId || !parentOptionId) {
+                    conditionError = 'Choose the parent question and answer for every conditional question.';
+                    return;
+                }
+
+                if (parentQuestionId === childQuestionId) {
+                    conditionError = 'A question cannot depend on itself.';
+                    return;
+                }
+
+                const parentCard = form.find(
+                    `.question-card[data-question-id="${parentQuestionId}"]`
                 );
+
+                if (!parentCard.length || !parentCard.find('.question-toggle').is(':checked')) {
+                    conditionError = 'The parent question of a conditional question must also be selected.';
+                }
+            });
+
+            if (conditionError) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                toast(conditionError);
             }
         });
     });
 </script>
+
 
 
 
