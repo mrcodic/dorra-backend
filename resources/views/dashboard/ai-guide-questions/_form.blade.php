@@ -53,6 +53,25 @@
         })->values()->all();
     }
 
+    /*
+     * Optional data for option-level conditional popup.
+     *
+     * Pass `conditionalQuestions` from the controller as a Collection/array
+     * of existing AiGuideQuestion models the admin is allowed to target.
+     *
+     * Pass `optionConditionalQuestionIds` as:
+     * [
+     *     option_id => [question_id, question_id, ...],
+     * ]
+     * when editing an existing question.
+     */
+    $conditionalQuestions = collect($conditionalQuestions ?? [])
+        ->filter(fn($item) => (bool) ($item->is_active ?? true))
+        ->reject(fn($item) => $question && (int) $item->id === (int) $question->id)
+        ->values();
+
+    $optionConditionalQuestionIds = collect($optionConditionalQuestionIds ?? []);
+
     $isColorPalette = collect($options)->contains(
         fn($option) => !empty(data_get($option, 'ui_data.colors', []))
     );
@@ -315,6 +334,20 @@
                 $colors = array_values(
                     data_get($option, 'ui_data.colors', [])
                 );
+
+                $conditionalQuestionIds = collect(
+                    old(
+                        "options.$index.conditional_question_ids",
+                        !empty($option['id'])
+                            ? ($optionConditionalQuestionIds->get((int) $option['id'], []))
+                            : []
+                    )
+                )
+                    ->map(fn($id) => (int) $id)
+                    ->filter()
+                    ->unique()
+                    ->values()
+                    ->all();
             @endphp
 
             <div
@@ -331,7 +364,7 @@
 
                 <div class="row align-items-end">
 
-                    <div class="col-md-11 mb-2">
+                    <div class="col-md-10 mb-2">
                         <div class="row option-label-fields">
                             <div class="col-md-6">
                                 <label class="form-label">Label English *</label>
@@ -410,7 +443,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-1 option-actions">
+                    <div class="col-md-2 option-actions">
                         <div class="form-check form-switch mb-1">
                             <input
                                 type="hidden"
@@ -433,9 +466,33 @@
                         >
                             <i data-feather="trash-2"></i>
                         </button>
+
+                        <div class="option-conditional-question-inputs">
+                            @foreach($conditionalQuestionIds as $conditionalQuestionId)
+                                <input
+                                    type="hidden"
+                                    name="options[{{ $index }}][conditional_question_ids][]"
+                                    value="{{ $conditionalQuestionId }}"
+                                >
+                            @endforeach
+                        </div>
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-info w-100 mt-50 configure-option-condition"
+                            data-option-index="{{ $index }}"
+                        >
+                            <i data-feather="git-branch"></i>
+                            Conditional
+                            <span
+                                class="badge bg-info text-white option-condition-count ms-25 {{ count($conditionalQuestionIds) ? '' : 'd-none' }}"
+                            >
+                                {{ count($conditionalQuestionIds) }}
+                            </span>
+                        </button>
                     </div>
 
-                    <div class="col-md-11 color-palette-section">
+                    <div class="col-md-10 color-palette-section">
                         <div class="border rounded p-1 bg-light">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <div>
@@ -495,6 +552,102 @@
     </div>
 </div>
 
+{{-- Option-level conditional questions popup --}}
+<div
+    class="modal fade"
+    id="option-condition-modal"
+    tabindex="-1"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title mb-25">
+                        Conditional Questions
+                    </h5>
+
+                    <small class="text-muted">
+                        Choose the questions that should appear when this option is selected.
+                    </small>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="alert alert-light-info border mb-2">
+                    <strong>Selected option:</strong>
+                    <span id="option-condition-option-label">-</span>
+                </div>
+
+                <label
+                    for="option-condition-question-ids"
+                    class="form-label"
+                >
+                    Show Questions
+                </label>
+
+                <select
+                    id="option-condition-question-ids"
+                    class="form-select"
+                    multiple
+                    size="10"
+                >
+                    @foreach($conditionalQuestions as $conditionalQuestion)
+                        <option value="{{ $conditionalQuestion->id }}">
+                            {{ $conditionalQuestion->title }}
+                        </option>
+                    @endforeach
+                </select>
+
+                @if($conditionalQuestions->isEmpty())
+                    <small class="text-warning d-block mt-50">
+                        No other active questions are available. Pass
+                        <code>$conditionalQuestions</code> from the controller.
+                    </small>
+                @else
+                    <small class="text-muted d-block mt-50">
+                        Hold Ctrl / Cmd to select multiple questions.
+                    </small>
+                @endif
+            </div>
+
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    id="clear-option-condition"
+                    class="btn btn-outline-danger me-auto"
+                >
+                    Clear
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    id="save-option-condition"
+                    class="btn btn-primary"
+                    @disabled($conditionalQuestions->isEmpty())
+                >
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
 
 <script>
@@ -524,7 +677,70 @@
 
         let optionIndex = {{ count($options) }};
         let isSubmitting = false;
+        let activeConditionalOptionRow = null;
+
         const mediaDeleteBaseUrl = @json(url('api/v1/media'));
+
+        function optionConditionalQuestionIds(row) {
+            return row
+                .find('.option-conditional-question-inputs input[type="hidden"]')
+                .map(function () {
+                    return String($(this).val());
+                })
+                .get()
+                .filter(Boolean);
+        }
+
+        function setOptionConditionalQuestionIds(row, ids) {
+            const container = row.find('.option-conditional-question-inputs');
+            const index = row.data('option-index');
+
+            container.empty();
+
+            [...new Set((ids ?? []).map(String).filter(Boolean))]
+                .forEach(questionId => {
+                    container.append(`
+                        <input
+                            type="hidden"
+                            name="options[${index}][conditional_question_ids][]"
+                            value="${questionId}"
+                        >
+                    `);
+                });
+
+            updateOptionConditionCount(row);
+        }
+
+        function updateOptionConditionCount(row) {
+            const count = optionConditionalQuestionIds(row).length;
+            const badge = row.find('.option-condition-count');
+
+            badge
+                .text(count)
+                .toggleClass('d-none', count === 0);
+
+            row
+                .find('.configure-option-condition')
+                .toggleClass('btn-info', count > 0)
+                .toggleClass('btn-outline-info', count === 0);
+        }
+
+        function currentOptionLabel(row) {
+            const label = String(
+                row.find('.option-label-en').val()
+                || row.find('.option-label-ar').val()
+                || `Option ${Number(row.data('option-index')) + 1}`
+            ).trim();
+
+            return label || 'Option';
+        }
+
+        function closeOptionConditionModal() {
+            const modalElement = document.getElementById('option-condition-modal');
+            const instance = bootstrap.Modal.getInstance(modalElement);
+
+            instance?.hide();
+        }
 
         function deleteMedia(mediaId) {
             if (!mediaId) {
@@ -829,7 +1045,7 @@
             >
                 <div class="row align-items-end">
 
-                    <div class="col-md-11">
+                    <div class="col-md-10">
                         <div class="row option-label-fields">
                             <div class="col-md-6 mb-2">
                                 <label class="form-label">Label English *</label>
@@ -907,7 +1123,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-1 option-actions">
+                    <div class="col-md-2 option-actions">
                         <div class="form-check form-switch mb-1">
                             <input
                                 type="hidden"
@@ -930,9 +1146,25 @@
                         >
                             <i data-feather="trash-2"></i>
                         </button>
+
+                        <div class="option-conditional-question-inputs"></div>
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-info w-100 mt-50 configure-option-condition"
+                            data-option-index="${index}"
+                        >
+                            <i data-feather="git-branch"></i>
+                            Conditional
+                            <span
+                                class="badge bg-info text-white option-condition-count ms-25 d-none"
+                            >
+                                0
+                            </span>
+                        </button>
                     </div>
 
-                    <div class="col-md-11 color-palette-section">
+                    <div class="col-md-10 color-palette-section">
                         <div class="border rounded p-1 bg-light">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <div>
@@ -1079,6 +1311,70 @@
                 updatePaletteValues($(this));
             });
         }
+
+        $(document)
+            .off('click.optionCondition')
+            .on('click.optionCondition', '.configure-option-condition', function () {
+                const row = $(this).closest('.option-row');
+
+                activeConditionalOptionRow = row;
+
+                const selectedIds = optionConditionalQuestionIds(row);
+
+                $('#option-condition-option-label')
+                    .text(currentOptionLabel(row));
+
+                $('#option-condition-question-ids')
+                    .val(selectedIds);
+
+                bootstrap.Modal
+                    .getOrCreateInstance(
+                        document.getElementById('option-condition-modal')
+                    )
+                    .show();
+            });
+
+        $('#save-option-condition')
+            .off('click.optionCondition')
+            .on('click.optionCondition', function () {
+                if (!activeConditionalOptionRow) {
+                    return;
+                }
+
+                const selectedIds =
+                    $('#option-condition-question-ids').val() ?? [];
+
+                setOptionConditionalQuestionIds(
+                    activeConditionalOptionRow,
+                    selectedIds
+                );
+
+                closeOptionConditionModal();
+            });
+
+        $('#clear-option-condition')
+            .off('click.optionCondition')
+            .on('click.optionCondition', function () {
+                if (!activeConditionalOptionRow) {
+                    return;
+                }
+
+                $('#option-condition-question-ids').val([]);
+
+                setOptionConditionalQuestionIds(
+                    activeConditionalOptionRow,
+                    []
+                );
+
+                closeOptionConditionModal();
+            });
+
+        $('#option-condition-modal')
+            .on('hidden.bs.modal', function () {
+                activeConditionalOptionRow = null;
+                $('#option-condition-question-ids').val([]);
+                $('#option-condition-option-label').text('-');
+            });
 
         $('#add-option')
             .off('click.aiOption')
@@ -1322,7 +1618,10 @@
          * then detect palette mode and show the selected colors.
          */
         $('.option-row').each(function () {
-            updatePalettePreview($(this));
+            const row = $(this);
+
+            updatePalettePreview(row);
+            updateOptionConditionCount(row);
         });
 
         toggleColorPaletteMode();
@@ -1337,7 +1636,3 @@
         });
     });
 </script>
-
-
-
-
