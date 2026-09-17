@@ -120,15 +120,15 @@ class SettingController extends Controller
         return view('dashboard.settings.notifications', compact('groups'));
     }
 
-        public function raedAllNotifications(?DatabaseNotification $notification)
-        {
-            if ($notification) {
-                $notification->markAsRead();
-                return Response::api();
-            }
-            auth()->user()->unreadNotifications->markAsRead();
+    public function raedAllNotifications(?DatabaseNotification $notification)
+    {
+        if ($notification) {
+            $notification->markAsRead();
             return Response::api();
         }
+        auth()->user()->unreadNotifications->markAsRead();
+        return Response::api();
+    }
     public function updateNotifications(Request $request,SettingRepositoryInterface $settingRepository)
     {
         $incoming = (array)$request->input('settings', []);
@@ -293,6 +293,52 @@ class SettingController extends Controller
             'key' => $request->input('key'),
             'value' => $newValue
         ], $setting->id);
+        return Response::api();
+    }
+    public function updateBundleSection(Request $request, SettingRepositoryInterface $settingRepository)
+    {
+        $request->validate([
+            'description_en' => 'nullable|string',
+            'description_ar' => 'nullable|string',
+            'website_image_id' => 'nullable|integer|exists:media,id',
+            'mobile_image_id' => 'nullable|integer|exists:media,id',
+        ]);
+
+
+
+        $websiteMedia = $request->filled('website_image_id')
+            ? Media::find($request->input('website_image_id'))
+            : null;
+
+        $mobileMedia = $request->filled('mobile_image_id')
+            ? Media::find($request->input('mobile_image_id'))
+            : null;
+        $data = [
+            'bundle_description_en'    => $request->input('description_en', ''),
+            'bundle_description_ar'    => $request->input('description_ar', ''),
+            'bundle_website_image_id'  => $request->input('website_image_id', ''),
+            'bundle_website_image'     => $websiteMedia?->getUrl() ?? '',
+            'bundle_mobile_image_id'   => $request->input('mobile_image_id', ''),
+            'bundle_mobile_image'      => $mobileMedia?->getUrl() ?? '',
+        ];
+
+        foreach ($data as $key => $value) {
+            $setting = $settingRepository->query()->where('key', $key)->first();
+
+            if ($setting) {
+                $settingRepository->update([
+                    'key' => $key,
+                    'value' => $value,
+                ], $setting->id);
+            } else {
+                $settingRepository->query()->create([
+                    'key' => $key,
+                    'value' => $value,
+                    'group' => 'bundle_landing',
+                ]);
+            }
+        }
+
         return Response::api();
     }
 
