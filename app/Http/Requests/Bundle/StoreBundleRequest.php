@@ -25,7 +25,7 @@ class StoreBundleRequest extends FormRequest
             'status' => ['required', 'in:draft,active'],
             'display_bundle_on_visit' => ['nullable', 'boolean'],
 
-            'start_at' => ['nullable', 'date'],
+            'start_at' => ['nullable', 'date','after_or_equal:today'],
             'end_at' => ['nullable', 'date', 'after_or_equal:start_at'],
 
             'image' => [
