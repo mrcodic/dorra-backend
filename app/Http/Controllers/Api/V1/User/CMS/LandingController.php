@@ -38,6 +38,10 @@ class LandingController extends Controller
         return Response::api(data: setting(group: "statistics_landing"));
 
     }
+    public function bundle()
+    {
+        return Response::api(data: setting(group: "bundle_landing"));
+    }
 
     public function partners()
     {
