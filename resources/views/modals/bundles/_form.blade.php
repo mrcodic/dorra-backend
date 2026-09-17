@@ -147,40 +147,40 @@
         </div>
     </div>
 
-    <div class="row mb-3">
-        <div class="col-md-12">
-            <div class="form-check">
-                <input
-                    type="hidden"
-                    name="display_bundle_on_visit"
-                    value="0"
-                >
+    {{--    <div class="row mb-3">--}}
+    {{--        <div class="col-md-12">--}}
+    {{--            <div class="form-check">--}}
+    {{--                <input--}}
+    {{--                    type="hidden"--}}
+    {{--                    name="display_bundle_on_visit"--}}
+    {{--                    value="0"--}}
+    {{--                >--}}
 
-                <input
-                    class="form-check-input bundle-display-on-visit"
-                    type="checkbox"
-                    name="display_bundle_on_visit"
-                    value="1"
-                    id="{{ $prefix }}DisplayBundleOnVisit"
-                >
+    {{--                <input--}}
+    {{--                    class="form-check-input bundle-display-on-visit"--}}
+    {{--                    type="checkbox"--}}
+    {{--                    name="display_bundle_on_visit"--}}
+    {{--                    value="1"--}}
+    {{--                    id="{{ $prefix }}DisplayBundleOnVisit"--}}
+    {{--                >--}}
 
-                <label
-                    class="form-check-label"
-                    for="{{ $prefix }}DisplayBundleOnVisit"
-                >
-                    Display this bundle popup when customer visits website
-                </label>
-            </div>
+    {{--                <label--}}
+    {{--                    class="form-check-label"--}}
+    {{--                    for="{{ $prefix }}DisplayBundleOnVisit"--}}
+    {{--                >--}}
+    {{--                    Display this bundle popup when customer visits website--}}
+    {{--                </label>--}}
+    {{--            </div>--}}
 
-            <small class="text-muted d-block mt-50">
-                Only one bundle can be displayed on website visit. The customer still chooses and configures it manually.
-            </small>
+    {{--            <small class="text-muted d-block mt-50">--}}
+    {{--                Only one bundle can be displayed on website visit. The customer still chooses and configures it manually.--}}
+    {{--            </small>--}}
 
-            <small class="text-danger d-block mt-50 d-none bundle-display-on-visit-warning">
-                Another bundle is already selected for website visit popup.
-            </small>
-        </div>
-    </div>
+    {{--            <small class="text-danger d-block mt-50 d-none bundle-display-on-visit-warning">--}}
+    {{--                Another bundle is already selected for website visit popup.--}}
+    {{--            </small>--}}
+    {{--        </div>--}}
+    {{--    </div>--}}
 
     <hr>
 
@@ -316,8 +316,8 @@
                 name="trigger[quantity_rule]"
                 class="form-select bundle-select2 bundle-trigger-quantity-rule"
             >
-                <option value="any">Any Quantity</option>
-                <option value="minimum">Minimum Quantity</option>
+                {{--                <option value="any">Any Quantity</option>--}}
+                <option value="minimum">Quantity</option>
             </select>
         </div>
 
@@ -508,22 +508,22 @@
                     </div>
                 </div>
 
-{{--                <div class="form-group mb-2">--}}
-{{--                    <label class="label-text mb-1">--}}
-{{--                        Maximum Discount Amount--}}
-{{--                        <span class="text-muted">(optional)</span>--}}
-{{--                    </label>--}}
-{{--                    <input--}}
-{{--                        type="number"--}}
-{{--                        min="0"--}}
-{{--                        step="0.01"--}}
-{{--                        name="rewards[__INDEX__][max_discount_amount]"--}}
-{{--                        class="form-control"--}}
-{{--                        placeholder="Leave empty for no maximum"--}}
-{{--                    >--}}
-{{--                </div>--}}
+                {{--                <div class="form-group mb-2">--}}
+                {{--                    <label class="label-text mb-1">--}}
+                {{--                        Maximum Discount Amount--}}
+                {{--                        <span class="text-muted">(optional)</span>--}}
+                {{--                    </label>--}}
+                {{--                    <input--}}
+                {{--                        type="number"--}}
+                {{--                        min="0"--}}
+                {{--                        step="0.01"--}}
+                {{--                        name="rewards[__INDEX__][max_discount_amount]"--}}
+                {{--                        class="form-control"--}}
+                {{--                        placeholder="Leave empty for no maximum"--}}
+                {{--                    >--}}
+                {{--                </div>--}}
 
-{{--                <div class="bundle-reward-flow alert alert-light border mb-0 d-none"></div>--}}
+                {{--                <div class="bundle-reward-flow alert alert-light border mb-0 d-none"></div>--}}
             </div>
         </div>
     </template>
@@ -533,19 +533,19 @@
     {{-- ============================================================= --}}
     {{-- BEHAVIOR                                                      --}}
     {{-- ============================================================= --}}
-{{--    <h6 class="mb-1">3. Bundle Behavior</h6>--}}
+    {{--    <h6 class="mb-1">3. Bundle Behavior</h6>--}}
 
-{{--    <div class="row mb-2">--}}
-{{--        <div class="col-md-6">--}}
-{{--            <label class="label-text mb-1">Bundle Usage</label>--}}
-{{--            <select--}}
-{{--                name="repeat_type"--}}
-{{--                class="form-select bundle-select2"--}}
-{{--            >--}}
-{{--                <option value="once">Apply Once</option>--}}
-{{--                <option value="repeat">Repeat Based On Quantity</option>--}}
-{{--            </select>--}}
-{{--        </div>--}}
-{{--    </div>--}}
+    {{--    <div class="row mb-2">--}}
+    {{--        <div class="col-md-6">--}}
+    {{--            <label class="label-text mb-1">Bundle Usage</label>--}}
+    {{--            <select--}}
+    {{--                name="repeat_type"--}}
+    {{--                class="form-select bundle-select2"--}}
+    {{--            >--}}
+    {{--                <option value="once">Apply Once</option>--}}
+    {{--                <option value="repeat">Repeat Based On Quantity</option>--}}
+    {{--            </select>--}}
+    {{--        </div>--}}
+    {{--    </div>--}}
 
 </div>
