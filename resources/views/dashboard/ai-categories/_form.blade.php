@@ -2915,15 +2915,15 @@
                 const operator =
                     $('#quick-condition-operator').val() || 'selected';
 
-                if (!parentQuestionId) {
-                    toast('Select the parent question for the condition.');
-                    return;
-                }
-
-                if (!parentOptionId) {
-                    toast('Select the parent answer for the condition.');
-                    return;
-                }
+                // if (!parentQuestionId) {
+                //     toast('Select the parent question for the condition.');
+                //     return;
+                // }
+                //
+                // if (!parentOptionId) {
+                //     toast('Select the parent answer for the condition.');
+                //     return;
+                // }
 
                 const parentCard = $(
                     `.question-card[data-question-id="${parentQuestionId}"]`
