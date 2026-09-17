@@ -9,6 +9,7 @@
 
     $savedOptions = $question?->options?->map(function ($option) {
         $media = $option->getFirstMedia('option_image');
+
         return [
             'id' => $option->id,
             'label' => [
@@ -25,12 +26,32 @@
                 ),
             ],
              'media_id' => $media?->id,
-             'image_url' => $media?->getFullUrl(),
+             'image_url' => $media ? $media->getFullUrl() : null,
             'is_active' => (bool) $option->is_active,
         ];
     })->toArray() ?? [];
 
     $options = old('options', $savedOptions);
+
+    /*
+     * If validation redirects back, old('options') contains media_id but not image_url.
+     * Restore the saved image URL using the option id so Edit preview still works.
+     */
+    if (old('options') !== null) {
+        $savedOptionsById = collect($savedOptions)->keyBy(fn($option) => (int) ($option['id'] ?? 0));
+
+        $options = collect($options)->map(function ($option) use ($savedOptionsById) {
+            $optionId = (int) ($option['id'] ?? 0);
+            $saved = $optionId ? $savedOptionsById->get($optionId) : null;
+
+            if ($saved) {
+                $option['media_id'] = $option['media_id'] ?? $saved['media_id'] ?? null;
+                $option['image_url'] = $option['image_url'] ?? $saved['image_url'] ?? null;
+            }
+
+            return $option;
+        })->values()->all();
+    }
 
     $isColorPalette = collect($options)->contains(
         fn($option) => !empty(data_get($option, 'ui_data.colors', []))
@@ -324,7 +345,7 @@
                                 <label class="form-label">Option Image</label>
 
                                 <div
-                                    class="dropzone option-image-dropzone"
+                                    class="option-image-dropzone"
                                     data-media-id="{{ $option['media_id'] ?? '' }}"
                                     data-image-url="{{ $option['image_url'] ?? '' }}"
                                 >
@@ -437,6 +458,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
 
 <script>
+    if (window.Dropzone) {
+        Dropzone.autoDiscover = false;
+    }
+</script>
+
+<script>
     $(document).ready(function () {
         feather.replace();
 
@@ -458,101 +485,183 @@
         let optionIndex = {{ count($options) }};
         let isSubmitting = false;
 
-        if (window.Dropzone) {
-            Dropzone.autoDiscover = false;
-        }
-
         function initOptionDropzone(element) {
-            if (!element || !window.Dropzone || element.dropzone) return;
+            if (!element) return null;
+
+            if (!window.Dropzone) {
+                console.error('Dropzone is not loaded.');
+                return null;
+            }
+
+            if (element.dropzone) {
+                return element.dropzone;
+            }
 
             const dropzoneElement = $(element);
+
+            if (dropzoneElement.data('dz-initialized')) {
+                return element.dropzone ?? null;
+            }
+
+            dropzoneElement.data('dz-initialized', true);
             const row = dropzoneElement.closest('.option-row');
             const hiddenInput = row.find('.option-media-id');
             const removeInput = row.find('.option-remove-media');
-            const existingMediaId = dropzoneElement.attr('data-media-id');
-            const existingImageUrl = dropzoneElement.attr('data-image-url');
 
-            const dz = new Dropzone(element, {
-                url: @json(route('media.store')),
-                maxFiles: 1,
-                acceptedFiles: 'image/*',
-                addRemoveLinks: true,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
-                },
+            const existingMediaId = String(
+                dropzoneElement.attr('data-media-id') ?? ''
+            ).trim();
 
-                success: function (file, response) {
-                    const mediaId = response?.data?.id ?? null;
-                    const imageUrl = response?.data?.original_url ?? response?.data?.url ?? null;
+            const existingImageUrl = String(
+                dropzoneElement.attr('data-image-url') ?? ''
+            ).trim();
 
-                    if (!mediaId) {
-                        hiddenInput.val('');
-                        showToast('Image uploaded but media ID was not returned.');
-                        this.removeFile(file);
-                        return;
+            let dz;
+
+            try {
+                dz = new Dropzone(element, {
+                    url: @json(route('media.store')),
+                    paramName: 'file',
+                    maxFiles: 1,
+                    acceptedFiles: 'image/*',
+                    addRemoveLinks: true,
+                    clickable: true,
+                    thumbnailWidth: 160,
+                    thumbnailHeight: 160,
+
+                    headers: {
+                        'X-CSRF-TOKEN': @json(csrf_token()),
+                        'Accept': 'application/json'
+                    },
+
+                    init: function () {
+                        const instance = this;
+
+                        if (!existingMediaId || !existingImageUrl) {
+                            return;
+                        }
+
+                        const mockFile = {
+                            name: 'Current image',
+                            size: 1,
+                            type: 'image/*',
+                            accepted: true,
+                            status: Dropzone.SUCCESS,
+                            _mediaId: existingMediaId,
+                            _isExisting: true
+                        };
+
+                        /*
+                         * Register the existing file in Dropzone and render its thumbnail.
+                         * Adding dz-started explicitly also hides the default Dropzone message.
+                         */
+                        instance.files.push(mockFile);
+                        instance.emit('addedfile', mockFile);
+                        instance.emit('thumbnail', mockFile, existingImageUrl);
+                        instance.emit('success', mockFile, {
+                            data: {
+                                id: existingMediaId,
+                                original_url: existingImageUrl
+                            }
+                        });
+                        instance.emit('complete', mockFile);
+
+                        element.classList.add('dz-started');
+
+                        hiddenInput.val(existingMediaId);
+                        removeInput.val(0);
+                    },
+
+                    success: function (file, response) {
+                        const mediaId = response?.data?.id ?? null;
+                        const imageUrl = response?.data?.original_url ?? response?.data?.url ?? null;
+
+                        if (!mediaId) {
+                            showToast('Image uploaded but media ID was not returned.');
+                            return;
+                        }
+
+                        hiddenInput.val(mediaId);
+                        removeInput.val(0);
+
+                        file._mediaId = String(mediaId);
+                        file._imageUrl = imageUrl;
+                        file._isExisting = false;
+
+                        dropzoneElement.attr('data-media-id', mediaId);
+
+                        if (imageUrl) {
+                            dropzoneElement.attr('data-image-url', imageUrl);
+                        }
+                    },
+
+                    removedfile: function (file) {
+                        if (file.previewElement) {
+                            file.previewElement.remove();
+                        }
+
+                        const removedMediaId = String(file._mediaId ?? '');
+                        const currentMediaId = String(hiddenInput.val() ?? '');
+
+                        if (!removedMediaId || removedMediaId === currentMediaId) {
+                            hiddenInput.val('');
+                            removeInput.val(1);
+
+                            dropzoneElement.attr('data-media-id', '');
+                            dropzoneElement.attr('data-image-url', '');
+                        }
+
+                        if (!this.files.length) {
+                            element.classList.remove('dz-started');
+                        }
+                    },
+
+                    maxfilesexceeded: function (file) {
+                        /*
+                         * Replace the current preview with the newly selected image.
+                         * Success will store the new media id and reset remove_media to 0.
+                         */
+                        this.removeAllFiles(true);
+                        this.addFile(file);
+                    },
+
+                    error: function (file, response) {
+                        const message = typeof response === 'string'
+                            ? response
+                            : response?.message ?? 'Unable to upload image.';
+
+                        showToast(message);
+
+                        if (file.previewElement) {
+                            file.previewElement.classList.add('dz-error');
+                        }
                     }
+                });
+            } catch (error) {
+                dropzoneElement.removeData('dz-initialized');
 
-                    hiddenInput.val(mediaId);
-                    removeInput.val(0);
-
-                    file._mediaId = mediaId;
-                    file._imageUrl = imageUrl;
-                },
-
-                removedfile: function (file) {
-                    if (file.previewElement) {
-                        file.previewElement.remove();
-                    }
-
-                    if (!file._mediaId || String(hiddenInput.val()) === String(file._mediaId)) {
-                        hiddenInput.val('');
-                        removeInput.val(1);
-                    }
-                },
-
-                maxfilesexceeded: function (file) {
-                    this.removeAllFiles(true);
-                    this.addFile(file);
-                },
-
-                error: function (file, response) {
-                    const message = typeof response === 'string'
-                        ? response
-                        : response?.message ?? 'Unable to upload image.';
-
-                    showToast(message);
-
-                    if (file.previewElement) {
-                        file.previewElement.classList.add('dz-error');
-                    }
+                // If another script already attached Dropzone, reuse it instead of throwing.
+                if (element.dropzone) {
+                    return element.dropzone;
                 }
-            });
 
-            if (existingMediaId && existingImageUrl) {
-                const mockFile = {
-                    name: 'Current image',
-                    size: 0,
-                    accepted: true,
-                    _mediaId: existingMediaId
-                };
-
-                dz.emit('addedfile', mockFile);
-                dz.emit('thumbnail', mockFile, existingImageUrl);
-                dz.emit('complete', mockFile);
-                dz.files.push(mockFile);
-
-                hiddenInput.val(existingMediaId);
-                removeInput.val(0);
+                console.error('Unable to initialize option Dropzone:', error);
+                return null;
             }
+
+            return dz;
         }
 
         function destroyOptionDropzone(row) {
             const element = row.find('.option-image-dropzone')[0];
 
-            if (element?.dropzone) {
+            if (!element) return;
+
+            if (element.dropzone) {
                 element.dropzone.destroy();
             }
+
+            $(element).removeData('dz-initialized');
         }
 
         function supportsOptions() {
@@ -699,7 +808,7 @@
                                 <label class="form-label">Option Image</label>
 
                                 <div
-                                    class="dropzone option-image-dropzone"
+                                    class="option-image-dropzone"
                                     data-media-id=""
                                     data-image-url=""
                                 >
@@ -1140,15 +1249,22 @@
          * then detect palette mode and show the selected colors.
          */
         $('.option-row').each(function () {
-            const row = $(this);
-
-            updatePalettePreview(row);
-            initOptionDropzone(row.find('.option-image-dropzone')[0]);
+            updatePalettePreview($(this));
         });
 
         toggleColorPaletteMode();
+
+        /*
+         * Initialize after the final mode is applied.
+         * This is especially important on Edit where Dropzone must render
+         * the already attached Media Library image.
+         */
+        $('.option-row').each(function () {
+            initOptionDropzone($(this).find('.option-image-dropzone')[0]);
+        });
     });
 </script>
+
 
 
 
