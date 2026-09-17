@@ -13,42 +13,25 @@ return new class extends Migration
 
             $table->id();
 
-            $table->unsignedBigInteger('ai_guide_question_assignment_id');
-            $table->unsignedBigInteger('parent_question_id');
-            $table->unsignedBigInteger('parent_option_id');
+            $table->foreignId('ai_guide_question_assignment_id')
+                ->unique('agqc_assignment_unique')
+                ->constrained('ai_guide_question_assignments')
+                ->cascadeOnDelete()
+                ->name('agqc_assignment_fk');
+
+            $table->foreignId('parent_question_id')
+                ->constrained('ai_guide_questions')
+                ->cascadeOnDelete()
+                ->name('agqc_question_fk');
+
+            $table->foreignId('parent_option_id')
+                ->constrained('ai_guide_question_options')
+                ->cascadeOnDelete()
+                ->name('agqc_option_fk');
 
             $table->string('operator', 30)->default('selected');
 
             $table->timestamps();
-
-            $table->unique(
-                'ai_guide_question_assignment_id',
-                'agqc_assignment_unique'
-            );
-
-            $table->foreign(
-                'ai_guide_question_assignment_id',
-                'agqc_assignment_fk'
-            )
-                ->references('id')
-                ->on('ai_guide_question_assignments')
-                ->cascadeOnDelete();
-
-            $table->foreign(
-                'parent_question_id',
-                'agqc_question_fk'
-            )
-                ->references('id')
-                ->on('ai_guide_questions')
-                ->cascadeOnDelete();
-
-            $table->foreign(
-                'parent_option_id',
-                'agqc_option_fk'
-            )
-                ->references('id')
-                ->on('ai_guide_question_options')
-                ->cascadeOnDelete();
         });
     }
 
