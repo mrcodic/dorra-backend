@@ -54,22 +54,38 @@
     }
 
     /*
-     * Optional data for option-level conditional popup.
+     * Option-level conditional popup.
      *
-     * Pass `conditionalQuestions` from the controller as a Collection/array
-     * of existing AiGuideQuestion models the admin is allowed to target.
-     *
-     * Pass `optionConditionalQuestionIds` as:
-     * [
-     *     option_id => [question_id, question_id, ...],
-     * ]
-     * when editing an existing question.
+     * If the controller already passes $conditionalQuestions, use it.
+     * Otherwise load active questions here so this Blade works standalone.
+     * The current question is excluded because an option must not reveal
+     * its own parent question.
      */
-    $conditionalQuestions = collect($conditionalQuestions ?? [])
-        ->filter(fn($item) => (bool) ($item->is_active ?? true))
-        ->reject(fn($item) => $question && (int) $item->id === (int) $question->id)
-        ->values();
+    if (isset($conditionalQuestions)) {
+        $conditionalQuestions = collect($conditionalQuestions)
+            ->filter(fn($item) => (bool) ($item->is_active ?? true))
+            ->reject(fn($item) => $question && (int) $item->id === (int) $question->id)
+            ->sortBy([
+                ['sort_order', 'asc'],
+                ['id', 'asc'],
+            ])
+            ->values();
+    } else {
+        $conditionalQuestions = \App\Models\AiGuideQuestion::query()
+            ->where('is_active', true)
+            ->when(
+                $question?->id,
+                fn($query, $questionId) => $query->where('id', '!=', $questionId)
+            )
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+    }
 
+    /*
+     * Optional edit-state map:
+     * [option_id => [question_id, question_id, ...]]
+     */
     $optionConditionalQuestionIds = collect($optionConditionalQuestionIds ?? []);
 
     $isColorPalette = collect($options)->contains(
@@ -608,8 +624,7 @@
 
                 @if($conditionalQuestions->isEmpty())
                     <small class="text-warning d-block mt-50">
-                        No other active questions are available. Pass
-                        <code>$conditionalQuestions</code> from the controller.
+                        No other active questions are available yet.
                     </small>
                 @else
                     <small class="text-muted d-block mt-50">
