@@ -62,25 +62,65 @@
 
 <style>
     .option-image-dropzone {
-        min-height: 120px;
+        min-height: 150px;
         border: 1px dashed #d8d6de;
         border-radius: .357rem;
         background: #fff;
         padding: 12px;
+        overflow: hidden;
+        position: relative;
     }
 
     .option-image-dropzone .dz-message {
-        margin: 1rem 0;
+        margin: 2rem 0;
         color: #6e6b7b;
+        text-align: center;
+    }
+
+    .option-image-dropzone.dz-started .dz-message {
+        display: none;
     }
 
     .option-image-dropzone .dz-preview {
-        margin: 8px;
+        position: relative !important;
+        display: inline-flex !important;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 140px !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        vertical-align: top;
     }
 
     .option-image-dropzone .dz-preview .dz-image {
-        width: 90px;
-        height: 90px;
+        width: 140px !important;
+        height: 110px !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        background: #f8f8f8;
+    }
+
+    .option-image-dropzone .dz-preview .dz-image img {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        object-fit: contain !important;
+    }
+
+    .option-image-dropzone .dz-preview .dz-details,
+    .option-image-dropzone .dz-preview .dz-success-mark,
+    .option-image-dropzone .dz-preview .dz-error-mark {
+        display: none !important;
+    }
+
+    .option-image-dropzone .dz-preview .dz-remove {
+        display: inline-block;
+        margin-top: 8px;
+        font-size: 12px;
+        color: #ea5455;
+        text-decoration: none;
     }
 </style>
 
@@ -484,6 +524,32 @@
 
         let optionIndex = {{ count($options) }};
         let isSubmitting = false;
+        const mediaDeleteBaseUrl = @json(url('api/v1/media'));
+
+        function deleteMedia(mediaId) {
+            if (!mediaId) {
+                return Promise.resolve();
+            }
+
+            return fetch(`${mediaDeleteBaseUrl}/${mediaId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': @json(csrf_token()),
+                    'Accept': 'application/json'
+                }
+            }).then(async response => {
+                if (response.ok) return;
+
+                let message = 'Unable to remove image.';
+
+                try {
+                    const data = await response.json();
+                    message = data?.message ?? message;
+                } catch (_) {}
+
+                throw new Error(message);
+            });
+        }
 
         function initOptionDropzone(element) {
             if (!element) return null;
@@ -593,22 +659,29 @@
                         if (imageUrl) {
                             dropzoneElement.attr('data-image-url', imageUrl);
                         }
+
+                        element.classList.add('dz-started');
                     },
 
                     removedfile: function (file) {
+                        const removedMediaId = String(file._mediaId ?? '');
+                        const currentMediaId = String(hiddenInput.val() ?? '');
+
                         if (file.previewElement) {
                             file.previewElement.remove();
                         }
 
-                        const removedMediaId = String(file._mediaId ?? '');
-                        const currentMediaId = String(hiddenInput.val() ?? '');
-
                         if (!removedMediaId || removedMediaId === currentMediaId) {
                             hiddenInput.val('');
                             removeInput.val(1);
-
                             dropzoneElement.attr('data-media-id', '');
                             dropzoneElement.attr('data-image-url', '');
+                        }
+
+                        if (removedMediaId) {
+                            deleteMedia(removedMediaId).catch(error => {
+                                showToast(error.message ?? 'Unable to remove image.');
+                            });
                         }
 
                         if (!this.files.length) {
