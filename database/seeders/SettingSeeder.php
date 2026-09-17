@@ -42,9 +42,9 @@ class SettingSeeder extends Seeder
 
             // Bundle (navbar tab)
             ['key' => 'bundle_description', 'value' => '', 'group' => 'bundle_landing'],
-            ['key' => 'bundle_website_image_id', 'value' => null, 'group' => 'bundle_landing'],
+            ['key' => 'bundle_website_image_id', 'value' => '', 'group' => 'bundle_landing'],
             ['key' => 'bundle_website_image', 'value' => '', 'group' => 'bundle_landing'],
-            ['key' => 'bundle_mobile_image_id', 'value' => null, 'group' => 'bundle_landing'],
+            ['key' => 'bundle_mobile_image_id', 'value' => '', 'group' => 'bundle_landing'],
             ['key' => 'bundle_mobile_image', 'value' => '', 'group' => 'bundle_landing'],
         ];
 
