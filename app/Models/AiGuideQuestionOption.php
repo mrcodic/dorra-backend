@@ -33,6 +33,6 @@ class AiGuideQuestionOption extends Model implements HasMedia
     }
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection(getMediaCollectionName('option_image'))->singleFile();
+        $this->addMediaCollection('option_image')->singleFile();
     }
 }
