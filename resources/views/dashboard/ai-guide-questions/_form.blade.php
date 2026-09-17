@@ -25,7 +25,7 @@
                 ),
             ],
              'media_id' => $media?->id,
-             'image_url' => $media?->original_url,
+             'image_url' => $media?->getFullUrl(),
             'is_active' => (bool) $option->is_active,
         ];
     })->toArray() ?? [];
