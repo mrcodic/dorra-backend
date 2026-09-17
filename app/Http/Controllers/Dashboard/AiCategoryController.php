@@ -61,7 +61,7 @@ class AiCategoryController extends DashboardController
         $currentAiCategoryId = $routeAiCategory instanceof \App\Models\AiCategory
             ? $routeAiCategory->id
             : (is_numeric($routeAiCategory) ? (int) $routeAiCategory : null);
-
+        $questionConditions = $this->getAiCategoryQuestionConditions($currentAiCategoryId);
         $aiCategoryMorph = (new \App\Models\AiCategory())->getMorphClass();
 
         $questions = $this->aiGuideQuestionRepository->query()
@@ -130,6 +130,7 @@ class AiCategoryController extends DashboardController
             'questions' => $questions,
             'studioItems' => $studioItems,
             'studioItemQuestionIds' => $studioItemQuestionIds,
+            'questionConditions' => $questionConditions,
         ];
 
         $this->assoiciatedData = [
@@ -423,5 +424,63 @@ class AiCategoryController extends DashboardController
         }
 
         return $key;
+    }
+    private function getAiCategoryQuestionConditions(?int $aiCategoryId): array
+    {
+        if (
+            !$aiCategoryId
+            || !Schema::hasTable('ai_guide_question_assignments')
+            || !Schema::hasTable('ai_guide_question_conditions')
+        ) {
+            return [];
+        }
+
+        $aiCategory = AiCategory::query()->find($aiCategoryId);
+
+        if (!$aiCategory) {
+            return [];
+        }
+
+        $morphTypes = array_values(array_unique([
+            $aiCategory->getMorphClass(),
+            'ai_category',
+            AiCategory::class,
+        ]));
+
+        $assignments = DB::table('ai_guide_question_assignments')
+            ->where('assignable_id', $aiCategory->id)
+            ->whereIn('assignable_type', $morphTypes)
+            ->get(['id', 'ai_guide_question_id']);
+
+        if ($assignments->isEmpty()) {
+            return [];
+        }
+
+        $questionIdByAssignmentId = $assignments
+            ->mapWithKeys(fn($assignment) => [
+                (int) $assignment->id => (int) $assignment->ai_guide_question_id,
+            ]);
+
+        return DB::table('ai_guide_question_conditions')
+            ->whereIn('ai_guide_question_assignment_id', $questionIdByAssignmentId->keys())
+            ->get()
+            ->mapWithKeys(function ($condition) use ($questionIdByAssignmentId) {
+                $questionId = $questionIdByAssignmentId->get(
+                    (int) $condition->ai_guide_question_assignment_id
+                );
+
+                if (!$questionId) {
+                    return [];
+                }
+
+                return [
+                    $questionId => [
+                        'parent_question_id' => (int) $condition->parent_question_id,
+                        'parent_option_id' => (int) $condition->parent_option_id,
+                        'operator' => $condition->operator ?: 'selected',
+                    ],
+                ];
+            })
+            ->all();
     }
 }

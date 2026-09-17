@@ -164,6 +164,58 @@
 
 
                     </div>
+
+                    <!-- Bundle -->
+                    <p class="fw-semibold text-black fs-16 mt-3">Bundle</p>
+                    <form id="bundleSectionForm" action="{{ route('bundle-section.update') }}" method="POST"
+                          enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+
+                        <input type="hidden" name="website_image_id" id="bundleWebsiteImageId"
+                               value="{{ setting('bundle_website_image_id') }}">
+                        <input type="hidden" name="mobile_image_id" id="bundleMobileImageId"
+                               value="{{ setting('bundle_mobile_image_id') }}">
+
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Website Image</label>
+                                <div class="dropzone" id="bundle-website-dropzone"></div>
+                                <small class="text d-block mb-2">Recommended: 1920×520 px, max 2 MB</small>
+                                <div class="upload-wrapper">
+                                    <div class="uploaded-image {{ setting('bundle_website_image') ? '' : 'd-none' }} mt-2"
+                                         id="bundleWebsitePreview">
+                                        <img src="{{ setting('bundle_website_image') }}" class="img-fluid rounded"
+                                             style="width:60px;height:60px;object-fit:cover;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Mobile Image</label>
+                                <div class="dropzone" id="bundle-mobile-dropzone"></div>
+                                <small class="text d-block mb-2">Recommended: 375×504 px, max 2 MB</small>
+                                <div class="upload-wrapper">
+                                    <div class="uploaded-image {{ setting('bundle_mobile_image') ? '' : 'd-none' }} mt-2"
+                                         id="bundleMobilePreview">
+                                        <img src="{{ setting('bundle_mobile_image') }}" class="img-fluid rounded"
+                                             style="width:60px;height:60px;object-fit:cover;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-2 mt-2">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control" rows="3"
+                                      placeholder="Enter bundle description">{{ setting('bundle_description') }}</textarea>
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i data-feather="save" class="me-1"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
                 <!-- tab2 -->
@@ -1909,6 +1961,92 @@
                             resetForm: false,
                         }
                     )
+                </script>
+                <script>
+                    Dropzone.autoDiscover = false;
+
+                    let bundleWebsiteDropzone = new Dropzone("#bundle-website-dropzone", {
+                        url: "{{ route('media.store') }}",
+                        maxFiles: 1,
+                        maxFilesize: 2,
+                        acceptedFiles: "image/*",
+                        addRemoveLinks: true,
+                        dictDefaultMessage: "Drag image here or click to upload",
+                        headers: {
+                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        },
+                        init: function () {
+                            this.on("maxfilesexceeded", function (file) {
+                                this.removeAllFiles();
+                                this.addFile(file);
+                            });
+
+                            this.on("success", function (file, response) {
+                                document.getElementById("bundleWebsiteImageId").value = response.data.id;
+                                $('#bundleWebsitePreview img').attr('src', response.data.url ?? response.data.path);
+                                $('#bundleWebsitePreview').removeClass('d-none');
+                            });
+
+                            this.on("removedfile", function (file) {
+                                document.getElementById("bundleWebsiteImageId").value = "";
+                                $('#bundleWebsitePreview').addClass('d-none');
+
+                                if (file.xhr) {
+                                    let response = JSON.parse(file.xhr.response);
+                                    fetch("{{ url('api/v1/media') }}/" + response.data.id, {
+                                        method: "DELETE",
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+
+                    let bundleMobileDropzone = new Dropzone("#bundle-mobile-dropzone", {
+                        url: "{{ route('media.store') }}",
+                        maxFiles: 1,
+                        maxFilesize: 2,
+                        acceptedFiles: "image/*",
+                        addRemoveLinks: true,
+                        dictDefaultMessage: "Drag image here or click to upload",
+                        headers: {
+                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        },
+                        init: function () {
+                            this.on("maxfilesexceeded", function (file) {
+                                this.removeAllFiles();
+                                this.addFile(file);
+                            });
+
+                            this.on("success", function (file, response) {
+                                document.getElementById("bundleMobileImageId").value = response.data.id;
+                                $('#bundleMobilePreview img').attr('src', response.data.url ?? response.data.path);
+                                $('#bundleMobilePreview').removeClass('d-none');
+                            });
+
+                            this.on("removedfile", function (file) {
+                                document.getElementById("bundleMobileImageId").value = "";
+                                $('#bundleMobilePreview').addClass('d-none');
+
+                                if (file.xhr) {
+                                    let response = JSON.parse(file.xhr.response);
+                                    fetch("{{ url('api/v1/media') }}/" + response.data.id, {
+                                        method: "DELETE",
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+
+                    handleAjaxFormSubmit("#bundleSectionForm", {
+                        successMessage: "Bundle updated successfully",
+                        resetForm: false,
+                    });
                 </script>
                 <script>
                     let selectedDesignId = null;

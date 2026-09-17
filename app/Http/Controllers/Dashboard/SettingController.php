@@ -295,6 +295,49 @@ class SettingController extends Controller
         ], $setting->id);
         return Response::api();
     }
+    public function updateBundleSection(Request $request, SettingRepositoryInterface $settingRepository)
+    {
+        $request->validate([
+            'description' => 'nullable|string',
+            'website_image_id' => 'nullable|integer|exists:media,id',
+            'mobile_image_id' => 'nullable|integer|exists:media,id',
+        ]);
+
+        $websiteMedia = $request->filled('website_image_id')
+            ? Media::find($request->input('website_image_id'))
+            : null;
+
+        $mobileMedia = $request->filled('mobile_image_id')
+            ? Media::find($request->input('mobile_image_id'))
+            : null;
+
+        $data = [
+            'bundle_description'       => $request->input('description'),
+            'bundle_website_image_id'  => $request->input('website_image_id'),
+            'bundle_website_image'     => $websiteMedia?->getUrl(),
+            'bundle_mobile_image_id'   => $request->input('mobile_image_id'),
+            'bundle_mobile_image'      => $mobileMedia?->getUrl(),
+        ];
+
+        foreach ($data as $key => $value) {
+            $setting = $settingRepository->query()->where('key', $key)->first();
+
+            if ($setting) {
+                $settingRepository->update([
+                    'key' => $key,
+                    'value' => $value,
+                ], $setting->id);
+            } else {
+                $settingRepository->query()->create([
+                    'key' => $key,
+                    'value' => $value,
+                    'group' => 'bundle_landing',
+                ]);
+            }
+        }
+
+        return Response::api();
+    }
 
     public function updateStatisticsSection(Request $request, SettingRepositoryInterface $settingRepository)
     {

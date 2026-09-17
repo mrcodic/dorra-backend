@@ -39,6 +39,13 @@ class SettingSeeder extends Seeder
             ['key' => 'customers', 'value' => 1200, 'group' => 'statistics_landing'],
             ['key' => 'orders', 'value' => 3400, 'group' => 'statistics_landing'],
             ['key' => 'rate', 'value' => 4.9, 'group' => 'statistics_landing'],
+
+            // Bundle (navbar tab)
+            ['key' => 'bundle_description', 'value' => '', 'group' => 'bundle_landing'],
+            ['key' => 'bundle_website_image_id', 'value' => null, 'group' => 'bundle_landing'],
+            ['key' => 'bundle_website_image', 'value' => '', 'group' => 'bundle_landing'],
+            ['key' => 'bundle_mobile_image_id', 'value' => null, 'group' => 'bundle_landing'],
+            ['key' => 'bundle_mobile_image', 'value' => '', 'group' => 'bundle_landing'],
         ];
 
         // -------- Notification toggles (group = notifications) --------
