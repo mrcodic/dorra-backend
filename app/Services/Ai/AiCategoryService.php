@@ -63,13 +63,13 @@ class AiCategoryService extends BaseService
             $studioItems = Arr::pull($validatedData, 'studio_items', []);
 
             $aiCategory = $this->repository->create($validatedData);
-            $this->syncQuestionConditions($aiCategory, $questions);
 
             $this->generationConfigService->sync(
                 $aiCategory->id,
                 $questions,
                 $studioItems
             );
+            $this->syncQuestionConditions($aiCategory, $questions);
 
             return $aiCategory->load(array_unique(array_merge(
                 $relationsToLoad,
@@ -85,13 +85,13 @@ class AiCategoryService extends BaseService
             $studioItems = Arr::pull($validatedData, 'studio_items', []);
 
             $aiCategory = $this->repository->update($validatedData, $id);
-            $this->syncQuestionConditions($aiCategory, $questions);
 
             $this->generationConfigService->sync(
                 $aiCategory->id,
                 $questions,
                 $studioItems
             );
+            $this->syncQuestionConditions($aiCategory, $questions);
 
             return $aiCategory->load(array_unique(array_merge(
                 $relationsToLoad,
