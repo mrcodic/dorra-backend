@@ -25,7 +25,7 @@ class AiGuideQuestionResource extends JsonResource
             'promptLabel' => $this->prompt_label,
 
             'isColorPalette' => $isColorPalette,
-
+            'showWhen' => $this->show_when ?? null,
             'options' => $this->when(
                 in_array(
                     $this->type,
