@@ -1105,6 +1105,92 @@
                         </div>
                     </div>
 
+                    <div class="border rounded p-1 mt-1" id="quick-condition-section">
+                        <div class="d-flex justify-content-between align-items-center gap-1">
+                            <div>
+                                <h6 class="mb-25">Conditional Visibility</h6>
+                                <small class="text-muted">
+                                    Show this question only when a selected parent question has a specific answer.
+                                </small>
+                            </div>
+
+                            <div class="form-check form-switch mb-0">
+                                <input
+                                    type="checkbox"
+                                    id="quick-condition-enabled"
+                                    class="form-check-input"
+                                >
+
+                                <label
+                                    for="quick-condition-enabled"
+                                    class="form-check-label"
+                                >
+                                    Conditional
+                                </label>
+                            </div>
+                        </div>
+
+                        <div
+                            id="quick-condition-panel"
+                            class="question-condition-panel p-1 mt-1 d-none"
+                        >
+                            <div class="row">
+                                <div class="col-md-5 mb-1">
+                                    <label class="form-label">Parent Question *</label>
+
+                                    <select
+                                        id="quick-condition-parent-question"
+                                        class="form-select"
+                                    >
+                                        <option value="">Select parent question</option>
+                                    </select>
+
+                                    <small class="text-muted">
+                                        Only selected Single/Multi Select questions can be parents.
+                                    </small>
+                                </div>
+
+                                <div class="col-md-3 mb-1">
+                                    <label class="form-label">Operator *</label>
+
+                                    <select
+                                        id="quick-condition-operator"
+                                        class="form-select"
+                                    >
+                                        <option value="selected">Selected</option>
+                                        <option value="not_selected">Not selected</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4 mb-1">
+                                    <label class="form-label">Answer *</label>
+
+                                    <select
+                                        id="quick-condition-parent-option"
+                                        class="form-select"
+                                    >
+                                        <option value="">Select answer</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div
+                                id="quick-condition-summary"
+                                class="question-condition-summary d-none"
+                            >
+                                Show when
+                                <strong id="quick-condition-summary-question"></strong>
+                                <span id="quick-condition-summary-operator">has</span>
+                                answer
+                                <strong id="quick-condition-summary-option"></strong>.
+                            </div>
+
+                            <small class="text-muted d-block mt-50">
+                                Required validation applies only while this condition is matched.
+                            </small>
+                        </div>
+                    </div>
+
                     <div id="quick-options-section" class="border rounded p-1 mt-1">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <div>
@@ -1724,6 +1810,163 @@
                 .prop('checked', false);
         });
 
+        function quickConditionEnabled() {
+            return $('#quick-condition-enabled').is(':checked');
+        }
+
+        function selectedConditionalParentIds() {
+            return $('#questions-container .question-card')
+                .filter(function () {
+                    return $(this).find('.question-toggle').is(':checked');
+                })
+                .map(function () {
+                    return Number($(this).data('question-id'));
+                })
+                .get()
+                .filter(Boolean);
+        }
+
+        function quickConditionParentOptionsHtml(selectedParentId = null) {
+            const selectedIds = new Set(selectedConditionalParentIds());
+
+            return Object.values(conditionQuestionData)
+                .filter(question => selectedIds.has(Number(question.id)))
+                .map(question => `
+                    <option
+                        value="${Number(question.id)}"
+                        ${Number(selectedParentId) === Number(question.id) ? 'selected' : ''}
+                    >
+                        ${escapeHtml(question.title)}
+                    </option>
+                `)
+                .join('');
+        }
+
+        function populateQuickConditionParents(selectedParentId = null) {
+            const select = $('#quick-condition-parent-question');
+
+            if (!select.length) return;
+
+            select.html(`
+                <option value="">Select parent question</option>
+                ${quickConditionParentOptionsHtml(selectedParentId)}
+            `);
+        }
+
+        function populateQuickConditionAnswers(selectedOptionId = null) {
+            const parentQuestionId = Number(
+                $('#quick-condition-parent-question').val() || 0
+            );
+
+            $('#quick-condition-parent-option').html(`
+                <option value="">Select answer</option>
+                ${conditionAnswerOptionsHtml(parentQuestionId, selectedOptionId)}
+            `);
+        }
+
+        function updateQuickConditionSummary() {
+            const enabled = quickConditionEnabled();
+            const panel = $('#quick-condition-panel');
+            const summary = $('#quick-condition-summary');
+
+            panel.toggleClass('d-none', !enabled);
+
+            if (!enabled) {
+                summary.addClass('d-none');
+                return;
+            }
+
+            const parentId = Number(
+                $('#quick-condition-parent-question').val() || 0
+            );
+
+            const optionId = Number(
+                $('#quick-condition-parent-option').val() || 0
+            );
+
+            const operator = $('#quick-condition-operator').val();
+            const parent = conditionQuestionData[parentId];
+
+            const option = parent?.options?.find(
+                item => Number(item.id) === optionId
+            );
+
+            if (!parent || !option) {
+                summary.addClass('d-none');
+                return;
+            }
+
+            $('#quick-condition-summary-question').text(parent.title);
+            $('#quick-condition-summary-operator').text(
+                operator === 'not_selected'
+                    ? 'does not have'
+                    : 'has'
+            );
+            $('#quick-condition-summary-option').text(option.label);
+
+            summary.removeClass('d-none');
+        }
+
+        function ensureQuickConditionSortOrder() {
+            const parentQuestionId = Number(
+                $('#quick-condition-parent-question').val() || 0
+            );
+
+            if (!parentQuestionId) return;
+
+            const parentCard = $(
+                `.question-card[data-question-id="${parentQuestionId}"]`
+            );
+
+            if (!parentCard.length) return;
+
+            const parentSort = Number(
+                parentCard
+                    .find(`input[name="questions[${parentQuestionId}][sort_order]"]`)
+                    .val() || 0
+            );
+
+            const currentSort = Number(
+                $('#quick-sort-order').val() || 0
+            );
+
+            if (currentSort <= parentSort) {
+                $('#quick-sort-order').val(parentSort + 1);
+            }
+        }
+
+        $('#quick-condition-enabled').on('change', function () {
+            if (quickConditionEnabled()) {
+                populateQuickConditionParents(
+                    $('#quick-condition-parent-question').val()
+                );
+            }
+
+            updateQuickConditionSummary();
+        });
+
+        $('#quick-condition-parent-question').on('change', function () {
+            populateQuickConditionAnswers();
+            ensureQuickConditionSortOrder();
+            updateQuickConditionSummary();
+        });
+
+        $('#quick-condition-parent-option, #quick-condition-operator').on(
+            'change',
+            updateQuickConditionSummary
+        );
+
+        $('#quick-question-modal').on('shown.bs.modal', function () {
+            const currentParentId =
+                $('#quick-condition-parent-question').val();
+
+            populateQuickConditionParents(currentParentId);
+            populateQuickConditionAnswers(
+                $('#quick-condition-parent-option').val()
+            );
+            updateQuickConditionSummary();
+        });
+
         function quickPaletteEnabled() {
             return $('#quick-color-palette-question').is(':checked');
         }
@@ -2223,6 +2466,17 @@
             $('#quick-required').prop('checked', false);
             $('#quick-color-palette-question').prop('checked', false);
 
+            $('#quick-condition-enabled').prop('checked', false);
+            $('#quick-condition-parent-question').html(
+                '<option value="">Select parent question</option>'
+            );
+            $('#quick-condition-parent-option').html(
+                '<option value="">Select answer</option>'
+            );
+            $('#quick-condition-operator').val('selected');
+            $('#quick-condition-panel').addClass('d-none');
+            $('#quick-condition-summary').addClass('d-none');
+
             $('#quick-question-type')
                 .find('option')
                 .prop('disabled', false);
@@ -2647,6 +2901,65 @@
                 return;
             }
 
+            let pendingCondition = null;
+
+            if (quickConditionEnabled()) {
+                const parentQuestionId = Number(
+                    $('#quick-condition-parent-question').val() || 0
+                );
+
+                const parentOptionId = Number(
+                    $('#quick-condition-parent-option').val() || 0
+                );
+
+                const operator =
+                    $('#quick-condition-operator').val() || 'selected';
+
+                if (!parentQuestionId) {
+                    toast('Select the parent question for the condition.');
+                    return;
+                }
+
+                if (!parentOptionId) {
+                    toast('Select the parent answer for the condition.');
+                    return;
+                }
+
+                const parentCard = $(
+                    `.question-card[data-question-id="${parentQuestionId}"]`
+                );
+
+                if (
+                    !parentCard.length
+                    || !parentCard.find('.question-toggle').is(':checked')
+                ) {
+                    toast(
+                        'The parent question must be selected for this AI Product.'
+                    );
+                    return;
+                }
+
+                const parent = conditionQuestionData[parentQuestionId];
+                const parentOption = parent?.options?.find(
+                    item => Number(item.id) === parentOptionId
+                );
+
+                if (!parent || !parentOption) {
+                    toast(
+                        'The selected answer does not belong to the parent question.'
+                    );
+                    return;
+                }
+
+                ensureQuickConditionSortOrder();
+
+                pendingCondition = {
+                    parent_question_id: parentQuestionId,
+                    parent_option_id: parentOptionId,
+                    operator: operator
+                };
+            }
+
             button
                 .prop('disabled', true)
                 .html(
@@ -2718,6 +3031,31 @@
 
                     toggleQuestion(newQuestionCard);
                     initializeQuestionCondition(newQuestionCard);
+
+                    if (pendingCondition) {
+                        newQuestionCard
+                            .find('.question-condition-toggle')
+                            .prop('checked', true);
+
+                        newQuestionCard
+                            .find('.condition-parent-question')
+                            .val(
+                                String(
+                                    pendingCondition.parent_question_id
+                                )
+                            );
+
+                        populateConditionAnswers(
+                            newQuestionCard,
+                            pendingCondition.parent_option_id
+                        );
+
+                        newQuestionCard
+                            .find('.condition-operator')
+                            .val(pendingCondition.operator);
+
+                        updateConditionSummary(newQuestionCard);
+                    }
 
                     const modalElement =
                         document.getElementById(
@@ -2836,8 +3174,3 @@
         });
     });
 </script>
-
-
-
-
-
