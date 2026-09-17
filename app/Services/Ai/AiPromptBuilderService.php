@@ -137,11 +137,12 @@ class AiPromptBuilderService
         $sections = [];
 
         $sections[] = trim("
-Create a professional {$studioName} design.
+Create a professional custom design.
 
-The design is intended for:
-{$categoryName}.
-        ");
+Context (for understanding only — do not render this as text in the artwork):
+- Product type: {$studioName}
+- Category: {$categoryName}
+    ");
 
         if ($resolvedAnswers->isNotEmpty()) {
             $sections[] =
@@ -201,6 +202,8 @@ The design is intended for:
             'Follow the requested style and user choices precisely.',
             'Do not introduce unrelated text, objects, decorations, or concepts.',
             'Do not generate a product mockup unless explicitly requested.',
+            'Do not write, spell out, or render the product type or category name (or any letters from them) as text anywhere in the artwork.',
+            'Do not include any written text in the artwork unless explicitly requested in the design requirements above.',
         ]);
 
         return collect($sections)
@@ -645,42 +648,20 @@ The design is intended for:
         array $studioSettings
     ): string {
         return collect([
-            data_get(
-                $studioSettings,
-                'negative_rules'
-            ),
-
-            data_get(
-                $categorySettings,
-                'negative_rules'
-            ),
+            data_get($studioSettings, 'negative_rules'),
+            data_get($categorySettings, 'negative_rules'),
 
             'low quality',
             'distorted composition',
             'unrelated elements',
             'unwanted product mockup',
+            'product name as text',
+            'category name as text',
+            'written labels or captions',
         ])
             ->map(fn($value) => trim((string) $value))
             ->filter()
             ->unique()
             ->implode("\n");
-    }
-
-    private function isEmptyAnswer(
-        mixed $value
-    ): bool {
-        if ($value === null) {
-            return true;
-        }
-
-        if (
-            is_string($value)
-            && trim($value) === ''
-        ) {
-            return true;
-        }
-
-        return is_array($value)
-            && empty($value);
     }
 }

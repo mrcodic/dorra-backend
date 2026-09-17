@@ -9,16 +9,22 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ai_guide_question_conditions', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+
             $table->id();
 
-            $table->unsignedInteger('ai_guide_question_assignment_id');
-            $table->unsignedInteger('parent_question_id');
-            $table->unsignedInteger('parent_option_id');
+            $table->unsignedBigInteger('ai_guide_question_assignment_id');
+            $table->unsignedBigInteger('parent_question_id');
+            $table->unsignedBigInteger('parent_option_id');
 
-            $table->string('operator', 30)
-                ->default('selected');
+            $table->string('operator', 30)->default('selected');
 
             $table->timestamps();
+
+            $table->unique(
+                'ai_guide_question_assignment_id',
+                'agqc_assignment_unique'
+            );
 
             $table->foreign(
                 'ai_guide_question_assignment_id',
@@ -30,7 +36,7 @@ return new class extends Migration
 
             $table->foreign(
                 'parent_question_id',
-                'agqc_parent_question_fk'
+                'agqc_question_fk'
             )
                 ->references('id')
                 ->on('ai_guide_questions')
@@ -38,23 +44,16 @@ return new class extends Migration
 
             $table->foreign(
                 'parent_option_id',
-                'agqc_parent_option_fk'
+                'agqc_option_fk'
             )
                 ->references('id')
                 ->on('ai_guide_question_options')
                 ->cascadeOnDelete();
-
-            $table->unique(
-                'ai_guide_question_assignment_id',
-                'agqc_assignment_unique'
-            );
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists(
-            'ai_guide_question_conditions'
-        );
+        Schema::dropIfExists('ai_guide_question_conditions');
     }
 };
