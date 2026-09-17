@@ -11,11 +11,12 @@ return new class extends Migration
         Schema::create('ai_guide_question_conditions', function (Blueprint $table) {
             $table->id();
 
-            $table->unsignedBigInteger('ai_guide_question_assignment_id');
-            $table->unsignedBigInteger('parent_question_id');
-            $table->unsignedBigInteger('parent_option_id');
+            $table->unsignedInteger('ai_guide_question_assignment_id');
+            $table->unsignedInteger('parent_question_id');
+            $table->unsignedInteger('parent_option_id');
 
-            $table->string('operator', 30)->default('selected');
+            $table->string('operator', 30)
+                ->default('selected');
 
             $table->timestamps();
 
@@ -52,6 +53,8 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('ai_guide_question_conditions');
+        Schema::dropIfExists(
+            'ai_guide_question_conditions'
+        );
     }
 };
