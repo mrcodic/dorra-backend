@@ -298,10 +298,13 @@ class SettingController extends Controller
     public function updateBundleSection(Request $request, SettingRepositoryInterface $settingRepository)
     {
         $request->validate([
-            'description' => 'nullable|string',
+            'description_en' => 'nullable|string',
+            'description_ar' => 'nullable|string',
             'website_image_id' => 'nullable|integer|exists:media,id',
             'mobile_image_id' => 'nullable|integer|exists:media,id',
         ]);
+
+
 
         $websiteMedia = $request->filled('website_image_id')
             ? Media::find($request->input('website_image_id'))
@@ -310,13 +313,13 @@ class SettingController extends Controller
         $mobileMedia = $request->filled('mobile_image_id')
             ? Media::find($request->input('mobile_image_id'))
             : null;
-
         $data = [
-            'bundle_description'       => $request->input('description'),
-            'bundle_website_image_id'  => $request->input('website_image_id'),
-            'bundle_website_image'     => $websiteMedia?->getUrl(),
-            'bundle_mobile_image_id'   => $request->input('mobile_image_id'),
-            'bundle_mobile_image'      => $mobileMedia?->getUrl(),
+            'bundle_description_en'    => $request->input('description_en', ''),
+            'bundle_description_ar'    => $request->input('description_ar', ''),
+            'bundle_website_image_id'  => $request->input('website_image_id', ''),
+            'bundle_website_image'     => $websiteMedia?->getUrl() ?? '',
+            'bundle_mobile_image_id'   => $request->input('mobile_image_id', ''),
+            'bundle_mobile_image'      => $mobileMedia?->getUrl() ?? '',
         ];
 
         foreach ($data as $key => $value) {

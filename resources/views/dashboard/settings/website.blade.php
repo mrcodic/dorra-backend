@@ -204,10 +204,17 @@
                             </div>
                         </div>
 
-                        <div class="mb-2 mt-2">
-                            <label class="form-label">Description</label>
-                            <textarea name="description" class="form-control" rows="3"
-                                      placeholder="Enter bundle description">{{ setting('bundle_description') }}</textarea>
+                        <div class="row mb-2 mt-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Description in English</label>
+                                <textarea name="description_en" class="form-control" rows="3"
+                                          placeholder="Enter bundle description">{{ setting('bundle_description_en') }}</textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Description in Arabic</label>
+                                <textarea name="description_ar" class="form-control" rows="3"
+                                          placeholder="ادخل وصف الباقة" dir="rtl">{{ setting('bundle_description_ar') }}</textarea>
+                            </div>
                         </div>
 
                         <div class="text-end">

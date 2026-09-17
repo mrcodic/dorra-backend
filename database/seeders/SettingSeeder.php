@@ -41,7 +41,8 @@ class SettingSeeder extends Seeder
             ['key' => 'rate', 'value' => 4.9, 'group' => 'statistics_landing'],
 
             // Bundle (navbar tab)
-            ['key' => 'bundle_description', 'value' => '', 'group' => 'bundle_landing'],
+            ['key' => 'bundle_description_en', 'value' => '', 'group' => 'bundle_landing'],
+            ['key' => 'bundle_description_ar', 'value' => '', 'group' => 'bundle_landing'],
             ['key' => 'bundle_website_image_id', 'value' => '', 'group' => 'bundle_landing'],
             ['key' => 'bundle_website_image', 'value' => '', 'group' => 'bundle_landing'],
             ['key' => 'bundle_mobile_image_id', 'value' => '', 'group' => 'bundle_landing'],
