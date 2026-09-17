@@ -594,7 +594,7 @@
                     class="btn-close"
                     data-bs-dismiss="modal"
                     aria-label="Close"
-                ></button>
+                >x</button>
             </div>
 
             <div class="modal-body">
