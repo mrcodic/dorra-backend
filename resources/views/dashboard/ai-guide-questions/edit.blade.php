@@ -2,6 +2,9 @@
 
 @section('title', 'Edit AI Question')
 @section('main-page', 'AI Questions')
+@section('vendor-style')
+    <link rel="stylesheet" href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}">
+@endsection
 
 @section('content')
     <div class="card">
@@ -25,3 +28,6 @@
     </div>
 @endsection
 
+@section('vendor-script')
+    <script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
+@endsection
