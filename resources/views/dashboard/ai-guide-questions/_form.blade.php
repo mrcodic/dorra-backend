@@ -8,6 +8,7 @@
     );
 
     $savedOptions = $question?->options?->map(function ($option) {
+        $media = $option->getFirstMedia(getMediaCollectionName('option_image'));
         return [
             'id' => $option->id,
             'label' => [
@@ -23,6 +24,8 @@
                     data_get($option->ui_data, 'colors', [])
                 ),
             ],
+             'media_id' => $media?->id,
+             'image_url' => $media?->original_url,
             'is_active' => (bool) $option->is_active,
         ];
     })->toArray() ?? [];
@@ -292,7 +295,29 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-md-6 mt-1 option-image-wrapper">
+                        <label class="form-label">Option Image</label>
 
+                        <div
+                            class="dropzone option-image-dropzone"
+                            data-media-id="{{ $option['media_id'] ?? '' }}"
+                            data-image-url="{{ $option['image_url'] ?? '' }}"
+                        ></div>
+
+                        <input
+                            type="hidden"
+                            name="options[{{ $index }}][media_id]"
+                            value="{{ $option['media_id'] ?? '' }}"
+                            class="option-media-id"
+                        >
+
+                        <input
+                            type="hidden"
+                            name="options[{{ $index }}][remove_media]"
+                            value="0"
+                            class="option-remove-media"
+                        >
+                    </div>
                     <div class="col-md-1 option-actions">
                         <div class="form-check form-switch mb-1">
                             <input
@@ -377,6 +402,83 @@
         @endforeach
     </div>
 </div>
+
+<script !src="">
+    Dropzone.autoDiscover = false;
+
+    function initOptionDropzone(element) {
+        const dropzoneElement = $(element);
+
+        if (dropzoneElement.data('dz-initialized')) return;
+
+        const row = dropzoneElement.closest('.option-row');
+        const hiddenInput = row.find('.option-media-id');
+        const removeInput = row.find('.option-remove-media');
+
+        const existingMediaId = dropzoneElement.data('media-id');
+        const existingImageUrl = dropzoneElement.data('image-url');
+
+        const dz = new Dropzone(element, {
+            url: "{{ route('media.store') }}",
+            maxFiles: 1,
+            acceptedFiles: "image/*",
+            addRemoveLinks: true,
+
+            headers: {
+                "X-CSRF-TOKEN": document
+                    .querySelector('meta[name="csrf-token"]')
+                    .getAttribute("content")
+            },
+
+            success: function (file, response) {
+                const mediaId = response.data.id;
+                const imageUrl = response.data.original_url ?? response.data.url;
+
+                hiddenInput.val(mediaId);
+                removeInput.val(0);
+
+                file._mediaId = mediaId;
+                file._imageUrl = imageUrl;
+            },
+
+            removedfile: function (file) {
+                if (file.previewElement) {
+                    file.previewElement.remove();
+                }
+
+                hiddenInput.val('');
+                removeInput.val(1);
+            },
+
+            maxfilesexceeded: function (file) {
+                this.removeAllFiles(true);
+                this.addFile(file);
+            }
+        });
+
+        if (existingMediaId && existingImageUrl) {
+            const mockFile = {
+                name: 'Current image',
+                size: 0,
+                accepted: true,
+                _mediaId: existingMediaId
+            };
+
+            dz.emit('addedfile', mockFile);
+            dz.emit('thumbnail', mockFile, existingImageUrl);
+            dz.emit('complete', mockFile);
+
+            dz.files.push(mockFile);
+
+            hiddenInput.val(existingMediaId);
+        }
+
+        dropzoneElement.data('dz-initialized', true);
+    }
+    $('.option-image-dropzone').each(function () {
+        initOptionDropzone(this);
+    });
+</script>
 
 <script>
     $(document).ready(function () {
@@ -539,6 +641,30 @@
                                     dir="rtl"
                                 ></textarea>
                             </div>
+
+<div class="col-md-6 mt-1 option-image-wrapper">
+    <label class="form-label">Option Image</label>
+
+    <div
+        class="dropzone option-image-dropzone"
+        data-media-id=""
+        data-image-url=""
+    ></div>
+
+    <input
+        type="hidden"
+        name="options[${index}][media_id]"
+        value=""
+        class="option-media-id"
+    >
+
+    <input
+        type="hidden"
+        name="options[${index}][remove_media]"
+        value="0"
+        class="option-remove-media"
+    >
+</div>
                         </div>
                     </div>
 
@@ -595,8 +721,11 @@
             </div>
         `);
 
-            const newRow = optionsContainer.children('.option-row').last();
 
+            const newRow = optionsContainer.children('.option-row').last();
+            initOptionDropzone(
+                newRow.find('.option-image-dropzone')[0]
+            );
             if (colorPaletteToggle.is(':checked')) {
                 newRow.find('.option-label-fields').show();
                 newRow.find('.normal-option-fields').hide();

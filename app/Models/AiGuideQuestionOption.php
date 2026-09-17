@@ -29,4 +29,8 @@ class AiGuideQuestionOption extends Model
     {
         return $this->belongsTo(AiGuideQuestion::class);
     }
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection(getMediaCollectionName('option_image'))->singleFile();
+    }
 }

@@ -1,7 +1,6 @@
-@php
-  $category = \App\Models\Category::find(request('product_without_category_id'));
-    $isTableau = $category && $category->is_tableau;
-  @endphp
+
+
+
 <div class="modal new-user-modal fade" id="templateEditorModal">
     <div class="modal-dialog modal-dialog-centered">
         <div class="add-new-user modal-content pt-0 px-1">

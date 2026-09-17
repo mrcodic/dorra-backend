@@ -106,6 +106,20 @@ class AiGuideQuestionService extends BaseService
             $optionId = isset($option['id']) ? (int) $option['id'] : null;
             $existing = $optionId ? $existingOptions->get($optionId) : null;
 
+            $mediaId = !empty($option['media_id'])
+                ? (int) $option['media_id']
+                : null;
+
+            $removeMedia = filter_var(
+                $option['remove_media'] ?? false,
+                FILTER_VALIDATE_BOOLEAN
+            );
+
+            unset(
+                $option['media_id'],
+                $option['remove_media']
+            );
+
             $data = $this->prepareOptionData(
                 questionId: $questionId,
                 option: $option,
@@ -115,11 +129,25 @@ class AiGuideQuestionService extends BaseService
 
             if ($existing) {
                 $existing->update($data);
+
+                $this->syncOptionMedia(
+                    option: $existing,
+                    mediaId: $mediaId,
+                    removeMedia: $removeMedia
+                );
+
                 $submittedIds[] = $existing->id;
                 continue;
             }
 
             $model = $this->optionRepository->create($data);
+
+            $this->syncOptionMedia(
+                option: $model,
+                mediaId: $mediaId,
+                removeMedia: $removeMedia
+            );
+
             $submittedIds[] = $model->id;
         }
 
@@ -130,7 +158,7 @@ class AiGuideQuestionService extends BaseService
             $query->whereNotIn('id', $submittedIds);
         }
 
-        $query->delete();
+        $this->deleteOptionModels($query->get());
     }
 
     private function prepareOptionData(int $questionId, array $option, int $index, $existing = null): array
@@ -139,27 +167,41 @@ class AiGuideQuestionService extends BaseService
         $colors = $uiData['colors'] ?? [];
         $isPalette = !empty($colors);
 
-        $label = is_array($option['label'] ?? null) ? $option['label'] : [];
-        $promptValue = is_array($option['prompt_value'] ?? null) ? $option['prompt_value'] : [];
+        $label = is_array($option['label'] ?? null)
+            ? $option['label']
+            : [];
+
+        $promptValue = is_array($option['prompt_value'] ?? null)
+            ? $option['prompt_value']
+            : [];
+
+        $englishLabel = trim((string) ($label['en'] ?? ''));
+
+        if ($englishLabel === '') {
+            throw ValidationException::withMessages([
+                "options.{$index}.label.en" => [
+                    'English label is required for every option.',
+                ],
+            ]);
+        }
+
+        $label['en'] = $englishLabel;
+        $label['ar'] = trim((string) ($label['ar'] ?? ''));
 
         if ($isPalette) {
             [$label, $promptValue] = $this->preparePaletteContent(
-                $label,
-                $promptValue,
-                $colors,
-                $index
+                label: $label,
+                promptValue: $promptValue,
+                colors: $colors
             );
         }
 
-
         /*
-         * Existing values must remain stable.
-         * Changing an admin label must not change the API identifier.
+         * Existing API values remain stable.
+         * Editing the label must not regenerate option value.
          */
-        $value = $existing?->value ?: $this->generateOptionValue(
-            $questionId,
-            $option['label']['en']  ?: "color_palette_" . ($index + 1)
-        );
+        $value = $existing?->value
+            ?: $this->generateOptionValue($questionId, $label['en']);
 
         return [
             'ai_guide_question_id' => $questionId,
@@ -172,24 +214,46 @@ class AiGuideQuestionService extends BaseService
         ];
     }
 
-    private function preparePaletteContent(array $label, array $promptValue, array $colors, int $index): array
+    private function preparePaletteContent(array $label, array $promptValue, array $colors): array
     {
-        $number = $index + 1;
         $colorsText = implode(', ', $colors);
-
-        /*
-         * Frontend does not need to send label/prompt_value for palettes.
-         * Backend generates safe defaults.
-         */
-        $label['en'] = trim((string) ($label['en'] ?? '')) ?: "Color Palette {$number}";
-        $label['ar'] = trim((string) ($label['ar'] ?? '')) ?: "لوحة ألوان {$number}";
-
         $defaultPrompt = "Use this exact color palette: {$colorsText}";
 
+        /*
+         * Palette label is written manually by admin.
+         * Only prompt value is automatically generated from colors.
+         */
         $promptValue['en'] = trim((string) ($promptValue['en'] ?? '')) ?: $defaultPrompt;
         $promptValue['ar'] = trim((string) ($promptValue['ar'] ?? '')) ?: $defaultPrompt;
 
         return [$label, $promptValue];
+    }
+
+    private function syncOptionMedia($option, ?int $mediaId, bool $removeMedia = false): void
+    {
+        $collectionName = getMediaCollectionName('option_image');
+
+        /*
+         * New media wins if both remove_media and media_id arrive.
+         */
+        if ($mediaId) {
+            attachMediaToModel(
+                mediaId: $mediaId,
+                model: $option,
+                collectionName: 'option_image',
+                clearExisting: true
+            );
+
+            return;
+        }
+
+        if (!$removeMedia) {
+            return;
+        }
+
+        if (method_exists($option, 'clearMediaCollection')) {
+            $option->clearMediaCollection($collectionName);
+        }
     }
 
     private function normalizeUiData(?array $uiData): ?array
@@ -199,8 +263,8 @@ class AiGuideQuestionService extends BaseService
         }
 
         /*
-         * Whitelist supported UI metadata.
-         * Do not store arbitrary frontend JSON.
+         * ui_data is only for supported visual metadata such as palettes.
+         * Option images are stored through Spatie Media Library.
          */
         $colors = collect($uiData['colors'] ?? [])
             ->filter(fn($color) => is_string($color))
@@ -210,7 +274,9 @@ class AiGuideQuestionService extends BaseService
             ->values()
             ->all();
 
-        return $colors ? ['colors' => $colors] : null;
+        return $colors
+            ? ['colors' => $colors]
+            : null;
     }
 
     private function supportsOptions(AiGuideQuestionTypeEnum $type): bool
@@ -223,9 +289,24 @@ class AiGuideQuestionService extends BaseService
 
     private function deleteQuestionOptions(int $questionId): void
     {
-        $this->optionRepository->query()
+        $options = $this->optionRepository->query()
             ->where('ai_guide_question_id', $questionId)
-            ->delete();
+            ->get();
+
+        $this->deleteOptionModels($options);
+    }
+
+    private function deleteOptionModels($options): void
+    {
+        $collectionName = getMediaCollectionName('option_image');
+
+        foreach ($options as $option) {
+            if (method_exists($option, 'clearMediaCollection')) {
+                $option->clearMediaCollection($collectionName);
+            }
+
+            $option->delete();
+        }
     }
 
     private function generateOptionValue(int $questionId, string $label): string

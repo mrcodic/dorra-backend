@@ -737,7 +737,7 @@
                             The question is created globally, then automatically selected for this product.
                         </small>
                     </div>
-
+                    <input type="hidden" class="quick-option-media-id">
                     <button
                         type="button"
                         class="btn-close"
@@ -1924,16 +1924,16 @@
                             en: labelEn,
                             ar: row.find('.quick-option-label-ar').val().trim()
                         },
+
                         prompt_value: {
                             en: row.find('.quick-option-prompt-en').val().trim(),
                             ar: row.find('.quick-option-prompt-ar').val().trim()
                         },
-                        ui_data: {
-                            colors: colors
-                        },
+
+                        media_id: row.find('.quick-option-media-id').val() || null,
+
                         is_active: 1
                     });
-
                     return;
                 }
 
