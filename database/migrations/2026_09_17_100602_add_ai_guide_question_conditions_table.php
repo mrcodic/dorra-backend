@@ -11,25 +11,41 @@ return new class extends Migration
         Schema::create('ai_guide_question_conditions', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('ai_guide_question_assignment_id')
-                ->constrained('ai_guide_question_assignments')
-                ->cascadeOnDelete();
-
-            $table->foreignId('parent_question_id')
-                ->constrained('ai_guide_questions')
-                ->cascadeOnDelete();
-
-            $table->foreignId('parent_option_id')
-                ->constrained('ai_guide_question_options')
-                ->cascadeOnDelete();
+            $table->unsignedBigInteger('ai_guide_question_assignment_id');
+            $table->unsignedBigInteger('parent_question_id');
+            $table->unsignedBigInteger('parent_option_id');
 
             $table->string('operator', 30)->default('selected');
 
             $table->timestamps();
 
+            $table->foreign(
+                'ai_guide_question_assignment_id',
+                'agqc_assignment_fk'
+            )
+                ->references('id')
+                ->on('ai_guide_question_assignments')
+                ->cascadeOnDelete();
+
+            $table->foreign(
+                'parent_question_id',
+                'agqc_parent_question_fk'
+            )
+                ->references('id')
+                ->on('ai_guide_questions')
+                ->cascadeOnDelete();
+
+            $table->foreign(
+                'parent_option_id',
+                'agqc_parent_option_fk'
+            )
+                ->references('id')
+                ->on('ai_guide_question_options')
+                ->cascadeOnDelete();
+
             $table->unique(
                 'ai_guide_question_assignment_id',
-                'ai_guide_question_conditions_assignment_unique'
+                'agqc_assignment_unique'
             );
         });
     }
