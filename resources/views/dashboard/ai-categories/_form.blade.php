@@ -79,25 +79,65 @@
     }
 
     .quick-option-dropzone {
-        min-height: 120px;
+        min-height: 150px;
         border: 1px dashed #d8d6de;
         border-radius: .357rem;
         background: #fff;
         padding: 12px;
+        overflow: hidden;
+        position: relative;
     }
 
     .quick-option-dropzone .dz-message {
-        margin: 1rem 0;
+        margin: 2rem 0;
         color: #6e6b7b;
+        text-align: center;
+    }
+
+    .quick-option-dropzone.dz-started .dz-message {
+        display: none;
     }
 
     .quick-option-dropzone .dz-preview {
-        margin: 8px;
+        position: relative !important;
+        display: inline-flex !important;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 140px !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        vertical-align: top;
     }
 
     .quick-option-dropzone .dz-preview .dz-image {
-        width: 90px;
-        height: 90px;
+        width: 140px !important;
+        height: 110px !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        background: #f8f8f8;
+    }
+
+    .quick-option-dropzone .dz-preview .dz-image img {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        object-fit: contain !important;
+    }
+
+    .quick-option-dropzone .dz-preview .dz-details,
+    .quick-option-dropzone .dz-preview .dz-success-mark,
+    .quick-option-dropzone .dz-preview .dz-error-mark {
+        display: none !important;
+    }
+
+    .quick-option-dropzone .dz-preview .dz-remove {
+        display: inline-block;
+        margin-top: 8px;
+        font-size: 12px;
+        color: #ea5455;
+        text-decoration: none;
     }
 </style>
 
@@ -912,6 +952,11 @@
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
+<script>
+    if (window.Dropzone) {
+        Dropzone.autoDiscover = false;
+    }
+</script>
 
 <script>
     $(function () {
@@ -921,12 +966,10 @@
         const multiSelect = @json(\App\Enums\Ai\AiGuideQuestionTypeEnum::MULTI_SELECT->value);
         const quickStoreUrl = @json(route('ai-categories.questions.quick-store'));
         const mediaStoreUrl = @json(route('media.store'));
+        const mediaDeleteBaseUrl = @json(url('api/v1/media'));
         const currentAiCategoryId = @json($aiCategory?->id);
         const csrfToken = @json(csrf_token());
 
-        if (window.Dropzone) {
-            Dropzone.autoDiscover = false;
-        }
         const quickStudioStoreUrl = @json(route('ai-categories.studio-items.quick-store'));
         const quickStudioUpdateUrlTemplate = @json(route('ai-categories.studio-items.quick-update', ['studioItem' => '__STUDIO_ITEM_ID__']));
         const quickStudioDeleteUrlTemplate = @json(route('ai-categories.studio-items.quick-delete', ['studioItem' => '__STUDIO_ITEM_ID__']));
@@ -937,6 +980,7 @@
 
         let quickOptionIndex = 0;
         let pendingStudioQuestionIds = [];
+        let quickQuestionSaved = false;
 
         function initStudioQuestionsSelect2() {
             const select = $('#quick-studio-question-ids');
@@ -1427,6 +1471,8 @@
                 $('#quick-options-container .quick-option-row').each(function () {
                     const row = $(this);
 
+                    clearQuickOptionImage(row);
+
                     if (!row.find('.quick-palette-color-row').length) {
                         addQuickPaletteColor(row, '#000000');
                     }
@@ -1450,25 +1496,51 @@
             toggleQuickOptions();
         }
 
+        function deleteQuickOptionMedia(mediaId) {
+            if (!mediaId) return Promise.resolve();
+
+            return fetch(`${mediaDeleteBaseUrl}/${mediaId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                }
+            }).then(async response => {
+                if (response.ok) return;
+
+                let message = 'Unable to remove image.';
+
+                try {
+                    const data = await response.json();
+                    message = data?.message ?? message;
+                } catch (_) {}
+
+                throw new Error(message);
+            });
+        }
+
         function initQuickOptionDropzone(optionRow) {
             if (!window.Dropzone) {
                 console.error('Dropzone is not loaded.');
-                return;
+                return null;
             }
 
             const element = optionRow.find('.quick-option-dropzone')[0];
 
-            if (!element || element.dropzone) {
-                return;
-            }
+            if (!element) return null;
+            if (element.dropzone) return element.dropzone;
 
             const hiddenInput = optionRow.find('.quick-option-media-id');
 
-            new Dropzone(element, {
+            const dz = new Dropzone(element, {
                 url: mediaStoreUrl,
+                paramName: 'file',
                 maxFiles: 1,
                 acceptedFiles: 'image/*',
                 addRemoveLinks: true,
+                clickable: true,
+                thumbnailWidth: 160,
+                thumbnailHeight: 160,
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
                     'Accept': 'application/json'
@@ -1481,25 +1553,37 @@
                     if (!mediaId) {
                         hiddenInput.val('');
                         toast('Image uploaded but media ID was not returned.');
-                        this.removeFile(file);
                         return;
                     }
 
                     hiddenInput.val(mediaId);
-                    file._mediaId = mediaId;
+                    file._mediaId = String(mediaId);
                     file._imageUrl = imageUrl;
+                    file._deleteOnRemove = true;
+
+                    element.classList.add('dz-started');
                 },
 
                 removedfile: function (file) {
+                    const mediaId = String(file._mediaId ?? '');
+                    const currentMediaId = String(hiddenInput.val() ?? '');
+
                     if (file.previewElement) {
                         file.previewElement.remove();
                     }
 
-                    if (
-                        !file._mediaId
-                        || String(hiddenInput.val()) === String(file._mediaId)
-                    ) {
+                    if (!mediaId || mediaId === currentMediaId) {
                         hiddenInput.val('');
+                    }
+
+                    if (mediaId && file._deleteOnRemove !== false) {
+                        deleteQuickOptionMedia(mediaId).catch(error => {
+                            toast(error.message ?? 'Unable to remove image.');
+                        });
+                    }
+
+                    if (!this.files.length) {
+                        element.classList.remove('dz-started');
                     }
                 },
 
@@ -1520,14 +1604,36 @@
                     }
                 }
             });
+
+            return dz;
         }
 
-        function destroyQuickOptionDropzone(optionRow) {
+        function destroyQuickOptionDropzone(optionRow, deleteMedia = true) {
             const element = optionRow.find('.quick-option-dropzone')[0];
 
-            if (element?.dropzone) {
-                element.dropzone.destroy();
+            if (!element?.dropzone) return;
+
+            element.dropzone.files.forEach(file => {
+                file._deleteOnRemove = deleteMedia;
+            });
+
+            element.dropzone.destroy();
+        }
+
+        function clearQuickOptionImage(optionRow) {
+            const element = optionRow.find('.quick-option-dropzone')[0];
+
+            if (!element?.dropzone) {
+                optionRow.find('.quick-option-media-id').val('');
+                return;
             }
+
+            element.dropzone.files.forEach(file => {
+                file._deleteOnRemove = true;
+            });
+
+            element.dropzone.removeAllFiles(true);
+            optionRow.find('.quick-option-media-id').val('');
         }
 
         function addQuickOption() {
@@ -1577,7 +1683,7 @@
                             <div class="col-12 mt-1">
                                 <label class="form-label">Option Image</label>
 
-                                <div class="dropzone quick-option-dropzone">
+                                <div class="quick-option-dropzone">
                                     <div class="dz-message">
                                         Drop image here or click to upload
                                     </div>
@@ -1753,7 +1859,7 @@
         $(document).on('click', '.quick-remove-option', function () {
             const row = $(this).closest('.quick-option-row');
 
-            destroyQuickOptionDropzone(row);
+            destroyQuickOptionDropzone(row, true);
             row.remove();
 
             if (quickPaletteEnabled()) {
@@ -1801,7 +1907,7 @@
             updateQuickPaletteValues(optionRow);
         });
 
-        function resetQuickQuestionModal() {
+        function resetQuickQuestionModal(deleteTemporaryMedia = true) {
             $('#quick-title-en, #quick-title-ar, #quick-prompt-label-en, #quick-prompt-label-ar, #quick-placeholder-en, #quick-placeholder-ar').val('');
             $('#quick-sort-order').val(0);
             $('#quick-required').prop('checked', false);
@@ -1814,7 +1920,7 @@
             $('#quick-question-type').val(singleSelect);
 
             $('#quick-options-container .quick-option-row').each(function () {
-                destroyQuickOptionDropzone($(this));
+                destroyQuickOptionDropzone($(this), deleteTemporaryMedia);
             });
 
             $('#quick-options-container').empty();
@@ -2204,11 +2310,12 @@
                             'quick-question-modal'
                         );
 
+                    quickQuestionSaved = true;
+
                     bootstrap.Modal
                         .getOrCreateInstance(modalElement)
                         .hide();
 
-                    resetQuickQuestionModal();
                     feather.replace();
 
                     toast(
@@ -2248,10 +2355,11 @@
         });
 
         $('#quick-question-modal').on('hidden.bs.modal', function () {
-            resetQuickQuestionModal();
+            resetQuickQuestionModal(!quickQuestionSaved);
+            quickQuestionSaved = false;
         });
 
-        resetQuickQuestionModal();
+        resetQuickQuestionModal(false);
 
         // Safety check before the parent AI Product form submits.
         $(document).on('submit', 'form', function (event) {
@@ -2272,6 +2380,7 @@
         });
     });
 </script>
+
 
 
 
