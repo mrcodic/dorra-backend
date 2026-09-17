@@ -94,6 +94,7 @@
 @endphp
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.css">
+<link rel="stylesheet" href="{{ asset('admin/vendors/css/forms/select/select2.min.css') }}">
 
 <style>
     .option-image-dropzone {
@@ -593,7 +594,7 @@
                     class="btn-close"
                     data-bs-dismiss="modal"
                     aria-label="Close"
-                >x</button>
+                ></button>
             </div>
 
             <div class="modal-body">
@@ -613,7 +614,7 @@
                     id="option-condition-question-ids"
                     class="form-select select2"
                     multiple
-                    size="10"
+                    data-placeholder="Search and select questions"
                 >
                     @foreach($conditionalQuestions as $conditionalQuestion)
                         <option value="{{ $conditionalQuestion->id }}">
@@ -628,7 +629,7 @@
                     </small>
                 @else
                     <small class="text-muted d-block mt-50">
-                        Hold Ctrl / Cmd to select multiple questions.
+                        Search and select one or more questions.
                     </small>
                 @endif
             </div>
@@ -663,6 +664,7 @@
     </div>
 </div>
 
+<script src="{{ asset('admin/vendors/js/forms/select/select2.full.min.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
 
 <script>
@@ -1327,6 +1329,28 @@
             });
         }
 
+        function initConditionalQuestionsSelect2() {
+            const select = $('#option-condition-question-ids');
+
+            if (!select.length || !$.fn.select2) {
+                return;
+            }
+
+            if (select.hasClass('select2-hidden-accessible')) {
+                return;
+            }
+
+            select.select2({
+                width: '100%',
+                placeholder: 'Search and select questions',
+                allowClear: true,
+                closeOnSelect: false,
+                dropdownParent: $('#option-condition-modal')
+            });
+        }
+
+        initConditionalQuestionsSelect2();
+
         $(document)
             .off('click.optionCondition')
             .on('click.optionCondition', '.configure-option-condition', function () {
@@ -1340,7 +1364,8 @@
                     .text(currentOptionLabel(row));
 
                 $('#option-condition-question-ids')
-                    .val(selectedIds);
+                    .val(selectedIds)
+                    .trigger('change');
 
                 bootstrap.Modal
                     .getOrCreateInstance(
@@ -1374,7 +1399,9 @@
                     return;
                 }
 
-                $('#option-condition-question-ids').val([]);
+                $('#option-condition-question-ids')
+                    .val([])
+                    .trigger('change');
 
                 setOptionConditionalQuestionIds(
                     activeConditionalOptionRow,
@@ -1387,7 +1414,9 @@
         $('#option-condition-modal')
             .on('hidden.bs.modal', function () {
                 activeConditionalOptionRow = null;
-                $('#option-condition-question-ids').val([]);
+                $('#option-condition-question-ids')
+                    .val([])
+                    .trigger('change');
                 $('#option-condition-option-label').text('-');
             });
 
