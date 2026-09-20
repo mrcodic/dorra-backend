@@ -484,15 +484,15 @@
                             <i data-feather="trash-2"></i>
                         </button>
 
-                        <div class="option-conditional-question-inputs">
-                            @foreach($conditionalQuestionIds as $conditionalQuestionId)
-                                <input
-                                    type="hidden"
-                                    name="options[{{ $index }}][conditional_question_ids][]"
-                                    value="{{ $conditionalQuestionId }}"
-                                >
-                            @endforeach
-                        </div>
+{{--                        <div class="option-conditional-question-inputs">--}}
+{{--                            @foreach($conditionalQuestionIds as $conditionalQuestionId)--}}
+{{--                                <input--}}
+{{--                                    type="hidden"--}}
+{{--                                    name="options[{{ $index }}][conditional_question_ids][]"--}}
+{{--                                    value="{{ $conditionalQuestionId }}"--}}
+{{--                                >--}}
+{{--                            @endforeach--}}
+{{--                        </div>--}}
 
 {{--                        <button--}}
 {{--                            type="button"--}}
