@@ -421,67 +421,84 @@ class AiGuideQuestionService extends BaseService
         ?int $mediaId,
         bool $removeMedia = false
     ): void {
-        /*
-         * Always use the literal Spatie collection.
-         */
+        $collectionName = 'option_image';
+
         $currentMedia = $option->getFirstMedia(
-            'option_image'
+            $collectionName
         );
 
         /*
-         * IMPORTANT:
-         *
-         * During Edit the form can submit the same media_id
-         * that is already attached to this option.
-         *
-         * Do nothing in that case.
-         *
-         * Without this guard, clearExisting=true could remove
-         * the current media before attempting to attach it again.
+         * Same media already attached.
          */
         if (
             $mediaId
             && $currentMedia
-            && (int) $currentMedia->id === (int) $mediaId
+            && (int) $currentMedia->id === $mediaId
         ) {
             return;
         }
 
         /*
-         * A different/new image was uploaded.
-         *
-         * New media always wins, even if remove_media=1
-         * accidentally arrives in the same request.
+         * Attach new uploaded media.
          */
         if ($mediaId) {
-            attachMediaToModel(
-                mediaId: $mediaId,
-                model: $option,
-                collectionName: 'option_image',
-                clearExisting: true
-            );
+            $media = Media::query()->find($mediaId);
+
+            if (!$media) {
+                throw ValidationException::withMessages([
+                    'media_id' => [
+                        'Uploaded media was not found.',
+                    ],
+                ]);
+            }
+
+            /*
+             * Remove previous option image only when
+             * we're attaching a different one.
+             */
+            if ($currentMedia) {
+                $option->clearMediaCollection(
+                    $collectionName
+                );
+            }
+
+            /*
+             * IMPORTANT:
+             * use getMorphClass(), not get_class().
+             *
+             * This keeps Spatie polymorphic relation
+             * compatible with Laravel morph maps.
+             */
+            $media->model_type = $option->getMorphClass();
+            $media->model_id = $option->getKey();
+            $media->collection_name = $collectionName;
+
+            $media->save();
+
+            /*
+             * Clear cached relation so getFirstMedia()
+             * immediately sees the newly attached media.
+             */
+            $option->unsetRelation('media');
 
             return;
         }
 
         /*
-         * Edit without changing the image:
-         *
-         * media_id = null
-         * remove_media = false
-         *
-         * Keep the existing image.
+         * Keep current image.
          */
         if (!$removeMedia) {
             return;
         }
 
         /*
-         * Explicit image removal.
+         * Explicit remove.
          */
         $option->clearMediaCollection(
-            'option_image'
+            $collectionName
         );
+
+        $option->unsetRelation('media');
     }
 
     private function normalizeUiData(
