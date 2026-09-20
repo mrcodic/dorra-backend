@@ -3,6 +3,7 @@
 namespace App\Services\Ai;
 
 use App\Enums\Ai\AiGuideQuestionTypeEnum;
+use App\Models\Media;
 use App\Repositories\Interfaces\AiGuideQuestionOptionRepositoryInterface;
 use App\Repositories\Interfaces\AiGuideQuestionRepositoryInterface;
 use App\Services\BaseService;
