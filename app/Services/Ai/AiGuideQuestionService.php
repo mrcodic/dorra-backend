@@ -27,85 +27,195 @@ class AiGuideQuestionService extends BaseService
 
         $questions = $this->repository->query()
             ->withCount('options')
-            ->when(request()->filled('search_value'), function ($query) use ($locale) {
-                if (hasMeaningfulSearch(request('search_value'))) {
-                    $search = strtolower(request('search_value'));
-
-                    $query->where(function ($query) use ($search, $locale) {
-                        $query->whereRaw(
-                            "LOWER(JSON_UNQUOTE(JSON_EXTRACT(title, '$.\"{$locale}\"'))) LIKE ?",
-                            ["%{$search}%"]
-                        )->orWhereRaw(
-                            "LOWER(JSON_UNQUOTE(JSON_EXTRACT(prompt_label, '$.\"{$locale}\"'))) LIKE ?",
-                            ["%{$search}%"]
+            ->when(
+                request()->filled('search_value'),
+                function ($query) use ($locale) {
+                    if (hasMeaningfulSearch(request('search_value'))) {
+                        $search = strtolower(
+                            request('search_value')
                         );
-                    });
-                } else {
-                    $query->whereRaw('1 = 0');
+
+                        $query->where(
+                            function ($query) use (
+                                $search,
+                                $locale
+                            ) {
+                                $query->whereRaw(
+                                    "LOWER(JSON_UNQUOTE(JSON_EXTRACT(title, '$.\"{$locale}\"'))) LIKE ?",
+                                    ["%{$search}%"]
+                                )->orWhereRaw(
+                                    "LOWER(JSON_UNQUOTE(JSON_EXTRACT(prompt_label, '$.\"{$locale}\"'))) LIKE ?",
+                                    ["%{$search}%"]
+                                );
+                            }
+                        );
+                    } else {
+                        $query->whereRaw('1 = 0');
+                    }
                 }
-            })
-            ->when(request()->filled('type'), fn($query) => $query->where('type', request('type')))
-            ->when(request()->filled('is_active'), fn($query) => $query->where('is_active', request('is_active')))
+            )
+            ->when(
+                request()->filled('type'),
+                fn($query) => $query->where(
+                    'type',
+                    request('type')
+                )
+            )
+            ->when(
+                request()->filled('is_active'),
+                fn($query) => $query->where(
+                    'is_active',
+                    request('is_active')
+                )
+            )
             ->orderBy('sort_order')
             ->orderBy('id');
 
         return DataTables::of($questions)
-            ->editColumn('title', fn($question) => $question->title)
-            ->editColumn('prompt_label', fn($question) => $question->prompt_label)
-            ->editColumn('type', fn($question) => $question->type->value)
-            ->addColumn('type_label', fn($question) => $question->type->label())
-            ->addColumn('action', fn() => [
-                'can_edit' => (bool) auth()->user()->hasPermissionTo('ai-guide-questions_update'),
-                'can_delete' => (bool) auth()->user()->hasPermissionTo('ai-guide-questions_delete'),
-            ])
+            ->editColumn(
+                'title',
+                fn($question) => $question->title
+            )
+            ->editColumn(
+                'prompt_label',
+                fn($question) => $question->prompt_label
+            )
+            ->editColumn(
+                'type',
+                fn($question) => $question->type->value
+            )
+            ->addColumn(
+                'type_label',
+                fn($question) => $question->type->label()
+            )
+            ->addColumn(
+                'action',
+                fn() => [
+                    'can_edit' => (bool) auth()
+                        ->user()
+                        ->hasPermissionTo(
+                            'ai-guide-questions_update'
+                        ),
+
+                    'can_delete' => (bool) auth()
+                        ->user()
+                        ->hasPermissionTo(
+                            'ai-guide-questions_delete'
+                        ),
+                ]
+            )
             ->make(true);
     }
 
-    public function storeResource($validatedData, $relationsToStore = [], $relationsToLoad = [])
-    {
-        return $this->handleTransaction(function () use ($validatedData, $relationsToLoad) {
-            $options = Arr::pull($validatedData, 'options', []);
-            $validatedData['key'] = (string) Str::ulid();
+    public function storeResource(
+        $validatedData,
+        $relationsToStore = [],
+        $relationsToLoad = []
+    ) {
+        return $this->handleTransaction(
+            function () use (
+                $validatedData,
+                $relationsToLoad
+            ) {
+                $options = Arr::pull(
+                    $validatedData,
+                    'options',
+                    []
+                );
 
-            $question = $this->repository->create($validatedData);
+                $validatedData['key'] = (string) Str::ulid();
 
-            $this->syncOptions($question->id, $question->type, $options);
+                $question = $this->repository->create(
+                    $validatedData
+                );
 
-            return $question->load($relationsToLoad);
-        });
+                $this->syncOptions(
+                    $question->id,
+                    $question->type,
+                    $options
+                );
+
+                return $question->load(
+                    $relationsToLoad
+                );
+            }
+        );
     }
 
-    public function updateResource($validatedData, $id, $relationsToLoad = [])
-    {
-        return $this->handleTransaction(function () use ($validatedData, $id, $relationsToLoad) {
-            $options = Arr::pull($validatedData, 'options', []);
+    public function updateResource(
+        $validatedData,
+        $id,
+        $relationsToLoad = []
+    ) {
+        return $this->handleTransaction(
+            function () use (
+                $validatedData,
+                $id,
+                $relationsToLoad
+            ) {
+                $options = Arr::pull(
+                    $validatedData,
+                    'options',
+                    []
+                );
 
-            $question = $this->repository->update($validatedData, $id);
+                $question = $this->repository->update(
+                    $validatedData,
+                    $id
+                );
 
-            $this->syncOptions($question->id, $question->type, $options);
+                $this->syncOptions(
+                    $question->id,
+                    $question->type,
+                    $options
+                );
 
-            return $question->load($relationsToLoad);
-        });
+                return $question->load(
+                    $relationsToLoad
+                );
+            }
+        );
     }
 
-    private function syncOptions(int $questionId, AiGuideQuestionTypeEnum $type, array $options): void
-    {
+    private function syncOptions(
+        int $questionId,
+        AiGuideQuestionTypeEnum $type,
+        array $options
+    ): void {
         if (!$this->supportsOptions($type)) {
-            $this->deleteQuestionOptions($questionId);
+            $this->deleteQuestionOptions(
+                $questionId
+            );
+
             return;
         }
 
-        $existingOptions = $this->optionRepository->query()
-            ->where('ai_guide_question_id', $questionId)
+        $existingOptions = $this->optionRepository
+            ->query()
+            ->where(
+                'ai_guide_question_id',
+                $questionId
+            )
             ->get()
             ->keyBy('id');
 
         $submittedIds = [];
 
         foreach (array_values($options) as $index => $option) {
-            $optionId = isset($option['id']) ? (int) $option['id'] : null;
-            $existing = $optionId ? $existingOptions->get($optionId) : null;
+            $optionId = isset($option['id'])
+                ? (int) $option['id']
+                : null;
 
+            $existing = $optionId
+                ? $existingOptions->get($optionId)
+                : null;
+
+            /*
+             * media_id is not stored on the options table.
+             *
+             * It is only used to sync the Spatie Media Library
+             * collection after the option itself is created/updated.
+             */
             $mediaId = !empty($option['media_id'])
                 ? (int) $option['media_id']
                 : null;
@@ -127,6 +237,9 @@ class AiGuideQuestionService extends BaseService
                 existing: $existing
             );
 
+            /*
+             * Existing option.
+             */
             if ($existing) {
                 $existing->update($data);
 
@@ -137,10 +250,16 @@ class AiGuideQuestionService extends BaseService
                 );
 
                 $submittedIds[] = $existing->id;
+
                 continue;
             }
 
-            $model = $this->optionRepository->create($data);
+            /*
+             * New option.
+             */
+            $model = $this->optionRepository->create(
+                $data
+            );
 
             $this->syncOptionMedia(
                 option: $model,
@@ -151,31 +270,57 @@ class AiGuideQuestionService extends BaseService
             $submittedIds[] = $model->id;
         }
 
-        $query = $this->optionRepository->query()
-            ->where('ai_guide_question_id', $questionId);
+        /*
+         * Delete options removed from the submitted form.
+         */
+        $query = $this->optionRepository
+            ->query()
+            ->where(
+                'ai_guide_question_id',
+                $questionId
+            );
 
         if ($submittedIds) {
-            $query->whereNotIn('id', $submittedIds);
+            $query->whereNotIn(
+                'id',
+                $submittedIds
+            );
         }
 
-        $this->deleteOptionModels($query->get());
+        $this->deleteOptionModels(
+            $query->get()
+        );
     }
 
-    private function prepareOptionData(int $questionId, array $option, int $index, $existing = null): array
-    {
-        $uiData = $this->normalizeUiData($option['ui_data'] ?? null);
+    private function prepareOptionData(
+        int $questionId,
+        array $option,
+        int $index,
+        $existing = null
+    ): array {
+        $uiData = $this->normalizeUiData(
+            $option['ui_data'] ?? null
+        );
+
         $colors = $uiData['colors'] ?? [];
+
         $isPalette = !empty($colors);
 
-        $label = is_array($option['label'] ?? null)
+        $label = is_array(
+            $option['label'] ?? null
+        )
             ? $option['label']
             : [];
 
-        $promptValue = is_array($option['prompt_value'] ?? null)
+        $promptValue = is_array(
+            $option['prompt_value'] ?? null
+        )
             ? $option['prompt_value']
             : [];
 
-        $englishLabel = trim((string) ($label['en'] ?? ''));
+        $englishLabel = trim(
+            (string) ($label['en'] ?? '')
+        );
 
         if ($englishLabel === '') {
             throw ValidationException::withMessages([
@@ -186,10 +331,16 @@ class AiGuideQuestionService extends BaseService
         }
 
         $label['en'] = $englishLabel;
-        $label['ar'] = trim((string) ($label['ar'] ?? ''));
+
+        $label['ar'] = trim(
+            (string) ($label['ar'] ?? '')
+        );
 
         if ($isPalette) {
-            [$label, $promptValue] = $this->preparePaletteContent(
+            [
+                $label,
+                $promptValue,
+            ] = $this->preparePaletteContent(
                 label: $label,
                 promptValue: $promptValue,
                 colors: $colors
@@ -197,44 +348,110 @@ class AiGuideQuestionService extends BaseService
         }
 
         /*
-         * Existing API values remain stable.
-         * Editing the label must not regenerate option value.
+         * Existing API option value must remain stable.
+         *
+         * Changing the label on Edit must NOT regenerate value.
          */
         $value = $existing?->value
-            ?: $this->generateOptionValue($questionId, $label['en']);
+            ?: $this->generateOptionValue(
+                $questionId,
+                $label['en']
+            );
 
         return [
             'ai_guide_question_id' => $questionId,
             'value' => $value,
             'label' => $label,
-            'prompt_value' => $promptValue ?: null,
+
+            'prompt_value' => $promptValue
+                ?: null,
+
             'ui_data' => $uiData,
-            'is_active' => (bool) ($option['is_active'] ?? true),
+
+            'is_active' => (bool) (
+                $option['is_active']
+                ?? true
+            ),
+
             'sort_order' => $index,
         ];
     }
 
-    private function preparePaletteContent(array $label, array $promptValue, array $colors): array
-    {
-        $colorsText = implode(', ', $colors);
-        $defaultPrompt = "Use this exact color palette: {$colorsText}";
+    private function preparePaletteContent(
+        array $label,
+        array $promptValue,
+        array $colors
+    ): array {
+        $colorsText = implode(
+            ', ',
+            $colors
+        );
+
+        $defaultPrompt =
+            "Use this exact color palette: {$colorsText}";
 
         /*
-         * Palette label is written manually by admin.
-         * Only prompt value is automatically generated from colors.
+         * Admin writes the palette label manually.
+         *
+         * Only the AI prompt value is generated from
+         * the selected palette colors.
          */
-        $promptValue['en'] = trim((string) ($promptValue['en'] ?? '')) ?: $defaultPrompt;
-        $promptValue['ar'] = trim((string) ($promptValue['ar'] ?? '')) ?: $defaultPrompt;
+        $promptValue['en'] = trim(
+            (string) (
+                $promptValue['en']
+                ?? ''
+            )
+        ) ?: $defaultPrompt;
 
-        return [$label, $promptValue];
+        $promptValue['ar'] = trim(
+            (string) (
+                $promptValue['ar']
+                ?? ''
+            )
+        ) ?: $defaultPrompt;
+
+        return [
+            $label,
+            $promptValue,
+        ];
     }
 
-    private function syncOptionMedia($option, ?int $mediaId, bool $removeMedia = false): void
-    {
-        $collectionName = getMediaCollectionName('option_image');
+    private function syncOptionMedia(
+        $option,
+        ?int $mediaId,
+        bool $removeMedia = false
+    ): void {
+        /*
+         * Always use the literal Spatie collection.
+         */
+        $currentMedia = $option->getFirstMedia(
+            'option_image'
+        );
 
         /*
-         * New media wins if both remove_media and media_id arrive.
+         * IMPORTANT:
+         *
+         * During Edit the form can submit the same media_id
+         * that is already attached to this option.
+         *
+         * Do nothing in that case.
+         *
+         * Without this guard, clearExisting=true could remove
+         * the current media before attempting to attach it again.
+         */
+        if (
+            $mediaId
+            && $currentMedia
+            && (int) $currentMedia->id === (int) $mediaId
+        ) {
+            return;
+        }
+
+        /*
+         * A different/new image was uploaded.
+         *
+         * New media always wins, even if remove_media=1
+         * accidentally arrives in the same request.
          */
         if ($mediaId) {
             attachMediaToModel(
@@ -247,87 +464,156 @@ class AiGuideQuestionService extends BaseService
             return;
         }
 
+        /*
+         * Edit without changing the image:
+         *
+         * media_id = null
+         * remove_media = false
+         *
+         * Keep the existing image.
+         */
         if (!$removeMedia) {
             return;
         }
 
-        if (method_exists($option, 'clearMediaCollection')) {
-            $option->clearMediaCollection($collectionName);
-        }
+        /*
+         * Explicit image removal.
+         */
+        $option->clearMediaCollection(
+            'option_image'
+        );
     }
 
-    private function normalizeUiData(?array $uiData): ?array
-    {
+    private function normalizeUiData(
+        ?array $uiData
+    ): ?array {
         if (!$uiData) {
             return null;
         }
 
         /*
-         * ui_data is only for supported visual metadata such as palettes.
-         * Option images are stored through Spatie Media Library.
+         * ui_data is only for supported visual
+         * metadata such as color palettes.
+         *
+         * Option images are stored through
+         * Spatie Media Library.
          */
-        $colors = collect($uiData['colors'] ?? [])
-            ->filter(fn($color) => is_string($color))
-            ->map(fn($color) => strtoupper(trim($color)))
-            ->filter(fn($color) => preg_match('/^#[0-9A-F]{6}$/', $color))
+        $colors = collect(
+            $uiData['colors'] ?? []
+        )
+            ->filter(
+                fn($color) => is_string($color)
+            )
+            ->map(
+                fn($color) => strtoupper(
+                    trim($color)
+                )
+            )
+            ->filter(
+                fn($color) =>
+                preg_match(
+                    '/^#[0-9A-F]{6}$/',
+                    $color
+                )
+            )
             ->unique()
             ->values()
             ->all();
 
         return $colors
-            ? ['colors' => $colors]
+            ? [
+                'colors' => $colors,
+            ]
             : null;
     }
 
-    private function supportsOptions(AiGuideQuestionTypeEnum $type): bool
-    {
-        return in_array($type, [
-            AiGuideQuestionTypeEnum::SINGLE_SELECT,
-            AiGuideQuestionTypeEnum::MULTI_SELECT,
-        ], true);
+    private function supportsOptions(
+        AiGuideQuestionTypeEnum $type
+    ): bool {
+        return in_array(
+            $type,
+            [
+                AiGuideQuestionTypeEnum::SINGLE_SELECT,
+                AiGuideQuestionTypeEnum::MULTI_SELECT,
+            ],
+            true
+        );
     }
 
-    private function deleteQuestionOptions(int $questionId): void
-    {
-        $options = $this->optionRepository->query()
-            ->where('ai_guide_question_id', $questionId)
+    private function deleteQuestionOptions(
+        int $questionId
+    ): void {
+        $options = $this->optionRepository
+            ->query()
+            ->where(
+                'ai_guide_question_id',
+                $questionId
+            )
             ->get();
 
-        $this->deleteOptionModels($options);
+        $this->deleteOptionModels(
+            $options
+        );
     }
 
-    private function deleteOptionModels($options): void
-    {
-        $collectionName = getMediaCollectionName('option_image');
-
+    private function deleteOptionModels(
+        $options
+    ): void {
         foreach ($options as $option) {
-            if (method_exists($option, 'clearMediaCollection')) {
-                $option->clearMediaCollection($collectionName);
-            }
+            /*
+             * Use the literal collection name.
+             *
+             * Do not use getMediaCollectionName().
+             */
+            $option->clearMediaCollection(
+                'option_image'
+            );
 
             $option->delete();
         }
     }
 
-    private function generateOptionValue(int $questionId, string $label): string
-    {
-        $base = Str::slug($label, '_') ?: 'option';
+    private function generateOptionValue(
+        int $questionId,
+        string $label
+    ): string {
+        $base = Str::slug(
+            $label,
+            '_'
+        ) ?: 'option';
+
         $value = $base;
+
         $counter = 2;
 
-        while ($this->optionValueExists($questionId, $value)) {
+        while (
+        $this->optionValueExists(
+            $questionId,
+            $value
+        )
+        ) {
             $value = "{$base}_{$counter}";
+
             $counter++;
         }
 
         return $value;
     }
 
-    private function optionValueExists(int $questionId, string $value): bool
-    {
-        return $this->optionRepository->query()
-            ->where('ai_guide_question_id', $questionId)
-            ->where('value', $value)
+    private function optionValueExists(
+        int $questionId,
+        string $value
+    ): bool {
+        return $this->optionRepository
+            ->query()
+            ->where(
+                'ai_guide_question_id',
+                $questionId
+            )
+            ->where(
+                'value',
+                $value
+            )
             ->exists();
     }
 }
