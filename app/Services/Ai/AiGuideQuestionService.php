@@ -183,6 +183,7 @@ class AiGuideQuestionService extends BaseService
         AiGuideQuestionTypeEnum $type,
         array $options
     ): void {
+        dd($options);
         if (!$this->supportsOptions($type)) {
             $this->deleteQuestionOptions(
                 $questionId
@@ -226,7 +227,7 @@ class AiGuideQuestionService extends BaseService
                 FILTER_VALIDATE_BOOLEAN
             );
 
-           
+
 dd($mediaId,$removeMedia);
             $data = $this->prepareOptionData(
                 questionId: $questionId,
