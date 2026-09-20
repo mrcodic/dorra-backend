@@ -554,7 +554,6 @@
 
                     $conditionParentQuestionId = (int) data_get($savedCondition, 'parent_question_id', 0);
                     $conditionParentOptionId = (int) data_get($savedCondition, 'parent_option_id', 0);
-                    $conditionOperator = (string) data_get($savedCondition, 'operator', 'selected');
 
                     $conditionParentQuestion = $questions->firstWhere('id', $conditionParentQuestionId);
                     $conditionParentOption = $conditionParentQuestion?->options?->firstWhere('id', $conditionParentOptionId);
@@ -705,21 +704,6 @@
                                     </select>
                                 </div>
 
-                                <div class="col-md-3 mb-1">
-                                    <label class="form-label">Operator *</label>
-
-                                    <select
-                                        name="questions[{{ $question->id }}][condition][operator]"
-                                        class="form-select condition-operator"
-                                    >
-                                        <option value="selected" @selected($conditionOperator === 'selected')>
-                                            Selected
-                                        </option>
-                                        <option value="not_selected" @selected($conditionOperator === 'not_selected')>
-                                            Not selected
-                                        </option>
-                                    </select>
-                                </div>
 
                                 <div class="col-md-4 mb-1">
                                     <label class="form-label">Answer *</label>
@@ -749,9 +733,6 @@
                                 <strong class="condition-summary-question">
                                     {{ $conditionParentQuestion?->title }}
                                 </strong>
-                                <span class="condition-summary-operator">
-                                    {{ $conditionOperator === 'not_selected' ? 'does not have' : 'has' }}
-                                </span>
                                 answer
                                 <strong class="condition-summary-option">
                                     {{ $conditionParentOption?->label }}
@@ -1148,18 +1129,6 @@
                                     <small class="text-muted">
                                         Only selected Single/Multi Select questions can be parents.
                                     </small>
-                                </div>
-
-                                <div class="col-md-3 mb-1">
-                                    <label class="form-label">Operator *</label>
-
-                                    <select
-                                        id="quick-condition-operator"
-                                        class="form-select"
-                                    >
-                                        <option value="selected">Selected</option>
-                                        <option value="not_selected">Not selected</option>
-                                    </select>
                                 </div>
 
                                 <div class="col-md-4 mb-1">
@@ -2752,17 +2721,7 @@
                                     </select>
                                 </div>
 
-                                <div class="col-md-3 mb-1">
-                                    <label class="form-label">Operator *</label>
 
-                                    <select
-                                        name="questions[${id}][condition][operator]"
-                                        class="form-select condition-operator"
-                                    >
-                                        <option value="selected">Selected</option>
-                                        <option value="not_selected">Not selected</option>
-                                    </select>
-                                </div>
 
                                 <div class="col-md-4 mb-1">
                                     <label class="form-label">Answer *</label>

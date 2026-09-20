@@ -53,7 +53,6 @@ class StoreAiCategoryRequest extends FormRequest
             'questions.*.condition' => ['nullable', 'array'],
             'questions.*.condition.parent_question_id' => ['nullable', 'integer', 'exists:ai_guide_questions,id'],
             'questions.*.condition.parent_option_id' => ['nullable', 'integer', 'exists:ai_guide_question_options,id'],
-            'questions.*.condition.operator' => ['nullable', 'in:selected,not_selected'],
         ];
     }
 
