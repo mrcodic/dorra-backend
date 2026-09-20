@@ -153,6 +153,9 @@ class BundleCartService
         Bundle $bundle,
         $bundleItems
     ): void {
+        /*
+         * Prevent adding the exact same bundle twice.
+         */
         $sameBundleAlreadyExists = $cart->items()
             ->where('bundle_id', $bundle->id)
             ->whereNotNull('bundle_group_key')
@@ -164,6 +167,13 @@ class BundleCartService
             ]);
         }
 
+        /*
+         * Prevent conflict with normal cart items only.
+         *
+         * Important:
+         * If the same product exists inside another bundle group,
+         * we allow it because each bundle has its own bundle_group_key.
+         */
         foreach ($bundleItems as $bundleItem) {
             $cartable = $bundleItem->itemable;
 
@@ -176,12 +186,17 @@ class BundleCartService
                 $cartable->getMorphClass(),
             ]);
 
-            $alreadyInCart = $cart->items()
+            $alreadyExistsAsNormalItem = $cart->items()
                 ->whereIn('cartable_type', $cartableTypes)
                 ->where('cartable_id', $cartable->getKey())
+                ->where(function ($query) {
+                    $query
+                        ->whereNull('bundle_group_key')
+                        ->orWhere('bundle_group_key', '');
+                })
                 ->exists();
 
-            if ($alreadyInCart) {
+            if ($alreadyExistsAsNormalItem) {
                 throw ValidationException::withMessages([
                     'bundle_id' => [
                         "Item [{$cartable->name}] is already in cart. Remove it first before adding this bundle.",
