@@ -12,7 +12,7 @@ $.ajaxSetup({
         serverSide: true,
         searching: false,
         // orderable: false,
-
+        dom: '<"row"<"col-12"tr>><"row"<"col-md-6"i><"col-md-6"p>>',
         ajax: {
             url: bundlesDataUrl,
             type: 'GET',
