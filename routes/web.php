@@ -265,7 +265,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
             Route::delete('carousels/{carousel}', 'removeCarousel')->name('carousels.remove');
 
-            Route::put('landing-sections', 'landingSections')->name('landing-sections.update');
+        Route::put('landing-sections', 'landingSections')->name('landing-sections.update');
             Route::put('bundle-section', 'updateBundleSection')->name('bundle-section.update');
 
             Route::put('statistics', 'updateStatisticsSection')->name('statistics-section.update');
