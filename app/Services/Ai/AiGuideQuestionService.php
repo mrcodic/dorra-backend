@@ -230,7 +230,7 @@ class AiGuideQuestionService extends BaseService
                 $option['media_id'],
                 $option['remove_media']
             );
-
+dd($mediaId,$removeMedia);
             $data = $this->prepareOptionData(
                 questionId: $questionId,
                 option: $option,
