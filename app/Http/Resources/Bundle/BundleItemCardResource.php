@@ -23,7 +23,7 @@ class BundleItemCardResource extends JsonResource
             'item_type' => $isProduct ? 'product' : 'category',
 
             'quantity' => $this->quantity,
-            
+
             'discount_type' => $this->discount_type?->value ?? $this->discount_type,
             'discount_value' => $this->discount_value,
 

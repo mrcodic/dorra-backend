@@ -35,7 +35,7 @@ class BundleCartService
         return DB::transaction(function () use ($request) {
             $cart = $this->cartService->resolveUserCart();
 
-            if (! $cart) {
+            if (!$cart) {
                 throw ValidationException::withMessages([
                     'cart' => ['Cart could not be resolved.'],
                 ]);
