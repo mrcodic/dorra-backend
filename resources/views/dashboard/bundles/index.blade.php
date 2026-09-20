@@ -55,18 +55,18 @@
                         </select>
                     </div>
 
-                    @can('bundles_create')
-                        <div class="col-12 col-md-3 text-md-end">
-                            <a
-                                class="btn btn-outline-primary w-100 w-md-auto"
-                                data-bs-toggle="modal"
-                                data-bs-target="#addBundleModal"
-                            >
-                                <i data-feather="plus"></i>
-                                Add New Bundle
-                            </a>
-                        </div>
-                    @endcan
+{{--                    @can('bundles_create')--}}
+{{--                        <div class="col-12 col-md-3 text-md-end">--}}
+{{--                            <a--}}
+{{--                                class="btn btn-outline-primary w-100 w-md-auto"--}}
+{{--                                data-bs-toggle="modal"--}}
+{{--                                data-bs-target="#addBundleModal"--}}
+{{--                            >--}}
+{{--                                <i data-feather="plus"></i>--}}
+{{--                                Add New Bundle--}}
+{{--                            </a>--}}
+{{--                        </div>--}}
+{{--                    @endcan--}}
                 </div>
 
                 <table class="bundle-list-table table">
