@@ -100,6 +100,16 @@ class StoreAiGuideQuestionRequest extends FormRequest
                 'string',
                 'regex:/^#[0-9A-Fa-f]{6}$/',
             ],
+            'options.*.media_id' => [
+                'nullable',
+                'integer',
+                'exists:media,id',
+            ],
+
+            'options.*.remove_media' => [
+                'nullable',
+                'boolean',
+            ],
         ];
     }
 
