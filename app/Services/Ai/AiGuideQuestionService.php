@@ -226,10 +226,7 @@ class AiGuideQuestionService extends BaseService
                 FILTER_VALIDATE_BOOLEAN
             );
 
-            unset(
-                $option['media_id'],
-                $option['remove_media']
-            );
+           
 dd($mediaId,$removeMedia);
             $data = $this->prepareOptionData(
                 questionId: $questionId,
