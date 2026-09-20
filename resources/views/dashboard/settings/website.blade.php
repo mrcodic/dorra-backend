@@ -442,29 +442,29 @@
 
                                                 {{-- Product Selection --}}
                                                 {{-- Product --}}
-                                                <div class="mb-2">
-                                                    <label class="form-label">Categories</label>
-                                                    <select name="product_id" class="form-select js-product-select">
-                                                        <option value="" disabled selected>— Select a category —</option>
-                                                        @foreach($products as $product)
-                                                            <option value="{{ $product->id }}" {{ (isset($carousel) && $carousel->product_id == $product->id) ? 'selected' : '' }}>
-                                                                {{ $product->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
+{{--                                                <div class="mb-2">--}}
+{{--                                                    <label class="form-label">Categories</label>--}}
+{{--                                                    <select name="product_id" class="form-select js-product-select">--}}
+{{--                                                        <option value="" disabled selected>— Select a category —</option>--}}
+{{--                                                        @foreach($products as $product)--}}
+{{--                                                            <option value="{{ $product->id }}" {{ (isset($carousel) && $carousel->product_id == $product->id) ? 'selected' : '' }}>--}}
+{{--                                                                {{ $product->name }}--}}
+{{--                                                            </option>--}}
+{{--                                                        @endforeach--}}
+{{--                                                    </select>--}}
+{{--                                                </div>--}}
 
-                                                <div class="mb-2">
-                                                    <label class="form-label">Product Without Categories</label>
-                                                    <select name="category_id" class="form-select js-category-select">
-                                                        <option value="" disabled selected>— Select a product —</option>
-                                                        @foreach($categoriesCarousels as $category)
-                                                            <option value="{{ $category->id }}" {{ (isset($carousel) && $carousel->category_id == $category->id) ? 'selected' : '' }}>
-                                                                {{ $category->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
+{{--                                                <div class="mb-2">--}}
+{{--                                                    <label class="form-label">Product Without Categories</label>--}}
+{{--                                                    <select name="category_id" class="form-select js-category-select">--}}
+{{--                                                        <option value="" disabled selected>— Select a product —</option>--}}
+{{--                                                        @foreach($categoriesCarousels as $category)--}}
+{{--                                                            <option value="{{ $category->id }}" {{ (isset($carousel) && $carousel->category_id == $category->id) ? 'selected' : '' }}>--}}
+{{--                                                                {{ $category->name }}--}}
+{{--                                                            </option>--}}
+{{--                                                        @endforeach--}}
+{{--                                                    </select>--}}
+{{--                                                </div>--}}
 
                                                 {{-- Actions --}}
                                                 <div
@@ -586,29 +586,29 @@
                                                 </div>
 
                                                 {{-- Product --}}
-                                                <div class="mb-2">
-                                                    <label class="form-label">Categories</label>
-                                                    <select name="product_id" class="form-select js-product-select">
-                                                        <option value="" disabled selected>— Select a category —</option>
-                                                        @foreach($products as $product)
-                                                            <option value="{{ $product->id }}" {{ (isset($carousel) && $carousel->product_id == $product->id) ? 'selected' : '' }}>
-                                                                {{ $product->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
+{{--                                                <div class="mb-2">--}}
+{{--                                                    <label class="form-label">Categories</label>--}}
+{{--                                                    <select name="product_id" class="form-select js-product-select">--}}
+{{--                                                        <option value="" disabled selected>— Select a category —</option>--}}
+{{--                                                        @foreach($products as $product)--}}
+{{--                                                            <option value="{{ $product->id }}" {{ (isset($carousel) && $carousel->product_id == $product->id) ? 'selected' : '' }}>--}}
+{{--                                                                {{ $product->name }}--}}
+{{--                                                            </option>--}}
+{{--                                                        @endforeach--}}
+{{--                                                    </select>--}}
+{{--                                                </div>--}}
 
-                                                <div class="mb-2">
-                                                    <label class="form-label">Product Without Categories</label>
-                                                    <select name="category_id" class="form-select js-category-select">
-                                                        <option value="" disabled selected>— Select a product —</option>
-                                                        @foreach($categoriesCarousels as $category)
-                                                            <option value="{{ $category->id }}" {{ (isset($carousel) && $carousel->category_id == $category->id) ? 'selected' : '' }}>
-                                                                {{ $category->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
+{{--                                                <div class="mb-2">--}}
+{{--                                                    <label class="form-label">Product Without Categories</label>--}}
+{{--                                                    <select name="category_id" class="form-select js-category-select">--}}
+{{--                                                        <option value="" disabled selected>— Select a product —</option>--}}
+{{--                                                        @foreach($categoriesCarousels as $category)--}}
+{{--                                                            <option value="{{ $category->id }}" {{ (isset($carousel) && $carousel->category_id == $category->id) ? 'selected' : '' }}>--}}
+{{--                                                                {{ $category->name }}--}}
+{{--                                                            </option>--}}
+{{--                                                        @endforeach--}}
+{{--                                                    </select>--}}
+{{--                                                </div>--}}
 
 
                                                 <div

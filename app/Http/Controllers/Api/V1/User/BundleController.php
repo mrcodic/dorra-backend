@@ -22,12 +22,9 @@ class BundleController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $bundles = $this->bundleService->getAll(
-            relations: [
-                'trigger.itemable',
-                'rewards.itemable',
-            ],
-            paginate: $request->get('paginate', false)
+        $bundles = $this->bundleService->getActiveBundles(
+            paginate: $request->get('paginate', false),
+            perPage: $request->get('per_page', 10),
         );
 
         $bundleResourceCollection = $bundles instanceof LengthAwarePaginator
@@ -39,13 +36,11 @@ class BundleController extends Controller
 
     public function show($id, Request $request): JsonResponse
     {
-        $bundle = $this->bundleService->showResource(
+        $bundle = $this->bundleService->showActiveBundle(
             $id,
             [
                 'trigger.itemable',
-                'trigger.itemable.specifications.options',
                 'rewards.itemable',
-                'rewards.itemable.specifications.options',
             ]
         );
 

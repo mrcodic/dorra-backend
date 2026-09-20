@@ -28,7 +28,14 @@ class AiGuideQuestion extends Model
         'is_active' => 'boolean',
         'sort_order' => 'integer',
     ];
+    protected $appends = [
+        'show_when',
+    ];
 
+    public function getShowWhenAttribute(): ?array
+    {
+        return $this->attributes['show_when'] ?? null;
+    }
     public function options(): HasMany
     {
         return $this->hasMany(AiGuideQuestionOption::class)->orderBy('sort_order');

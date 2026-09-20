@@ -35,7 +35,9 @@ class AiCategoryQuestionResource extends JsonResource
             'placeholder' => $this->placeholder,
 
             'prompt_label' => $this->prompt_label,
-
+            'conditions' => array_values(
+                $this->resolved_conditions ?? []
+            ),
             'options' => $supportsOptions
                 ? AiCategoryQuestionOptionResource::collection(
                     $this->options->whereIn(

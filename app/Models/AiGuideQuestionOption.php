@@ -4,11 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
 
-class AiGuideQuestionOption extends Model
+class AiGuideQuestionOption extends Model implements HasMedia
 {
-    use HasTranslations;
+    use HasTranslations, InteractsWithMedia;
     protected $translatable = ['label','prompt_value'];
 
     protected $fillable = [
@@ -28,5 +30,9 @@ class AiGuideQuestionOption extends Model
     public function aiGuideQuestion(): BelongsTo
     {
         return $this->belongsTo(AiGuideQuestion::class);
+    }
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('option_image')->singleFile();
     }
 }

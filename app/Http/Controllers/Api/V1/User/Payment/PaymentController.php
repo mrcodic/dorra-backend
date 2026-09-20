@@ -22,6 +22,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 
 class PaymentController extends Controller
@@ -85,62 +87,193 @@ class PaymentController extends Controller
         ]);
 
         $this->handleTransaction(function () use ($request) {
-            $order = $this->orderRepository->query()->with('orderItems.specs')->find($request->get('order_id'));
+            $order = $this->orderRepository
+                ->query()
+                ->with([
+                    'orderItems.specs.productSpecificationOption',
+                    'orderItems.orderable',
+                    'orderItems.productPrice',
+                ])
+                ->findOrFail($request->get('order_id'));
+
             $cart = $this->cartService->getCurrentUserOrGuestCart();
-            collect($order->orderItems)->each(function ($orderItem) use ($cart) {
-                $existingCartItem = $cart?->items()
-                    ->where('cartable_id', $orderItem->orderable_id)
-                    ->where('cartable_type', $orderItem->orderable_type)
-                    ->first();
 
-                if (!$existingCartItem) {
-                    if ($orderItem->orderable->has_custom_prices) {
-                        $subTotal = ($orderItem->productPrice?->price ?? $orderItem->product_price)
-                            + ($orderItem->specs->sum(function ($spec) {
-                                return $spec->productSpecificationOption?->price;
-                            }) ?: $orderItem->specs_price);
-                    } else {
-                        $subTotal = (
-                                ($orderItem->orderable->base_price ?? $orderItem->product_price)
-                                + ($orderItem->specs->sum(function ($spec) {
-                                    return $spec->productSpecificationOption?->price;
-                                }) ?: $orderItem->specs_price)
-                            ) * $orderItem->quantity;
-                    }
+            if (! $cart) {
+                throw ValidationException::withMessages([
+                    'cart' => ['Cart not found.'],
+                ]);
+            }
 
-                    $cartItem = $cart?->items()->create([
-                        'cartable_id' => $orderItem->orderable_id,
-                        'cartable_type' => $orderItem->orderable_type,
-                        'product_price_id' => $orderItem->product_price_id,
-                        'product_price' => $orderItem->productPrice?->price ?? $orderItem->product_price,
-                        'specs_price' => ($orderItem->specs->sum(function ($spec) {
-                            return $spec->productSpecificationOption?->price;
-                        }) ?: $orderItem->specs_price),
-                        'quantity' => $orderItem->quantity,
-                        'sub_total' => $subTotal,
-                        'itemable_type' => $orderItem->itemable_type,
-                        'itemable_id' => $orderItem->itemable_id,
-                        'type' => $orderItem->type,
-                    ]);
+            $orderItems = $order->orderItems ?? collect();
 
+            /*
+             * 1. Handle bundle order items.
+             * Every old order bundle group becomes a new cart bundle group.
+             */
+            $bundleGroups = $orderItems
+                ->filter(fn ($orderItem) => ! empty($orderItem->bundle_group_key))
+                ->groupBy('bundle_group_key');
 
-                    $specs = $orderItem->specs->toArray();
+            foreach ($bundleGroups as $oldBundleGroupKey => $bundleItems) {
+                $firstBundleItem = $bundleItems->first();
 
+                /*
+                 * Prevent adding the same bundle again if it already exists in cart.
+                 */
+                if ($firstBundleItem?->bundle_id) {
+                    $bundleAlreadyExists = $cart->items()
+                        ->where('bundle_id', $firstBundleItem->bundle_id)
+                        ->whereNotNull('bundle_group_key')
+                        ->exists();
 
-                    $filtered = array_filter($specs, function ($spec) {
-                        return !in_array(null, $spec, true);
-                    });
-                    if (!empty($filtered)) {
-                        $cartItem?->specs()->createMany($filtered);
+                    if ($bundleAlreadyExists) {
+                        continue;
                     }
                 }
-            });
+
+                $newBundleGroupKey = (string) Str::uuid();
+
+                foreach ($bundleItems as $orderItem) {
+                    $this->createCartItemFromOrderItem(
+                        cart: $cart,
+                        orderItem: $orderItem,
+                        bundleGroupKey: $newBundleGroupKey
+                    );
+                }
+            }
+
+            /*
+             * 2. Handle normal order items.
+             */
+            $normalItems = $orderItems
+                ->filter(fn ($orderItem) => empty($orderItem->bundle_group_key));
+
+            foreach ($normalItems as $orderItem) {
+                $existingCartItem = $cart->items()
+                    ->where('cartable_id', $orderItem->orderable_id)
+                    ->where('cartable_type', $orderItem->orderable_type)
+                    ->where(function ($query) {
+                        $query
+                            ->whereNull('bundle_group_key')
+                            ->orWhere('bundle_group_key', '');
+                    })
+                    ->first();
+
+                if ($existingCartItem) {
+                    continue;
+                }
+
+                $this->createCartItemFromOrderItem(
+                    cart: $cart,
+                    orderItem: $orderItem
+                );
+            }
+
+            $cart->update([
+                'discount_code_id' => null,
+                'discount_amount' => 0,
+                'price' => $cart->items()->sum('sub_total'),
+            ]);
         });
 
         return Response::api();
     }
+    private function createCartItemFromOrderItem($cart, $orderItem, ?string $bundleGroupKey = null)
+    {
+        if (! $orderItem->orderable) {
+            return null;
+        }
 
+        $specsPrice = $this->resolveOrderItemSpecsPrice($orderItem);
 
+        if ($orderItem->orderable->has_custom_prices) {
+            $subTotal = ($orderItem->productPrice?->price ?? $orderItem->product_price)
+                + $specsPrice;
+        } else {
+            $subTotal = (
+                    ($orderItem->orderable->base_price ?? $orderItem->product_price)
+                    + $specsPrice
+                ) * $orderItem->quantity;
+        }
+
+        $cartItem = $cart->items()->create([
+            'cartable_id' => $orderItem->orderable_id,
+            'cartable_type' => $orderItem->orderable_type,
+
+            'product_price_id' => $orderItem->product_price_id,
+            'product_price' => $orderItem->productPrice?->price ?? $orderItem->product_price,
+
+            'specs_price' => $specsPrice,
+            'quantity' => $orderItem->quantity,
+            'sub_total' => $subTotal,
+
+            'itemable_type' => $orderItem->itemable_type,
+            'itemable_id' => $orderItem->itemable_id,
+
+            'color' => $orderItem->color,
+            'type' => $orderItem->type,
+
+            /*
+             * Do not restore old discount codes on buy again.
+             */
+            'discount_code_id' => null,
+
+            /*
+             * Restore bundle discount only for bundle items.
+             */
+            'discount_amount' => $bundleGroupKey
+                ? (float) ($orderItem->discount_amount ?? 0)
+                : 0,
+
+            /*
+             * Bundle fields.
+             */
+            'bundle_id' => $bundleGroupKey ? $orderItem->bundle_id : null,
+            'bundle_item_id' => $bundleGroupKey ? $orderItem->bundle_item_id : null,
+            'bundle_group_key' => $bundleGroupKey,
+            'bundle_role' => $bundleGroupKey ? $orderItem->bundle_role : null,
+        ]);
+
+        $this->copyOrderItemSpecsToCartItem($orderItem, $cartItem);
+
+        return $cartItem;
+    }
+
+    private function resolveOrderItemSpecsPrice($orderItem): float
+    {
+        $specsPrice = $orderItem->specs->sum(function ($spec) {
+            return $spec->productSpecificationOption?->price;
+        });
+
+        return (float) ($specsPrice ?: $orderItem->specs_price);
+    }
+
+    private function copyOrderItemSpecsToCartItem($orderItem, $cartItem): void
+    {
+        if (! $cartItem || $orderItem->specs->isEmpty()) {
+            return;
+        }
+
+        $specs = $orderItem->specs
+            ->map(function ($spec) {
+                return [
+                    'product_specification_id' => $spec->product_specification_id,
+                    'spec_option_id' => $spec->spec_option_id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            })
+            ->filter(function ($spec) {
+                return ! empty($spec['product_specification_id'])
+                    && ! empty($spec['spec_option_id']);
+            })
+            ->values()
+            ->toArray();
+
+        if (! empty($specs)) {
+            $cartItem->specs()->createMany($specs);
+        }
+    }
     /**
      * @param $transaction
      * @param mixed $paymentMethod

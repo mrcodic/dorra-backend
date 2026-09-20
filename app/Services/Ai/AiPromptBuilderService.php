@@ -41,10 +41,28 @@ class AiPromptBuilderService
             }
         }
 
-        $questions = $this->aiGenerationConfigService->getAssignedQuestions($aiCategoryId, $aiStudioItemId);
+        $questions = $this->aiGenerationConfigService->getAssignedQuestions(
+            $aiCategoryId,
+            $aiStudioItemId
+        );
 
-        $resolvedAnswers = $this->resolveAnswers(
+        /*
+         * Keep only questions that should currently be visible
+         * according to their assignment-level condition.
+         */
+        $visibleQuestions = $this->filterVisibleQuestions(
             $questions,
+            $answers
+        );
+
+        /*
+         * Required validation and prompt building now operate only
+         * on questions that are currently visible.
+         *
+         * Hidden question answers are ignored automatically.
+         */
+        $resolvedAnswers = $this->resolveAnswers(
+            $visibleQuestions,
             $answers
         );
 
@@ -70,33 +88,42 @@ class AiPromptBuilderService
         return [
             'prompt' => $prompt,
             'negative_prompt' => $negativePrompt,
+
             'generation' => [
                 'type' => $studioItem
                     ? ($studioItem->generation_type?->value ?? $studioItem->generation_type)
                     : null,
+
                 'resolution' => $aiCategory->default_resolution,
                 'aspect_ratio' => $aiCategory->aspect_ratio,
                 'provider' => $aiCategory->provider,
                 'model' => $aiCategory->model,
+
                 'credits_cost' => (int) ($studioItem?->credits_cost ?? 1),
+
                 'transparent_background' => (bool) data_get(
                     $categorySettings,
                     'transparent_background',
                     false
                 ),
+
                 'print_ready' => (bool) data_get(
                     $categorySettings,
                     'print_ready',
                     false
                 ),
             ],
+
             'context' => [
                 'ai_category_id' => $aiCategory->id,
                 'ai_studio_item_id' => $studioItem?->id,
                 'category_name' => $categoryName,
                 'studio_item_name' => $studioItem?->name,
             ],
-            'resolved_answers' => $resolvedAnswers->values()->all(),
+
+            'resolved_answers' => $resolvedAnswers
+                ->values()
+                ->all(),
         ];
     }
 
@@ -110,11 +137,12 @@ class AiPromptBuilderService
         $sections = [];
 
         $sections[] = trim("
-Create a professional {$studioName} design.
+Create a professional custom design.
 
-The design is intended for:
-{$categoryName}.
-        ");
+Context (for understanding only — do not render this as text in the artwork):
+- Product type: {$studioName}
+- Category: {$categoryName}
+    ");
 
         if ($resolvedAnswers->isNotEmpty()) {
             $sections[] =
@@ -174,6 +202,8 @@ The design is intended for:
             'Follow the requested style and user choices precisely.',
             'Do not introduce unrelated text, objects, decorations, or concepts.',
             'Do not generate a product mockup unless explicitly requested.',
+            'Do not write, spell out, or render the product type or category name (or any letters from them) as text anywhere in the artwork.',
+            'Do not include any written text in the artwork unless explicitly requested in the design requirements above.',
         ]);
 
         return collect($sections)
@@ -182,8 +212,206 @@ The design is intended for:
             ->implode("\n\n");
     }
 
-    private function resolveAnswers(Collection $questions, array $answers): Collection
+    /**
+     * Resolve which questions are visible based on:
+     *
+     * resolved_condition = [
+     *     'parent_question_id' => 10,
+     *     'parent_option_id' => 50,
+     *     'operator' => 'selected',
+     * ]
+     *
+     * Questions without a condition are always visible.
+     *
+     * If the parent conditional question itself is hidden,
+     * its child questions are also hidden.
+     */
+    private function filterVisibleQuestions(
+        Collection $questions,
+        array $answers
+    ): Collection {
+        $visibleQuestionIds = collect();
+
+        return $questions
+            ->filter(function ($question) use (
+                $questions,
+                $answers,
+                $visibleQuestionIds
+            ) {
+                $condition = $question->resolved_condition ?? null;
+
+                /*
+                 * Normal question:
+                 * always visible.
+                 */
+                if (!$condition) {
+                    $visibleQuestionIds->push(
+                        (int) $question->id
+                    );
+
+                    return true;
+                }
+
+                $parentQuestionId = (int) data_get(
+                    $condition,
+                    'parent_question_id'
+                );
+
+                /*
+                 * Invalid condition or parent question is itself hidden.
+                 */
+                if (
+                    !$parentQuestionId
+                    || !$visibleQuestionIds->contains($parentQuestionId)
+                ) {
+                    return false;
+                }
+
+                $parentQuestion = $questions->first(
+                    fn($item) =>
+                        (int) $item->id === $parentQuestionId
+                );
+
+                if (!$parentQuestion) {
+                    return false;
+                }
+
+                $visible = $this->conditionMatches(
+                    $condition,
+                    $parentQuestion,
+                    $answers
+                );
+
+                if ($visible) {
+                    $visibleQuestionIds->push(
+                        (int) $question->id
+                    );
+                }
+
+                return $visible;
+            })
+            ->values();
+    }
+
+    /**
+     * Determine whether one conditional rule matches.
+     */
+    private function conditionMatches(
+        array $condition,
+              $parentQuestion,
+        array $answers
+    ): bool {
+        $parentKey = (string) $parentQuestion->key;
+
+        /*
+         * Parent has no answer yet.
+         *
+         * Child stays hidden.
+         */
+        if (!array_key_exists($parentKey, $answers)) {
+            return false;
+        }
+
+        $answer = $answers[$parentKey];
+
+        if ($this->isEmptyAnswer($answer)) {
+            return false;
+        }
+
+        $parentOptionId = (int) data_get(
+            $condition,
+            'parent_option_id'
+        );
+
+        if (!$parentOptionId) {
+            return false;
+        }
+
+        /*
+         * The condition stores option ID,
+         * but frontend answers use option VALUE.
+         *
+         * Resolve the option first so we can compare correctly.
+         */
+        $parentOption = $parentQuestion
+            ->options
+            ->first(
+                fn($option) =>
+                    (int) $option->id === $parentOptionId
+            );
+
+        if (!$parentOption) {
+            return false;
+        }
+
+        $expectedValue = (string) $parentOption->value;
+
+        /*
+         * Supports both:
+         *
+         * SINGLE_SELECT:
+         * "logo"
+         *
+         * MULTI_SELECT:
+         * ["logo", "print"]
+         */
+        $selected = is_array($answer)
+            ? collect($answer)
+                ->filter(
+                    fn($value) =>
+                        is_string($value)
+                        || is_numeric($value)
+                )
+                ->map(
+                    fn($value) =>
+                    (string) $value
+                )
+                ->contains($expectedValue)
+            : (string) $answer === $expectedValue;
+
+        return match (
+        data_get(
+            $condition,
+            'operator',
+            'selected'
+        )
+        ) {
+            'not_selected' => !$selected,
+            default => $selected,
+        };
+    }
+    private function isEmptyAnswer(mixed $value): bool
     {
+        if ($value === null) {
+            return true;
+        }
+
+        if (is_string($value)) {
+            return trim($value) === '';
+        }
+
+        if (is_array($value)) {
+            return collect($value)
+                ->filter(function ($item) {
+                    if ($item === null) {
+                        return false;
+                    }
+
+                    if (is_string($item)) {
+                        return trim($item) !== '';
+                    }
+
+                    return true;
+                })
+                ->isEmpty();
+        }
+
+        return false;
+    }
+    private function resolveAnswers(
+        Collection $questions,
+        array $answers
+    ): Collection {
         $errors = [];
         $resolved = collect();
 
@@ -196,6 +424,10 @@ The design is intended for:
                 ?? $question->required
             );
 
+            /*
+             * Because this method receives only visible questions,
+             * hidden required questions do not trigger validation.
+             */
             if (
                 $required
                 && $this->isEmptyAnswer($value)
@@ -283,7 +515,8 @@ The design is intended for:
                                 || is_numeric($item)
                         )
                         ->map(
-                            fn($item) => (string) $item
+                            fn($item) =>
+                            (string) $item
                         )
                         ->unique()
                         ->values();
@@ -442,42 +675,20 @@ The design is intended for:
         array $studioSettings
     ): string {
         return collect([
-            data_get(
-                $studioSettings,
-                'negative_rules'
-            ),
-
-            data_get(
-                $categorySettings,
-                'negative_rules'
-            ),
+            data_get($studioSettings, 'negative_rules'),
+            data_get($categorySettings, 'negative_rules'),
 
             'low quality',
             'distorted composition',
             'unrelated elements',
             'unwanted product mockup',
+            'product name as text',
+            'category name as text',
+            'written labels or captions',
         ])
             ->map(fn($value) => trim((string) $value))
             ->filter()
             ->unique()
             ->implode("\n");
-    }
-
-    private function isEmptyAnswer(
-        mixed $value
-    ): bool {
-        if ($value === null) {
-            return true;
-        }
-
-        if (
-            is_string($value)
-            && trim($value) === ''
-        ) {
-            return true;
-        }
-
-        return is_array($value)
-            && empty($value);
     }
 }

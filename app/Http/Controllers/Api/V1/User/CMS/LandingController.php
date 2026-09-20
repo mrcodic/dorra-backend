@@ -20,6 +20,10 @@ class LandingController extends Controller
     public function __construct(public CategoryService $categoryService)
     {
     }
+    public function bundle()
+    {
+        return Response::api(data: setting(group: "bundle_landing"));
+    }
 
     public function carousels()
     {

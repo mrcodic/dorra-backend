@@ -72,6 +72,16 @@ class QuickStoreAiGuideQuestionRequest extends FormRequest
             'options.*.ui_data.colors' => ['nullable', 'array', 'max:10'],
             'options.*.ui_data.colors.*' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'options.*.is_active' => ['nullable', 'boolean'],
+            'options.*.media_id' => [
+                'nullable',
+                'integer',
+                'exists:media,id',
+            ],
+
+            'options.*.remove_media' => [
+                'nullable',
+                'boolean',
+            ],
         ];
     }
 }

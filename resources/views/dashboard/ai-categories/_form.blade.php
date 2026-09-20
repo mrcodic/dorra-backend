@@ -35,6 +35,44 @@
 
     $oldQuestions = old('questions');
 
+    /*
+     * Conditional visibility belongs to the question assignment, not the global question.
+     * Backend can provide:
+     * $associatedData['questionConditions'][question_id] = [
+     *     'parent_question_id' => 1,
+     *     'parent_option_id' => 4,
+     *     'operator' => 'selected',
+     * ];
+     */
+    $questionConditions = collect($associatedData['questionConditions'] ?? []);
+
+    $conditionQuestionsPayload = $questions
+        ->filter(fn ($question) => in_array(
+            $question->type?->value ?? $question->type,
+            [
+                \App\Enums\Ai\AiGuideQuestionTypeEnum::SINGLE_SELECT->value,
+                \App\Enums\Ai\AiGuideQuestionTypeEnum::MULTI_SELECT->value,
+            ],
+            true
+        ))
+        ->mapWithKeys(function ($question) {
+            return [
+                (int) $question->id => [
+                    'id' => (int) $question->id,
+                    'title' => $question->title,
+                    'options' => $question->options
+                        ->where('is_active', true)
+                        ->values()
+                        ->map(fn ($option) => [
+                            'id' => (int) $option->id,
+                            'label' => $option->label,
+                        ])
+                        ->all(),
+                ],
+            ];
+        })
+        ->all();
+
     $studioItemsPayload = $studioItems->mapWithKeys(function ($studioItem) {
         return [
             $studioItem->id => [
@@ -61,6 +99,7 @@
 @endphp
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.css">
 
 <style>
     .ai-config-card {
@@ -75,6 +114,91 @@
 
     .question-options-panel {
         background: #fafafa;
+    }
+
+    .question-condition-settings {
+        background: #fcfbff;
+    }
+
+    .question-condition-panel {
+        border: 1px solid rgba(115, 103, 240, .22);
+        background: rgba(115, 103, 240, .035);
+        border-radius: .5rem;
+    }
+
+    .question-condition-summary {
+        border: 1px solid rgba(255, 159, 67, .3);
+        background: rgba(255, 159, 67, .08);
+        color: #a15c11;
+        border-radius: .357rem;
+        padding: .65rem .75rem;
+        font-size: .85rem;
+    }
+
+    .question-condition-badge {
+        white-space: nowrap;
+    }
+
+    .quick-option-dropzone {
+        min-height: 150px;
+        border: 1px dashed #d8d6de;
+        border-radius: .357rem;
+        background: #fff;
+        padding: 12px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .quick-option-dropzone .dz-message {
+        margin: 2rem 0;
+        color: #6e6b7b;
+        text-align: center;
+    }
+
+    .quick-option-dropzone.dz-started .dz-message {
+        display: none;
+    }
+
+    .quick-option-dropzone .dz-preview {
+        position: relative !important;
+        display: inline-flex !important;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 140px !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        vertical-align: top;
+    }
+
+    .quick-option-dropzone .dz-preview .dz-image {
+        width: 140px !important;
+        height: 110px !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        background: #f8f8f8;
+    }
+
+    .quick-option-dropzone .dz-preview .dz-image img {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        object-fit: contain !important;
+    }
+
+    .quick-option-dropzone .dz-preview .dz-details,
+    .quick-option-dropzone .dz-preview .dz-success-mark,
+    .quick-option-dropzone .dz-preview .dz-error-mark {
+        display: none !important;
+    }
+
+    .quick-option-dropzone .dz-preview .dz-remove {
+        display: inline-block;
+        margin-top: 8px;
+        font-size: 12px;
+        color: #ea5455;
+        text-decoration: none;
     }
 </style>
 
@@ -416,6 +540,23 @@
                         ],
                         true
                     );
+
+                    $savedCondition = $oldRow !== null
+                        ? data_get($oldRow, 'condition', [])
+                        : ($questionConditions->get($question->id) ?? []);
+
+                    $conditionEnabled = $oldRow !== null
+                        ? (bool) data_get($oldRow, 'condition_enabled', false)
+                        : (
+                            !empty(data_get($savedCondition, 'parent_question_id'))
+                            && !empty(data_get($savedCondition, 'parent_option_id'))
+                        );
+
+                    $conditionParentQuestionId = (int) data_get($savedCondition, 'parent_question_id', 0);
+                    $conditionParentOptionId = (int) data_get($savedCondition, 'parent_option_id', 0);
+
+                    $conditionParentQuestion = $questions->firstWhere('id', $conditionParentQuestionId);
+                    $conditionParentOption = $conditionParentQuestion?->options?->firstWhere('id', $conditionParentOptionId);
                 @endphp
 
                 <div
@@ -465,6 +606,12 @@
                                         {{ $question->type->label() }}
                                     </span>
 
+                                    <span
+                                        class="badge bg-light-warning text-warning question-condition-badge {{ $conditionEnabled ? '' : 'd-none' }}"
+                                    >
+                                        Conditional
+                                    </span>
+
                                     <div class="form-check form-switch">
                                         <input
                                             type="hidden"
@@ -495,6 +642,106 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="question-condition-settings border-top p-1">
+                        <div class="d-flex justify-content-between align-items-center gap-1">
+                            <div>
+                                <div class="fw-bolder">Conditional Visibility</div>
+                                <small class="text-muted">
+                                    Show this question only when a previous answer matches.
+                                </small>
+                            </div>
+
+                            <div class="form-check form-switch mb-0">
+                                <input
+                                    type="hidden"
+                                    name="questions[{{ $question->id }}][condition_enabled]"
+                                    value="0"
+                                >
+
+                                <input
+                                    type="checkbox"
+                                    id="question-condition-{{ $question->id }}"
+                                    name="questions[{{ $question->id }}][condition_enabled]"
+                                    value="1"
+                                    class="form-check-input question-condition-toggle"
+                                    @checked($conditionEnabled)
+                                >
+
+                                <label
+                                    class="form-check-label"
+                                    for="question-condition-{{ $question->id }}"
+                                >
+                                    Conditional
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="question-condition-panel p-1 mt-1 {{ $conditionEnabled ? '' : 'd-none' }}">
+                            <div class="row">
+                                <div class="col-md-5 mb-1">
+                                    <label class="form-label">Parent Question *</label>
+
+                                    <select
+                                        name="questions[{{ $question->id }}][condition][parent_question_id]"
+                                        class="form-select condition-parent-question"
+                                        data-current-option-id="{{ $conditionParentOptionId ?: '' }}"
+                                    >
+                                        <option value="">Select parent question</option>
+
+                                        @foreach($conditionQuestionsPayload as $parentQuestion)
+                                            @continue((int) $parentQuestion['id'] === (int) $question->id)
+
+                                            <option
+                                                value="{{ $parentQuestion['id'] }}"
+                                                @selected($conditionParentQuestionId === (int) $parentQuestion['id'])
+                                            >
+                                                {{ $parentQuestion['title'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+
+                                <div class="col-md-4 mb-1">
+                                    <label class="form-label">Answer *</label>
+
+                                    <select
+                                        name="questions[{{ $question->id }}][condition][parent_option_id]"
+                                        class="form-select condition-parent-option"
+                                    >
+                                        <option value="">Select answer</option>
+
+                                        @if($conditionParentQuestionId && isset($conditionQuestionsPayload[$conditionParentQuestionId]))
+                                            @foreach($conditionQuestionsPayload[$conditionParentQuestionId]['options'] as $parentOption)
+                                                <option
+                                                    value="{{ $parentOption['id'] }}"
+                                                    @selected($conditionParentOptionId === (int) $parentOption['id'])
+                                                >
+                                                    {{ $parentOption['label'] }}
+                                                </option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="question-condition-summary {{ $conditionEnabled && $conditionParentQuestion && $conditionParentOption ? '' : 'd-none' }}">
+                                Show when
+                                <strong class="condition-summary-question">
+                                    {{ $conditionParentQuestion?->title }}
+                                </strong>
+                                answer
+                                <strong class="condition-summary-option">
+                                    {{ $conditionParentOption?->label }}
+                                </strong>.
+                            </div>
+
+                            <small class="text-muted d-block mt-50">
+                                If this question is Required, validation applies only while the condition is matched.
+                            </small>
                         </div>
                     </div>
 
@@ -737,7 +984,6 @@
                             The question is created globally, then automatically selected for this product.
                         </small>
                     </div>
-
                     <button
                         type="button"
                         class="btn-close"
@@ -840,6 +1086,80 @@
                         </div>
                     </div>
 
+                    <div class="border rounded p-1 mt-1" id="quick-condition-section">
+                        <div class="d-flex justify-content-between align-items-center gap-1">
+                            <div>
+                                <h6 class="mb-25">Conditional Visibility</h6>
+                                <small class="text-muted">
+                                    Show this question only when a selected parent question has a specific answer.
+                                </small>
+                            </div>
+
+                            <div class="form-check form-switch mb-0">
+                                <input
+                                    type="checkbox"
+                                    id="quick-condition-enabled"
+                                    class="form-check-input"
+                                >
+
+                                <label
+                                    for="quick-condition-enabled"
+                                    class="form-check-label"
+                                >
+                                    Conditional
+                                </label>
+                            </div>
+                        </div>
+
+                        <div
+                            id="quick-condition-panel"
+                            class="question-condition-panel p-1 mt-1 d-none"
+                        >
+                            <div class="row">
+                                <div class="col-md-5 mb-1">
+                                    <label class="form-label">Parent Question *</label>
+
+                                    <select
+                                        id="quick-condition-parent-question"
+                                        class="form-select"
+                                    >
+                                        <option value="">Select parent question</option>
+                                    </select>
+
+                                    <small class="text-muted">
+                                        Only selected Single/Multi Select questions can be parents.
+                                    </small>
+                                </div>
+
+                                <div class="col-md-4 mb-1">
+                                    <label class="form-label">Answer *</label>
+
+                                    <select
+                                        id="quick-condition-parent-option"
+                                        class="form-select"
+                                    >
+                                        <option value="">Select answer</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div
+                                id="quick-condition-summary"
+                                class="question-condition-summary d-none"
+                            >
+                                Show when
+                                <strong id="quick-condition-summary-question"></strong>
+                                <span id="quick-condition-summary-operator">has</span>
+                                answer
+                                <strong id="quick-condition-summary-option"></strong>.
+                            </div>
+
+                            <small class="text-muted d-block mt-50">
+                                Required validation applies only while this condition is matched.
+                            </small>
+                        </div>
+                    </div>
+
                     <div id="quick-options-section" class="border rounded p-1 mt-1">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <div>
@@ -889,6 +1209,12 @@
 <script src="https://unpkg.com/feather-icons"></script>
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
+<script>
+    if (window.Dropzone) {
+        Dropzone.autoDiscover = false;
+    }
+</script>
 
 <script>
     $(function () {
@@ -897,8 +1223,11 @@
         const singleSelect = @json(\App\Enums\Ai\AiGuideQuestionTypeEnum::SINGLE_SELECT->value);
         const multiSelect = @json(\App\Enums\Ai\AiGuideQuestionTypeEnum::MULTI_SELECT->value);
         const quickStoreUrl = @json(route('ai-categories.questions.quick-store'));
+        const mediaStoreUrl = @json(route('media.store'));
+        const mediaDeleteBaseUrl = @json(url('api/v1/media'));
         const currentAiCategoryId = @json($aiCategory?->id);
         const csrfToken = @json(csrf_token());
+
         const quickStudioStoreUrl = @json(route('ai-categories.studio-items.quick-store'));
         const quickStudioUpdateUrlTemplate = @json(route('ai-categories.studio-items.quick-update', ['studioItem' => '__STUDIO_ITEM_ID__']));
         const quickStudioDeleteUrlTemplate = @json(route('ai-categories.studio-items.quick-delete', ['studioItem' => '__STUDIO_ITEM_ID__']));
@@ -906,9 +1235,11 @@
         const canDeleteStudioItems = @json(auth()->user()?->can('ai-studio-items_delete') ?? false);
 
         let studioItemData = @json($studioItemsPayload);
+        const conditionQuestionData = @json($conditionQuestionsPayload);
 
         let quickOptionIndex = 0;
         let pendingStudioQuestionIds = [];
+        let quickQuestionSaved = false;
 
         function initStudioQuestionsSelect2() {
             const select = $('#quick-studio-question-ids');
@@ -1300,20 +1631,126 @@
             resetStudioItemModal();
         });
 
+        function conditionParentOptionsHtml(currentQuestionId, selectedParentId = null) {
+            return Object.values(conditionQuestionData)
+                .filter(question => Number(question.id) !== Number(currentQuestionId))
+                .map(question => `
+                    <option
+                        value="${Number(question.id)}"
+                        ${Number(selectedParentId) === Number(question.id) ? 'selected' : ''}
+                    >
+                        ${escapeHtml(question.title)}
+                    </option>
+                `)
+                .join('');
+        }
+
+        function conditionAnswerOptionsHtml(parentQuestionId, selectedOptionId = null) {
+            const parent = conditionQuestionData[Number(parentQuestionId)];
+
+            if (!parent || !Array.isArray(parent.options)) {
+                return '';
+            }
+
+            return parent.options.map(option => `
+                <option
+                    value="${Number(option.id)}"
+                    ${Number(selectedOptionId) === Number(option.id) ? 'selected' : ''}
+                >
+                    ${escapeHtml(option.label)}
+                </option>
+            `).join('');
+        }
+
+        function populateConditionAnswers(card, selectedOptionId = null) {
+            const parentSelect = card.find('.condition-parent-question');
+            const optionSelect = card.find('.condition-parent-option');
+            const parentQuestionId = Number(parentSelect.val() || 0);
+
+            optionSelect.html(`
+                <option value="">Select answer</option>
+                ${conditionAnswerOptionsHtml(parentQuestionId, selectedOptionId)}
+            `);
+        }
+
+        function updateConditionSummary(card) {
+            const enabled = card.find('.question-condition-toggle').is(':checked');
+            const panel = card.find('.question-condition-panel');
+            const badge = card.find('.question-condition-badge');
+            const summary = card.find('.question-condition-summary');
+
+            panel.toggleClass('d-none', !enabled);
+            badge.toggleClass('d-none', !enabled);
+
+            if (!enabled) {
+                summary.addClass('d-none');
+                return;
+            }
+
+            const parentId = Number(card.find('.condition-parent-question').val() || 0);
+            const optionId = Number(card.find('.condition-parent-option').val() || 0);
+            const operator = card.find('.condition-operator').val();
+            const parent = conditionQuestionData[parentId];
+            const option = parent?.options?.find(item => Number(item.id) === optionId);
+
+            if (!parent || !option) {
+                summary.addClass('d-none');
+                return;
+            }
+
+            summary.find('.condition-summary-question').text(parent.title);
+            summary.find('.condition-summary-operator').text(
+                operator === 'not_selected' ? 'does not have' : 'has'
+            );
+            summary.find('.condition-summary-option').text(option.label);
+            summary.removeClass('d-none');
+        }
+
+        function initializeQuestionCondition(card) {
+            const parentSelect = card.find('.condition-parent-question');
+            const selectedOptionId = Number(parentSelect.data('current-option-id') || 0);
+
+            if (parentSelect.length) {
+                populateConditionAnswers(card, selectedOptionId);
+                parentSelect.removeAttr('data-current-option-id');
+            }
+
+            updateConditionSummary(card);
+        }
+
         function toggleQuestion(card) {
             const checked = card.find('.question-toggle').is(':checked');
 
             card.toggleClass('is-selected', checked);
             card.find('.question-settings').toggle(checked);
             card.find('.question-options').toggle(checked);
+            card.find('.question-condition-settings').toggle(checked);
         }
 
         $('.question-card').each(function () {
-            toggleQuestion($(this));
+            const card = $(this);
+
+            toggleQuestion(card);
+            initializeQuestionCondition(card);
         });
 
         $(document).on('change', '.question-toggle', function () {
             toggleQuestion($(this).closest('.question-card'));
+        });
+
+        $(document).on('change', '.question-condition-toggle', function () {
+            updateConditionSummary($(this).closest('.question-card'));
+        });
+
+        $(document).on('change', '.condition-parent-question', function () {
+            const card = $(this).closest('.question-card');
+
+            populateConditionAnswers(card);
+            updateConditionSummary(card);
+        });
+
+        $(document).on('change', '.condition-parent-option, .condition-operator', function () {
+            updateConditionSummary($(this).closest('.question-card'));
         });
 
         $('#select-all-questions').on('click', function () {
@@ -1340,6 +1777,163 @@
                 .closest('.question-options')
                 .find('.option-checkbox')
                 .prop('checked', false);
+        });
+
+        function quickConditionEnabled() {
+            return $('#quick-condition-enabled').is(':checked');
+        }
+
+        function selectedConditionalParentIds() {
+            return $('#questions-container .question-card')
+                .filter(function () {
+                    return $(this).find('.question-toggle').is(':checked');
+                })
+                .map(function () {
+                    return Number($(this).data('question-id'));
+                })
+                .get()
+                .filter(Boolean);
+        }
+
+        function quickConditionParentOptionsHtml(selectedParentId = null) {
+            const selectedIds = new Set(selectedConditionalParentIds());
+
+            return Object.values(conditionQuestionData)
+                .filter(question => selectedIds.has(Number(question.id)))
+                .map(question => `
+                    <option
+                        value="${Number(question.id)}"
+                        ${Number(selectedParentId) === Number(question.id) ? 'selected' : ''}
+                    >
+                        ${escapeHtml(question.title)}
+                    </option>
+                `)
+                .join('');
+        }
+
+        function populateQuickConditionParents(selectedParentId = null) {
+            const select = $('#quick-condition-parent-question');
+
+            if (!select.length) return;
+
+            select.html(`
+                <option value="">Select parent question</option>
+                ${quickConditionParentOptionsHtml(selectedParentId)}
+            `);
+        }
+
+        function populateQuickConditionAnswers(selectedOptionId = null) {
+            const parentQuestionId = Number(
+                $('#quick-condition-parent-question').val() || 0
+            );
+
+            $('#quick-condition-parent-option').html(`
+                <option value="">Select answer</option>
+                ${conditionAnswerOptionsHtml(parentQuestionId, selectedOptionId)}
+            `);
+        }
+
+        function updateQuickConditionSummary() {
+            const enabled = quickConditionEnabled();
+            const panel = $('#quick-condition-panel');
+            const summary = $('#quick-condition-summary');
+
+            panel.toggleClass('d-none', !enabled);
+
+            if (!enabled) {
+                summary.addClass('d-none');
+                return;
+            }
+
+            const parentId = Number(
+                $('#quick-condition-parent-question').val() || 0
+            );
+
+            const optionId = Number(
+                $('#quick-condition-parent-option').val() || 0
+            );
+
+            const operator = $('#quick-condition-operator').val();
+            const parent = conditionQuestionData[parentId];
+
+            const option = parent?.options?.find(
+                item => Number(item.id) === optionId
+            );
+
+            if (!parent || !option) {
+                summary.addClass('d-none');
+                return;
+            }
+
+            $('#quick-condition-summary-question').text(parent.title);
+            $('#quick-condition-summary-operator').text(
+                operator === 'not_selected'
+                    ? 'does not have'
+                    : 'has'
+            );
+            $('#quick-condition-summary-option').text(option.label);
+
+            summary.removeClass('d-none');
+        }
+
+        function ensureQuickConditionSortOrder() {
+            const parentQuestionId = Number(
+                $('#quick-condition-parent-question').val() || 0
+            );
+
+            if (!parentQuestionId) return;
+
+            const parentCard = $(
+                `.question-card[data-question-id="${parentQuestionId}"]`
+            );
+
+            if (!parentCard.length) return;
+
+            const parentSort = Number(
+                parentCard
+                    .find(`input[name="questions[${parentQuestionId}][sort_order]"]`)
+                    .val() || 0
+            );
+
+            const currentSort = Number(
+                $('#quick-sort-order').val() || 0
+            );
+
+            if (currentSort <= parentSort) {
+                $('#quick-sort-order').val(parentSort + 1);
+            }
+        }
+
+        $('#quick-condition-enabled').on('change', function () {
+            if (quickConditionEnabled()) {
+                populateQuickConditionParents(
+                    $('#quick-condition-parent-question').val()
+                );
+            }
+
+            updateQuickConditionSummary();
+        });
+
+        $('#quick-condition-parent-question').on('change', function () {
+            populateQuickConditionAnswers();
+            ensureQuickConditionSortOrder();
+            updateQuickConditionSummary();
+        });
+
+        $('#quick-condition-parent-option, #quick-condition-operator').on(
+            'change',
+            updateQuickConditionSummary
+        );
+
+        $('#quick-question-modal').on('shown.bs.modal', function () {
+            const currentParentId =
+                $('#quick-condition-parent-question').val();
+
+            populateQuickConditionParents(currentParentId);
+            populateQuickConditionAnswers(
+                $('#quick-condition-parent-option').val()
+            );
+            updateQuickConditionSummary();
         });
 
         function quickPaletteEnabled() {
@@ -1399,6 +1993,8 @@
                 $('#quick-options-container .quick-option-row').each(function () {
                     const row = $(this);
 
+                    clearQuickOptionImage(row);
+
                     if (!row.find('.quick-palette-color-row').length) {
                         addQuickPaletteColor(row, '#000000');
                     }
@@ -1420,6 +2016,173 @@
             $('#quick-options-container .quick-color-palette-section').addClass('d-none');
 
             toggleQuickOptions();
+        }
+
+        function deleteQuickOptionMedia(mediaId) {
+            if (!mediaId) return Promise.resolve();
+
+            return fetch(`${mediaDeleteBaseUrl}/${mediaId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                }
+            }).then(async response => {
+                if (response.ok) return;
+
+                let message = 'Unable to remove image.';
+
+                try {
+                    const data = await response.json();
+                    message = data?.message ?? message;
+                } catch (_) {}
+
+                throw new Error(message);
+            });
+        }
+
+        function initQuickOptionDropzone(optionRow) {
+            if (!window.Dropzone) {
+                console.error('Dropzone is not loaded.');
+                return null;
+            }
+
+            const element = optionRow.find('.quick-option-dropzone')[0];
+
+            if (!element) return null;
+            if (element.dropzone) return element.dropzone;
+
+            const hiddenInput = optionRow.find('.quick-option-media-id');
+
+            const REQUIRED_WIDTH = 48;
+            const REQUIRED_HEIGHT = 48;
+            const MAX_FILESIZE_MB = 2;
+
+            const dz = new Dropzone(element, {
+                url: mediaStoreUrl,
+                paramName: 'file',
+                maxFiles: 1,
+                acceptedFiles: 'image/*',
+                maxFilesize: MAX_FILESIZE_MB,
+                addRemoveLinks: true,
+                clickable: true,
+                thumbnailWidth: 160,
+                thumbnailHeight: 160,
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+
+                accept: function (file, done) {
+                    const img = new Image();
+                    const objectUrl = URL.createObjectURL(file);
+
+                    img.onload = function () {
+                        URL.revokeObjectURL(objectUrl);
+
+                        if (img.width !== REQUIRED_WIDTH || img.height !== REQUIRED_HEIGHT) {
+                            done(`Image must be exactly ${REQUIRED_WIDTH}x${REQUIRED_HEIGHT}px (uploaded: ${img.width}x${img.height}px).`);
+                            return;
+                        }
+
+                        done();
+                    };
+
+                    img.onerror = function () {
+                        URL.revokeObjectURL(objectUrl);
+                        done('Unable to read image dimensions.');
+                    };
+
+                    img.src = objectUrl;
+                },
+
+                success: function (file, response) {
+                    const mediaId = response?.data?.id ?? null;
+                    const imageUrl = response?.data?.original_url ?? response?.data?.url ?? null;
+
+                    if (!mediaId) {
+                        hiddenInput.val('');
+                        toast('Image uploaded but media ID was not returned.');
+                        return;
+                    }
+
+                    hiddenInput.val(mediaId);
+                    file._mediaId = String(mediaId);
+                    file._imageUrl = imageUrl;
+                    file._deleteOnRemove = true;
+
+                    element.classList.add('dz-started');
+                },
+
+                removedfile: function (file) {
+                    const mediaId = String(file._mediaId ?? '');
+                    const currentMediaId = String(hiddenInput.val() ?? '');
+
+                    if (file.previewElement) {
+                        file.previewElement.remove();
+                    }
+
+                    if (!mediaId || mediaId === currentMediaId) {
+                        hiddenInput.val('');
+                    }
+
+                    if (mediaId && file._deleteOnRemove !== false) {
+                        deleteQuickOptionMedia(mediaId).catch(error => {
+                            toast(error.message ?? 'Unable to remove image.');
+                        });
+                    }
+
+                    if (!this.files.length) {
+                        element.classList.remove('dz-started');
+                    }
+                },
+
+                maxfilesexceeded: function (file) {
+                    this.removeAllFiles(true);
+                    this.addFile(file);
+                },
+
+                error: function (file, response) {
+                    const message = typeof response === 'string'
+                        ? response
+                        : response?.message ?? 'Unable to upload image.';
+
+                    toast(message);
+
+                    if (file.previewElement) {
+                        file.previewElement.classList.add('dz-error');
+                    }
+                }
+            });
+
+            return dz;
+        }
+        function destroyQuickOptionDropzone(optionRow, deleteMedia = true) {
+            const element = optionRow.find('.quick-option-dropzone')[0];
+
+            if (!element?.dropzone) return;
+
+            element.dropzone.files.forEach(file => {
+                file._deleteOnRemove = deleteMedia;
+            });
+
+            element.dropzone.destroy();
+        }
+
+        function clearQuickOptionImage(optionRow) {
+            const element = optionRow.find('.quick-option-dropzone')[0];
+
+            if (!element?.dropzone) {
+                optionRow.find('.quick-option-media-id').val('');
+                return;
+            }
+
+            element.dropzone.files.forEach(file => {
+                file._deleteOnRemove = true;
+            });
+
+            element.dropzone.removeAllFiles(true);
+            optionRow.find('.quick-option-media-id').val('');
         }
 
         function addQuickOption() {
@@ -1465,6 +2228,25 @@
                                 <label class="form-label">Prompt Value Arabic</label>
                                 <textarea class="form-control quick-option-prompt-ar" rows="2" dir="rtl"></textarea>
                             </div>
+
+                            <div class="col-12 mt-1">
+                                <label class="form-label">Option Image</label>
+
+                                <div class="quick-option-dropzone">
+                                    <div class="dz-message">
+                                        Drop image here or click to upload
+                                    </div>
+ <div class="text-center text-muted small mt-50">
+                                        JPG, PNG, WEBP - Max 2MB (48x48)
+                                    </div>
+                                </div>
+
+                                <input type="hidden" class="quick-option-media-id">
+
+                                <small class="text-muted d-block mt-50">
+                                    Optional. One image per option.
+                                </small>
+                            </div>
                         </div>
                     </div>
 
@@ -1498,6 +2280,8 @@
             `);
 
             const row = $('#quick-options-container .quick-option-row').last();
+
+            initQuickOptionDropzone(row);
 
             if (quickPaletteEnabled()) {
                 row.find('.quick-normal-option-fields').hide();
@@ -1625,7 +2409,10 @@
         });
 
         $(document).on('click', '.quick-remove-option', function () {
-            $(this).closest('.quick-option-row').remove();
+            const row = $(this).closest('.quick-option-row');
+
+            destroyQuickOptionDropzone(row, true);
+            row.remove();
 
             if (quickPaletteEnabled()) {
                 updateAllQuickPaletteValues();
@@ -1672,17 +2459,32 @@
             updateQuickPaletteValues(optionRow);
         });
 
-        function resetQuickQuestionModal() {
+        function resetQuickQuestionModal(deleteTemporaryMedia = true) {
             $('#quick-title-en, #quick-title-ar, #quick-prompt-label-en, #quick-prompt-label-ar, #quick-placeholder-en, #quick-placeholder-ar').val('');
             $('#quick-sort-order').val(0);
             $('#quick-required').prop('checked', false);
             $('#quick-color-palette-question').prop('checked', false);
+
+            $('#quick-condition-enabled').prop('checked', false);
+            $('#quick-condition-parent-question').html(
+                '<option value="">Select parent question</option>'
+            );
+            $('#quick-condition-parent-option').html(
+                '<option value="">Select answer</option>'
+            );
+            $('#quick-condition-operator').val('selected');
+            $('#quick-condition-panel').addClass('d-none');
+            $('#quick-condition-summary').addClass('d-none');
 
             $('#quick-question-type')
                 .find('option')
                 .prop('disabled', false);
 
             $('#quick-question-type').val(singleSelect);
+
+            $('#quick-options-container .quick-option-row').each(function () {
+                destroyQuickOptionDropzone($(this), deleteTemporaryMedia);
+            });
 
             $('#quick-options-container').empty();
 
@@ -1693,6 +2495,20 @@
         }
 
         function buildOptionVisual(option) {
+            const imageUrl = option.image ?? option.image_url ?? null;
+
+            if (imageUrl) {
+                return `
+                    <div class="mt-1">
+                        <img
+                            src="${escapeHtml(imageUrl)}"
+                            alt=""
+                            style="width:100%;height:90px;object-fit:cover;border-radius:6px"
+                        >
+                    </div>
+                `;
+            }
+
             const colors = Array.isArray(option.colors)
                 ? option.colors
                     .map(normalizeHexColor)
@@ -1846,6 +2662,10 @@
                                         ${escapeHtml(question.type_label)}
                                     </span>
 
+                                    <span class="badge bg-light-warning text-warning question-condition-badge d-none">
+                                        Conditional
+                                    </span>
+
                                     ${question.isColorPalette ? `
                                         <span class="badge bg-light-info text-info">
                                             Color Palette
@@ -1887,6 +2707,78 @@
                         </div>
                     </div>
 
+                    <div class="question-condition-settings border-top p-1">
+                        <div class="d-flex justify-content-between align-items-center gap-1">
+                            <div>
+                                <div class="fw-bolder">Conditional Visibility</div>
+                                <small class="text-muted">
+                                    Show this question only when a previous answer matches.
+                                </small>
+                            </div>
+
+                            <div class="form-check form-switch mb-0">
+                                <input
+                                    type="hidden"
+                                    name="questions[${id}][condition_enabled]"
+                                    value="0"
+                                >
+
+                                <input
+                                    type="checkbox"
+                                    id="question-condition-${id}"
+                                    name="questions[${id}][condition_enabled]"
+                                    value="1"
+                                    class="form-check-input question-condition-toggle"
+                                >
+
+                                <label class="form-check-label" for="question-condition-${id}">
+                                    Conditional
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="question-condition-panel p-1 mt-1 d-none">
+                            <div class="row">
+                                <div class="col-md-5 mb-1">
+                                    <label class="form-label">Parent Question *</label>
+
+                                    <select
+                                        name="questions[${id}][condition][parent_question_id]"
+                                        class="form-select condition-parent-question"
+                                    >
+                                        <option value="">Select parent question</option>
+                                        ${conditionParentOptionsHtml(id)}
+                                    </select>
+                                </div>
+
+
+
+                                <div class="col-md-4 mb-1">
+                                    <label class="form-label">Answer *</label>
+
+                                    <select
+                                        name="questions[${id}][condition][parent_option_id]"
+                                        class="form-select condition-parent-option"
+                                    >
+                                        <option value="">Select answer</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="question-condition-summary d-none">
+                                Show when
+                                <strong class="condition-summary-question"></strong>
+                                <span class="condition-summary-operator">has</span>
+                                answer
+                                <strong class="condition-summary-option"></strong>.
+                            </div>
+
+                            <small class="text-muted d-block mt-50">
+                                If this question is Required, validation applies only while the condition is matched.
+                            </small>
+                        </div>
+                    </div>
+
                     ${optionsHtml}
                 </div>
             `;
@@ -1924,16 +2816,14 @@
                             en: labelEn,
                             ar: row.find('.quick-option-label-ar').val().trim()
                         },
+
                         prompt_value: {
                             en: row.find('.quick-option-prompt-en').val().trim(),
                             ar: row.find('.quick-option-prompt-ar').val().trim()
                         },
-                        ui_data: {
-                            colors: colors
-                        },
+
                         is_active: 1
                     });
-
                     return;
                 }
 
@@ -1956,6 +2846,7 @@
                         en: row.find('.quick-option-prompt-en').val().trim(),
                         ar: row.find('.quick-option-prompt-ar').val().trim()
                     },
+                    media_id: row.find('.quick-option-media-id').val() || null,
                     is_active: 1
                 });
             });
@@ -1997,6 +2888,65 @@
                         : 'Add at least one option.'
                 );
                 return;
+            }
+
+            let pendingCondition = null;
+
+            if (quickConditionEnabled()) {
+                const parentQuestionId = Number(
+                    $('#quick-condition-parent-question').val() || 0
+                );
+
+                const parentOptionId = Number(
+                    $('#quick-condition-parent-option').val() || 0
+                );
+
+                const operator =
+                    $('#quick-condition-operator').val() || 'selected';
+
+                // if (!parentQuestionId) {
+                //     toast('Select the parent question for the condition.');
+                //     return;
+                // }
+                //
+                // if (!parentOptionId) {
+                //     toast('Select the parent answer for the condition.');
+                //     return;
+                // }
+
+                const parentCard = $(
+                    `.question-card[data-question-id="${parentQuestionId}"]`
+                );
+
+                if (
+                    !parentCard.length
+                    || !parentCard.find('.question-toggle').is(':checked')
+                ) {
+                    toast(
+                        'The parent question must be selected for this AI Product.'
+                    );
+                    return;
+                }
+
+                const parent = conditionQuestionData[parentQuestionId];
+                const parentOption = parent?.options?.find(
+                    item => Number(item.id) === parentOptionId
+                );
+
+                if (!parent || !parentOption) {
+                    toast(
+                        'The selected answer does not belong to the parent question.'
+                    );
+                    return;
+                }
+
+                ensureQuickConditionSortOrder();
+
+                pendingCondition = {
+                    parent_question_id: parentQuestionId,
+                    parent_option_id: parentOptionId,
+                    operator: operator
+                };
             }
 
             button
@@ -2049,20 +2999,64 @@
 
                     $('#no-questions-alert').remove();
 
+                    conditionQuestionData[Number(question.id)] = {
+                        id: Number(question.id),
+                        title: question.title,
+                        options: Array.isArray(question.options)
+                            ? question.options.map(option => ({
+                                id: Number(option.id),
+                                label: option.label
+                            }))
+                            : []
+                    };
+
                     $('#questions-container').append(
                         buildQuestionCard(question)
                     );
+
+                    const newQuestionCard = $(
+                        `.question-card[data-question-id="${Number(question.id)}"]`
+                    );
+
+                    toggleQuestion(newQuestionCard);
+                    initializeQuestionCondition(newQuestionCard);
+
+                    if (pendingCondition) {
+                        newQuestionCard
+                            .find('.question-condition-toggle')
+                            .prop('checked', true);
+
+                        newQuestionCard
+                            .find('.condition-parent-question')
+                            .val(
+                                String(
+                                    pendingCondition.parent_question_id
+                                )
+                            );
+
+                        populateConditionAnswers(
+                            newQuestionCard,
+                            pendingCondition.parent_option_id
+                        );
+
+                        newQuestionCard
+                            .find('.condition-operator')
+                            .val(pendingCondition.operator);
+
+                        updateConditionSummary(newQuestionCard);
+                    }
 
                     const modalElement =
                         document.getElementById(
                             'quick-question-modal'
                         );
 
+                    quickQuestionSaved = true;
+
                     bootstrap.Modal
                         .getOrCreateInstance(modalElement)
                         .hide();
 
-                    resetQuickQuestionModal();
                     feather.replace();
 
                     toast(
@@ -2102,10 +3096,11 @@
         });
 
         $('#quick-question-modal').on('hidden.bs.modal', function () {
-            resetQuickQuestionModal();
+            resetQuickQuestionModal(!quickQuestionSaved);
+            quickQuestionSaved = false;
         });
 
-        resetQuickQuestionModal();
+        resetQuickQuestionModal(false);
 
         // Safety check before the parent AI Product form submits.
         $(document).on('submit', 'form', function (event) {
@@ -2119,12 +3114,52 @@
                 event.preventDefault();
                 event.stopImmediatePropagation();
 
-                toast(
-                    'Select at least one Studio Item.'
+                toast('Select at least one Studio Item.');
+                return;
+            }
+
+            let conditionError = null;
+
+            form.find('.question-card').each(function () {
+                if (conditionError) return;
+
+                const card = $(this);
+
+                if (
+                    !card.find('.question-toggle').is(':checked')
+                    || !card.find('.question-condition-toggle').is(':checked')
+                ) {
+                    return;
+                }
+
+                const childQuestionId = Number(card.data('question-id'));
+                const parentQuestionId = Number(card.find('.condition-parent-question').val() || 0);
+                const parentOptionId = Number(card.find('.condition-parent-option').val() || 0);
+
+                // if (!parentQuestionId || !parentOptionId) {
+                //     conditionError = 'Choose the parent question and answer for every conditional question.';
+                //     return;
+                // }
+
+                if (parentQuestionId === childQuestionId) {
+                    conditionError = 'A question cannot depend on itself.';
+                    return;
+                }
+
+                const parentCard = form.find(
+                    `.question-card[data-question-id="${parentQuestionId}"]`
                 );
+
+                if (!parentCard.length || !parentCard.find('.question-toggle').is(':checked')) {
+                    conditionError = 'The parent question of a conditional question must also be selected.';
+                }
+            });
+
+            if (conditionError) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                toast(conditionError);
             }
         });
     });
 </script>
-
-

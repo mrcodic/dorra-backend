@@ -24,6 +24,9 @@ class BundleItemCardResource extends JsonResource
 
             'quantity' => $this->quantity,
 
+            'discount_type' => $this->discount_type?->value ?? $this->discount_type,
+            'discount_value' => $this->discount_value,
+
             'has_specs' => (bool) ($item?->has_specs ?? false),
             'require_customize_design' => (bool) ($item?->require_customize_design ?? false),
             'specs' => $this->when(

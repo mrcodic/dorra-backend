@@ -11,7 +11,7 @@ $.ajaxSetup({
         processing: true,
         serverSide: true,
         searching: false,
-        orderable: false,
+        // orderable: false,
 
         ajax: {
             url: bundlesDataUrl,
@@ -61,17 +61,17 @@ $.ajaxSetup({
                 orderable: false,
                 render: data => `${data || 0} item(s)`
             },
-            {
-                data: 'display_bundle_on_visit',
-                orderable: false,
-                render: function (data) {
-                    const enabled = Boolean(data);
-                    const cls = enabled ? 'bg-light-success' : 'bg-light-secondary';
-                    const label = enabled ? 'Enabled' : 'Disabled';
-
-                    return `<span class="badge ${cls}">${label}</span>`;
-                }
-            },
+            // {
+            //     data: 'display_bundle_on_visit',
+            //     orderable: false,
+            //     render: function (data) {
+            //         const enabled = Boolean(data);
+            //         const cls = enabled ? 'bg-light-success' : 'bg-light-secondary';
+            //         const label = enabled ? 'Enabled' : 'Disabled';
+            //
+            //         return `<span class="badge ${cls}">${label}</span>`;
+            //     }
+            // },
             {
                 data: 'status_data',
                 orderable: false,
@@ -703,11 +703,24 @@ $.ajaxSetup({
             return response?.data ?? null;
         } catch (xhr) {
             return {
-                error: xhr?.responseJSON?.message || 'Could not load product flow.'
+                error: extractFirstErrorMessage(xhr) || 'Could not load product flow.'
             };
         }
     }
 
+    function extractFirstErrorMessage(xhr) {
+        const errors = xhr?.responseJSON?.errors;
+
+        if (errors && Object.keys(errors).length) {
+            const firstMessages = Object.values(errors)[0];
+
+            return Array.isArray(firstMessages)
+                ? firstMessages[0]
+                : firstMessages;
+        }
+
+        return xhr?.responseJSON?.message;
+    }
     function renderFlow($target, meta) {
         if (!meta) {
             $target.addClass('d-none').empty();

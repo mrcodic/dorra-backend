@@ -238,6 +238,6 @@ class Bundle extends Model implements HasMedia
     public function getImageUrlAttribute(): string
     {
         return $this->getFirstMediaUrl('bundle_image')
-            ?: asset('assets/images/bundles/default-bundle.png');
+            ?: asset('images/default-image.png');
     }
 }

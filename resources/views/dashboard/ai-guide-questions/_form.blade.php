@@ -8,6 +8,8 @@
     );
 
     $savedOptions = $question?->options?->map(function ($option) {
+        $media = $option->getFirstMedia('option_image');
+
         return [
             'id' => $option->id,
             'label' => [
@@ -23,16 +25,140 @@
                     data_get($option->ui_data, 'colors', [])
                 ),
             ],
+             'media_id' => $media?->id,
+             'image_url' => $media ? $media->getFullUrl() : null,
             'is_active' => (bool) $option->is_active,
         ];
     })->toArray() ?? [];
 
     $options = old('options', $savedOptions);
 
+    /*
+     * If validation redirects back, old('options') contains media_id but not image_url.
+     * Restore the saved image URL using the option id so Edit preview still works.
+     */
+    if (old('options') !== null) {
+        $savedOptionsById = collect($savedOptions)->keyBy(fn($option) => (int) ($option['id'] ?? 0));
+
+        $options = collect($options)->map(function ($option) use ($savedOptionsById) {
+            $optionId = (int) ($option['id'] ?? 0);
+            $saved = $optionId ? $savedOptionsById->get($optionId) : null;
+
+            if ($saved) {
+                $option['media_id'] = $option['media_id'] ?? $saved['media_id'] ?? null;
+                $option['image_url'] = $option['image_url'] ?? $saved['image_url'] ?? null;
+            }
+
+            return $option;
+        })->values()->all();
+    }
+
+    /*
+     * Option-level conditional popup.
+     *
+     * If the controller already passes $conditionalQuestions, use it.
+     * Otherwise load active questions here so this Blade works standalone.
+     * The current question is excluded because an option must not reveal
+     * its own parent question.
+     */
+    if (isset($conditionalQuestions)) {
+        $conditionalQuestions = collect($conditionalQuestions)
+            ->filter(fn($item) => (bool) ($item->is_active ?? true))
+            ->reject(fn($item) => $question && (int) $item->id === (int) $question->id)
+            ->sortBy([
+                ['sort_order', 'asc'],
+                ['id', 'asc'],
+            ])
+            ->values();
+    } else {
+        $conditionalQuestions = \App\Models\AiGuideQuestion::query()
+            ->where('is_active', true)
+            ->when(
+                $question?->id,
+                fn($query, $questionId) => $query->where('id', '!=', $questionId)
+            )
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+    }
+
+    /*
+     * Optional edit-state map:
+     * [option_id => [question_id, question_id, ...]]
+     */
+//    $optionConditionalQuestionIds = collect($optionConditionalQuestionIds ?? []);
+
     $isColorPalette = collect($options)->contains(
         fn($option) => !empty(data_get($option, 'ui_data.colors', []))
     );
 @endphp
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.css">
+<link rel="stylesheet" href="{{ asset('admin/vendors/css/forms/select/select2.min.css') }}">
+
+<style>
+    .option-image-dropzone {
+        min-height: 150px;
+        border: 1px dashed #d8d6de;
+        border-radius: .357rem;
+        background: #fff;
+        padding: 12px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .option-image-dropzone .dz-message {
+        margin: 2rem 0;
+        color: #6e6b7b;
+        text-align: center;
+    }
+
+    .option-image-dropzone.dz-started .dz-message {
+        display: none;
+    }
+
+    .option-image-dropzone .dz-preview {
+        position: relative !important;
+        display: inline-flex !important;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 140px !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        vertical-align: top;
+    }
+
+    .option-image-dropzone .dz-preview .dz-image {
+        width: 140px !important;
+        height: 110px !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        background: #f8f8f8;
+    }
+
+    .option-image-dropzone .dz-preview .dz-image img {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        object-fit: contain !important;
+    }
+
+    .option-image-dropzone .dz-preview .dz-details,
+    .option-image-dropzone .dz-preview .dz-success-mark,
+    .option-image-dropzone .dz-preview .dz-error-mark {
+        display: none !important;
+    }
+
+    .option-image-dropzone .dz-preview .dz-remove {
+        display: inline-block;
+        margin-top: 8px;
+        font-size: 12px;
+        color: #ea5455;
+        text-decoration: none;
+    }
+</style>
 
 <div class="row">
     <div class="col-md-6 mb-1">
@@ -225,6 +351,20 @@
                 $colors = array_values(
                     data_get($option, 'ui_data.colors', [])
                 );
+
+//                $conditionalQuestionIds = collect(
+//                    old(
+//                        "options.$index.conditional_question_ids",
+//                        !empty($option['id'])
+//                            ? ($optionConditionalQuestionIds->get((int) $option['id'], []))
+//                            : []
+//                    )
+//                )
+//                    ->map(fn($id) => (int) $id)
+//                    ->filter()
+//                    ->unique()
+//                    ->values()
+//                    ->all();
             @endphp
 
             <div
@@ -241,7 +381,7 @@
 
                 <div class="row align-items-end">
 
-                    <div class="col-md-11 mb-2">
+                    <div class="col-md-10 mb-2">
                         <div class="row option-label-fields">
                             <div class="col-md-6">
                                 <label class="form-label">Label English *</label>
@@ -290,10 +430,40 @@
                                     dir="rtl"
                                 >{{ data_get($option, 'prompt_value.ar', '') }}</textarea>
                             </div>
+
+                            <div class="col-12 mt-1 option-image-wrapper">
+                                <label class="form-label">Option Image</label>
+
+                                <div
+                                    class="option-image-dropzone"
+                                    data-media-id="{{ $option['media_id'] ?? '' }}"
+                                    data-image-url="{{ $option['image_url'] ?? '' }}"
+                                >
+                                    <div class="dz-message">Drop image here or click to upload</div>
+                                    <div class="text-center text-muted small mt-50">
+                                        JPG, PNG, WEBP - Max 2MB (48x48)
+                                    </div>
+                                </div>
+
+                                <input
+                                    type="hidden"
+                                    name="options[{{ $index }}][media_id]"
+                                    value="{{ $option['media_id'] ?? '' }}"
+                                    class="option-media-id"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="options[{{ $index }}][remove_media]"
+                                    value="0"
+                                    class="option-remove-media"
+                                >
+
+                                <small class="text-muted d-block mt-50">Optional. One image per option.</small>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="col-md-1 option-actions">
+                    <div class="col-md-2 option-actions">
                         <div class="form-check form-switch mb-1">
                             <input
                                 type="hidden"
@@ -316,9 +486,33 @@
                         >
                             <i data-feather="trash-2"></i>
                         </button>
+
+{{--                        <div class="option-conditional-question-inputs">--}}
+{{--                            @foreach($conditionalQuestionIds as $conditionalQuestionId)--}}
+{{--                                <input--}}
+{{--                                    type="hidden"--}}
+{{--                                    name="options[{{ $index }}][conditional_question_ids][]"--}}
+{{--                                    value="{{ $conditionalQuestionId }}"--}}
+{{--                                >--}}
+{{--                            @endforeach--}}
+{{--                        </div>--}}
+
+{{--                        <button--}}
+{{--                            type="button"--}}
+{{--                            class="btn btn-outline-info w-100 mt-50 configure-option-condition"--}}
+{{--                            data-option-index="{{ $index }}"--}}
+{{--                        >--}}
+{{--                            <i data-feather="git-branch"></i>--}}
+{{--                            Conditional--}}
+{{--                            <span--}}
+{{--                                class="badge bg-info text-white option-condition-count ms-25 {{ count($conditionalQuestionIds) ? '' : 'd-none' }}"--}}
+{{--                            >--}}
+{{--                                {{ count($conditionalQuestionIds) }}--}}
+{{--                            </span>--}}
+{{--                        </button>--}}
                     </div>
 
-                    <div class="col-md-11 color-palette-section">
+                    <div class="col-md-10 color-palette-section">
                         <div class="border rounded p-1 bg-light">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <div>
@@ -378,6 +572,110 @@
     </div>
 </div>
 
+{{-- Option-level conditional questions popup --}}
+<div
+    class="modal fade"
+    id="option-condition-modal"
+    tabindex="-1"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title mb-25">
+                        Conditional Questions
+                    </h5>
+
+                    <small class="text-muted">
+                        Choose the questions that should appear when this option is selected.
+                    </small>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                >x</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="alert alert-light-info border mb-2">
+                    <strong>Selected option:</strong>
+                    <span id="option-condition-option-label">-</span>
+                </div>
+
+                <label
+                    for="option-condition-question-ids"
+                    class="form-label"
+                >
+                    Show Questions
+                </label>
+
+                <select
+                    id="option-condition-question-ids"
+                    class="form-select select2"
+                    multiple
+                    data-placeholder="Search and select questions"
+                >
+                    @foreach($conditionalQuestions as $conditionalQuestion)
+                        <option value="{{ $conditionalQuestion->id }}">
+                            {{ $conditionalQuestion->title }}
+                        </option>
+                    @endforeach
+                </select>
+
+                @if($conditionalQuestions->isEmpty())
+                    <small class="text-warning d-block mt-50">
+                        No other active questions are available yet.
+                    </small>
+                @else
+                    <small class="text-muted d-block mt-50">
+                        Search and select one or more questions.
+                    </small>
+                @endif
+            </div>
+
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    id="clear-option-condition"
+                    class="btn btn-outline-danger me-auto"
+                >
+                    Clear
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    id="save-option-condition"
+                    class="btn btn-primary"
+                    @disabled($conditionalQuestions->isEmpty())
+                >
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ asset('admin/vendors/js/forms/select/select2.full.min.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
+
+<script>
+    if (window.Dropzone) {
+        Dropzone.autoDiscover = false;
+    }
+</script>
+
 <script>
     $(document).ready(function () {
         feather.replace();
@@ -399,6 +697,305 @@
 
         let optionIndex = {{ count($options) }};
         let isSubmitting = false;
+        let activeConditionalOptionRow = null;
+
+        const mediaDeleteBaseUrl = @json(url('api/v1/media'));
+
+        function optionConditionalQuestionIds(row) {
+            return row
+                .find('.option-conditional-question-inputs input[type="hidden"]')
+                .map(function () {
+                    return String($(this).val());
+                })
+                .get()
+                .filter(Boolean);
+        }
+
+        function setOptionConditionalQuestionIds(row, ids) {
+            const container = row.find('.option-conditional-question-inputs');
+            const index = row.data('option-index');
+
+            container.empty();
+
+            [...new Set((ids ?? []).map(String).filter(Boolean))]
+                .forEach(questionId => {
+                    container.append(`
+                        <input
+                            type="hidden"
+                            name="options[${index}][conditional_question_ids][]"
+                            value="${questionId}"
+                        >
+                    `);
+                });
+
+            updateOptionConditionCount(row);
+        }
+
+        function updateOptionConditionCount(row) {
+            const count = optionConditionalQuestionIds(row).length;
+            const badge = row.find('.option-condition-count');
+
+            badge
+                .text(count)
+                .toggleClass('d-none', count === 0);
+
+            row
+                .find('.configure-option-condition')
+                .toggleClass('btn-info', count > 0)
+                .toggleClass('btn-outline-info', count === 0);
+        }
+
+        function currentOptionLabel(row) {
+            const label = String(
+                row.find('.option-label-en').val()
+                || row.find('.option-label-ar').val()
+                || `Option ${Number(row.data('option-index')) + 1}`
+            ).trim();
+
+            return label || 'Option';
+        }
+
+        function closeOptionConditionModal() {
+            const modalElement = document.getElementById('option-condition-modal');
+            const instance = bootstrap.Modal.getInstance(modalElement);
+
+            instance?.hide();
+        }
+
+        function deleteMedia(mediaId) {
+            if (!mediaId) {
+                return Promise.resolve();
+            }
+
+            return fetch(`${mediaDeleteBaseUrl}/${mediaId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': @json(csrf_token()),
+                    'Accept': 'application/json'
+                }
+            }).then(async response => {
+                if (response.ok) return;
+
+                let message = 'Unable to remove image.';
+
+                try {
+                    const data = await response.json();
+                    message = data?.message ?? message;
+                } catch (_) {}
+
+                throw new Error(message);
+            });
+        }
+
+        function initOptionDropzone(element) {
+            if (!element) return null;
+
+            if (!window.Dropzone) {
+                console.error('Dropzone is not loaded.');
+                return null;
+            }
+
+            if (element.dropzone) {
+                return element.dropzone;
+            }
+
+            const dropzoneElement = $(element);
+
+            if (dropzoneElement.data('dz-initialized')) {
+                return element.dropzone ?? null;
+            }
+
+            dropzoneElement.data('dz-initialized', true);
+            const row = dropzoneElement.closest('.option-row');
+            const hiddenInput = row.find('.option-media-id');
+            const removeInput = row.find('.option-remove-media');
+
+            const existingMediaId = String(
+                dropzoneElement.attr('data-media-id') ?? ''
+            ).trim();
+
+            const existingImageUrl = String(
+                dropzoneElement.attr('data-image-url') ?? ''
+            ).trim();
+
+            const REQUIRED_WIDTH = 48;
+            const REQUIRED_HEIGHT = 48;
+            const MAX_FILESIZE_MB = 2;
+
+            let dz;
+
+            try {
+                dz = new Dropzone(element, {
+                    url: @json(route('media.store')),
+                    paramName: 'file',
+                    maxFiles: 1,
+                    acceptedFiles: 'image/*',
+                    maxFilesize: MAX_FILESIZE_MB, // MB, Dropzone rejects anything larger automatically
+                    addRemoveLinks: true,
+                    clickable: true,
+                    thumbnailWidth: 160,
+                    thumbnailHeight: 160,
+
+                    headers: {
+                        'X-CSRF-TOKEN': @json(csrf_token()),
+                        'Accept': 'application/json'
+                    },
+
+                    accept: function (file, done) {
+                        // Skip dimension check for the pre-existing mock file on init
+                        if (file._isExisting) {
+                            done();
+                            return;
+                        }
+
+                        const img = new Image();
+                        const objectUrl = URL.createObjectURL(file);
+
+                        img.onload = function () {
+                            URL.revokeObjectURL(objectUrl);
+
+                            if (img.width !== REQUIRED_WIDTH || img.height !== REQUIRED_HEIGHT) {
+                                done(`Image must be exactly ${REQUIRED_WIDTH}x${REQUIRED_HEIGHT}px (uploaded: ${img.width}x${img.height}px).`);
+                                return;
+                            }
+
+                            done();
+                        };
+
+                        img.onerror = function () {
+                            URL.revokeObjectURL(objectUrl);
+                            done('Unable to read image dimensions.');
+                        };
+
+                        img.src = objectUrl;
+                    },
+
+                    init: function () {
+                        const instance = this;
+
+                        if (!existingMediaId || !existingImageUrl) {
+                            return;
+                        }
+
+                        const mockFile = {
+                            name: 'Current image',
+                            size: 1,
+                            type: 'image/*',
+                            accepted: true,
+                            status: Dropzone.SUCCESS,
+                            _mediaId: existingMediaId,
+                            _isExisting: true
+                        };
+
+                        instance.files.push(mockFile);
+                        instance.emit('addedfile', mockFile);
+                        instance.emit('thumbnail', mockFile, existingImageUrl);
+                        instance.emit('success', mockFile, {
+                            data: {
+                                id: existingMediaId,
+                                original_url: existingImageUrl
+                            }
+                        });
+                        instance.emit('complete', mockFile);
+
+                        element.classList.add('dz-started');
+
+                        hiddenInput.val(existingMediaId);
+                        removeInput.val(0);
+                    },
+
+                    success: function (file, response) {
+                        const mediaId = response?.data?.id ?? null;
+                        const imageUrl = response?.data?.original_url ?? response?.data?.url ?? null;
+
+                        if (!mediaId) {
+                            showToast('Image uploaded but media ID was not returned.');
+                            return;
+                        }
+
+                        hiddenInput.val(mediaId);
+                        removeInput.val(0);
+
+                        file._mediaId = String(mediaId);
+                        file._imageUrl = imageUrl;
+                        file._isExisting = false;
+
+                        dropzoneElement.attr('data-media-id', mediaId);
+
+                        if (imageUrl) {
+                            dropzoneElement.attr('data-image-url', imageUrl);
+                        }
+
+                        element.classList.add('dz-started');
+                    },
+
+                    removedfile: function (file) {
+                        const removedMediaId = String(file._mediaId ?? '');
+                        const currentMediaId = String(hiddenInput.val() ?? '');
+
+                        if (file.previewElement) {
+                            file.previewElement.remove();
+                        }
+
+                        if (!removedMediaId || removedMediaId === currentMediaId) {
+                            hiddenInput.val('');
+                            removeInput.val(1);
+                            dropzoneElement.attr('data-media-id', '');
+                            dropzoneElement.attr('data-image-url', '');
+                        }
+
+                        if (removedMediaId) {
+                            deleteMedia(removedMediaId).catch(error => {
+                                showToast(error.message ?? 'Unable to remove image.');
+                            });
+                        }
+
+                        if (!this.files.length) {
+                            element.classList.remove('dz-started');
+                        }
+                    },
+
+                    maxfilesexceeded: function (file) {
+                        this.removeAllFiles(true);
+                        this.addFile(file);
+                    },
+
+                    error: function (file, response) {
+                        const message = typeof response === 'string'
+                            ? response
+                            : response?.message ?? 'Unable to upload image.';
+
+                        showToast(message);
+
+                        if (file.previewElement) {
+                            file.previewElement.classList.add('dz-error');
+                        }
+                    }
+                });
+            } catch (error) {
+                dropzoneElement.removeData('dz-initialized');
+
+                if (element.dropzone) {
+                    return element.dropzone;
+                }
+
+                console.error('Unable to initialize option Dropzone:', error);
+                return null;
+            }
+
+            return dz;
+        }
+        function destroyOptionDropzone(row) {
+            const element = row.find('.option-image-dropzone')[0];
+
+            if (!element) return;
+
+            if (element.dropzone) {
+                element.dropzone.destroy();
+            }
+
+            $(element).removeData('dz-initialized');
+        }
 
         function supportsOptions() {
             return optionTypes.includes(typeSelect.val());
@@ -492,7 +1089,7 @@
             >
                 <div class="row align-items-end">
 
-                    <div class="col-md-11">
+                    <div class="col-md-10">
                         <div class="row option-label-fields">
                             <div class="col-md-6 mb-2">
                                 <label class="form-label">Label English *</label>
@@ -539,10 +1136,41 @@
                                     dir="rtl"
                                 ></textarea>
                             </div>
+
+                            <div class="col-12 mt-1 option-image-wrapper">
+                                <label class="form-label">Option Image</label>
+
+                                <div
+                                    class="option-image-dropzone"
+                                    data-media-id=""
+                                    data-image-url=""
+                                >
+                                    <div class="dz-message">Drop image here or click to upload</div>
+ <div class="text-center text-muted small mt-50">
+                                        JPG, PNG, WEBP - Max 2MB (48x48)
+                                    </div>
+                                </div>
+
+                                <input
+                                    type="hidden"
+                                    name="options[${index}][media_id]"
+                                    value=""
+                                    class="option-media-id"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="options[${index}][remove_media]"
+                                    value="0"
+                                    class="option-remove-media"
+                                >
+
+                                <small class="text-muted d-block mt-50">Optional. One image per option.</small>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="col-md-1 option-actions">
+                    <div class="col-md-2 option-actions">
                         <div class="form-check form-switch mb-1">
                             <input
                                 type="hidden"
@@ -565,9 +1193,25 @@
                         >
                             <i data-feather="trash-2"></i>
                         </button>
+
+                        <div class="option-conditional-question-inputs"></div>
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-info w-100 mt-50 configure-option-condition"
+                            data-option-index="${index}"
+                        >
+                            <i data-feather="git-branch"></i>
+                            Conditional
+                            <span
+                                class="badge bg-info text-white option-condition-count ms-25 d-none"
+                            >
+                                0
+                            </span>
+                        </button>
                     </div>
 
-                    <div class="col-md-11 color-palette-section">
+                    <div class="col-md-10 color-palette-section">
                         <div class="border rounded p-1 bg-light">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <div>
@@ -595,8 +1239,11 @@
             </div>
         `);
 
-            const newRow = optionsContainer.children('.option-row').last();
 
+            const newRow = optionsContainer.children('.option-row').last();
+            initOptionDropzone(
+                newRow.find('.option-image-dropzone')[0]
+            );
             if (colorPaletteToggle.is(':checked')) {
                 newRow.find('.option-label-fields').show();
                 newRow.find('.normal-option-fields').hide();
@@ -712,6 +1359,97 @@
             });
         }
 
+        function initConditionalQuestionsSelect2() {
+            const select = $('#option-condition-question-ids');
+
+            if (!select.length || !$.fn.select2) {
+                return;
+            }
+
+            if (select.hasClass('select2-hidden-accessible')) {
+                return;
+            }
+
+            select.select2({
+                width: '100%',
+                placeholder: 'Search and select questions',
+                allowClear: true,
+                closeOnSelect: false,
+                dropdownParent: $('#option-condition-modal')
+            });
+        }
+
+        initConditionalQuestionsSelect2();
+
+        $(document)
+            .off('click.optionCondition')
+            .on('click.optionCondition', '.configure-option-condition', function () {
+                const row = $(this).closest('.option-row');
+
+                activeConditionalOptionRow = row;
+
+                const selectedIds = optionConditionalQuestionIds(row);
+
+                $('#option-condition-option-label')
+                    .text(currentOptionLabel(row));
+
+                $('#option-condition-question-ids')
+                    .val(selectedIds)
+                    .trigger('change');
+
+                bootstrap.Modal
+                    .getOrCreateInstance(
+                        document.getElementById('option-condition-modal')
+                    )
+                    .show();
+            });
+
+        $('#save-option-condition')
+            .off('click.optionCondition')
+            .on('click.optionCondition', function () {
+                if (!activeConditionalOptionRow) {
+                    return;
+                }
+
+                const selectedIds =
+                    $('#option-condition-question-ids').val() ?? [];
+
+                setOptionConditionalQuestionIds(
+                    activeConditionalOptionRow,
+                    selectedIds
+                );
+
+                closeOptionConditionModal();
+            });
+
+        $('#clear-option-condition')
+            .off('click.optionCondition')
+            .on('click.optionCondition', function () {
+                if (!activeConditionalOptionRow) {
+                    return;
+                }
+
+                $('#option-condition-question-ids')
+                    .val([])
+                    .trigger('change');
+
+                setOptionConditionalQuestionIds(
+                    activeConditionalOptionRow,
+                    []
+                );
+
+                closeOptionConditionModal();
+            });
+
+        $('#option-condition-modal')
+            .on('hidden.bs.modal', function () {
+                activeConditionalOptionRow = null;
+                $('#option-condition-question-ids')
+                    .val([])
+                    .trigger('change');
+                $('#option-condition-option-label').text('-');
+            });
+
         $('#add-option')
             .off('click.aiOption')
             .on('click.aiOption', function () {
@@ -721,7 +1459,10 @@
         optionsContainer
             .off('click.aiOption')
             .on('click.aiOption', '.remove-option', function () {
-                $(this).closest('.option-row').remove();
+                const row = $(this).closest('.option-row');
+
+                destroyOptionDropzone(row);
+                row.remove();
 
                 if (colorPaletteToggle.is(':checked')) {
                     updateAllPaletteValues();
@@ -951,11 +1692,21 @@
          * then detect palette mode and show the selected colors.
          */
         $('.option-row').each(function () {
-            updatePalettePreview($(this));
+            const row = $(this);
+
+            updatePalettePreview(row);
+            updateOptionConditionCount(row);
         });
 
         toggleColorPaletteMode();
+
+        /*
+         * Initialize after the final mode is applied.
+         * This is especially important on Edit where Dropzone must render
+         * the already attached Media Library image.
+         */
+        $('.option-row').each(function () {
+            initOptionDropzone($(this).find('.option-image-dropzone')[0]);
+        });
     });
 </script>
-
-

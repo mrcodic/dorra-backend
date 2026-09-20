@@ -112,7 +112,27 @@ class OrderService extends BaseService
         $orders = $this->repository
             ->query()
             ->with($this->relations)
-            ->withCount(['orderItems'])
+            ->addSelect([
+                'order_items_count' => \App\Models\OrderItem::query()
+                    ->selectRaw("
+            COALESCE(SUM(
+                CASE
+                    WHEN bundle_group_key IS NULL OR bundle_group_key = ''
+                    THEN 1
+                    ELSE 0
+                END
+            ), 0)
+            +
+            COUNT(DISTINCT
+                CASE
+                    WHEN bundle_group_key IS NOT NULL AND bundle_group_key != ''
+                    THEN bundle_group_key
+                    ELSE NULL
+                END
+            )
+        ")
+                    ->whereColumn('order_items.order_id', 'orders.id')
+            ])
             ->when(request()->filled('search_value'), function ($query) {
                 if (hasMeaningfulSearch(request('search_value'))) {
                     $search = request('search_value');

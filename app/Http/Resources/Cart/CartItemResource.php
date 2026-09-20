@@ -21,10 +21,14 @@ class CartItemResource extends JsonResource
 
         $isBundleItem = ! empty($this->bundle_group_key) || ! empty($this->bundle_id);
 
-        $cartHasDiscount = $this->cart?->discount_amount > 0
-            || $this->cart?->items()->where('discount_amount', '>', 0)->exists();
+        $hasCartLevelDiscount = (float) ($this->cart?->discount_amount ?? 0) > 0
+            && ! empty($this->cart?->discount_code_id);
 
-        $lastOffer = $cartHasDiscount ? null : $cartable?->lastOffer;
+        $hasItemDiscountCode = ! empty($this->discount_code_id);
+        
+        $lastOffer = ($isBundleItem || $hasCartLevelDiscount || $hasItemDiscountCode)
+            ? null
+            : $cartable?->lastOffer;
 
         $sub = (float) $this->getAttribute('sub_total');
         $val = (float) ($lastOffer?->getRawOriginal('value') ?? 0);

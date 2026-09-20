@@ -562,4 +562,51 @@ class BundleService extends BaseService
             ->latest()
             ->first();
     }
+    public function getActiveBundles(bool $paginate = false, $perPage = 10)
+    {
+        $query = $this->repository
+            ->query()
+            ->with([
+                'trigger.itemable',
+                'rewards.itemable',
+            ])
+            ->where('status', 'active')
+            ->whereHas('trigger')
+            ->whereHas('rewards')
+            ->where(function ($query) {
+                $query
+                    ->whereNull('start_at')
+                    ->orWhere('start_at', '<=', now());
+            })
+            ->where(function ($query) {
+                $query
+                    ->whereNull('end_at')
+                    ->orWhere('end_at', '>=', now());
+            })
+            ->latest();
+        return $paginate ? $query->paginate($perPage) : $query->get();
+    }
+    public function showActiveBundle($id, $relations = [])
+    {
+        return $this->repository
+            ->query()
+            ->with($relations ?: [
+                'trigger.itemable',
+                'rewards.itemable',
+            ])
+            ->where('status', 'active')
+            ->whereHas('trigger')
+            ->whereHas('rewards')
+            ->where(function ($query) {
+                $query
+                    ->whereNull('start_at')
+                    ->orWhere('start_at', '<=', now());
+            })
+            ->where(function ($query) {
+                $query
+                    ->whereNull('end_at')
+                    ->orWhere('end_at', '>=', now());
+            })
+            ->findOrFail($id);
+    }
 }

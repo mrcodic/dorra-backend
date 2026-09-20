@@ -49,6 +49,10 @@ class StoreAiCategoryRequest extends FormRequest
                 'distinct',
                 'exists:ai_guide_question_options,id',
             ],
+            'questions.*.condition_enabled' => ['nullable', 'boolean'],
+            'questions.*.condition' => ['nullable', 'array'],
+            'questions.*.condition.parent_question_id' => ['nullable', 'integer', 'exists:ai_guide_questions,id'],
+            'questions.*.condition.parent_option_id' => ['nullable', 'integer', 'exists:ai_guide_question_options,id'],
         ];
     }
 

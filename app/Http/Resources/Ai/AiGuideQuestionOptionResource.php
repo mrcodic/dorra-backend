@@ -18,6 +18,9 @@ class AiGuideQuestionOptionResource extends JsonResource
                 'colors',
                 []
             ),
+            'image' => $this->getFirstMediaUrl(
+               'option_image'
+            ) ?: null,
         ];
     }
 }
