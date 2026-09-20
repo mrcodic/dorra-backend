@@ -380,7 +380,34 @@ Context (for understanding only — do not render this as text in the artwork):
             default => $selected,
         };
     }
+    private function isEmptyAnswer(mixed $value): bool
+    {
+        if ($value === null) {
+            return true;
+        }
 
+        if (is_string($value)) {
+            return trim($value) === '';
+        }
+
+        if (is_array($value)) {
+            return collect($value)
+                ->filter(function ($item) {
+                    if ($item === null) {
+                        return false;
+                    }
+
+                    if (is_string($item)) {
+                        return trim($item) !== '';
+                    }
+
+                    return true;
+                })
+                ->isEmpty();
+        }
+
+        return false;
+    }
     private function resolveAnswers(
         Collection $questions,
         array $answers
