@@ -36,7 +36,7 @@ class BundleController extends Controller
 
     public function show($id, Request $request): JsonResponse
     {
-        $bundle = $this->bundleService->showResource(
+        $bundle = $this->bundleService->showActiveBundle(
             $id,
             [
                 'trigger.itemable',
