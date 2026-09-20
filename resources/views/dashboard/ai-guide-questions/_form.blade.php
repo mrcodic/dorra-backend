@@ -440,6 +440,9 @@
                                     data-image-url="{{ $option['image_url'] ?? '' }}"
                                 >
                                     <div class="dz-message">Drop image here or click to upload</div>
+                                    <div class="text-muted small mt-50">
+                                        JPG, PNG, WEBP - Max 2MB (48x48)
+                                    </div>
                                 </div>
 
                                 <input
@@ -815,6 +818,10 @@
                 dropzoneElement.attr('data-image-url') ?? ''
             ).trim();
 
+            const REQUIRED_WIDTH = 48;
+            const REQUIRED_HEIGHT = 48;
+            const MAX_FILESIZE_MB = 2;
+
             let dz;
 
             try {
@@ -823,6 +830,7 @@
                     paramName: 'file',
                     maxFiles: 1,
                     acceptedFiles: 'image/*',
+                    maxFilesize: MAX_FILESIZE_MB, // MB, Dropzone rejects anything larger automatically
                     addRemoveLinks: true,
                     clickable: true,
                     thumbnailWidth: 160,
@@ -831,6 +839,35 @@
                     headers: {
                         'X-CSRF-TOKEN': @json(csrf_token()),
                         'Accept': 'application/json'
+                    },
+
+                    accept: function (file, done) {
+                        // Skip dimension check for the pre-existing mock file on init
+                        if (file._isExisting) {
+                            done();
+                            return;
+                        }
+
+                        const img = new Image();
+                        const objectUrl = URL.createObjectURL(file);
+
+                        img.onload = function () {
+                            URL.revokeObjectURL(objectUrl);
+
+                            if (img.width !== REQUIRED_WIDTH || img.height !== REQUIRED_HEIGHT) {
+                                done(`Image must be exactly ${REQUIRED_WIDTH}x${REQUIRED_HEIGHT}px (uploaded: ${img.width}x${img.height}px).`);
+                                return;
+                            }
+
+                            done();
+                        };
+
+                        img.onerror = function () {
+                            URL.revokeObjectURL(objectUrl);
+                            done('Unable to read image dimensions.');
+                        };
+
+                        img.src = objectUrl;
                     },
 
                     init: function () {
@@ -850,10 +887,6 @@
                             _isExisting: true
                         };
 
-                        /*
-                         * Register the existing file in Dropzone and render its thumbnail.
-                         * Adding dz-started explicitly also hides the default Dropzone message.
-                         */
                         instance.files.push(mockFile);
                         instance.emit('addedfile', mockFile);
                         instance.emit('thumbnail', mockFile, existingImageUrl);
@@ -923,10 +956,6 @@
                     },
 
                     maxfilesexceeded: function (file) {
-                        /*
-                         * Replace the current preview with the newly selected image.
-                         * Success will store the new media id and reset remove_media to 0.
-                         */
                         this.removeAllFiles(true);
                         this.addFile(file);
                     },
@@ -946,7 +975,6 @@
             } catch (error) {
                 dropzoneElement.removeData('dz-initialized');
 
-                // If another script already attached Dropzone, reuse it instead of throwing.
                 if (element.dropzone) {
                     return element.dropzone;
                 }
@@ -957,7 +985,6 @@
 
             return dz;
         }
-
         function destroyOptionDropzone(row) {
             const element = row.find('.option-image-dropzone')[0];
 
@@ -1119,6 +1146,9 @@
                                     data-image-url=""
                                 >
                                     <div class="dz-message">Drop image here or click to upload</div>
+ <div class="text-muted small mt-50">
+                                        JPG, PNG, WEBP - Max 2MB (48x48)
+                                    </div>
                                 </div>
 
                                 <input

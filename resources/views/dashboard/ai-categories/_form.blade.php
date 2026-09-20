@@ -2054,11 +2054,16 @@
 
             const hiddenInput = optionRow.find('.quick-option-media-id');
 
+            const REQUIRED_WIDTH = 48;
+            const REQUIRED_HEIGHT = 48;
+            const MAX_FILESIZE_MB = 2;
+
             const dz = new Dropzone(element, {
                 url: mediaStoreUrl,
                 paramName: 'file',
                 maxFiles: 1,
                 acceptedFiles: 'image/*',
+                maxFilesize: MAX_FILESIZE_MB,
                 addRemoveLinks: true,
                 clickable: true,
                 thumbnailWidth: 160,
@@ -2066,6 +2071,29 @@
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
                     'Accept': 'application/json'
+                },
+
+                accept: function (file, done) {
+                    const img = new Image();
+                    const objectUrl = URL.createObjectURL(file);
+
+                    img.onload = function () {
+                        URL.revokeObjectURL(objectUrl);
+
+                        if (img.width !== REQUIRED_WIDTH || img.height !== REQUIRED_HEIGHT) {
+                            done(`Image must be exactly ${REQUIRED_WIDTH}x${REQUIRED_HEIGHT}px (uploaded: ${img.width}x${img.height}px).`);
+                            return;
+                        }
+
+                        done();
+                    };
+
+                    img.onerror = function () {
+                        URL.revokeObjectURL(objectUrl);
+                        done('Unable to read image dimensions.');
+                    };
+
+                    img.src = objectUrl;
                 },
 
                 success: function (file, response) {
@@ -2129,7 +2157,6 @@
 
             return dz;
         }
-
         function destroyQuickOptionDropzone(optionRow, deleteMedia = true) {
             const element = optionRow.find('.quick-option-dropzone')[0];
 
@@ -2208,6 +2235,9 @@
                                 <div class="quick-option-dropzone">
                                     <div class="dz-message">
                                         Drop image here or click to upload
+                                    </div>
+ <div class="text-muted small mt-50">
+                                        JPG, PNG, WEBP - Max 2MB (48x48)
                                     </div>
                                 </div>
 
