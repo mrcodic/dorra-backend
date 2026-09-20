@@ -703,11 +703,24 @@ $.ajaxSetup({
             return response?.data ?? null;
         } catch (xhr) {
             return {
-                error: xhr?.responseJSON?.message || 'Could not load product flow.'
+                error: extractFirstErrorMessage(xhr) || 'Could not load product flow.'
             };
         }
     }
 
+    function extractFirstErrorMessage(xhr) {
+        const errors = xhr?.responseJSON?.errors;
+
+        if (errors && Object.keys(errors).length) {
+            const firstMessages = Object.values(errors)[0];
+
+            return Array.isArray(firstMessages)
+                ? firstMessages[0]
+                : firstMessages;
+        }
+
+        return xhr?.responseJSON?.message;
+    }
     function renderFlow($target, meta) {
         if (!meta) {
             $target.addClass('d-none').empty();
@@ -1636,23 +1649,23 @@ $.ajaxSetup({
      * =====================================================================
      */
 
-        function showValidationErrors(xhr) {
-            const errors = xhr.responseJSON?.errors || {};
-            console.log("errors", errors);
-            if (Object.keys(errors).length) {
-                Object.values(errors).forEach(messages => {
-                    showErrorToast(
-                        Array.isArray(messages)
-                            ? messages[0]
-                            : messages
-                    );
-                });
+    function showValidationErrors(xhr) {
+        const errors = xhr.responseJSON?.errors || {};
 
-                return;
-            }
+        if (Object.keys(errors).length) {
+            Object.values(errors).forEach(messages => {
+                showErrorToast(
+                    Array.isArray(messages)
+                        ? messages[0]
+                        : messages
+                );
+            });
 
-            showErrorToast(xhr.responseJSON?.message || 'Something went wrong.');
+            return;
         }
+
+        showErrorToast(xhr.responseJSON?.message || 'Something went wrong.');
+    }
 
     function showErrorToast(message) {
         Toastify({
