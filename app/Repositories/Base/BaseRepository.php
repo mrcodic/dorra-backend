@@ -27,10 +27,19 @@ class BaseRepository implements BaseRepositoryInterface
     }
 
 
-    public function find($id,$relations = [])
+    public function find($id, $relations = [], $methods = [])
     {
+        $query = $this->model->with($relations);
 
-        return $this->model->with($relations)->findOrFail($id);
+        foreach ($methods as [$method, $params]) {
+            if ($params instanceof \Closure) {
+                $query->{$method}($params);
+            } else {
+                $query->{$method}(...(array) $params);
+            }
+        }
+
+        return $query->findOrFail($id);
     }
 
     public function create(array $data)

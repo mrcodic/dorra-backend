@@ -41,6 +41,17 @@ class BundleController extends Controller
             [
                 'trigger.itemable',
                 'rewards.itemable',
+            ],
+            [
+                ['where', ['status', 'active']],
+                ['where', function ($query) {
+                    $query->whereNull('start_at')
+                        ->orWhere('start_at', '<=', now());
+                }],
+                ['where', function ($query) {
+                    $query->whereNull('end_at')
+                        ->orWhere('end_at', '>=', now());
+                }],
             ]
         );
 

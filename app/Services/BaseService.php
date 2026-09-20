@@ -22,9 +22,9 @@ class BaseService
         return $this->repository->all($paginate, $columns, $relations, filters: $this->filters, perPage: $perPage,counts: $counts);
     }
 
-    public function showResource($id, $relations = [])
+    public function showResource($id, $relations = [], $methods = [])
     {
-        $model = $this->repository->find($id, $relations);
+        $model = $this->repository->find($id, $relations,$methods);
         return $model;
 
     }
