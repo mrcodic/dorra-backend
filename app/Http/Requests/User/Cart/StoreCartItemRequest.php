@@ -247,6 +247,7 @@ class StoreCartItemRequest extends BaseRequest
             ->when($this->product_price_id, fn($q) => $q->where('product_price_id', $this->product_price_id))
             ->when($this->template_id, fn($q) => $q->where('itemable_id', $this->template_id))
             ->when($this->design_id, fn($q) => $q->where('itemable_id', $this->design_id))
+            ->whereNull('bundle_group_key')
             ->with('specs')
             ->get();
 
