@@ -78,7 +78,7 @@
                         <th>Bundle</th>
                         <th>Trigger</th>
                         <th>Rewards</th>
-                        <th>Popup</th>
+{{--                        <th>Popup</th>--}}
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>

@@ -61,17 +61,17 @@ $.ajaxSetup({
                 orderable: false,
                 render: data => `${data || 0} item(s)`
             },
-            {
-                data: 'display_bundle_on_visit',
-                orderable: false,
-                render: function (data) {
-                    const enabled = Boolean(data);
-                    const cls = enabled ? 'bg-light-success' : 'bg-light-secondary';
-                    const label = enabled ? 'Enabled' : 'Disabled';
-
-                    return `<span class="badge ${cls}">${label}</span>`;
-                }
-            },
+            // {
+            //     data: 'display_bundle_on_visit',
+            //     orderable: false,
+            //     render: function (data) {
+            //         const enabled = Boolean(data);
+            //         const cls = enabled ? 'bg-light-success' : 'bg-light-secondary';
+            //         const label = enabled ? 'Enabled' : 'Disabled';
+            //
+            //         return `<span class="badge ${cls}">${label}</span>`;
+            //     }
+            // },
             {
                 data: 'status_data',
                 orderable: false,
