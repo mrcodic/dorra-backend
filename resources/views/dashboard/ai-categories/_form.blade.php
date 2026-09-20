@@ -2236,7 +2236,7 @@
                                     <div class="dz-message">
                                         Drop image here or click to upload
                                     </div>
- <div class="text-muted small mt-50">
+ <div class="text-center text-muted small mt-50">
                                         JPG, PNG, WEBP - Max 2MB (48x48)
                                     </div>
                                 </div>
