@@ -1636,18 +1636,24 @@ $.ajaxSetup({
      * =====================================================================
      */
 
-    function showValidationErrors(error) {
-        const errors = error.response?.data?.errors || {};
+        function showValidationErrors(xhr) {
+            const errors = xhr.responseJSON?.errors || {};
+            console.log("errors", errors);
+            if (Object.keys(errors).length) {
+                Object.values(errors).forEach(messages => {
+                    showErrorToast(
+                        Array.isArray(messages)
+                            ? messages[0]
+                            : messages
+                    );
+                });
 
-        if (Object.keys(errors).length) {
-            Object.values(errors).forEach(messages => {
-                showErrorToast(Array.isArray(messages) ? messages[0] : messages);
-            });
-            return;
+                return;
+            }
+
+            showErrorToast(xhr.responseJSON?.message || 'Something went wrong.');
         }
 
-        showErrorToast(error.response?.data?.message || 'Something went wrong.');
-    }
     function showErrorToast(message) {
         Toastify({
             text: message,
