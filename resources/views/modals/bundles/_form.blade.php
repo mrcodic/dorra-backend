@@ -187,7 +187,7 @@
     {{-- ============================================================= --}}
     {{-- TRIGGER                                                       --}}
     {{-- ============================================================= --}}
-    <h6 class="mb-1">1. Customer Must Buy</h6>
+    <h6 class="mb-1">1. Trigger Product (Customer Buys at Full Price)</h6>
 
     <div class="form-group mb-2">
         <label class="label-text mb-1 d-block">Product Type</label>
@@ -342,7 +342,7 @@
     {{-- REWARDS                                                       --}}
     {{-- ============================================================= --}}
     <div class="d-flex align-items-center justify-content-between mb-1">
-        <h6 class="mb-0">2. Customer Gets</h6>
+        <h6 class="mb-0">2. Reward Product (Discounted or Free)</h6>
 
         <button
             type="button"
