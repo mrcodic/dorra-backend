@@ -13,23 +13,32 @@ class CartResource extends JsonResource
     {
         $items = $this->items ?? collect();
 
-        $normalItems = $this->standaloneCartItems();
-        $bundleGroups = $this->resolveBundleGroups();
-
         $isDownload = $items->isNotEmpty() && $items->every(
                 fn ($item) => $item->type == ItemTypeEnum::DOWNLOAD
             );
 
-
-        $singleItemsSubTotal = $this->calculateItemsSubTotal($normalItems);
-
-        $bundleGroupsTotal = round(
-            $bundleGroups->sum('total'),
-            2
-        );
-
         $subAfter = round(
-            $singleItemsSubTotal + $bundleGroupsTotal,
+            $items->sum(function ($item) use ($items) {
+                $cartable = $item->cartable;
+
+                $cartHasDiscount = $this->discount_amount > 0
+                    || $items->contains(fn ($i) => $i->discount_amount > 0);
+
+                $lastOffer = $cartHasDiscount ? null : $cartable?->lastOffer;
+
+                $sub = (float) $item->sub_total;
+                $val = (float) ($lastOffer?->getRawOriginal('value') ?? 0);
+
+                if ($item->discount_amount > 0) {
+                    return max(0, $sub - (float) $item->discount_amount);
+                }
+
+                if ($lastOffer) {
+                    return round($sub * (1 - ($val / 100)), 2);
+                }
+
+                return $sub;
+            }),
             2
         );
 
@@ -37,17 +46,17 @@ class CartResource extends JsonResource
             ? $this->discountCode
             : null;
 
+        $bundleGroups = $this->resolveBundleGroups();
+
         return [
             'id' => $this->id,
 
-            'items' => CartItemResource::collection($normalItems),
+            // normal cart items only
+            'items' => CartItemResource::collection($this->standaloneCartItems()),
 
-            'single_items_sub_total' => $singleItemsSubTotal,
-
+            // bundle cart items only
             'has_bundle_items' => $bundleGroups->isNotEmpty(),
             'bundle_groups' => $bundleGroups,
-
-            'bundle_groups_total' => $bundleGroupsTotal,
 
             'all_items_are_download' => $isDownload,
 
@@ -94,34 +103,6 @@ class CartResource extends JsonResource
         return ($this->items ?? collect())
             ->filter(fn ($item) => empty($item->bundle_group_key))
             ->values();
-    }
-
-    private function calculateItemsSubTotal($items): float
-    {
-        return round(
-            $items->sum(function ($item) use ($items) {
-                $cartable = $item->cartable;
-
-                $cartHasDiscount = $this->discount_amount > 0
-                    || $items->contains(fn ($i) => $i->discount_amount > 0);
-
-                $lastOffer = $cartHasDiscount ? null : $cartable?->lastOffer;
-
-                $sub = (float) $item->sub_total;
-                $val = (float) ($lastOffer?->getRawOriginal('value') ?? 0);
-
-                if ($item->discount_amount > 0) {
-                    return max(0, $sub - (float) $item->discount_amount);
-                }
-
-                if ($lastOffer) {
-                    return round($sub * (1 - ($val / 100)), 2);
-                }
-
-                return $sub;
-            }),
-            2
-        );
     }
 
     private function resolveBundleGroups()
