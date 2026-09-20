@@ -570,7 +570,6 @@ class BundleService extends BaseService
                 'trigger.itemable',
                 'rewards.itemable',
             ])
-            ->where('display_bundle_on_visit', true)
             ->where('status', 'active')
             ->whereHas('trigger')
             ->whereHas('rewards')
