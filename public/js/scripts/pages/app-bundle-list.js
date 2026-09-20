@@ -702,6 +702,7 @@ $.ajaxSetup({
 
             return response?.data ?? null;
         } catch (xhr) {
+            console.log('fetchItemMeta error xhr:', xhr);
             return {
                 error: extractFirstErrorMessage(xhr) || 'Could not load product flow.'
             };
