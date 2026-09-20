@@ -86,7 +86,7 @@
      * Optional edit-state map:
      * [option_id => [question_id, question_id, ...]]
      */
-    $optionConditionalQuestionIds = collect($optionConditionalQuestionIds ?? []);
+//    $optionConditionalQuestionIds = collect($optionConditionalQuestionIds ?? []);
 
     $isColorPalette = collect($options)->contains(
         fn($option) => !empty(data_get($option, 'ui_data.colors', []))
@@ -352,19 +352,19 @@
                     data_get($option, 'ui_data.colors', [])
                 );
 
-                $conditionalQuestionIds = collect(
-                    old(
-                        "options.$index.conditional_question_ids",
-                        !empty($option['id'])
-                            ? ($optionConditionalQuestionIds->get((int) $option['id'], []))
-                            : []
-                    )
-                )
-                    ->map(fn($id) => (int) $id)
-                    ->filter()
-                    ->unique()
-                    ->values()
-                    ->all();
+//                $conditionalQuestionIds = collect(
+//                    old(
+//                        "options.$index.conditional_question_ids",
+//                        !empty($option['id'])
+//                            ? ($optionConditionalQuestionIds->get((int) $option['id'], []))
+//                            : []
+//                    )
+//                )
+//                    ->map(fn($id) => (int) $id)
+//                    ->filter()
+//                    ->unique()
+//                    ->values()
+//                    ->all();
             @endphp
 
             <div
@@ -494,19 +494,19 @@
                             @endforeach
                         </div>
 
-                        <button
-                            type="button"
-                            class="btn btn-outline-info w-100 mt-50 configure-option-condition"
-                            data-option-index="{{ $index }}"
-                        >
-                            <i data-feather="git-branch"></i>
-                            Conditional
-                            <span
-                                class="badge bg-info text-white option-condition-count ms-25 {{ count($conditionalQuestionIds) ? '' : 'd-none' }}"
-                            >
-                                {{ count($conditionalQuestionIds) }}
-                            </span>
-                        </button>
+{{--                        <button--}}
+{{--                            type="button"--}}
+{{--                            class="btn btn-outline-info w-100 mt-50 configure-option-condition"--}}
+{{--                            data-option-index="{{ $index }}"--}}
+{{--                        >--}}
+{{--                            <i data-feather="git-branch"></i>--}}
+{{--                            Conditional--}}
+{{--                            <span--}}
+{{--                                class="badge bg-info text-white option-condition-count ms-25 {{ count($conditionalQuestionIds) ? '' : 'd-none' }}"--}}
+{{--                            >--}}
+{{--                                {{ count($conditionalQuestionIds) }}--}}
+{{--                            </span>--}}
+{{--                        </button>--}}
                     </div>
 
                     <div class="col-md-10 color-palette-section">
