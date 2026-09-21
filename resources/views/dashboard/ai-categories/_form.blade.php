@@ -887,21 +887,21 @@
                                                 </select>
                                             </div>
 
-{{--                                            <div class="col-md-2 mb-1">--}}
-{{--                                                <label class="form-label">Rule</label>--}}
+                                            {{--                                            <div class="col-md-2 mb-1">--}}
+                                            {{--                                                <label class="form-label">Rule</label>--}}
 
-{{--                                                <select--}}
-{{--                                                    name="questions[{{ $question->id }}][conditions][{{ $conditionIndex }}][operator]"--}}
-{{--                                                    class="form-select condition-operator"--}}
-{{--                                                >--}}
-{{--                                                    <option value="selected" @selected($conditionOperator === 'selected')>--}}
-{{--                                                        Is selected--}}
-{{--                                                    </option>--}}
-{{--                                                    <option value="not_selected" @selected($conditionOperator === 'not_selected')>--}}
-{{--                                                        Is not selected--}}
-{{--                                                    </option>--}}
-{{--                                                </select>--}}
-{{--                                            </div>--}}
+                                            {{--                                                <select--}}
+                                            {{--                                                    name="questions[{{ $question->id }}][conditions][{{ $conditionIndex }}][operator]"--}}
+                                            {{--                                                    class="form-select condition-operator"--}}
+                                            {{--                                                >--}}
+                                            {{--                                                    <option value="selected" @selected($conditionOperator === 'selected')>--}}
+                                            {{--                                                        Is selected--}}
+                                            {{--                                                    </option>--}}
+                                            {{--                                                    <option value="not_selected" @selected($conditionOperator === 'not_selected')>--}}
+                                            {{--                                                        Is not selected--}}
+                                            {{--                                                    </option>--}}
+                                            {{--                                                </select>--}}
+                                            {{--                                            </div>--}}
 
                                             <div class="col-md-2 mb-1">
                                                 <button
@@ -1852,15 +1852,37 @@
 
         function conditionAnswerOptionsHtml(parentQuestionId, selectedOptionIds = []) {
             const parent = conditionQuestionData[Number(parentQuestionId)];
-            const selectedIds = new Set(
-                normalizeConditionSelectedIds(selectedOptionIds)
+            const selectedValues = normalizeConditionSelectedIds(selectedOptionIds);
+            const selectedIds = new Set(selectedValues);
+            const selectedOrder = new Map(
+                selectedValues.map((id, index) => [String(id), index])
             );
 
             if (!parent || !Array.isArray(parent.options)) {
                 return '';
             }
 
-            return parent.options.map(option => `
+            /*
+             * Keep selected answers in the same order they were selected/saved.
+             * Unselected answers keep their original relative order afterwards.
+             */
+            const orderedOptions = [...parent.options].sort((a, b) => {
+                const aId = String(a.id);
+                const bId = String(b.id);
+                const aSelected = selectedOrder.has(aId);
+                const bSelected = selectedOrder.has(bId);
+
+                if (aSelected && bSelected) {
+                    return selectedOrder.get(aId) - selectedOrder.get(bId);
+                }
+
+                if (aSelected) return -1;
+                if (bSelected) return 1;
+
+                return 0;
+            });
+
+            return orderedOptions.map(option => `
                 <option
                     value="${Number(option.id)}"
                     ${selectedIds.has(String(option.id)) ? 'selected' : ''}
@@ -1899,9 +1921,35 @@
                         return String($(this).val()) === selectedId;
                     });
 
+                /*
+                 * Select2 normally renders selected tags using <option> order.
+                 * Move the newest selection after the previously selected ones
+                 * so the visible tags follow the user's click order.
+                 */
                 selectedOption.detach().appendTo(select);
 
-                select.trigger('change.select2');
+                const selectedValues = select
+                    .find('option:selected')
+                    .map(function () {
+                        return String($(this).val());
+                    })
+                    .get();
+
+                /*
+                 * Re-initialize after the event finishes so Select2 redraws
+                 * the tags using the new option order.
+                 */
+                setTimeout(function () {
+                    if (select.hasClass('select2-hidden-accessible')) {
+                        select.select2('destroy');
+                    }
+
+                    initConditionAnswersSelect2(select);
+
+                    select
+                        .val(selectedValues)
+                        .trigger('change.select2');
+                }, 0);
             }
         );
 
