@@ -317,21 +317,6 @@ class AiGenerationConfigService
 //                            'logic' => 'all',
                             'rules' => $showRules->all(),
                         ];
-
-                        /*
-                         * Preserve the old simple fields when only one rule
-                         * exists, so existing frontend logic still works for
-                         * the old one-parent/one-answer case.
-                         */
-                        if ($showRules->count() === 1) {
-                            $firstRule = $showRules->first();
-
-                            $showWhen['questionId'] = $firstRule['questionId'];
-                            $showWhen['optionValues'] = $firstRule['optionValues'];
-                            $showWhen['optionValue'] = $firstRule['optionValues'][0] ?? null;
-                            $showWhen['operator'] = $firstRule['operator'];
-                        }
-
                         $question->setAttribute('show_when', $showWhen);
                     }
                 }
