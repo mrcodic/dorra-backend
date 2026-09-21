@@ -1886,6 +1886,24 @@
                 closeOnSelect: false
             });
         }
+        $(document).on(
+            'select2:select',
+            '.condition-parent-options',
+            function (e) {
+                const select = $(this);
+                const selectedId = String(e.params.data.id);
+
+                const selectedOption = select
+                    .find('option')
+                    .filter(function () {
+                        return String($(this).val()) === selectedId;
+                    });
+
+                selectedOption.detach().appendTo(select);
+
+                select.trigger('change.select2');
+            }
+        );
 
         function populateConditionAnswers(rule, selectedOptionIds = []) {
             const parentQuestionId = Number(
