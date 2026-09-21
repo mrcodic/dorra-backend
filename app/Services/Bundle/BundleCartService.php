@@ -9,6 +9,7 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\Design;
+use App\Models\Guest;
 use App\Models\Media;
 use App\Models\Mockup;
 use App\Models\Product;
@@ -16,7 +17,9 @@ use App\Models\ProductPrice;
 use App\Models\ProductSpecification;
 use App\Models\ProductSpecificationOption;
 use App\Models\Template;
-use App\Services\CartService;
+use App\Models\User;
+use App\Repositories\Interfaces\CartRepositoryInterface;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -27,17 +30,23 @@ use Illuminate\Validation\ValidationException;
 class BundleCartService
 {
     public function __construct(
-        private readonly CartService $cartService
+        public CartRepositoryInterface $cartRepository,
     ) {}
 
     public function store(Request $request): Cart
     {
         return DB::transaction(function () use ($request) {
-            $cart = $this->cartService->resolveUserCart();
+            $userId = getAuthOrGuest() instanceof User ? getAuthOrGuest()->id : null;
+            $guestId = getAuthOrGuest() instanceof Guest ? getAuthOrGuest()->id : null;
 
+            $cart = $this->cartRepository->query()
+                ->when($userId, fn($query) => $query->where('user_id', $userId))
+                ->when(!$userId && $guestId, fn($query) => $query->where('guest_id', $guestId))
+                ->first();
             if (!$cart) {
-                throw ValidationException::withMessages([
-                    'cart' => ['Cart could not be resolved.'],
+                $cart = $this->cartRepository->query()->create([
+                    'user_id' => $userId,
+                    'guest_id' => $guestId,
                 ]);
             }
 
