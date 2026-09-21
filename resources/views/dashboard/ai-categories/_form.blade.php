@@ -46,6 +46,81 @@
      */
     $questionConditions = collect($associatedData['questionConditions'] ?? []);
 
+
+    /*
+     * Multi-condition edit fallback.
+     *
+     * New structure:
+     * questionConditions[child_question_id] = [
+     *     [
+     *         'parent_question_id' => 10,
+     *         'parent_option_ids' => [50, 51],
+     *         'operator' => 'selected',
+     *     ],
+     * ];
+     *
+     * This fallback keeps the current controller untouched.
+     */
+    if (
+        $questionConditions->isEmpty()
+        && $aiCategory?->id
+        && \Illuminate\Support\Facades\Schema::hasTable('ai_guide_question_conditions')
+    ) {
+        $aiCategoryMorphTypes = array_values(array_unique([
+            $aiCategory->getMorphClass(),
+            'ai_category',
+            \App\Models\AiCategory::class,
+        ]));
+
+        $categoryQuestionAssignments = \Illuminate\Support\Facades\DB::table('ai_guide_question_assignments')
+            ->where('assignable_id', $aiCategory->id)
+            ->whereIn('assignable_type', $aiCategoryMorphTypes)
+            ->get();
+
+        if ($categoryQuestionAssignments->isNotEmpty()) {
+            $questionIdByAssignmentId = $categoryQuestionAssignments
+                ->keyBy(fn ($assignment) => (int) $assignment->id)
+                ->map(fn ($assignment) => (int) $assignment->ai_guide_question_id);
+
+            $questionConditions = \Illuminate\Support\Facades\DB::table('ai_guide_question_conditions')
+                ->whereIn(
+                    'ai_guide_question_assignment_id',
+                    $categoryQuestionAssignments->pluck('id')
+                )
+                ->orderBy('id')
+                ->get()
+                ->groupBy(function ($condition) use ($questionIdByAssignmentId) {
+                    return (int) ($questionIdByAssignmentId->get(
+                        (int) $condition->ai_guide_question_assignment_id
+                    ) ?? 0);
+                })
+                ->filter(fn ($rows, $questionId) => (int) $questionId > 0)
+                ->map(function ($rows) {
+                    return $rows
+                        ->groupBy(fn ($condition) => implode(':', [
+                            (int) $condition->parent_question_id,
+                            (string) ($condition->operator ?: 'selected'),
+                        ]))
+                        ->map(function ($group) {
+                            $first = $group->first();
+
+                            return [
+                                'parent_question_id' => (int) $first->parent_question_id,
+                                'parent_option_ids' => $group
+                                    ->pluck('parent_option_id')
+                                    ->map(fn ($id) => (int) $id)
+                                    ->unique()
+                                    ->values()
+                                    ->all(),
+                                'operator' => (string) ($first->operator ?: 'selected'),
+                            ];
+                        })
+                        ->values()
+                        ->all();
+                });
+        }
+    }
+
     $conditionQuestionsPayload = $questions
         ->filter(fn ($question) => in_array(
             $question->type?->value ?? $question->type,
@@ -541,22 +616,81 @@
                         true
                     );
 
-                    $savedCondition = $oldRow !== null
-                        ? data_get($oldRow, 'condition', [])
+                    $savedConditionsRaw = $oldRow !== null
+                        ? data_get($oldRow, 'conditions', [])
                         : ($questionConditions->get($question->id) ?? []);
+
+                    /*
+                     * Backward compatibility with the old single-condition form.
+                     */
+                    if (
+                        empty($savedConditionsRaw)
+                        && $oldRow !== null
+                        && !empty(data_get($oldRow, 'condition'))
+                    ) {
+                        $legacyCondition = data_get($oldRow, 'condition', []);
+
+                        $savedConditionsRaw = [[
+                            'parent_question_id' => data_get($legacyCondition, 'parent_question_id'),
+                            'parent_option_ids' => array_values(array_filter([
+                                data_get($legacyCondition, 'parent_option_id'),
+                            ])),
+                            'operator' => data_get($legacyCondition, 'operator', 'selected'),
+                        ]];
+                    }
+
+                    if (
+                        is_array($savedConditionsRaw)
+                        && array_key_exists('parent_question_id', $savedConditionsRaw)
+                    ) {
+                        $savedConditionsRaw = [[
+                            'parent_question_id' => data_get($savedConditionsRaw, 'parent_question_id'),
+                            'parent_option_ids' => data_get(
+                                $savedConditionsRaw,
+                                'parent_option_ids',
+                                array_values(array_filter([
+                                    data_get($savedConditionsRaw, 'parent_option_id'),
+                                ]))
+                            ),
+                            'operator' => data_get($savedConditionsRaw, 'operator', 'selected'),
+                        ]];
+                    }
+
+                    $savedConditions = collect($savedConditionsRaw)
+                        ->map(function ($condition) {
+                            return [
+                                'parent_question_id' => (int) data_get($condition, 'parent_question_id', 0),
+                                'parent_option_ids' => collect(
+                                    data_get(
+                                        $condition,
+                                        'parent_option_ids',
+                                        array_values(array_filter([
+                                            data_get($condition, 'parent_option_id'),
+                                        ]))
+                                    )
+                                )
+                                    ->map(fn ($id) => (int) $id)
+                                    ->filter()
+                                    ->unique()
+                                    ->values()
+                                    ->all(),
+                                'operator' => (string) data_get($condition, 'operator', 'selected'),
+                            ];
+                        })
+                        ->filter(fn ($condition) => $condition['parent_question_id'] || !empty($condition['parent_option_ids']))
+                        ->values();
 
                     $conditionEnabled = $oldRow !== null
                         ? (bool) data_get($oldRow, 'condition_enabled', false)
-                        : (
-                            !empty(data_get($savedCondition, 'parent_question_id'))
-                            && !empty(data_get($savedCondition, 'parent_option_id'))
-                        );
+                        : $savedConditions->isNotEmpty();
 
-                    $conditionParentQuestionId = (int) data_get($savedCondition, 'parent_question_id', 0);
-                    $conditionParentOptionId = (int) data_get($savedCondition, 'parent_option_id', 0);
-
-                    $conditionParentQuestion = $questions->firstWhere('id', $conditionParentQuestionId);
-                    $conditionParentOption = $conditionParentQuestion?->options?->firstWhere('id', $conditionParentOptionId);
+                    $conditionRows = $savedConditions->isNotEmpty()
+                        ? $savedConditions->all()
+                        : [[
+                            'parent_question_id' => 0,
+                            'parent_option_ids' => [],
+                            'operator' => 'selected',
+                        ]];
                 @endphp
 
                 <div
@@ -680,67 +814,129 @@
                         </div>
 
                         <div class="question-condition-panel p-1 mt-1 {{ $conditionEnabled ? '' : 'd-none' }}">
-                            <div class="row">
-                                <div class="col-md-5 mb-1">
-                                    <label class="form-label">Parent Question *</label>
+                            <div
+                                class="condition-rules"
+                                data-next-index="{{ count($conditionRows) }}"
+                            >
+                                @foreach($conditionRows as $conditionIndex => $savedCondition)
+                                    @php
+                                        $conditionParentQuestionId = (int) data_get(
+                                            $savedCondition,
+                                            'parent_question_id',
+                                            0
+                                        );
 
-                                    <select
-                                        name="questions[{{ $question->id }}][condition][parent_question_id]"
-                                        class="form-select condition-parent-question"
-                                        data-current-option-id="{{ $conditionParentOptionId ?: '' }}"
+                                        $conditionParentOptionIds = collect(
+                                            data_get($savedCondition, 'parent_option_ids', [])
+                                        )
+                                            ->map(fn ($id) => (int) $id)
+                                            ->all();
+
+                                        $conditionOperator = (string) data_get(
+                                            $savedCondition,
+                                            'operator',
+                                            'selected'
+                                        );
+                                    @endphp
+
+                                    <div
+                                        class="condition-rule border rounded p-1 mb-1"
+                                        data-condition-index="{{ $conditionIndex }}"
                                     >
-                                        <option value="">Select parent question</option>
+                                        <div class="row align-items-end">
+                                            <div class="col-md-4 mb-1">
+                                                <label class="form-label">Parent Question *</label>
 
-                                        @foreach($conditionQuestionsPayload as $parentQuestion)
-                                            @continue((int) $parentQuestion['id'] === (int) $question->id)
-
-                                            <option
-                                                value="{{ $parentQuestion['id'] }}"
-                                                @selected($conditionParentQuestionId === (int) $parentQuestion['id'])
-                                            >
-                                                {{ $parentQuestion['title'] }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-
-                                <div class="col-md-4 mb-1">
-                                    <label class="form-label">Answer *</label>
-
-                                    <select
-                                        name="questions[{{ $question->id }}][condition][parent_option_id]"
-                                        class="form-select condition-parent-option"
-                                    >
-                                        <option value="">Select answer</option>
-
-                                        @if($conditionParentQuestionId && isset($conditionQuestionsPayload[$conditionParentQuestionId]))
-                                            @foreach($conditionQuestionsPayload[$conditionParentQuestionId]['options'] as $parentOption)
-                                                <option
-                                                    value="{{ $parentOption['id'] }}"
-                                                    @selected($conditionParentOptionId === (int) $parentOption['id'])
+                                                <select
+                                                    name="questions[{{ $question->id }}][conditions][{{ $conditionIndex }}][parent_question_id]"
+                                                    class="form-select condition-parent-question"
                                                 >
-                                                    {{ $parentOption['label'] }}
-                                                </option>
-                                            @endforeach
-                                        @endif
-                                    </select>
-                                </div>
+                                                    <option value="">Select parent question</option>
+
+                                                    @foreach($conditionQuestionsPayload as $parentQuestion)
+                                                        @continue((int) $parentQuestion['id'] === (int) $question->id)
+
+                                                        <option
+                                                            value="{{ $parentQuestion['id'] }}"
+                                                            @selected($conditionParentQuestionId === (int) $parentQuestion['id'])
+                                                        >
+                                                            {{ $parentQuestion['title'] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-4 mb-1">
+                                                <label class="form-label">Answers * <small class="text-muted">(OR)</small></label>
+
+                                                <select
+                                                    name="questions[{{ $question->id }}][conditions][{{ $conditionIndex }}][parent_option_ids][]"
+                                                    class="form-select condition-parent-options"
+                                                    multiple
+                                                    style="width:100%"
+                                                >
+                                                    @if($conditionParentQuestionId && isset($conditionQuestionsPayload[$conditionParentQuestionId]))
+                                                        @foreach($conditionQuestionsPayload[$conditionParentQuestionId]['options'] as $parentOption)
+                                                            <option
+                                                                value="{{ $parentOption['id'] }}"
+                                                                @selected(in_array((int) $parentOption['id'], $conditionParentOptionIds, true))
+                                                            >
+                                                                {{ $parentOption['label'] }}
+                                                            </option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-2 mb-1">
+                                                <label class="form-label">Rule</label>
+
+                                                <select
+                                                    name="questions[{{ $question->id }}][conditions][{{ $conditionIndex }}][operator]"
+                                                    class="form-select condition-operator"
+                                                >
+                                                    <option value="selected" @selected($conditionOperator === 'selected')>
+                                                        Is selected
+                                                    </option>
+                                                    <option value="not_selected" @selected($conditionOperator === 'not_selected')>
+                                                        Is not selected
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-2 mb-1">
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-outline-danger w-100 remove-condition-rule"
+                                                >
+                                                    <i data-feather="trash-2"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
 
-                            <div class="question-condition-summary {{ $conditionEnabled && $conditionParentQuestion && $conditionParentOption ? '' : 'd-none' }}">
-                                Show when
-                                <strong class="condition-summary-question">
-                                    {{ $conditionParentQuestion?->title }}
-                                </strong>
-                                answer
-                                <strong class="condition-summary-option">
-                                    {{ $conditionParentOption?->label }}
-                                </strong>.
+                            <div class="d-flex justify-content-between align-items-center gap-1 mt-50">
+                                <small class="text-muted">
+                                    Multiple answers in one row are OR. Different rows are AND.
+                                </small>
+
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-primary add-condition-rule"
+                                >
+                                    <i data-feather="plus"></i>
+                                    Add Parent Rule
+                                </button>
+                            </div>
+
+                            <div class="question-condition-summary mt-1 {{ $conditionEnabled ? '' : 'd-none' }}">
+                                All parent rules must match. Inside each rule, any selected answer can match.
                             </div>
 
                             <small class="text-muted d-block mt-50">
-                                If this question is Required, validation applies only while the condition is matched.
+                                If this question is Required, validation applies only while all parent rules are matched.
                             </small>
                         </div>
                     </div>
@@ -1645,8 +1841,21 @@
                 .join('');
         }
 
-        function conditionAnswerOptionsHtml(parentQuestionId, selectedOptionId = null) {
+        function normalizeConditionSelectedIds(selectedOptionIds = []) {
+            const values = Array.isArray(selectedOptionIds)
+                ? selectedOptionIds
+                : [selectedOptionIds];
+
+            return values
+                .map(value => String(value ?? '').trim())
+                .filter(Boolean);
+        }
+
+        function conditionAnswerOptionsHtml(parentQuestionId, selectedOptionIds = []) {
             const parent = conditionQuestionData[Number(parentQuestionId)];
+            const selectedIds = new Set(
+                normalizeConditionSelectedIds(selectedOptionIds)
+            );
 
             if (!parent || !Array.isArray(parent.options)) {
                 return '';
@@ -1655,22 +1864,179 @@
             return parent.options.map(option => `
                 <option
                     value="${Number(option.id)}"
-                    ${Number(selectedOptionId) === Number(option.id) ? 'selected' : ''}
+                    ${selectedIds.has(String(option.id)) ? 'selected' : ''}
                 >
                     ${escapeHtml(option.label)}
                 </option>
             `).join('');
         }
 
-        function populateConditionAnswers(card, selectedOptionId = null) {
-            const parentSelect = card.find('.condition-parent-question');
-            const optionSelect = card.find('.condition-parent-option');
-            const parentQuestionId = Number(parentSelect.val() || 0);
+        function initConditionAnswersSelect2(select) {
+            if (!select?.length || typeof $.fn.select2 !== 'function') {
+                return;
+            }
 
-            optionSelect.html(`
-                <option value="">Select answer</option>
-                ${conditionAnswerOptionsHtml(parentQuestionId, selectedOptionId)}
-            `);
+            if (select.hasClass('select2-hidden-accessible')) {
+                select.select2('destroy');
+            }
+
+            select.select2({
+                width: '100%',
+                placeholder: 'Select one or more answers',
+                allowClear: true,
+                closeOnSelect: false
+            });
+        }
+
+        function populateConditionAnswers(rule, selectedOptionIds = []) {
+            const parentQuestionId = Number(
+                rule.find('.condition-parent-question').val() || 0
+            );
+
+            const optionSelect = rule.find('.condition-parent-options');
+
+            if (optionSelect.hasClass('select2-hidden-accessible')) {
+                optionSelect.select2('destroy');
+            }
+
+            optionSelect.html(
+                conditionAnswerOptionsHtml(
+                    parentQuestionId,
+                    selectedOptionIds
+                )
+            );
+
+            initConditionAnswersSelect2(optionSelect);
+        }
+
+        function nextConditionIndex(card) {
+            const container = card.find('.condition-rules');
+            const next = Number(container.attr('data-next-index') || 0);
+
+            container.attr('data-next-index', next + 1);
+
+            return next;
+        }
+
+        function buildConditionRuleHtml(
+            questionId,
+            index,
+            condition = {}
+        ) {
+            const parentQuestionId = Number(
+                condition.parent_question_id || 0
+            );
+
+            const selectedOptionIds = normalizeConditionSelectedIds(
+                condition.parent_option_ids
+                ?? condition.parent_option_id
+                ?? []
+            );
+
+            const operator = condition.operator || 'selected';
+
+            return `
+                <div
+                    class="condition-rule border rounded p-1 mb-1"
+                    data-condition-index="${index}"
+                >
+                    <div class="row align-items-end">
+                        <div class="col-md-4 mb-1">
+                            <label class="form-label">Parent Question *</label>
+
+                            <select
+                                name="questions[${questionId}][conditions][${index}][parent_question_id]"
+                                class="form-select condition-parent-question"
+                            >
+                                <option value="">Select parent question</option>
+                                ${conditionParentOptionsHtml(
+                questionId,
+                parentQuestionId
+            )}
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-1">
+                            <label class="form-label">
+                                Answers * <small class="text-muted">(OR)</small>
+                            </label>
+
+                            <select
+                                name="questions[${questionId}][conditions][${index}][parent_option_ids][]"
+                                class="form-select condition-parent-options"
+                                multiple
+                                style="width:100%"
+                            >
+                                ${conditionAnswerOptionsHtml(
+                parentQuestionId,
+                selectedOptionIds
+            )}
+                            </select>
+                        </div>
+
+                        <div class="col-md-2 mb-1">
+                            <label class="form-label">Rule</label>
+
+                            <select
+                                name="questions[${questionId}][conditions][${index}][operator]"
+                                class="form-select condition-operator"
+                            >
+                                <option
+                                    value="selected"
+                                    ${operator === 'selected' ? 'selected' : ''}
+                                >
+                                    Is selected
+                                </option>
+                                <option
+                                    value="not_selected"
+                                    ${operator === 'not_selected' ? 'selected' : ''}
+                                >
+                                    Is not selected
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2 mb-1">
+                            <button
+                                type="button"
+                                class="btn btn-outline-danger w-100 remove-condition-rule"
+                            >
+                                <i data-feather="trash-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function addConditionRule(card, condition = {}) {
+            const questionId = Number(card.data('question-id'));
+            const index = nextConditionIndex(card);
+            const container = card.find('.condition-rules');
+
+            container.append(
+                buildConditionRuleHtml(
+                    questionId,
+                    index,
+                    condition
+                )
+            );
+
+            const rule = container.find('.condition-rule').last();
+
+            initConditionAnswersSelect2(
+                rule.find('.condition-parent-options')
+            );
+
+            feather.replace();
+
+            return rule;
+        }
+
+        function ensureConditionRule(card) {
+            if (!card.find('.condition-rule').length) {
+                addConditionRule(card);
+            }
         }
 
         function updateConditionSummary(card) {
@@ -1681,39 +2047,21 @@
 
             panel.toggleClass('d-none', !enabled);
             badge.toggleClass('d-none', !enabled);
+            summary.toggleClass('d-none', !enabled);
 
-            if (!enabled) {
-                summary.addClass('d-none');
-                return;
+            if (enabled) {
+                ensureConditionRule(card);
+
+                card.find('.condition-parent-options').each(function () {
+                    initConditionAnswersSelect2($(this));
+                });
             }
-
-            const parentId = Number(card.find('.condition-parent-question').val() || 0);
-            const optionId = Number(card.find('.condition-parent-option').val() || 0);
-            const operator = card.find('.condition-operator').val();
-            const parent = conditionQuestionData[parentId];
-            const option = parent?.options?.find(item => Number(item.id) === optionId);
-
-            if (!parent || !option) {
-                summary.addClass('d-none');
-                return;
-            }
-
-            summary.find('.condition-summary-question').text(parent.title);
-            summary.find('.condition-summary-operator').text(
-                operator === 'not_selected' ? 'does not have' : 'has'
-            );
-            summary.find('.condition-summary-option').text(option.label);
-            summary.removeClass('d-none');
         }
 
         function initializeQuestionCondition(card) {
-            const parentSelect = card.find('.condition-parent-question');
-            const selectedOptionId = Number(parentSelect.data('current-option-id') || 0);
-
-            if (parentSelect.length) {
-                populateConditionAnswers(card, selectedOptionId);
-                parentSelect.removeAttr('data-current-option-id');
-            }
+            card.find('.condition-parent-options').each(function () {
+                initConditionAnswersSelect2($(this));
+            });
 
             updateConditionSummary(card);
         }
@@ -1742,15 +2090,32 @@
             updateConditionSummary($(this).closest('.question-card'));
         });
 
-        $(document).on('change', '.condition-parent-question', function () {
-            const card = $(this).closest('.question-card');
-
-            populateConditionAnswers(card);
-            updateConditionSummary(card);
+        $(document).on('click', '.add-condition-rule', function () {
+            addConditionRule($(this).closest('.question-card'));
         });
 
-        $(document).on('change', '.condition-parent-option, .condition-operator', function () {
-            updateConditionSummary($(this).closest('.question-card'));
+        $(document).on('click', '.remove-condition-rule', function () {
+            const card = $(this).closest('.question-card');
+            const rule = $(this).closest('.condition-rule');
+            const optionSelect = rule.find('.condition-parent-options');
+
+            if (optionSelect.hasClass('select2-hidden-accessible')) {
+                optionSelect.select2('destroy');
+            }
+
+            rule.remove();
+
+            if (card.find('.question-condition-toggle').is(':checked')) {
+                ensureConditionRule(card);
+            }
+
+            feather.replace();
+        });
+
+        $(document).on('change', '.condition-parent-question', function () {
+            const rule = $(this).closest('.condition-rule');
+
+            populateConditionAnswers(rule, []);
         });
 
         $('#select-all-questions').on('click', function () {
@@ -2712,7 +3077,7 @@
                             <div>
                                 <div class="fw-bolder">Conditional Visibility</div>
                                 <small class="text-muted">
-                                    Show this question only when a previous answer matches.
+                                    Show this question only when parent answers match.
                                 </small>
                             </div>
 
@@ -2738,43 +3103,33 @@
                         </div>
 
                         <div class="question-condition-panel p-1 mt-1 d-none">
-                            <div class="row">
-                                <div class="col-md-5 mb-1">
-                                    <label class="form-label">Parent Question *</label>
-
-                                    <select
-                                        name="questions[${id}][condition][parent_question_id]"
-                                        class="form-select condition-parent-question"
-                                    >
-                                        <option value="">Select parent question</option>
-                                        ${conditionParentOptionsHtml(id)}
-                                    </select>
-                                </div>
-
-
-
-                                <div class="col-md-4 mb-1">
-                                    <label class="form-label">Answer *</label>
-
-                                    <select
-                                        name="questions[${id}][condition][parent_option_id]"
-                                        class="form-select condition-parent-option"
-                                    >
-                                        <option value="">Select answer</option>
-                                    </select>
-                                </div>
+                            <div
+                                class="condition-rules"
+                                data-next-index="1"
+                            >
+                                ${buildConditionRuleHtml(id, 0)}
                             </div>
 
-                            <div class="question-condition-summary d-none">
-                                Show when
-                                <strong class="condition-summary-question"></strong>
-                                <span class="condition-summary-operator">has</span>
-                                answer
-                                <strong class="condition-summary-option"></strong>.
+                            <div class="d-flex justify-content-between align-items-center gap-1 mt-50">
+                                <small class="text-muted">
+                                    Multiple answers in one row are OR. Different rows are AND.
+                                </small>
+
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-primary add-condition-rule"
+                                >
+                                    <i data-feather="plus"></i>
+                                    Add Parent Rule
+                                </button>
+                            </div>
+
+                            <div class="question-condition-summary mt-1 d-none">
+                                All parent rules must match. Inside each rule, any selected answer can match.
                             </div>
 
                             <small class="text-muted d-block mt-50">
-                                If this question is Required, validation applies only while the condition is matched.
+                                If this question is Required, validation applies only while all parent rules are matched.
                             </small>
                         </div>
                     </div>
@@ -3026,7 +3381,11 @@
                             .find('.question-condition-toggle')
                             .prop('checked', true);
 
-                        newQuestionCard
+                        const firstConditionRule = newQuestionCard
+                            .find('.condition-rule')
+                            .first();
+
+                        firstConditionRule
                             .find('.condition-parent-question')
                             .val(
                                 String(
@@ -3035,11 +3394,11 @@
                             );
 
                         populateConditionAnswers(
-                            newQuestionCard,
-                            pendingCondition.parent_option_id
+                            firstConditionRule,
+                            [pendingCondition.parent_option_id]
                         );
 
-                        newQuestionCard
+                        firstConditionRule
                             .find('.condition-operator')
                             .val(pendingCondition.operator);
 
@@ -3133,26 +3492,47 @@
                 }
 
                 const childQuestionId = Number(card.data('question-id'));
-                const parentQuestionId = Number(card.find('.condition-parent-question').val() || 0);
-                const parentOptionId = Number(card.find('.condition-parent-option').val() || 0);
+                const rules = card.find('.condition-rule');
 
-                // if (!parentQuestionId || !parentOptionId) {
-                //     conditionError = 'Choose the parent question and answer for every conditional question.';
-                //     return;
-                // }
-
-                if (parentQuestionId === childQuestionId) {
-                    conditionError = 'A question cannot depend on itself.';
+                if (!rules.length) {
+                    conditionError = 'Add at least one parent rule for every conditional question.';
                     return;
                 }
 
-                const parentCard = form.find(
-                    `.question-card[data-question-id="${parentQuestionId}"]`
-                );
+                rules.each(function () {
+                    if (conditionError) return false;
 
-                if (!parentCard.length || !parentCard.find('.question-toggle').is(':checked')) {
-                    conditionError = 'The parent question of a conditional question must also be selected.';
-                }
+                    const rule = $(this);
+                    const parentQuestionId = Number(
+                        rule.find('.condition-parent-question').val() || 0
+                    );
+
+                    const parentOptionIds = (
+                        rule.find('.condition-parent-options').val() ?? []
+                    ).filter(Boolean);
+
+                    if (!parentQuestionId || !parentOptionIds.length) {
+                        conditionError = 'Choose a parent question and at least one answer for every condition rule.';
+                        return false;
+                    }
+
+                    if (parentQuestionId === childQuestionId) {
+                        conditionError = 'A question cannot depend on itself.';
+                        return false;
+                    }
+
+                    const parentCard = form.find(
+                        `.question-card[data-question-id="${parentQuestionId}"]`
+                    );
+
+                    if (
+                        !parentCard.length
+                        || !parentCard.find('.question-toggle').is(':checked')
+                    ) {
+                        conditionError = 'Every parent question of a conditional question must also be selected.';
+                        return false;
+                    }
+                });
             });
 
             if (conditionError) {

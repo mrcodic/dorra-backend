@@ -213,18 +213,31 @@ Context (for understanding only — do not render this as text in the artwork):
     }
 
     /**
-     * Resolve which questions are visible based on:
+     * Resolve which questions are visible.
      *
-     * resolved_condition = [
-     *     'parent_question_id' => 10,
-     *     'parent_option_id' => 50,
-     *     'operator' => 'selected',
+     * resolved_conditions uses:
+     *
+     * [
+     *     [
+     *         'parent_question_id' => 10,
+     *         'parent_option_ids' => [50, 51],
+     *         'operator' => 'selected',
+     *     ],
+     *     [
+     *         'parent_question_id' => 20,
+     *         'parent_option_ids' => [80, 81],
+     *         'operator' => 'selected',
+     *     ],
      * ]
      *
-     * Questions without a condition are always visible.
+     * Same rule:
+     *     option IDs are OR.
      *
-     * If the parent conditional question itself is hidden,
-     * its child questions are also hidden.
+     * Different rules:
+     *     rules are AND.
+     *
+     * The existing sort-order rule still guarantees that parent
+     * questions are evaluated before their child question.
      */
     private function filterVisibleQuestions(
         Collection $questions,
@@ -238,13 +251,44 @@ Context (for understanding only — do not render this as text in the artwork):
                 $answers,
                 $visibleQuestionIds
             ) {
-                $condition = $question->resolved_condition ?? null;
+                $conditions = collect(
+                    $question->resolved_conditions ?? []
+                );
 
                 /*
-                 * Normal question:
-                 * always visible.
+                 * Backward compatibility with the old single condition.
                  */
-                if (!$condition) {
+                if (
+                    $conditions->isEmpty()
+                    && !empty($question->resolved_condition)
+                ) {
+                    $legacy = $question->resolved_condition;
+
+                    $conditions = collect([[
+                        'parent_question_id' => (int) data_get(
+                            $legacy,
+                            'parent_question_id'
+                        ),
+                        'parent_option_ids' => array_values(
+                            array_filter([
+                                (int) data_get(
+                                    $legacy,
+                                    'parent_option_id'
+                                ),
+                            ])
+                        ),
+                        'operator' => (string) data_get(
+                            $legacy,
+                            'operator',
+                            'selected'
+                        ),
+                    ]]);
+                }
+
+                /*
+                 * Normal question: always visible.
+                 */
+                if ($conditions->isEmpty()) {
                     $visibleQuestionIds->push(
                         (int) $question->id
                     );
@@ -252,34 +296,45 @@ Context (for understanding only — do not render this as text in the artwork):
                     return true;
                 }
 
-                $parentQuestionId = (int) data_get(
-                    $condition,
-                    'parent_question_id'
-                );
-
                 /*
-                 * Invalid condition or parent question is itself hidden.
+                 * Different parent rules are AND.
                  */
-                if (
-                    !$parentQuestionId
-                    || !$visibleQuestionIds->contains($parentQuestionId)
-                ) {
-                    return false;
-                }
+                $visible = $conditions->every(
+                    function ($condition) use (
+                        $questions,
+                        $answers,
+                        $visibleQuestionIds
+                    ) {
+                        $parentQuestionId = (int) data_get(
+                            $condition,
+                            'parent_question_id'
+                        );
 
-                $parentQuestion = $questions->first(
-                    fn($item) =>
-                        (int) $item->id === $parentQuestionId
-                );
+                        if (
+                            !$parentQuestionId
+                            || !$visibleQuestionIds->contains(
+                                $parentQuestionId
+                            )
+                        ) {
+                            return false;
+                        }
 
-                if (!$parentQuestion) {
-                    return false;
-                }
+                        $parentQuestion = $questions->first(
+                            fn($item) =>
+                                (int) $item->id
+                                === $parentQuestionId
+                        );
 
-                $visible = $this->conditionMatches(
-                    $condition,
-                    $parentQuestion,
-                    $answers
+                        if (!$parentQuestion) {
+                            return false;
+                        }
+
+                        return $this->conditionMatches(
+                            $condition,
+                            $parentQuestion,
+                            $answers
+                        );
+                    }
                 );
 
                 if ($visible) {
@@ -294,7 +349,9 @@ Context (for understanding only — do not render this as text in the artwork):
     }
 
     /**
-     * Determine whether one conditional rule matches.
+     * Determine whether one conditional parent rule matches.
+     *
+     * Multiple parent_option_ids inside the rule are OR.
      */
     private function conditionMatches(
         array $condition,
@@ -303,11 +360,6 @@ Context (for understanding only — do not render this as text in the artwork):
     ): bool {
         $parentKey = (string) $parentQuestion->key;
 
-        /*
-         * Parent has no answer yet.
-         *
-         * Child stays hidden.
-         */
         if (!array_key_exists($parentKey, $answers)) {
             return false;
         }
@@ -318,68 +370,81 @@ Context (for understanding only — do not render this as text in the artwork):
             return false;
         }
 
-        $parentOptionId = (int) data_get(
-            $condition,
-            'parent_option_id'
-        );
-
-        if (!$parentOptionId) {
-            return false;
-        }
+        $parentOptionIds = collect(
+            data_get($condition, 'parent_option_ids', [])
+        )
+            ->map(fn($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values();
 
         /*
-         * The condition stores option ID,
-         * but frontend answers use option VALUE.
-         *
-         * Resolve the option first so we can compare correctly.
+         * Backward compatibility with the old parent_option_id.
          */
-        $parentOption = $parentQuestion
-            ->options
-            ->first(
-                fn($option) =>
-                    (int) $option->id === $parentOptionId
+        if ($parentOptionIds->isEmpty()) {
+            $legacyOptionId = (int) data_get(
+                $condition,
+                'parent_option_id'
             );
 
-        if (!$parentOption) {
+            if ($legacyOptionId) {
+                $parentOptionIds = collect([
+                    $legacyOptionId,
+                ]);
+            }
+        }
+
+        if ($parentOptionIds->isEmpty()) {
             return false;
         }
 
-        $expectedValue = (string) $parentOption->value;
+        $expectedValues = $parentQuestion
+            ->options
+            ->whereIn('id', $parentOptionIds)
+            ->pluck('value')
+            ->map(fn($value) => (string) $value)
+            ->unique()
+            ->values();
 
-        /*
-         * Supports both:
-         *
-         * SINGLE_SELECT:
-         * "logo"
-         *
-         * MULTI_SELECT:
-         * ["logo", "print"]
-         */
-        $selected = is_array($answer)
+        if ($expectedValues->isEmpty()) {
+            return false;
+        }
+
+        $answerValues = is_array($answer)
             ? collect($answer)
                 ->filter(
                     fn($value) =>
                         is_string($value)
                         || is_numeric($value)
                 )
-                ->map(
-                    fn($value) =>
-                    (string) $value
-                )
-                ->contains($expectedValue)
-            : (string) $answer === $expectedValue;
+                ->map(fn($value) => (string) $value)
+                ->unique()
+                ->values()
+            : collect([(string) $answer]);
+
+        /*
+         * selected:
+         *     any expected answer selected => true.
+         *
+         * not_selected:
+         *     none of the expected answers selected => true.
+         */
+        $hasAnySelected = $answerValues
+            ->intersect($expectedValues)
+            ->isNotEmpty();
 
         return match (
-        data_get(
+        (string) data_get(
             $condition,
             'operator',
             'selected'
         )
         ) {
-            'not_selected' => !$selected,
-            default => $selected,
+            'not_selected' => !$hasAnySelected,
+            default => $hasAnySelected,
         };
     }
+
     private function isEmptyAnswer(mixed $value): bool
     {
         if ($value === null) {
@@ -408,6 +473,7 @@ Context (for understanding only — do not render this as text in the artwork):
 
         return false;
     }
+
     private function resolveAnswers(
         Collection $questions,
         array $answers

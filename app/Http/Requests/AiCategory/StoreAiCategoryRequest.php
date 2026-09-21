@@ -50,9 +50,56 @@ class StoreAiCategoryRequest extends FormRequest
                 'exists:ai_guide_question_options,id',
             ],
             'questions.*.condition_enabled' => ['nullable', 'boolean'],
+
+            /*
+             * Old single-condition payload kept for backward compatibility.
+             */
             'questions.*.condition' => ['nullable', 'array'],
-            'questions.*.condition.parent_question_id' => ['nullable', 'integer', 'exists:ai_guide_questions,id'],
-            'questions.*.condition.parent_option_id' => ['nullable', 'integer', 'exists:ai_guide_question_options,id'],
+            'questions.*.condition.parent_question_id' => [
+                'nullable',
+                'integer',
+                'exists:ai_guide_questions,id',
+            ],
+            'questions.*.condition.parent_option_id' => [
+                'nullable',
+                'integer',
+                'exists:ai_guide_question_options,id',
+            ],
+            'questions.*.condition.operator' => [
+                'nullable',
+                Rule::in(['selected', 'not_selected']),
+            ],
+
+            /*
+             * New multi-parent + multi-answer payload.
+             *
+             * Same condition row:
+             *     parent_option_ids = OR
+             *
+             * Different condition rows:
+             *     AND
+             */
+            'questions.*.conditions' => ['nullable', 'array'],
+            'questions.*.conditions.*' => ['array'],
+            'questions.*.conditions.*.parent_question_id' => [
+                'nullable',
+                'integer',
+                'exists:ai_guide_questions,id',
+            ],
+            'questions.*.conditions.*.parent_option_ids' => [
+                'nullable',
+                'array',
+                'min:1',
+            ],
+            'questions.*.conditions.*.parent_option_ids.*' => [
+                'integer',
+                'distinct',
+                'exists:ai_guide_question_options,id',
+            ],
+            'questions.*.conditions.*.operator' => [
+                'nullable',
+                Rule::in(['selected', 'not_selected']),
+            ],
         ];
     }
 

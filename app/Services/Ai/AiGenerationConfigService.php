@@ -12,10 +12,8 @@ use Illuminate\Validation\ValidationException;
 
 class AiGenerationConfigService
 {
-    public function getAssignedQuestions(
-        int $aiCategoryId,
-        ?int $aiStudioItemId = null
-    ): Collection {
+    public function getAssignedQuestions(int $aiCategoryId, ?int $aiStudioItemId = null): Collection
+    {
         $aiCategory = AiCategory::query()
             ->with('studioItems')
             ->findOrFail($aiCategoryId);
@@ -30,8 +28,7 @@ class AiGenerationConfigService
         ]];
 
         if ($aiStudioItemId !== null) {
-            $studioItem = $aiCategory->studioItems
-                ->firstWhere('id', $aiStudioItemId);
+            $studioItem = $aiCategory->studioItems->firstWhere('id', $aiStudioItemId);
 
             if (!$studioItem || !$studioItem->is_active) {
                 throw ValidationException::withMessages([
@@ -51,21 +48,9 @@ class AiGenerationConfigService
             ];
         }
 
-        /*
-         * Question assignments from:
-         * - AI Product
-         * - selected Studio Item
-         */
         $questionAssignments = $this
-            ->contextAssignments(
-                'ai_guide_question_assignments',
-                $contexts
-            )
-            ->filter(
-                fn($row) =>
-                    $row->is_active === null
-                    || (bool) $row->is_active
-            )
+            ->contextAssignments('ai_guide_question_assignments', $contexts)
+            ->filter(fn($row) => $row->is_active === null || (bool) $row->is_active)
             ->values();
 
         if ($questionAssignments->isEmpty()) {
@@ -73,22 +58,21 @@ class AiGenerationConfigService
         }
 
         /*
-         * Load conditional rules by assignment ID.
+         * IMPORTANT:
+         * One assignment can now have MANY condition rows.
          */
         $conditionsByAssignmentId = collect();
 
         if (Schema::hasTable('ai_guide_question_conditions')) {
-            $conditionsByAssignmentId = DB::table(
-                'ai_guide_question_conditions'
-            )
+            $conditionsByAssignmentId = DB::table('ai_guide_question_conditions')
                 ->whereIn(
                     'ai_guide_question_assignment_id',
                     $questionAssignments->pluck('id')
                 )
+                ->orderBy('id')
                 ->get()
-                ->keyBy(
-                    fn($row) =>
-                    (int) $row->ai_guide_question_assignment_id
+                ->groupBy(
+                    fn($row) => (int) $row->ai_guide_question_assignment_id
                 );
         }
 
@@ -98,62 +82,28 @@ class AiGenerationConfigService
             ->unique()
             ->values();
 
-        /*
-         * Load questions with ALL active options first.
-         *
-         * We need the full option collection to resolve:
-         *
-         * parent question ID
-         *      ↓
-         * question key
-         *
-         * parent option ID
-         *      ↓
-         * option value
-         */
         $questions = AiGuideQuestion::query()
             ->where('is_active', true)
             ->whereIn('id', $questionIds)
             ->with([
                 'options' => fn($query) => $query
-                    ->where('is_active', true)
                     ->orderBy('sort_order')
                     ->orderBy('id'),
             ])
             ->get()
-            ->keyBy(
-                fn($question) => (int) $question->id
-            );
+            ->keyBy(fn($question) => (int) $question->id);
 
         /*
-         * Keep lookup maps BEFORE filtering options.
+         * Keep a full option lookup BEFORE options are filtered per assignment.
+         * It is used to convert condition option IDs to frontend option values.
          */
-        $questionKeyById = $questions
-            ->mapWithKeys(
-                fn($question) => [
-                    (int) $question->id => $question->key,
-                ]
-            );
-
-        $optionById = $questions
+        $allOptionsById = $questions
             ->flatMap(fn($question) => $question->options)
-            ->keyBy(
-                fn($option) => (int) $option->id
-            );
+            ->keyBy(fn($option) => (int) $option->id);
 
-        /*
-         * Option assignments.
-         */
         $optionAssignments = $this
-            ->contextAssignments(
-                'ai_guide_option_assignments',
-                $contexts
-            )
-            ->filter(
-                fn($row) =>
-                    $row->is_active === null
-                    || (bool) $row->is_active
-            )
+            ->contextAssignments('ai_guide_option_assignments', $contexts)
+            ->filter(fn($row) => $row->is_active === null || (bool) $row->is_active)
             ->values();
 
         $assignedOptionIds = $optionAssignments
@@ -168,11 +118,9 @@ class AiGenerationConfigService
                 $questionAssignments,
                 $assignedOptionIds,
                 $conditionsByAssignmentId,
-                $questionKeyById,
-                $optionById
+                $allOptionsById
             ) {
                 $questionId = (int) $questionId;
-
                 $question = $questions->get($questionId);
 
                 if (!$question) {
@@ -182,39 +130,18 @@ class AiGenerationConfigService
                 $assignments = $questionAssignments
                     ->filter(
                         fn($assignment) =>
-                            (int) $assignment->ai_guide_question_id
-                            === $questionId
+                            (int) $assignment->ai_guide_question_id === $questionId
                     )
                     ->values();
 
-                /*
-                 * Resolve required.
-                 *
-                 * Any assignment required=true wins.
-                 *
-                 * Otherwise:
-                 * explicit false wins over global.
-                 */
                 $requiredValues = $assignments
                     ->pluck('required')
-                    ->filter(
-                        fn($value) => $value !== null
-                    );
+                    ->filter(fn($value) => $value !== null);
 
-                if (
-                    $requiredValues->contains(
-                        fn($value) => (bool) $value
-                    )
-                ) {
-                    $question->setAttribute(
-                        'resolved_required',
-                        true
-                    );
+                if ($requiredValues->contains(fn($value) => (bool) $value)) {
+                    $question->setAttribute('resolved_required', true);
                 } elseif ($requiredValues->isNotEmpty()) {
-                    $question->setAttribute(
-                        'resolved_required',
-                        false
-                    );
+                    $question->setAttribute('resolved_required', false);
                 } else {
                     $question->setAttribute(
                         'resolved_required',
@@ -222,50 +149,28 @@ class AiGenerationConfigService
                     );
                 }
 
-                /*
-                 * Resolve sort order.
-                 */
-                $resolvedSortOrder = $assignments
-                    ->pluck('sort_order')
-                    ->filter(
-                        fn($value) => $value !== null
-                    )
-                    ->map(fn($value) => (int) $value)
-                    ->min();
-
                 $question->setAttribute(
                     'resolved_sort_order',
-                    $resolvedSortOrder
-                    ?? (int) ($question->sort_order ?? 0)
+                    $assignments
+                        ->pluck('sort_order')
+                        ->filter(fn($value) => $value !== null)
+                        ->map(fn($value) => (int) $value)
+                        ->min() ?? (int) ($question->sort_order ?? 0)
                 );
 
-                /*
-                 * Resolve options.
-                 */
                 $allOptions = $question->options
-                    ->filter(
-                        fn($option) =>
-                        (bool) ($option->is_active ?? true)
-                    )
-                    ->sortBy([
-                        ['sort_order', 'asc'],
-                        ['id', 'asc'],
-                    ])
+                    ->filter(fn($option) => (bool) ($option->is_active ?? true))
+                    ->sortBy('sort_order')
                     ->values();
 
                 $useAllOptions = $assignments->contains(
-                    fn($assignment) =>
-                        ($assignment->options_mode ?? null)
-                        === 'all'
+                    fn($assignment) => ($assignment->options_mode ?? null) === 'all'
                 );
 
                 $resolvedOptions = $useAllOptions
                     ? $allOptions
                     : $allOptions
-                        ->whereIn(
-                            'id',
-                            $assignedOptionIds
-                        )
+                        ->whereIn('id', $assignedOptionIds)
                         ->values();
 
                 $question->setAttribute(
@@ -276,141 +181,181 @@ class AiGenerationConfigService
                         ->all()
                 );
 
-                $question->setRelation(
-                    'options',
-                    $resolvedOptions
-                );
+                $question->setRelation('options', $resolvedOptions);
 
                 /*
-                 * =====================================================
-                 * CONDITION
-                 * =====================================================
+                 * =========================================================
+                 * CONDITIONAL VISIBILITY
+                 * =========================================================
                  *
-                 * Important merge rule:
+                 * Same parent question + multiple option rows => OR
+                 * Different parent questions                  => AND
                  *
-                 * If Product OR Studio Item assigns this question
-                 * without a condition:
-                 *
-                 *      show_when = null
-                 *
-                 * because that question is unconditional.
+                 * If ANY effective assignment has no conditions, the
+                 * question remains unconditional. This preserves the old
+                 * Product + Studio Item merge behavior.
                  */
-                $assignmentConditions = $assignments
-                    ->map(
-                        fn($assignment) =>
-                        $conditionsByAssignmentId->get(
-                            (int) $assignment->id
-                        )
-                    );
-
-                $hasUnconditionalAssignment =
-                    $assignmentConditions->contains(
-                        fn($condition) =>
-                            $condition === null
-                    );
-
-                $question->setAttribute(
-                    'show_when',
-                    null
+                $assignmentConditions = $assignments->mapWithKeys(
+                    fn($assignment) => [
+                        (int) $assignment->id => collect(
+                            $conditionsByAssignmentId->get(
+                                (int) $assignment->id,
+                                collect()
+                            )
+                        ),
+                    ]
                 );
 
+                $hasUnconditionalAssignment = $assignmentConditions->contains(
+                    fn($conditions) => $conditions->isEmpty()
+                );
+
+                $question->setAttribute('resolved_conditions', []);
+                $question->setAttribute('resolved_condition', null);
+                $question->setAttribute('show_when', null);
+
                 if (!$hasUnconditionalAssignment) {
+                    $rawConditions = $assignmentConditions
+                        ->flatMap(fn($conditions) => $conditions)
+                        ->values();
+
                     /*
-                     * For the simple frontend contract,
-                     * use the first unique condition.
+                     * Group rows by parent question + operator.
+                     * Every option inside a group is OR.
                      */
-                    $condition = $assignmentConditions
-                        ->filter()
-                        ->unique(
-                            fn($condition) => implode(':', [
+                    $resolvedConditions = $rawConditions
+                        ->groupBy(function ($condition) {
+                            return implode(':', [
                                 (int) $condition->parent_question_id,
-                                (int) $condition->parent_option_id,
-                                $condition->operator ?: 'selected',
-                            ])
-                        )
-                        ->first();
+                                (string) ($condition->operator ?: 'selected'),
+                            ]);
+                        })
+                        ->map(function ($conditions) {
+                            $first = $conditions->first();
 
-                    if ($condition) {
-                        $parentQuestionId =
-                            (int) $condition->parent_question_id;
+                            return [
+                                'parent_question_id' => (int) $first->parent_question_id,
+                                'parent_option_ids' => $conditions
+                                    ->pluck('parent_option_id')
+                                    ->map(fn($id) => (int) $id)
+                                    ->unique()
+                                    ->values()
+                                    ->all(),
+                                'operator' => (string) ($first->operator ?: 'selected'),
+                            ];
+                        })
+                        ->values();
 
-                        $parentOptionId =
-                            (int) $condition->parent_option_id;
+                    $question->setAttribute(
+                        'resolved_conditions',
+                        $resolvedConditions->all()
+                    );
 
-                        $parentQuestionKey =
-                            $questionKeyById->get(
-                                $parentQuestionId
-                            );
+                    /*
+                     * Keep old internal single condition for compatibility
+                     * when there is exactly one parent and one answer.
+                     */
+                    if (
+                        $resolvedConditions->count() === 1
+                        && count($resolvedConditions->first()['parent_option_ids']) === 1
+                    ) {
+                        $single = $resolvedConditions->first();
 
-                        $parentOption =
-                            $optionById->get(
-                                $parentOptionId
-                            );
+                        $question->setAttribute('resolved_condition', [
+                            'parent_question_id' => $single['parent_question_id'],
+                            'parent_option_id' => $single['parent_option_ids'][0],
+                            'operator' => $single['operator'],
+                        ]);
+                    }
+
+                    /*
+                     * Keep the API key exactly `showWhen` via the resource.
+                     * The attribute below only extends its value so frontend
+                     * can support multiple parents and multiple answers.
+                     */
+                    $showRules = $resolvedConditions
+                        ->map(function ($condition) use ($questions, $allOptionsById) {
+                            $parentQuestionId = (int) $condition['parent_question_id'];
+                            $parentQuestion = $questions->get($parentQuestionId);
+
+                            if (!$parentQuestion) {
+                                return null;
+                            }
+
+                            $optionValues = collect($condition['parent_option_ids'])
+                                ->map(function ($optionId) use ($allOptionsById, $parentQuestionId) {
+                                    $option = $allOptionsById->get((int) $optionId);
+
+                                    if (
+                                        !$option
+                                        || (int) $option->ai_guide_question_id !== $parentQuestionId
+                                    ) {
+                                        return null;
+                                    }
+
+                                    return (string) $option->value;
+                                })
+                                ->filter(fn($value) => $value !== null && $value !== '')
+                                ->unique()
+                                ->values();
+
+                            if ($optionValues->isEmpty()) {
+                                return null;
+                            }
+
+                            return [
+                                'questionId' => (string) $parentQuestion->key,
+                                'optionValues' => $optionValues->all(),
+                                'operator' => $condition['operator'] ?: 'selected',
+                            ];
+                        })
+                        ->filter()
+                        ->values();
+
+                    if ($showRules->isNotEmpty()) {
+                        $showWhen = [
+                            'logic' => 'all',
+                            'rules' => $showRules->all(),
+                        ];
 
                         /*
-                         * Extra safety:
-                         * make sure this option actually belongs
-                         * to the parent question.
+                         * Preserve the old simple fields when only one rule
+                         * exists, so existing frontend logic still works for
+                         * the old one-parent/one-answer case.
                          */
-                        if (
-                            $parentQuestionKey
-                            && $parentOption
-                            && (int) $parentOption->ai_guide_question_id
-                            === $parentQuestionId
-                        ) {
-                            $question->setAttribute(
-                                'show_when',
-                                [
-                                    'questionId' =>
-                                        $parentQuestionKey,
+                        if ($showRules->count() === 1) {
+                            $firstRule = $showRules->first();
 
-                                    'optionValue' =>
-                                        $parentOption->value,
-
-                                    'operator' =>
-                                        $condition->operator
-                                            ?: 'selected',
-                                ]
-                            );
+                            $showWhen['questionId'] = $firstRule['questionId'];
+                            $showWhen['optionValues'] = $firstRule['optionValues'];
+                            $showWhen['optionValue'] = $firstRule['optionValues'][0] ?? null;
+                            $showWhen['operator'] = $firstRule['operator'];
                         }
+
+                        $question->setAttribute('show_when', $showWhen);
                     }
                 }
 
                 return $question;
             })
             ->filter()
-            ->sortBy(
-                fn($question) => [
-                    (int) (
-                        $question->resolved_sort_order
-                        ?? 0
-                    ),
-                    (int) $question->id,
-                ]
-            )
+            ->sortBy(fn($question) => [
+                (int) ($question->resolved_sort_order ?? 0),
+                (int) $question->id,
+            ])
             ->values();
     }
 
-    private function contextAssignments(
-        string $table,
-        array $contexts
-    ): Collection {
+    private function contextAssignments(string $table, array $contexts): Collection
+    {
         return DB::table($table)
             ->where(function ($query) use ($contexts) {
                 foreach ($contexts as $context) {
-                    $query->orWhere(
-                        function ($subQuery) use ($context) {
-                            $subQuery
-                                ->where(
-                                    'assignable_id',
-                                    $context['id']
-                                )
-                                ->whereIn(
-                                    'assignable_type',
-                                    $context['types']
-                                );
-                        }
-                    );
+                    $query->orWhere(function ($subQuery) use ($context) {
+                        $subQuery
+                            ->where('assignable_id', $context['id'])
+                            ->whereIn('assignable_type', $context['types']);
+                    });
                 }
             })
             ->get();

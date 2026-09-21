@@ -69,6 +69,7 @@ class AiCategoryService extends BaseService
                 $questions,
                 $studioItems
             );
+
             $this->syncQuestionConditions($aiCategory, $questions);
 
             return $aiCategory->load(array_unique(array_merge(
@@ -91,6 +92,7 @@ class AiCategoryService extends BaseService
                 $questions,
                 $studioItems
             );
+
             $this->syncQuestionConditions($aiCategory, $questions);
 
             return $aiCategory->load(array_unique(array_merge(
@@ -112,9 +114,9 @@ class AiCategoryService extends BaseService
             ? $query->paginate($perPage)
             : $query->get();
     }
+
     private function syncQuestionConditions(AiCategory $aiCategory, array $rows): void
     {
-
         $selectedRows = collect($rows)
             ->mapWithKeys(function ($row, $key) {
                 $questionId = (int) ($row['question_id'] ?? $key);
@@ -166,78 +168,52 @@ class AiCategoryService extends BaseService
                 continue;
             }
 
-            $condition = $row['condition'] ?? [];
+            $conditions = collect($row['conditions'] ?? []);
 
-            $parentQuestionId = (int) ($condition['parent_question_id'] ?? 0);
-            $parentOptionId = (int) ($condition['parent_option_id'] ?? 0);
-            $operator = (string) ($condition['operator'] ?? 'selected');
+            /*
+             * Backward compatibility with the old single-condition payload.
+             */
+            if ($conditions->isEmpty() && !empty($row['condition'])) {
+                $legacy = $row['condition'];
 
-            if (!$parentQuestionId || !$parentOptionId) {
-                throw ValidationException::withMessages([
-                    "questions.{$questionId}.condition" => [
-                        'Parent question and answer are required.',
-                    ],
-                ]);
+                $conditions = collect([[
+                    'parent_question_id' => $legacy['parent_question_id'] ?? null,
+                    'parent_option_ids' => array_values(array_filter([
+                        $legacy['parent_option_id'] ?? null,
+                    ])),
+                    'operator' => $legacy['operator'] ?? 'selected',
+                ]]);
             }
 
-            if ($parentQuestionId === (int) $questionId) {
+            $conditions = $conditions
+                ->map(function ($condition) {
+                    $condition = is_array($condition) ? $condition : [];
+
+                    $optionIds = collect(
+                        $condition['parent_option_ids']
+                        ?? array_values(array_filter([
+                        $condition['parent_option_id'] ?? null,
+                    ]))
+                    )
+                        ->map(fn($id) => (int) $id)
+                        ->filter()
+                        ->unique()
+                        ->values()
+                        ->all();
+
+                    return [
+                        'parent_question_id' => (int) ($condition['parent_question_id'] ?? 0),
+                        'parent_option_ids' => $optionIds,
+                        'operator' => (string) ($condition['operator'] ?? 'selected'),
+                    ];
+                })
+                ->filter(fn($condition) => $condition['parent_question_id'] || !empty($condition['parent_option_ids']))
+                ->values();
+
+            if ($conditions->isEmpty()) {
                 throw ValidationException::withMessages([
-                    "questions.{$questionId}.condition.parent_question_id" => [
-                        'A question cannot depend on itself.',
-                    ],
-                ]);
-            }
-
-            if (!$selectedRows->has($parentQuestionId)) {
-                throw ValidationException::withMessages([
-                    "questions.{$questionId}.condition.parent_question_id" => [
-                        'The parent question must be selected for this AI Product.',
-                    ],
-                ]);
-            }
-
-            $parentQuestion = $questions->get($parentQuestionId);
-
-            if (!$parentQuestion) {
-                throw ValidationException::withMessages([
-                    "questions.{$questionId}.condition.parent_question_id" => [
-                        'The selected parent question is unavailable.',
-                    ],
-                ]);
-            }
-
-            $parentOption = $parentQuestion->options->firstWhere(
-                'id',
-                $parentOptionId
-            );
-
-            if (!$parentOption) {
-                throw ValidationException::withMessages([
-                    "questions.{$questionId}.condition.parent_option_id" => [
-                        'The selected answer does not belong to the parent question.',
-                    ],
-                ]);
-            }
-
-            if (!in_array($operator, ['selected', 'not_selected'], true)) {
-                throw ValidationException::withMessages([
-                    "questions.{$questionId}.condition.operator" => [
-                        'Invalid conditional operator.',
-                    ],
-                ]);
-            }
-
-            $childSort = (int) ($row['sort_order'] ?? 0);
-            $parentSort = (int) data_get(
-                $selectedRows->get($parentQuestionId),
-                'sort_order',
-                0
-            );
-
-            if ($parentSort >= $childSort) {
-                throw ValidationException::withMessages([
-                    "questions.{$questionId}.condition.parent_question_id" => [
-                        'The parent question must appear before the conditional question.',
+                    "questions.{$questionId}.conditions" => [
+                        'At least one conditional parent question and answer are required.',
                     ],
                 ]);
             }
@@ -252,14 +228,105 @@ class AiCategoryService extends BaseService
                 ]);
             }
 
-            $inserts[] = [
-                'ai_guide_question_assignment_id' => $assignment->id,
-                'parent_question_id' => $parentQuestionId,
-                'parent_option_id' => $parentOptionId,
-                'operator' => $operator,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
+            foreach ($conditions as $conditionIndex => $condition) {
+                $parentQuestionId = (int) $condition['parent_question_id'];
+                $parentOptionIds = collect($condition['parent_option_ids'])
+                    ->map(fn($id) => (int) $id)
+                    ->filter()
+                    ->unique()
+                    ->values();
+                $operator = (string) $condition['operator'];
+
+                if (!$parentQuestionId || $parentOptionIds->isEmpty()) {
+                    throw ValidationException::withMessages([
+                        "questions.{$questionId}.conditions.{$conditionIndex}" => [
+                            'Parent question and at least one answer are required.',
+                        ],
+                    ]);
+                }
+
+                if ($parentQuestionId === (int) $questionId) {
+                    throw ValidationException::withMessages([
+                        "questions.{$questionId}.conditions.{$conditionIndex}.parent_question_id" => [
+                            'A question cannot depend on itself.',
+                        ],
+                    ]);
+                }
+
+                if (!$selectedRows->has($parentQuestionId)) {
+                    throw ValidationException::withMessages([
+                        "questions.{$questionId}.conditions.{$conditionIndex}.parent_question_id" => [
+                            'The parent question must be selected for this AI Product.',
+                        ],
+                    ]);
+                }
+
+                $parentQuestion = $questions->get($parentQuestionId);
+
+                if (!$parentQuestion) {
+                    throw ValidationException::withMessages([
+                        "questions.{$questionId}.conditions.{$conditionIndex}.parent_question_id" => [
+                            'The selected parent question is unavailable.',
+                        ],
+                    ]);
+                }
+
+                $validParentOptionIds = $parentQuestion->options
+                    ->pluck('id')
+                    ->map(fn($id) => (int) $id);
+
+                $invalidOptionIds = $parentOptionIds->diff($validParentOptionIds);
+
+                if ($invalidOptionIds->isNotEmpty()) {
+                    throw ValidationException::withMessages([
+                        "questions.{$questionId}.conditions.{$conditionIndex}.parent_option_ids" => [
+                            'One or more selected answers do not belong to the parent question.',
+                        ],
+                    ]);
+                }
+
+                if (!in_array($operator, ['selected', 'not_selected'], true)) {
+                    throw ValidationException::withMessages([
+                        "questions.{$questionId}.conditions.{$conditionIndex}.operator" => [
+                            'Invalid conditional operator.',
+                        ],
+                    ]);
+                }
+
+                /*
+                 * Keep the existing ordering rule because the current runtime
+                 * visibility resolver evaluates questions in sort order.
+                 */
+                $childSort = (int) ($row['sort_order'] ?? 0);
+                $parentSort = (int) data_get(
+                    $selectedRows->get($parentQuestionId),
+                    'sort_order',
+                    0
+                );
+
+                if ($parentSort >= $childSort) {
+                    throw ValidationException::withMessages([
+                        "questions.{$questionId}.conditions.{$conditionIndex}.parent_question_id" => [
+                            'The parent question must appear before the conditional question.',
+                        ],
+                    ]);
+                }
+
+                /*
+                 * Same parent question + many answers = OR.
+                 * Different parent questions = AND at runtime.
+                 */
+                foreach ($parentOptionIds as $parentOptionId) {
+                    $inserts[] = [
+                        'ai_guide_question_assignment_id' => $assignment->id,
+                        'parent_question_id' => $parentQuestionId,
+                        'parent_option_id' => $parentOptionId,
+                        'operator' => $operator,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+            }
         }
 
         if ($inserts) {
