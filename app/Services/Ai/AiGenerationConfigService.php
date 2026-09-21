@@ -314,7 +314,7 @@ class AiGenerationConfigService
 
                     if ($showRules->isNotEmpty()) {
                         $showWhen = [
-                            'logic' => 'all',
+//                            'logic' => 'all',
                             'rules' => $showRules->all(),
                         ];
 
