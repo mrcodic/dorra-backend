@@ -831,11 +831,11 @@
                                             ->map(fn ($id) => (int) $id)
                                             ->all();
 
-                                        $conditionOperator = (string) data_get(
-                                            $savedCondition,
-                                            'operator',
-                                            'selected'
-                                        );
+//                                        $conditionOperator = (string) data_get(
+//                                            $savedCondition,
+//                                            'operator',
+//                                            'selected'
+//                                        );
                                     @endphp
 
                                     <div
@@ -887,21 +887,21 @@
                                                 </select>
                                             </div>
 
-                                            <div class="col-md-2 mb-1">
-                                                <label class="form-label">Rule</label>
+{{--                                            <div class="col-md-2 mb-1">--}}
+{{--                                                <label class="form-label">Rule</label>--}}
 
-                                                <select
-                                                    name="questions[{{ $question->id }}][conditions][{{ $conditionIndex }}][operator]"
-                                                    class="form-select condition-operator"
-                                                >
-                                                    <option value="selected" @selected($conditionOperator === 'selected')>
-                                                        Is selected
-                                                    </option>
-                                                    <option value="not_selected" @selected($conditionOperator === 'not_selected')>
-                                                        Is not selected
-                                                    </option>
-                                                </select>
-                                            </div>
+{{--                                                <select--}}
+{{--                                                    name="questions[{{ $question->id }}][conditions][{{ $conditionIndex }}][operator]"--}}
+{{--                                                    class="form-select condition-operator"--}}
+{{--                                                >--}}
+{{--                                                    <option value="selected" @selected($conditionOperator === 'selected')>--}}
+{{--                                                        Is selected--}}
+{{--                                                    </option>--}}
+{{--                                                    <option value="not_selected" @selected($conditionOperator === 'not_selected')>--}}
+{{--                                                        Is not selected--}}
+{{--                                                    </option>--}}
+{{--                                                </select>--}}
+{{--                                            </div>--}}
 
                                             <div class="col-md-2 mb-1">
                                                 <button
@@ -1972,29 +1972,6 @@
             )}
                             </select>
                         </div>
-
-                        <div class="col-md-2 mb-1">
-                            <label class="form-label">Rule</label>
-
-                            <select
-                                name="questions[${questionId}][conditions][${index}][operator]"
-                                class="form-select condition-operator"
-                            >
-                                <option
-                                    value="selected"
-                                    ${operator === 'selected' ? 'selected' : ''}
-                                >
-                                    Is selected
-                                </option>
-                                <option
-                                    value="not_selected"
-                                    ${operator === 'not_selected' ? 'selected' : ''}
-                                >
-                                    Is not selected
-                                </option>
-                            </select>
-                        </div>
-
                         <div class="col-md-2 mb-1">
                             <button
                                 type="button"
