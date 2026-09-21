@@ -93,7 +93,6 @@ class StoreAiCategoryRequest extends FormRequest
             ],
             'questions.*.conditions.*.parent_option_ids.*' => [
                 'integer',
-                'distinct',
                 'exists:ai_guide_question_options,id',
             ],
             'questions.*.conditions.*.operator' => [
