@@ -65,7 +65,9 @@ class BundleController extends Controller
         $cart = $bundleCartService->store($request);
 
         return Response::api(
-            data: $cart
+             data: [
+            'cookie_value' => $cart->guest?->cookie_value,
+        ]
         );
     }
 }
