@@ -609,12 +609,6 @@ class CartService extends BaseService
         $cartItem = $this->cartItemRepository->query()
             ->whereKey($itemId)
             ->firstOrFail();
-        if ($cartItem->bundle_group_key) {
-            throw ValidationException::withMessages([
-                'item' => ['Please remove the bundle and add it again.'],
-            ]);
-        }
-
         $product = $cartItem->cartable;
         $priceDetails = $this->calculatePriceDetails($validatedData, $product, price: $cartItem->product_price);
         $this->handleSpecs(Arr::get($validatedData, 'specs', []), $cartItem);
