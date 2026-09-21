@@ -36,7 +36,10 @@ class Product extends Model implements HasMedia
         'is_tableau',
     ];
 
-
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
     public function price(): Attribute
     {
         return Attribute::get(function ($value) {

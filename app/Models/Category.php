@@ -41,6 +41,10 @@ class Category extends Model implements HasMedia
     protected $casts = [
         'colors' => 'array'
     ];
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     public function scopeIsLanding(Builder $builder): Builder
     {
