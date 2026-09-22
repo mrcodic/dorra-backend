@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Models\Concerns\HasAttachedBundles;
 use App\Models\Mockup;
 use App\Enums\Product\StatusEnum;
+use App\Observers\ProductObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
@@ -14,7 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasManyThrough, MorphMany, MorphToMany};
-
+#[ObservedBy(ProductObserver::class)]
 class Product extends Model implements HasMedia
 {
     use InteractsWithMedia, HasTranslations, SoftDeletes, HasAttachedBundles;

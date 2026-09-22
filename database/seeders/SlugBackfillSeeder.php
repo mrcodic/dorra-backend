@@ -4,11 +4,13 @@ namespace Database\Seeders;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Observers\Traits\GeneratesUniqueSlug;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class SlugBackfillSeeder extends Seeder
 {
+    use GeneratesUniqueSlug;
+
     /**
      * Run the database seeds.
      */
@@ -23,24 +25,20 @@ class SlugBackfillSeeder extends Seeder
      */
     private function backfillSlugs(string $model, string $sourceColumn): void
     {
-        $model::whereNull('slug')
-            ->orWhere('slug', '')
+        $count = 0;
+
+        $model::where(function ($query) {
+            $query->whereNull('slug')->orWhere('slug', '');
+        })
             ->orderBy('id')
-            ->chunkById(100, function ($rows) use ($model, $sourceColumn) {
+            ->chunkById(100, function ($rows) use ($model, $sourceColumn, &$count) {
                 foreach ($rows as $row) {
-                    $base = Str::slug($row->{$sourceColumn});
-                    $slug = $base;
-                    $i = 1;
-
-                    while ($model::where('slug', $slug)->where('id', '!=', $row->id)->exists()) {
-                        $slug = "{$base}-{$i}";
-                        $i++;
-                    }
-
-                    $row->update(['slug' => $slug]);
+                    $row->slug = $this->generateUniqueSlug($row, $sourceColumn);
+                    $row->saveQuietly(); 
+                    $count++;
                 }
             });
 
-        $this->command->info("Slugs backfilled for {$model}.");
+        $this->command->info("Slugs backfilled for {$model}: {$count} row(s).");
     }
 }
