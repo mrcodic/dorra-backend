@@ -190,6 +190,47 @@ class BundleCartService
             ]);
         });
     }
+    private function ensureBundleHasNoDuplicatePaidItems(Bundle $bundle): void
+    {
+        $bundleItems = collect([$bundle->trigger])
+            ->merge($bundle->rewards)
+            ->filter()
+            ->values();
+
+        $duplicates = $bundleItems
+            ->groupBy(function ($bundleItem) {
+                $itemable = $bundleItem->itemable;
+
+                return implode('|', [
+                    $this->getBundleItemRole($bundleItem),
+                    $itemable ? get_class($itemable) : 'null',
+                    $itemable?->getKey() ?? 'null',
+                    $bundleItem->price_id ?? 'no_price',
+                    $bundleItem->discount_type?->value ?? $bundleItem->discount_type ?? 'no_discount_type',
+                    $bundleItem->discount_value ?? 'no_discount_value',
+                ]);
+            })
+            ->filter(fn ($items) => $items->count() > 1);
+
+        if ($duplicates->isEmpty()) {
+            return;
+        }
+
+        $duplicateNames = $duplicates
+            ->map(function ($items) {
+                $first = $items->first();
+
+                return $first?->itemable?->name ?? "Bundle item #{$first?->id}";
+            })
+            ->values()
+            ->implode(', ');
+
+        throw ValidationException::withMessages([
+            'bundle_id' => [
+                "This bundle has duplicated items: {$duplicateNames}. Please keep one bundle item and set the correct quantity.",
+            ],
+        ]);
+    }
     private function normalizeQuantityPriceDetails(
         array $priceDetails,
         int $requiredQuantity,
@@ -374,6 +415,8 @@ class BundleCartService
                 'bundle_id' => ['Selected bundle is not configured correctly.'],
             ]);
         }
+
+        $this->ensureBundleHasNoDuplicatePaidItems($bundle);
 
         return $bundle;
     }
