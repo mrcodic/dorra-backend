@@ -27,6 +27,8 @@ class AiGenerationConfigService
             ])),
         ]];
 
+        $studioContext = null;
+
         if ($aiStudioItemId !== null) {
             $studioItem = $aiCategory->studioItems->firstWhere('id', $aiStudioItemId);
 
@@ -38,14 +40,16 @@ class AiGenerationConfigService
                 ]);
             }
 
-            $contexts[] = [
-                'id' => $studioItem->id,
+            $studioContext = [
+                'id' => (int) $studioItem->id,
                 'types' => array_values(array_unique([
                     $studioItem->getMorphClass(),
                     'ai_studio_item',
                     AiStudioItem::class,
                 ])),
             ];
+
+            $contexts[] = $studioContext;
         }
 
         $questionAssignments = $this
@@ -118,7 +122,8 @@ class AiGenerationConfigService
                 $questionAssignments,
                 $assignedOptionIds,
                 $conditionsByAssignmentId,
-                $allOptionsById
+                $allOptionsById,
+                $studioContext
             ) {
                 $questionId = (int) $questionId;
                 $question = $questions->get($questionId);
@@ -149,9 +154,36 @@ class AiGenerationConfigService
                     );
                 }
 
+                /*
+                 * When a Studio Item is selected, its assignment controls the
+                 * question order for questions attached to that Studio Item.
+                 *
+                 * Product assignment order remains the fallback for questions
+                 * that are only attached to the AI Product.
+                 */
+                $sortAssignments = $assignments;
+
+                if ($studioContext !== null) {
+                    $studioAssignments = $assignments
+                        ->filter(function ($assignment) use ($studioContext) {
+                            return
+                                (int) $assignment->assignable_id === (int) $studioContext['id']
+                                && in_array(
+                                    (string) $assignment->assignable_type,
+                                    $studioContext['types'],
+                                    true
+                                );
+                        })
+                        ->values();
+
+                    if ($studioAssignments->isNotEmpty()) {
+                        $sortAssignments = $studioAssignments;
+                    }
+                }
+
                 $question->setAttribute(
                     'resolved_sort_order',
-                    $assignments
+                    $sortAssignments
                         ->pluck('sort_order')
                         ->filter(fn($value) => $value !== null)
                         ->map(fn($value) => (int) $value)
@@ -191,9 +223,10 @@ class AiGenerationConfigService
                  * Same parent question + multiple option rows => OR
                  * Different parent questions                  => AND
                  *
-                 * If ANY effective assignment has no conditions, the
-                 * question remains unconditional. This preserves the old
-                 * Product + Studio Item merge behavior.
+                 * Empty condition rows on another context (for example a
+                 * Studio Item attachment) must NOT erase a Product condition.
+                 * Only assignments that actually define conditions participate
+                 * in the merged visibility rules.
                  */
                 $assignmentConditions = $assignments->mapWithKeys(
                     fn($assignment) => [
