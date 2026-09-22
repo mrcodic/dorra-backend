@@ -226,53 +226,62 @@ class BundleCartService
         });
 
         /*
-         * Old flow support:
-         * One config without quantity means use full required bundle quantity.
+         * Old flow:
+         * One config without quantity means full required quantity.
          */
         if (! $hasAnyQuantity && $configs->count() === 1) {
-            return $configs
-                ->map(function ($config) use ($requiredQuantity) {
-                    $config['quantity'] = $requiredQuantity;
+            $configs = $configs->map(function ($config) use ($requiredQuantity) {
+                $config['quantity'] = $requiredQuantity;
 
-                    return $config;
-                })
-                ->values();
-        }
-
-        /*
-         * Multiple configs without quantity:
-         * every config = quantity 1.
-         */
-        return $configs
-            ->map(function ($config) {
+                return $config;
+            });
+        } else {
+            /*
+             * Multiple configs:
+             * no quantity means quantity = 1
+             */
+            $configs = $configs->map(function ($config) {
                 $config['quantity'] = max((int) Arr::get($config, 'quantity', 1), 1);
 
                 return $config;
+            });
+        }
+
+        /*
+         * Merge duplicated same template/design/specs/color/mockup.
+         */
+        return $configs
+            ->groupBy(fn ($config) => $this->bundleConfigUniqueKey($config))
+            ->map(function ($sameConfigs) {
+                $first = $sameConfigs->first();
+
+                $first['quantity'] = $sameConfigs->sum(function ($config) {
+                    return max((int) Arr::get($config, 'quantity', 1), 1);
+                });
+
+                return $first;
             })
             ->values();
     }
-    private function normalizeUnitPriceDetails(array $priceDetails, int $requiredQuantity): array
+
+    private function bundleConfigUniqueKey(array $config): string
     {
-        $productPrice = (float) ($priceDetails['product_price'] ?? 0);
-        $specsSum = (float) ($priceDetails['specs_sum'] ?? 0);
+        $specs = collect(Arr::get($config, 'specs', []))
+            ->map(fn ($spec) => [
+                'id' => (int) Arr::get($spec, 'id'),
+                'option' => (int) Arr::get($spec, 'option'),
+            ])
+            ->sortBy('id')
+            ->values()
+            ->toJson();
 
-        /*
-         * If selected product price option represents a package quantity,
-         * split package price over the required selected templates/designs.
-         *
-         * Example:
-         * price option = 200 for quantity 2
-         * each selected template gets 100.
-         */
-        if (! empty($priceDetails['product_price_id']) && $requiredQuantity > 1) {
-            $productPrice = round($productPrice / $requiredQuantity, 2);
-        }
-
-        $priceDetails['product_price'] = $productPrice;
-        $priceDetails['sub_total'] = round($productPrice + $specsSum, 2);
-        $priceDetails['quantity'] = 1;
-
-        return $priceDetails;
+        return implode('|', [
+            Arr::get($config, 'template_id') ?: 'template:null',
+            Arr::get($config, 'design_id') ?: 'design:null',
+            Arr::get($config, 'color') ?: 'color:null',
+            Arr::get($config, 'mockup_id') ?: 'mockup:null',
+            $specs,
+        ]);
     }
     private function ensureBundleItemsAreNotAlreadyInCart(
         Cart $cart,
