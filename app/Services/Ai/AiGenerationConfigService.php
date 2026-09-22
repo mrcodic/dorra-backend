@@ -206,16 +206,15 @@ class AiGenerationConfigService
                     ]
                 );
 
-                $hasUnconditionalAssignment = $assignmentConditions->contains(
-                    fn($conditions) => $conditions->isEmpty()
-                );
-
                 $question->setAttribute('resolved_conditions', []);
                 $question->setAttribute('resolved_condition', null);
                 $question->setAttribute('show_when', null);
 
-                if (!$hasUnconditionalAssignment) {
-                    $rawConditions = $assignmentConditions
+                $conditionalAssignments = $assignmentConditions
+                    ->filter(fn($conditions) => $conditions->isNotEmpty());
+
+                if ($conditionalAssignments->isNotEmpty()) {
+                    $rawConditions = $conditionalAssignments
                         ->flatMap(fn($conditions) => $conditions)
                         ->values();
 
