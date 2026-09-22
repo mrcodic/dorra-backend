@@ -344,7 +344,6 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::get('/{id}/questions',  'questions')->name('questions');
             Route::put('/{id}/questions',  'updateQuestions')->name('questions.update');
 
-
         }));
         Route::resource('ai-studio-items', AiStudioItemController::class);
         Route::post('ai-categories/studio-items/quick-store', [AiCategoryController::class, 'quickStoreStudioItem'])
