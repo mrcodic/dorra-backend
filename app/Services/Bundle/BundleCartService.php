@@ -91,9 +91,17 @@ class BundleCartService
 
             foreach ($bundleItems as $bundleItem) {
                 $requiredQuantity = max((int) ($bundleItem->quantity ?? 1), 1);
+                $rawConfigs = $payloadItems
+                    ->get($bundleItem->id, collect())
+                    ->values();
+
+                $this->ensureCustomPriceBundleItemHasSingleConfig(
+                    bundleItem: $bundleItem,
+                    configs: $rawConfigs
+                );
 
                 $configs = $this->normalizeBundleItemConfigs(
-                    configs: $payloadItems->get($bundleItem->id, collect()),
+                    configs: $rawConfigs,
                     requiredQuantity: $requiredQuantity
                 );
 
@@ -202,7 +210,37 @@ class BundleCartService
             ]);
         });
     }
+    private function ensureCustomPriceBundleItemHasSingleConfig(BundleItem $bundleItem, $configs): void
+    {
+        if (! $this->bundleItemUsesCustomPrice($bundleItem)) {
+            return;
+        }
 
+        if (collect($configs)->count() <= 1) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            'items' => [
+                "Bundle item #{$bundleItem->id} uses custom price quantity. Please choose one template/design only.",
+            ],
+        ]);
+    }
+
+    private function bundleItemUsesCustomPrice(BundleItem $bundleItem): bool
+    {
+        $item = $bundleItem->itemable;
+
+        if ($bundleItem->price_id) {
+            return true;
+        }
+
+        if ((bool) data_get($item, 'has_custom_prices')) {
+            return true;
+        }
+
+        return $item && method_exists($item, 'prices') && $item->prices()->exists();
+    }
     private function normalizeBundleItemConfigs($configs, int $requiredQuantity)
     {
         $configs = collect($configs)->values();
