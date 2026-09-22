@@ -19,7 +19,6 @@ use App\Models\ProductSpecificationOption;
 use App\Models\Template;
 use App\Models\User;
 use App\Repositories\Interfaces\CartRepositoryInterface;
-
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -36,8 +35,16 @@ class BundleCartService
     public function store(Request $request): Cart
     {
         return DB::transaction(function () use ($request) {
-            $userId = getAuthOrGuest() instanceof User ? getAuthOrGuest()->id : null;
-            $guestId = getAuthOrGuest() instanceof Guest ? getAuthOrGuest()->id : null;
+            $authOrGuest = getAuthOrGuest();
+
+            $userId = $authOrGuest instanceof User ? $authOrGuest->id : null;
+            $guestId = $authOrGuest instanceof Guest ? $authOrGuest->id : null;
+
+            if (! $userId && ! $guestId) {
+                throw ValidationException::withMessages([
+                    'cart' => ['Cart could not be resolved.'],
+                ]);
+            }
 
             $cart = $this->cartRepository->query()
                 ->when($userId, fn ($query) => $query->where('user_id', $userId))
@@ -56,11 +63,15 @@ class BundleCartService
             $bundle = $this->getValidBundle((int) $request->bundle_id);
 
             /*
-             * Important:
              * groupBy allows same bundle_item_id to be sent more than once.
-             * Example:
-             * bundle_item_id = 30, quantity = 2
-             * request should contain item 30 twice with different templates/designs.
+             *
+             * Supported:
+             * 1) Old flow:
+             *    one item without quantity => full bundle_item quantity
+             *
+             * 2) New flow:
+             *    same bundle_item_id repeated with different template/design
+             *    or explicit quantity per row.
              */
             $payloadItems = collect($request->input('items', []))
                 ->groupBy(fn ($item) => (int) Arr::get($item, 'bundle_item_id'));
@@ -174,6 +185,7 @@ class BundleCartService
                     );
                 }
             }
+
             $cart->update([
                 'discount_code_id' => null,
                 'discount_amount' => 0,
@@ -190,68 +202,7 @@ class BundleCartService
             ]);
         });
     }
-    private function ensureBundleHasNoDuplicatePaidItems(Bundle $bundle): void
-    {
-        $bundleItems = collect([$bundle->trigger])
-            ->merge($bundle->rewards)
-            ->filter()
-            ->values();
 
-        $duplicates = $bundleItems
-            ->groupBy(function ($bundleItem) {
-                $itemable = $bundleItem->itemable;
-
-                return implode('|', [
-                    $this->getBundleItemRole($bundleItem),
-                    $itemable ? get_class($itemable) : 'null',
-                    $itemable?->getKey() ?? 'null',
-                    $bundleItem->price_id ?? 'no_price',
-                    $bundleItem->discount_type?->value ?? $bundleItem->discount_type ?? 'no_discount_type',
-                    $bundleItem->discount_value ?? 'no_discount_value',
-                ]);
-            })
-            ->filter(fn ($items) => $items->count() > 1);
-
-        if ($duplicates->isEmpty()) {
-            return;
-        }
-
-        $duplicateNames = $duplicates
-            ->map(function ($items) {
-                $first = $items->first();
-
-                return $first?->itemable?->name ?? "Bundle item #{$first?->id}";
-            })
-            ->values()
-            ->implode(', ');
-
-        throw ValidationException::withMessages([
-            'bundle_id' => [
-                "This bundle has duplicated items: {$duplicateNames}. Please keep one bundle item and set the correct quantity.",
-            ],
-        ]);
-    }
-    private function normalizeQuantityPriceDetails(
-        array $priceDetails,
-        int $requiredQuantity,
-        int $configQuantity
-    ): array {
-        $productPrice = (float) ($priceDetails['product_price'] ?? 0);
-        $specsSum = (float) ($priceDetails['specs_sum'] ?? 0);
-
-        if (! empty($priceDetails['product_price_id']) && $requiredQuantity > 1) {
-            $productPrice = round($productPrice / $requiredQuantity, 2);
-        }
-
-        $priceDetails['product_price'] = $productPrice;
-        $priceDetails['quantity'] = $configQuantity;
-        $priceDetails['sub_total'] = round(
-            ($productPrice + $specsSum) * $configQuantity,
-            2
-        );
-
-        return $priceDetails;
-    }
     private function normalizeBundleItemConfigs($configs, int $requiredQuantity)
     {
         $configs = collect($configs)->values();
@@ -268,7 +219,7 @@ class BundleCartService
 
         /*
          * Old flow:
-         * One config without quantity means full required quantity.
+         * one config without quantity means full required bundle item quantity.
          */
         if (! $hasAnyQuantity && $configs->count() === 1) {
             $configs = $configs->map(function ($config) use ($requiredQuantity) {
@@ -279,7 +230,7 @@ class BundleCartService
         } else {
             /*
              * Multiple configs:
-             * no quantity means quantity = 1
+             * missing quantity means quantity = 1.
              */
             $configs = $configs->map(function ($config) {
                 $config['quantity'] = max((int) Arr::get($config, 'quantity', 1), 1);
@@ -289,7 +240,8 @@ class BundleCartService
         }
 
         /*
-         * Merge duplicated same template/design/specs/color/mockup.
+         * Merge duplicated same template/design/specs/color/mockup
+         * for the same bundle_item_id.
          */
         return $configs
             ->groupBy(fn ($config) => $this->bundleConfigUniqueKey($config))
@@ -324,6 +276,40 @@ class BundleCartService
             $specs,
         ]);
     }
+
+    private function normalizeQuantityPriceDetails(
+        array $priceDetails,
+        int $requiredQuantity,
+        int $configQuantity
+    ): array {
+        $productPrice = (float) ($priceDetails['product_price'] ?? 0);
+        $specsSum = (float) ($priceDetails['specs_sum'] ?? 0);
+
+        /*
+         * Dorra custom price is usually package price.
+         * Example:
+         * price option = EGP 400 for quantity 20.
+         *
+         * If user chooses:
+         * template A quantity 10
+         * template B quantity 10
+         *
+         * each unit should be 400 / 20 = 20.
+         */
+        if (! empty($priceDetails['product_price_id']) && $requiredQuantity > 1) {
+            $productPrice = round($productPrice / $requiredQuantity, 2);
+        }
+
+        $priceDetails['product_price'] = $productPrice;
+        $priceDetails['quantity'] = $configQuantity;
+        $priceDetails['sub_total'] = round(
+            ($productPrice + $specsSum) * $configQuantity,
+            2
+        );
+
+        return $priceDetails;
+    }
+
     private function ensureBundleItemsAreNotAlreadyInCart(
         Cart $cart,
         Bundle $bundle,
@@ -346,9 +332,8 @@ class BundleCartService
         /*
          * Prevent conflict with normal cart items only.
          *
-         * Important:
-         * If the same product exists inside another bundle group,
-         * we allow it because each bundle has its own bundle_group_key.
+         * Same product inside another bundle group is allowed,
+         * because each bundle has its own bundle_group_key.
          */
         foreach ($bundleItems as $bundleItem) {
             $cartable = $bundleItem->itemable;
@@ -381,6 +366,7 @@ class BundleCartService
             }
         }
     }
+
     private function getValidBundle(int $bundleId): Bundle
     {
         $bundle = Bundle::query()
@@ -416,9 +402,57 @@ class BundleCartService
             ]);
         }
 
-        $this->ensureBundleHasNoDuplicatePaidItems($bundle);
+        /*
+         * Prevent this invalid setup:
+         *
+         * Bundle Item 1: notebook quantity 20
+         * Bundle Item 2: notebook quantity 1 discount 50%
+         *
+         * If same Product/Category is needed more than once,
+         * use one bundle item with the required quantity,
+         * then split templates/designs from request payload.
+         */
+        $this->ensureBundleHasNoDuplicateItems($bundle);
 
         return $bundle;
+    }
+
+    private function ensureBundleHasNoDuplicateItems(Bundle $bundle): void
+    {
+        $bundleItems = collect([$bundle->trigger])
+            ->merge($bundle->rewards)
+            ->filter()
+            ->values();
+
+        $duplicates = $bundleItems
+            ->groupBy(function ($bundleItem) {
+                $itemable = $bundleItem->itemable;
+
+                return implode('|', [
+                    $itemable ? get_class($itemable) : 'null',
+                    $itemable?->getKey() ?? 'null',
+                ]);
+            })
+            ->filter(fn ($items) => $items->count() > 1);
+
+        if ($duplicates->isEmpty()) {
+            return;
+        }
+
+        $duplicateNames = $duplicates
+            ->map(function ($items) {
+                $first = $items->first();
+
+                return $first?->itemable?->name ?? "Bundle item #{$first?->id}";
+            })
+            ->values()
+            ->implode(', ');
+
+        throw ValidationException::withMessages([
+            'bundle_id' => [
+                "This bundle has duplicated items: {$duplicateNames}. Please keep one bundle item and set the correct quantity.",
+            ],
+        ]);
     }
 
     private function ensureCartCanAcceptBundle(Cart $cart): void
@@ -432,25 +466,6 @@ class BundleCartService
                 'bundle' => ['Remove discount code before adding bundle.'],
             ]);
         }
-    }
-
-    private function resolveApplications(Bundle $bundle, Request $request): int
-    {
-        $repeatType = $bundle->repeat_type?->value ?? $bundle->repeat_type;
-
-        $requestedApplications = max((int) $request->input('applications', 1), 1);
-
-        if ($repeatType === 'once') {
-            if ($requestedApplications > 1) {
-                throw ValidationException::withMessages([
-                    'applications' => ['This bundle can be applied once only.'],
-                ]);
-            }
-
-            return 1;
-        }
-
-        return $requestedApplications;
     }
 
     private function resolveItemable(array $config, Model $cartable): Design|Template
