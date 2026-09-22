@@ -213,29 +213,6 @@
         white-space: nowrap;
     }
 
-    .question-studio-items-settings {
-        background: #fbfcff;
-    }
-
-    .question-studio-item-box {
-        background: #fff;
-        transition: border-color .2s ease, background-color .2s ease;
-    }
-
-    .question-studio-item-box.is-attached {
-        border-color: rgba(115, 103, 240, .4) !important;
-        background: rgba(115, 103, 240, .035);
-    }
-
-    .question-studio-item-order {
-        width: 86px;
-    }
-
-    .question-studio-item-status {
-        min-width: 54px;
-        text-align: right;
-    }
-
     .quick-option-dropzone {
         min-height: 150px;
         border: 1px dashed #d8d6de;
@@ -801,107 +778,6 @@
                         </div>
                     </div>
 
-                    <div class="question-studio-items-settings border-top p-1">
-                        <div class="d-flex justify-content-between align-items-center gap-1">
-                            <div>
-                                <div class="fw-bolder">Studio Items</div>
-                                <small class="text-muted">
-                                    Attach this question to selected Studio Items and choose its order inside each Studio Item.
-                                </small>
-                            </div>
-
-                            <span class="badge bg-light-info text-info">
-                                Global Studio Mapping
-                            </span>
-                        </div>
-
-                        <div class="row mt-1 question-studio-items-list">
-                            @foreach($studioItems as $studioItem)
-                                @php
-                                    $studioQuestionIds = collect(
-                                        data_get(
-                                            $studioItemsPayload,
-                                            $studioItem->id . '.question_ids',
-                                            []
-                                        )
-                                    )
-                                        ->map(fn ($id) => (int) $id)
-                                        ->values();
-
-                                    $studioQuestionIndex = $studioQuestionIds->search(
-                                        (int) $question->id
-                                    );
-
-                                    $studioQuestionAttached =
-                                        $studioQuestionIndex !== false;
-
-                                    $studioEnabledForProduct =
-                                        (bool) $studioItem->is_active
-                                        && in_array(
-                                            (int) $studioItem->id,
-                                            $selectedStudioItemIds,
-                                            true
-                                        );
-                                @endphp
-
-                                <div
-                                    class="col-md-6 mb-1 question-studio-item-row {{ $studioEnabledForProduct ? '' : 'd-none' }}"
-                                    data-studio-item-id="{{ $studioItem->id }}"
-                                >
-                                    <div class="question-studio-item-box border rounded p-1 {{ $studioQuestionAttached ? 'is-attached' : '' }}">
-                                        <div class="d-flex justify-content-between align-items-center gap-1">
-                                            <div class="form-check mb-0 flex-grow-1">
-                                                <input
-                                                    type="checkbox"
-                                                    class="form-check-input question-studio-item-toggle"
-                                                    id="question-{{ $question->id }}-studio-item-{{ $studioItem->id }}"
-                                                    data-studio-item-id="{{ $studioItem->id }}"
-                                                    @checked($studioQuestionAttached)
-                                                    @disabled(!(auth()->user()?->can('ai-studio-items_update') ?? false))
-                                                >
-
-                                                <label
-                                                    class="form-check-label fw-bolder"
-                                                    for="question-{{ $question->id }}-studio-item-{{ $studioItem->id }}"
-                                                >
-                                                    {{ $studioItem->name }}
-                                                </label>
-                                            </div>
-
-                                            <div class="d-flex align-items-center gap-50">
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    value="{{ $studioQuestionAttached ? ((int) $studioQuestionIndex + 1) : '' }}"
-                                                    class="form-control form-control-sm question-studio-item-order"
-                                                    data-studio-item-id="{{ $studioItem->id }}"
-                                                    placeholder="Order"
-                                                    @disabled(
-                                                        !$studioQuestionAttached
-                                                        || !(auth()->user()?->can('ai-studio-items_update') ?? false)
-                                                    )
-                                                >
-
-                                                <small
-                                                    class="text-muted question-studio-item-status"
-                                                    data-studio-item-id="{{ $studioItem->id }}"
-                                                ></small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        <div class="alert alert-light mb-0 question-no-selected-studio-items d-none">
-                            Select at least one Studio Item for this AI Product to configure Studio-specific questions.
-                        </div>
-
-                        <small class="text-warning d-block mt-50">
-                            Studio Item question attachments are global. Changing them here affects every AI Product using that Studio Item.
-                        </small>
-                    </div>
-
                     <div class="question-condition-settings border-top p-1">
                         <div class="d-flex justify-content-between align-items-center gap-1">
                             <div>
@@ -1211,13 +1087,24 @@
                         </div>
 
                         <div class="col-12 mb-1">
-                            <div class="alert alert-info mb-0">
-                                <strong>Question Attachment</strong>
-                                <div class="mt-25">
-                                    Attach this Studio Item to questions and choose question order
-                                    directly from the <strong>Questions & Options</strong> section below.
-                                </div>
-                            </div>
+                            <label class="form-label">Attach Questions</label>
+
+                            <select
+                                id="quick-studio-question-ids"
+                                class="form-select select2"
+                                multiple
+                                style="width:100%"
+                            >
+                                @foreach($questions as $question)
+                                    <option value="{{ $question->id }}">
+                                        {{ $question->title }} — {{ $question->type->label() }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            <small class="text-muted">
+                                Select the questions attached to this Studio Item.
+                            </small>
                         </div>
 
                         <div class="col-md-6 mb-1">
@@ -1604,11 +1491,7 @@
         });
 
         $(document).on('change', '.studio-item-checkbox', function () {
-            const input = $(this);
-            const studioItemId = Number(input.val() || 0);
-
-            toggleStudioItemCard(input);
-            refreshQuestionStudioItems(studioItemId);
+            toggleStudioItemCard($(this));
         });
 
         function resetStudioItemModal() {
@@ -1749,7 +1632,6 @@
 
             const checkbox = $(`.studio-item-column[data-studio-item-id="${item.id}"] .studio-item-checkbox`);
             toggleStudioItemCard(checkbox);
-            refreshQuestionStudioItems(Number(item.id));
             feather.replace();
         }
 
@@ -1773,11 +1655,6 @@
         function removeStudioItemCard(id) {
             delete studioItemData[id];
             $(`.studio-item-column[data-studio-item-id="${id}"]`).remove();
-            $(`.question-studio-item-row[data-studio-item-id="${id}"]`).remove();
-
-            $('.question-card').each(function () {
-                refreshQuestionStudioItemsForCard($(this));
-            });
 
             if (!$('#studio-items-container .studio-item-column').length) {
                 $('#studio-items-container').html(`
@@ -1883,9 +1760,7 @@
                 sort_order: Number($('#quick-studio-sort-order').val() || 0),
                 is_active: $('#quick-studio-is-active').is(':checked') ? 1 : 0,
 
-                question_ids: id
-                    ? (studioItemData[id]?.question_ids ?? [])
-                    : [],
+                question_ids: $('#quick-studio-question-ids').val() ?? [],
 
                 settings: {
                     prompt_instructions: $('#quick-studio-prompt-instructions').val().trim(),
@@ -1951,774 +1826,6 @@
             resetStudioItemModal();
         });
 
-
-        /*
-         * Question -> Studio Item attachment.
-         *
-         * This uses the existing Studio Item quick-update endpoint, so no
-         * additional backend endpoint is required. The backend already stores
-         * Studio Item question order from the order of question_ids.
-         */
-
-        const studioQuestionSaveTimers = {};
-
-        function isStudioItemSelectedForProduct(studioItemId) {
-            const checkbox = $(
-                `.studio-item-checkbox[value="${Number(studioItemId)}"]`
-            );
-
-            return checkbox.length
-                && checkbox.is(':checked')
-                && !checkbox.is(':disabled');
-        }
-
-        function studioItemHasQuestion(studioItemId, questionId) {
-            const item = studioItemData[Number(studioItemId)];
-
-            if (!item) return false;
-
-            return (item.question_ids ?? [])
-                .map(Number)
-                .includes(Number(questionId));
-        }
-
-        function studioItemQuestionOrder(studioItemId, questionId) {
-            const item = studioItemData[Number(studioItemId)];
-
-            if (!item) return null;
-
-            const index = (item.question_ids ?? [])
-                .map(Number)
-                .indexOf(Number(questionId));
-
-            return index >= 0
-                ? index + 1
-                : null;
-        }
-
-        function buildQuestionStudioItemRowHtml(questionId, item) {
-            const studioItemId = Number(item.id);
-            const attached = studioItemHasQuestion(
-                studioItemId,
-                questionId
-            );
-
-            const order = studioItemQuestionOrder(
-                studioItemId,
-                questionId
-            );
-
-            const visible = isStudioItemSelectedForProduct(
-                studioItemId
-            );
-
-            const disabled = canEditStudioItems
-                ? ''
-                : 'disabled';
-
-            const orderDisabled =
-                canEditStudioItems && attached
-                    ? ''
-                    : 'disabled';
-
-            return `
-                <div
-                    class="col-md-6 mb-1 question-studio-item-row ${visible ? '' : 'd-none'}"
-                    data-studio-item-id="${studioItemId}"
-                >
-                    <div class="question-studio-item-box border rounded p-1 ${attached ? 'is-attached' : ''}">
-                        <div class="d-flex justify-content-between align-items-center gap-1">
-                            <div class="form-check mb-0 flex-grow-1">
-                                <input
-                                    type="checkbox"
-                                    class="form-check-input question-studio-item-toggle"
-                                    id="question-${Number(questionId)}-studio-item-${studioItemId}"
-                                    data-studio-item-id="${studioItemId}"
-                                    ${attached ? 'checked' : ''}
-                                    ${disabled}
-                                >
-
-                                <label
-                                    class="form-check-label fw-bolder"
-                                    for="question-${Number(questionId)}-studio-item-${studioItemId}"
-                                >
-                                    ${escapeHtml(item.name ?? item.key ?? `Studio Item #${studioItemId}`)}
-                                </label>
-                            </div>
-
-                            <div class="d-flex align-items-center gap-50">
-                                <input
-                                    type="number"
-                                    min="1"
-                                    value="${order ?? ''}"
-                                    class="form-control form-control-sm question-studio-item-order"
-                                    data-studio-item-id="${studioItemId}"
-                                    placeholder="Order"
-                                    ${orderDisabled}
-                                >
-
-                                <small
-                                    class="text-muted question-studio-item-status"
-                                    data-studio-item-id="${studioItemId}"
-                                ></small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function buildQuestionStudioItemsHtml(questionId) {
-            const rows = Object.values(studioItemData)
-                .map(item => buildQuestionStudioItemRowHtml(
-                    questionId,
-                    item
-                ))
-                .join('');
-
-            return `
-                <div class="question-studio-items-settings border-top p-1">
-                    <div class="d-flex justify-content-between align-items-center gap-1">
-                        <div>
-                            <div class="fw-bolder">Studio Items</div>
-                            <small class="text-muted">
-                                Attach this question to selected Studio Items and choose its order inside each Studio Item.
-                            </small>
-                        </div>
-
-                        <span class="badge bg-light-info text-info">
-                            Global Studio Mapping
-                        </span>
-                    </div>
-
-                    <div class="row mt-1 question-studio-items-list">
-                        ${rows}
-                    </div>
-
-                    <div class="alert alert-light mb-0 question-no-selected-studio-items d-none">
-                        Select at least one Studio Item for this AI Product to configure Studio-specific questions.
-                    </div>
-
-                    <small class="text-warning d-block mt-50">
-                        Studio Item question attachments are global. Changing them here affects every AI Product using that Studio Item.
-                    </small>
-                </div>
-            `;
-        }
-
-        function refreshQuestionStudioItemsForCard(card) {
-            const questionId = Number(
-                card.data('question-id')
-            );
-
-            if (!questionId) return;
-
-            const list = card.find(
-                '.question-studio-items-list'
-            );
-
-            if (!list.length) return;
-
-            Object.values(studioItemData).forEach(item => {
-                const studioItemId = Number(item.id);
-
-                let row = list.find(
-                    `.question-studio-item-row[data-studio-item-id="${studioItemId}"]`
-                );
-
-                if (!row.length) {
-                    list.append(
-                        buildQuestionStudioItemRowHtml(
-                            questionId,
-                            item
-                        )
-                    );
-
-                    row = list.find(
-                        `.question-studio-item-row[data-studio-item-id="${studioItemId}"]`
-                    );
-                }
-
-                const attached = studioItemHasQuestion(
-                    studioItemId,
-                    questionId
-                );
-
-                const order = studioItemQuestionOrder(
-                    studioItemId,
-                    questionId
-                );
-
-                const visible = isStudioItemSelectedForProduct(
-                    studioItemId
-                );
-
-                row.toggleClass(
-                    'd-none',
-                    !visible
-                );
-
-                row.find(
-                    '.question-studio-item-toggle'
-                )
-                    .prop(
-                        'checked',
-                        attached
-                    )
-                    .prop(
-                        'disabled',
-                        !canEditStudioItems
-                    );
-
-                row.find(
-                    '.question-studio-item-order'
-                )
-                    .val(
-                        attached
-                            ? order
-                            : ''
-                    )
-                    .prop(
-                        'disabled',
-                        !canEditStudioItems
-                        || !attached
-                    );
-
-                row.find(
-                    '.question-studio-item-box'
-                ).toggleClass(
-                    'is-attached',
-                    attached
-                );
-            });
-
-            const visibleRows = list
-                .find(
-                    '.question-studio-item-row'
-                )
-                .filter(
-                    ':not(.d-none)'
-                )
-                .length;
-
-            card.find(
-                '.question-no-selected-studio-items'
-            ).toggleClass(
-                'd-none',
-                visibleRows > 0
-            );
-        }
-
-        function refreshQuestionStudioItems(studioItemId = null) {
-            $('.question-card').each(function () {
-                const card = $(this);
-
-                if (studioItemId) {
-                    const questionId = Number(
-                        card.data('question-id')
-                    );
-
-                    const item = studioItemData[
-                        Number(studioItemId)
-                        ];
-
-                    const list = card.find(
-                        '.question-studio-items-list'
-                    );
-
-                    if (
-                        item
-                        && list.length
-                        && !list.find(
-                            `.question-studio-item-row[data-studio-item-id="${Number(studioItemId)}"]`
-                        ).length
-                    ) {
-                        list.append(
-                            buildQuestionStudioItemRowHtml(
-                                questionId,
-                                item
-                            )
-                        );
-                    }
-                }
-
-                refreshQuestionStudioItemsForCard(
-                    card
-                );
-            });
-
-            feather.replace();
-        }
-
-        function nextStudioQuestionOrder(studioItemId) {
-            let maxOrder = 0;
-
-            $(
-                `.question-studio-item-row[data-studio-item-id="${Number(studioItemId)}"]`
-            ).each(function () {
-                const row = $(this);
-
-                if (
-                    !row
-                        .find(
-                            '.question-studio-item-toggle'
-                        )
-                        .is(':checked')
-                ) {
-                    return;
-                }
-
-                const order = Number(
-                    row
-                        .find(
-                            '.question-studio-item-order'
-                        )
-                        .val()
-                    || 0
-                );
-
-                maxOrder = Math.max(
-                    maxOrder,
-                    order
-                );
-            });
-
-            return maxOrder + 1;
-        }
-
-        function collectStudioItemQuestionIds(studioItemId) {
-            const entries = [];
-
-            $('.question-card').each(function (domIndex) {
-                const card = $(this);
-                const questionId = Number(
-                    card.data('question-id')
-                );
-
-                const row = card.find(
-                    `.question-studio-item-row[data-studio-item-id="${Number(studioItemId)}"]`
-                );
-
-                if (
-                    !row.length
-                    || !row
-                        .find(
-                            '.question-studio-item-toggle'
-                        )
-                        .is(':checked')
-                ) {
-                    return;
-                }
-
-                const enteredOrder = Number(
-                    row
-                        .find(
-                            '.question-studio-item-order'
-                        )
-                        .val()
-                    || 0
-                );
-
-                entries.push({
-                    questionId,
-                    order:
-                        enteredOrder > 0
-                            ? enteredOrder
-                            : 999999,
-                    domIndex
-                });
-            });
-
-            return entries
-                .sort((a, b) => {
-                    if (a.order !== b.order) {
-                        return a.order - b.order;
-                    }
-
-                    return a.domIndex - b.domIndex;
-                })
-                .map(
-                    entry =>
-                        entry.questionId
-                );
-        }
-
-        function studioItemUpdatePayload(
-            item,
-            questionIds
-        ) {
-            return {
-                _method: 'PUT',
-                _token: csrfToken,
-
-                name: {
-                    en:
-                        item.name_en
-                        ?? item.name
-                        ?? '',
-                    ar:
-                        item.name_ar
-                        ?? ''
-                },
-
-                description: {
-                    en:
-                        item.description_en
-                        ?? '',
-                    ar:
-                        item.description_ar
-                        ?? ''
-                },
-
-                generation_type:
-                item.generation_type,
-
-                credits_cost:
-                    Number(
-                        item.credits_cost
-                        ?? 0
-                    ),
-
-                sort_order:
-                    Number(
-                        item.sort_order
-                        ?? 0
-                    ),
-
-                is_active:
-                    item.is_active
-                        ? 1
-                        : 0,
-
-                question_ids:
-                questionIds,
-
-                settings: {
-                    prompt_instructions:
-                        item.settings
-                            ?.prompt_instructions
-                        ?? '',
-
-                    negative_rules:
-                        item.settings
-                            ?.negative_rules
-                        ?? ''
-                }
-            };
-        }
-
-        function setStudioQuestionSavingState(
-            studioItemId,
-            saving,
-            message = ''
-        ) {
-            const rows = $(
-                `.question-studio-item-row[data-studio-item-id="${Number(studioItemId)}"]`
-            );
-
-            rows.find(
-                '.question-studio-item-toggle'
-            ).prop(
-                'disabled',
-                saving
-                || !canEditStudioItems
-            );
-
-            rows.find(
-                '.question-studio-item-order'
-            ).each(function () {
-                const input = $(this);
-                const checked = input
-                    .closest(
-                        '.question-studio-item-row'
-                    )
-                    .find(
-                        '.question-studio-item-toggle'
-                    )
-                    .is(':checked');
-
-                input.prop(
-                    'disabled',
-                    saving
-                    || !canEditStudioItems
-                    || !checked
-                );
-            });
-
-            rows.find(
-                '.question-studio-item-status'
-            )
-                .text(
-                    saving
-                        ? 'Saving...'
-                        : message
-                )
-                .toggleClass(
-                    'text-success',
-                    !saving
-                    && message === 'Saved'
-                )
-                .toggleClass(
-                    'text-danger',
-                    !saving
-                    && !!message
-                    && message !== 'Saved'
-                );
-        }
-
-        function saveStudioItemQuestionMapping(
-            studioItemId
-        ) {
-            if (!canEditStudioItems) {
-                return;
-            }
-
-            const id = Number(
-                studioItemId
-            );
-
-            const item =
-                studioItemData[id];
-
-            if (!item) {
-                toast(
-                    'Studio Item data could not be loaded.'
-                );
-
-                return;
-            }
-
-            const questionIds =
-                collectStudioItemQuestionIds(
-                    id
-                );
-
-            const url =
-                quickStudioUpdateUrlTemplate
-                    .replace(
-                        '__STUDIO_ITEM_ID__',
-                        id
-                    );
-
-            setStudioQuestionSavingState(
-                id,
-                true
-            );
-
-            $.ajax({
-                url,
-                type: 'POST',
-                data:
-                    studioItemUpdatePayload(
-                        item,
-                        questionIds
-                    ),
-
-                success: function (
-                    response
-                ) {
-                    const updatedItem =
-                        response.data
-                        ?? response;
-
-                    studioItemData[id] =
-                        updatedItem;
-
-                    refreshQuestionStudioItems(
-                        id
-                    );
-
-                    if (
-                        Number(
-                            $('#quick-studio-item-id').val()
-                            || 0
-                        )
-                        === id
-                    ) {
-                        pendingStudioQuestionIds =
-                            (
-                                updatedItem
-                                    .question_ids
-                                ?? []
-                            ).map(
-                                String
-                            );
-                    }
-
-                    setStudioQuestionSavingState(
-                        id,
-                        false,
-                        'Saved'
-                    );
-                },
-
-                error: function (xhr) {
-                    refreshQuestionStudioItems(
-                        id
-                    );
-
-                    setStudioQuestionSavingState(
-                        id,
-                        false,
-                        'Failed'
-                    );
-
-                    const response =
-                        xhr.responseJSON
-                        ?? {};
-
-                    if (
-                        xhr.status === 422
-                        && response.errors
-                    ) {
-                        Object.values(
-                            response.errors
-                        )
-                            .flat()
-                            .forEach(
-                                message =>
-                                    toast(
-                                        message
-                                    )
-                            );
-
-                        return;
-                    }
-
-                    toast(
-                        response.message
-                        ?? 'Unable to update Studio Item questions.'
-                    );
-                }
-            });
-        }
-
-        $(document).on(
-            'change',
-            '.question-studio-item-toggle',
-            function () {
-                if (!canEditStudioItems) {
-                    return;
-                }
-
-                const toggle = $(this);
-                const row = toggle.closest(
-                    '.question-studio-item-row'
-                );
-
-                const studioItemId = Number(
-                    toggle.data(
-                        'studio-item-id'
-                    )
-                    || row.data(
-                        'studio-item-id'
-                    )
-                    || 0
-                );
-
-                const orderInput = row.find(
-                    '.question-studio-item-order'
-                );
-
-                const attached =
-                    toggle.is(':checked');
-
-                row.find(
-                    '.question-studio-item-box'
-                ).toggleClass(
-                    'is-attached',
-                    attached
-                );
-
-                orderInput.prop(
-                    'disabled',
-                    !attached
-                );
-
-                if (
-                    attached
-                    && !Number(
-                        orderInput.val()
-                        || 0
-                    )
-                ) {
-                    orderInput.val(
-                        nextStudioQuestionOrder(
-                            studioItemId
-                        )
-                    );
-                }
-
-                if (!attached) {
-                    orderInput.val('');
-                }
-
-                saveStudioItemQuestionMapping(
-                    studioItemId
-                );
-            }
-        );
-
-        $(document).on(
-            'change',
-            '.question-studio-item-order',
-            function () {
-                if (!canEditStudioItems) {
-                    return;
-                }
-
-                const input = $(this);
-
-                const studioItemId = Number(
-                    input.data(
-                        'studio-item-id'
-                    )
-                    || input
-                        .closest(
-                            '.question-studio-item-row'
-                        )
-                        .data(
-                            'studio-item-id'
-                        )
-                    || 0
-                );
-
-                if (!studioItemId) {
-                    return;
-                }
-
-                const normalizedOrder =
-                    Math.max(
-                        1,
-                        Number(
-                            input.val()
-                            || 1
-                        )
-                    );
-
-                input.val(
-                    normalizedOrder
-                );
-
-                clearTimeout(
-                    studioQuestionSaveTimers[
-                        studioItemId
-                        ]
-                );
-
-                studioQuestionSaveTimers[
-                    studioItemId
-                    ] = setTimeout(
-                    function () {
-                        saveStudioItemQuestionMapping(
-                            studioItemId
-                        );
-                    },
-                    350
-                );
-            }
-        );
-
         function conditionParentOptionsHtml(currentQuestionId, selectedParentId = null) {
             return Object.values(conditionQuestionData)
                 .filter(question => Number(question.id) !== Number(currentQuestionId))
@@ -2745,37 +1852,15 @@
 
         function conditionAnswerOptionsHtml(parentQuestionId, selectedOptionIds = []) {
             const parent = conditionQuestionData[Number(parentQuestionId)];
-            const selectedValues = normalizeConditionSelectedIds(selectedOptionIds);
-            const selectedIds = new Set(selectedValues);
-            const selectedOrder = new Map(
-                selectedValues.map((id, index) => [String(id), index])
+            const selectedIds = new Set(
+                normalizeConditionSelectedIds(selectedOptionIds)
             );
 
             if (!parent || !Array.isArray(parent.options)) {
                 return '';
             }
 
-            /*
-             * Keep selected answers in the same order they were selected/saved.
-             * Unselected answers keep their original relative order afterwards.
-             */
-            const orderedOptions = [...parent.options].sort((a, b) => {
-                const aId = String(a.id);
-                const bId = String(b.id);
-                const aSelected = selectedOrder.has(aId);
-                const bSelected = selectedOrder.has(bId);
-
-                if (aSelected && bSelected) {
-                    return selectedOrder.get(aId) - selectedOrder.get(bId);
-                }
-
-                if (aSelected) return -1;
-                if (bSelected) return 1;
-
-                return 0;
-            });
-
-            return orderedOptions.map(option => `
+            return parent.options.map(option => `
                 <option
                     value="${Number(option.id)}"
                     ${selectedIds.has(String(option.id)) ? 'selected' : ''}
@@ -2801,50 +1886,6 @@
                 closeOnSelect: false
             });
         }
-        $(document).on(
-            'select2:select',
-            '.condition-parent-options',
-            function (e) {
-                const select = $(this);
-                const selectedId = String(e.params.data.id);
-
-                const selectedOption = select
-                    .find('option')
-                    .filter(function () {
-                        return String($(this).val()) === selectedId;
-                    });
-
-                /*
-                 * Select2 normally renders selected tags using <option> order.
-                 * Move the newest selection after the previously selected ones
-                 * so the visible tags follow the user's click order.
-                 */
-                selectedOption.detach().appendTo(select);
-
-                const selectedValues = select
-                    .find('option:selected')
-                    .map(function () {
-                        return String($(this).val());
-                    })
-                    .get();
-
-                /*
-                 * Re-initialize after the event finishes so Select2 redraws
-                 * the tags using the new option order.
-                 */
-                setTimeout(function () {
-                    if (select.hasClass('select2-hidden-accessible')) {
-                        select.select2('destroy');
-                    }
-
-                    initConditionAnswersSelect2(select);
-
-                    select
-                        .val(selectedValues)
-                        .trigger('change.select2');
-                }, 0);
-            }
-        );
 
         function populateConditionAnswers(rule, selectedOptionIds = []) {
             const parentQuestionId = Number(
@@ -3015,7 +2056,6 @@
 
             toggleQuestion(card);
             initializeQuestionCondition(card);
-            refreshQuestionStudioItemsForCard(card);
         });
 
         $(document).on('change', '.question-toggle', function () {
@@ -4008,8 +3048,6 @@
                         </div>
                     </div>
 
-                    ${buildQuestionStudioItemsHtml(id)}
-
                     <div class="question-condition-settings border-top p-1">
                         <div class="d-flex justify-content-between align-items-center gap-1">
                             <div>
@@ -4313,7 +3351,6 @@
 
                     toggleQuestion(newQuestionCard);
                     initializeQuestionCondition(newQuestionCard);
-                    refreshQuestionStudioItemsForCard(newQuestionCard);
 
                     if (pendingCondition) {
                         newQuestionCard
