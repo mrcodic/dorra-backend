@@ -6,7 +6,6 @@ use App\Http\Controllers\Api\V1\User\Mockup\BulkMockupController;
 use App\Http\Controllers\Api\V1\User\ShippingAddress\ShippingController;
 use App\Http\Controllers\Dashboard\{AdminController,
     AiCategoryController,
-    AiGuideQuestionAssignmentController,
     AiGuideQuestionController,
     AiStudioItemController,
     BoardController,
@@ -329,18 +328,6 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::get('/data', [AiGuideQuestionController::class, 'getData'])->name('data');
             Route::post('/bulk-delete', [AiGuideQuestionController::class, 'bulkDelete'])->name('bulk-delete');
         }));
-        Route::prefix('ai-guide-questions')->name('ai-guide-questions.')->group(function () {
-                Route::get('product-config', [AiGuideQuestionAssignmentController::class, 'productConfig'])->name('product-config');
-
-                Route::get('{question}/conditions', [AiGuideQuestionAssignmentController::class, 'showConditions'])->name('conditions.show');
-
-                Route::put('{question}/conditions', [AiGuideQuestionAssignmentController::class, 'updateConditions']
-                )->name('conditions.update');
-
-                Route::put('{question}/sort-order', [AiGuideQuestionAssignmentController::class, 'updateSortOrder']
-                )->name('sort-order.update');
-            });
-
         Route::resource('ai-guide-questions', AiGuideQuestionController::class);
 
         Route::group(['prefix' => 'ai-categories', 'as' => 'ai-categories.', 'controller' => AiCategoryController::class,], (function () {
