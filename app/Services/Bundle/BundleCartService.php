@@ -79,16 +79,27 @@ class BundleCartService
             );
 
             foreach ($bundleItems as $bundleItem) {
-                $configs = $payloadItems
-                    ->get($bundleItem->id, collect())
-                    ->values();
-
                 $requiredQuantity = max((int) ($bundleItem->quantity ?? 1), 1);
 
-                if ($configs->count() !== $requiredQuantity) {
+                $configs = $this->normalizeBundleItemConfigs(
+                    configs: $payloadItems->get($bundleItem->id, collect()),
+                    requiredQuantity: $requiredQuantity
+                );
+
+                if ($configs->isEmpty()) {
+                    throw ValidationException::withMessages([
+                        'items' => ["Missing configuration for bundle item #{$bundleItem->id}."],
+                    ]);
+                }
+
+                $sentQuantity = $configs->sum(function ($config) {
+                    return max((int) Arr::get($config, 'quantity', 1), 1);
+                });
+
+                if ($sentQuantity !== $requiredQuantity) {
                     throw ValidationException::withMessages([
                         'items' => [
-                            "Bundle item #{$bundleItem->id} requires {$requiredQuantity} selected templates/designs.",
+                            "Bundle item #{$bundleItem->id} requires quantity {$requiredQuantity}, but {$sentQuantity} was sent.",
                         ],
                     ]);
                 }
@@ -102,6 +113,8 @@ class BundleCartService
                 }
 
                 foreach ($configs as $config) {
+                    $configQuantity = max((int) Arr::get($config, 'quantity', 1), 1);
+
                     $itemable = $this->resolveItemable($config, $cartable);
 
                     $priceDetails = $this->calculatePriceDetails(
@@ -111,13 +124,10 @@ class BundleCartService
                         bundleItem: $bundleItem
                     );
 
-                    /*
-                     * Each selected template/design becomes one cart item.
-                     * So each row quantity should be 1.
-                     */
-                    $priceDetails = $this->normalizeUnitPriceDetails(
+                    $priceDetails = $this->normalizeQuantityPriceDetails(
                         priceDetails: $priceDetails,
-                        requiredQuantity: $requiredQuantity
+                        requiredQuantity: $requiredQuantity,
+                        configQuantity: $configQuantity
                     );
 
                     $discountAmount = $this->isReward($bundleItem)
@@ -136,7 +146,7 @@ class BundleCartService
                         'product_price_id' => $priceDetails['product_price_id'],
 
                         'sub_total' => $priceDetails['sub_total'],
-                        'quantity' => 1,
+                        'quantity' => $configQuantity,
 
                         'color' => Arr::get($config, 'color'),
                         'type' => TypeEnum::PRINT,
@@ -164,7 +174,6 @@ class BundleCartService
                     );
                 }
             }
-
             $cart->update([
                 'discount_code_id' => null,
                 'discount_amount' => 0,
@@ -180,6 +189,67 @@ class BundleCartService
                 'discountCode',
             ]);
         });
+    }
+    private function normalizeQuantityPriceDetails(
+        array $priceDetails,
+        int $requiredQuantity,
+        int $configQuantity
+    ): array {
+        $productPrice = (float) ($priceDetails['product_price'] ?? 0);
+        $specsSum = (float) ($priceDetails['specs_sum'] ?? 0);
+
+        if (! empty($priceDetails['product_price_id']) && $requiredQuantity > 1) {
+            $productPrice = round($productPrice / $requiredQuantity, 2);
+        }
+
+        $priceDetails['product_price'] = $productPrice;
+        $priceDetails['quantity'] = $configQuantity;
+        $priceDetails['sub_total'] = round(
+            ($productPrice + $specsSum) * $configQuantity,
+            2
+        );
+
+        return $priceDetails;
+    }
+    private function normalizeBundleItemConfigs($configs, int $requiredQuantity)
+    {
+        $configs = collect($configs)->values();
+
+        if ($configs->isEmpty()) {
+            return $configs;
+        }
+
+        $hasAnyQuantity = $configs->contains(function ($config) {
+            $quantity = Arr::get($config, 'quantity');
+
+            return $quantity !== null && $quantity !== '';
+        });
+
+        /*
+         * Old flow support:
+         * One config without quantity means use full required bundle quantity.
+         */
+        if (! $hasAnyQuantity && $configs->count() === 1) {
+            return $configs
+                ->map(function ($config) use ($requiredQuantity) {
+                    $config['quantity'] = $requiredQuantity;
+
+                    return $config;
+                })
+                ->values();
+        }
+
+        /*
+         * Multiple configs without quantity:
+         * every config = quantity 1.
+         */
+        return $configs
+            ->map(function ($config) {
+                $config['quantity'] = max((int) Arr::get($config, 'quantity', 1), 1);
+
+                return $config;
+            })
+            ->values();
     }
     private function normalizeUnitPriceDetails(array $priceDetails, int $requiredQuantity): array
     {

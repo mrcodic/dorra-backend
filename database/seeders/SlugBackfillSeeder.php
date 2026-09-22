@@ -34,7 +34,7 @@ class SlugBackfillSeeder extends Seeder
             ->chunkById(100, function ($rows) use ($model, $sourceColumn, &$count) {
                 foreach ($rows as $row) {
                     $row->slug = $this->generateUniqueSlug($row, $sourceColumn);
-                    $row->saveQuietly(); 
+                    $row->saveQuietly();
                     $count++;
                 }
             });
