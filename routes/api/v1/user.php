@@ -114,14 +114,13 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::get('/public-search', [MainController::class, 'publicSearch']);
 
     Route::apiResource('categories', CategoryController::class)->only(['index', 'show'])
-        ->parameters(['categories' => 'category:slug'])
         ->middleware(TrackVisits::class);
     Route::get('sub-categories', [MainController::class, 'subCategories']);
     Route::controller(ProductController::class)->group(function () {
         Route::get('product-types', 'productTypes');
         Route::get('products/{product}/quantities', 'getQuantities');
     });
-    Route::apiResource('products', ProductController::class)->only(['index', 'show'])->parameters(['products' => 'product:slug']);;
+    Route::apiResource('products', ProductController::class)->only(['index', 'show']);
 
 
     Route::controller(DesignController::class)->prefix('designs/')->group(function () {

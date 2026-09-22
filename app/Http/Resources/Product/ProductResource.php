@@ -35,6 +35,7 @@ class ProductResource extends JsonResource
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
             'description' => $this->when(isset($this->description), $this->description),
+            'slug' => $this->slug,
             'category' => CategoryResource::make($this->whenLoaded('category')),
             'has_custom_prices' => $this->when(isset($this->has_custom_prices), $this->has_custom_prices),
             'base_price' => $this->when(isset($this->base_price), $this->base_price),
