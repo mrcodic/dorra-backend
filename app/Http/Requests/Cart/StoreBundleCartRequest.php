@@ -134,16 +134,63 @@ class StoreBundleCartRequest extends BaseRequest
             ]);
         }
 
-        $duplicatedIds = $requestBundleItemIds
-            ->duplicates()
+        $bundleItems = collect([$bundle->trigger])
+            ->merge($bundle->rewards)
+            ->filter()
             ->values();
 
-        if ($duplicatedIds->isNotEmpty()) {
+        $requestBundleItemIds = collect($this->input('items', []))
+            ->pluck('bundle_item_id')
+            ->map(fn ($id) => (int) $id)
+            ->values();
+
+        $requiredBundleItemIds = $bundleItems
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->values();
+
+        $uniqueRequestBundleItemIds = $requestBundleItemIds
+            ->unique()
+            ->values();
+
+        $missingIds = $requiredBundleItemIds
+            ->diff($uniqueRequestBundleItemIds)
+            ->values();
+
+        if ($missingIds->isNotEmpty()) {
             throw ValidationException::withMessages([
                 'items' => [
-                    'Duplicated bundle items: ' . $duplicatedIds->implode(', '),
+                    'Missing configuration for bundle items: ' . $missingIds->implode(', '),
                 ],
             ]);
+        }
+
+        $extraIds = $uniqueRequestBundleItemIds
+            ->diff($requiredBundleItemIds)
+            ->values();
+
+        if ($extraIds->isNotEmpty()) {
+            throw ValidationException::withMessages([
+                'items' => [
+                    'Invalid bundle items for this bundle: ' . $extraIds->implode(', '),
+                ],
+            ]);
+        }
+
+        foreach ($bundleItems as $bundleItem) {
+            $requiredQuantity = max((int) ($bundleItem->quantity ?? 1), 1);
+
+            $sentCount = $requestBundleItemIds
+                ->filter(fn ($id) => (int) $id === (int) $bundleItem->id)
+                ->count();
+
+            if ($sentCount !== $requiredQuantity) {
+                throw ValidationException::withMessages([
+                    'items' => [
+                        "Bundle item #{$bundleItem->id} requires {$requiredQuantity} selected templates/designs.",
+                    ],
+                ]);
+            }
         }
 
         $notBelongingItems = BundleItem::query()

@@ -40,10 +40,11 @@ class BundleCartService
             $guestId = getAuthOrGuest() instanceof Guest ? getAuthOrGuest()->id : null;
 
             $cart = $this->cartRepository->query()
-                ->when($userId, fn($query) => $query->where('user_id', $userId))
-                ->when(!$userId && $guestId, fn($query) => $query->where('guest_id', $guestId))
+                ->when($userId, fn ($query) => $query->where('user_id', $userId))
+                ->when(! $userId && $guestId, fn ($query) => $query->where('guest_id', $guestId))
                 ->first();
-            if (!$cart) {
+
+            if (! $cart) {
                 $cart = $this->cartRepository->query()->create([
                     'user_id' => $userId,
                     'guest_id' => $guestId,
@@ -54,8 +55,15 @@ class BundleCartService
 
             $bundle = $this->getValidBundle((int) $request->bundle_id);
 
+            /*
+             * Important:
+             * groupBy allows same bundle_item_id to be sent more than once.
+             * Example:
+             * bundle_item_id = 30, quantity = 2
+             * request should contain item 30 twice with different templates/designs.
+             */
             $payloadItems = collect($request->input('items', []))
-                ->keyBy(fn ($item) => (int) Arr::get($item, 'bundle_item_id'));
+                ->groupBy(fn ($item) => (int) Arr::get($item, 'bundle_item_id'));
 
             $bundleGroupKey = (string) Str::uuid();
 
@@ -71,11 +79,17 @@ class BundleCartService
             );
 
             foreach ($bundleItems as $bundleItem) {
-                $config = $payloadItems->get($bundleItem->id);
+                $configs = $payloadItems
+                    ->get($bundleItem->id, collect())
+                    ->values();
 
-                if (! $config) {
+                $requiredQuantity = max((int) ($bundleItem->quantity ?? 1), 1);
+
+                if ($configs->count() !== $requiredQuantity) {
                     throw ValidationException::withMessages([
-                        'items' => ["Missing configuration for bundle item #{$bundleItem->id}."],
+                        'items' => [
+                            "Bundle item #{$bundleItem->id} requires {$requiredQuantity} selected templates/designs.",
+                        ],
                     ]);
                 }
 
@@ -87,57 +101,68 @@ class BundleCartService
                     ]);
                 }
 
-                $itemable = $this->resolveItemable($config, $cartable);
+                foreach ($configs as $config) {
+                    $itemable = $this->resolveItemable($config, $cartable);
 
-                $priceDetails = $this->calculatePriceDetails(
-                    config: $config,
-                    cartable: $cartable,
-                    itemable: $itemable,
-                    bundleItem: $bundleItem
-                );
+                    $priceDetails = $this->calculatePriceDetails(
+                        config: $config,
+                        cartable: $cartable,
+                        itemable: $itemable,
+                        bundleItem: $bundleItem
+                    );
 
-                $discountAmount = $this->isReward($bundleItem)
-                    ? $this->calculateRewardDiscount($bundleItem, $priceDetails['sub_total'])
-                    : 0;
+                    /*
+                     * Each selected template/design becomes one cart item.
+                     * So each row quantity should be 1.
+                     */
+                    $priceDetails = $this->normalizeUnitPriceDetails(
+                        priceDetails: $priceDetails,
+                        requiredQuantity: $requiredQuantity
+                    );
 
-                $cartItem = $cart->items()->create([
-                    'itemable_id' => $itemable->id,
-                    'itemable_type' => get_class($itemable),
+                    $discountAmount = $this->isReward($bundleItem)
+                        ? $this->calculateRewardDiscount($bundleItem, $priceDetails['sub_total'])
+                        : 0;
 
-                    'cartable_id' => $cartable->id,
-                    'cartable_type' => get_class($cartable),
+                    $cartItem = $cart->items()->create([
+                        'itemable_id' => $itemable->id,
+                        'itemable_type' => get_class($itemable),
 
-                    'specs_price' => $priceDetails['specs_sum'],
-                    'product_price' => $priceDetails['product_price'],
-                    'product_price_id' => $priceDetails['product_price_id'],
+                        'cartable_id' => $cartable->id,
+                        'cartable_type' => get_class($cartable),
 
-                    'sub_total' => $priceDetails['sub_total'],
-                    'quantity' => $priceDetails['quantity'],
+                        'specs_price' => $priceDetails['specs_sum'],
+                        'product_price' => $priceDetails['product_price'],
+                        'product_price_id' => $priceDetails['product_price_id'],
 
-                    'color' => Arr::get($config, 'color'),
-                    'type' => TypeEnum::PRINT,
+                        'sub_total' => $priceDetails['sub_total'],
+                        'quantity' => 1,
 
-                    'discount_code_id' => null,
-                    'discount_amount' => $discountAmount,
+                        'color' => Arr::get($config, 'color'),
+                        'type' => TypeEnum::PRINT,
 
-                    'bundle_id' => $bundle->id,
-                    'bundle_item_id' => $bundleItem->id,
-                    'bundle_group_key' => $bundleGroupKey,
-                    'bundle_role' => $this->getBundleItemRole($bundleItem),
-                ]);
+                        'discount_code_id' => null,
+                        'discount_amount' => $discountAmount,
 
-                $this->handleSpecs(
-                    specs: $this->resolveSpecs($config, $itemable),
-                    cartItem: $cartItem
-                );
+                        'bundle_id' => $bundle->id,
+                        'bundle_item_id' => $bundleItem->id,
+                        'bundle_group_key' => $bundleGroupKey,
+                        'bundle_role' => $this->getBundleItemRole($bundleItem),
+                    ]);
 
-                $this->attachMockupMedia(
-                    config: $config,
-                    cart: $cart,
-                    cartItem: $cartItem,
-                    cartable: $cartable,
-                    itemable: $itemable
-                );
+                    $this->handleSpecs(
+                        specs: $this->resolveSpecs($config, $itemable),
+                        cartItem: $cartItem
+                    );
+
+                    $this->attachMockupMedia(
+                        config: $config,
+                        cart: $cart,
+                        cartItem: $cartItem,
+                        cartable: $cartable,
+                        itemable: $itemable
+                    );
+                }
             }
 
             $cart->update([
@@ -156,7 +181,29 @@ class BundleCartService
             ]);
         });
     }
+    private function normalizeUnitPriceDetails(array $priceDetails, int $requiredQuantity): array
+    {
+        $productPrice = (float) ($priceDetails['product_price'] ?? 0);
+        $specsSum = (float) ($priceDetails['specs_sum'] ?? 0);
 
+        /*
+         * If selected product price option represents a package quantity,
+         * split package price over the required selected templates/designs.
+         *
+         * Example:
+         * price option = 200 for quantity 2
+         * each selected template gets 100.
+         */
+        if (! empty($priceDetails['product_price_id']) && $requiredQuantity > 1) {
+            $productPrice = round($productPrice / $requiredQuantity, 2);
+        }
+
+        $priceDetails['product_price'] = $productPrice;
+        $priceDetails['sub_total'] = round($productPrice + $specsSum, 2);
+        $priceDetails['quantity'] = 1;
+
+        return $priceDetails;
+    }
     private function ensureBundleItemsAreNotAlreadyInCart(
         Cart $cart,
         Bundle $bundle,
