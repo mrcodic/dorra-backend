@@ -106,6 +106,7 @@ class TemplateResource extends JsonResource
         return [
             'id' => $this->when(isset($this->id), $this->id),
             'name' => $this->when(isset($this->name), $this->name),
+            'slug' => $this->slug,
             'name_en' => $this->getTranslation('name', 'en'),
             'name_ar' => $this->getTranslation('name', 'ar'),
             'description' => $this->description,

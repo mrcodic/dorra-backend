@@ -3,9 +3,21 @@
 namespace App\Observers;
 
 use App\Models\Template;
+use App\Observers\Traits\GeneratesUniqueSlug;
 
 class TemplateObserver
 {
+    use GeneratesUniqueSlug;
+
+    public function creating(Template $template)
+    {
+        $this->assignSlugOnCreate($template);
+    }
+
+    public function updating(Template $template)
+    {
+        $this->assignSlugOnUpdate($template);
+    }
     /**
      * Handle the Template "created" event.
      */

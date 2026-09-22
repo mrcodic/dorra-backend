@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Template;
 use App\Observers\Traits\GeneratesUniqueSlug;
 use Illuminate\Database\Seeder;
 
@@ -18,6 +19,7 @@ class SlugBackfillSeeder extends Seeder
     {
         $this->backfillSlugs(Product::class, 'name');
         $this->backfillSlugs(Category::class, 'name');
+        $this->backfillSlugs(Template::class, 'name');
     }
 
     /**

@@ -49,6 +49,7 @@ class Template extends Model implements HasMedia
         'supported_languages',
         'is_best_seller',
         'use_front_as_back',
+        'slug',
 
     ];
     protected $casts = [

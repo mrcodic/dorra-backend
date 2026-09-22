@@ -36,6 +36,7 @@ class Product extends Model implements HasMedia
         'show_customize_design_btn',
         'colors',
         'is_tableau',
+        'slug',
     ];
 
     public function price(): Attribute
