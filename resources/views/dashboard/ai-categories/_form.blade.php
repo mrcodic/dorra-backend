@@ -174,7 +174,12 @@
         }
     }
 
-    $conditionQuestionsPayload = $questions
+    $conditionQuestionsSource = collect(
+        $associatedData['conditionQuestions']
+        ?? $questions
+    );
+
+    $conditionQuestionsPayload = $conditionQuestionsSource
         ->filter(fn ($question) => in_array(
             $question->type?->value ?? $question->type,
             [
@@ -1524,6 +1529,7 @@
 
         $(document).on('change', '.studio-item-checkbox', function () {
             toggleStudioItemCard($(this));
+            refreshConditionParentQuestions();
         });
 
         function resetStudioItemModal() {
@@ -1841,9 +1847,75 @@
 
 
 
-        function conditionParentOptionsHtml(currentQuestionId, selectedParentId = null) {
+        function directProductConditionQuestionIds() {
+            return $('#questions-container .question-card')
+                .filter(function () {
+                    return $(this)
+                        .find('.question-toggle')
+                        .is(':checked');
+                })
+                .map(function () {
+                    return Number(
+                        $(this).data('question-id')
+                    );
+                })
+                .get()
+                .filter(Boolean);
+        }
+
+        function selectedStudioConditionQuestionIds() {
+            const ids = new Set();
+
+            $('.studio-item-checkbox:checked').each(function () {
+                const studioItemId = Number(
+                    $(this).val() || 0
+                );
+
+                const studioItem =
+                    studioItemData[studioItemId];
+
+                (
+                    studioItem?.question_ids
+                    ?? []
+                ).forEach(questionId => {
+                    const id = Number(questionId);
+
+                    if (id) {
+                        ids.add(id);
+                    }
+                });
+            });
+
+            return Array.from(ids);
+        }
+
+        function availableConditionParentIds() {
+            return new Set([
+                ...directProductConditionQuestionIds(),
+                ...selectedStudioConditionQuestionIds(),
+            ]);
+        }
+
+        function conditionParentOptionsHtml(
+            currentQuestionId,
+            selectedParentId = null
+        ) {
+            const availableIds =
+                availableConditionParentIds();
+
             return Object.values(conditionQuestionData)
-                .filter(question => Number(question.id) !== Number(currentQuestionId))
+                .filter(question => {
+                    const questionId =
+                        Number(question.id);
+
+                    return (
+                        questionId
+                        !== Number(currentQuestionId)
+                        && availableIds.has(
+                            questionId
+                        )
+                    );
+                })
                 .map(question => `
                     <option
                         value="${Number(question.id)}"
@@ -1853,6 +1925,75 @@
                     </option>
                 `)
                 .join('');
+        }
+
+        function refreshConditionParentQuestions() {
+            $('.condition-parent-question').each(function () {
+                const select = $(this);
+                const rule = select.closest(
+                    '.condition-rule'
+                );
+
+                const card = select.closest(
+                    '.question-card'
+                );
+
+                const childQuestionId = Number(
+                    card.data('question-id')
+                    || 0
+                );
+
+                const previousParentId = Number(
+                    select.val()
+                    || 0
+                );
+
+                const previousOptionIds = (
+                    rule
+                        .find(
+                            '.condition-parent-options'
+                        )
+                        .val()
+                    ?? []
+                );
+
+                select.html(`
+                    <option value="">
+                        Select parent question
+                    </option>
+                    ${conditionParentOptionsHtml(
+                    childQuestionId,
+                    previousParentId
+                )}
+                `);
+
+                const stillAvailable =
+                    previousParentId
+                    && select.find(
+                        `option[value="${previousParentId}"]`
+                    ).length;
+
+                if (stillAvailable) {
+                    select.val(
+                        String(previousParentId)
+                    );
+
+                    populateConditionAnswers(
+                        rule,
+                        previousOptionIds
+                    );
+                } else {
+                    select.val('');
+                    populateConditionAnswers(
+                        rule,
+                        []
+                    );
+                }
+            });
+
+            populateQuickConditionParents(
+                $('#quick-condition-parent-question').val()
+            );
         }
 
         function normalizeConditionSelectedIds(selectedOptionIds = []) {
@@ -2163,10 +2304,12 @@
         });
 
         reindexProductQuestionOrders();
+        refreshConditionParentQuestions();
 
         $(document).on('change', '.question-toggle', function () {
             toggleQuestion($(this).closest('.question-card'));
             reindexProductQuestionOrders();
+            refreshConditionParentQuestions();
         });
 
         $(document).on('change', '.question-condition-toggle', function () {
@@ -2232,15 +2375,9 @@
         }
 
         function selectedConditionalParentIds() {
-            return $('#questions-container .question-card')
-                .filter(function () {
-                    return $(this).find('.question-toggle').is(':checked');
-                })
-                .map(function () {
-                    return Number($(this).data('question-id'));
-                })
-                .get()
-                .filter(Boolean);
+            return Array.from(
+                availableConditionParentIds()
+            );
         }
 
         function quickConditionParentOptionsHtml(selectedParentId = null) {
@@ -3473,6 +3610,7 @@
                     toggleQuestion(newQuestionCard);
                     initializeQuestionCondition(newQuestionCard);
                     reindexProductQuestionOrders();
+                    refreshConditionParentQuestions();
 
                     if (pendingCondition) {
                         newQuestionCard
@@ -3641,3 +3779,4 @@
         });
     });
 </script>
+
