@@ -2,7 +2,9 @@
 
 @section('title', 'Add AI Studio Item')
 @section('main-page', 'AI Studio Items')
-
+@section('vendor-style')
+    <link rel="stylesheet" href="{{ asset('vendors/css/forms/select/select2.min.css') }}">
+@endsection
 @section('content')
     <div class="card">
         <div class="card-header border-bottom">
@@ -21,4 +23,7 @@
             ])
         </div>
     </div>
+@endsection
+@section('vendor-script')
+    <script src="{{ asset('vendors/js/forms/select/select2.full.min.js') }}"></script>
 @endsection

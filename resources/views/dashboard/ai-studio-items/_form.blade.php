@@ -1145,39 +1145,7 @@
                             </select>
                         </div>
 
-                        <div class="col-md-2 mb-1">
-                            <label class="form-label">
-                                Operator
-                            </label>
 
-                            <select
-                                class="form-select studio-condition-operator"
-                            >
-                                <option
-                                    value="selected"
-                                    ${
-                operator
-                === 'selected'
-                    ? 'selected'
-                    : ''
-            }
-                                >
-                                    Selected
-                                </option>
-
-                                <option
-                                    value="not_selected"
-                                    ${
-                operator
-                === 'not_selected'
-                    ? 'selected'
-                    : ''
-            }
-                                >
-                                    Not Selected
-                                </option>
-                            </select>
-                        </div>
 
                         <div class="col-md-2 mb-1">
                             <button
