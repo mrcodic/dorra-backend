@@ -1144,9 +1144,11 @@
 
                     select.select2({
                         width: '100%',
-                        placeholder:
-                            'Select Parent',
-                        allowClear: true
+                        placeholder: 'Select Parent',
+                        allowClear: true,
+                        dropdownParent: select.closest(
+                            '.studio-question-condition-panel'
+                        )
                     });
                 });
 
@@ -1167,10 +1169,12 @@
 
                     select.select2({
                         width: '100%',
-                        placeholder:
-                            'Select one or more answers',
+                        placeholder: 'Select one or more answers',
                         allowClear: true,
-                        closeOnSelect: false
+                        closeOnSelect: false,
+                        dropdownParent: select.closest(
+                            '.studio-question-condition-panel'
+                        )
                     });
                 });
         }
@@ -1208,7 +1212,7 @@
                             </label>
 
                             <select
-                                class="form-select studio-condition-parent"
+                                class="form-select select2 studio-condition-parent"
                             >
                                 <option value="">
                                     Select Parent
@@ -1468,11 +1472,17 @@
                     '.studio-question-card'
                 );
 
-                card
-                    .find(
-                        '.studio-question-condition-panel'
-                    )
-                    .toggleClass('d-none');
+                const panel = card.find(
+                    '.studio-question-condition-panel'
+                );
+
+                panel.toggleClass('d-none');
+
+                if (!panel.hasClass('d-none')) {
+                    initConditionSelect2(
+                        panel
+                    );
+                }
 
                 refreshConditionPanelState(
                     card
