@@ -13,7 +13,7 @@
      * Change route name here only if your route name is different.
      */
     $sharedTemplatesUrl = $sharedTemplatesUrl
-        ?? route('dashboard.bundles.shared-templates');
+        ?? route('bundles.shared-templates');
 @endphp
 
 <div class="bundle-form-fields" data-prefix="{{ $prefix }}">
