@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\Bundle\RepeatTypeEnum;
 use App\Enums\Bundle\StatusEnum;
+use App\Observers\BundleObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
+#[ObservedBy(BundleObserver::class)]
 
 class Bundle extends Model implements HasMedia
 {
