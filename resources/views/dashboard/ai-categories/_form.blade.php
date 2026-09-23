@@ -36,50 +36,53 @@
     $oldQuestions = old('questions');
 
     /*
-     * AI Product edit:
-     * show only questions already attached to this Product.
+     * Questions & Options must show ONLY questions attached directly
+     * to this AI Product. Global/general questions and Studio Item-only
+     * questions are intentionally excluded.
      *
-     * On create there is no Product assignment yet, so keep the full active
-     * question list available for the initial attachment.
-     *
-     * If validation fails, also keep any newly selected question from old()
-     * so it does not disappear from the form.
+     * On Create there is no Product assignment yet, so the list starts
+     * empty. "Add New Question" can append a newly-created question to
+     * the current form and it will be attached when the Product is saved.
      */
-    $displayQuestions = $questions;
+    $productQuestionAssignments = collect();
+    $displayQuestions = collect();
 
     if ($aiCategory?->id) {
-        $attachedQuestionIds = $assignedQuestions
-            ->keys()
-            ->map(fn ($id) => (int) $id)
-            ->values()
-            ->all();
+        $aiCategoryMorphTypes = array_values(array_unique([
+            $aiCategory->getMorphClass(),
+            'ai_category',
+            \App\Models\AiCategory::class,
+        ]));
 
-        $oldSelectedQuestionIds = collect(is_array($oldQuestions) ? $oldQuestions : [])
-            ->filter(fn ($row) => (bool) data_get($row, 'selected', false))
-            ->map(fn ($row) => (int) data_get($row, 'question_id', 0))
-            ->filter()
-            ->values()
-            ->all();
-
-        $visibleQuestionIds = collect($attachedQuestionIds)
-            ->merge($oldSelectedQuestionIds)
-            ->unique()
-            ->values()
-            ->all();
+        $productQuestionAssignments = \Illuminate\Support\Facades\DB::table(
+            'ai_guide_question_assignments'
+        )
+            ->where('assignable_id', $aiCategory->id)
+            ->whereIn('assignable_type', $aiCategoryMorphTypes)
+            ->where(function ($query) {
+                $query
+                    ->whereNull('is_active')
+                    ->orWhere('is_active', true);
+            })
+            ->orderByRaw(
+                'CASE WHEN sort_order IS NULL THEN 1 ELSE 0 END'
+            )
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get()
+            ->keyBy(fn ($assignment) => (int) $assignment->ai_guide_question_id);
 
         $displayQuestions = $questions
-            ->filter(fn ($question) => in_array(
-                (int) $question->id,
-                $visibleQuestionIds,
-                true
+            ->filter(fn ($question) => $productQuestionAssignments->has(
+                (int) $question->id
             ))
-            ->sortBy(function ($question) use ($assignedQuestions) {
-                $assigned = $assignedQuestions->get($question->id);
+            ->sortBy(function ($question) use ($productQuestionAssignments) {
+                $assignment = $productQuestionAssignments->get(
+                    (int) $question->id
+                );
 
                 return [
-                    $assigned
-                        ? (int) ($assigned->pivot->sort_order ?? 0)
-                        : PHP_INT_MAX,
+                    (int) ($assignment->sort_order ?? 0),
                     (int) $question->id,
                 ];
             })
@@ -626,25 +629,40 @@
             @forelse($displayQuestions as $question)
                 @php
                     $assigned = $assignedQuestions->get($question->id);
+                    $productAssignment = $productQuestionAssignments->get(
+                        (int) $question->id
+                    );
+
                     $oldRow = is_array($oldQuestions)
                         ? ($oldQuestions[$question->id] ?? null)
                         : null;
 
+                    /*
+                     * Every server-rendered question here is attached directly
+                     * to the Product. old() may preserve an unchecked value
+                     * after failed validation so detach intent is not lost.
+                     */
                     $selected = $oldRow !== null
-                        ? (bool) data_get($oldRow, 'selected', false)
-                        : (bool) $assigned;
+                        ? (bool) data_get($oldRow, 'selected', true)
+                        : true;
 
                     $required = $oldRow !== null
                         ? (bool) data_get($oldRow, 'required', false)
-                        : ($assigned
-                            ? (bool) $assigned->pivot->required
+                        : ($productAssignment?->required !== null
+                            ? (bool) $productAssignment->required
                             : (bool) $question->required);
 
                     $sortOrder = $oldRow !== null
-                        ? (int) data_get($oldRow, 'sort_order', $question->sort_order ?? 0)
-                        : ($assigned
-                            ? (int) $assigned->pivot->sort_order
-                            : (int) ($question->sort_order ?? 0));
+                        ? (int) data_get(
+                            $oldRow,
+                            'sort_order',
+                            $productAssignment->sort_order ?? $question->sort_order ?? 0
+                        )
+                        : (int) (
+                            $productAssignment->sort_order
+                            ?? $question->sort_order
+                            ?? 0
+                        );
 
                     $selectedOptions = $oldRow !== null
                         ? collect(data_get($oldRow, 'options', []))
@@ -1070,11 +1088,8 @@
                 </div>
             @empty
                 <div id="no-questions-alert" class="alert alert-warning mb-0">
-                    @if($aiCategory?->id)
-                        No questions are attached to this AI Product yet. Use “Add New Question” to create and attach one.
-                    @else
-                        No active AI questions found. Use “Add New Question”.
-                    @endif
+                    No questions are attached directly to this AI Product yet.
+                    Use “Add New Question” to create and attach one.
                 </div>
             @endforelse
         </div>
