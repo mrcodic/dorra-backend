@@ -174,12 +174,11 @@
         }
     }
 
-    $conditionQuestionsSource = collect(
-        $associatedData['conditionQuestions']
-        ?? $questions
-    );
-
-    $conditionQuestionsPayload = $conditionQuestionsSource
+    /*
+     * Parent Question source = current AI Product questions only.
+     * Studio Item-only questions are intentionally excluded.
+     */
+    $conditionQuestionsPayload = $questions
         ->filter(fn ($question) => in_array(
             $question->type?->value ?? $question->type,
             [
@@ -1529,7 +1528,6 @@
 
         $(document).on('change', '.studio-item-checkbox', function () {
             toggleStudioItemCard($(this));
-            refreshConditionParentQuestions();
         });
 
         function resetStudioItemModal() {
@@ -1863,37 +1861,10 @@
                 .filter(Boolean);
         }
 
-        function selectedStudioConditionQuestionIds() {
-            const ids = new Set();
-
-            $('.studio-item-checkbox:checked').each(function () {
-                const studioItemId = Number(
-                    $(this).val() || 0
-                );
-
-                const studioItem =
-                    studioItemData[studioItemId];
-
-                (
-                    studioItem?.question_ids
-                    ?? []
-                ).forEach(questionId => {
-                    const id = Number(questionId);
-
-                    if (id) {
-                        ids.add(id);
-                    }
-                });
-            });
-
-            return Array.from(ids);
-        }
-
         function availableConditionParentIds() {
-            return new Set([
-                ...directProductConditionQuestionIds(),
-                ...selectedStudioConditionQuestionIds(),
-            ]);
+            return new Set(
+                directProductConditionQuestionIds()
+            );
         }
 
         function conditionParentOptionsHtml(

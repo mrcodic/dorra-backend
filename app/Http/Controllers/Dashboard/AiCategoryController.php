@@ -125,46 +125,9 @@ class AiCategoryController extends DashboardController
             ])
             ->all();
 
-        /*
-         * Parent-condition source.
-         *
-         * Keep the Product Questions list scoped exactly as before, but make
-         * sure conditionQuestionData also knows about questions that belong
-         * only to Studio Items. The Blade/JS filters this broader source to
-         * the questions actually available for the current Product context:
-         *
-         * - questions directly attached to the AI Product
-         * - questions attached to Studio Items currently selected on Product
-         */
-        $conditionQuestionIds = collect($questions)
-            ->pluck('id')
-            ->map(fn($id) => (int) $id)
-            ->merge(
-                collect($studioItemQuestionIds)
-                    ->flatten()
-                    ->map(fn($id) => (int) $id)
-            )
-            ->filter()
-            ->unique()
-            ->values();
-
-        $conditionQuestions = AiGuideQuestion::query()
-            ->where('is_active', true)
-            ->whereIn('id', $conditionQuestionIds)
-            ->with([
-                'options' => fn($query) => $query
-                    ->where('is_active', true)
-                    ->orderBy('sort_order')
-                    ->orderBy('id'),
-            ])
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get();
-
         $associatedData = [
             'categories' => $categories,
             'questions' => $questions,
-            'conditionQuestions' => $conditionQuestions,
             'studioItems' => $studioItems,
             'studioItemQuestionIds' => $studioItemQuestionIds,
             'questionConditions' => $questionConditions,
