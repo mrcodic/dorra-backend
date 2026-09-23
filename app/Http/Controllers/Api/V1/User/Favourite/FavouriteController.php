@@ -27,8 +27,9 @@ class FavouriteController extends Controller
 
         if ($items instanceof LengthAwarePaginator) {
             $items->setCollection(
-                $items->getCollection()
-                    ->map(fn ($item) => FavouriteItemResource::make($item)->resolve(request()))
+                $items->getCollection()->map(
+                    fn ($item) => FavouriteItemResource::make($item)->resolve(request())
+                )
             );
 
             return Response::api(data: $items);
@@ -46,7 +47,7 @@ class FavouriteController extends Controller
 
         return Response::api(data: [
             'cookie_value' => $result['cookie_value'],
-            'is_favourite' => $result['is_favourite'],
+            'is_favourite' => $result['is_favourite']
         ]);
     }
 }
