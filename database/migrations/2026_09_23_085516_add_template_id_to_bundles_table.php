@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bundles', function (Blueprint $table) {
-            $table->foreignId('template_id')
+            $table->foreignUuid('template_id')
                 ->nullable()
                 ->after('display_bundle_on_visit')
                 ->constrained('templates')
