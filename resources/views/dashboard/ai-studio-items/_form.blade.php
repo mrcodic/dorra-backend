@@ -221,6 +221,18 @@
         align-items: center;
     }
 
+    /* Parent Question: hide Select2 dropdown chevron/arrow. */
+    .studio-condition-parent + .select2-container
+    .select2-selection__arrow {
+        display: none !important;
+    }
+
+    .studio-condition-parent + .select2-container
+    .select2-selection--single
+    .select2-selection__rendered {
+        padding-right: 10px !important;
+    }
+
     .studio-condition-rule .select2-selection--multiple {
         min-height: 38px !important;
     }
@@ -1215,39 +1227,7 @@
                             </select>
                         </div>
 
-                        <div class="col-md-2 mb-1">
-                            <label class="form-label">
-                                Operator
-                            </label>
-
-                            <select
-                                class="form-select studio-condition-operator"
-                            >
-                                <option
-                                    value="selected"
-                                    ${
-                operator
-                === 'selected'
-                    ? 'selected'
-                    : ''
-            }
-                                >
-                                    Selected
-                                </option>
-
-                                <option
-                                    value="not_selected"
-                                    ${
-                operator
-                === 'not_selected'
-                    ? 'selected'
-                    : ''
-            }
-                                >
-                                    Not Selected
-                                </option>
-                            </select>
-                        </div>
+                 
 
                         <div class="col-md-2 mb-1">
                             <button

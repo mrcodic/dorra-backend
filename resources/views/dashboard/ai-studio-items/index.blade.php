@@ -166,12 +166,6 @@
                                title="Edit">
                                 <i data-feather="edit-2"></i>
                             </a>
-
-                            <a href="${baseUrl}/${id}/questions"
-                               class="btn btn-sm btn-outline-info"
-                               title="Configure Questions">
-                                <i data-feather="list"></i>
-                            </a>
                         `);
                             }
 
