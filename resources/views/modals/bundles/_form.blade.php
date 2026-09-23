@@ -614,8 +614,9 @@
                         };
                     },
                     processResults: function (response) {
-                        const data = response.data || [];
-                        const meta = response.meta || {};
+                        const payload = response.data || {};
+                        const data = payload.data || [];
+                        const meta = payload.meta || {};
 
                         return {
                             results: data.map(function (template) {
