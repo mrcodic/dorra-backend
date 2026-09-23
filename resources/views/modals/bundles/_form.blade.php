@@ -9,11 +9,21 @@
         $associatedData['product_without_categories']
         ?? collect();
 
-    /*
-     * Change route name here only if your route name is different.
-     */
+    $bundle = $model ?? null;
+
+    $selectedTemplateId = old('template_id', $bundle?->template_id);
+    $useSharedTemplate = old('use_shared_template', ! empty($selectedTemplateId) ? 1 : 0);
+
+    $selectedTemplateName = $bundle?->template?->name;
+    $selectedTemplateImage = $bundle?->template
+        ? (
+            $bundle->template->getFirstMediaUrl('templates-preview')
+            ?: $bundle->template->getFirstMediaUrl('templates')
+        )
+        : null;
+
     $sharedTemplatesUrl = $sharedTemplatesUrl
-        ?? route('bundles.shared-templates');
+        ?? route('dashboard.bundles.shared-templates');
 @endphp
 
 <div class="bundle-form-fields" data-prefix="{{ $prefix }}">
@@ -491,6 +501,7 @@
                 name="use_shared_template"
                 value="1"
                 id="{{ $prefix }}UseSharedTemplate"
+                @checked((int) $useSharedTemplate === 1)
             >
 
             <label class="form-check-label" for="{{ $prefix }}UseSharedTemplate">
@@ -498,15 +509,25 @@
             </label>
         </div>
 
-        <div class="bundle-shared-template-wrapper d-none">
+        <div class="bundle-shared-template-wrapper {{ (int) $useSharedTemplate === 1 ? '' : 'd-none' }}">
             <label class="form-label">Shared Template</label>
 
             <select
                 name="template_id"
                 class="form-select shared-template-select"
-                disabled
+                {{ (int) $useSharedTemplate === 1 ? '' : 'disabled' }}
             >
                 <option value="">Choose template</option>
+
+                @if($selectedTemplateId && $selectedTemplateName)
+                    <option
+                        value="{{ $selectedTemplateId }}"
+                        selected
+                        data-image-url="{{ $selectedTemplateImage }}"
+                    >
+                        {{ $selectedTemplateName }}
+                    </option>
+                @endif
             </select>
 
             <small class="text-muted">
@@ -516,10 +537,6 @@
     </div>
 
     <hr>
-
-    {{-- ============================================================= --}}
-    {{-- BEHAVIOR                                                      --}}
-    {{-- ============================================================= --}}
 
 </div>
 
@@ -584,6 +601,23 @@
                 event.preventDefault();
                 alert('Please select trigger and reward items first.');
             }
+        });
+
+        $(function () {
+            $('.bundle-use-shared-template:checked').each(function () {
+                const $section = $(this).closest('.bundle-shared-template-section');
+                const $wrapper = $section.find('.bundle-shared-template-wrapper');
+                const $select = $section.find('.shared-template-select');
+
+                $wrapper.removeClass('d-none');
+                $select.prop('disabled', false);
+
+                initBundleSharedTemplateSelect($section);
+
+                if ($select.find('option:selected').length && $select.val()) {
+                    $select.trigger('change');
+                }
+            });
         });
 
         function initBundleSharedTemplateSelect($section) {
@@ -730,14 +764,16 @@
                 return template.text;
             }
 
-            if (! template.image_url) {
+            const imageUrl = template.image_url || $(template.element).data('image-url');
+
+            if (! imageUrl) {
                 return template.text;
             }
 
             return $(`
                 <div class="d-flex align-items-center">
                     <img
-                        src="${template.image_url}"
+                        src="${imageUrl}"
                         style="width:36px;height:36px;object-fit:cover;border-radius:6px;margin-right:8px;"
                     >
                     <span>${template.text}</span>

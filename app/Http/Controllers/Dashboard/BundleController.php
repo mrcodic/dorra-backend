@@ -68,7 +68,7 @@ class BundleController extends DashboardController
         $this->methodRelations = [
             'index' => [],
             'show' => ['trigger.itemable', 'rewards.itemable'],
-            'edit' => ['trigger.itemable', 'rewards.itemable'],
+            'edit' => ['template','trigger.itemable', 'rewards.itemable'],
             'update' => ['trigger.itemable', 'rewards.itemable'],
             'store' => ['trigger.itemable', 'rewards.itemable'],
         ];
