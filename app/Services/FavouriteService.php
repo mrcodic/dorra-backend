@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Repositories\Interfaces\FavouriteItemRepositoryInterface;
 use App\Repositories\Interfaces\FavouriteRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
@@ -48,18 +49,20 @@ class FavouriteService extends BaseService
         return $this->repository->query()->firstOrCreate($attributes);
     }
 
-    public function items(): Collection
+    public function items(bool $paginate = false, int $perPage = 15): Collection|LengthAwarePaginator
     {
         $favourite = $this->getCurrentFavourite(create: false);
 
-        if (! $favourite) {
-            return new Collection();
-        }
+        $query = $favourite
+            ? $favourite->items()->with(['favouritable', 'contextable'])->latest()
+            : $this->favouriteItemRepository->query()
+                ->whereRaw('1 = 0')
+                ->with(['favouritable', 'contextable'])
+                ->latest();
 
-        return $favourite->items()
-            ->with(['favouritable', 'contextable'])
-            ->latest()
-            ->get();
+        return $paginate
+            ? $query->paginate($perPage)->withQueryString()
+            : $query->get();
     }
 
     public function toggle(array $validatedData): array
@@ -98,6 +101,7 @@ class FavouriteService extends BaseService
                 $existing->delete();
 
                 return [
+                    'cookie_value' => $favourite->guest?->cookie_value,
                     'is_favourite' => false,
                     'item' => null,
                     'favouritable_type' => $validatedData['favouritable_type'],
@@ -111,6 +115,7 @@ class FavouriteService extends BaseService
             $item->load(['favouritable', 'contextable']);
 
             return [
+                'cookie_value' => $favourite->guest?->cookie_value,
                 'is_favourite' => true,
                 'item' => $item,
                 'favouritable_type' => $validatedData['favouritable_type'],

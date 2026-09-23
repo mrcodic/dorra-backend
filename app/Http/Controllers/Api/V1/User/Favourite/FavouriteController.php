@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Favourite\ToggleFavouriteRequest;
 use App\Http\Resources\Favourite\FavouriteItemResource;
 use App\Services\FavouriteService;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
 
 class FavouriteController extends Controller
@@ -16,7 +17,22 @@ class FavouriteController extends Controller
 
     public function index()
     {
-        $items = $this->favouriteService->items();
+        $paginate = request()->boolean('paginate', false);
+        $perPage = max(1, min(request()->integer('per_page', 15), 100));
+
+        $items = $this->favouriteService->items(
+            paginate: $paginate,
+            perPage: $perPage,
+        );
+
+        if ($items instanceof LengthAwarePaginator) {
+            $items->setCollection(
+                $items->getCollection()
+                    ->map(fn ($item) => FavouriteItemResource::make($item)->resolve(request()))
+            );
+
+            return Response::api(data: $items);
+        }
 
         return Response::api(data: [
             'items' => FavouriteItemResource::collection($items)->resolve(request()),
@@ -29,14 +45,8 @@ class FavouriteController extends Controller
         $result = $this->favouriteService->toggle($request->validated());
 
         return Response::api(data: [
+            'cookie_value' => $result['cookie_value'],
             'is_favourite' => $result['is_favourite'],
-            'favouritable_type' => $result['favouritable_type'],
-            'favouritable_id' => $result['favouritable_id'],
-            'contextable_type' => $result['contextable_type'],
-            'contextable_id' => $result['contextable_id'],
-            'item' => $result['item']
-                ? FavouriteItemResource::make($result['item'])->resolve(request())
-                : null,
         ]);
     }
 }
