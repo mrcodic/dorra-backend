@@ -23,7 +23,7 @@
         : null;
 
     $sharedTemplatesUrl = $sharedTemplatesUrl
-        ?? route('dashboard.bundles.shared-templates');
+        ?? route('bundles.shared-templates');
 @endphp
 
 <div class="bundle-form-fields" data-prefix="{{ $prefix }}">
