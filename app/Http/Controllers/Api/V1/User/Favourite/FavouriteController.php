@@ -25,20 +25,11 @@ class FavouriteController extends Controller
             perPage: $perPage,
         );
 
-        if ($items instanceof LengthAwarePaginator) {
-            $items->setCollection(
-                $items->getCollection()->map(
-                    fn ($item) => FavouriteItemResource::make($item)->resolve(request())
-                )
-            );
+        $favouriteResourceCollection = $items instanceof LengthAwarePaginator
+            ? FavouriteItemResource::collection($items)->response()->getData()
+            : FavouriteItemResource::collection($items);
 
-            return Response::api(data: $items);
-        }
-
-        return Response::api(data: [
-            'items' => FavouriteItemResource::collection($items)->resolve(request()),
-            'count' => $items->count(),
-        ]);
+        return Response::api(data: $favouriteResourceCollection);
     }
 
     public function toggle(ToggleFavouriteRequest $request)
@@ -47,7 +38,7 @@ class FavouriteController extends Controller
 
         return Response::api(data: [
             'cookie_value' => $result['cookie_value'],
-            'is_favourite' => $result['is_favourite']
+            'is_favourite' => $result['is_favourite'],
         ]);
     }
 }
