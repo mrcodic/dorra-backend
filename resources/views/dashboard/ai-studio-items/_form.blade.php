@@ -1144,11 +1144,9 @@
 
                     select.select2({
                         width: '100%',
-                        placeholder: 'Select Parent',
-                        allowClear: true,
-                        dropdownParent: select.closest(
-                            '.studio-question-condition-panel'
-                        )
+                        placeholder:
+                            'Select Parent',
+                        allowClear: true
                     });
                 });
 
@@ -1169,12 +1167,10 @@
 
                     select.select2({
                         width: '100%',
-                        placeholder: 'Select one or more answers',
+                        placeholder:
+                            'Select one or more answers',
                         allowClear: true,
-                        closeOnSelect: false,
-                        dropdownParent: select.closest(
-                            '.studio-question-condition-panel'
-                        )
+                        closeOnSelect: false
                     });
                 });
         }
@@ -1212,7 +1208,7 @@
                             </label>
 
                             <select
-                                class="form-select select2 studio-condition-parent"
+                                class="form-select studio-condition-parent"
                             >
                                 <option value="">
                                     Select Parent
@@ -1472,17 +1468,11 @@
                     '.studio-question-card'
                 );
 
-                const panel = card.find(
-                    '.studio-question-condition-panel'
-                );
-
-                panel.toggleClass('d-none');
-
-                if (!panel.hasClass('d-none')) {
-                    initConditionSelect2(
-                        panel
-                    );
-                }
+                card
+                    .find(
+                        '.studio-question-condition-panel'
+                    )
+                    .toggleClass('d-none');
 
                 refreshConditionPanelState(
                     card
