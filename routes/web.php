@@ -8,6 +8,7 @@ use App\Http\Controllers\Dashboard\{AdminController,
     AiCategoryController,
     AiGuideQuestionController,
     AiStudioItemController,
+    AiStudioItemQuestionConfigController,
     BoardController,
     BundleController,
     CategoryController,
@@ -346,6 +347,8 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
 
         }));
         Route::resource('ai-studio-items', AiStudioItemController::class);
+        Route::put('ai-studio-items/{studioItem}/question-config', [AiStudioItemQuestionConfigController::class, 'update',])->name('ai-studio-items.question-config.update');
+
         Route::post('ai-categories/studio-items/quick-store', [AiCategoryController::class, 'quickStoreStudioItem'])
             ->name('ai-categories.studio-items.quick-store');
         Route::delete('ai-categories/studio-items/{studioItem}/quick-delete', [AiCategoryController::class, 'quickDeleteStudioItem'])
