@@ -20,6 +20,8 @@ class BundleCardResource extends JsonResource
             'status' => $this->status?->value ?? $this->status,
 
             'display_bundle_on_visit' => (bool) $this->display_bundle_on_visit,
+            'template_id' => $this->template_id,
+            'is_attached_to_template' => ! empty($this->template_id),
 
             'saving' => $this->saving,
 
