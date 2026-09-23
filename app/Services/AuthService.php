@@ -38,6 +38,7 @@ class AuthService
         public GuestRepositoryInterface           $guestRepository,
         public AdminRepositoryInterface           $adminRepository,
         public DiscountCodeRepositoryInterface    $discountCodeRepository,
+        public FavouriteService                  $favouriteService,
     ) {}
 
     public function register($validatedData): false|User
@@ -300,6 +301,8 @@ class AuthService
                 ->whereNull('user_id')
                 ->where('guest_id', $guest->id)
                 ->update(['user_id' => $user->id]);
+
+            $this->favouriteService->mergeGuestIntoUser($guest, $user);
         });
     }
 }

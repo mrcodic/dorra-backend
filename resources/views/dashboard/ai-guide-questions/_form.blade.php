@@ -1196,7 +1196,7 @@
 
                         <div class="option-conditional-question-inputs"></div>
 
-                    
+
                     </div>
 
                     <div class="col-md-10 color-palette-section">

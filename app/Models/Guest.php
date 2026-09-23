@@ -22,6 +22,11 @@ class Guest extends Model implements HasMedia
         return $this->hasOne(Cart::class);
     }
 
+    public function favourite(): HasOne
+    {
+        return $this->hasOne(Favourite::class);
+    }
+
 
     public function cartItems(): HasManyThrough
     {

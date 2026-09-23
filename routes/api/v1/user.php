@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\V1\User\{Ai\AiAssetController,
     Category\CategoryController,
     CMS\LandingController,
     Design\DesignController,
+    Favourite\FavouriteController,
     Folder\FolderController,
     Industry\IndustryController,
     Invitation\InvitationController,
@@ -166,6 +167,8 @@ Route::middleware(LocalizationMiddleware::class)->group(function () {
     Route::resource('bundles', BundleController::class)->only(['index', 'show']);
     Route::post('carts/bundles', [BundleController::class,'addBundleToCart']);
 
+    Route::get('favourites', [FavouriteController::class, 'index']);
+    Route::post('favourites/toggle', [FavouriteController::class, 'toggle']);
 
     Route::middleware('auth:sanctum')->group(function () {
 
