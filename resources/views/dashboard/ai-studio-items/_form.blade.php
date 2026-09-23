@@ -183,6 +183,11 @@
     href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
 >
 
+<link
+    rel="stylesheet"
+    href="{{ asset(mix('vendors/css/forms/select/select2.min.css')) }}"
+>
+
 
 <style>
     .studio-question-card {
@@ -206,8 +211,27 @@
         background: #fff;
     }
 
-    .studio-condition-answer-select {
-        min-height: 90px;
+    .studio-condition-rule .select2-container {
+        width: 100% !important;
+    }
+
+    .studio-condition-rule .select2-selection--single {
+        min-height: 38px;
+        display: flex;
+        align-items: center;
+    }
+
+    .studio-condition-rule .select2-selection--multiple {
+        min-height: 38px !important;
+    }
+
+    .studio-condition-rule .select2-selection__rendered {
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+
+    .studio-condition-rule .remove-studio-condition-rule {
+        min-height: 38px;
     }
 </style>
 
@@ -862,6 +886,7 @@
 
 <script src="https://unpkg.com/feather-icons"></script>
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="{{ asset(mix('vendors/js/forms/select/select2.full.min.js')) }}"></script>
 
 <script>
     $(function () {
@@ -962,78 +987,92 @@
             childQuestionId,
             selectedParentId = null
         ) {
-            const childCard = questionCard(
-                childQuestionId
-            );
-
-            const childSort = Number(
-                childCard
-                    .find('.studio-question-order')
-                    .val()
-                || 0
-            );
-
-            return attachedQuestionIds()
-                .filter(parentId => {
+            return Object.values(
+                studioQuestionPayload
+                ?? {}
+            )
+                .filter(parent => {
                     if (
-                        Number(parentId)
+                        Number(parent.id)
                         === Number(childQuestionId)
                     ) {
                         return false;
                     }
 
-                    const parent =
-                        studioQuestionPayload[
-                            Number(parentId)
-                            ];
+                    return [
+                        'single_select',
+                        'multi_select'
+                    ].includes(
+                        String(parent.type)
+                    );
+                })
+                .sort((a, b) => {
+                    const aCard = questionCard(a.id);
+                    const bCard = questionCard(b.id);
 
-                    if (!parent) {
-                        return false;
+                    const aAttached = aCard
+                        .find('.studio-question-toggle')
+                        .is(':checked');
+
+                    const bAttached = bCard
+                        .find('.studio-question-toggle')
+                        .is(':checked');
+
+                    /*
+                     * Already attached parents first, then keep the
+                     * general question order.
+                     */
+                    if (aAttached !== bAttached) {
+                        return aAttached ? -1 : 1;
                     }
 
-                    if (
-                        ![
-                            'single_select',
-                            'multi_select'
-                        ].includes(
-                            String(parent.type)
-                        )
-                    ) {
-                        return false;
-                    }
-
-                    const parentSort = Number(
-                        questionCard(parentId)
-                            .find(
-                                '.studio-question-order'
-                            )
+                    const aOrder = Number(
+                        aCard
+                            .find('.studio-question-order')
                             .val()
                         || 0
                     );
 
-                    /*
-                     * The visibility resolver is order-sensitive.
-                     * Parent must appear before the child.
-                     */
-                    return parentSort < childSort;
+                    const bOrder = Number(
+                        bCard
+                            .find('.studio-question-order')
+                            .val()
+                        || 0
+                    );
+
+                    if (aOrder !== bOrder) {
+                        return aOrder - bOrder;
+                    }
+
+                    return Number(a.id) - Number(b.id);
                 })
-                .map(parentId => {
-                    const parent =
-                        studioQuestionPayload[
-                            Number(parentId)
-                            ];
+                .map(parent => {
+                    const parentCard =
+                        questionCard(parent.id);
+
+                    const attached =
+                        parentCard
+                            .find(
+                                '.studio-question-toggle'
+                            )
+                            .is(':checked');
+
+                    const suffix =
+                        attached
+                            ? ''
+                            : ' — will attach';
 
                     return `
                         <option
-                            value="${Number(parentId)}"
+                            value="${Number(parent.id)}"
                             ${
                         Number(selectedParentId)
-                        === Number(parentId)
+                        === Number(parent.id)
                             ? 'selected'
                             : ''
                     }
                         >
-                            ${escapeHtml(parent.title)}
+                            ${escapeHtml(parent.title + suffix)}
                         </option>
                     `;
                 })
@@ -1080,6 +1119,66 @@
                 .join('');
         }
 
+        function initConditionSelect2(scope = document) {
+            if (
+                typeof $.fn.select2
+                !== 'function'
+            ) {
+                return;
+            }
+
+            $(scope)
+                .find(
+                    '.studio-condition-parent'
+                )
+                .each(function () {
+                    const select = $(this);
+
+                    if (
+                        select.hasClass(
+                            'select2-hidden-accessible'
+                        )
+                    ) {
+                        return;
+                    }
+
+                    select.select2({
+                        width: '100%',
+                        placeholder: 'Select Parent',
+                        allowClear: true,
+                        dropdownParent: select.closest(
+                            '.studio-question-condition-panel'
+                        )
+                    });
+                });
+
+            $(scope)
+                .find(
+                    '.studio-condition-answer-select'
+                )
+                .each(function () {
+                    const select = $(this);
+
+                    if (
+                        select.hasClass(
+                            'select2-hidden-accessible'
+                        )
+                    ) {
+                        return;
+                    }
+
+                    select.select2({
+                        width: '100%',
+                        placeholder: 'Select one or more answers',
+                        allowClear: true,
+                        closeOnSelect: false,
+                        dropdownParent: select.closest(
+                            '.studio-question-condition-panel'
+                        )
+                    });
+                });
+        }
+
         function buildConditionRule(
             childQuestionId,
             condition = {}
@@ -1113,7 +1212,7 @@
                             </label>
 
                             <select
-                                class="form-select studio-condition-parent"
+                                class="form-select select2 studio-condition-parent"
                             >
                                 <option value="">
                                     Select Parent
@@ -1135,7 +1234,7 @@
                             </label>
 
                             <select
-                                class="form-select studio-condition-answer-select"
+                                class="form-select select2 studio-condition-answer-select"
                                 multiple
                             >
                                 ${conditionAnswerOptionsHtml(
@@ -1145,7 +1244,39 @@
                             </select>
                         </div>
 
+                        <div class="col-md-2 mb-1">
+                            <label class="form-label">
+                                Operator
+                            </label>
 
+                            <select
+                                class="form-select studio-condition-operator"
+                            >
+                                <option
+                                    value="selected"
+                                    ${
+                operator
+                === 'selected'
+                    ? 'selected'
+                    : ''
+            }
+                                >
+                                    Selected
+                                </option>
+
+                                <option
+                                    value="not_selected"
+                                    ${
+                operator
+                === 'not_selected'
+                    ? 'selected'
+                    : ''
+            }
+                                >
+                                    Not Selected
+                                </option>
+                            </select>
+                        </div>
 
                         <div class="col-md-2 mb-1">
                             <button
@@ -1195,16 +1326,27 @@
                     card.data('question-id')
                 );
 
-            card
-                .find(
-                    '.studio-condition-rules'
+            const rulesContainer = card.find(
+                '.studio-condition-rules'
+            );
+
+            rulesContainer.append(
+                buildConditionRule(
+                    childQuestionId,
+                    condition
                 )
-                .append(
-                    buildConditionRule(
-                        childQuestionId,
-                        condition
+            );
+
+            const newRule =
+                rulesContainer
+                    .find(
+                        '.studio-condition-rule'
                     )
-                );
+                    .last();
+
+            initConditionSelect2(
+                newRule
+            );
 
             refreshConditionPanelState(
                 card
@@ -1263,6 +1405,16 @@
                         || 0
                     );
 
+                if (
+                    parentSelect.hasClass(
+                        'select2-hidden-accessible'
+                    )
+                ) {
+                    parentSelect.select2(
+                        'destroy'
+                    );
+                }
+
                 parentSelect.html(`
                     <option value="">
                         Select Parent
@@ -1281,6 +1433,10 @@
                         )
                     );
                 }
+
+                initConditionSelect2(
+                    rule
+                );
             });
         }
 
@@ -1316,11 +1472,17 @@
                     '.studio-question-card'
                 );
 
-                card
-                    .find(
-                        '.studio-question-condition-panel'
-                    )
-                    .toggleClass('d-none');
+                const panel = card.find(
+                    '.studio-question-condition-panel'
+                );
+
+                panel.toggleClass('d-none');
+
+                if (!panel.hasClass('d-none')) {
+                    initConditionSelect2(
+                        panel
+                    );
+                }
 
                 refreshConditionPanelState(
                     card
@@ -1350,11 +1512,30 @@
                     '.studio-question-card'
                 );
 
-                $(this)
-                    .closest(
-                        '.studio-condition-rule'
+                const rule = $(this).closest(
+                    '.studio-condition-rule'
+                );
+
+                rule
+                    .find(
+                        '.studio-condition-parent, '
+                        + '.studio-condition-answer-select'
                     )
-                    .remove();
+                    .each(function () {
+                        const select = $(this);
+
+                        if (
+                            select.hasClass(
+                                'select2-hidden-accessible'
+                            )
+                        ) {
+                            select.select2(
+                                'destroy'
+                            );
+                        }
+                    });
+
+                rule.remove();
 
                 refreshConditionPanelState(
                     card
@@ -1370,22 +1551,141 @@
                     '.studio-condition-rule'
                 );
 
+                const childCard =
+                    rule.closest(
+                        '.studio-question-card'
+                    );
+
                 const parentQuestionId =
                     Number(
                         $(this).val()
                         || 0
                     );
 
-                rule
-                    .find(
+                /*
+                 * A conditional parent must also belong to this Studio Item.
+                 * If admin chooses a general question that is not attached yet,
+                 * attach it automatically.
+                 */
+                if (parentQuestionId) {
+                    const parentCard =
+                        questionCard(
+                            parentQuestionId
+                        );
+
+                    const parentToggle =
+                        parentCard.find(
+                            '.studio-question-toggle'
+                        );
+
+                    if (
+                        !parentToggle
+                            .is(':checked')
+                    ) {
+                        parentToggle
+                            .prop(
+                                'checked',
+                                true
+                            );
+
+                        refreshQuestionCardState(
+                            parentCard
+                        );
+                    }
+                }
+
+                const answerSelect =
+                    rule.find(
                         '.studio-condition-answer-select'
+                    );
+
+                if (
+                    answerSelect.hasClass(
+                        'select2-hidden-accessible'
                     )
-                    .html(
-                        conditionAnswerOptionsHtml(
-                            parentQuestionId,
-                            []
+                ) {
+                    answerSelect.select2(
+                        'destroy'
+                    );
+                }
+
+                answerSelect.html(
+                    conditionAnswerOptionsHtml(
+                        parentQuestionId,
+                        []
+                    )
+                );
+
+                initConditionSelect2(
+                    rule
+                );
+
+                /*
+                 * Update other rule dropdown labels so the newly auto-attached
+                 * parent no longer says "will attach".
+                 */
+                refreshConditionParentSelects();
+            }
+        );
+
+
+        $(document).on(
+            'select2:select',
+            '.studio-condition-answer-select',
+            function (e) {
+                const select = $(this);
+                const selectedId = String(
+                    e.params.data.id
+                );
+
+                const selectedOption =
+                    select
+                        .find('option')
+                        .filter(function () {
+                            return String(
+                                $(this).val()
+                            ) === selectedId;
+                        });
+
+                selectedOption
+                    .detach()
+                    .appendTo(select);
+
+                const selectedValues =
+                    select
+                        .find('option:selected')
+                        .map(function () {
+                            return String(
+                                $(this).val()
+                            );
+                        })
+                        .get();
+
+                setTimeout(function () {
+                    if (
+                        select.hasClass(
+                            'select2-hidden-accessible'
+                        )
+                    ) {
+                        select.select2(
+                            'destroy'
+                        );
+                    }
+
+                    initConditionSelect2(
+                        select.closest(
+                            '.studio-condition-rule'
                         )
                     );
+
+                    select
+                        .val(
+                            selectedValues
+                        )
+                        .trigger(
+                            'change.select2'
+                        );
+                }, 0);
             }
         );
 
@@ -1647,6 +1947,9 @@
         refreshAllQuestionCards();
         hydrateInitialConditions();
         refreshConditionParentSelects();
+        initConditionSelect2(
+            document
+        );
 
         form
             .off('submit.aiStudioItem')
