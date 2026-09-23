@@ -100,6 +100,6 @@ class BundleController extends DashboardController
     public function sharedTemplates(Request $request)
     {
         $templates = $this->bundleService->sharedTemplates($request);
-        return Response::api(data: TemplateResource::collection($templates));
+        return Response::api(data: $templates);
     }
 }
