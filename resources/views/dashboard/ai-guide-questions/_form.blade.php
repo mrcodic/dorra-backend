@@ -1196,19 +1196,7 @@
 
                         <div class="option-conditional-question-inputs"></div>
 
-                        <button
-                            type="button"
-                            class="btn btn-outline-info w-100 mt-50 configure-option-condition"
-                            data-option-index="${index}"
-                        >
-                            <i data-feather="git-branch"></i>
-                            Conditional
-                            <span
-                                class="badge bg-info text-white option-condition-count ms-25 d-none"
-                            >
-                                0
-                            </span>
-                        </button>
+                    
                     </div>
 
                     <div class="col-md-10 color-palette-section">
