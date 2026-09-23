@@ -18,14 +18,16 @@ class AiGenerationConfigService
             ->with('studioItems')
             ->findOrFail($aiCategoryId);
 
-        $contexts = [[
-            'id' => $aiCategory->id,
+        $categoryContext = [
+            'id' => (int) $aiCategory->id,
             'types' => array_values(array_unique([
                 $aiCategory->getMorphClass(),
                 'ai_category',
                 AiCategory::class,
             ])),
-        ]];
+        ];
+
+        $contexts = [$categoryContext];
 
         $studioContext = null;
 
@@ -123,6 +125,7 @@ class AiGenerationConfigService
                 $assignedOptionIds,
                 $conditionsByAssignmentId,
                 $allOptionsById,
+                $categoryContext,
                 $studioContext
             ) {
                 $questionId = (int) $questionId;
@@ -155,13 +158,24 @@ class AiGenerationConfigService
                 }
 
                 /*
-                 * When a Studio Item is selected, its assignment controls the
-                 * question order for questions attached to that Studio Item.
+                 * Product questions always come before Studio Item-only questions.
                  *
-                 * Product assignment order remains the fallback for questions
-                 * that are only attached to the AI Product.
+                 * If the same question is attached to both the AI Product and the
+                 * selected Studio Item, the Product assignment wins for ordering.
                  */
-                $sortAssignments = $assignments;
+                $productAssignments = $assignments
+                    ->filter(function ($assignment) use ($categoryContext) {
+                        return
+                            (int) $assignment->assignable_id === (int) $categoryContext['id']
+                            && in_array(
+                                (string) $assignment->assignable_type,
+                                $categoryContext['types'],
+                                true
+                            );
+                    })
+                    ->values();
+
+                $studioAssignments = collect();
 
                 if ($studioContext !== null) {
                     $studioAssignments = $assignments
@@ -175,10 +189,21 @@ class AiGenerationConfigService
                                 );
                         })
                         ->values();
+                }
 
-                    if ($studioAssignments->isNotEmpty()) {
-                        $sortAssignments = $studioAssignments;
-                    }
+                if ($productAssignments->isNotEmpty()) {
+                    $sortAssignments = $productAssignments;
+                    $question->setAttribute('resolved_context_priority', 0);
+                } elseif ($studioAssignments->isNotEmpty()) {
+                    $sortAssignments = $studioAssignments;
+                    $question->setAttribute('resolved_context_priority', 1);
+                } else {
+                    /*
+                     * Defensive fallback. getAssignedQuestions() is built only
+                     * from assignment rows, so this normally cannot happen.
+                     */
+                    $sortAssignments = $assignments;
+                    $question->setAttribute('resolved_context_priority', 2);
                 }
 
                 $question->setAttribute(
@@ -357,6 +382,7 @@ class AiGenerationConfigService
             })
             ->filter()
             ->sortBy(fn($question) => [
+                (int) ($question->resolved_context_priority ?? 0),
                 (int) ($question->resolved_sort_order ?? 0),
                 (int) $question->id,
             ])
