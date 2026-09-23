@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Bundle;
 
+use App\Models\Template;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreBundleRequest extends FormRequest
 {
@@ -73,6 +75,10 @@ class StoreBundleRequest extends FormRequest
                 'max:100',
             ],
             'rewards.*.max_discount_amount' => ['nullable', 'numeric', 'min:0'],
+            'template_id' => [
+                'nullable',
+                Rule::exists((new Template())->getTable(), 'id'),
+            ],
         ];
     }
 
