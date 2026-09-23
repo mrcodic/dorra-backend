@@ -12,7 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bundles', function (Blueprint $table) {
-            //
+            $table->foreignId('template_id')
+                ->nullable()
+                ->after('display_bundle_on_visit')
+                ->constrained('templates')
+                ->nullOnDelete();
         });
     }
 
@@ -22,7 +26,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('bundles', function (Blueprint $table) {
-            //
+            $table->dropForeign('bundles_template_id');
+            $table->dropColumn('template_id');
         });
     }
 };
