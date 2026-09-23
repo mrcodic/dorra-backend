@@ -833,12 +833,19 @@
 
                                     <div style="width:85px">
                                         <input
-                                            type="number"
+                                            type="hidden"
                                             name="questions[{{ $question->id }}][sort_order]"
-                                            value="{{ $sortOrder }}"
+                                            value="{{ $loop->index }}"
+                                            class="question-sort-order-value"
+                                        >
+
+                                        <input
+                                            type="number"
+                                            value="{{ $loop->index }}"
                                             min="0"
-                                            class="form-control form-control-sm"
+                                            class="form-control form-control-sm question-sort-order-display"
                                             placeholder="Order"
+                                            disabled
                                         >
                                     </div>
                                 </div>
@@ -1292,7 +1299,11 @@
                                 min="0"
                                 value="0"
                                 class="form-control"
+                                disabled
                             >
+                            <small class="text-muted">
+                                Order is assigned automatically.
+                            </small>
                         </div>
 
                         <div class="col-md-6 mb-1">
@@ -2112,6 +2123,29 @@
             updateConditionSummary(card);
         }
 
+        function reindexProductQuestionOrders() {
+            let order = 0;
+
+            $('#questions-container .question-card').each(function () {
+                const card = $(this);
+
+                if (!card.find('.question-toggle').is(':checked')) {
+                    return;
+                }
+
+                card.find('.question-sort-order-value').val(order);
+                card.find('.question-sort-order-display').val(order);
+
+                order++;
+            });
+
+            return order;
+        }
+
+        function nextProductQuestionOrder() {
+            return reindexProductQuestionOrders();
+        }
+
         function toggleQuestion(card) {
             const checked = card.find('.question-toggle').is(':checked');
 
@@ -2128,8 +2162,11 @@
             initializeQuestionCondition(card);
         });
 
+        reindexProductQuestionOrders();
+
         $(document).on('change', '.question-toggle', function () {
             toggleQuestion($(this).closest('.question-card'));
+            reindexProductQuestionOrders();
         });
 
         $(document).on('change', '.question-condition-toggle', function () {
@@ -2337,6 +2374,10 @@
         );
 
         $('#quick-question-modal').on('shown.bs.modal', function () {
+            $('#quick-sort-order').val(
+                nextProductQuestionOrder()
+            );
+
             const currentParentId =
                 $('#quick-condition-parent-question').val();
 
@@ -2872,7 +2913,9 @@
 
         function resetQuickQuestionModal(deleteTemporaryMedia = true) {
             $('#quick-title-en, #quick-title-ar, #quick-prompt-label-en, #quick-prompt-label-ar, #quick-placeholder-en, #quick-placeholder-ar').val('');
-            $('#quick-sort-order').val(0);
+            $('#quick-sort-order').val(
+                nextProductQuestionOrder()
+            );
             $('#quick-required').prop('checked', false);
             $('#quick-color-palette-question').prop('checked', false);
 
@@ -3105,12 +3148,19 @@
 
                                     <div style="width:85px">
                                         <input
-                                            type="number"
+                                            type="hidden"
                                             name="questions[${id}][sort_order]"
-                                            value="${Number(question.sort_order ?? 0)}"
+                                            value="0"
+                                            class="question-sort-order-value"
+                                        >
+
+                                        <input
+                                            type="number"
+                                            value="0"
                                             min="0"
-                                            class="form-control form-control-sm"
+                                            class="form-control form-control-sm question-sort-order-display"
                                             placeholder="Order"
+                                            disabled
                                         >
                                     </div>
                                 </div>
@@ -3422,6 +3472,7 @@
 
                     toggleQuestion(newQuestionCard);
                     initializeQuestionCondition(newQuestionCard);
+                    reindexProductQuestionOrders();
 
                     if (pendingCondition) {
                         newQuestionCard
