@@ -507,11 +507,46 @@ class BundleCartService
         }
     }
 
-    private function resolveItemable(array $config, Model $cartable,$bundle): Design|Template
+    private function resolveItemable(array $config, Model $cartable, Bundle $bundle): Design|Template
     {
         $designId = Arr::get($config, 'design_id');
         $templateId = Arr::get($config, 'template_id');
+
+        /*
+         * Bundle attached to shared template.
+         *
+         * Frontend must send template_id.
+         * If customer customized, frontend also sends design_id.
+         */
         if ($bundle->template_id) {
+            if (! $templateId) {
+                throw ValidationException::withMessages([
+                    'template_id' => ['Template id is required for attached template bundle.'],
+                ]);
+            }
+
+            if ((string) $templateId !== (string) $bundle->template_id) {
+                throw ValidationException::withMessages([
+                    'template_id' => ['Selected template does not match bundle attached template.'],
+                ]);
+            }
+
+            if ($designId) {
+                $design = Design::query()
+                    ->with(['specifications', 'mockup', 'products'])
+                    ->find($designId);
+
+                if (! $design) {
+                    throw ValidationException::withMessages([
+                        'design_id' => ['Selected design not found.'],
+                    ]);
+                }
+
+                $this->validateDesignMatchesCartable($design, $cartable);
+
+                return $design;
+            }
+
             $template = Template::query()
                 ->with(['products', 'categories', 'media'])
                 ->find($bundle->template_id);
@@ -526,6 +561,7 @@ class BundleCartService
 
             return $template;
         }
+
         if ($designId) {
             $design = Design::query()
                 ->with(['specifications', 'mockup', 'products'])
@@ -562,7 +598,6 @@ class BundleCartService
             'template_id' => ['Template or design is required for every bundle item.'],
         ]);
     }
-
     private function validateTemplateMatchesCartable(Template $template, Model $cartable): void
     {
         if ($cartable instanceof Product) {

@@ -185,17 +185,43 @@ class StoreBundleCartRequest extends BaseRequest
         }
     }
 
-    private function validateEveryItemHasTemplateOrDesign($requestItems,$bundle): void
+    private function validateEveryItemHasTemplateOrDesign($requestItems, $bundle): void
     {
-        if ($bundle?->template_id) {
-            return;
-        }
         foreach ($requestItems as $index => $item) {
             $templateId = data_get($item, 'template_id');
             $designId = data_get($item, 'design_id');
 
             $hasTemplate = $templateId !== null && $templateId !== '';
             $hasDesign = $designId !== null && $designId !== '';
+
+            /*
+             * Bundle attached to shared template:
+             * frontend must send template_id.
+             * design_id is allowed for customized design.
+             */
+            if ($bundle?->template_id) {
+                if (! $hasTemplate) {
+                    throw ValidationException::withMessages([
+                        "items.{$index}.template_id" => [
+                            'Template id is required for attached template bundle.',
+                        ],
+                    ]);
+                }
+
+                if ((string) $templateId !== (string) $bundle->template_id) {
+                    throw ValidationException::withMessages([
+                        "items.{$index}.template_id" => [
+                            'Selected template does not match bundle attached template.',
+                        ],
+                    ]);
+                }
+
+                /*
+                 * Important:
+                 * allow design_id with template_id here.
+                 */
+                return;
+            }
 
             if (! $hasTemplate && ! $hasDesign) {
                 throw ValidationException::withMessages([
@@ -214,7 +240,6 @@ class StoreBundleCartRequest extends BaseRequest
             }
         }
     }
-
     private function ensureCustomPriceBundleItemHasSingleConfig($bundleItem, $configs): void
     {
         if (! $this->bundleItemUsesCustomPrice($bundleItem)) {
