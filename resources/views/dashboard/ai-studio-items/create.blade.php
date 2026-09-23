@@ -1230,7 +1230,7 @@
                             </label>
 
                             <select
-                                class="form-select studio-condition-answer-select"
+                                class="form-select select2 studio-condition-answer-select"
                                 multiple
                             >
                                 ${conditionAnswerOptionsHtml(
