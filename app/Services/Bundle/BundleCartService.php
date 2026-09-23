@@ -134,7 +134,7 @@ class BundleCartService
                 foreach ($configs as $config) {
                     $configQuantity = max((int) Arr::get($config, 'quantity', 1), 1);
 
-                    $itemable = $this->resolveItemable($config, $cartable);
+                    $itemable = $this->resolveItemable($config, $cartable,$bundle);
 
                     $priceDetails = $this->calculatePriceDetails(
                         config: $config,
@@ -409,6 +409,7 @@ class BundleCartService
     {
         $bundle = Bundle::query()
             ->with([
+                'template',
                 'trigger.itemable',
                 'rewards.itemable',
             ])
@@ -506,11 +507,25 @@ class BundleCartService
         }
     }
 
-    private function resolveItemable(array $config, Model $cartable): Design|Template
+    private function resolveItemable(array $config, Model $cartable,$bundle): Design|Template
     {
         $designId = Arr::get($config, 'design_id');
         $templateId = Arr::get($config, 'template_id');
+        if ($bundle->template_id) {
+            $template = Template::query()
+                ->with(['products', 'categories', 'media'])
+                ->find($bundle->template_id);
 
+            if (! $template) {
+                throw ValidationException::withMessages([
+                    'template_id' => ['Bundle attached template not found.'],
+                ]);
+            }
+
+            $this->validateTemplateMatchesCartable($template, $cartable);
+
+            return $template;
+        }
         if ($designId) {
             $design = Design::query()
                 ->with(['specifications', 'mockup', 'products'])

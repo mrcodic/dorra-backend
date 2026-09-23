@@ -9,6 +9,7 @@ use App\Models\Bundle;
 use App\Models\BundleItem;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Template;
 use App\Repositories\Base\BaseRepositoryInterface;
 use App\Repositories\Interfaces\BundleRepositoryInterface;
 use App\Services\Bundle\BundleItemPurchaseFlowResolver;
@@ -175,8 +176,69 @@ class BundleService extends BaseService
             'flow' => $this->purchaseFlowResolver->resolve($item),
         ];
     }
+    public function sharedTemplates($request)
+    {
+        $validated = $request->validate([
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.type' => ['required', 'string', 'in:product,category'],
+            'items.*.id' => ['required', 'integer'],
 
-    private function splitPayload(array $validatedData): array
+            'search' => ['nullable', 'string', 'max:255'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:30'],
+        ]);
+
+        $items = collect($validated['items'])
+            ->unique(fn ($item) => $item['type'] . ':' . $item['id'])
+            ->values();
+
+        $perPage = (int) ($validated['per_page'] ?? 20);
+        $search = $validated['search'] ?? null;
+
+        $query = Template::query()
+            ->select(['id', 'name'])
+            ->with('media');
+
+        foreach ($items as $item) {
+            if ($item['type'] === 'product') {
+                $query->whereHas('products', function ($q) use ($item) {
+                    $q->whereKey((int) $item['id']);
+                });
+            }
+
+            if ($item['type'] === 'category') {
+                $query->whereHas('categories', function ($q) use ($item) {
+                    $q->whereKey((int) $item['id']);
+                });
+            }
+        }
+
+        $query
+            ->when($search, function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%');
+            })
+            ->orderBy('name');
+
+        $templates = $query->simplePaginate($perPage);
+
+        $templates->setCollection(
+            $templates->getCollection()->map(fn ($template) => [
+                'id' => $template->id,
+                'name' => $template->name,
+                'image_url' => $template->getFirstMediaUrl('templates-preview')
+                    ?: $template->getFirstMediaUrl('templates'),
+            ])
+        );
+
+        return [
+            'data' => $templates->items(),
+            'meta' => [
+                'current_page' => $templates->currentPage(),
+                'per_page' => $templates->perPage(),
+                'has_more_pages' => $templates->hasMorePages(),
+                'next_page_url' => $templates->nextPageUrl(),
+            ],
+        ];
+    }    private function splitPayload(array $validatedData): array
     {
         $trigger = Arr::pull($validatedData, 'trigger');
         $rewards = Arr::pull($validatedData, 'rewards');

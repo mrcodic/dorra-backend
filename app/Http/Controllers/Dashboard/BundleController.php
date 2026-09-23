@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Base\DashboardController;
+use App\Http\Resources\TeamResource;
+use App\Http\Resources\Template\TemplateResource;
 use App\Http\Requests\Bundle\{StoreBundleRequest, UpdateBundleRequest};
 use App\Models\Bundle;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
@@ -94,5 +96,10 @@ class BundleController extends DashboardController
                     : null
             )
         );
+    }
+    public function sharedTemplates(Request $request)
+    {
+        $templates = $this->bundleService->sharedTemplates($request);
+        return Response::api(data: TemplateResource::collection($templates));
     }
 }

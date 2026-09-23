@@ -105,7 +105,7 @@ class StoreBundleCartRequest extends BaseRequest
         $requestItems = collect($this->input('items', []))
             ->values();
 
-        $this->validateEveryItemHasTemplateOrDesign($requestItems);
+        $this->validateEveryItemHasTemplateOrDesign($requestItems,$bundle);
 
         $requestBundleItemIds = $requestItems
             ->pluck('bundle_item_id')
@@ -185,8 +185,11 @@ class StoreBundleCartRequest extends BaseRequest
         }
     }
 
-    private function validateEveryItemHasTemplateOrDesign($requestItems): void
+    private function validateEveryItemHasTemplateOrDesign($requestItems,$bundle): void
     {
+        if ($bundle?->template_id) {
+            return;
+        }
         foreach ($requestItems as $index => $item) {
             $templateId = data_get($item, 'template_id');
             $designId = data_get($item, 'design_id');

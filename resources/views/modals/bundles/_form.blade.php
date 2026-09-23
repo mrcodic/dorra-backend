@@ -8,6 +8,12 @@
     $productWithoutCategories =
         $associatedData['product_without_categories']
         ?? collect();
+
+    /*
+     * Change route name here only if your route name is different.
+     */
+    $sharedTemplatesUrl = $sharedTemplatesUrl
+        ?? route('dashboard.bundles.shared-templates');
 @endphp
 
 <div class="bundle-form-fields" data-prefix="{{ $prefix }}">
@@ -81,6 +87,7 @@
             </div>
         </div>
     </div>
+
     <div class="row mb-2">
         <div class="col-md-6">
             <label class="label-text mb-1" for="{{ $prefix }}BundleDescriptionEn">
@@ -147,41 +154,6 @@
         </div>
     </div>
 
-    {{--    <div class="row mb-3">--}}
-    {{--        <div class="col-md-12">--}}
-    {{--            <div class="form-check">--}}
-    {{--                <input--}}
-    {{--                    type="hidden"--}}
-    {{--                    name="display_bundle_on_visit"--}}
-    {{--                    value="0"--}}
-    {{--                >--}}
-
-    {{--                <input--}}
-    {{--                    class="form-check-input bundle-display-on-visit"--}}
-    {{--                    type="checkbox"--}}
-    {{--                    name="display_bundle_on_visit"--}}
-    {{--                    value="1"--}}
-    {{--                    id="{{ $prefix }}DisplayBundleOnVisit"--}}
-    {{--                >--}}
-
-    {{--                <label--}}
-    {{--                    class="form-check-label"--}}
-    {{--                    for="{{ $prefix }}DisplayBundleOnVisit"--}}
-    {{--                >--}}
-    {{--                    Display this bundle popup when customer visits website--}}
-    {{--                </label>--}}
-    {{--            </div>--}}
-
-    {{--            <small class="text-muted d-block mt-50">--}}
-    {{--                Only one bundle can be displayed on website visit. The customer still chooses and configures it manually.--}}
-    {{--            </small>--}}
-
-    {{--            <small class="text-danger d-block mt-50 d-none bundle-display-on-visit-warning">--}}
-    {{--                Another bundle is already selected for website visit popup.--}}
-    {{--            </small>--}}
-    {{--        </div>--}}
-    {{--    </div>--}}
-
     <hr>
 
     {{-- ============================================================= --}}
@@ -228,10 +200,6 @@
 
     <div class="bundle-trigger-with-category">
         <div class="form-group mb-2">
-            {{--
-                Intentionally follows your existing Dorra labels:
-                actual value = Category(is_has_category=1), admin label = Products.
-            --}}
             <label class="label-text mb-1">Products</label>
             <select
                 name="trigger[parent_category_id]"
@@ -248,7 +216,6 @@
         </div>
 
         <div class="form-group mb-2">
-            {{-- actual value = Product child, admin label = Categories. --}}
             <label class="label-text mb-1">Categories</label>
             <select
                 name="trigger[item_id]"
@@ -280,7 +247,7 @@
     <div class="row mb-2 bundle-trigger-price-wrapper d-none">
         <div class="col-md-6">
             <label class="label-text mb-1">
-                Trigger Quantity  Option
+                Trigger Quantity Option
             </label>
 
             <select
@@ -316,7 +283,6 @@
                 name="trigger[quantity_rule]"
                 class="form-select bundle-select2 bundle-trigger-quantity-rule"
             >
-                {{--                <option value="any">Any Quantity</option>--}}
                 <option value="minimum">Quantity</option>
             </select>
         </div>
@@ -407,7 +373,6 @@
 
                 <div class="bundle-reward-with-category">
                     <div class="form-group mb-2">
-                        {{-- Same intentional opposite label as Offers --}}
                         <label class="label-text mb-1">Products</label>
                         <select
                             name="rewards[__INDEX__][parent_category_id]"
@@ -423,7 +388,6 @@
                     </div>
 
                     <div class="form-group mb-2">
-                        {{-- actual child Product --}}
                         <label class="label-text mb-1">Categories</label>
                         <select
                             name="rewards[__INDEX__][item_id]"
@@ -507,45 +471,281 @@
                         >
                     </div>
                 </div>
-
-                {{--                <div class="form-group mb-2">--}}
-                {{--                    <label class="label-text mb-1">--}}
-                {{--                        Maximum Discount Amount--}}
-                {{--                        <span class="text-muted">(optional)</span>--}}
-                {{--                    </label>--}}
-                {{--                    <input--}}
-                {{--                        type="number"--}}
-                {{--                        min="0"--}}
-                {{--                        step="0.01"--}}
-                {{--                        name="rewards[__INDEX__][max_discount_amount]"--}}
-                {{--                        class="form-control"--}}
-                {{--                        placeholder="Leave empty for no maximum"--}}
-                {{--                    >--}}
-                {{--                </div>--}}
-
-                {{--                <div class="bundle-reward-flow alert alert-light border mb-0 d-none"></div>--}}
             </div>
         </div>
     </template>
+
+    {{-- ============================================================= --}}
+    {{-- SHARED TEMPLATE                                                --}}
+    {{-- ============================================================= --}}
+    <div
+        class="col-md-12 mb-2 bundle-shared-template-section"
+        data-shared-templates-url="{{ $sharedTemplatesUrl }}"
+    >
+        <input type="hidden" name="use_shared_template" value="0">
+
+        <div class="form-check mb-1">
+            <input
+                class="form-check-input bundle-use-shared-template"
+                type="checkbox"
+                name="use_shared_template"
+                value="1"
+                id="{{ $prefix }}UseSharedTemplate"
+            >
+
+            <label class="form-check-label" for="{{ $prefix }}UseSharedTemplate">
+                Use shared template for this bundle
+            </label>
+        </div>
+
+        <div class="bundle-shared-template-wrapper d-none">
+            <label class="form-label">Shared Template</label>
+
+            <select
+                name="template_id"
+                class="form-select shared-template-select"
+                disabled
+            >
+                <option value="">Choose template</option>
+            </select>
+
+            <small class="text-muted">
+                Template will be applied to all bundle trigger/reward items.
+            </small>
+        </div>
+    </div>
 
     <hr>
 
     {{-- ============================================================= --}}
     {{-- BEHAVIOR                                                      --}}
     {{-- ============================================================= --}}
-    {{--    <h6 class="mb-1">3. Bundle Behavior</h6>--}}
-
-    {{--    <div class="row mb-2">--}}
-    {{--        <div class="col-md-6">--}}
-    {{--            <label class="label-text mb-1">Bundle Usage</label>--}}
-    {{--            <select--}}
-    {{--                name="repeat_type"--}}
-    {{--                class="form-select bundle-select2"--}}
-    {{--            >--}}
-    {{--                <option value="once">Apply Once</option>--}}
-    {{--                <option value="repeat">Repeat Based On Quantity</option>--}}
-    {{--            </select>--}}
-    {{--        </div>--}}
-    {{--    </div>--}}
 
 </div>
+
+<script>
+    (function () {
+        if (window.__bundleSharedTemplateScriptLoaded) {
+            return;
+        }
+
+        window.__bundleSharedTemplateScriptLoaded = true;
+
+        $(document).on('change', '.bundle-use-shared-template', function () {
+            const $section = $(this).closest('.bundle-shared-template-section');
+            const $wrapper = $section.find('.bundle-shared-template-wrapper');
+            const $select = $section.find('.shared-template-select');
+
+            if ($(this).is(':checked')) {
+                $wrapper.removeClass('d-none');
+                $select.prop('disabled', false);
+
+                initBundleSharedTemplateSelect($section);
+
+                return;
+            }
+
+            clearBundleSharedTemplateSelect($select);
+
+            $select.prop('disabled', true);
+            $wrapper.addClass('d-none');
+        });
+
+        $(document).on(
+            'change',
+            [
+                '.bundle-trigger-scope',
+                '.bundle-trigger-child',
+                '.bundle-trigger-direct',
+                '.bundle-reward-scope',
+                '.bundle-reward-child',
+                '.bundle-reward-direct'
+            ].join(','),
+            function () {
+                const $form = $(this).closest('.bundle-form-fields');
+                const $section = $form.find('.bundle-shared-template-section');
+                const $checkbox = $section.find('.bundle-use-shared-template');
+
+                if (! $checkbox.is(':checked')) {
+                    return;
+                }
+
+                clearBundleSharedTemplateSelect(
+                    $section.find('.shared-template-select')
+                );
+            }
+        );
+
+        $(document).on('select2:opening', '.shared-template-select', function (event) {
+            const $section = $(this).closest('.bundle-shared-template-section');
+            const items = collectBundleTemplateFilterItems($section);
+
+            if (! items.length) {
+                event.preventDefault();
+                alert('Please select trigger and reward items first.');
+            }
+        });
+
+        function initBundleSharedTemplateSelect($section) {
+            const $select = $section.find('.shared-template-select');
+
+            if ($select.hasClass('select2-hidden-accessible')) {
+                return;
+            }
+
+            const url = $section.data('shared-templates-url');
+
+            $select.select2({
+                width: '100%',
+                placeholder: 'Choose template',
+                allowClear: true,
+                ajax: {
+                    url: url,
+                    type: 'POST',
+                    delay: 350,
+                    dataType: 'json',
+                    data: function (params) {
+                        return {
+                            _token: $('meta[name="csrf-token"]').attr('content'),
+                            search: params.term || '',
+                            page: params.page || 1,
+                            per_page: 20,
+                            items: collectBundleTemplateFilterItems($section)
+                        };
+                    },
+                    processResults: function (response) {
+                        const data = response.data || [];
+                        const meta = response.meta || {};
+
+                        return {
+                            results: data.map(function (template) {
+                                return {
+                                    id: template.id,
+                                    text: template.name,
+                                    image_url: template.image_url
+                                };
+                            }),
+                            pagination: {
+                                more: !!meta.has_more_pages
+                            }
+                        };
+                    }
+                },
+                templateResult: formatBundleSharedTemplateOption,
+                templateSelection: formatBundleSharedTemplateSelection
+            });
+        }
+
+        function clearBundleSharedTemplateSelect($select) {
+            if ($select.hasClass('select2-hidden-accessible')) {
+                $select.val(null).trigger('change');
+                return;
+            }
+
+            $select.val('');
+        }
+
+        function collectBundleTemplateFilterItems($section) {
+            const $form = $section.closest('.bundle-form-fields');
+            const items = [];
+
+            const triggerItem = resolveBundleTriggerTemplateFilterItem($form);
+
+            if (triggerItem) {
+                items.push(triggerItem);
+            }
+
+            $form.find('.bundle-reward-card').each(function () {
+                const rewardItem = resolveBundleRewardTemplateFilterItem($(this));
+
+                if (rewardItem) {
+                    items.push(rewardItem);
+                }
+            });
+
+            return uniqueBundleTemplateFilterItems(items);
+        }
+
+        function resolveBundleTriggerTemplateFilterItem($form) {
+            const scope = $form.find('.bundle-trigger-scope:checked').val();
+
+            if (scope === 'with_category') {
+                const id = $form.find('.bundle-trigger-child').val();
+
+                return id
+                    ? {
+                        type: 'product',
+                        id: id
+                    }
+                    : null;
+            }
+
+            const id = $form.find('.bundle-trigger-direct').val();
+
+            return id
+                ? {
+                    type: 'category',
+                    id: id
+                }
+                : null;
+        }
+
+        function resolveBundleRewardTemplateFilterItem($card) {
+            const scope = $card.find('.bundle-reward-scope:checked').val();
+
+            if (scope === 'with_category') {
+                const id = $card.find('.bundle-reward-child').val();
+
+                return id
+                    ? {
+                        type: 'product',
+                        id: id
+                    }
+                    : null;
+            }
+
+            const id = $card.find('.bundle-reward-direct').val();
+
+            return id
+                ? {
+                    type: 'category',
+                    id: id
+                }
+                : null;
+        }
+
+        function uniqueBundleTemplateFilterItems(items) {
+            const map = {};
+
+            items.forEach(function (item) {
+                map[item.type + ':' + item.id] = item;
+            });
+
+            return Object.values(map);
+        }
+
+        function formatBundleSharedTemplateOption(template) {
+            if (! template.id) {
+                return template.text;
+            }
+
+            if (! template.image_url) {
+                return template.text;
+            }
+
+            return $(`
+                <div class="d-flex align-items-center">
+                    <img
+                        src="${template.image_url}"
+                        style="width:36px;height:36px;object-fit:cover;border-radius:6px;margin-right:8px;"
+                    >
+                    <span>${template.text}</span>
+                </div>
+            `);
+        }
+
+        function formatBundleSharedTemplateSelection(template) {
+            return template.text || 'Choose template';
+        }
+    })();
+</script>

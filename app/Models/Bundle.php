@@ -6,6 +6,7 @@ use App\Enums\Bundle\RepeatTypeEnum;
 use App\Enums\Bundle\StatusEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -29,6 +30,7 @@ class Bundle extends Model implements HasMedia
         'application_type',
         'repeat_type',
         'display_bundle_on_visit',
+        'template_id',
         'start_at',
         'end_at',
     ];
@@ -170,6 +172,10 @@ class Bundle extends Model implements HasMedia
     {
         return (float) (
             data_get($price, 'price'));
+    }
+    public function template(): BelongsTo
+    {
+        return $this->belongsTo(Template::class);
     }
     public function items(): HasMany
     {

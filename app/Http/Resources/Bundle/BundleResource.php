@@ -19,7 +19,8 @@ class BundleResource extends JsonResource
 //            'repeat_type' => $this->repeat_type?->value ?? $this->repeat_type,
             'image_url' => $this->image_url,
             'display_bundle_on_visit' => (bool) $this->display_bundle_on_visit,
-
+            'template_id' => $this->template_id,
+            'is_attached_to_template' => ! empty($this->template_id),
             'start_at' => $this->start_at?->format('Y-m-d'),
             'end_at' => $this->end_at?->format('Y-m-d'),
             'saving' => $this->saving,

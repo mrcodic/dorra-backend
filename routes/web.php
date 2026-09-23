@@ -356,6 +356,7 @@ Route::middleware(AutoCheckPermission::class)->group(function () {
             Route::get('/data', 'getData')->name('data');
             Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
             Route::get('item-meta', 'itemMeta')->name('item-meta');
+            Route::post('/shared-templates','sharedTemplates')->name('shared-templates');
         }));
         Route::resource('/bundles', BundleController::class);
 
