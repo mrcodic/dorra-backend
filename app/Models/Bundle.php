@@ -33,6 +33,7 @@ class Bundle extends Model implements HasMedia
         'template_id',
         'start_at',
         'end_at',
+        'slug',
     ];
 
     protected function casts(): array

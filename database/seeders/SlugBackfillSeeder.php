@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Bundle;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Template;
@@ -20,6 +21,7 @@ class SlugBackfillSeeder extends Seeder
         $this->backfillSlugs(Product::class, 'name');
         $this->backfillSlugs(Category::class, 'name');
         $this->backfillSlugs(Template::class, 'name');
+        $this->backfillSlugs(Bundle::class, 'name');
     }
 
     /**

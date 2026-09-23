@@ -13,6 +13,7 @@ class BundleCardResource extends JsonResource
             'id' => $this->id,
 
             'name' => $this->name,
+            'slug' => $this->slug,
             'description' => $this->description,
 
             'image_url' => $this->image_url,

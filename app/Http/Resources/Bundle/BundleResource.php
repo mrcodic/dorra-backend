@@ -13,6 +13,7 @@ class BundleResource extends JsonResource
             'id' => $this->id,
 
             'name' => $this->name,
+            'slug' => $this->slug,
             'description' => $this->description,
 
             'status' => $this->status?->value ?? $this->status,
