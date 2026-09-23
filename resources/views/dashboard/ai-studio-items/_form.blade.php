@@ -669,7 +669,7 @@
                 <h5 class="mb-25">Questions & Conditional Visibility</h5>
                 <p class="text-muted mb-0">
                     All active general AI questions are available here.
-                    Attach only the questions this Studio Item needs.
+                    Attach questions, set order and conditions, then use the main Save button.
                 </p>
             </div>
 
@@ -678,7 +678,6 @@
                     type="button"
                     id="studio-select-all-questions"
                     class="btn btn-sm btn-outline-primary"
-                    @disabled(!$isEdit)
                 >
                     Select All
                 </button>
@@ -687,30 +686,11 @@
                     type="button"
                     id="studio-clear-questions"
                     class="btn btn-sm btn-outline-secondary"
-                    @disabled(!$isEdit)
                 >
                     Clear
                 </button>
-
-                @if($isEdit)
-                    <button
-                        type="button"
-                        id="save-studio-question-config"
-                        class="btn btn-sm btn-primary"
-                    >
-                        <i data-feather="save"></i>
-                        Save Questions
-                    </button>
-                @endif
             </div>
         </div>
-
-        @if(!$isEdit)
-            <div class="alert alert-info">
-                Create the Studio Item first, then edit it to attach questions,
-                set their order and configure conditional visibility.
-            </div>
-        @endif
 
         <div id="studio-question-list" class="d-flex flex-column gap-1">
             @forelse($generalQuestions as $question)
@@ -766,7 +746,6 @@
                                 id="studio-question-{{ $question->id }}"
                                 value="{{ $question->id }}"
                                 @checked($selected)
-                                @disabled(!$isEdit)
                             >
                         </div>
 
@@ -792,7 +771,7 @@
                                 type="checkbox"
                                 class="form-check-input studio-question-required"
                                 @checked($required)
-                                @disabled(!$isEdit || !$selected)
+                                @disabled(!$selected)
                             >
 
                             <small>Required</small>
@@ -805,14 +784,14 @@
                                 class="form-control form-control-sm studio-question-order"
                                 value="{{ $sortOrder }}"
                                 title="Studio Item question order"
-                                @disabled(!$isEdit || !$selected)
+                                @disabled(!$selected)
                             >
                         </div>
 
                         <button
                             type="button"
                             class="btn btn-sm btn-outline-primary studio-question-condition-toggle"
-                            @disabled(!$isEdit || !$selected)
+                            @disabled(!$selected)
                         >
                             <i data-feather="git-branch"></i>
                             Conditional
@@ -898,10 +877,6 @@
 
         const studioQuestionPayload = @json($studioQuestionPayload);
         const initialStudioQuestionConfig = @json($initialStudioQuestionConfig);
-        const studioItemId = Number(@json($studioItem?->id ?? 0));
-        const studioQuestionConfigUrl = studioItemId
-            ? `{{ url('ai-studio-items') }}/${studioItemId}/question-config`
-            : null;
 
         let isSubmitting = false;
         let conditionRuleSequence = 0;
@@ -967,7 +942,7 @@
                 )
                 .prop(
                     'disabled',
-                    !studioItemId || !selected
+                    !selected
                 );
 
             if (!selected) {
@@ -1681,27 +1656,17 @@
 
         $('#studio-select-all-questions').on(
             'click',
-            function () {
-                if (!studioItemId) {
-                    return;
-                }
-
-                $('.studio-question-toggle')
-                    .prop('checked', true)
-                    .trigger('change');
+            function () {                $('.studio-question-toggle')
+                .prop('checked', true)
+                .trigger('change');
             }
         );
 
         $('#studio-clear-questions').on(
             'click',
-            function () {
-                if (!studioItemId) {
-                    return;
-                }
-
-                $('.studio-question-toggle')
-                    .prop('checked', false)
-                    .trigger('change');
+            function () {                $('.studio-question-toggle')
+                .prop('checked', false)
+                .trigger('change');
             }
         );
 
@@ -1716,109 +1681,93 @@
 
                 const card = $(this);
 
-                const questionId =
-                    Number(
-                        card.data('question-id')
-                    );
+                const questionId = Number(
+                    card.data('question-id')
+                );
 
-                const selected =
+                const selected = card
+                    .find('.studio-question-toggle')
+                    .is(':checked');
+
+                const required = card
+                    .find('.studio-question-required')
+                    .is(':checked');
+
+                const sortOrder = Number(
                     card
-                        .find(
-                            '.studio-question-toggle'
-                        )
-                        .is(':checked');
-
-                if (!selected) {
-                    return;
-                }
-
-                const required =
-                    card
-                        .find(
-                            '.studio-question-required'
-                        )
-                        .is(':checked');
-
-                const sortOrder =
-                    Number(
-                        card
-                            .find(
-                                '.studio-question-order'
-                            )
-                            .val()
-                        || 0
-                    );
+                        .find('.studio-question-order')
+                        .val()
+                    || 0
+                );
 
                 const conditions = [];
 
-                card
-                    .find(
-                        '.studio-condition-rule'
-                    )
-                    .each(function () {
-                        if (error) {
-                            return;
-                        }
+                /*
+                 * Conditions only belong to attached questions.
+                 * Unselected rows are still sent with selected=false so the
+                 * backend can detach them on both Create and Update.
+                 */
+                if (selected) {
+                    card
+                        .find('.studio-condition-rule')
+                        .each(function () {
+                            if (error) {
+                                return;
+                            }
 
-                        const rule = $(this);
+                            const rule = $(this);
 
-                        const parentQuestionId =
-                            Number(
+                            const parentQuestionId = Number(
                                 rule
-                                    .find(
-                                        '.studio-condition-parent'
-                                    )
+                                    .find('.studio-condition-parent')
                                     .val()
                                 || 0
                             );
 
-                        const parentOptionIds =
-                            (
+                            const parentOptionIds = (
                                 rule
-                                    .find(
-                                        '.studio-condition-answer-select'
-                                    )
+                                    .find('.studio-condition-answer-select')
                                     .val()
                                 ?? []
                             )
                                 .map(Number)
                                 .filter(Boolean);
 
-                        const operator =
-                            String(
+                            const operator = String(
                                 rule
-                                    .find(
-                                        '.studio-condition-operator'
-                                    )
+                                    .find('.studio-condition-operator')
                                     .val()
                                 || 'selected'
                             );
 
-                        if (
-                            !parentQuestionId
-                            || !parentOptionIds.length
-                        ) {
-                            error =
-                                'Choose a parent question and at least one answer for every conditional rule.';
+                            if (
+                                !parentQuestionId
+                                || !parentOptionIds.length
+                            ) {
+                                error =
+                                    'Choose a parent question and at least one answer for every conditional rule.';
+                                return;
+                            }
 
-                            return;
-                        }
+                            conditions.push({
+                                parent_question_id:
+                                parentQuestionId,
 
-                        conditions.push({
-                            parent_question_id:
-                            parentQuestionId,
+                                parent_option_ids:
+                                parentOptionIds,
 
-                            parent_option_ids:
-                            parentOptionIds,
-
-                            operator:
-                            operator
+                                operator:
+                                operator
+                            });
                         });
-                    });
+                }
 
                 questions.push({
                     question_id:
                     questionId,
+
+                    selected:
+                    selected,
 
                     required:
                     required,
@@ -1837,102 +1786,88 @@
             };
         }
 
-        $('#save-studio-question-config').on(
-            'click',
-            function () {
-                if (
-                    !studioItemId
-                    || !studioQuestionConfigUrl
-                ) {
-                    showToast(
-                        'Create the Studio Item first.'
+        /*
+         * Send a real Laravel nested `questions` array in multipart FormData:
+         *
+         * questions[0][question_id]
+         * questions[0][selected]
+         * questions[0][required]
+         * questions[0][sort_order]
+         * questions[0][conditions][0][parent_question_id]
+         * questions[0][conditions][0][parent_option_ids][]
+         * questions[0][conditions][0][operator]
+         */
+        function appendQuestionsToFormData(
+            formData,
+            questions
+        ) {
+            questions.forEach(
+                (question, questionIndex) => {
+                    const base =
+                        `questions[${questionIndex}]`;
+
+                    formData.append(
+                        `${base}[question_id]`,
+                        String(question.question_id)
                     );
 
-                    return;
-                }
-
-                const button = $(this);
-                const config =
-                    collectStudioQuestionConfig();
-
-                if (config.error) {
-                    showToast(
-                        config.error
+                    formData.append(
+                        `${base}[selected]`,
+                        question.selected ? '1' : '0'
                     );
 
-                    return;
-                }
+                    formData.append(
+                        `${base}[required]`,
+                        question.required ? '1' : '0'
+                    );
 
-                button.prop(
-                    'disabled',
-                    true
-                );
+                    formData.append(
+                        `${base}[sort_order]`,
+                        String(question.sort_order ?? 0)
+                    );
 
-                $.ajax({
-                    url:
-                    studioQuestionConfigUrl,
+                    (
+                        question.conditions
+                        ?? []
+                    ).forEach(
+                        (
+                            condition,
+                            conditionIndex
+                        ) => {
+                            const conditionBase =
+                                `${base}[conditions][${conditionIndex}]`;
 
-                    type:
-                        'POST',
-
-                    data: {
-                        _method:
-                            'PUT',
-
-                        _token:
-                            '{{ csrf_token() }}',
-
-                        questions:
-                        config.questions
-                    },
-
-                    success:
-                        function (response) {
-                            showToast(
-                                response.message
-                                ?? 'Studio Item questions saved successfully.',
-                                false
-                            );
-                        },
-
-                    error:
-                        function (xhr) {
-                            const response =
-                                xhr.responseJSON
-                                ?? {};
-
-                            if (
-                                xhr.status === 422
-                                && response.errors
-                            ) {
-                                Object.values(
-                                    response.errors
+                            formData.append(
+                                `${conditionBase}[parent_question_id]`,
+                                String(
+                                    condition.parent_question_id
                                 )
-                                    .flat()
-                                    .forEach(
-                                        message =>
-                                            showToast(
-                                                message
-                                            )
-                                    );
-                            } else {
-                                showToast(
-                                    response.message
-                                    ?? 'Unable to save Studio Item questions.'
-                                );
-                            }
-                        },
+                            );
 
-                    complete:
-                        function () {
-                            button.prop(
-                                'disabled',
-                                false
+                            (
+                                condition.parent_option_ids
+                                ?? []
+                            ).forEach(
+                                optionId => {
+                                    formData.append(
+                                        `${conditionBase}[parent_option_ids][]`,
+                                        String(optionId)
+                                    );
+                                }
+                            );
+
+                            formData.append(
+                                `${conditionBase}[operator]`,
+                                String(
+                                    condition.operator
+                                    ?? 'selected'
+                                )
                             );
                         }
-                });
-            }
-        );
+                    );
+                }
+            );
+        }
 
         refreshAllQuestionCards();
         hydrateInitialConditions();
@@ -1950,6 +1885,16 @@
                     return;
                 }
 
+                const questionConfig =
+                    collectStudioQuestionConfig();
+
+                if (questionConfig.error) {
+                    showToast(
+                        questionConfig.error
+                    );
+                    return;
+                }
+
                 isSubmitting = true;
 
                 submitButton
@@ -1960,6 +1905,11 @@
                 `);
 
                 const formData = new FormData(this);
+
+                appendQuestionsToFormData(
+                    formData,
+                    questionConfig.questions
+                );
 
                 $.ajax({
                     url: form.attr('action'),
