@@ -211,18 +211,6 @@
         background: #fff;
     }
 
-    .select2-hidden-accessible {
-        border: 0 !important;
-        clip: rect(0 0 0 0) !important;
-        height: 1px !important;
-        margin: -1px !important;
-        overflow: hidden !important;
-        padding: 0 !important;
-        position: absolute !important;
-        width: 1px !important;
-        white-space: nowrap !important;
-    }
-
     .studio-condition-rule .select2-container {
         width: 100% !important;
     }
@@ -681,7 +669,7 @@
                 <h5 class="mb-25">Questions & Conditional Visibility</h5>
                 <p class="text-muted mb-0">
                     All active general AI questions are available here.
-                    Attach questions, set order and conditions, then use the main Save button.
+                    Attach only the questions this Studio Item needs.
                 </p>
             </div>
 
@@ -690,6 +678,7 @@
                     type="button"
                     id="studio-select-all-questions"
                     class="btn btn-sm btn-outline-primary"
+                    @disabled(!$isEdit)
                 >
                     Select All
                 </button>
@@ -698,11 +687,30 @@
                     type="button"
                     id="studio-clear-questions"
                     class="btn btn-sm btn-outline-secondary"
+                    @disabled(!$isEdit)
                 >
                     Clear
                 </button>
+
+                @if($isEdit)
+                    <button
+                        type="button"
+                        id="save-studio-question-config"
+                        class="btn btn-sm btn-primary"
+                    >
+                        <i data-feather="save"></i>
+                        Save Questions
+                    </button>
+                @endif
             </div>
         </div>
+
+        @if(!$isEdit)
+            <div class="alert alert-info">
+                Create the Studio Item first, then edit it to attach questions,
+                set their order and configure conditional visibility.
+            </div>
+        @endif
 
         <div id="studio-question-list" class="d-flex flex-column gap-1">
             @forelse($generalQuestions as $question)
@@ -758,6 +766,7 @@
                                 id="studio-question-{{ $question->id }}"
                                 value="{{ $question->id }}"
                                 @checked($selected)
+                                @disabled(!$isEdit)
                             >
                         </div>
 
@@ -783,7 +792,7 @@
                                 type="checkbox"
                                 class="form-check-input studio-question-required"
                                 @checked($required)
-                                @disabled(!$selected)
+                                @disabled(!$isEdit || !$selected)
                             >
 
                             <small>Required</small>
@@ -796,14 +805,14 @@
                                 class="form-control form-control-sm studio-question-order"
                                 value="{{ $sortOrder }}"
                                 title="Studio Item question order"
-                                @disabled(!$selected)
+                                @disabled(!$isEdit || !$selected)
                             >
                         </div>
 
                         <button
                             type="button"
                             class="btn btn-sm btn-outline-primary studio-question-condition-toggle"
-                            @disabled(!$selected)
+                            @disabled(!$isEdit || !$selected)
                         >
                             <i data-feather="git-branch"></i>
                             Conditional
@@ -889,6 +898,10 @@
 
         const studioQuestionPayload = @json($studioQuestionPayload);
         const initialStudioQuestionConfig = @json($initialStudioQuestionConfig);
+        const studioItemId = Number(@json($studioItem?->id ?? 0));
+        const studioQuestionConfigUrl = studioItemId
+            ? `{{ url('ai-studio-items') }}/${studioItemId}/question-config`
+            : null;
 
         let isSubmitting = false;
         let conditionRuleSequence = 0;
@@ -954,7 +967,7 @@
                 )
                 .prop(
                     'disabled',
-                    !selected
+                    !studioItemId || !selected
                 );
 
             if (!selected) {
@@ -1107,65 +1120,59 @@
         }
 
         function initConditionSelect2(scope = document) {
-            if (typeof $.fn.select2 !== 'function') {
-                console.error('Select2 is not loaded.');
+            if (
+                typeof $.fn.select2
+                !== 'function'
+            ) {
                 return;
             }
 
-            const root = $(scope);
-
-            const parentSelects = root.is(
-                '.studio-condition-parent'
-            )
-                ? root
-                : root.find(
+            $(scope)
+                .find(
                     '.studio-condition-parent'
-                );
+                )
+                .each(function () {
+                    const select = $(this);
 
-            parentSelects.each(function () {
-                const select = $(this);
+                    if (
+                        select.hasClass(
+                            'select2-hidden-accessible'
+                        )
+                    ) {
+                        return;
+                    }
 
-                if (
-                    select.hasClass(
-                        'select2-hidden-accessible'
-                    )
-                ) {
-                    select.select2('destroy');
-                }
-
-                select.select2({
-                    width: '100%',
-                    placeholder: 'Select Parent',
-                    allowClear: true
+                    select.select2({
+                        width: '100%',
+                        placeholder:
+                            'Select Parent',
+                        allowClear: true
+                    });
                 });
-            });
 
-            const answerSelects = root.is(
-                '.studio-condition-answer-select'
-            )
-                ? root
-                : root.find(
+            $(scope)
+                .find(
                     '.studio-condition-answer-select'
-                );
+                )
+                .each(function () {
+                    const select = $(this);
 
-            answerSelects.each(function () {
-                const select = $(this);
+                    if (
+                        select.hasClass(
+                            'select2-hidden-accessible'
+                        )
+                    ) {
+                        return;
+                    }
 
-                if (
-                    select.hasClass(
-                        'select2-hidden-accessible'
-                    )
-                ) {
-                    select.select2('destroy');
-                }
-
-                select.select2({
-                    width: '100%',
-                    placeholder: 'Select one or more answers',
-                    allowClear: true,
-                    closeOnSelect: false
+                    select.select2({
+                        width: '100%',
+                        placeholder:
+                            'Select one or more answers',
+                        allowClear: true,
+                        closeOnSelect: false
+                    });
                 });
-            });
         }
 
         function buildConditionRule(
@@ -1201,7 +1208,7 @@
                             </label>
 
                             <select
-                                class="form-select select2 studio-condition-parent"
+                                class="form-select studio-condition-parent"
                             >
                                 <option value="">
                                     Select Parent
@@ -1337,12 +1344,6 @@
                 newRule
             );
 
-            setTimeout(function () {
-                initConditionSelect2(
-                    newRule
-                );
-            }, 0);
-
             refreshConditionPanelState(
                 card
             );
@@ -1467,19 +1468,11 @@
                     '.studio-question-card'
                 );
 
-                const panel = card.find(
-                    '.studio-question-condition-panel'
-                );
-
-                panel.toggleClass('d-none');
-
-                if (!panel.hasClass('d-none')) {
-                    setTimeout(function () {
-                        initConditionSelect2(
-                            panel
-                        );
-                    }, 0);
-                }
+                card
+                    .find(
+                        '.studio-question-condition-panel'
+                    )
+                    .toggleClass('d-none');
 
                 refreshConditionPanelState(
                     card
@@ -1614,7 +1607,7 @@
                 );
 
                 initConditionSelect2(
-                    answerSelect
+                    rule
                 );
 
                 /*
@@ -1688,17 +1681,27 @@
 
         $('#studio-select-all-questions').on(
             'click',
-            function () {                $('.studio-question-toggle')
-                .prop('checked', true)
-                .trigger('change');
+            function () {
+                if (!studioItemId) {
+                    return;
+                }
+
+                $('.studio-question-toggle')
+                    .prop('checked', true)
+                    .trigger('change');
             }
         );
 
         $('#studio-clear-questions').on(
             'click',
-            function () {                $('.studio-question-toggle')
-                .prop('checked', false)
-                .trigger('change');
+            function () {
+                if (!studioItemId) {
+                    return;
+                }
+
+                $('.studio-question-toggle')
+                    .prop('checked', false)
+                    .trigger('change');
             }
         );
 
@@ -1834,6 +1837,103 @@
             };
         }
 
+        $('#save-studio-question-config').on(
+            'click',
+            function () {
+                if (
+                    !studioItemId
+                    || !studioQuestionConfigUrl
+                ) {
+                    showToast(
+                        'Create the Studio Item first.'
+                    );
+
+                    return;
+                }
+
+                const button = $(this);
+                const config =
+                    collectStudioQuestionConfig();
+
+                if (config.error) {
+                    showToast(
+                        config.error
+                    );
+
+                    return;
+                }
+
+                button.prop(
+                    'disabled',
+                    true
+                );
+
+                $.ajax({
+                    url:
+                    studioQuestionConfigUrl,
+
+                    type:
+                        'POST',
+
+                    data: {
+                        _method:
+                            'PUT',
+
+                        _token:
+                            '{{ csrf_token() }}',
+
+                        questions:
+                        config.questions
+                    },
+
+                    success:
+                        function (response) {
+                            showToast(
+                                response.message
+                                ?? 'Studio Item questions saved successfully.',
+                                false
+                            );
+                        },
+
+                    error:
+                        function (xhr) {
+                            const response =
+                                xhr.responseJSON
+                                ?? {};
+
+                            if (
+                                xhr.status === 422
+                                && response.errors
+                            ) {
+                                Object.values(
+                                    response.errors
+                                )
+                                    .flat()
+                                    .forEach(
+                                        message =>
+                                            showToast(
+                                                message
+                                            )
+                                    );
+                            } else {
+                                showToast(
+                                    response.message
+                                    ?? 'Unable to save Studio Item questions.'
+                                );
+                            }
+                        },
+
+                    complete:
+                        function () {
+                            button.prop(
+                                'disabled',
+                                false
+                            );
+                        }
+                });
+            }
+        );
+
         refreshAllQuestionCards();
         hydrateInitialConditions();
         refreshConditionParentSelects();
@@ -1850,23 +1950,6 @@
                     return;
                 }
 
-                /*
-                 * Questions/conditions are UI-managed fields, so serialize them
-                 * into one JSON field. The FormRequest decodes this into the
-                 * validated `questions` array before validation.
-                 *
-                 * This also lets us explicitly submit [] and clear every
-                 * Studio Item question assignment.
-                 */
-                const questionConfig = collectStudioQuestionConfig();
-
-                if (questionConfig.error) {
-                    showToast(
-                        questionConfig.error
-                    );
-                    return;
-                }
-
                 isSubmitting = true;
 
                 submitButton
@@ -1877,13 +1960,6 @@
                 `);
 
                 const formData = new FormData(this);
-
-                formData.set(
-                    'questions_json',
-                    JSON.stringify(
-                        questionConfig.questions
-                    )
-                );
 
                 $.ajax({
                     url: form.attr('action'),
