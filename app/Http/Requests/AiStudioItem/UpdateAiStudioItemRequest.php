@@ -84,6 +84,79 @@ class UpdateAiStudioItemRequest extends FormRequest
                 'mimes:jpg,jpeg,png,webp',
                 'max:5120',
             ],
+
+            /*
+             * If `questions` is omitted on Update, existing Studio Item
+             * question mappings remain untouched.
+             *
+             * To clear all mappings explicitly, submit:
+             * questions: []
+             */
+            'questions' => [
+                'nullable',
+                'array',
+            ],
+
+            'questions.*' => [
+                'array',
+            ],
+
+            'questions.*.question_id' => [
+                'required',
+                'integer',
+                'distinct',
+                'exists:ai_guide_questions,id',
+            ],
+
+            'questions.*.selected' => [
+                'nullable',
+                'boolean',
+            ],
+
+            'questions.*.required' => [
+                'nullable',
+                'boolean',
+            ],
+
+            'questions.*.sort_order' => [
+                'nullable',
+                'integer',
+                'min:0',
+            ],
+
+            'questions.*.conditions' => [
+                'nullable',
+                'array',
+            ],
+
+            'questions.*.conditions.*' => [
+                'array',
+            ],
+
+            'questions.*.conditions.*.parent_question_id' => [
+                'required',
+                'integer',
+                'exists:ai_guide_questions,id',
+            ],
+
+            'questions.*.conditions.*.parent_option_ids' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+
+            'questions.*.conditions.*.parent_option_ids.*' => [
+                'integer',
+                'exists:ai_guide_question_options,id',
+            ],
+
+            'questions.*.conditions.*.operator' => [
+                'nullable',
+                Rule::in([
+                    'selected',
+                    'not_selected',
+                ]),
+            ],
         ];
     }
 }

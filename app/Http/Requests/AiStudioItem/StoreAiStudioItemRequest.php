@@ -81,6 +81,88 @@ class StoreAiStudioItemRequest extends FormRequest
                 'mimes:jpg,jpeg,png,webp',
                 'max:5120',
             ],
+
+            /*
+             * Studio Item question assignments.
+             *
+             * `questions` is nullable so the old create/update flow still works.
+             * When it is present, AiStudioItemService::syncQuestions() owns the
+             * assignment, order, required flag, options and conditions.
+             */
+            'questions' => [
+                'nullable',
+                'array',
+            ],
+
+            'questions.*' => [
+                'array',
+            ],
+
+            'questions.*.question_id' => [
+                'required',
+                'integer',
+                'distinct',
+                'exists:ai_guide_questions,id',
+            ],
+
+            /*
+             * Optional for compatibility:
+             * - full forms can submit selected=true/false
+             * - compact AJAX payloads can send selected rows only and omit it
+             */
+            'questions.*.selected' => [
+                'nullable',
+                'boolean',
+            ],
+
+            'questions.*.required' => [
+                'nullable',
+                'boolean',
+            ],
+
+            'questions.*.sort_order' => [
+                'nullable',
+                'integer',
+                'min:0',
+            ],
+
+            'questions.*.conditions' => [
+                'nullable',
+                'array',
+            ],
+
+            'questions.*.conditions.*' => [
+                'array',
+            ],
+
+            'questions.*.conditions.*.parent_question_id' => [
+                'required',
+                'integer',
+                'exists:ai_guide_questions,id',
+            ],
+
+            'questions.*.conditions.*.parent_option_ids' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+
+            /*
+             * Do NOT add `distinct` here.
+             * The same option value may legitimately appear in another rule.
+             */
+            'questions.*.conditions.*.parent_option_ids.*' => [
+                'integer',
+                'exists:ai_guide_question_options,id',
+            ],
+
+            'questions.*.conditions.*.operator' => [
+                'nullable',
+                Rule::in([
+                    'selected',
+                    'not_selected',
+                ]),
+            ],
         ];
     }
 }
