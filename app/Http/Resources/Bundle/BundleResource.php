@@ -21,6 +21,7 @@ class BundleResource extends JsonResource
             'image_url' => $this->image_url,
             'display_bundle_on_visit' => (bool) $this->display_bundle_on_visit,
             'template_id' => $this->template_id,
+            'use_shared_template' => ! empty($this->template_id),
             'is_attached_to_template' => ! empty($this->template_id),
             'attached_template' => $this->whenLoaded('template', function () {
                 return [
