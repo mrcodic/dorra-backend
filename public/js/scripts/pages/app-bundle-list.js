@@ -11,7 +11,6 @@ $.ajaxSetup({
         processing: true,
         serverSide: true,
         searching: false,
-        // orderable: false,
 
         ajax: {
             url: bundlesDataUrl,
@@ -61,17 +60,6 @@ $.ajaxSetup({
                 orderable: false,
                 render: data => `${data || 0} item(s)`
             },
-            // {
-            //     data: 'display_bundle_on_visit',
-            //     orderable: false,
-            //     render: function (data) {
-            //         const enabled = Boolean(data);
-            //         const cls = enabled ? 'bg-light-success' : 'bg-light-secondary';
-            //         const label = enabled ? 'Enabled' : 'Disabled';
-            //
-            //         return `<span class="badge ${cls}">${label}</span>`;
-            //     }
-            // },
             {
                 data: 'status_data',
                 orderable: false,
@@ -152,6 +140,7 @@ $.ajaxSetup({
     });
 
     let searchTimer = null;
+    let isFillingBundleEdit = false;
 
     $('#search-bundle-form').on('keyup', function () {
         clearTimeout(searchTimer);
@@ -193,309 +182,7 @@ $.ajaxSetup({
         resetTriggerPriceOptions($modal);
         applyDisplayBundleOnVisitAvailability($modal, getCurrentModalBundleId($modal));
     }
-    function bindSharedTemplate($modal) {
-        if ($modal.data('shared-template-bound')) {
-            return;
-        }
 
-        $modal.data('shared-template-bound', true);
-
-        $modal.on('change', '.bundle-use-shared-template', function () {
-            const $section = $(this).closest('.bundle-shared-template-section');
-            const $wrapper = $section.find('.bundle-shared-template-wrapper');
-            const $select = $section.find('.shared-template-select');
-
-            if ($(this).is(':checked')) {
-                $wrapper.removeClass('d-none');
-                $select.prop('disabled', false);
-
-                initBundleSharedTemplateSelect($section);
-
-                return;
-            }
-
-            clearBundleSharedTemplateSelect($select);
-
-            $select.prop('disabled', true);
-            $wrapper.addClass('d-none');
-        });
-
-        $modal.on(
-            'change',
-            [
-                '.bundle-trigger-scope',
-                '.bundle-trigger-child',
-                '.bundle-trigger-direct',
-                '.bundle-reward-scope',
-                '.bundle-reward-child',
-                '.bundle-reward-direct'
-            ].join(','),
-            function () {
-                const $section = $modal.find('.bundle-shared-template-section');
-                const $checkbox = $section.find('.bundle-use-shared-template');
-
-                if (! $checkbox.is(':checked')) {
-                    return;
-                }
-
-                clearBundleSharedTemplateSelect(
-                    $section.find('.shared-template-select')
-                );
-            }
-        );
-
-        $modal.on('select2:opening', '.shared-template-select', function (event) {
-            const $section = $(this).closest('.bundle-shared-template-section');
-            const items = collectBundleTemplateFilterItems($section);
-
-            if (! items.length) {
-                event.preventDefault();
-                showErrorToast('Please select trigger and reward items first.');
-            }
-        });
-    }
-
-    function initBundleSharedTemplateSelect($section) {
-        const $select = $section.find('.shared-template-select');
-
-        if ($select.hasClass('select2-hidden-accessible')) {
-            return;
-        }
-
-        const url = $section.data('shared-templates-url');
-        const $modal = $select.closest('.modal');
-
-        $select.select2({
-            width: '100%',
-            placeholder: 'Choose template',
-            allowClear: true,
-            dropdownParent: $modal.length ? $modal : $(document.body),
-            ajax: {
-                url: url,
-                type: 'POST',
-                delay: 350,
-                dataType: 'json',
-                data: function (params) {
-                    return {
-                        _token: bundleCsrfToken,
-                        search: params.term || '',
-                        page: params.page || 1,
-                        per_page: 20,
-                        items: collectBundleTemplateFilterItems($section)
-                    };
-                },
-                processResults: function (response) {
-                    const payload = response.data && response.data.data
-                        ? response.data
-                        : response;
-
-                    const data = payload.data || [];
-                    const meta = payload.meta || {};
-
-                    return {
-                        results: data.map(function (template) {
-                            return {
-                                id: template.id,
-                                text: template.name,
-                                image_url: template.image_url
-                            };
-                        }),
-                        pagination: {
-                            more: !!meta.has_more_pages
-                        }
-                    };
-                }
-            },
-            templateResult: formatBundleSharedTemplateOption,
-            templateSelection: formatBundleSharedTemplateSelection
-        });
-    }
-
-    function setBundleSharedTemplateForEdit($modal, row) {
-        const $section = $modal.find('.bundle-shared-template-section');
-        const $checkbox = $section.find('.bundle-use-shared-template');
-        const $wrapper = $section.find('.bundle-shared-template-wrapper');
-        const $select = $section.find('.shared-template-select');
-
-        const attachedTemplate =
-            row.attached_template ||
-            row.shared_template ||
-            row.template ||
-            null;
-
-        const templateId =
-            row.template_id ||
-            attachedTemplate?.id ||
-            null;
-
-        if (! templateId) {
-            $checkbox.prop('checked', false);
-            $wrapper.addClass('d-none');
-
-            clearBundleSharedTemplateSelect($select);
-
-            $select.prop('disabled', true);
-
-            return;
-        }
-
-        $checkbox.prop('checked', true);
-        $wrapper.removeClass('d-none');
-        $select.prop('disabled', false);
-
-        initBundleSharedTemplateSelect($section);
-
-        const templateName =
-            attachedTemplate?.name ||
-            row.template_name ||
-            'Selected template';
-
-        const imageUrl =
-            attachedTemplate?.image_url ||
-            row.template_image_url ||
-            '';
-
-        const option = new Option(templateName, templateId, true, true);
-
-        if (imageUrl) {
-            $(option).attr('data-image-url', imageUrl);
-        }
-
-        $select
-            .empty()
-            .append('<option value="">Choose template</option>')
-            .append(option)
-            .val(String(templateId))
-            .trigger('change');
-    }
-
-    function resetBundleSharedTemplate($modal) {
-        const $section = $modal.find('.bundle-shared-template-section');
-        const $checkbox = $section.find('.bundle-use-shared-template');
-        const $wrapper = $section.find('.bundle-shared-template-wrapper');
-        const $select = $section.find('.shared-template-select');
-
-        $checkbox.prop('checked', false);
-
-        clearBundleSharedTemplateSelect($select);
-
-        $select.prop('disabled', true);
-        $wrapper.addClass('d-none');
-    }
-
-    function clearBundleSharedTemplateSelect($select) {
-        if ($select.hasClass('select2-hidden-accessible')) {
-            $select.val(null).trigger('change');
-            return;
-        }
-
-        $select.val('');
-    }
-
-    function collectBundleTemplateFilterItems($section) {
-        const $modal = $section.closest('.modal');
-        const items = [];
-
-        const triggerItem = resolveBundleTriggerTemplateFilterItem($modal);
-
-        if (triggerItem) {
-            items.push(triggerItem);
-        }
-
-        $modal.find('.bundle-reward-card').each(function () {
-            const rewardItem = resolveBundleRewardTemplateFilterItem($(this));
-
-            if (rewardItem) {
-                items.push(rewardItem);
-            }
-        });
-
-        return uniqueBundleTemplateFilterItems(items);
-    }
-
-    function resolveBundleTriggerTemplateFilterItem($modal) {
-        const scope = $modal.find('.bundle-trigger-scope:checked').val();
-
-        if (scope === 'with_category') {
-            const id = $modal.find('.bundle-trigger-child').val();
-
-            return id
-                ? {
-                    type: 'product',
-                    id: id
-                }
-                : null;
-        }
-
-        const id = $modal.find('.bundle-trigger-direct').val();
-
-        return id
-            ? {
-                type: 'category',
-                id: id
-            }
-            : null;
-    }
-
-    function resolveBundleRewardTemplateFilterItem($card) {
-        const scope = $card.find('.bundle-reward-scope:checked').val();
-
-        if (scope === 'with_category') {
-            const id = $card.find('.bundle-reward-child').val();
-
-            return id
-                ? {
-                    type: 'product',
-                    id: id
-                }
-                : null;
-        }
-
-        const id = $card.find('.bundle-reward-direct').val();
-
-        return id
-            ? {
-                type: 'category',
-                id: id
-            }
-            : null;
-    }
-
-    function uniqueBundleTemplateFilterItems(items) {
-        const map = {};
-
-        items.forEach(function (item) {
-            map[item.type + ':' + item.id] = item;
-        });
-
-        return Object.values(map);
-    }
-
-    function formatBundleSharedTemplateOption(template) {
-        if (! template.id) {
-            return template.text;
-        }
-
-        const imageUrl = template.image_url || $(template.element).data('image-url');
-
-        if (! imageUrl) {
-            return template.text;
-        }
-
-        return $(`
-        <div class="d-flex align-items-center">
-            <img
-                src="${escapeHtml(imageUrl)}"
-                style="width:36px;height:36px;object-fit:cover;border-radius:6px;margin-right:8px;"
-            >
-            <span>${escapeHtml(template.text)}</span>
-        </div>
-    `);
-    }
-
-    function formatBundleSharedTemplateSelection(template) {
-        return template.text || 'Choose template';
-    }
     function initSelect2($root) {
         $root
             .find('.bundle-select2')
@@ -510,13 +197,6 @@ $.ajaxSetup({
                 }
 
                 const $modal = $select.closest('.modal');
-
-
-
-
-
-
-
 
                 $select.select2({
                     dropdownParent: $modal.length ? $modal : $root,
@@ -823,7 +503,7 @@ $.ajaxSetup({
         });
     }
 
-    function addReward($modal, data = null) {
+    async function addReward($modal, data = null) {
         const index = nextRewardIndex($modal);
         const number = $modal.find('.bundle-reward-card').length + 1;
 
@@ -843,8 +523,10 @@ $.ajaxSetup({
         resetRewardPriceOptions($card);
 
         if (data) {
-            fillRewardCard($modal, $card, data);
+            await fillRewardCard($modal, $card, data);
         }
+
+        return $card;
     }
 
     function nextRewardIndex($modal) {
@@ -1031,6 +713,7 @@ $.ajaxSetup({
 
         return xhr?.responseJSON?.message;
     }
+
     function renderFlow($target, meta) {
         if (!meta) {
             $target.addClass('d-none').empty();
@@ -1526,11 +1209,326 @@ $.ajaxSetup({
 
     /*
      * =====================================================================
+     * Shared template
+     * =====================================================================
+     */
+
+    function bindSharedTemplate($modal) {
+        if ($modal.data('shared-template-bound')) {
+            return;
+        }
+
+        $modal.data('shared-template-bound', true);
+
+        $modal.on('change', '.bundle-use-shared-template', function () {
+            const $section = $(this).closest('.bundle-shared-template-section');
+            const $wrapper = $section.find('.bundle-shared-template-wrapper');
+            const $select = $section.find('.shared-template-select');
+
+            if ($(this).is(':checked')) {
+                $wrapper.removeClass('d-none');
+                $select.prop('disabled', false);
+
+                initBundleSharedTemplateSelect($section);
+
+                return;
+            }
+
+            clearBundleSharedTemplateSelect($select);
+
+            $select.prop('disabled', true);
+            $wrapper.addClass('d-none');
+        });
+
+        $modal.on(
+            'change',
+            [
+                '.bundle-trigger-scope',
+                '.bundle-trigger-child',
+                '.bundle-trigger-direct',
+                '.bundle-reward-scope',
+                '.bundle-reward-child',
+                '.bundle-reward-direct'
+            ].join(','),
+            function () {
+                if (isFillingBundleEdit) {
+                    return;
+                }
+
+                const $section = $modal.find('.bundle-shared-template-section');
+                const $checkbox = $section.find('.bundle-use-shared-template');
+
+                if (!$checkbox.is(':checked')) {
+                    return;
+                }
+
+                clearBundleSharedTemplateSelect(
+                    $section.find('.shared-template-select')
+                );
+            }
+        );
+
+        $modal.on('select2:opening', '.shared-template-select', function (event) {
+            const $section = $(this).closest('.bundle-shared-template-section');
+            const items = collectBundleTemplateFilterItems($section);
+
+            if (!items.length) {
+                event.preventDefault();
+                showErrorToast('Please select trigger and reward items first.');
+            }
+        });
+    }
+
+    function initBundleSharedTemplateSelect($section) {
+        const $select = $section.find('.shared-template-select');
+
+        if ($select.hasClass('select2-hidden-accessible')) {
+            return;
+        }
+
+        const url = $section.data('shared-templates-url');
+        const $modal = $select.closest('.modal');
+
+        $select.select2({
+            width: '100%',
+            placeholder: 'Choose template',
+            allowClear: true,
+            dropdownParent: $modal.length ? $modal : $(document.body),
+            ajax: {
+                url: url,
+                type: 'POST',
+                delay: 350,
+                dataType: 'json',
+                data: function (params) {
+                    return {
+                        _token: bundleCsrfToken,
+                        search: params.term || '',
+                        page: params.page || 1,
+                        per_page: 20,
+                        items: collectBundleTemplateFilterItems($section)
+                    };
+                },
+                processResults: function (response) {
+                    const payload = response.data && response.data.data
+                        ? response.data
+                        : response;
+
+                    const data = payload.data || [];
+                    const meta = payload.meta || {};
+
+                    return {
+                        results: data.map(function (template) {
+                            return {
+                                id: template.id,
+                                text: template.name,
+                                image_url: template.image_url
+                            };
+                        }),
+                        pagination: {
+                            more: !!meta.has_more_pages
+                        }
+                    };
+                }
+            },
+            templateResult: formatBundleSharedTemplateOption,
+            templateSelection: formatBundleSharedTemplateSelection
+        });
+    }
+
+    function setBundleSharedTemplateForEdit($modal, row) {
+        const $section = $modal.find('.bundle-shared-template-section');
+        const $checkbox = $section.find('.bundle-use-shared-template');
+        const $wrapper = $section.find('.bundle-shared-template-wrapper');
+        const $select = $section.find('.shared-template-select');
+
+        const attachedTemplate =
+            row.attached_template ||
+            row.shared_template ||
+            row.template ||
+            null;
+
+        const templateId =
+            row.template_id ||
+            attachedTemplate?.id ||
+            null;
+
+        if (!templateId) {
+            $checkbox.prop('checked', false);
+            $wrapper.addClass('d-none');
+
+            clearBundleSharedTemplateSelect($select);
+
+            $select.prop('disabled', true);
+
+            return;
+        }
+
+        $checkbox.prop('checked', true);
+        $wrapper.removeClass('d-none');
+        $select.prop('disabled', false);
+
+        initBundleSharedTemplateSelect($section);
+
+        const templateName =
+            attachedTemplate?.name ||
+            row.template_name ||
+            'Selected template';
+
+        const imageUrl =
+            attachedTemplate?.image_url ||
+            row.template_image_url ||
+            '';
+
+        const option = new Option(templateName, templateId, true, true);
+
+        if (imageUrl) {
+            $(option).attr('data-image-url', imageUrl);
+        }
+
+        $select
+            .empty()
+            .append('<option value="">Choose template</option>')
+            .append(option)
+            .val(String(templateId))
+            .trigger('change.select2')
+            .trigger('change');
+    }
+
+    function resetBundleSharedTemplate($modal) {
+        const $section = $modal.find('.bundle-shared-template-section');
+        const $checkbox = $section.find('.bundle-use-shared-template');
+        const $wrapper = $section.find('.bundle-shared-template-wrapper');
+        const $select = $section.find('.shared-template-select');
+
+        $checkbox.prop('checked', false);
+
+        clearBundleSharedTemplateSelect($select);
+
+        $select.prop('disabled', true);
+        $wrapper.addClass('d-none');
+    }
+
+    function clearBundleSharedTemplateSelect($select) {
+        if ($select.hasClass('select2-hidden-accessible')) {
+            $select.val(null).trigger('change');
+            return;
+        }
+
+        $select.val('');
+    }
+
+    function collectBundleTemplateFilterItems($section) {
+        const $modal = $section.closest('.modal');
+        const items = [];
+
+        const triggerItem = resolveBundleTriggerTemplateFilterItem($modal);
+
+        if (triggerItem) {
+            items.push(triggerItem);
+        }
+
+        $modal.find('.bundle-reward-card').each(function () {
+            const rewardItem = resolveBundleRewardTemplateFilterItem($(this));
+
+            if (rewardItem) {
+                items.push(rewardItem);
+            }
+        });
+
+        return uniqueBundleTemplateFilterItems(items);
+    }
+
+    function resolveBundleTriggerTemplateFilterItem($modal) {
+        const scope = $modal.find('.bundle-trigger-scope:checked').val();
+
+        if (scope === 'with_category') {
+            const id = $modal.find('.bundle-trigger-child').val();
+
+            return id
+                ? {
+                    type: 'product',
+                    id: id
+                }
+                : null;
+        }
+
+        const id = $modal.find('.bundle-trigger-direct').val();
+
+        return id
+            ? {
+                type: 'category',
+                id: id
+            }
+            : null;
+    }
+
+    function resolveBundleRewardTemplateFilterItem($card) {
+        const scope = $card.find('.bundle-reward-scope:checked').val();
+
+        if (scope === 'with_category') {
+            const id = $card.find('.bundle-reward-child').val();
+
+            return id
+                ? {
+                    type: 'product',
+                    id: id
+                }
+                : null;
+        }
+
+        const id = $card.find('.bundle-reward-direct').val();
+
+        return id
+            ? {
+                type: 'category',
+                id: id
+            }
+            : null;
+    }
+
+    function uniqueBundleTemplateFilterItems(items) {
+        const map = {};
+
+        items.forEach(function (item) {
+            map[item.type + ':' + item.id] = item;
+        });
+
+        return Object.values(map);
+    }
+
+    function formatBundleSharedTemplateOption(template) {
+        if (!template.id) {
+            return template.text;
+        }
+
+        const imageUrl = template.image_url || $(template.element).data('image-url');
+
+        if (!imageUrl) {
+            return template.text;
+        }
+
+        return $(`
+            <div class="d-flex align-items-center">
+                <img
+                    src="${escapeHtml(imageUrl)}"
+                    style="width:36px;height:36px;object-fit:cover;border-radius:6px;margin-right:8px;"
+                >
+                <span>${escapeHtml(template.text)}</span>
+            </div>
+        `);
+    }
+
+    function formatBundleSharedTemplateSelection(template) {
+        return template.text || 'Choose template';
+    }
+
+    /*
+     * =====================================================================
      * Edit
      * =====================================================================
      */
 
-    $(document).on('click', '.edit-bundle-details', function (e) {
+    $(document).on('click', '.edit-bundle-details', async function (e) {
         e.preventDefault();
 
         const row = table
@@ -1578,19 +1576,27 @@ $.ajaxSetup({
 
         applyDisplayBundleOnVisitAvailability($modal, row.id);
 
-        fillTrigger($modal, row.trigger_data || null);
+        isFillingBundleEdit = true;
 
-        $modal.find('.bundle-rewards-container').empty();
+        try {
+            await fillTrigger($modal, row.trigger_data || null);
 
-        (row.rewards_data || []).forEach(reward => {
-            addReward($modal, reward);
-        });
+            $modal.find('.bundle-rewards-container').empty();
 
-        if (!(row.rewards_data || []).length) {
-            addReward($modal);
+            const rewards = row.rewards_data || [];
+
+            if (rewards.length) {
+                for (const reward of rewards) {
+                    await addReward($modal, reward);
+                }
+            } else {
+                await addReward($modal);
+            }
+
+            setBundleSharedTemplateForEdit($modal, row);
+        } finally {
+            isFillingBundleEdit = false;
         }
-
-        setBundleSharedTemplateForEdit($modal, row);
     });
 
     async function fillTrigger($modal, data) {
@@ -1843,6 +1849,7 @@ $.ajaxSetup({
         resetTriggerPriceOptions($modal);
         resetBundleImagePreview($modal);
         applyDisplayBundleOnVisitAvailability($modal, null);
+        resetBundleSharedTemplate($modal);
     }
 
     /*
