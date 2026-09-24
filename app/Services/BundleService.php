@@ -100,7 +100,7 @@ class BundleService extends BaseService
             ])
             ->withCount('rewards')
             ->when(request()->filled('search_value'), function ($query) use ($locale) {
-                $search = trim((string)request('search_value'));
+                $search = trim((string) request('search_value'));
 
                 if ($search !== '') {
                     $query->whereRaw(
@@ -115,11 +115,28 @@ class BundleService extends BaseService
             ->latest();
 
         return DataTables::of($query)
-            ->addColumn('name_translate', fn(Bundle $bundle) => $bundle->getTranslations('name'))
-            ->addColumn('description_translate', fn(Bundle $bundle) => $bundle->getTranslations('description'))
-            ->addColumn('image_url', fn(Bundle $bundle) => $bundle->image_url)
-            ->editColumn('name', fn(Bundle $bundle) => $bundle->name)
-            ->editColumn('display_bundle_on_visit', fn(Bundle $bundle) => (bool)$bundle->display_bundle_on_visit)
+            ->addColumn('name_translate', fn (Bundle $bundle) => $bundle->getTranslations('name'))
+            ->addColumn('description_translate', fn (Bundle $bundle) => $bundle->getTranslations('description'))
+            ->addColumn('image_url', fn (Bundle $bundle) => $bundle->image_url)
+
+            ->addColumn('template_id', fn (Bundle $bundle) => $bundle->template_id)
+            ->addColumn('use_shared_template', fn (Bundle $bundle) => ! empty($bundle->template_id))
+            ->addColumn('is_attached_to_template', fn (Bundle $bundle) => ! empty($bundle->template_id))
+            ->addColumn('attached_template', function (Bundle $bundle) {
+                if (! $bundle->template) {
+                    return null;
+                }
+
+                return [
+                    'id' => $bundle->template->id,
+                    'name' => $bundle->template->name,
+                    'image_url' => $bundle->template->getFirstMediaUrl('templates-preview')
+                        ?: $bundle->template->getFirstMediaUrl('templates'),
+                ];
+            })
+
+            ->editColumn('name', fn (Bundle $bundle) => $bundle->name)
+            ->editColumn('display_bundle_on_visit', fn (Bundle $bundle) => (bool) $bundle->display_bundle_on_visit)
             ->addColumn('status_data', function (Bundle $bundle) {
                 return [
                     'value' => $bundle->status->value,
@@ -132,25 +149,24 @@ class BundleService extends BaseService
                     'label' => $bundle->repeat_type->label(),
                 ];
             })
-            ->addColumn('trigger_data', fn(Bundle $bundle) => $this->serializeItem($bundle->trigger))
+            ->addColumn('trigger_data', fn (Bundle $bundle) => $this->serializeItem($bundle->trigger))
             ->addColumn('rewards_data', function (Bundle $bundle) {
                 return $bundle->rewards
-                    ->map(fn(BundleItem $item) => $this->serializeItem($item))
+                    ->map(fn (BundleItem $item) => $this->serializeItem($item))
                     ->values()
                     ->all();
             })
-            ->editColumn('start_at', fn(Bundle $bundle) => $bundle->start_at?->format('Y-m-d'))
-            ->editColumn('end_at', fn(Bundle $bundle) => $bundle->end_at?->format('Y-m-d'))
+            ->editColumn('start_at', fn (Bundle $bundle) => $bundle->start_at?->format('Y-m-d'))
+            ->editColumn('end_at', fn (Bundle $bundle) => $bundle->end_at?->format('Y-m-d'))
             ->addColumn('action', function () {
                 return [
-                    'can_show' => (bool)auth()->user()->hasPermissionTo('bundles_show'),
-                    'can_edit' => (bool)auth()->user()->hasPermissionTo('bundles_update'),
-                    'can_delete' => (bool)auth()->user()->hasPermissionTo('bundles_delete'),
+                    'can_show' => (bool) auth()->user()->hasPermissionTo('bundles_show'),
+                    'can_edit' => (bool) auth()->user()->hasPermissionTo('bundles_update'),
+                    'can_delete' => (bool) auth()->user()->hasPermissionTo('bundles_delete'),
                 ];
             })
             ->make(true);
     }
-
     public function itemMeta(string $scope, int $itemId, ?int $parentCategoryId = null): array
     {
         $item = $this->resolveSelectableItem(
@@ -239,14 +255,27 @@ class BundleService extends BaseService
                 'next_page_url' => $templates->nextPageUrl(),
             ],
         ];
-    }    private function splitPayload(array $validatedData): array
+    }
+    private function splitPayload(array $validatedData): array
     {
         $trigger = Arr::pull($validatedData, 'trigger');
         $rewards = Arr::pull($validatedData, 'rewards');
         $image = Arr::pull($validatedData, 'image');
 
+        $useSharedTemplate = (bool) Arr::pull($validatedData, 'use_shared_template', false);
+
         $validatedData['display_bundle_on_visit'] =
-            (bool)($validatedData['display_bundle_on_visit'] ?? false);
+            (bool) ($validatedData['display_bundle_on_visit'] ?? false);
+
+        if (! $useSharedTemplate) {
+            $validatedData['template_id'] = null;
+        }
+
+        if ($useSharedTemplate && empty($validatedData['template_id'])) {
+            throw ValidationException::withMessages([
+                'template_id' => 'Please choose shared template.',
+            ]);
+        }
 
         return [$validatedData, $trigger, $rewards, $image];
     }
