@@ -143,15 +143,14 @@ class TemplateResource extends JsonResource
             })->values()->all()
             ),
             'show_back' => (function () use ($media, $backPreviewImageUrl) {
-                if (empty($this->image) && !empty($backPreviewImageUrl)) {
-                    return true;
+                if (empty($backPreviewImageUrl)) {
+                    return false;
                 }
-                if (!empty($this->image) && !empty($backPreviewImageUrl)) {
-                    if ($media) {
-                        return $media->getCustomProperty('side') === 'back';
-                    }
-                    return true;
+
+                if ($media) {
+                    return $media->getCustomProperty('side') === 'back';
                 }
+
                 return false;
             })(),
             'source_design_svg' => $this->when(isset($this->image), $this->image),
