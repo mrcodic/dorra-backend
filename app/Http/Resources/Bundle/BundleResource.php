@@ -22,6 +22,14 @@ class BundleResource extends JsonResource
             'display_bundle_on_visit' => (bool) $this->display_bundle_on_visit,
             'template_id' => $this->template_id,
             'is_attached_to_template' => ! empty($this->template_id),
+            'attached_template' => $this->whenLoaded('template', function () {
+                return [
+                    'id' => $this->template?->id,
+                    'name' => $this->template?->name,
+                    'image_url' => $this->template?->getFirstMediaUrl('templates-preview')
+                        ?: $this->template?->getFirstMediaUrl('templates'),
+                ];
+            }),
             'start_at' => $this->start_at?->format('Y-m-d'),
             'end_at' => $this->end_at?->format('Y-m-d'),
             'saving' => $this->saving,

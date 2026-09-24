@@ -548,6 +548,12 @@
 
         window.__bundleSharedTemplateScriptLoaded = true;
 
+        /*
+        |--------------------------------------------------------------------------
+        | Events
+        |--------------------------------------------------------------------------
+        */
+
         $(document).on('change', '.bundle-use-shared-template', function () {
             const $section = $(this).closest('.bundle-shared-template-section');
             const $wrapper = $section.find('.bundle-shared-template-wrapper');
@@ -603,6 +609,12 @@
             }
         });
 
+        /*
+        |--------------------------------------------------------------------------
+        | Auto init on page load/edit page
+        |--------------------------------------------------------------------------
+        */
+
         $(function () {
             $('.bundle-use-shared-template:checked').each(function () {
                 const $section = $(this).closest('.bundle-shared-template-section');
@@ -620,6 +632,23 @@
             });
         });
 
+        /*
+        |--------------------------------------------------------------------------
+        | Public functions
+        |--------------------------------------------------------------------------
+        */
+
+        window.initBundleSharedTemplateSelect = initBundleSharedTemplateSelect;
+        window.clearBundleSharedTemplateSelect = clearBundleSharedTemplateSelect;
+        window.setBundleSharedTemplateForEdit = setBundleSharedTemplateForEdit;
+        window.collectBundleTemplateFilterItems = collectBundleTemplateFilterItems;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Select2 init
+        |--------------------------------------------------------------------------
+        */
+
         function initBundleSharedTemplateSelect($section) {
             const $select = $section.find('.shared-template-select');
 
@@ -633,6 +662,7 @@
                 width: '100%',
                 placeholder: 'Choose template',
                 allowClear: true,
+                dropdownParent: resolveSelect2DropdownParent($select),
                 ajax: {
                     url: url,
                     type: 'POST',
@@ -648,7 +678,26 @@
                         };
                     },
                     processResults: function (response) {
-                        const payload = response.data || {};
+                        /*
+                         * Supports both shapes:
+                         *
+                         * 1) Response::api(data: [
+                         *      data => [],
+                         *      meta => []
+                         *    ])
+                         *
+                         * response.data.data
+                         * response.data.meta
+                         *
+                         * 2) Direct response:
+                         *
+                         * response.data
+                         * response.meta
+                         */
+                        const payload = response.data && response.data.data
+                            ? response.data
+                            : response;
+
                         const data = payload.data || [];
                         const meta = payload.meta || {};
 
@@ -671,6 +720,90 @@
             });
         }
 
+        function resolveSelect2DropdownParent($select) {
+            const $modal = $select.closest('.modal');
+
+            if ($modal.length) {
+                return $modal;
+            }
+
+            return $(document.body);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Edit mode setter
+        |--------------------------------------------------------------------------
+        |
+        | Call this after filling edit modal data:
+        |
+        | window.setBundleSharedTemplateForEdit($form, bundle);
+        |
+        */
+
+        function setBundleSharedTemplateForEdit($form, bundle) {
+            const $section = $form.find('.bundle-shared-template-section');
+            const $checkbox = $section.find('.bundle-use-shared-template');
+            const $wrapper = $section.find('.bundle-shared-template-wrapper');
+            const $select = $section.find('.shared-template-select');
+
+            const attachedTemplate =
+                bundle.attached_template ||
+                bundle.shared_template ||
+                bundle.template ||
+                null;
+
+            const templateId =
+                bundle.template_id ||
+                attachedTemplate?.id ||
+                null;
+
+            if (! templateId) {
+                $checkbox.prop('checked', false);
+                $wrapper.addClass('d-none');
+
+                clearBundleSharedTemplateSelect($select);
+
+                $select.prop('disabled', true);
+
+                return;
+            }
+
+            $checkbox.prop('checked', true);
+            $wrapper.removeClass('d-none');
+            $select.prop('disabled', false);
+
+            initBundleSharedTemplateSelect($section);
+
+            const templateName =
+                attachedTemplate?.name ||
+                bundle.template_name ||
+                'Selected template';
+
+            const imageUrl =
+                attachedTemplate?.image_url ||
+                bundle.template_image_url ||
+                '';
+
+            const option = new Option(templateName, templateId, true, true);
+
+            if (imageUrl) {
+                $(option).attr('data-image-url', imageUrl);
+            }
+
+            $select
+                .empty()
+                .append('<option value="">Choose template</option>')
+                .append(option)
+                .trigger('change');
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Clear select
+        |--------------------------------------------------------------------------
+        */
+
         function clearBundleSharedTemplateSelect($select) {
             if ($select.hasClass('select2-hidden-accessible')) {
                 $select.val(null).trigger('change');
@@ -679,6 +812,12 @@
 
             $select.val('');
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Collect trigger/reward selected items
+        |--------------------------------------------------------------------------
+        */
 
         function collectBundleTemplateFilterItems($section) {
             const $form = $section.closest('.bundle-form-fields');
@@ -704,6 +843,10 @@
         function resolveBundleTriggerTemplateFilterItem($form) {
             const scope = $form.find('.bundle-trigger-scope:checked').val();
 
+            /*
+             * Dorra mapping:
+             * with_category child select stores actual Product id.
+             */
             if (scope === 'with_category') {
                 const id = $form.find('.bundle-trigger-child').val();
 
@@ -715,6 +858,9 @@
                     : null;
             }
 
+            /*
+             * without_category direct select stores Category id.
+             */
             const id = $form.find('.bundle-trigger-direct').val();
 
             return id
@@ -728,6 +874,10 @@
         function resolveBundleRewardTemplateFilterItem($card) {
             const scope = $card.find('.bundle-reward-scope:checked').val();
 
+            /*
+             * Dorra mapping:
+             * with_category child select stores actual Product id.
+             */
             if (scope === 'with_category') {
                 const id = $card.find('.bundle-reward-child').val();
 
@@ -739,6 +889,9 @@
                     : null;
             }
 
+            /*
+             * without_category direct select stores Category id.
+             */
             const id = $card.find('.bundle-reward-direct').val();
 
             return id
@@ -759,6 +912,12 @@
             return Object.values(map);
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Select2 templates
+        |--------------------------------------------------------------------------
+        */
+
         function formatBundleSharedTemplateOption(template) {
             if (! template.id) {
                 return template.text;
@@ -771,18 +930,37 @@
             }
 
             return $(`
-                <div class="d-flex align-items-center">
-                    <img
-                        src="${imageUrl}"
-                        style="width:36px;height:36px;object-fit:cover;border-radius:6px;margin-right:8px;"
-                    >
-                    <span>${template.text}</span>
-                </div>
-            `);
+            <div class="d-flex align-items-center">
+                <img
+                    src="${escapeHtmlAttribute(imageUrl)}"
+                    style="width:36px;height:36px;object-fit:cover;border-radius:6px;margin-right:8px;"
+                >
+                <span>${escapeHtml(template.text)}</span>
+            </div>
+        `);
         }
 
         function formatBundleSharedTemplateSelection(template) {
             return template.text || 'Choose template';
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Small escaping helpers
+        |--------------------------------------------------------------------------
+        */
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function escapeHtmlAttribute(value) {
+            return escapeHtml(value);
         }
     })();
 </script>
