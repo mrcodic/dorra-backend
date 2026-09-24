@@ -94,6 +94,7 @@ class BundleService extends BaseService
         $query = $this->repository
             ->query()
             ->with([
+                'template',
                 'trigger.itemable',
                 'rewards.itemable',
             ])
