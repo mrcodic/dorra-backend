@@ -70,23 +70,140 @@ class BundleService extends BaseService
 
             $this->syncBundleImage($bundle, $image);
 
-            /*
-            * Soft-delete old rule rows instead of hard deleting them.
-            * This keeps future cart/order references valid.
-            */
-            $bundle->items()->get()->each->delete();
+            $triggerItem = $this->syncTrigger($bundle, $triggerData);
 
-            $triggerItem = $this->createTrigger($bundle, $triggerData);
-
-            $this->createRewards($bundle, $rewardsData, $triggerItem);
+            $this->syncRewards($bundle, $rewardsData, $triggerItem);
 
             return $bundle->fresh($relations ?: [
+                'template',
                 'trigger.itemable',
                 'rewards.itemable',
             ]);
         });
     }
+    private function syncTrigger(Bundle $bundle, array $data): BundleItem
+    {
+        $item = $this->resolveSelectableItem($data, 'trigger');
 
+        [$priceId, $priceQuantity] = $this->resolveSelectedPriceOption(
+            $item,
+            $data,
+            'trigger.price_id'
+        );
+
+        if ($priceId) {
+            $quantityRule = QuantityRuleEnum::MINIMUM->value;
+            $quantity = $priceQuantity;
+        } else {
+            $quantityRule = $data['quantity_rule'] ?? QuantityRuleEnum::ANY->value;
+
+            $quantity = $quantityRule === QuantityRuleEnum::ANY->value
+                ? 1
+                : (int) ($data['quantity'] ?? 1);
+        }
+
+        $payload = [
+            'itemable_type' => $item->getMorphClass(),
+            'itemable_id' => $item->id,
+            'role' => ItemRoleEnum::TRIGGER->value,
+            'quantity_rule' => $quantityRule,
+            'quantity' => $quantity,
+            'price_id' => $priceId,
+            'discount_type' => null,
+            'discount_value' => null,
+            'max_discount_amount' => null,
+            'sort_order' => 0,
+        ];
+
+        $triggerItem = $bundle->items()
+            ->where('role', ItemRoleEnum::TRIGGER->value)
+            ->orderBy('sort_order')
+            ->first();
+
+        if ($triggerItem) {
+            $triggerItem->update($payload);
+
+            return $triggerItem->refresh();
+        }
+
+        return $bundle->items()->create($payload);
+    }
+
+    private function syncRewards(Bundle $bundle, array $rewards, BundleItem $triggerItem): void
+    {
+        $existingRewards = $bundle->items()
+            ->where('role', ItemRoleEnum::REWARD->value)
+            ->orderBy('sort_order')
+            ->get()
+            ->values();
+
+        $keptRewardIds = [];
+
+        collect($rewards)
+            ->values()
+            ->each(function (array $data, int $index) use (
+                $bundle,
+                $triggerItem,
+                $existingRewards,
+                &$keptRewardIds
+            ) {
+                $item = $this->resolveSelectableItem($data, "rewards.$index");
+
+                $this->ensureRewardIsDifferentFromTrigger(
+                    $triggerItem,
+                    $item,
+                    $index
+                );
+
+                [$priceId, $priceQuantity] = $this->resolveSelectedPriceOption(
+                    $item,
+                    $data,
+                    "rewards.$index.price_id"
+                );
+
+                $quantity = $priceId
+                    ? $priceQuantity
+                    : (int) ($data['quantity'] ?? 1);
+
+                $discountType = $data['discount_type'];
+
+                $discountValue = $discountType === DiscountTypeEnum::FREE->value
+                    ? 100
+                    : (float) $data['discount_value'];
+
+                $payload = [
+                    'itemable_type' => $item->getMorphClass(),
+                    'itemable_id' => $item->id,
+                    'role' => ItemRoleEnum::REWARD->value,
+                    'quantity_rule' => null,
+                    'quantity' => $quantity,
+                    'price_id' => $priceId,
+                    'discount_type' => $discountType,
+                    'discount_value' => $discountValue,
+                    'max_discount_amount' => $data['max_discount_amount'] ?? null,
+                    'sort_order' => $index + 1,
+                ];
+
+                $rewardItem = $existingRewards->get($index);
+
+                if ($rewardItem) {
+                    $rewardItem->update($payload);
+                    $keptRewardIds[] = $rewardItem->id;
+
+                    return;
+                }
+
+                $newReward = $bundle->items()->create($payload);
+                $keptRewardIds[] = $newReward->id;
+            });
+
+        $bundle->items()
+            ->where('role', ItemRoleEnum::REWARD->value)
+            ->when(! empty($keptRewardIds), function ($query) use ($keptRewardIds) {
+                $query->whereNotIn('id', $keptRewardIds);
+            })
+            ->delete();
+    }
     public function getData(): JsonResponse
     {
         $locale = app()->getLocale();
