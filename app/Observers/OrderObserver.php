@@ -31,7 +31,7 @@ class OrderObserver
      */
     public function created(Order $order): void
     {
-        $prefix = (string) (setting('order_format') ?: '#ORD');
+        $prefix = (string)(setting('order_format') ?: '#ORD');
         $order->order_number = sprintf('%s-%s-%06d', $prefix, now()->format('Ymd'), $order->id);
         $order->saveQuietly();
         if (request()->user() instanceof Admin) {
@@ -45,41 +45,38 @@ class OrderObserver
      */
     public function updated(Order $order): void
     {
-        if ($order->wasChanged('status')){
+        if ($order->wasChanged('status')) {
             optional($order->user)->notify(new OrderUpdated($order));
             if (in_array($order->status, [StatusEnum::SHIPPED, StatusEnum::DELIVERED], true)) {
 
                 $scenario = $order->status === StatusEnum::SHIPPED ? 'picked_up' : 'delivered';
-//                Admin::select('id','first_name','last_name','email')
-//                    ->chunkById(200, function ($admins) use ($order, $scenario) {
-//                        Notification::send($admins, new ShippingStatus($order, $scenario));
-//                    });
+                Admin::select('id', 'first_name', 'last_name', 'email')
+                    ->chunkById(200, function ($admins) use ($order, $scenario) {
+                        Notification::send($admins, new ShippingStatus($order, $scenario));
+                    });
             }
-            if ($order->status === StatusEnum::CONFIRMED)
-            {
+            if ($order->status === StatusEnum::CONFIRMED) {
                 ProcessConfirmedOrderJob::dispatch($order);
                 CreateInvoiceJob::dispatch($order);
             }
-//        if ($order->status == StatusEnum::PREPARED)
-//        {
-//            $shippingManager = app(ShippingManger::class);
-//            $addressDto = AddressDTO::fromArray($order);
-//            $shippingManager->driver('shipblu')->createShipment($addressDto, $order->id);
-//        }
+            if ($order->status == StatusEnum::PREPARED) {
+                $shippingManager = app(ShippingManger::class);
+                $addressDto = AddressDTO::fromArray($order);
+                $shippingManager->driver('shipblu')->createShipment($addressDto, $order->id);
+            }
 
-    if ($order->wasChanged('status') && $order->status === StatusEnum::PENDING) {
-            $order->loadMissing(['paymentMethod']);
+            if ($order->wasChanged('status') && $order->status === StatusEnum::PENDING) {
+                $order->loadMissing(['paymentMethod']);
 
-            if ($order->paymentMethod?->code === 'cash_on_delivery') {
-                $order->update([
-                    'payment_status' => \App\Enums\Payment\StatusEnum::PENDING
-                ]);
+                if ($order->paymentMethod?->code === 'cash_on_delivery') {
+                    $order->update([
+                        'payment_status' => \App\Enums\Payment\StatusEnum::PENDING
+                    ]);
+                }
             }
         }
-        }
 
-        if ($order->wasChanged('inventory_id'))
-        {
+        if ($order->wasChanged('inventory_id')) {
             $inventory = Inventory::find($order->inventory_id);
             $inventory->update(["is_available" => false]);
         }

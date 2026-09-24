@@ -96,12 +96,12 @@ class ShippingController extends Controller
             $query->orders()->update([
                 'status' => StatusEnum::REQUESTED_PICKUP
             ]);
-//        $result = $this->shippingManger->driver('shipblu')->requestPickup($trackingNumbers);
+            $result = $this->shippingManger->driver('shipblu')->requestPickup($trackingNumbers);
 
-//        $this->shipmentRepository->query()
-//            ->whereIn('id', $validatedData['shipment_ids'])->update([
-//                'status' => $result[0]["status"]
-//            ]);
+            $this->shipmentRepository->query()
+                ->whereIn('id', $validatedData['shipment_ids'])->update([
+                    'status' => $result[0]["status"]
+                ]);
         });
 
         return Response::api();
@@ -110,21 +110,44 @@ class ShippingController extends Controller
 
     public function handleWebhook(Request $request): JsonResponse
     {
+        $expectedSecret = (string) config('services.shipblu.webhook_secret');
+        $receivedSecret = (string) $request->header('X-ShipBlu-Webhook-Secret');
+
+        if (
+            empty($expectedSecret) ||
+            empty($receivedSecret) ||
+            ! hash_equals($expectedSecret, $receivedSecret)
+        ) {
+            Log::warning('ShipBlu Webhook Unauthorized', [
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
 
         $payload = $request->all();
 
-        Log::info("ShipBlu Webhook Received", $payload);
+        Log::info('ShipBlu Webhook Received', [
+            'tracking_number' => $payload['tracking_number'] ?? null,
+            'status' => $payload['status'] ?? null,
+        ]);
 
         $tracking = $payload['tracking_number'] ?? null;
         $status = $payload['status'] ?? null;
 
-        if (!$tracking || !$status) {
+        if (! $tracking || ! $status) {
             return response()->json(['error' => 'Invalid payload'], 422);
         }
-        $shipment = Shipment::where('tracking_number', $tracking);
+
+        $shipment = Shipment::query()
+            ->with('order')
+            ->where('tracking_number', $tracking)
+            ->first();
+
         $order = $shipment?->order;
 
-        if (!$order) {
+        if (! $shipment || ! $order) {
             return response()->json(['error' => 'Order not found'], 404);
         }
 
@@ -137,13 +160,20 @@ class ShippingController extends Controller
             'DELIVERED' => StatusEnum::DELIVERED,
         ];
 
-        if (isset($map[$status]) && $shipment) {
-            $order->status = $map[$status];
-            $shipment->status = $status;
-            $shipment->save();
-            $order->save();
+        if (! isset($map[$status])) {
+            Log::warning('ShipBlu Webhook Unknown Status', [
+                'tracking_number' => $tracking,
+                'status' => $status,
+            ]);
+
+            return response()->json(['ok' => true]);
         }
 
+        $shipment->status = $status;
+        $shipment->save();
+
+        $order->status = $map[$status];
+        $order->save();
+
         return response()->json(['ok' => true]);
-    }
-}
+    }}
